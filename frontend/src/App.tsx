@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo} from "react";
 import "./App.css";
 
 type TestEntity = {
@@ -7,6 +7,7 @@ type TestEntity = {
 };
 
 function App() {
+  const API_BASE = useMemo(() => (import.meta.env.VITE_API_URL ?? "").trim(), []);
   const [items, setItems] = useState<TestEntity[]>([]);
   const [name, setName] = useState<string>("");
   const [loadingInsert, setLoadingInsert] = useState<boolean>(false);
@@ -14,7 +15,7 @@ function App() {
 
   const loadHello = async () => {
     try {
-      const res = await fetch("/api/hello");
+      const res = await fetch(`${API_BASE}/api/hello`);
       if (!res.ok) throw new Error(`GET /api/hello -> ${res.status}`);
 
     } catch (e) {
@@ -25,7 +26,7 @@ function App() {
   const loadAll = async () => {
     setError("");
     try {
-      const res = await fetch("/api/test");
+      const res = await fetch(`${API_BASE}/api/test`);
       if (!res.ok) throw new Error(`GET /api/test -> ${res.status}`);
       const data = await res.json();
       setItems(Array.isArray(data) ? data : []);
@@ -47,7 +48,7 @@ function App() {
     setLoadingInsert(true);
     try {
       // Si tu backend acepta query param "name"
-      const res = await fetch(`/api/test?name=${encodeURIComponent(trimmed)}`, {
+      const res = await fetch(`${API_BASE}/api/test?name=${encodeURIComponent(trimmed)}`, {
         method: "POST",
       });
       if (!res.ok) throw new Error(`POST /api/test -> ${res.status}`);
