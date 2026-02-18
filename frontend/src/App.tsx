@@ -13,20 +13,10 @@ function App() {
   const [loadingInsert, setLoadingInsert] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
-  const loadHello = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/api/hello`);
-      if (!res.ok) throw new Error(`GET /api/hello -> ${res.status}`);
-
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const loadAll = async () => {
     setError("");
     try {
-      const res = await fetch(`${API_BASE}/api/test`);
+      const res = await fetch(`${API_BASE}api/test`);
       if (!res.ok) throw new Error(`GET /api/test -> ${res.status}`);
       const data = await res.json();
       setItems(Array.isArray(data) ? data : []);
@@ -48,7 +38,7 @@ function App() {
     setLoadingInsert(true);
     try {
       // Si tu backend acepta query param "name"
-      const res = await fetch(`${API_BASE}/api/test?name=${encodeURIComponent(trimmed)}`, {
+      const res = await fetch(`${API_BASE}api/test?name=${encodeURIComponent(trimmed)}`, {
         method: "POST",
       });
       if (!res.ok) throw new Error(`POST /api/test -> ${res.status}`);
@@ -66,7 +56,6 @@ function App() {
   };
 
   useEffect(() => {
-    loadHello();
     loadAll();
   }, []);
 
