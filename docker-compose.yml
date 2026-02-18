@@ -1,0 +1,43 @@
+services:
+  db:
+    image: mariadb:11
+    container_name: cerebrus-db
+    environment:
+      MARIADB_DATABASE: cerebrus
+      MARIADB_USER: cerebrus
+      MARIADB_PASSWORD: cerebrus
+      MARIADB_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: cerebrus-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_URL: jdbc:mariadb://db:3306/cerebrus
+      DB_USER: cerebrus
+      DB_PASSWORD: cerebrus
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    container_name: cerebrus-frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  dbdata:
