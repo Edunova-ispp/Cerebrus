@@ -30,7 +30,7 @@ const cards = [
     images: [libro, dragon],
     cardCls: "secondary",
     title: "¿Eres un Maestro?",
-    desc: "Crea misiones épicas, diseña mapas de aprendizaje y guía a tus alumnos a la sabiduría.",
+    desc: "Crea misiones épicas, diseña mapas de aprendizaje divertidos y guía a tus alumnos a la sabiduría.",
     route: "/loginProfesores",
   },
   {
