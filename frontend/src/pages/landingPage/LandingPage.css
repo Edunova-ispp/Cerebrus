@@ -45,6 +45,23 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.landing-card-wrapper:hover {
+  transform: translateY(-6px);
+}
+
+.landing-card-wrapper:nth-child(1):hover {
+  filter: drop-shadow(0 0 18px var(--color-primary));
+}
+
+.landing-card-wrapper:nth-child(2):hover {
+  filter: drop-shadow(0 0 18px var(--color-secondary));
+}
+
+.landing-card-wrapper:nth-child(3):hover {
+  filter: drop-shadow(0 0 18px #FF9800);
 }
 
 .landing-card-images {
@@ -54,6 +71,10 @@
   margin-bottom: -20px;
   z-index: -1;
   position: relative;
+}
+
+.landing-card-wrapper:nth-child(2) .landing-card-images {
+  margin-bottom: -35px;
 }
 
 .landing-card-images img {

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import logo from "../../assets/logo.png";
 import maguito from "../../assets/props/maguito.png";
@@ -23,22 +24,27 @@ const cards = [
     cardCls: "primary",
     title: "¿Eres un aventurero?",
     desc: "¡Únete a un curso, completa desafíos y sube de nivel tus conocimientos!",
+    route: "/loginAlumnos",
   },
   {
     images: [libro, dragon],
     cardCls: "secondary",
     title: "¿Eres un Maestro?",
     desc: "Crea misiones épicas, diseña mapas de aprendizaje y guía a tus alumnos a la sabiduría.",
+    route: "/loginProfesores",
   },
   {
     images: [dueno],
     cardCls: "orange",
     title: "¿Eres un Dueño?",
     desc: "Administra tu organización, gestiona instructores y miembros para conquistar tus objetivos.",
+    route: "/loginDueños",
   },
 ];
 
 function LandingPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="landing-page">
       {/* Header row */}
@@ -56,7 +62,7 @@ function LandingPage() {
       {/* Cards row */}
       <div className="landing-cards">
         {cards.map((card, i) => (
-          <div key={i} className="landing-card-wrapper">
+          <div key={i} className="landing-card-wrapper" onClick={() => navigate(card.route)} style={{ cursor: "pointer" }}>
             <div className="landing-card-images">
               {card.images.map((src, j) => (
                 <img key={j} src={src} alt="" />
