@@ -1,0 +1,36 @@
+name: CI tests
+
+on:
+  pull_request:
+  push:
+    
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Docker versions
+        run: |
+          docker version
+          docker compose version
+
+      - name: Start DB (compose)
+        run: docker compose -f docker-compose.yml up -d db
+
+      - name: Backend tests (Maven in container)
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml run --rm backend-test
+
+      - name: Frontend tests (Node in container)
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml run --rm frontend-test
+
+      - name: Shutdown
+        if: always()
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v
