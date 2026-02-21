@@ -29,37 +29,37 @@ jobs:
 
             comments=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" --paginate)
 
-            marker_comment_id=$(echo "$comments" | jq -r --arg m "$MARKER" '
-                map(select(.body | contains($m))) | .[0].id // empty
+            marker_body=$(echo "$comments" | jq -r --arg m "$MARKER" '
+            map(select(.body | contains($m))) | .[0].body // empty
             ')
-            msg_id=$(echo "$comments" | jq -r --arg m "$MARKER" '
-                map(select(.body | contains($m))) | .[0].body
-                | capture("discord_message_id=(?<id>[0-9]+)")?.id // empty
+            marker_comment_id=$(echo "$comments" | jq -r --arg m "$MARKER" '
+            map(select(.body | contains($m))) | .[0].id // empty
             ')
 
+            msg_id=$(printf "%s" "$marker_body" | sed -nE 's/.*discord_message_id=([0-9]+).*/\1/p')
+
+            echo "marker_comment_id=${marker_comment_id:-<none>}"
             echo "discord_message_id=${msg_id:-<none>}"
 
             if [ -z "${msg_id:-}" ]; then
-                echo "No stored Discord message id found."
-                exit 0
+            echo "No stored Discord message id found. Nothing to delete."
+            exit 0
             fi
 
-            # Extraer webhook_id y webhook_token del webhook URL
             webhook_id=$(echo "$DISCORD_WEBHOOK_URL" | cut -d'/' -f6)
             webhook_token=$(echo "$DISCORD_WEBHOOK_URL" | cut -d'/' -f7)
 
             delete_url="https://discord.com/api/webhooks/${webhook_id}/${webhook_token}/messages/${msg_id}"
-
             echo "Delete URL: $delete_url"
 
             status=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$delete_url")
             echo "Discord DELETE status: $status"
 
             if [ "$status" != "204" ] && [ "$status" != "200" ] && [ "$status" != "404" ]; then
-                echo "Delete failed."
-                exit 1
+            echo "Discord delete failed."
+            exit 1
             fi
 
             if [ -n "${marker_comment_id:-}" ]; then
-                gh api -X DELETE "repos/${REPO}/issues/comments/${marker_comment_id}" >/dev/null || true
+            gh api -X DELETE "repos/${REPO}/issues/comments/${marker_comment_id}" >/dev/null || true
             fi
