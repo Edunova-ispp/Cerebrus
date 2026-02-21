@@ -1,10 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Oxygen:wght@300;400;700&display=swap');
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --color-primary: #D10057;
+  --color-secondary: #7C4DFF;
+  --color-accent: #FFF294;
+
+  font-family: 'Oxygen', 'Pixelify Sans', 'Oxygen', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
+  color: #F9F7F0;
   background-color: #242424;
 
   font-synthesis: none;
@@ -57,7 +63,7 @@ button:focus-visible {
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
-    background-color: #ffffff;
+    background-color: #F9F7F0;
   }
   a:hover {
     color: #747bff;
