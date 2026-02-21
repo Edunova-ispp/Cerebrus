@@ -1,0 +1,128 @@
+name: PR Discord TODO
+
+on:
+  pull_request:
+    branches: ["trunk"]
+    types: [opened, reopened, closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-discord-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  notify_on_open:
+    if: ${{ github.event.action == 'opened' || github.event.action == 'reopened' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post message to Discord and store message id in PR comment
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "Missing DISCORD_WEBHOOK_URL secret"
+            exit 1
+          fi
+
+          MARKER="<!-- discord-pr-message -->"
+
+          # 1) Send message to Discord (wait=true makes Discord return message JSON including id)
+          payload=$(jq -n --arg content "Nuevo pull request: ${PR_URL} hecho por ${AUTHOR}" '{content: $content}')
+          resp=$(curl -sS -X POST "${DISCORD_WEBHOOK_URL}?wait=true" \
+            -H "Content-Type: application/json" \
+            -d "$payload")
+
+          msg_id=$(echo "$resp" | jq -r '.id // empty')
+          if [ -z "$msg_id" ]; then
+            echo "Discord response did not include message id. Response:"
+            echo "$resp"
+            exit 1
+          fi
+
+          echo "Discord message id: $msg_id"
+
+          # 2) Look for existing marker comment in the PR
+          comments=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" --paginate)
+          existing_id=$(echo "$comments" | jq -r --arg m "$MARKER" '
+            map(select(.body | contains($m))) | .[0].id // empty
+          ')
+
+          body="${MARKER}
+          discord_message_id=${msg_id}"
+
+          # 3) Create or update the marker comment
+          if [ -n "$existing_id" ]; then
+            echo "Updating existing marker comment: $existing_id"
+            gh api -X PATCH "repos/${REPO}/issues/comments/${existing_id}" \
+              -f body="$body" >/dev/null
+          else
+            echo "Creating marker comment"
+            gh api -X POST "repos/${REPO}/issues/${PR_NUMBER}/comments" \
+              -f body="$body" >/dev/null
+          fi
+
+  delete_on_close:
+    if: ${{ github.event.action == 'closed' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete Discord message and clean marker comment
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "Missing DISCORD_WEBHOOK_URL secret"
+            exit 1
+          fi
+
+          MARKER="<!-- discord-pr-message -->"
+
+          # Fetch comments to find marker
+          comments=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" --paginate)
+
+          marker_comment_id=$(echo "$comments" | jq -r --arg m "$MARKER" '
+            map(select(.body | contains($m))) | .[0].id // empty
+          ')
+          msg_id=$(echo "$comments" | jq -r --arg m "$MARKER" '
+            map(select(.body | contains($m))) | .[0].body
+            | capture("discord_message_id=(?<id>[0-9]+)")?.id // empty
+          ')
+
+          if [ -z "$msg_id" ]; then
+            echo "No stored Discord message id found. Nothing to delete."
+            exit 0
+          fi
+
+          # Parse webhook id/token from the webhook URL: https://discord.com/api/webhooks/{id}/{token}
+          webhook_id=$(echo "$DISCORD_WEBHOOK_URL" | sed -E 's#.*/webhooks/([0-9]+)/([^/?]+).*#\1#')
+          webhook_token=$(echo "$DISCORD_WEBHOOK_URL" | sed -E 's#.*/webhooks/([0-9]+)/([^/?]+).*#\2#')
+
+          if [ -z "$webhook_id" ] || [ -z "$webhook_token" ]; then
+            echo "Could not parse webhook id/token from DISCORD_WEBHOOK_URL"
+            exit 1
+          fi
+
+          # Delete the Discord message sent by this webhook
+          delete_url="https://discord.com/api/webhooks/${webhook_id}/${webhook_token}/messages/${msg_id}"
+          echo "Deleting Discord message: $msg_id"
+          curl -sS -X DELETE "$delete_url" >/dev/null || true
+
+          # Optional: remove the marker comment from the PR so it doesn't clutter
+          if [ -n "${marker_comment_id:-}" ]; then
+            echo "Deleting marker PR comment: $marker_comment_id"
+            gh api -X DELETE "repos/${REPO}/issues/comments/${marker_comment_id}" >/dev/null || true
+          fi
