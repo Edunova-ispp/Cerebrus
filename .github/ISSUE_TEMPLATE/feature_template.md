@@ -5,7 +5,7 @@ title: "[FEATURE] "
 assignees: ""
 ---
 
-## 1️⃣ Historia de Usuario
+## Historia de Usuario
 
 **Como** <tipo de usuario>  
 **Quiero** <objetivo o funcionalidad>  
@@ -13,7 +13,7 @@ assignees: ""
 
 ---
 
-## 2️⃣ Descripción
+## Descripción
 
 ### Contexto
 Explicación detallada del problema o funcionalidad a implementar.
