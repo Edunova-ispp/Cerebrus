@@ -36,7 +36,7 @@ Explicación detallada del problema o funcionalidad a implementar.
 
 ---
 
-## 3️Recomendación técnica
+## Recomendación técnica
 
 ### Propuesta de implementación
 Explicación técnica sugerida para abordar la issue.
