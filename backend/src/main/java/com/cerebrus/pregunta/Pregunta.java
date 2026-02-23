@@ -3,7 +3,6 @@ package com.cerebrus.pregunta;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cerebrus.actividad.Actividad;
 import com.cerebrus.respuesta.Respuesta;
 
 import jakarta.persistence.CascadeType;
@@ -13,8 +12,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -31,9 +28,7 @@ public class Pregunta {
 
     private String imagen;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "actividad_id", nullable = false)
-    private Actividad actividad;
+    
 
     @OneToMany(mappedBy = "pregunta", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Respuesta> respuestas = new ArrayList<>();
@@ -42,10 +37,9 @@ public class Pregunta {
     public Pregunta() {
     }
 
-    public Pregunta(String pregunta, String imagen, Actividad actividad) {
+    public Pregunta(String pregunta, String imagen) {
         this.pregunta = pregunta;
         this.imagen = imagen;
-        this.actividad = actividad;
     }
 
     // Getters y Setters
@@ -71,14 +65,6 @@ public class Pregunta {
 
     public void setImagen(String imagen) {
         this.imagen = imagen;
-    }
-
-    public Actividad getActividad() {
-        return actividad;
-    }
-
-    public void setActividad(Actividad actividad) {
-        this.actividad = actividad;
     }
 
     public List<Respuesta> getRespuestas() {

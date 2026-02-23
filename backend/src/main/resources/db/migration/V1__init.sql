@@ -63,7 +63,6 @@ CREATE TABLE curso (
     imagen VARCHAR(255),
     codigo VARCHAR(255) NOT NULL,
     visibilidad BOOLEAN NOT NULL,
-    organizacion_id BIGINT NOT NULL,
     maestro_id BIGINT NOT NULL,
     FOREIGN KEY (organizacion_id) REFERENCES organizacion(id) ON DELETE CASCADE,
     FOREIGN KEY (maestro_id) REFERENCES maestro(id) ON DELETE RESTRICT
@@ -151,7 +150,6 @@ CREATE TABLE pregunta (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     pregunta TEXT NOT NULL,
     imagen VARCHAR(255),
-    actividad_id BIGINT NOT NULL,
     FOREIGN KEY (actividad_id) REFERENCES actividad(id) ON DELETE CASCADE
 );
 
@@ -203,6 +201,7 @@ CREATE TABLE respuesta_alumno (
 CREATE TABLE resp_alumno_general (
     id BIGINT PRIMARY KEY,
     respuesta TEXT NOT NULL,
+    pregunta_id BIGINT NOT NULL,
     FOREIGN KEY (id) REFERENCES respuesta_alumno(id) ON DELETE CASCADE
 );
 
@@ -227,6 +226,7 @@ CREATE TABLE resp_alumno_punto_imagen (
     respuesta TEXT NOT NULL,
     pixel_x INT NOT NULL,
     pixel_y INT NOT NULL,
+    marcar_imagen_id BIGINT NOT NULL,
     FOREIGN KEY (id) REFERENCES respuesta_alumno(id) ON DELETE CASCADE
 );
 

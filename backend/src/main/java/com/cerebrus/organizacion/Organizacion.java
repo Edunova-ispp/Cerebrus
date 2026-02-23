@@ -34,8 +34,7 @@ public class Organizacion {
     @OneToMany(mappedBy = "organizacion", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Maestro> maestros = new ArrayList<>();
 
-    @OneToMany(mappedBy = "organizacion", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<Curso> cursos = new ArrayList<>();
+
 
     @OneToOne(mappedBy = "organizacion", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Director director;
@@ -84,14 +83,6 @@ public class Organizacion {
 
     public void setMaestros(List<Maestro> maestros) {
         this.maestros = maestros;
-    }
-
-    public List<Curso> getCursos() {
-        return cursos;
-    }
-
-    public void setCursos(List<Curso> cursos) {
-        this.cursos = cursos;
     }
 
     public Director getDirector() {

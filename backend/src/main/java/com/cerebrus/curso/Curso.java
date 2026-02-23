@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cerebrus.inscripcion.Inscripcion;
-import com.cerebrus.organizacion.Organizacion;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.usuario.Maestro;
 
@@ -43,10 +42,6 @@ public class Curso {
     private Boolean visibilidad;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organizacion_id", nullable = false)
-    private Organizacion organizacion;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maestro_id", nullable = false)
     private Maestro maestro;
 
@@ -61,13 +56,12 @@ public class Curso {
     }
 
     public Curso(String titulo, String descripcion, String imagen, String codigo,
-                 Boolean visibilidad, Organizacion organizacion, Maestro maestro) {
+                 Boolean visibilidad, Maestro maestro) {
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.imagen = imagen;
         this.codigo = codigo;
         this.visibilidad = visibilidad;
-        this.organizacion = organizacion;
         this.maestro = maestro;
     }
 
@@ -118,14 +112,6 @@ public class Curso {
 
     public void setVisibilidad(Boolean visibilidad) {
         this.visibilidad = visibilidad;
-    }
-
-    public Organizacion getOrganizacion() {
-        return organizacion;
-    }
-
-    public void setOrganizacion(Organizacion organizacion) {
-        this.organizacion = organizacion;
     }
 
     public Maestro getMaestro() {
