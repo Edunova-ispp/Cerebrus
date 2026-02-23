@@ -8,5 +8,6 @@ public enum TipoAct {
     CLASIFICACION,
     TABLERO,
     ORDEN,
-    IMAGEN
+    IMAGEN,
+    TEORIA
 }
