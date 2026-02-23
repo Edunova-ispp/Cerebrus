@@ -51,9 +51,13 @@ public class Tablero extends Actividad {
         this.preguntas = preguntas;
     }
 
-    // Validación: número de preguntas debe ser igual a tamaño - 1
     public boolean validarNumeroPreguntas() {
-        return preguntas.size() == (tamano.getSize() - 1);
+        if(tamano==TamanoTablero.TRES_X_TRES) {
+            return preguntas.size() == 8;
+        } else if(tamano==TamanoTablero.CUATRO_X_CUATRO) {
+            return preguntas.size() == 15;
+        }
+        return false;
     }
 
     @Override
