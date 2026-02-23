@@ -1,9 +1,0 @@
-package com.example.demo.entity;
-
-public enum TipoActGeneral {
-    TEST,
-    CARTA,
-    CRUCIGRAMA,
-    ABIERTA,
-    CLASIFICACION
-}
