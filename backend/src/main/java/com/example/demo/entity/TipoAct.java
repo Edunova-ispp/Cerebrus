@@ -1,9 +1,12 @@
 package com.example.demo.entity;
 
-public enum TipoActGeneral {
+public enum TipoAct {
     TEST,
     CARTA,
     CRUCIGRAMA,
     ABIERTA,
-    CLASIFICACION
+    CLASIFICACION,
+    TABLERO,
+    ORDEN,
+    IMAGEN
 }
