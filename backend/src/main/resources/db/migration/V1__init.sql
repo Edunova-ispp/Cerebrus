@@ -22,6 +22,7 @@ CREATE TABLE usuario (
 -- Tabla: alumno (hereda de usuario)
 CREATE TABLE alumno (
     id BIGINT PRIMARY KEY,
+    organizacion_id BIGINT NOT NULL,
     puntos INT NOT NULL,
     FOREIGN KEY (id) REFERENCES usuario(id) ON DELETE CASCADE
 );
