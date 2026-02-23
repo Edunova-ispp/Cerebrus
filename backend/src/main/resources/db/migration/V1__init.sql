@@ -208,6 +208,8 @@ CREATE TABLE resp_alumno_general (
 -- Tabla: resp_alumno_ordenacion (hereda de respuesta_alumno)
 CREATE TABLE resp_alumno_ordenacion (
     id BIGINT PRIMARY KEY,
+    ordenacion_id BIGINT NOT NULL,
+    FOREIGN KEY (ordenacion_id) REFERENCES ordenacion(id) ON DELETE CASCADE,
     FOREIGN KEY (id) REFERENCES respuesta_alumno(id) ON DELETE CASCADE
 );
 
@@ -248,4 +250,5 @@ CREATE INDEX idx_respuesta_pregunta ON respuesta(pregunta_id);
 CREATE INDEX idx_actividad_alumno_alumno ON actividad_alumno(alumno_id);
 CREATE INDEX idx_actividad_alumno_actividad ON actividad_alumno(actividad_id);
 CREATE INDEX idx_respuesta_alumno_actividad ON respuesta_alumno(actividad_alumno_id);
+CREATE INDEX idx_resp_alumno_ordenacion_ordenacion ON resp_alumno_ordenacion(ordenacion_id);
 

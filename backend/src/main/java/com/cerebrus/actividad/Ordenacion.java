@@ -3,14 +3,17 @@ package com.cerebrus.actividad;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cerebrus.respuestaalumno.RespAlumnoOrdenacion;
 import com.cerebrus.tema.Tema;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 
@@ -23,6 +26,9 @@ public class Ordenacion extends Actividad {
     @Column(name = "valor")
     @OrderColumn(name = "orden")
     private List<String> valores = new ArrayList<>();
+
+    @OneToMany(mappedBy = "ordenacion", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<RespAlumnoOrdenacion> respuestasAlumnoOrdenacion = new ArrayList<>();
 
     // Constructores
     public Ordenacion() {
@@ -42,6 +48,14 @@ public class Ordenacion extends Actividad {
 
     public void setValores(List<String> valores) {
         this.valores = valores;
+    }
+
+    public List<RespAlumnoOrdenacion> getRespuestasAlumnoOrdenacion() {
+        return respuestasAlumnoOrdenacion;
+    }
+
+    public void setRespuestasAlumnoOrdenacion(List<RespAlumnoOrdenacion> respuestasAlumnoOrdenacion) {
+        this.respuestasAlumnoOrdenacion = respuestasAlumnoOrdenacion;
     }
 
     @Override
