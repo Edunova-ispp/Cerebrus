@@ -72,3 +72,16 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* ── Global scrollbar ── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+
