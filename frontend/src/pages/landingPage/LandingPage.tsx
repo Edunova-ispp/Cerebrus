@@ -5,6 +5,7 @@ import maguito from "../../assets/props/maguito.png";
 import dragon from "../../assets/props/dragon.png";
 import libro from "../../assets/props/libro.png";
 import dueno from "../../assets/props/dueño.png";
+import ProfileIcon from "../../assets/icons/profile.svg?react";
 
 // Alternating primary/secondary, except 'u' which uses accent
 const TITLE = [
@@ -47,6 +48,10 @@ function LandingPage() {
 
   return (
     <div className="landing-page">
+      <button className="landing-login-btn" onClick={() => navigate("/login")}>
+        Login
+        <ProfileIcon className="landing-login-icon" aria-hidden />
+      </button>
       {/* Header row */}
       <div className="landing-header">
         <h1 className="landing-title">

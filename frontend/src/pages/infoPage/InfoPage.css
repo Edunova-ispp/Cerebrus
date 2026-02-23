@@ -1,0 +1,192 @@
+.info-page {
+  font-family: 'Pixelify Sans', sans-serif;
+  min-height: 100vh;
+  padding: 32px 40px 60px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Header */
+.info-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+  gap: 4px;
+}
+
+.info-title {
+  margin: 0;
+  font-size: clamp(180px, 10vw, 90px);
+  line-height: 1;
+  display: flex;
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+.info-title .title-char {
+  -webkit-text-stroke: 3px #1a1a1a;
+  paint-order: stroke fill;
+  text-shadow: 6px 6px 0px #000638;
+  display: inline-block;
+  animation: char-float 3s ease-in-out infinite;
+}
+
+.info-title .title-char.primary   { color: var(--color-primary); }
+.info-title .title-char.secondary { color: var(--color-secondary); }
+.info-title .title-char.accent    { color: var(--color-accent); }
+
+@keyframes char-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+.info-title .title-char:nth-child(1) { animation-delay: 0.0s; }
+.info-title .title-char:nth-child(2) { animation-delay: 0.2s; }
+.info-title .title-char:nth-child(3) { animation-delay: 0.4s; }
+.info-title .title-char:nth-child(4) { animation-delay: 0.6s; }
+.info-title .title-char:nth-child(5) { animation-delay: 0.8s; }
+.info-title .title-char:nth-child(6) { animation-delay: 1.0s; }
+.info-title .title-char:nth-child(7) { animation-delay: 1.2s; }
+.info-title .title-char:nth-child(8) { animation-delay: 1.4s; }
+
+.info-subtitle {
+  margin: 0;
+  font-size: clamp(70px, 3vw, 36px);
+  color: #000638;
+  font-family: 'Pixelify Sans', sans-serif;
+  -webkit-text-stroke: 1px #1a1a1a;
+}
+
+/* Sections */
+.info-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.info-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.info-section.reverse {
+  direction: rtl;
+}
+
+.info-section.reverse > * {
+  direction: ltr;
+}
+
+/* Text card */
+.info-text-card {
+  border-radius: 20px;
+  padding: 24px 22px;
+  box-shadow: 6px 6px 0px #000000;
+  border: 2px solid #000000;
+  box-sizing: border-box;
+}
+
+.info-text-card.primary   { background-color: var(--color-primary); }
+.info-text-card.secondary { background-color: var(--color-secondary); }
+.info-text-card.orange    { background-color: #FF9800; }
+
+.info-text-card h2 {
+  margin: 0 0 10px;
+  font-size: clamp(18px, 2.2vw, 26px);
+  color: #fff;
+  font-family: 'Pixelify Sans', sans-serif;
+  line-height: 1.2;
+}
+
+.info-text-card p {
+  margin: 0;
+  font-size: clamp(13px, 1.4vw, 18px);
+  color: #fff;
+  font-family: 'Pixelify Sans', sans-serif;
+  line-height: 1.6;
+}
+
+/* Video placeholder */
+.info-video-placeholder {
+  border-radius: 20px;
+  border: 2px solid #000000;
+  box-shadow: 6px 6px 0px #000000;
+  background-color: var(--color-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+}
+
+.info-video-placeholder svg {
+  width: clamp(40px, 6vw, 70px);
+  height: clamp(40px, 6vw, 70px);
+  fill: rgba(255,255,255,0.5);
+}
+
+/* Bottom */
+.info-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.info-bottom-logo {
+  height: clamp(220px, 8vw, 100px);
+  object-fit: contain;
+}
+
+.info-cta-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: clamp(94px, 3.5vw, 42px);
+  color: #000638;
+  cursor: pointer;
+  transition: color 0.15s ease, text-shadow 0.15s ease;
+}
+
+.info-cta-btn:hover {
+  color: #FFF294;
+  -webkit-text-stroke: 2px #000638;
+  text-shadow: 2px 2px 0px #000638;
+  outline: none;
+}
+
+/* Back button */
+.info-back-btn {
+  position: absolute;
+  top: -16px;
+  left: -220px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: rgba(209, 0, 87, 0.52);
+  border: 2px solid #000000;
+  border-radius: 15px;
+  padding: 8px 18px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: clamp(14px, 1.6vw, 20px);
+  color: #000638;
+  cursor: pointer;
+  box-shadow: 4px 4px 0px #000000;
+  transition: color 0.15s ease, text-shadow 0.15s ease;
+  z-index: 10;
+}
+
+.info-back-btn:hover {
+  color: #FFF294;
+  text-shadow: 2px 2px 0px #000638;
+  border: 2px solid #000000;
+  outline: none;
+}
