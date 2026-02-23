@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,9 +42,8 @@ public class Organizacion {
     public Organizacion() {
     }
 
-    public Organizacion(String nombre, Boolean activo) {
+    public Organizacion(String nombre) {
         this.nombre = nombre;
-        this.activo = activo;
     }
 
     // Getters y Setters
@@ -110,7 +110,7 @@ public class Organizacion {
         return "Organizacion{" +
                 "id=" + id +
                 ", nombre='" + nombre + '\'' +
-                ", activo=" + activo +
+                ", activo=" + getActivo() +
                 '}';
     }
 }
