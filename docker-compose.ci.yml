@@ -1,0 +1,27 @@
+services:
+  backend-test:
+    image: maven:3.9-eclipse-temurin-21
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    environment:
+      # usa el mismo host "db" del compose
+      SPRING_DATASOURCE_URL: jdbc:mariadb://db:3306/cerebrus
+      SPRING_DATASOURCE_USERNAME: cerebrus
+      SPRING_DATASOURCE_PASSWORD: cerebrus
+      # si tu app usa estas vars en perfil docker, también las dejamos:
+      DB_URL: jdbc:mariadb://db:3306/cerebrus
+      DB_USER: cerebrus
+      DB_PASSWORD: cerebrus
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      db:
+        condition: service_healthy
+    command: mvn -B test
+
+  frontend-test:
+    image: node:20
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    command: sh -lc "npm ci && npm test --if-present"
