@@ -2,6 +2,8 @@
   font-family: 'Pixelify Sans', sans-serif;
   padding: 16px 60px 40px;
   box-sizing: border-box;
+  height: 90vh;
+  position: relative;
 }
 
 /* Header */
@@ -49,6 +51,44 @@
 .landing-logo {
   height: clamp(250px, 14vw, 160px);
   object-fit: contain;
+}
+
+.landing-login-btn {
+  position: absolute;
+  top: -16px;
+  right: -100px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: rgba(209, 0, 87, 0.52);
+  border: 2px solid #000000;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: clamp(18px, 2vw, 26px);
+  color: #000638;
+  cursor: pointer;
+  box-shadow: 4px 4px 0px #000000;
+  transition: color 0.15s ease, text-shadow 0.15s ease;
+  z-index: 10;
+}
+
+.landing-login-btn:hover {
+  color: #FFF294;
+  text-shadow: 2px 2px 0px #000638;
+  border: 2px solid #000000;
+  outline: none;
+}
+
+.landing-login-icon {
+  height: clamp(22px, 2vw, 30px);
+  width: auto;
+  fill: currentColor;
+  transition: filter 0.15s ease;
+}
+
+.landing-login-btn:hover .landing-login-icon {
+  filter: drop-shadow(2px 2px 0px #000638);
 }
 
 /* Cards */

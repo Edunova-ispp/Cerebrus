@@ -5,6 +5,7 @@ import maguito from "../../assets/props/maguito.png";
 import dragon from "../../assets/props/dragon.png";
 import libro from "../../assets/props/libro.png";
 import dueno from "../../assets/props/dueño.png";
+import ProfileIcon from "../../assets/icons/profile.svg?react";
 
 // Alternating primary/secondary, except 'u' which uses accent
 const TITLE = [
@@ -24,21 +25,21 @@ const cards = [
     cardCls: "primary",
     title: "¿Eres un aventurero?",
     desc: "¡Únete a un curso, completa desafíos y sube de nivel tus conocimientos!",
-    route: "/loginAlumnos",
+    route: "/infoAlumnos",
   },
   {
     images: [libro, dragon],
     cardCls: "secondary",
     title: "¿Eres un Maestro?",
     desc: "Crea misiones épicas, diseña mapas de aprendizaje divertidos y guía a tus alumnos a la sabiduría.",
-    route: "/loginProfesores",
+    route: "/infoProfesores",
   },
   {
     images: [dueno],
     cardCls: "orange",
     title: "¿Eres un Dueño?",
     desc: "Administra tu organización, gestiona instructores y miembros para conquistar tus objetivos.",
-    route: "/loginDueños",
+    route: "/infoDueños",
   },
 ];
 
@@ -47,6 +48,10 @@ function LandingPage() {
 
   return (
     <div className="landing-page">
+      <button className="landing-login-btn" onClick={() => navigate("/login")}>
+        Login
+        <ProfileIcon className="landing-login-icon" aria-hidden />
+      </button>
       {/* Header row */}
       <div className="landing-header">
         <h1 className="landing-title">
