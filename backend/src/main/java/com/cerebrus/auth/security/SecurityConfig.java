@@ -49,15 +49,16 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable()) 
+            
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) 
+            
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/auth/**").permitAll() 
                 .requestMatchers("/api-docs/**", "/swagger-ui/**").permitAll() 
                 .anyRequest().authenticated() 
             );
 
         http.authenticationProvider(authenticationProvider());
-
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
