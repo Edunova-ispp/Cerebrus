@@ -41,7 +41,10 @@ public abstract class Actividad {
     private String imagen;
 
     @Column(nullable = false)
-    private Boolean respVisible;
+    private Boolean respVisible = false;
+
+    @Column
+    private String comentariosRespVisible;
 
     @Column(nullable = false)
     private Integer posicion;
@@ -61,12 +64,13 @@ public abstract class Actividad {
     }
 
     public Actividad(String titulo, String descripcion, Integer puntuacion, String imagen,
-                     Boolean respVisible, Integer posicion, Integer version, Tema tema) {
+                     Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Tema tema) {
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.puntuacion = puntuacion;
         this.imagen = imagen;
         this.respVisible = respVisible;
+        this.comentariosRespVisible = comentariosRespVisible;
         this.posicion = posicion;
         this.version = version;
         this.tema = tema;
@@ -119,6 +123,14 @@ public abstract class Actividad {
 
     public void setRespVisible(Boolean respVisible) {
         this.respVisible = respVisible;
+    }
+
+    public String getComentariosRespVisible(){
+        return comentariosRespVisible;
+    }
+
+    public void setComentariosRespVisible(String comentariosRespVisible){
+        this.comentariosRespVisible = comentariosRespVisible;
     }
 
     public Integer getPosicion() {

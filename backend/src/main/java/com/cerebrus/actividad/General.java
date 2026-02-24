@@ -33,8 +33,8 @@ public class General extends Actividad {
     }
 
     public General(String titulo, String descripcion, Integer puntuacion, String imagen,
-                   Boolean respVisible, Integer posicion, Integer version, Tema tema, TipoActGeneral tipo) {
-        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema);
+                   Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Tema tema, TipoActGeneral tipo) {
+        super(titulo, descripcion, puntuacion, imagen, respVisible, comentariosRespVisible,  posicion, version, tema);
         this.tipo = tipo;
     }
 
