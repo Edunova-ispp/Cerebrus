@@ -1,5 +1,7 @@
 package com.cerebrus.actividad;
 
-public interface GeneralService {
+import java.util.List;
 
+public interface GeneralService {
+	General crearTipoTest(String titulo, String descripcion, Integer puntuacion, Long temaId, List<Long> preguntasId);
 }
