@@ -1,13 +1,19 @@
 package com.cerebrus.utils;
 
+import java.security.SecureRandom;
 import java.util.Collection;
 
 public class CerebrusUtils {
+    private static final char[] ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+    private static final int CODE_LENGTH = 7;
+    private static final SecureRandom RNG = new SecureRandom();
 
     public static String generateUniqueCode(){
-        //TODO: Implementar lógica para generar un código único de 7 caracteres alfanuméricos (mayúsculas y números)
-        String codigoEjemplo ="DAVID123";
-        return codigoEjemplo;
+        char[] code = new char[CODE_LENGTH];
+        for (int i = 0; i < CODE_LENGTH; i++) {
+            code[i] = ALPHABET[RNG.nextInt(ALPHABET.length)];
+        }
+        return new String(code);
     }
 
     public static <T> Collection<T> shuffleCollection(Collection<T> collection) {
