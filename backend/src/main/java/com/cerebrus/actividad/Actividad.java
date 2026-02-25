@@ -64,19 +64,6 @@ public abstract class Actividad {
     }
 
     public Actividad(String titulo, String descripcion, Integer puntuacion, String imagen,
-                     Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Tema tema) {
-        this.titulo = titulo;
-        this.descripcion = descripcion;
-        this.puntuacion = puntuacion;
-        this.imagen = imagen;
-        this.respVisible = respVisible;
-        this.comentariosRespVisible = comentariosRespVisible;
-        this.posicion = posicion;
-        this.version = version;
-        this.tema = tema;
-    }
-
-    public Actividad(String titulo, String descripcion, Integer puntuacion, String imagen,
                      Boolean respVisible, Integer posicion, Integer version, Tema tema) {
         this.titulo = titulo;
         this.descripcion = descripcion;
