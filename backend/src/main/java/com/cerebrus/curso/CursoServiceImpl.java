@@ -26,6 +26,7 @@ public class CursoServiceImpl implements CursoService {
         this.usuarioService = usuarioService;
     }
 
+    @Override
     public List<Curso> ObtenerCursosUsuarioLogueado() {
         //Esta funcion devuleve una lista con todos los cursos del usuario logueado, 
         // si el usuario es un maestro devuelve los cursos que ha creado, 
@@ -47,7 +48,7 @@ public class CursoServiceImpl implements CursoService {
        
     }
 
-    
+    @Override
      public List<String> obtenerDetallesCurso(Long id) {
         //Esta funcion devuelve una lista de strings con los detalles(titulo, descripcion, imagen y/o codigo) 
         // de un curso específico, 
