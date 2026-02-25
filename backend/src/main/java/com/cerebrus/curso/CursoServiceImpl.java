@@ -28,7 +28,7 @@ public class CursoServiceImpl implements CursoService {
     }
 
     @Override
-    public List<Curso> obtenerCursosUsuarioLogueado() {
+    public List<Curso> ObtenerCursosUsuarioLogueado() {
         //Esta funcion devuleve una lista con todos los cursos del usuario logueado, 
         // si el usuario es un maestro devuelve los cursos que ha creado, 
         // si el usuario es un alumno devuelve los cursos a los que se ha inscrito 
