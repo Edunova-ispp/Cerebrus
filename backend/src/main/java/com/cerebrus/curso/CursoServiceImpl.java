@@ -26,26 +26,7 @@ public class CursoServiceImpl implements CursoService {
         this.usuarioService = usuarioService;
     }
 
-    public List<Curso> ObtenerCursosUsuarioLogueado() {
-        //Esta funcion devuleve una lista con todos los cursos del usuario logueado, 
-        // si el usuario es un maestro devuelve los cursos que ha creado, 
-        // si el usuario es un alumno devuelve los cursos a los que se ha inscrito 
-        // y que son visibles.
-
-
-        //TODO:obtener el usuario logueado, se ha asumido un metodo obtenerUsuarioLogueado().
-       
-        Usuario usuario = usuarioService.findCurrentUser(); 
-        if (usuario instanceof Maestro) {
-             return cursoRepository.findByMaestroId(usuario.getId());
-        } else if (usuario instanceof Alumno) {
-             return cursoRepository.findByAlumnoId(usuario.getId());
-        }else{
-            throw new RuntimeException("403 Forbidden");
-        }
-
-       
-    }
+    
      public List<String> obtenerDetallesCurso(Long id) {
         //Esta funcion devuelve una lista de strings con los detalles(titulo, descripcion, imagen y/o codigo) 
         // de un curso específico, 

@@ -21,10 +21,7 @@ public class CursoController {
         this.cursoService = cursoService;
     }
 
-@GetMapping
-    public ResponseEntity<List<Curso>> obtenerListadoCursos() {
-        return ResponseEntity.ok(cursoService.ObtenerCursosUsuarioLogueado());
-    }
+
 
     
 @GetMapping("/{id}/detalles")
