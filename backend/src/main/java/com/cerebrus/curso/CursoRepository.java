@@ -23,4 +23,6 @@ public interface CursoRepository extends JpaRepository<Curso, Long> {
 	Curso findByID(@Param("id") Long id);
 
 	boolean existsByCodigo(String codigo);
+    @Query("SELECT c FROM Curso c WHERE c.codigo = :codigo")
+	Curso findByCodigo(@Param("codigo") String codigo);
 }
