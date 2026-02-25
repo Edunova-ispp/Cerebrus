@@ -16,4 +16,11 @@ public class CursoController {
     public CursoController(CursoService cursoService) {
         this.cursoService = cursoService;
     }
+
+@GetMapping
+    public ResponseEntity<List<Curso>> obtenerListadoCursos() {
+        return ResponseEntity.ok(cursoService.ObtenerCursosUsuarioLogueado());
+    }
+
+
 }
