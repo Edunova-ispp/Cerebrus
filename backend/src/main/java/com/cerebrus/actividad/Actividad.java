@@ -76,6 +76,18 @@ public abstract class Actividad {
         this.tema = tema;
     }
 
+    public Actividad(String titulo, String descripcion, Integer puntuacion, String imagen,
+                     Boolean respVisible, Integer posicion, Integer version, Tema tema) {
+        this.titulo = titulo;
+        this.descripcion = descripcion;
+        this.puntuacion = puntuacion;
+        this.imagen = imagen;
+        this.respVisible = respVisible;
+        this.posicion = posicion;
+        this.version = version;
+        this.tema = tema;
+    }
+
     // Getters y Setters
     public Long getId() {
         return id;

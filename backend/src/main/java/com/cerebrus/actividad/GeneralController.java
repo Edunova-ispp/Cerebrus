@@ -3,6 +3,7 @@ package com.cerebrus.actividad;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,8 +12,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.cerebrus.pregunta.Pregunta;
+
+import jakarta.validation.Valid;
 
 
 @RestController
@@ -27,29 +33,25 @@ public class GeneralController {
         this.generalService = generalService;
     }
 
-    public record TipoTestRequest(
-        String titulo,
-        String descripcion,
-        Integer puntuacion,
-        Long temaId,
-        Boolean respVisible,
-        String comentariosRespVisible,
-        List<Long> preguntasId
-    ) {}
-
     @PostMapping("/test")
-    public ResponseEntity<General> crearTipoTest(@RequestBody TipoTestRequest request) {
-        General creado = generalService.crearTipoTest(
-            request.titulo(),
-            request.descripcion(),
-            request.puntuacion(),
-            request.temaId(),
-            request.respVisible(),
-            request.comentariosRespVisible(),
-            request.preguntasId()
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<General> crearTipoTest(@RequestBody @Valid General general) {
+
+        List<Long> preguntasId = general.getPreguntas().stream()
+            .map(Pregunta::getId)
+            .toList();
+        
+        General generalCreada = generalService.crearTipoTest(
+            general.getTitulo(),
+            general.getDescripcion(),
+            general.getPuntuacion(),
+            general.getTema().getId(),
+            general.getRespVisible(),
+            general.getComentariosRespVisible(),
+            preguntasId
         );
 
-        return ResponseEntity.ok(creado);
+        return new ResponseEntity<>(generalCreada, HttpStatus.CREATED);
     }
 
     @GetMapping("{id}")
@@ -58,21 +60,21 @@ public class GeneralController {
     }
 
     @PutMapping("test/update/{id}")
-    public ResponseEntity<General> updateTipoTest(@PathVariable Long id, @RequestBody TipoTestRequest request){
+    public ResponseEntity<General> updateTipoTest(@PathVariable Long id, @RequestBody @Valid General general){
         General actualizado = generalService.updateTipoTest(
             id,
-            request.titulo(),
-            request.descripcion(),
-            request.puntuacion(),
-            request.respVisible(),
-            request.comentariosRespVisible(),
-            request.preguntasId()
+            general.getTitulo(),
+            general.getDescripcion(),
+            general.getPuntuacion(),
+            general.getRespVisible(),
+            general.getComentariosRespVisible(),
+            general.getPreguntas().stream().map(Pregunta::getId).toList()
         );
         return ResponseEntity.ok(actualizado);
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteTipoTest(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteActividad(@PathVariable Long id) {
         generalService.deleteActividad(id);
         return ResponseEntity.noContent().build();
     }
