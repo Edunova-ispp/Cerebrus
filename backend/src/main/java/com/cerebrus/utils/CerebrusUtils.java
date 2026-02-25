@@ -1,8 +1,10 @@
 package com.cerebrus.utils;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Collection;
-
+import java.util.Collections;
+import java.util.List;
 public class CerebrusUtils {
     private static final char[] ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
     private static final int CODE_LENGTH = 7;
@@ -17,8 +19,16 @@ public class CerebrusUtils {
     }
 
     public static <T> Collection<T> shuffleCollection(Collection<T> collection) {
-        //TODO: Implementar lógica para mezclar aleatoriamente los elementos de la colección
-        return collection;
+        if (collection == null || collection.isEmpty()) {
+            return Collections.emptyList();
+        }
+        if (collection.size() == 1) {
+            return new ArrayList<>(collection); 
+        }
+
+        List<T> copy = new ArrayList<>(collection); 
+        Collections.shuffle(copy, RNG);              
+        return copy;                                 
     }
     
 }
