@@ -19,6 +19,6 @@ public interface CursoRepository extends JpaRepository<Curso, Long> {
 
 	@Query("SELECT curso FROM Inscripcion i WHERE i.alumno.id = :alumnoId AND i.curso.visibilidad = true")
 	List<Curso> findByAlumnoId(@Param("alumnoId") Long alumnoId);
-
-	Curso findByID(Long id);
+    @Query("SELECT c FROM Curso c WHERE c.id = :id")
+	Curso findByID(@Param("id") Long id);
 }
