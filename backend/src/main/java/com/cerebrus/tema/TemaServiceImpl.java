@@ -59,7 +59,6 @@ public class TemaServiceImpl implements TemaService {
 
         tema.setTitulo(nuevoTitulo);
         return temaRepository.save(tema);
-        this.cursoService = cursoService;
     }
 
     public List<Tema> ObtenerTemasPorCursoAlumno(Integer cursoId) {
