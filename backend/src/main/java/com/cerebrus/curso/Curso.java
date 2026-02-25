@@ -35,7 +35,7 @@ public class Curso {
 
     private String imagen;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String codigo;
 
     @Column(nullable = false)

@@ -1,6 +1,7 @@
 package com.cerebrus.curso;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -8,7 +9,7 @@ import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
-
+import com.cerebrus.utils.CerebrusUtils;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class CursoServiceImpl implements CursoService {
     }
 
     @Override
-    public List<Curso> ObtenerCursosUsuarioLogueado() {
+    public List<Curso> obtenerCursosUsuarioLogueado() {
         //Esta funcion devuleve una lista con todos los cursos del usuario logueado, 
         // si el usuario es un maestro devuelve los cursos que ha creado, 
         // si el usuario es un alumno devuelve los cursos a los que se ha inscrito 
@@ -82,5 +83,30 @@ public class CursoServiceImpl implements CursoService {
 }
      }
 
+    @Transactional
+    @Override
+    public Curso crearCurso(String titulo, String descripcion, String imagen){
+        Usuario usuario = usuarioService.findCurrentUser();
+        if (!(usuario instanceof Maestro)){
+            throw new AccessDeniedException("Solo un maestro puede crear cursos");
+        }
+
+        Curso curso = new Curso();
+        curso.setTitulo(titulo);
+        curso.setDescripcion(descripcion);
+        curso.setImagen(imagen);
+        curso.setVisibilidad(false);
+        Maestro maestro = (Maestro) usuario;   
+        curso.setMaestro(maestro);
+        String codigo;
+        while(true){
+            codigo = CerebrusUtils.generateUniqueCode();
+            if(!cursoRepository.existsByCodigo(codigo)){
+                break;
+            }
+        }
+        curso.setCodigo(codigo);
+        return cursoRepository.save(curso);
+    } 
 
 }
