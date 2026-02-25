@@ -1,5 +1,7 @@
 package com.cerebrus.tema;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,9 +10,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.cerebrus.actividad.Actividad;
+import com.cerebrus.actividad.ActividadService;
 
 @RestController
 @RequestMapping("/api/temas")
@@ -18,10 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class TemaController {
 
     private final TemaService temaService;
+    private final ActividadService actividadService;
 
     @Autowired
-    public TemaController(TemaService temaService) {
+    public TemaController(TemaService temaService, ActividadService actividadService) {
         this.temaService = temaService;
+        this.actividadService = actividadService;
     }
 
     @PostMapping
@@ -75,5 +83,15 @@ public class TemaController {
         public void setNuevoTitulo(String nuevoTitulo) {
             this.nuevoTitulo = nuevoTitulo;
         }
+    }
+
+    @GetMapping("/curso/{cursoId}")
+    public ResponseEntity<List<TemaDTO>> ObtenerTemasPorCursoAlumno(@PathVariable Integer cursoId) {
+        List<Tema> temas = temaService.ObtenerTemasPorCursoAlumno(cursoId);
+        List<TemaDTO> temasDTO = temas.stream().map(tema -> {
+            List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
+            return new TemaDTO(tema, actividades);
+        }).toList();
+        return ResponseEntity.ok(temasDTO);
     }
 }
