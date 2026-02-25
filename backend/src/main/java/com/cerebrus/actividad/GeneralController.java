@@ -83,7 +83,10 @@ public class GeneralController {
             general.getDescripcion(),
             general.getPuntuacion(),
             general.getRespVisible(),
-            general.getComentariosRespVisible()
+            general.getComentariosRespVisible(),
+            general.getPosicion(),
+            general.getVersion(),
+            general.getTema().getId()
         );
         return ResponseEntity.ok(actualizado);
     }
@@ -97,7 +100,10 @@ public class GeneralController {
             general.getPuntuacion(),
             general.getRespVisible(),
             general.getComentariosRespVisible(),
-            general.getPreguntas().stream().map(Pregunta::getId).toList()
+            general.getPreguntas().stream().map(Pregunta::getId).toList(),
+            general.getPosicion(),
+            general.getVersion(),
+            general.getTema().getId()
         );
         return ResponseEntity.ok(actualizado);
     }

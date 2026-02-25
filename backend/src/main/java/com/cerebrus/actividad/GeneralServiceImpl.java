@@ -3,10 +3,12 @@ package com.cerebrus.actividad;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.TipoActGeneral;
+import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
@@ -34,14 +36,15 @@ public class GeneralServiceImpl implements GeneralService {
     }
 
     @Override
-    public General crearActGeneral(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible) {
+    public General crearActGeneral(String titulo, String descripcion, Integer puntuacion, Long temaId, 
+        Boolean respVisible, String comentariosRespVisible) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
-            throw new RuntimeException("Solo un maestro puede crear actividades");
+            throw new AccessDeniedException("Solo un maestro puede crear actividades");
         }
 
-        Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new RuntimeException("El tema de la actividad no existe"));
+        Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
         General actividad = new General();
         actividad.setTitulo(titulo);
         actividad.setDescripcion(descripcion);
@@ -58,12 +61,13 @@ public class GeneralServiceImpl implements GeneralService {
 
     @Override
     @Transactional
-    public General crearTipoTest(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible,
+    public General crearTipoTest(String titulo, String descripcion, Integer puntuacion, Long temaId, 
+        Boolean respVisible, String comentariosRespVisible,
             List<Long> preguntasId) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
-            throw new RuntimeException("Solo un maestro puede crear actividades");
+            throw new AccessDeniedException("Solo un maestro puede crear actividades");
         }
 
         General tipoTest = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
@@ -75,20 +79,21 @@ public class GeneralServiceImpl implements GeneralService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public General readActividad(Long id){
-        return generalRepository.findByIdWithPreguntas(id).orElseThrow(() -> new RuntimeException("Actividad tipo test no encontrada"));
+        return generalRepository.findByIdWithPreguntas(id).orElseThrow(() -> new ResourceNotFoundException("Actividad tipo test no encontrada"));
     }
 
     @Override
-    public General updateActGeneral(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, String comentariosRespVisible){
+    public General updateActGeneral(Long id, String titulo, String descripcion, Integer puntuacion, 
+        Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Long temaId) {
         
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
-            throw new RuntimeException("Solo un maestro puede actualizar actividades");
+            throw new AccessDeniedException("Solo un maestro puede actualizar actividades");
         }
         
-        General actividad = generalRepository.findById(id).orElseThrow(() -> new RuntimeException("Actividad no encontrada"));
+        General actividad = generalRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
         actividad.setTitulo(titulo);
         actividad.setDescripcion(descripcion);
         actividad.setPuntuacion(puntuacion);
@@ -101,21 +106,27 @@ public class GeneralServiceImpl implements GeneralService {
         } else {
             actividad.setComentariosRespVisible(comentariosRespVisible);
         }
-        actividad.setVersion(2);
-        //TODO: Posicion y tema cambian???
+        actividad.setVersion(version+1);
+        actividad.setPosicion(posicion);
+
+        Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
+        actividad.setTema(tema);
+        
         return actividad;
     }
 
     @Override
     @Transactional
-    public General updateTipoTest(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId){
+    public General updateTipoTest(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
+        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId) {
      
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
-            throw new RuntimeException("Solo un maestro puede actualizar actividades");
+            throw new AccessDeniedException("Solo un maestro puede actualizar actividades tipo test");
         }
 
-        General tipoTest = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible);
+        General tipoTest = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
+            posicion, version, temaId);
         if(preguntasId != null){
             List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
             tipoTest.getPreguntas().clear();
@@ -131,10 +142,10 @@ public class GeneralServiceImpl implements GeneralService {
         
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
-            throw new RuntimeException("Solo un maestro puede eliminar actividades");
+            throw new AccessDeniedException("Solo un maestro puede eliminar actividades");
         }
         
-        General general = generalRepository.findById(id).orElseThrow(() -> new RuntimeException("Actividad tipo test no encontrada"));
+        General general = generalRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Actividad tipo test no encontrada"));
         generalRepository.delete(general);
     }
 }

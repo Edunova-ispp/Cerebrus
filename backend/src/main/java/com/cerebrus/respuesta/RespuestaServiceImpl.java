@@ -1,6 +1,7 @@
 package com.cerebrus.respuesta;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -8,6 +9,7 @@ import com.cerebrus.pregunta.PreguntaRepository;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.Maestro;
+import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 
 @Service
@@ -32,10 +34,10 @@ public class RespuestaServiceImpl implements RespuestaService {
         
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
-            throw new RuntimeException("Solo un maestro puede crear respuestas");
+            throw new AccessDeniedException("Solo un maestro puede crear respuestas");
         }
 
-        Pregunta pregunta = preguntaRepository.findById(preguntaId).orElseThrow(() -> new RuntimeException("La pregunta de la respuesta no existe"));
+        Pregunta pregunta = preguntaRepository.findById(preguntaId).orElseThrow(() -> new ResourceNotFoundException("La pregunta de la respuesta no existe"));
         
         Respuesta respuestaObj = new Respuesta();
         respuestaObj.setRespuesta(respuesta);
@@ -48,7 +50,7 @@ public class RespuestaServiceImpl implements RespuestaService {
     @Override
     @Transactional(readOnly = true)
     public Respuesta readRespuesta(Long id) {
-        return respuestaRepository.findById(id).orElseThrow(() -> new RuntimeException("La respuesta no existe"));
+        return respuestaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La respuesta no existe"));
     }
 
     @Override
@@ -57,10 +59,10 @@ public class RespuestaServiceImpl implements RespuestaService {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
-            throw new RuntimeException("Solo un maestro puede actualizar respuestas");
+            throw new AccessDeniedException("Solo un maestro puede actualizar respuestas");
         }
 
-        Respuesta respuestaObj = respuestaRepository.findById(id).orElseThrow(() -> new RuntimeException("La respuesta no existe"));
+        Respuesta respuestaObj = respuestaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La respuesta no existe"));
         respuestaObj.setRespuesta(respuesta);
         respuestaObj.setImagen(imagen);
         respuestaObj.setCorrecta(correcta);
@@ -73,10 +75,10 @@ public class RespuestaServiceImpl implements RespuestaService {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
-            throw new RuntimeException("Solo un maestro puede eliminar respuestas");
+            throw new AccessDeniedException("Solo un maestro puede eliminar respuestas");
         }
 
-        Respuesta respuestaObj = respuestaRepository.findById(id).orElseThrow(() -> new RuntimeException("La respuesta no existe"));
+        Respuesta respuestaObj = respuestaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La respuesta no existe"));
         respuestaRepository.delete(respuestaObj);
     }
 }
