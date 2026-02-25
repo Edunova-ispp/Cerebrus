@@ -5,5 +5,6 @@ public enum TipoActGeneral {
     CARTA,
     CRUCIGRAMA,
     ABIERTA,
-    CLASIFICACION
+    CLASIFICACION,
+    TEORIA
 }
