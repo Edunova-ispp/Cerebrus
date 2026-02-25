@@ -4,15 +4,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cerebrus.usuario.Alumno;
+import com.cerebrus.usuario.Maestro;
+import com.cerebrus.usuario.Usuario;
+import com.cerebrus.usuario.UsuarioService;
+
+
+import java.util.List;
+
+
 @Service
 @Transactional
 public class CursoServiceImpl implements CursoService {
 
     private final CursoRepository cursoRepository;
+    private final UsuarioService usuarioService;
 
     @Autowired
-    public CursoServiceImpl(CursoRepository cursoRepository) {
+    public CursoServiceImpl(CursoRepository cursoRepository, UsuarioService usuarioService) {
         this.cursoRepository = cursoRepository;
+        this.usuarioService = usuarioService;
     }
 
     public List<Curso> ObtenerCursosUsuarioLogueado() {
@@ -23,11 +34,14 @@ public class CursoServiceImpl implements CursoService {
 
 
         //TODO:obtener el usuario logueado, se ha asumido un metodo obtenerUsuarioLogueado().
-       Usuario usuario = obtenerUsuarioLogueado(); 
+       
+        Usuario usuario = usuarioService.findCurrentUser(); 
         if (usuario instanceof Maestro) {
              return cursoRepository.findByMaestroId(usuario.getId());
         } else if (usuario instanceof Alumno) {
              return cursoRepository.findByAlumnoId(usuario.getId());
+        }else{
+            throw new RuntimeException("403 Forbidden");
         }
 
        
