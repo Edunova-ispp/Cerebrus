@@ -38,6 +38,12 @@ public class General extends Actividad {
         this.tipo = tipo;
     }
 
+    public General(String titulo, String descripcion, Integer puntuacion, String imagen,
+                   Boolean respVisible, Integer posicion, Integer version, Tema tema, TipoActGeneral tipo) {
+        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema);
+        this.tipo = tipo;
+    }
+
     // Getters y Setters
     public TipoActGeneral getTipo() {
         return tipo;
