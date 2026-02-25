@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface TemaService {
 
-    public List<Tema> ObtenerTemasPorCursoAlumno(Integer cursoId);
+    List<Tema> ObtenerTemasPorCursoAlumno(Integer cursoId);
 
     Tema crearTema(String titulo, Long cursoId, Long maestroId);
 

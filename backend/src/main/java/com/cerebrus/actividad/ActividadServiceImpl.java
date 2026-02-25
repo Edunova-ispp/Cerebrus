@@ -1,5 +1,7 @@
 package com.cerebrus.actividad;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,5 +41,11 @@ public class ActividadServiceImpl implements ActividadService {
         Actividad actividad = new General(titulo, descripcion, puntuacion, imagen, false, nuevaPosicion, 1, tema, TipoActGeneral.TEORIA);
 
         return actividadRepository.save(actividad);
+    }
+
+    @Override
+    public List<Actividad> ObtenerActividadesPorTema(Long temaId) {
+        //Esta funcion devuelve una lista con todas las actividades de un tema, 
+        return actividadRepository.findByTemaId(temaId);
     }
 }
