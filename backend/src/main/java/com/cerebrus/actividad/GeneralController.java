@@ -33,6 +33,22 @@ public class GeneralController {
         this.generalService = generalService;
     }
 
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<General> crearActGeneral(@RequestBody @Valid General general) {
+        
+        General generalCreada = generalService.crearActGeneral(
+            general.getTitulo(),
+            general.getDescripcion(),
+            general.getPuntuacion(),
+            general.getTema().getId(),
+            general.getRespVisible(),
+            general.getComentariosRespVisible()
+        );
+
+        return new ResponseEntity<>(generalCreada, HttpStatus.CREATED);
+    }
+
     @PostMapping("/test")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<General> crearTipoTest(@RequestBody @Valid General general) {
@@ -54,12 +70,25 @@ public class GeneralController {
         return new ResponseEntity<>(generalCreada, HttpStatus.CREATED);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<General> readActividad(@PathVariable Long id){
         return ResponseEntity.ok(generalService.readActividad(id));
     }
 
-    @PutMapping("test/update/{id}")
+    @PutMapping("/update/{id}")
+    public ResponseEntity<General> updateActGeneral(@PathVariable Long id, @RequestBody @Valid General general){
+        General actualizado = generalService.updateActGeneral(
+            id,
+            general.getTitulo(),
+            general.getDescripcion(),
+            general.getPuntuacion(),
+            general.getRespVisible(),
+            general.getComentariosRespVisible()
+        );
+        return ResponseEntity.ok(actualizado);
+    }
+    
+    @PutMapping("/test/update/{id}")
     public ResponseEntity<General> updateTipoTest(@PathVariable Long id, @RequestBody @Valid General general){
         General actualizado = generalService.updateTipoTest(
             id,

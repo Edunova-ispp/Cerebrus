@@ -8,6 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.respuesta.Respuesta;
+import com.cerebrus.usuario.Maestro;
+import com.cerebrus.usuario.Usuario;
+import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.utils.CerebrusUtils;
 
@@ -17,18 +20,26 @@ public class PreguntaServiceImpl implements PreguntaService {
 
     private final PreguntaRepository preguntaRepository;
     private final ActividadRepository actividadRepository;
+    private final UsuarioService usuarioService;
 
     @Autowired
-    public PreguntaServiceImpl(PreguntaRepository preguntaRepository, ActividadRepository actividadRepository) {
+    public PreguntaServiceImpl(PreguntaRepository preguntaRepository, 
+        ActividadRepository actividadRepository, UsuarioService usuarioService) {
         this.preguntaRepository = preguntaRepository;
         this.actividadRepository = actividadRepository;
+        this.usuarioService = usuarioService;
     }
 
     @Override
     @Transactional
     public Pregunta crearPregunta(String pregunta, String imagen, Long actId) {
+
+        Usuario u = usuarioService.findCurrentUser();
+        if (!(u instanceof Maestro)) {
+            throw new RuntimeException("Solo un maestro puede crear preguntas");
+        }
         
-        Actividad actividad = actividadRepository.findById(actId).orElseThrow(() -> new RuntimeException("La actividad es incorrecta"));
+        Actividad actividad = actividadRepository.findById(actId).orElseThrow(() -> new RuntimeException("La actividad de la pregunta no existe"));
         
         Pregunta preguntaObj = new Pregunta();
         preguntaObj.setPregunta(pregunta);
@@ -49,6 +60,12 @@ public class PreguntaServiceImpl implements PreguntaService {
     @Override
     @Transactional
     public Pregunta updatePregunta(Long id, String pregunta, String imagen) {
+
+        Usuario u = usuarioService.findCurrentUser();
+        if (!(u instanceof Maestro)) {
+            throw new RuntimeException("Solo un maestro puede actualizar preguntas");
+        }
+
         Pregunta preguntaObj = preguntaRepository.findById(id).orElseThrow(() -> new RuntimeException("La pregunta no existe"));
         preguntaObj.setPregunta(pregunta);
         preguntaObj.setImagen(imagen);
@@ -58,6 +75,12 @@ public class PreguntaServiceImpl implements PreguntaService {
     @Override
     @Transactional
     public void deletePregunta(Long id) {
+
+        Usuario u = usuarioService.findCurrentUser();
+        if (!(u instanceof Maestro)) {
+            throw new RuntimeException("Solo un maestro puede eliminar preguntas");
+        }
+        
         Pregunta preguntaObj = preguntaRepository.findById(id).orElseThrow(() -> new RuntimeException("La pregunta no existe"));
         preguntaRepository.delete(preguntaObj);
     }
