@@ -41,7 +41,10 @@ public abstract class Actividad {
     private String imagen;
 
     @Column(nullable = false)
-    private Boolean respVisible;
+    private Boolean respVisible = false;
+
+    @Column
+    private String comentariosRespVisible;
 
     @Column(nullable = false)
     private Integer posicion;
@@ -119,6 +122,14 @@ public abstract class Actividad {
 
     public void setRespVisible(Boolean respVisible) {
         this.respVisible = respVisible;
+    }
+
+    public String getComentariosRespVisible(){
+        return comentariosRespVisible;
+    }
+
+    public void setComentariosRespVisible(String comentariosRespVisible){
+        this.comentariosRespVisible = comentariosRespVisible;
     }
 
     public Integer getPosicion() {
