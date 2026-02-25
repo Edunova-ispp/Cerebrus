@@ -40,7 +40,7 @@ public class CursoServiceImpl implements CursoService {
         //TODO:obtener el usuario logueado, se ha asumido un metodo obtenerUsuarioLogueado().
         Usuario usuario = usuarioService.findCurrentUser(); 
         if(usuario instanceof Maestro){
-            if(curso.getMaestro().getId()!=usuario.getId()){
+            if(!curso.getMaestro().getId().equals(usuario.getId())){
                 throw new RuntimeException("403 Forbidden");
             }else {
                 return List.of(curso.getTitulo(), curso.getDescripcion(), curso.getImagen(), curso.getCodigo());
