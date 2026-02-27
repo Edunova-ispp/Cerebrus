@@ -202,6 +202,10 @@ public class ActividadAlumno {
                 ", fecha_inicio=" + inicio + 
                 ", fecha_fin=" + acabada +
                 ", nota=" + nota +
+                ", num_abandonos=" + numAbandonos +
+                ", num_repeticiones=" + getNumRepeticiones() +
+                ", num_fallos=" + getNumFallos() +
+                ", estado=" + getEstadoActividad() +
                 '}';
     }
 }
