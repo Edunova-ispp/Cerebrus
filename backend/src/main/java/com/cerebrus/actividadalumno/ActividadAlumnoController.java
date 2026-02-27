@@ -35,7 +35,6 @@ public class ActividadAlumnoController {
         ActividadAlumno actividadAlumnoCreada = actividadAlumnoService.crearActividadAlumno(
             actividadAlumno.getTiempo(),
             actividadAlumno.getPuntuacion(),
-            actividadAlumno.getFecha(),
             actividadAlumno.getInicio(),
             actividadAlumno.getAcabada(),
             actividadAlumno.getNota(),
@@ -60,7 +59,6 @@ public class ActividadAlumnoController {
             id,
             actividadAlumno.getTiempo(),
             actividadAlumno.getPuntuacion(),
-            actividadAlumno.getFecha(),
             actividadAlumno.getInicio(),
             actividadAlumno.getAcabada(),
             actividadAlumno.getNota(),

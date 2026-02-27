@@ -1,6 +1,7 @@
 package com.cerebrus.actividadalumno;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,13 +31,13 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
     @Override
     @Transactional
-    public ActividadAlumno crearActividadAlumno(Integer tiempo, Integer puntuacion, LocalDate fecha, LocalDate inicio,
-        LocalDate acabada, Integer nota, Integer numAbandonos, Long alumnoId, Long actId) {
+    public ActividadAlumno crearActividadAlumno(Integer tiempo, Integer puntuacion, LocalDateTime inicio,
+        LocalDateTime acabada, Integer nota, Integer numAbandonos, Long alumnoId, Long actId) {
         
         Actividad actividad = actividadRepository.findById(actId).orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
         Alumno alumno = alumnoRepository.findById(alumnoId).orElseThrow(() -> new ResourceNotFoundException("El alumno no existe"));
 
-        ActividadAlumno actividadAlumno = new ActividadAlumno(tiempo, puntuacion, fecha, 
+        ActividadAlumno actividadAlumno = new ActividadAlumno(tiempo, puntuacion, 
             inicio, acabada, nota, numAbandonos, alumno, actividad);
         return actividadAlumnoRepository.save(actividadAlumno);
     }
@@ -49,12 +50,11 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
     @Override
     @Transactional
-    public ActividadAlumno updateActividadAlumno(Long id, Integer tiempo, Integer puntuacion, LocalDate fecha,
-         LocalDate inicio, LocalDate acabada, Integer nota, Integer numAbandonos) {
+    public ActividadAlumno updateActividadAlumno(Long id, Integer tiempo, Integer puntuacion,
+         LocalDateTime inicio, LocalDateTime acabada, Integer nota, Integer numAbandonos) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         actividadAlumno.setTiempo(tiempo);
         actividadAlumno.setPuntuacion(puntuacion);
-        actividadAlumno.setFecha(fecha);
         actividadAlumno.setInicio(inicio);
         actividadAlumno.setAcabada(acabada);
         actividadAlumno.setNota(nota);

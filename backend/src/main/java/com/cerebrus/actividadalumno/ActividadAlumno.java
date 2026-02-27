@@ -1,6 +1,6 @@
 package com.cerebrus.actividadalumno;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,14 +36,11 @@ public class ActividadAlumno {
     @Column(nullable = false)
     private Integer puntuacion;
 
-    @Column(nullable = false)
-    private LocalDate fecha;
+    @Column
+    private LocalDateTime inicio = LocalDateTime.of(1970, 1, 1, 0, 0);
 
     @Column
-    private LocalDate inicio = LocalDate.ofEpochDay(0);
-
-    @Column
-    private LocalDate acabada = LocalDate.ofEpochDay(0);
+    private LocalDateTime acabada = LocalDateTime.of(1970, 1, 1, 0, 0);
 
     @Column(nullable = false)
     private Integer numAbandonos = 0;
@@ -68,11 +65,10 @@ public class ActividadAlumno {
     public ActividadAlumno() {
     }
 
-    public ActividadAlumno(Integer tiempo, Integer puntuacion, LocalDate fecha, LocalDate inicio, 
-        LocalDate acabada, Integer nota, Integer numAbandonos, Alumno alumno, Actividad actividad) {
+    public ActividadAlumno(Integer tiempo, Integer puntuacion, LocalDateTime inicio, 
+        LocalDateTime acabada, Integer nota, Integer numAbandonos, Alumno alumno, Actividad actividad) {
         this.tiempo = tiempo;
         this.puntuacion = puntuacion;
-        this.fecha = fecha;
         this.inicio = inicio;
         this.acabada = acabada;
         this.nota = nota;
@@ -114,27 +110,19 @@ public class ActividadAlumno {
         this.nota = nota;
     }
 
-    public LocalDate getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
-    }
-
-    public LocalDate getInicio(){
+    public LocalDateTime getInicio(){
         return inicio;
     }
 
-    public void setInicio(LocalDate inicio){
+    public void setInicio(LocalDateTime inicio){
         this.inicio=inicio;
     }
 
-    public LocalDate getAcabada(){
+    public LocalDateTime getAcabada(){
         return acabada;
     }
 
-    public void setAcabada(LocalDate acabada){
+    public void setAcabada(LocalDateTime acabada){
         this.acabada=acabada;
     }
 
@@ -164,7 +152,7 @@ public class ActividadAlumno {
         EstadoActividad result;
         if(getNumRepeticiones() > 0 && respuestasAlumno.get(respuestasAlumno.size()-1).getCorrecta().equals(Boolean.TRUE)){
             result = EstadoActividad.TERMINADA;
-        } else if (inicio != null && !(inicio.equals(LocalDate.ofEpochDay(0)))){
+        } else if (inicio != null && !(inicio.equals(LocalDateTime.of(1970, 1, 1, 0, 0)))){
             result = EstadoActividad.EMPEZADA;
         } else {
             result = EstadoActividad.SIN_EMPEZAR;
@@ -202,7 +190,6 @@ public class ActividadAlumno {
                 "id=" + id +
                 ", tiempo=" + tiempo +
                 ", puntuacion=" + puntuacion +
-                ", fecha=" + fecha +
                 ", fecha_inicio=" + inicio + 
                 ", fecha_fin=" + acabada +
                 ", nota=" + nota +
