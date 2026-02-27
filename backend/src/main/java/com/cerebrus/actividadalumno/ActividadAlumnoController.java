@@ -36,6 +36,10 @@ public class ActividadAlumnoController {
             actividadAlumno.getTiempo(),
             actividadAlumno.getPuntuacion(),
             actividadAlumno.getFecha(),
+            actividadAlumno.getInicio(),
+            actividadAlumno.getAcabada(),
+            actividadAlumno.getNota(),
+            actividadAlumno.getNumAbandonos(),
             actividadAlumno.getAlumno().getId(),
             actividadAlumno.getActividad().getId()
         );
@@ -56,7 +60,11 @@ public class ActividadAlumnoController {
             id,
             actividadAlumno.getTiempo(),
             actividadAlumno.getPuntuacion(),
-            actividadAlumno.getFecha()
+            actividadAlumno.getFecha(),
+            actividadAlumno.getInicio(),
+            actividadAlumno.getAcabada(),
+            actividadAlumno.getNota(),
+            actividadAlumno.getNumAbandonos()
         );
         return new ResponseEntity<>(actividadAlumnoActualizada, HttpStatus.OK);
     }

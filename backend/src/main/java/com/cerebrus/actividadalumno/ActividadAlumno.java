@@ -68,11 +68,15 @@ public class ActividadAlumno {
     public ActividadAlumno() {
     }
 
-    public ActividadAlumno(Integer tiempo, Integer puntuacion, LocalDate fecha,
-                           Alumno alumno, Actividad actividad) {
+    public ActividadAlumno(Integer tiempo, Integer puntuacion, LocalDate fecha, LocalDate inicio, 
+        LocalDate acabada, Integer nota, Integer numAbandonos, Alumno alumno, Actividad actividad) {
         this.tiempo = tiempo;
         this.puntuacion = puntuacion;
         this.fecha = fecha;
+        this.inicio = inicio;
+        this.acabada = acabada;
+        this.nota = nota;
+        this.numAbandonos = numAbandonos;
         this.alumno = alumno;
         this.actividad = actividad;
     }
