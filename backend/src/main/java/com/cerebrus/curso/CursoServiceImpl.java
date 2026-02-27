@@ -85,6 +85,24 @@ public class CursoServiceImpl implements CursoService {
 
     @Transactional
     @Override
+    public Curso cambiarVisibilidad(Long id) {
+        Curso curso = cursoRepository.findByID(id);
+        if (curso == null) {
+            throw new RuntimeException("404 Not Found");
+        }
+        Usuario usuario = usuarioService.findCurrentUser();
+        if (!(usuario instanceof Maestro)) {
+            throw new RuntimeException("403 Forbidden");
+        }
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new RuntimeException("403 Forbidden");
+        }
+        curso.setVisibilidad(!curso.getVisibilidad());
+        return cursoRepository.save(curso);
+    }
+
+    @Transactional
+    @Override
     public Curso crearCurso(String titulo, String descripcion, String imagen){
         Usuario usuario = usuarioService.findCurrentUser();
         if (!(usuario instanceof Maestro)){

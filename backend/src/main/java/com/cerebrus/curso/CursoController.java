@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -72,5 +73,20 @@ public class CursoController {
     @GetMapping
     public ResponseEntity<List<Curso>> obtenerCursos() {
         return ResponseEntity.ok(cursoService.ObtenerCursosUsuarioLogueado());
+    }
+
+    @PatchMapping("/{id}/visibilidad")
+    public ResponseEntity<Curso> cambiarVisibilidad(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(cursoService.cambiarVisibilidad(id));
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("404 Not Found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            } else if (e.getMessage().equals("403 Forbidden")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
     }
 }
