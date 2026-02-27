@@ -67,4 +67,12 @@ public class ActividadAlumnoController {
         actividadAlumnoService.deleteActividadAlumno(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/puntuacion/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ActividadAlumno> corregirPuntuacionActividadAlumno(@PathVariable Long id, @RequestBody Integer nuevaPuntuacion) {
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirPuntuacionActividadAlumno(id, nuevaPuntuacion);
+        return new ResponseEntity<>(actividadAlumnoActualizada, HttpStatus.OK);
+    }
+
 }

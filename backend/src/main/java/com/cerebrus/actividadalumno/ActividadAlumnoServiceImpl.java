@@ -2,6 +2,7 @@ package com.cerebrus.actividadalumno;
 
 import java.time.LocalDate;
 
+import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.actividad.ActividadRepository;
+import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.usuario.AlumnoRepository;
 
 @Service
@@ -59,5 +61,13 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     public void deleteActividadAlumno(Long id) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad del alumno no existe"));
         actividadAlumnoRepository.delete(actividadAlumno);
+    }
+
+    @Override
+    @Transactional
+    public ActividadAlumno corregirPuntuacionActividadAlumno(Long id, Integer nuevaPuntuacion) {
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
+        actividadAlumno.setPuntuacion(nuevaPuntuacion);
+        return actividadAlumnoRepository.save(actividadAlumno);
     }
 }

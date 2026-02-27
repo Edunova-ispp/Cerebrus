@@ -12,7 +12,7 @@ public class ResourceNotFoundException extends RuntimeException {
 	private static final long serialVersionUID = -3906338266891937036L;
 
 	public ResourceNotFoundException(String resourceName, String fieldName, Object fieldValue) {
-		super(String.format("%s not found with %s: '%s'", resourceName, fieldName, fieldValue));
+		super(String.format("No se ha encontrado una entidad del tipo %s con campo %s: '%s'", resourceName, fieldName, fieldValue));
 	}
 
 	public ResourceNotFoundException(final String message) {
