@@ -3,13 +3,13 @@ import NavbarMisCursos from "../../components/NavbarMisCursos/NavbarMisCursos";
 import CursoCard from "../../components/CursoCard/CursoCard";
 import { apiFetch } from "../../utils/api";
 import type { Curso } from "../../types/curso";
-import { getCurrentUserRoles } from "../../types/curso";
+import { getCurrentUserRoles, getCurrentUserInfo } from "../../types/curso";
 import "./MisCursos.css";
 
 // TODO: Eliminar estos datos de placeholder cuando el login y el endpoint GET /api/cursos estén operativos.
 // El useEffect ya está preparado: si hay token en localStorage carga datos reales, si no usa estos mocks.
 const MOCK_CURSOS: Curso[] = [
-  { id: 1, titulo: "Matemáticas Avanzadas", descripcion: "Cálculo y álgebra lineal", imagen: null, codigo: "MAT01", visibilidad: true },
+  { id: 1, titulo: "Placeholder - No login", descripcion: "Cálculo y álgebra lineal", imagen: null, codigo: "MAT01", visibilidad: true },
   { id: 2, titulo: "Historia del Arte", descripcion: "Del Renacimiento al Barroco", imagen: null, codigo: "ARTE01", visibilidad: true },
   { id: 3, titulo: "Programación Web", descripcion: "HTML, CSS y JavaScript", imagen: null, codigo: "WEB01", visibilidad: true },
   { id: 4, titulo: "Biología Celular", descripcion: "Estructura y función celular", imagen: null, codigo: "BIO01", visibilidad: true },
@@ -35,7 +35,7 @@ export default function MisCursos() {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiFetch("api/cursos");
+      const res = await apiFetch("/api/cursos");
       const data = await res.json();
       setCursos(Array.isArray(data) ? data : []);
     } catch (e) {
@@ -46,8 +46,12 @@ export default function MisCursos() {
   };
 
   useEffect(() => {
-    if (token) loadCursos();
-    else {
+    if (token) {
+      const userInfo = getCurrentUserInfo();
+      console.log("✅ Sesión activa:", userInfo);
+      loadCursos();
+    } else {
+      console.log("⚠️ Sin token — mostrando cursos mock");
       setCursos(MOCK_CURSOS);
       setLoading(false);
     }
@@ -61,7 +65,7 @@ export default function MisCursos() {
     setJoinSuccess(null);
     try {
       await apiFetch(
-        `api/inscripciones/inscribe?codigoCurso=${encodeURIComponent(codigo)}`,
+        `/api/inscripciones/inscribe?codigoCurso=${encodeURIComponent(codigo)}`,  
         { method: "POST" }
       );
       setJoinSuccess("¡Te has unido al curso correctamente!");
