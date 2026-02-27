@@ -1,5 +1,7 @@
 package com.cerebrus.actividadalumno;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,10 +76,10 @@ public class ActividadAlumnoController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/puntuacion/{id}")
+    @PutMapping("/corregir-manualmente/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumno> corregirPuntuacionActividadAlumno(@PathVariable Long id, @RequestBody Integer nuevaPuntuacion) {
-        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirPuntuacionActividadAlumno(id, nuevaPuntuacion);
+    public ResponseEntity<ActividadAlumno> corregirActividadAlumno(@PathVariable Long id, @RequestBody Integer nuevaNota, @RequestBody List<Long> nuevasCorreccionesRespuestasIds) {
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumno(id, nuevaNota, nuevasCorreccionesRespuestasIds);
         return new ResponseEntity<>(actividadAlumnoActualizada, HttpStatus.OK);
     }
 

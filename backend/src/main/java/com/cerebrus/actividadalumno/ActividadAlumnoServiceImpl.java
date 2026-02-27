@@ -2,6 +2,7 @@ package com.cerebrus.actividadalumno;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import com.cerebrus.actividad.Actividad;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.respuestaalumno.RespuestaAlumno;
+import com.cerebrus.respuestaalumno.RespuestaAlumnoService;
 import com.cerebrus.usuario.AlumnoRepository;
 
 @Service
@@ -21,13 +24,15 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     private final ActividadAlumnoRepository actividadAlumnoRepository;
     private final ActividadRepository actividadRepository;
     private final AlumnoRepository alumnoRepository;
+    private final RespuestaAlumnoService respuestaAlumnoService;
 
     @Autowired
     public ActividadAlumnoServiceImpl(ActividadAlumnoRepository actividadAlumnoRepository, 
-        ActividadRepository actividadRepository, AlumnoRepository alumnoRepository) {
+        ActividadRepository actividadRepository, AlumnoRepository alumnoRepository, RespuestaAlumnoService respuestaAlumnoService) {
         this.actividadAlumnoRepository = actividadAlumnoRepository;
         this.actividadRepository = actividadRepository;
         this.alumnoRepository = alumnoRepository;
+        this.respuestaAlumnoService = respuestaAlumnoService;
     }
 
     @Override
@@ -72,9 +77,32 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
     @Override
     @Transactional
-    public ActividadAlumno corregirPuntuacionActividadAlumno(Long id, Integer nuevaPuntuacion) {
+    public ActividadAlumno corregirActividadAlumno(Long id, Integer nuevaNota, List<Long> nuevasCorreccionesRespuestasIds) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
-        actividadAlumno.setPuntuacion(nuevaPuntuacion);
+        if (nuevaNota != null) {
+            corregirNotaActividadAlumno(actividadAlumno, nuevaNota);
+        }
+        if (nuevasCorreccionesRespuestasIds != null && !nuevasCorreccionesRespuestasIds.isEmpty()) {
+            corregirRespuestasActividadAlumno(actividadAlumno, nuevasCorreccionesRespuestasIds);
+        }
         return actividadAlumnoRepository.save(actividadAlumno);
+    }
+
+    @Override
+    public void corregirNotaActividadAlumno(ActividadAlumno actividadAlumno, Integer nuevaNota) {
+        actividadAlumno.setNota(nuevaNota);
+    }
+
+    @Override
+    public void corregirRespuestasActividadAlumno(ActividadAlumno actividadAlumno, List<Long> nuevasCorreccionesRespuestasIds) {
+        for (Long respuestaId: nuevasCorreccionesRespuestasIds) {
+            RespuestaAlumno respuestaAlumno = respuestaAlumnoService.encontrarRespuestaAlumnoPorId(respuestaId);
+            if(respuestaAlumno == null) {
+                throw new ResourceNotFoundException("RespuestaAlumno", "id", respuestaId);
+            } else if (!respuestaAlumno.getActividadAlumno().getId().equals(actividadAlumno.getId())) {
+                throw new IllegalArgumentException("La respuesta con id " + respuestaId + " no pertenece a la actividad del alumno con id " + actividadAlumno.getId());
+            }
+            respuestaAlumnoService.marcarODesmarcarRespuestaCorrecta(respuestaId);
+        }
     }
 }

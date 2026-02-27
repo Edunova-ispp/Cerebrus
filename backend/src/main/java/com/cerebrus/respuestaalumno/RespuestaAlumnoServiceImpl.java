@@ -19,7 +19,12 @@ public class RespuestaAlumnoServiceImpl implements RespuestaAlumnoService {
     }
 
     @Override
-    @Transactional
+    public RespuestaAlumno encontrarRespuestaAlumnoPorId(Long id) {
+        return respuestaAlumnoRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("RespuestaAlumno", "id", id));
+    }
+
+    @Override
     public RespuestaAlumno marcarODesmarcarRespuestaCorrecta(Long id) {
         RespuestaAlumno respuestaAlumno = respuestaAlumnoRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("RespuestaAlumno", "id", id));

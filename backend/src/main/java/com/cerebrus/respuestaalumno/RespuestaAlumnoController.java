@@ -22,11 +22,4 @@ public class RespuestaAlumnoController {
     public RespuestaAlumnoController(RespuestaAlumnoService respuestaAlumnoService) {
         this.respuestaAlumnoService = respuestaAlumnoService;
     }
-
-    @PutMapping("/cambiar-correcta/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<RespuestaAlumno> marcarODesmarcarRespuestaCorrecta(@PathVariable Long id) {
-        RespuestaAlumno respuestaAlumnoActualizada = respuestaAlumnoService.marcarODesmarcarRespuestaCorrecta(id);
-        return new ResponseEntity<>(respuestaAlumnoActualizada, HttpStatus.OK);
-    }
 }
