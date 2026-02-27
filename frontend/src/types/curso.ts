@@ -19,3 +19,14 @@ export function getCurrentUserRoles(): string[] {
     return [];
   }
 }
+
+/** Decodifica el JWT y devuelve el payload completo (sub, roles, exp, ...) */
+export function getCurrentUserInfo(): Record<string, unknown> | null {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+  try {
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch {
+    return null;
+  }
+}
