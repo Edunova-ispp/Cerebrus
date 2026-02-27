@@ -70,4 +70,9 @@ public class CursoController {
         Curso creado = cursoService.crearCurso(request.getTitulo(), request.getDescripcion(), request.getImagen());
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
+
+    @GetMapping
+    public ResponseEntity<List<Curso>> obtenerCursos() {
+        return ResponseEntity.ok(cursoService.ObtenerCursosUsuarioLogueado());
+    }
 }
