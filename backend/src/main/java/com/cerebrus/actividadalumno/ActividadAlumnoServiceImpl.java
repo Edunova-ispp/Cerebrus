@@ -1,6 +1,7 @@
 package com.cerebrus.actividadalumno;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,35 +32,41 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
     @Override
     @Transactional
-    public ActividadAlumno crearActividadAlumno(Integer tiempo, Integer puntuacion, LocalDate fecha, Long alumnoId, Long actId) {
+    public ActividadAlumno crearActividadAlumno(Integer tiempo, Integer puntuacion, LocalDateTime inicio,
+        LocalDateTime acabada, Integer nota, Integer numAbandonos, Long alumnoId, Long actId) {
         
-        Actividad actividad = actividadRepository.findById(actId).orElseThrow(() -> new RuntimeException("La actividad no existe"));
-        Alumno alumno = alumnoRepository.findById(alumnoId).orElseThrow(() -> new RuntimeException("El alumno no existe"));
+        Actividad actividad = actividadRepository.findById(actId).orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
+        Alumno alumno = alumnoRepository.findById(alumnoId).orElseThrow(() -> new ResourceNotFoundException("El alumno no existe"));
 
-        ActividadAlumno actividadAlumno = new ActividadAlumno(tiempo, puntuacion, fecha, alumno, actividad);
+        ActividadAlumno actividadAlumno = new ActividadAlumno(tiempo, puntuacion, 
+            inicio, acabada, nota, numAbandonos, alumno, actividad);
         return actividadAlumnoRepository.save(actividadAlumno);
     }
 
     @Override
     @Transactional(readOnly = true)
     public ActividadAlumno readActividadAlumno(Long id) {
-        return actividadAlumnoRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad del alumno no existe"));
+        return actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
     }
 
     @Override
     @Transactional
-    public ActividadAlumno updateActividadAlumno(Long id, Integer tiempo, Integer puntuacion, LocalDate fecha) {
-        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad del alumno no existe"));
+    public ActividadAlumno updateActividadAlumno(Long id, Integer tiempo, Integer puntuacion,
+         LocalDateTime inicio, LocalDateTime acabada, Integer nota, Integer numAbandonos) {
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         actividadAlumno.setTiempo(tiempo);
         actividadAlumno.setPuntuacion(puntuacion);
-        actividadAlumno.setFecha(fecha);
+        actividadAlumno.setInicio(inicio);
+        actividadAlumno.setAcabada(acabada);
+        actividadAlumno.setNota(nota);
+        actividadAlumno.setNumAbandonos(numAbandonos);
         return actividadAlumnoRepository.save(actividadAlumno);
     }
 
     @Override
     @Transactional
     public void deleteActividadAlumno(Long id) {
-        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad del alumno no existe"));
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         actividadAlumnoRepository.delete(actividadAlumno);
     }
 
