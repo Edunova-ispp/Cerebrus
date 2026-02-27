@@ -201,7 +201,7 @@ public class ActividadAlumno {
                 ", fecha=" + fecha +
                 ", fecha_inicio=" + inicio + 
                 ", fecha_fin=" + acabada +
-
+                ", nota=" + nota +
                 '}';
     }
 }
