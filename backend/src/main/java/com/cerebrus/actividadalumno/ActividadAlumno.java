@@ -4,13 +4,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.cglib.core.Local;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,7 +15,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
@@ -57,15 +52,6 @@ public class ActividadAlumno {
     @Min(0)
     @Max(10)
     private Integer nota;
-
-    @Transient
-    private Integer numRepeticiones;
-
-    @Transient
-    private Integer numFallos;
-
-    @Transient
-    private EstadoActividad estadoActividad;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "alumno_id", nullable = false)
@@ -172,7 +158,7 @@ public class ActividadAlumno {
 
     public EstadoActividad getEstadoActividad(){
         EstadoActividad result;
-        if(getNumRepeticiones() > 0 && respuestasAlumno.get(respuestasAlumno.size()).getCorrecta().equals(Boolean.TRUE)){
+        if(getNumRepeticiones() > 0 && respuestasAlumno.get(respuestasAlumno.size()-1).getCorrecta().equals(Boolean.TRUE)){
             result = EstadoActividad.TERMINADA;
         } else if (inicio != null && !(inicio.equals(LocalDate.ofEpochDay(0)))){
             result = EstadoActividad.EMPEZADA;
