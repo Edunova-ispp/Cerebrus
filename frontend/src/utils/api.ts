@@ -1,5 +1,10 @@
 const API_BASE = () => (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
+export async function toggleVisibilidadCurso(id: number): Promise<import('../types/curso').Curso> {
+  const res = await apiFetch(`/api/cursos/${id}/visibilidad`, { method: "PATCH" });
+  return res.json();
+}
+
 export async function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
   const token = localStorage.getItem("token");
 
