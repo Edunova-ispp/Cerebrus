@@ -11,7 +11,7 @@ function getInitials(titulo: string): string {
 }
 
 interface CursoCardProps {
-  curso: Curso;
+  readonly curso: Curso;
 }
 
 export default function CursoCard({ curso }: CursoCardProps) {

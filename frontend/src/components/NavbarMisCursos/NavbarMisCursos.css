@@ -17,9 +17,17 @@
   box-shadow: 6px 6px 0px #000;
 }
 
+.navbar-logo-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
 .navbar-logo {
   height: 50px;
-  cursor: pointer;
   object-fit: contain;
 }
 

@@ -6,7 +6,7 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
   const headers: HeadersInit = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(options.headers ?? {}),
+    ...(options.headers as Record<string, string> | undefined),
   };
 
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;

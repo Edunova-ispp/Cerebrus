@@ -21,9 +21,9 @@ function PixelAvatar() {
     <svg width={8 * size} height={8 * size} viewBox={`0 0 ${8 * size} ${8 * size}`} style={{ imageRendering: "pixelated", display: "block" }}>
       {grid.map((row, r) =>
         row.map((cell, c) =>
-          cell !== 0 ? (
+          cell === 0 ? null : (
             <rect key={`${r}-${c}`} x={c * size} y={r * size} width={size} height={size} fill={colors[cell]} />
-          ) : null
+          )
         )
       )}
     </svg>
@@ -36,12 +36,13 @@ export default function NavbarMisCursos() {
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        <img
-          src={logo}
-          alt="Cerebrus"
-          className="navbar-logo"
+        <button
+          type="button"
+          className="navbar-logo-btn"
           onClick={() => navigate("/")}
-        />
+        >
+          <img src={logo} alt="Cerebrus" className="navbar-logo" />
+        </button>
         <div className="navbar-links">
           <button className="navbar-link" onClick={() => navigate("/misCursos")}>
             Mis Cursos

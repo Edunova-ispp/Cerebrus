@@ -6,7 +6,7 @@ import type { Curso } from "../../types/curso";
 import { getCurrentUserRoles, getCurrentUserInfo } from "../../types/curso";
 import "./MisCursos.css";
 
-// TODO: Eliminar estos datos de placeholder cuando el login y el endpoint GET /api/cursos estén operativos.
+// Datos de placeholder para cuando no hay sesión activa.
 // El useEffect ya está preparado: si hay token en localStorage carga datos reales, si no usa estos mocks.
 const MOCK_CURSOS: Curso[] = [
   { id: 1, titulo: "Placeholder - No login", descripcion: "Cálculo y álgebra lineal", imagen: null, codigo: "MAT01", visibilidad: true },
@@ -88,8 +88,9 @@ export default function MisCursos() {
 
           {!isMaestro && (
             <div className="mis-cursos-join">
-              <label className="join-label">Código del curso:</label>
+              <label className="join-label" htmlFor="codigoCursoInput">Código del curso:</label>
               <input
+                id="codigoCursoInput"
                 className="join-input"
                 type="text"
                 value={codigoCurso}
@@ -110,19 +111,18 @@ export default function MisCursos() {
         {joinError && <p className="mis-cursos-feedback mis-cursos-feedback--error">{joinError}</p>}
         {joinSuccess && <p className="mis-cursos-feedback mis-cursos-feedback--success">{joinSuccess}</p>}
 
-        {loading ? (
-          <p className="mis-cursos-empty">Cargando cursos...</p>
-        ) : error ? (
-          <p className="mis-cursos-empty mis-cursos-feedback--error">{error}</p>
-        ) : cursos.length === 0 ? (
-          <p className="mis-cursos-empty">No tienes cursos todavía.</p>
-        ) : (
-          <div className="mis-cursos-grid">
-            {cursos.map((curso) => (
-              <CursoCard key={curso.id} curso={curso} />
-            ))}
-          </div>
-        )}
+        {(() => {
+          if (loading) return <p className="mis-cursos-empty">Cargando cursos...</p>;
+          if (error) return <p className="mis-cursos-empty mis-cursos-feedback--error">{error}</p>;
+          if (cursos.length === 0) return <p className="mis-cursos-empty">No tienes cursos todavía.</p>;
+          return (
+            <div className="mis-cursos-grid">
+              {cursos.map((curso) => (
+                <CursoCard key={curso.id} curso={curso} />
+              ))}
+            </div>
+          );
+        })()}
       </main>
     </div>
   );
