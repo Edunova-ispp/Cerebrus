@@ -12,9 +12,11 @@ function getInitials(titulo: string): string {
 
 interface CursoCardProps {
   readonly curso: Curso;
+  readonly isMaestro?: boolean;
+  readonly onToggleVisibilidad?: (id: number) => void;
 }
 
-export default function CursoCard({ curso }: CursoCardProps) {
+export default function CursoCard({ curso, isMaestro = false, onToggleVisibilidad }: CursoCardProps) {
   return (
     <motion.div
       className="curso-card"
@@ -37,6 +39,25 @@ export default function CursoCard({ curso }: CursoCardProps) {
       <div className="curso-card__footer">
         <span className="curso-card__titulo">{curso.titulo}</span>
       </div>
+      {isMaestro && (
+        <div className="curso-card__maestro-info">
+          <div className="curso-card__maestro-row">
+            <span className="curso-card__maestro-label">Código:</span>
+            <span className="curso-card__maestro-value curso-card__codigo">{curso.codigo}</span>
+          </div>
+          <div className="curso-card__maestro-row">
+            <span className="curso-card__maestro-label">Visible:</span>
+            <label className="curso-card__toggle">
+              <input
+                type="checkbox"
+                checked={curso.visibilidad}
+                onChange={() => onToggleVisibilidad?.(curso.id)}
+              />
+              <span className="curso-card__toggle-slider" />
+            </label>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

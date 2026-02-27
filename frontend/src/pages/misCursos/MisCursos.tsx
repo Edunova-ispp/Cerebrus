@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import NavbarMisCursos from "../../components/NavbarMisCursos/NavbarMisCursos";
 import CursoCard from "../../components/CursoCard/CursoCard";
-import { apiFetch } from "../../utils/api";
+import { apiFetch, toggleVisibilidadCurso } from "../../utils/api";
 import type { Curso } from "../../types/curso";
 import { getCurrentUserRoles, getCurrentUserInfo } from "../../types/curso";
 import "./MisCursos.css";
@@ -26,6 +27,7 @@ export default function MisCursos() {
   const [joinError, setJoinError] = useState<string | null>(null);
   const [joinSuccess, setJoinSuccess] = useState<string | null>(null);
 
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const isMaestro = getCurrentUserRoles().some((r) =>
     r.toUpperCase().includes("MAESTRO")
@@ -78,6 +80,17 @@ export default function MisCursos() {
     }
   };
 
+  const handleToggleVisibilidad = async (id: number) => {
+    try {
+      const updated = await toggleVisibilidadCurso(id);
+      setCursos((prev) =>
+        prev.map((c) => (c.id === updated.id ? updated : c))
+      );
+    } catch {
+      // Si falla, no se actualiza el estado (el toggle vuelve a su posición anterior)
+    }
+  };
+
   return (
     <div className="mis-cursos-page">
       <NavbarMisCursos />
@@ -106,6 +119,14 @@ export default function MisCursos() {
               </button>
             </div>
           )}
+          {isMaestro && (
+            <button
+              className="join-btn"
+              onClick={() => navigate("/crearCurso")}
+            >
+              + Crear nuevo curso
+            </button>
+          )}
         </div>
 
         {joinError && <p className="mis-cursos-feedback mis-cursos-feedback--error">{joinError}</p>}
@@ -118,7 +139,12 @@ export default function MisCursos() {
           return (
             <div className="mis-cursos-grid">
               {cursos.map((curso) => (
-                <CursoCard key={curso.id} curso={curso} />
+                <CursoCard
+                  key={curso.id}
+                  curso={curso}
+                  isMaestro={isMaestro}
+                  onToggleVisibilidad={handleToggleVisibilidad}
+                />
               ))}
             </div>
           );
