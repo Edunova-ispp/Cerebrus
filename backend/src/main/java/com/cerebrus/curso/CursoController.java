@@ -89,4 +89,19 @@ public class CursoController {
             }
         }
     }
+
+    @GetMapping("/{id}/progreso")
+    public ResponseEntity<ProgresoDTO> obtenerProgreso(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(cursoService.getProgreso(id));
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("404")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            } else if (e.getMessage().contains("403")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
 }

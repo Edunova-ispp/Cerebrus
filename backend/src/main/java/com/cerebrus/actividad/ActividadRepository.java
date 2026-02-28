@@ -15,4 +15,7 @@ public interface ActividadRepository extends JpaRepository<Actividad, Long> {
 
     @Query("SELECT a FROM Actividad a WHERE a.tema.id = :temaId")
     List<Actividad> findByTemaId(@Param("temaId") Long temaId);
+
+    @Query("SELECT COUNT(a) FROM Actividad a WHERE a.tema.curso.id = :cursoId")
+    long countByCursoId(@Param("cursoId") Long cursoId);
 }

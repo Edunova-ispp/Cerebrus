@@ -7,4 +7,5 @@ public interface CursoService {
     List<Curso> ObtenerCursosUsuarioLogueado();
     Curso crearCurso(String titulo, String descripcion, String imagen);
     Curso cambiarVisibilidad(Long id);
+    ProgresoDTO getProgreso(Long cursoId);
 }
