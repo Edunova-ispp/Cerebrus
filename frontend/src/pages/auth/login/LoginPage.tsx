@@ -17,7 +17,8 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8080/auth/login', {
+      const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+      const response = await fetch(`${apiBase}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,17 +29,17 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
         
-        localStorage.setItem('token', data.jwt);
+        localStorage.setItem('token', data.token);
         localStorage.setItem('username', data.username);
-        localStorage.setItem('role', data.role);
+        localStorage.setItem('role', data.roles[0]);
 
-        const rolUsuario = String(data.role).toUpperCase();
+        const rolUsuario = String(data.roles[0]).toUpperCase();
 
         if (rolUsuario.includes("ALUMNO")) {
           navigate('/miscursos');
         } 
         else if (rolUsuario.includes("PROFESOR") || rolUsuario.includes("MAESTRO")) {
-          navigate('/crearcursos');
+          navigate('/miscursos');
         } 
         else if (rolUsuario.includes("DUEÑO") || rolUsuario.includes("DUENO") || rolUsuario.includes("DIRECTOR")) {
           navigate('/infoDueños');
@@ -60,9 +61,10 @@ const Login = () => {
     <div className="login-page-container">
       <div className="login-box">
         
-        {/* LOGO */}
+        {/* LOGO + TITLE */}
         <div className="login-header">
           <img src={logo} alt="Cerebrus Mascot" className="login-logo" />
+          <h2 className="login-title">Iniciar Sesión</h2>
         </div>
         
         <form onSubmit={handleSubmit} className="login-form">

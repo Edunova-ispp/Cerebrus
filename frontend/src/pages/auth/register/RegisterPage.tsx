@@ -66,7 +66,7 @@ const RegisterPage = () => {
         setSuccess('¡Registro exitoso!');
         setTimeout(() => {
           if (tipoUsuario === 'ALUMNO') navigate('/miscursos');
-          else if (tipoUsuario === 'MAESTRO') navigate('/crearcursos');
+          else if (tipoUsuario === 'MAESTRO') navigate('/miscursos');
           else if (tipoUsuario === 'DIRECTOR') navigate('/infoDueños');
           else navigate('/');
         }, 2000);
@@ -80,89 +80,94 @@ const RegisterPage = () => {
 
   return (
     <div className="register-page-wrapper">
-      <div className="register-top-label">Registro</div>
-      <div className="register-header">
-          <h1 className="register-text-logo">Cerebrus</h1>
-          <img src={mascotImg} alt="Cerebrus Mascot" className="register-mascot" />
-      </div>
-
       <div className="register-card">
+        <div className="register-header">
+          <img src={mascotImg} alt="Cerebrus Mascot" className="register-mascot" />
+          <h2 className="register-text-logo">Registro</h2>
+        </div>
+
         <form onSubmit={handleSubmit} className="register-form-layout">
-          
-          <div className="register-field-group">
-            <label className="register-label">Tipo de cuenta:</label>
-            <select 
-              value={tipoUsuario} 
-              onChange={(e) => setTipoUsuario(e.target.value)} 
-              className="register-input"
-            >
-              <option value="ALUMNO">Alumno</option>
-              <option value="MAESTRO">Maestro</option>
-              <option value="DIRECTOR">Director</option>
-            </select>
-          </div>
 
-          {tipoUsuario === "ALUMNO" && (
+          <div className="register-fields-row">
             <div className="register-field-group">
-              <label className="register-label">Puntos Iniciales:</label>
-              <input 
-                type="number" 
-                placeholder="0"
-                value={puntos} 
-                onChange={(e) => setPuntos(e.target.value)} 
-                className="register-input" 
-              />
+              <label className="register-label">Tipo de cuenta:</label>
+              <select
+                value={tipoUsuario}
+                onChange={(e) => setTipoUsuario(e.target.value)}
+                className="register-input"
+              >
+                <option value="ALUMNO">Alumno</option>
+                <option value="MAESTRO">Maestro</option>
+                <option value="DIRECTOR">Director</option>
+              </select>
             </div>
-          )}
-
-          <div className="register-field-group">
-            <label className="register-label">Nombre:</label>
-            <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required className="register-input" />
+            {tipoUsuario === "ALUMNO" && (
+              <div className="register-field-group">
+                <label className="register-label">Puntos Iniciales:</label>
+                <input
+                  type="number"
+                  placeholder="0"
+                  value={puntos}
+                  onChange={(e) => setPuntos(e.target.value)}
+                  className="register-input"
+                />
+              </div>
+            )}
           </div>
 
-          <div className="register-field-group">
-            <label className="register-label">Primer Apellido:</label>
-            <input type="text" value={primerApellido} onChange={(e) => setPrimerApellido(e.target.value)} required className="register-input" />
+          <div className="register-fields-row">
+            <div className="register-field-group">
+              <label className="register-label">Nombre:</label>
+              <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required className="register-input" />
+            </div>
+            <div className="register-field-group">
+              <label className="register-label">Primer Apellido:</label>
+              <input type="text" value={primerApellido} onChange={(e) => setPrimerApellido(e.target.value)} required className="register-input" />
+            </div>
           </div>
 
-          <div className="register-field-group">
-            <label className="register-label">Segundo Apellido:</label>
-            <input type="text" value={segundoApellido} onChange={(e) => setSegundoApellido(e.target.value)} required className="register-input" />
+          <div className="register-fields-row">
+            <div className="register-field-group">
+              <label className="register-label">Segundo Apellido:</label>
+              <input type="text" value={segundoApellido} onChange={(e) => setSegundoApellido(e.target.value)} required className="register-input" />
+            </div>
+            <div className="register-field-group">
+              <label className="register-label">Correo electrónico:</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="register-input" />
+            </div>
           </div>
 
-          <div className="register-field-group">
-            <label className="register-label">Correo electrónico:</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="register-input" />
+          <div className="register-fields-row">
+            <div className="register-field-group">
+              <label className="register-label">Usuario:</label>
+              <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required className="register-input" />
+            </div>
+            <div className="register-field-group">
+              <label className="register-label">Organización:</label>
+              <input type="text" value={organizacion} onChange={(e) => setOrganizacion(e.target.value)} required className="register-input" />
+            </div>
           </div>
 
-          <div className="register-field-group">
-            <label className="register-label">Nombre de usuario:</label>
-            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required className="register-input" />
+          <div className="register-fields-row">
+            <div className="register-field-group">
+              <label className="register-label">Contraseña:</label>
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="register-input" />
+            </div>
+            <div className="register-field-group">
+              <label className="register-label">Confirmar contraseña:</label>
+              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="register-input" />
+            </div>
           </div>
 
-          <div className="register-field-group">
-            <label className="register-label">Organización:</label>
-            <input type="text" value={organizacion} onChange={(e) => setOrganizacion(e.target.value)} required className="register-input" />
-          </div>
-
-          <div className="register-field-group">
-            <label className="register-label">Contraseña:</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="register-input" />
-          </div>
-
-          <div className="register-field-group">
-            <label className="register-label">Confirmar contraseña:</label>
-            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="register-input" />
-          </div>
-
-          {error && <p className="register-feedback register-feedback-error" style={{color: 'red', fontSize: '12px'}}>{error}</p>}
+          {error && <p className="register-feedback register-feedback-error">{error}</p>}
           {success && <p className="register-feedback register-feedback-success">{success}</p>}
-          
+
           <div className="register-submit-container">
-            <button type="submit" className="register-submit-btn">Registrate</button>
+            <button type="submit" className="register-submit-btn">Registrarse</button>
           </div>
         </form>
       </div>
+
       <p className="register-footer-text">
         ¿Ya tienes cuenta? <Link to="/auth/login" className="register-link">Iniciar sesión</Link>
       </p>
