@@ -7,8 +7,8 @@ export interface Curso {
   visibilidad: boolean;
 }
 
-export interface InscripcionResumen {
-  cursoId: number;
+export interface ProgresoAlumno {
+  estado: 'SIN_EMPEZAR' | 'EMPEZADA' | 'TERMINADA';
   puntos: number;
 }
 

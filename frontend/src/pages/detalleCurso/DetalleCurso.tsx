@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams, Navigate } from "react-router-dom";
 import { getCurrentUserRoles } from "../../types/curso";
-import type { Curso, InscripcionResumen } from "../../types/curso";
-import { apiFetch, fetchMisInscripciones } from "../../utils/api";
+import type { Curso, ProgresoAlumno } from "../../types/curso";
+import { apiFetch, fetchProgresoAlumno } from "../../utils/api";
 import DetalleCursoProfesor from "./DetalleCursoProfesor";
 import DetalleCursoAlumno from "./DetalleCursoAlumno";
 
@@ -20,25 +20,18 @@ export default function DetalleCurso() {
   );
 
   const [curso, setCurso] = useState<Curso | null>(stateFromNav ?? null);
-  const [puntos, setPuntos] = useState<number>(0);
+  const [progreso, setProgreso] = useState<ProgresoAlumno | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [cursoData, inscripciones] = await Promise.all([
-          // Si vino del navigation state lo usamos directamente, si no hacemos fetch
-          stateFromNav
-            ? Promise.resolve(stateFromNav)
-            : apiFetch("/api/cursos")
-                .then((r) => r.json())
-                .then((data: Curso[]) => data.find((c) => String(c.id) === id) ?? null),
-          // Sólo los alumnos tienen inscripciones
-          isMaestro
-            ? Promise.resolve([] as InscripcionResumen[])
-            : fetchMisInscripciones().catch(() => [] as InscripcionResumen[]),
-        ]);
+        const cursoData = stateFromNav
+          ? stateFromNav
+          : await apiFetch("/api/cursos")
+              .then((r) => r.json())
+              .then((data: Curso[]) => data.find((c) => String(c.id) === id) ?? null);
 
         if (!cursoData) {
           setNotFound(true);
@@ -47,10 +40,10 @@ export default function DetalleCurso() {
 
         setCurso(cursoData);
 
-        const insc = (inscripciones as InscripcionResumen[]).find(
-          (i) => String(i.cursoId) === id
-        );
-        setPuntos(insc?.puntos ?? 0);
+        if (!isMaestro) {
+          const prog = await fetchProgresoAlumno(Number(id)).catch(() => null);
+          setProgreso(prog);
+        }
       } catch {
         setNotFound(true);
       } finally {
@@ -78,5 +71,5 @@ export default function DetalleCurso() {
     return <DetalleCursoProfesor curso={curso} />;
   }
 
-  return <DetalleCursoAlumno curso={curso} puntos={puntos} />;
+  return <DetalleCursoAlumno curso={curso} progreso={progreso} />;
 }
