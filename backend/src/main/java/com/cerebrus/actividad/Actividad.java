@@ -41,7 +41,10 @@ public abstract class Actividad {
     private String imagen;
 
     @Column(nullable = false)
-    private Boolean respVisible;
+    private Boolean respVisible = false;
+
+    @Column
+    private String comentariosRespVisible;
 
     @Column(nullable = false)
     private Integer posicion;
@@ -121,6 +124,14 @@ public abstract class Actividad {
         this.respVisible = respVisible;
     }
 
+    public String getComentariosRespVisible(){
+        return comentariosRespVisible;
+    }
+
+    public void setComentariosRespVisible(String comentariosRespVisible){
+        this.comentariosRespVisible = comentariosRespVisible;
+    }
+
     public Integer getPosicion() {
         return posicion;
     }
@@ -153,6 +164,10 @@ public abstract class Actividad {
         this.actividadesAlumno = actividadesAlumno;
     }
 
+    public Integer getNumRepeticionesTotales() {
+        return actividadesAlumno == null ? 0 : actividadesAlumno.stream().mapToInt(ActividadAlumno::getNumRepeticiones).sum();
+    }
+
     @Override
     public String toString() {
         return "Actividad{" +
@@ -161,6 +176,7 @@ public abstract class Actividad {
                 ", puntuacion=" + puntuacion +
                 ", posicion=" + posicion +
                 ", version=" + version +
+                ", repeticiones_totales=" + getNumRepeticionesTotales() +
                 '}';
     }
 }
