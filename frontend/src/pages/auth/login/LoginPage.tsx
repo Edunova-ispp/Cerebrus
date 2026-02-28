@@ -17,7 +17,8 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8080/auth/login', {
+      const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+      const response = await fetch(`${apiBase}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,11 +29,11 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
         
-        localStorage.setItem('token', data.jwt);
+        localStorage.setItem('token', data.token);
         localStorage.setItem('username', data.username);
-        localStorage.setItem('role', data.role);
+        localStorage.setItem('role', data.roles[0]);
 
-        const rolUsuario = String(data.role).toUpperCase();
+        const rolUsuario = String(data.roles[0]).toUpperCase();
 
         if (rolUsuario.includes("ALUMNO")) {
           navigate('/miscursos');
