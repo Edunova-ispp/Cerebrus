@@ -68,7 +68,7 @@ public class CursoController {
         }
     }
 
-    public class CrearCursoRequest {
+    public static class CrearCursoRequest {
 
         @NotBlank
         private String titulo;
@@ -84,6 +84,9 @@ public class CursoController {
 
         public String getImagen() { return imagen; }
         public void setImagen(String imagen) { this.imagen = imagen; }
+        
+        public CrearCursoRequest() {
+    }
     }
 
     @PostMapping("/curso")

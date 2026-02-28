@@ -17,7 +17,7 @@ import com.cerebrus.actividadalumno.EstadoActividad;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.actividad.ActividadRepository;
-import com.cerebrus.actividadalumno.ActividadAlumno;
+import com.cerebrus.actividadalumno.ActividadAlumnoProgreso;
 import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
 import com.cerebrus.actividadalumno.ActividadAlumnoProgreso;
 import com.cerebrus.usuario.Alumno;
@@ -25,9 +25,6 @@ import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.utils.CerebrusUtils;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 
 @Service
