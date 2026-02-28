@@ -41,6 +41,10 @@
   background: transparent;
   border: none;
   color: var(--color-accent);
+  background-color: rgba(209, 0, 87, 0.15);
+  border: 3px solid #000 !important;
+  border-radius: 12px;
+  padding: 2px 14px;
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 2.2rem;
   font-weight: bold;
@@ -52,6 +56,27 @@
 
 .navbar-link--perfil {
   color: #000;
+  cursor: default;
+}
+
+.navbar-username {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #000;
+}
+
+.navbar-link--logout {
+  color: var(--color-accent);
+  background-color: rgba(209, 0, 87, 0.15);
+  border: 3px solid #000 !important;
+  border-radius: 12px;
+  padding: 2px 14px;
+  transition: background-color 0.15s ease;
+}
+
+.navbar-link--logout:hover {
+  background-color: rgba(209, 0, 87, 0.45);
 }
 
 .profile-icon {

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import "./NavbarMisCursos.css";
@@ -32,6 +33,21 @@ function PixelAvatar() {
 
 export default function NavbarMisCursos() {
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const username = localStorage.getItem("username") || "Usuario";
+
+  useEffect(() => {
+    if (!token) {
+      navigate("/auth/login");
+    }
+  }, [navigate, token]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+    navigate("/");
+  };
 
   return (
     <nav className="navbar">
@@ -47,8 +63,12 @@ export default function NavbarMisCursos() {
           <button className="navbar-link" onClick={() => navigate("/misCursos")}>
             Mis Cursos
           </button>
-          <button className="navbar-link navbar-link--perfil" onClick={() => navigate("/perfil")}>
-            Perfil <span className="profile-icon"><PixelAvatar /></span>
+          <div className="navbar-link navbar-link--perfil">
+            <span className="profile-icon"><PixelAvatar /></span>
+            <span className="navbar-username">{username}</span>
+          </div>
+          <button className="navbar-link navbar-link--logout" onClick={handleLogout}>
+            Cerrar sesión
           </button>
         </div>
       </div>
