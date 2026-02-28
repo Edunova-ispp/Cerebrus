@@ -1,22 +1,20 @@
 package com.cerebrus.curso;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.ActividadRepository;
-import com.cerebrus.actividadalumno.ActividadAlumno;
-import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
 import com.cerebrus.actividadalumno.ActividadAlumnoProgreso;
+import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.utils.CerebrusUtils;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 
 @Service
