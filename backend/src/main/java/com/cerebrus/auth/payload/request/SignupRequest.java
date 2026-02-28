@@ -31,5 +31,7 @@ public class SignupRequest {
     @NotBlank 
     private String tipoUsuario;
 	
-
+	@NotBlank
+    private String organizacion;
+	
 }
