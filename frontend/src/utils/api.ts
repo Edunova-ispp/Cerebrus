@@ -5,6 +5,11 @@ export async function toggleVisibilidadCurso(id: number): Promise<import('../typ
   return res.json();
 }
 
+export async function fetchMisInscripciones(): Promise<import('../types/curso').InscripcionResumen[]> {
+  const res = await apiFetch("/api/inscripciones/mis-inscripciones");
+  return res.json();
+}
+
 export async function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
   const token = localStorage.getItem("token");
 

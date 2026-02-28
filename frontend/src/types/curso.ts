@@ -7,6 +7,11 @@ export interface Curso {
   visibilidad: boolean;
 }
 
+export interface InscripcionResumen {
+  cursoId: number;
+  puntos: number;
+}
+
 /** Decodifica el JWT y te mira que rol tiene y te lo saca */
 export function getCurrentUserRoles(): string[] {
   const token = localStorage.getItem("token");
