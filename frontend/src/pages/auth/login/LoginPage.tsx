@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import "./LoginPage.css"; 
-import logo from "../../../assets/logo.png"; 
+import logo from "../../../assets/logo.png";
+import "./LoginPage.css";
 
 export type UserType = "alumno" | "profesor" | "dueno";
 
@@ -38,7 +38,7 @@ const Login = () => {
           navigate('/miscursos');
         } 
         else if (rolUsuario.includes("PROFESOR") || rolUsuario.includes("MAESTRO")) {
-          navigate('/crearcursos');
+          navigate('/cursos');
         } 
         else if (rolUsuario.includes("DUEÑO") || rolUsuario.includes("DUENO") || rolUsuario.includes("DIRECTOR")) {
           navigate('/infoDueños');
