@@ -48,10 +48,20 @@ function LandingPage() {
 
   return (
     <div className="landing-page">
-      <button className="landing-login-btn" onClick={() => navigate("/login")}>
-        Login
-        <ProfileIcon className="landing-login-icon" aria-hidden />
-      </button>
+      
+      {/* Contenedor para agrupar los botones de la esquina superior */}
+      <div className="landing-top-buttons" style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "10px" }}>
+        <button className="landing-login-btn" onClick={() => navigate("/auth/login")}>
+          Login
+          <ProfileIcon className="landing-login-icon" aria-hidden />
+        </button>
+
+        {/* Nuevo botón de Cerrar sesión */}
+        <button className="landing-login-btn" onClick={() => navigate("/auth/logout")} style={{ backgroundColor: "#ff4d4d", color: "white" }}>
+          Cerrar sesión
+        </button>
+      </div>
+
       {/* Header row */}
       <div className="landing-header">
         <h1 className="landing-title">
