@@ -47,7 +47,7 @@ export default function CursoCard({ curso, isMaestro = false, onToggleVisibilida
           </div>
           <div className="curso-card__maestro-row">
             <span className="curso-card__maestro-label">Visible:</span>
-            <label className="curso-card__toggle">
+            <label className="curso-card__toggle" aria-label="Visibilidad del curso">
               <input
                 type="checkbox"
                 checked={curso.visibilidad}

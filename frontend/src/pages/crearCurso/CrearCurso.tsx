@@ -1,4 +1,3 @@
-// TODO: Implementación pendiente — la completará un compañero.
 export default function CrearCurso() {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
