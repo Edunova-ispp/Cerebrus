@@ -164,6 +164,10 @@ public abstract class Actividad {
         this.actividadesAlumno = actividadesAlumno;
     }
 
+    public Integer getNumRepeticionesTotales() {
+        return actividadesAlumno == null ? 0 : actividadesAlumno.stream().mapToInt(ActividadAlumno::getNumRepeticiones).sum();
+    }
+
     @Override
     public String toString() {
         return "Actividad{" +
@@ -172,6 +176,7 @@ public abstract class Actividad {
                 ", puntuacion=" + puntuacion +
                 ", posicion=" + posicion +
                 ", version=" + version +
+                ", repeticiones_totales=" + getNumRepeticionesTotales() +
                 '}';
     }
 }

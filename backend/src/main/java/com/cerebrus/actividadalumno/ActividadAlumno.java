@@ -1,6 +1,6 @@
 package com.cerebrus.actividadalumno;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +15,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.respuestaalumno.RespuestaAlumno;
@@ -33,8 +36,19 @@ public class ActividadAlumno {
     @Column(nullable = false)
     private Integer puntuacion;
 
+    @Column
+    private LocalDateTime inicio = LocalDateTime.of(1970, 1, 1, 0, 0);
+
+    @Column
+    private LocalDateTime acabada = LocalDateTime.of(1970, 1, 1, 0, 0);
+
     @Column(nullable = false)
-    private LocalDate fecha;
+    private Integer numAbandonos = 0;
+
+    @Column (nullable = false)
+    @Min(0)
+    @Max(10)
+    private Integer nota;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "alumno_id", nullable = false)
@@ -51,11 +65,14 @@ public class ActividadAlumno {
     public ActividadAlumno() {
     }
 
-    public ActividadAlumno(Integer tiempo, Integer puntuacion, LocalDate fecha,
-                           Alumno alumno, Actividad actividad) {
+    public ActividadAlumno(Integer tiempo, Integer puntuacion, LocalDateTime inicio, 
+        LocalDateTime acabada, Integer nota, Integer numAbandonos, Alumno alumno, Actividad actividad) {
         this.tiempo = tiempo;
         this.puntuacion = puntuacion;
-        this.fecha = fecha;
+        this.inicio = inicio;
+        this.acabada = acabada;
+        this.nota = nota;
+        this.numAbandonos = numAbandonos;
         this.alumno = alumno;
         this.actividad = actividad;
     }
@@ -85,12 +102,62 @@ public class ActividadAlumno {
         this.puntuacion = puntuacion;
     }
 
-    public LocalDate getFecha() {
-        return fecha;
+    public Integer getNota(){
+        return nota;
     }
 
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
+    public void setNota(Integer nota){
+        this.nota = nota;
+    }
+
+    public LocalDateTime getInicio(){
+        return inicio;
+    }
+
+    public void setInicio(LocalDateTime inicio){
+        this.inicio=inicio;
+    }
+
+    public LocalDateTime getAcabada(){
+        return acabada;
+    }
+
+    public void setAcabada(LocalDateTime acabada){
+        this.acabada=acabada;
+    }
+
+    public Integer getNumAbandonos(){
+        return numAbandonos;
+    }
+
+    public void setNumAbandonos(Integer numAbandonos){
+        this.numAbandonos = numAbandonos;
+    }
+
+    public Integer getNumRepeticiones(){
+        return respuestasAlumno == null ? 0 : respuestasAlumno.size();
+    }
+
+    public Integer getNumFallos(){
+        Integer result;
+        if (respuestasAlumno==null) {
+            result=0;
+        } else {
+            result = (int) respuestasAlumno.stream().filter(r->Boolean.FALSE.equals(r.getCorrecta())).count();
+        }
+        return result;
+    }
+
+    public EstadoActividad getEstadoActividad(){
+        EstadoActividad result;
+        if(getNumRepeticiones() > 0 && respuestasAlumno.get(respuestasAlumno.size()-1).getCorrecta().equals(Boolean.TRUE)){
+            result = EstadoActividad.TERMINADA;
+        } else if (inicio != null && !(inicio.equals(LocalDateTime.of(1970, 1, 1, 0, 0)))){
+            result = EstadoActividad.EMPEZADA;
+        } else {
+            result = EstadoActividad.SIN_EMPEZAR;
+        }
+        return result;
     }
 
     public Alumno getAlumno() {
@@ -123,7 +190,13 @@ public class ActividadAlumno {
                 "id=" + id +
                 ", tiempo=" + tiempo +
                 ", puntuacion=" + puntuacion +
-                ", fecha=" + fecha +
+                ", fecha_inicio=" + inicio + 
+                ", fecha_fin=" + acabada +
+                ", nota=" + nota +
+                ", num_abandonos=" + numAbandonos +
+                ", num_repeticiones=" + getNumRepeticiones() +
+                ", num_fallos=" + getNumFallos() +
+                ", estado=" + getEstadoActividad() +
                 '}';
     }
 }
