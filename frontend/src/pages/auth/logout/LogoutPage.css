@@ -1,0 +1,76 @@
+/* --- CONTENEDOR PRINCIPAL --- */
+.logout-page-container {
+  min-height: 100vh;
+  background-color: #f5f4ea; /* Fondo crema característico de Cerebrus */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Press Start 2P', monospace; /* Fuente retro */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* --- TARJETA CENTRAL --- */
+.logout-form-container {
+  background-color: white;
+  border: 2px solid black;
+  border-radius: 15px;
+  padding: 40px 30px;
+  max-width: 450px;
+  width: 100%;
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.15); /* Sombra dura retro */
+  text-align: center;
+}
+
+/* --- TEXTO --- */
+.logout-h2 {
+  color: #1a1b41; /* Azul oscuro */
+  font-size: 18px;
+  line-height: 1.6;
+  margin-top: 0;
+  margin-bottom: 35px;
+}
+
+/* --- CONTENEDOR DE BOTONES --- */
+.button-container-logout {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Espacio entre los botones */
+  flex-wrap: wrap; /* Por si la pantalla es muy pequeña */
+}
+
+/* --- ESTILO BASE PARA BOTONES --- */
+.button-style-logout {
+  padding: 12px 25px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  border: 2px solid black;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s, background-color 0.2s;
+}
+
+/* Efecto al hacer clic en cualquier botón */
+.button-style-logout:active {
+  transform: translateY(3px); 
+}
+
+/* --- BOTÓN: NO (Cancelar) --- */
+.cancel-button-logout {
+  background-color: #ffffff;
+  color: #1a1b41;
+}
+
+.cancel-button-logout:hover {
+  background-color: #fef4c0; /* Se pone amarillento al pasar el ratón */
+}
+
+/* --- BOTÓN: SÍ (Cerrar sesión) --- */
+.logout-button {
+  background-color: #e6007e; /* Rosa brillante de Cerebrus */
+  color: white;
+}
+
+.logout-button:hover {
+  background-color: #ff1a9b; /* Un rosa más claro al pasar el ratón */
+}
