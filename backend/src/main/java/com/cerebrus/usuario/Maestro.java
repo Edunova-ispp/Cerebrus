@@ -18,10 +18,6 @@ import jakarta.persistence.Table;
 @Table(name = "maestro")
 public class Maestro extends Usuario {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organizacion_id", nullable = false)
-    private Organizacion organizacion;
-
     @OneToMany(mappedBy = "maestro", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Curso> cursos = new ArrayList<>();
 
@@ -33,17 +29,7 @@ public class Maestro extends Usuario {
     public Maestro(String nombre, String primerApellido, String segundoApellido,
                    String nombreUsuario, String correoElectronico, String contrasena,
                    Organizacion organizacion) {
-        super(nombre, primerApellido, segundoApellido, nombreUsuario, correoElectronico, contrasena);
-        this.organizacion = organizacion;
-    }
-
-    // Getters y Setters
-    public Organizacion getOrganizacion() {
-        return organizacion;
-    }
-
-    public void setOrganizacion(Organizacion organizacion) {
-        this.organizacion = organizacion;
+        super(nombre, primerApellido, segundoApellido, nombreUsuario, correoElectronico, contrasena, organizacion);
     }
 
     public List<Curso> getCursos() {
@@ -59,7 +45,7 @@ public class Maestro extends Usuario {
         return "Maestro{" +
                 "id=" + getId() +
                 ", nombre='" + getNombre() + '\'' +
-                ", organizacion=" + (organizacion != null ? organizacion.getId() : null) +
+                ", organizacion=" + (getOrganizacion() != null ? getOrganizacion().getId() : null) +
                 '}';
     }
 }

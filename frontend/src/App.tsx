@@ -5,6 +5,9 @@ import InfoPage from "./pages/infoPage/InfoPage";
 import MisCursos from "./pages/misCursos/MisCursos";
 import Placeholder from "./pages/placeholder/Placeholder";
 import DetalleCurso from "./pages/detalleCurso/DetalleCurso";
+import LoginPage from "./pages/auth/login/LoginPage";
+import RegisterPage from "./pages/auth/register/RegisterPage";
+import LogoutPage from "./pages/auth/logout/LogoutPage";
 
 function App() {
   return (
@@ -19,6 +22,9 @@ function App() {
       <Route path="/editarCurso/:id" element={<Placeholder />} />
       <Route path="/mapa/:id"      element={<Placeholder />} />
       <Route path="/cursos/:id"    element={<DetalleCurso />} />
+      <Route path="/auth/login"    element={<LoginPage />} />
+      <Route path="/auth/register"    element={<RegisterPage />} />
+      <Route path="/auth/logout"    element={<LogoutPage />} />
     </Routes>
   );
 }
