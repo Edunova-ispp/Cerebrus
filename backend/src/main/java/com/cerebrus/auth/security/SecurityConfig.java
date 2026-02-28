@@ -78,6 +78,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html")
                         .permitAll()
+                        .requestMatchers("/api/iaconnection/**").authenticated()
                         .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());

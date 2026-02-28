@@ -1,11 +1,15 @@
 package com.cerebrus.iaconnection;
 
 import com.cerebrus.TipoAct;
+import com.cerebrus.usuario.Maestro;
+import com.cerebrus.usuario.Usuario;
+import com.cerebrus.usuario.UsuarioService;
 
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties.Apiversion.Use;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -20,13 +24,15 @@ import org.springframework.web.client.RestTemplate;
 @Transactional
 public class IaConnectionServiceImpl implements IaConnectionService {
     private final RestTemplate restTemplate;
+    private final UsuarioService usuarioService;
  
     @Autowired
-    public IaConnectionServiceImpl(RestTemplate restTemplate) {
+    public IaConnectionServiceImpl(RestTemplate restTemplate , UsuarioService usuarioService) {
         this.restTemplate = restTemplate;
+        this.usuarioService = usuarioService;
     }
 
-    private final String apiKey = "TU_API_KEY_AQUI";
+    private final String apiKey = "AIzaSyCRLnqn2g-5Ovt9an-7yu1WnD-Uq7KMcUw";
     // Usamos gemini-1.5-flash por su velocidad y gratuidad
     private final String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
 
@@ -156,6 +162,10 @@ public class IaConnectionServiceImpl implements IaConnectionService {
      @Override
     public String generarActividad(TipoAct tipoActividad, String prompt) {
        
+        Usuario usuario = usuarioService.findCurrentUser();
+        if(!(usuario instanceof Maestro)){
+            throw new IllegalArgumentException("403 Forbidden");
+        }
        String promptDepurado = crearPromt(tipoActividad, prompt);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -179,7 +189,7 @@ public class IaConnectionServiceImpl implements IaConnectionService {
             Map firstPart = (Map) parts.get(0);
             String respuesta = (String) firstPart.get("text");
            if (!validateActivityResponse(respuesta, tipoActividad)) {
-                throw new IllegalArgumentException("400 Bad Request");
+              throw new IllegalArgumentException("400 Bad Request");
             }
             return respuesta;
         } catch (Exception e) {
