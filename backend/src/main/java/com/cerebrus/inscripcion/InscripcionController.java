@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cerebrus.inscripcion.InscripcionService;
+
 @RestController
 @RequestMapping("/api/inscripciones")
 @CrossOrigin(origins = "*")
@@ -22,21 +24,20 @@ public class InscripcionController {
     }
 
     @PostMapping("/inscribe")
-    public ResponseEntity<Void> inscribirAlumno(@RequestParam String codigoCurso) {
-        try {
-            inscripcionService.CrearInscripcion(codigoCurso);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<Inscripcion> inscribirAlumno(@RequestParam String codigoCurso) {
+         try {
+            return ResponseEntity.ok(inscripcionService.CrearInscripcion(codigoCurso));
         } catch (RuntimeException e) {
             if (e.getMessage().equals("404 Not Found")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             } else if (e.getMessage().equals("400 Bad Request")) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            } else if (e.getMessage().equals("401 Unauthorized")) {
+            } else if(e.getMessage().equals("401 Unauthorized")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            } else {
+
+            }else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
         }
     }
-
 }
