@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +22,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 @RestController
 @RequestMapping("/api/cursos")
-@CrossOrigin(origins = "*")
 public class CursoController {
 
     private final CursoServiceImpl cursoService;
@@ -92,5 +92,38 @@ public class CursoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 
+    @GetMapping
+    public ResponseEntity<List<Curso>> obtenerCursos() {
+        return ResponseEntity.ok(cursoService.ObtenerCursosUsuarioLogueado());
+    }
 
+    @PatchMapping("/{id}/visibilidad")
+    public ResponseEntity<Curso> cambiarVisibilidad(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(cursoService.cambiarVisibilidad(id));
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("404 Not Found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            } else if (e.getMessage().equals("403 Forbidden")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
+
+    @GetMapping("/{id}/progreso")
+    public ResponseEntity<ProgresoDTO> obtenerProgreso(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(cursoService.getProgreso(id));
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("404")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            } else if (e.getMessage().contains("403")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
 }

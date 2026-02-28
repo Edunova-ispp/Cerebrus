@@ -16,11 +16,18 @@ import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
 import com.cerebrus.actividadalumno.EstadoActividad;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
+import com.cerebrus.actividad.ActividadRepository;
+import com.cerebrus.actividadalumno.ActividadAlumno;
+import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadalumno.ActividadAlumnoProgreso;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.utils.CerebrusUtils;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Service
@@ -34,8 +41,7 @@ public class CursoServiceImpl implements CursoService {
 
     @Autowired
     public CursoServiceImpl(CursoRepository cursoRepository, UsuarioService usuarioService,
-                           ActividadAlumnoRepository actividadAlumnoRepository,
-                           ActividadRepository actividadRepository) {
+            ActividadAlumnoRepository actividadAlumnoRepository, ActividadRepository actividadRepository) {
         this.cursoRepository = cursoRepository;
         this.usuarioService = usuarioService;
         this.actividadAlumnoRepository = actividadAlumnoRepository;
@@ -100,6 +106,24 @@ public class CursoServiceImpl implements CursoService {
 
     @Transactional
     @Override
+    public Curso cambiarVisibilidad(Long id) {
+        Curso curso = cursoRepository.findByID(id);
+        if (curso == null) {
+            throw new RuntimeException("404 Not Found");
+        }
+        Usuario usuario = usuarioService.findCurrentUser();
+        if (!(usuario instanceof Maestro)) {
+            throw new RuntimeException("403 Forbidden");
+        }
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new RuntimeException("403 Forbidden");
+        }
+        curso.setVisibilidad(!curso.getVisibilidad());
+        return cursoRepository.save(curso);
+    }
+
+    @Transactional
+    @Override
     public Curso crearCurso(String titulo, String descripcion, String imagen){
         Usuario usuario = usuarioService.findCurrentUser();
         if (!(usuario instanceof Maestro)){
@@ -159,7 +183,7 @@ public class CursoServiceImpl implements CursoService {
                             .findFirst()
                             .orElse(null);
 
-                    if (actividadAlumno != null && 
+                    if (actividadAlumno != null &&
                         actividadAlumno.getEstadoActividad().equals(EstadoActividad.TERMINADA)) {
                         totalPuntos += actividad.getPuntuacion();
                     }
@@ -168,8 +192,49 @@ public class CursoServiceImpl implements CursoService {
 
             puntosPorAlumno.put(alumno, totalPuntos);
         }
-
         return puntosPorAlumno;
+        }
+
+
+    public ProgresoDTO getProgreso(Long cursoId) {
+        Curso curso = cursoRepository.findByID(cursoId);
+        if (curso == null) {
+            throw new RuntimeException("404 Not Found");
+        }
+
+        Usuario usuario = usuarioService.findCurrentUser();
+        if (!(usuario instanceof Alumno alumno)) {
+            throw new RuntimeException("403 Forbidden");
+        }
+
+        long totalActividades = actividadRepository.countByCursoId(cursoId);
+        if (totalActividades == 0) {
+            return new ProgresoDTO("SIN_EMPEZAR", 0);
+        }
+
+        List<ActividadAlumnoProgreso> registros = actividadAlumnoRepository.findProgresoByAlumnoAndCursoId(alumno, cursoId);
+
+        if (registros.isEmpty()) {
+            return new ProgresoDTO("SIN_EMPEZAR", 0);
+        }
+
+        long acabadas = registros.stream()
+                .filter(aa -> aa.getAcabada() != null)
+                .count();
+
+        if (acabadas == totalActividades) {
+            return new ProgresoDTO("TERMINADA", 0);
+        }
+
+        long conInicio = registros.stream()
+                .filter(aa -> aa.getInicio() != null)
+                .count();
+
+        if (conInicio > 0) {
+            return new ProgresoDTO("EMPEZADA", 0);
+        }
+
+        return new ProgresoDTO("SIN_EMPEZAR", 0);
     }
 
 }

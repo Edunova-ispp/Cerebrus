@@ -6,6 +6,7 @@ import java.util.List;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.usuario.Maestro;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -41,13 +42,16 @@ public class Curso {
     @Column(nullable = false)
     private Boolean visibilidad;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maestro_id", nullable = false)
     private Maestro maestro;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Tema> temas = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Inscripcion> inscripciones = new ArrayList<>();
 

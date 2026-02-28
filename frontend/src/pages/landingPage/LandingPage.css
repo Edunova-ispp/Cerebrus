@@ -53,10 +53,15 @@
   object-fit: contain;
 }
 
+.landing-top-buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
 .landing-login-btn {
-  position: absolute;
-  top: -16px;
-  right: -100px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -78,6 +83,16 @@
   text-shadow: 2px 2px 0px #000638;
   border: 2px solid #000000;
   outline: none;
+}
+
+.landing-logout-btn {
+  background-color: rgba(255, 77, 77, 0.6);
+  color: white;
+}
+
+.landing-logout-btn:hover {
+  color: white;
+  text-shadow: 1px 1px 0px #000;
 }
 
 .landing-login-icon {
