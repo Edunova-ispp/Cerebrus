@@ -5,8 +5,8 @@ export async function toggleVisibilidadCurso(id: number): Promise<import('../typ
   return res.json();
 }
 
-export async function fetchMisInscripciones(): Promise<import('../types/curso').InscripcionResumen[]> {
-  const res = await apiFetch("/api/inscripciones/mis-inscripciones");
+export async function fetchProgresoAlumno(cursoId: number): Promise<import('../types/curso').ProgresoAlumno> {
+  const res = await apiFetch(`/api/cursos/${cursoId}/progreso`);
   return res.json();
 }
 

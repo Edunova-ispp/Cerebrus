@@ -3,7 +3,7 @@ import DeployTesting from "./pages/deployTesting/DeployTesting";
 import LandingPage from "./pages/landingPage/LandingPage";
 import InfoPage from "./pages/infoPage/InfoPage";
 import MisCursos from "./pages/misCursos/MisCursos";
-import CrearCurso from "./pages/crearCurso/CrearCurso";
+import Placeholder from "./pages/placeholder/Placeholder";
 import DetalleCurso from "./pages/detalleCurso/DetalleCurso";
 
 function App() {
@@ -15,7 +15,9 @@ function App() {
       <Route path="/infoProfesores" element={<InfoPage userType="profesor" />} />
       <Route path="/infoDueños"    element={<InfoPage userType="dueno" />} />
       <Route path="/misCursos"     element={<MisCursos />} />
-      <Route path="/crearCurso"    element={<CrearCurso />} />
+      <Route path="/crearCurso"    element={<Placeholder />} />
+      <Route path="/editarCurso/:id" element={<Placeholder />} />
+      <Route path="/mapa/:id"      element={<Placeholder />} />
       <Route path="/cursos/:id"    element={<DetalleCurso />} />
     </Routes>
   );
