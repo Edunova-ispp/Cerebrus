@@ -1,164 +1,178 @@
-/* RegisterPage.css */
-
-/* Importación opcional si no usas el método del index.html, 
-   aunque es más lento cargando:
-   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap'); 
-*/
-
+/* ===== REGISTER PAGE ===== */
 .register-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   min-height: 100vh;
-  background-color: #f5f4ea; /* Color crema del fondo */
+  background-color: #F9EED4;
+  font-family: 'Pixelify Sans', sans-serif;
+  padding: 24px 20px;
+  box-sizing: border-box;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 700px;
+  background-color: #E285A9;
+  border: 4px solid #000;
+  border-radius: 20px;
+  padding: 32px 40px 36px;
+  box-shadow: 8px 8px 0px #000;
+  box-sizing: border-box;
+}
+
+.register-header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* Centra la tarjeta verticalmente */
-  padding: 20px;
-  /* Usamos una fuente pixelada para todo */
-  font-family: 'Press Start 2P', monospace; 
-  box-sizing: border-box;
-  position: relative;
-}
-
-/* Texto "Registro" arriba a la izquierda */
-.register-top-label {
-  position: absolute;
-  top: 10px;
-  left: 20px;
-  color: #a0a0a0;
-  font-size: 12px;
-}
-
-/* --- CABECERA (Logo y Mascota) --- */
-.register-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.register-text-logo {
-  font-size: 32px;
-  /* Efecto de color rosa con borde amarillo/crema */
-  color: #e6007e;
-  -webkit-text-stroke: 1.5px #fef4c0; 
-  text-shadow: 3px 3px 0 #000000;
-  margin: 0;
+  gap: 6px;
+  margin-bottom: 24px;
 }
 
 .register-mascot {
-  width: 80px; /* Tamaño ajustado para no verse enorme */
-  height: auto;
-  image-rendering: pixelated; /* Mantiene los bordes nítidos del pixel art */
+  height: 70px;
+  width: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(4px 4px 0 #000);
 }
 
-/* --- TARJETA DEL FORMULARIO --- */
-.register-card {
-  background-color: white;
-  border: 2px solid black; /* Borde negro nítido */
-  border-radius: 15px; /* Esquinas redondeadas */
-  padding: 25px;
-  width: 100%;
-  max-width: 480px; /* Un poco más ancha para quepan bien los labels */
-  box-sizing: border-box;
-  box-shadow: 5px 5px 0px rgba(0,0,0,0.1); /* Sombra suave retro */
+.register-text-logo {
+  font-size: 2.2rem;
+  color: #FFF294;
+  -webkit-text-stroke: 2px #000;
+  text-shadow: 4px 4px 0 #000;
+  margin: 0;
+  letter-spacing: 2px;
+  font-family: 'Pixelify Sans', sans-serif;
 }
 
 .register-form-layout {
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Espaciado ajustado */
+  gap: 14px;
+}
+
+/* 2-column grid for paired fields */
+.register-fields-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
 }
 
 .register-field-group {
   display: flex;
   flex-direction: column;
+  gap: 6px;
 }
 
 .register-label {
-  display: block;
-  margin-bottom: 8px;
-  color: #1a1b41;
-  font-size: 14px; /* Un poco más pequeña por la fuente pixel */
+  font-size: 1.1rem;
+  color: #1A1A1A;
+  font-family: 'Pixelify Sans', sans-serif;
 }
 
 .register-input {
   width: 100%;
-  padding: 12px;
-  background-color: #fef4c0; /* Fondo amarillento pálido */
-  border: 2px solid black; /* Borde negro grueso */
-  border-radius: 8px;
+  padding: 11px 14px;
+  background-color: #FFF3C7;
+  border: 3px solid #000;
+  border-radius: 12px;
   box-sizing: border-box;
-  font-family: 'Press Start 2P', monospace; /* Fuente también en el input */
-  font-size: 12px;
-  color: #000;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.1rem;
+  color: #1A1A1A;
+  box-shadow: 3px 3px 0 #000;
+  outline: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
-/* Estilo para cuando el input está seleccionado */
 .register-input:focus {
-  outline: none;
-  border-color: #e6007e; /* Cambia al rosa de Cerebrus */
+  border-color: #7a0030;
   background-color: #fff;
 }
 
-/* --- MENSAJES DE FEEDBACK --- */
+.register-input option {
+  background-color: #FFF3C7;
+}
+
 .register-feedback {
-  font-size: 10px;
+  font-size: 1rem;
   text-align: center;
-  margin: 5px 0;
-  line-height: 1.4;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 3px solid;
+  font-family: 'Pixelify Sans', sans-serif;
 }
 
 .register-feedback-error {
-  color: #ff0000;
+  color: #7a0030 !important;
+  background-color: rgba(255, 210, 210, 0.9);
+  border-color: #7a0030;
+  box-shadow: 3px 3px 0 #7a0030;
 }
 
 .register-feedback-success {
-  color: #00aa00;
+  color: #004f00;
+  background-color: rgba(180, 255, 180, 0.9);
+  border-color: #004f00;
+  box-shadow: 3px 3px 0 #004f00;
 }
 
-/* --- BOTÓN Y FOOTER --- */
 .register-submit-container {
   display: flex;
-  justify-content: center; /* Centra el botón horizontalmente */
-  margin-top: 15px;
+  justify-content: center;
+  margin-top: 8px;
 }
 
 .register-submit-btn {
-  padding: 10px 20px;
-  background-color: #f6d173; /* Color naranja/amarillo del botón */
-  color: black;
-  border: 2px solid black; /* Borde negro */
-  border-radius: 6px;
+  background-color: #FFF294;
+  border: 3px solid #000;
+  border-radius: 14px;
+  padding: 12px 48px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1A1A1A;
   cursor: pointer;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 14px;
-  transition: transform 0.1s;
+  box-shadow: 5px 5px 0 #000;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .register-submit-btn:hover {
-  background-color: #f8db91;
+  background-color: #ffe87a;
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 #000;
 }
 
 .register-submit-btn:active {
-  transform: translateY(2px); /* Efecto de pulsado */
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 #000;
 }
 
 .register-footer-text {
-  margin-top: 25px;
+  margin-top: 20px;
   text-align: center;
-  font-size: 14px; /* Ajustado */
-  color: #1a1b41;
-  line-height: 1.5;
+  font-size: 1.1rem;
+  color: #1A1A1A;
+  font-family: 'Pixelify Sans', sans-serif;
 }
 
 .register-link {
-  color: #1a1b41;
+  color: #000638;
   font-weight: bold;
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 .register-link:hover {
-  text-decoration: underline;
-  color: #e6007e;
+  color: #7a0030;
+}
+
+@media (max-width: 560px) {
+  .register-fields-row {
+    grid-template-columns: 1fr;
+  }
+  .register-card {
+    padding: 24px 20px 28px;
+  }
 }

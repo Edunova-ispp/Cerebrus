@@ -61,9 +61,10 @@ const Login = () => {
     <div className="login-page-container">
       <div className="login-box">
         
-        {/* LOGO */}
+        {/* LOGO + TITLE */}
         <div className="login-header">
           <img src={logo} alt="Cerebrus Mascot" className="login-logo" />
+          <h2 className="login-title">Iniciar Sesión</h2>
         </div>
         
         <form onSubmit={handleSubmit} className="login-form">
