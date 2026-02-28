@@ -15,6 +15,8 @@ import com.cerebrus.usuario.Usuario;
 
 class UserDetailsImplTest {
 
+    // Test para verificar que el método build asigna correctamente el rol de Alumno cuando el usuario 
+    // es una instancia de Alumno
     @Test
     void build_cuandoUsuarioEsAlumno_asignaRolAlumno() {
         Alumno alumno = new Alumno();
