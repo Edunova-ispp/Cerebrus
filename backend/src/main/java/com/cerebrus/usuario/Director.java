@@ -12,10 +12,6 @@ import jakarta.persistence.Table;
 @Table(name = "director")
 public class Director extends Usuario {
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organizacion_id", nullable = false, unique = true)
-    private Organizacion organizacion;
-
     // Constructores
     public Director() {
         super();
@@ -24,17 +20,7 @@ public class Director extends Usuario {
     public Director(String nombre, String primerApellido, String segundoApellido,
                     String nombreUsuario, String correoElectronico, String contrasena,
                     Organizacion organizacion) {
-        super(nombre, primerApellido, segundoApellido, nombreUsuario, correoElectronico, contrasena);
-        this.organizacion = organizacion;
-    }
-
-    // Getters y Setters
-    public Organizacion getOrganizacion() {
-        return organizacion;
-    }
-
-    public void setOrganizacion(Organizacion organizacion) {
-        this.organizacion = organizacion;
+        super(nombre, primerApellido, segundoApellido, nombreUsuario, correoElectronico, contrasena, organizacion);
     }
 
     @Override
@@ -42,7 +28,7 @@ public class Director extends Usuario {
         return "Director{" +
                 "id=" + getId() +
                 ", nombre='" + getNombre() + '\'' +
-                ", organizacion=" + (organizacion != null ? organizacion.getId() : null) +
+                ", organizacion=" + (getOrganizacion() != null ? getOrganizacion().getId() : null) +
                 '}';
     }
 }
