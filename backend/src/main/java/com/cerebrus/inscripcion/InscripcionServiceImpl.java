@@ -1,6 +1,8 @@
 package com.cerebrus.inscripcion;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,5 +54,18 @@ public class InscripcionServiceImpl implements InscripcionService {
         } else {
             throw new RuntimeException("401 Unauthorized");
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<InscripcionResumenDTO> obtenerMisInscripciones() {
+        Usuario usuario = usuarioService.findCurrentUser();
+        if (!(usuario instanceof Alumno)) {
+            throw new RuntimeException("403 Forbidden");
+        }
+        return inscripcionRepository.findByAlumnoId(usuario.getId())
+            .stream()
+            .map(i -> new InscripcionResumenDTO(i.getCurso().getId(), i.getPuntos()))
+            .collect(Collectors.toList());
     }
 }

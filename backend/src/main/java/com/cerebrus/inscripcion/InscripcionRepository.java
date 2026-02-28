@@ -10,4 +10,7 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> 
     @Query("SELECT i FROM Inscripcion i WHERE i.alumno.id = :alumnoId AND i.curso.id = :cursoId")
     Inscripcion findByAlumnoIdAndCursoId(Long alumnoId, Long cursoId);
 
+    @Query("SELECT i FROM Inscripcion i WHERE i.alumno.id = :alumnoId")
+    java.util.List<Inscripcion> findByAlumnoId(Long alumnoId);
+
 }
