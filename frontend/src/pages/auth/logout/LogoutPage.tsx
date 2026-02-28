@@ -1,19 +1,14 @@
 
 import { useNavigate } from 'react-router-dom';
-import "./LogoutPage.css"; // <-- Actualizado para cargar tu nuevo diseño pixel art
+import "./LogoutPage.css"; 
 
 const Logout = () => {
   const navigate = useNavigate();
 
   const sendLogoutRequest = () => {
-    // 1. Borrar el token de sesión del navegador
     localStorage.removeItem('token'); 
     
-    // Nota: Si en tu Login guardaste el token con otro nombre (ej. 'jwt'), 
-    // cambia 'token' por ese nombre en la línea de arriba.
-
-    // 2. Redirigir al usuario a la pantalla de login
-    navigate('/login'); // <-- Corregido para coincidir con tus rutas
+    navigate('/auth/login'); 
   };
 
   return (
