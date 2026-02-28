@@ -34,4 +34,5 @@ public class SignupRequest {
 	@NotBlank
     private String organizacion;
 	
+    private Integer puntos;
 }

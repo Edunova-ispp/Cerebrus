@@ -31,11 +31,16 @@ public class AuthService {
     }
 
     public void registrarUsuario(SignupRequest request) {
-        Usuario nuevoUsuario;
+        Usuario nuevoUsuario = null;
 
-        switch (request.getTipoUsuario().toUpperCase()) {
+        String tipo = request.getTipoUsuario().toUpperCase();
+
+        switch (tipo) {
             case "ALUMNO":
-                nuevoUsuario = new Alumno();
+                Alumno alumno = new Alumno();
+                Integer puntosIniciales = (request.getPuntos() != null) ? request.getPuntos() : 0;
+                alumno.setPuntos(puntosIniciales);
+                nuevoUsuario = alumno;
                 break;
             case "MAESTRO":
                 nuevoUsuario = new Maestro();
@@ -53,7 +58,6 @@ public class AuthService {
         nuevoUsuario.setNombreUsuario(request.getUsername());
         nuevoUsuario.setCorreoElectronico(request.getEmail());
         nuevoUsuario.setOrganizacion(new Organizacion(request.getOrganizacion()));
-        
         nuevoUsuario.setContrasena(passwordEncoder.encode(request.getPassword()));
 
         usuarioRepository.save(nuevoUsuario);
