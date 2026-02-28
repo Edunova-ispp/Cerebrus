@@ -66,7 +66,7 @@ const RegisterPage = () => {
         setSuccess('¡Registro exitoso!');
         setTimeout(() => {
           if (tipoUsuario === 'ALUMNO') navigate('/miscursos');
-          else if (tipoUsuario === 'MAESTRO') navigate('/crearcursos');
+          else if (tipoUsuario === 'MAESTRO') navigate('/miscursos');
           else if (tipoUsuario === 'DIRECTOR') navigate('/infoDueños');
           else navigate('/');
         }, 2000);

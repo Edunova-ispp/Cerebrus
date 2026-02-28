@@ -39,7 +39,7 @@ const Login = () => {
           navigate('/miscursos');
         } 
         else if (rolUsuario.includes("PROFESOR") || rolUsuario.includes("MAESTRO")) {
-          navigate('/crearcursos');
+          navigate('/miscursos');
         } 
         else if (rolUsuario.includes("DUEÑO") || rolUsuario.includes("DUENO") || rolUsuario.includes("DIRECTOR")) {
           navigate('/infoDueños');
