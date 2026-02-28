@@ -16,13 +16,13 @@ CREATE TABLE usuario (
     segundo_apellido VARCHAR(255) NOT NULL,
     nombre_usuario VARCHAR(255) NOT NULL UNIQUE,
     correo_electronico VARCHAR(255) NOT NULL UNIQUE,
-    contrasena VARCHAR(255) NOT NULL
+    contrasena VARCHAR(255) NOT NULL,
+    organizacion_id BIGINT NOT NULL
 );
 
 -- Tabla: alumno (hereda de usuario)
 CREATE TABLE alumno (
     id BIGINT PRIMARY KEY,
-    organizacion_id BIGINT NOT NULL,
     puntos INT NOT NULL,
     FOREIGN KEY (id) REFERENCES usuario(id) ON DELETE CASCADE
 );
@@ -30,17 +30,13 @@ CREATE TABLE alumno (
 -- Tabla: maestro (hereda de usuario)
 CREATE TABLE maestro (
     id BIGINT PRIMARY KEY,
-    organizacion_id BIGINT NOT NULL,
-    FOREIGN KEY (id) REFERENCES usuario(id) ON DELETE CASCADE,
-    FOREIGN KEY (organizacion_id) REFERENCES organizacion(id) ON DELETE RESTRICT
+    FOREIGN KEY (id) REFERENCES usuario(id) ON DELETE CASCADE
 );
 
 -- Tabla: director (hereda de usuario)
 CREATE TABLE director (
     id BIGINT PRIMARY KEY,
-    organizacion_id BIGINT NOT NULL UNIQUE,
-    FOREIGN KEY (id) REFERENCES usuario(id) ON DELETE CASCADE,
-    FOREIGN KEY (organizacion_id) REFERENCES organizacion(id) ON DELETE RESTRICT
+    FOREIGN KEY (id) REFERENCES usuario(id) ON DELETE CASCADE
 );
 
 -- Tabla: suscripcion
