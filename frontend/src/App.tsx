@@ -4,6 +4,9 @@ import LandingPage from "./pages/landingPage/LandingPage";
 import InfoPage from "./pages/infoPage/InfoPage";
 import MisCursos from "./pages/misCursos/MisCursos";
 import CrearCurso from "./pages/crearCurso/CrearCurso";
+import LoginPage from "./pages/auth/login/LoginPage";
+import RegisterPage from "./pages/auth/register/RegisterPage";
+import LogoutPage from "./pages/auth/logout/LogoutPage";
 
 function App() {
   return (
@@ -15,6 +18,9 @@ function App() {
       <Route path="/infoDueños"    element={<InfoPage userType="dueno" />} />
       <Route path="/misCursos"     element={<MisCursos />} />
       <Route path="/crearCurso"    element={<CrearCurso />} />
+      <Route path="/auth/login"    element={<LoginPage />} />
+      <Route path="/auth/register"    element={<RegisterPage />} />
+      <Route path="/auth/logout"    element={<LogoutPage />} />
     </Routes>
   );
 }

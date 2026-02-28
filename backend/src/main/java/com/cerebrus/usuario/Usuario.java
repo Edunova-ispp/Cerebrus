@@ -1,12 +1,18 @@
 package com.cerebrus.usuario;
 
+import com.cerebrus.organizacion.Organizacion;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -36,18 +42,23 @@ public abstract class Usuario {
     @Column(nullable = false)
     private String contrasena;
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "organizacion_id", nullable = false)
+    private Organizacion organizacion;
+
     // Constructores
     public Usuario() {
     }
 
     public Usuario(String nombre, String primerApellido, String segundoApellido, 
-                   String nombreUsuario, String correoElectronico, String contrasena) {
+                   String nombreUsuario, String correoElectronico, String contrasena, Organizacion organizacion) {
         this.nombre = nombre;
         this.primerApellido = primerApellido;
         this.segundoApellido = segundoApellido;
         this.nombreUsuario = nombreUsuario;
         this.correoElectronico = correoElectronico;
         this.contrasena = contrasena;
+        this.organizacion = organizacion;
     }
 
     // Getters y Setters
@@ -107,6 +118,14 @@ public abstract class Usuario {
         this.contrasena = contrasena;
     }
 
+    public Organizacion getOrganizacion() {
+        return organizacion;
+    }
+
+    public void setOrganizacion(Organizacion organizacion) {
+        this.organizacion = organizacion;
+    }
+
     @Override
     public String toString() {
         return "Usuario{" +
@@ -116,6 +135,7 @@ public abstract class Usuario {
                 ", segundoApellido='" + segundoApellido + '\'' +
                 ", nombreUsuario='" + nombreUsuario + '\'' +
                 ", correoElectronico='" + correoElectronico + '\'' +
+                ", organizacion='" + organizacion + '\'' +
                 '}';
     }
 }
