@@ -14,14 +14,17 @@ interface CursoCardProps {
   readonly curso: Curso;
   readonly isMaestro?: boolean;
   readonly onToggleVisibilidad?: (id: number) => void;
+  readonly onCardClick?: () => void;
 }
 
-export default function CursoCard({ curso, isMaestro = false, onToggleVisibilidad }: CursoCardProps) {
+export default function CursoCard({ curso, isMaestro = false, onToggleVisibilidad, onCardClick }: CursoCardProps) {
   return (
     <motion.div
       className="curso-card"
       whileHover={{ scale: 1.05 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      onClick={onCardClick}
+      style={{ cursor: onCardClick ? "pointer" : undefined }}
     >
       <div className="curso-card__cover">
         {curso.imagen ? (
@@ -47,7 +50,11 @@ export default function CursoCard({ curso, isMaestro = false, onToggleVisibilida
           </div>
           <div className="curso-card__maestro-row">
             <span className="curso-card__maestro-label">Visible:</span>
-            <label className="curso-card__toggle" aria-label="Visibilidad del curso">
+            <label
+              className="curso-card__toggle"
+              aria-label="Visibilidad del curso"
+              onClick={(e) => e.stopPropagation()}
+            >
               <input
                 type="checkbox"
                 checked={curso.visibilidad}
