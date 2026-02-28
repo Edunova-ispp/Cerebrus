@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cerebrus.curso.Curso;
 import com.cerebrus.suscripcion.Suscripcion;
 import com.cerebrus.usuario.Director;
 import com.cerebrus.usuario.Maestro;
+import com.cerebrus.usuario.Usuario;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -37,7 +37,7 @@ public class Organizacion {
 
 
     @OneToOne(mappedBy = "organizacion", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Director director;
+    private Usuario usuario;
 
     @OneToMany(mappedBy = "organizacion", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Suscripcion> suscripciones = new ArrayList<>();
@@ -85,12 +85,12 @@ public class Organizacion {
         this.maestros = maestros;
     }
 
-    public Director getDirector() {
-        return director;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setDirector(Director director) {
-        this.director = director;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     public List<Suscripcion> getSuscripciones() {

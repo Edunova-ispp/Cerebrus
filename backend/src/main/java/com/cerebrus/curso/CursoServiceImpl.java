@@ -5,12 +5,17 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cerebrus.actividad.ActividadRepository;
+import com.cerebrus.actividadalumno.ActividadAlumno;
+import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadalumno.ActividadAlumnoProgreso;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.utils.CerebrusUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -20,11 +25,16 @@ public class CursoServiceImpl implements CursoService {
 
     private final CursoRepository cursoRepository;
     private final UsuarioService usuarioService;
+    private final ActividadAlumnoRepository actividadAlumnoRepository;
+    private final ActividadRepository actividadRepository;
 
     @Autowired
-    public CursoServiceImpl(CursoRepository cursoRepository, UsuarioService usuarioService) {
+    public CursoServiceImpl(CursoRepository cursoRepository, UsuarioService usuarioService,
+            ActividadAlumnoRepository actividadAlumnoRepository, ActividadRepository actividadRepository) {
         this.cursoRepository = cursoRepository;
         this.usuarioService = usuarioService;
+        this.actividadAlumnoRepository = actividadAlumnoRepository;
+        this.actividadRepository = actividadRepository;
     }
 
     @Override
@@ -85,6 +95,24 @@ public class CursoServiceImpl implements CursoService {
 
     @Transactional
     @Override
+    public Curso cambiarVisibilidad(Long id) {
+        Curso curso = cursoRepository.findByID(id);
+        if (curso == null) {
+            throw new RuntimeException("404 Not Found");
+        }
+        Usuario usuario = usuarioService.findCurrentUser();
+        if (!(usuario instanceof Maestro)) {
+            throw new RuntimeException("403 Forbidden");
+        }
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new RuntimeException("403 Forbidden");
+        }
+        curso.setVisibilidad(!curso.getVisibilidad());
+        return cursoRepository.save(curso);
+    }
+
+    @Transactional
+    @Override
     public Curso crearCurso(String titulo, String descripcion, String imagen){
         Usuario usuario = usuarioService.findCurrentUser();
         if (!(usuario instanceof Maestro)){
@@ -107,6 +135,48 @@ public class CursoServiceImpl implements CursoService {
         }
         curso.setCodigo(codigo);
         return cursoRepository.save(curso);
-    } 
+    }
+
+    @Override
+    public ProgresoDTO getProgreso(Long cursoId) {
+        Curso curso = cursoRepository.findByID(cursoId);
+        if (curso == null) {
+            throw new RuntimeException("404 Not Found");
+        }
+
+        Usuario usuario = usuarioService.findCurrentUser();
+        if (!(usuario instanceof Alumno alumno)) {
+            throw new RuntimeException("403 Forbidden");
+        }
+
+        long totalActividades = actividadRepository.countByCursoId(cursoId);
+        if (totalActividades == 0) {
+            return new ProgresoDTO("SIN_EMPEZAR", 0);
+        }
+
+        List<ActividadAlumnoProgreso> registros = actividadAlumnoRepository.findProgresoByAlumnoAndCursoId(alumno, cursoId);
+
+        if (registros.isEmpty()) {
+            return new ProgresoDTO("SIN_EMPEZAR", 0);
+        }
+
+        long acabadas = registros.stream()
+                .filter(aa -> aa.getAcabada() != null)
+                .count();
+
+        if (acabadas == totalActividades) {
+            return new ProgresoDTO("TERMINADA", 0);
+        }
+
+        long conInicio = registros.stream()
+                .filter(aa -> aa.getInicio() != null)
+                .count();
+
+        if (conInicio > 0) {
+            return new ProgresoDTO("EMPEZADA", 0);
+        }
+
+        return new ProgresoDTO("SIN_EMPEZAR", 0);
+    }
 
 }

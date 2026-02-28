@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "./InfoPage.css";
 import logo from "../../assets/logo.png";
+import ProfileIcon from "../../assets/icons/profile.svg?react";
 
 export type UserType = "alumno" | "profesor" | "dueno";
 
@@ -78,6 +79,19 @@ function InfoPage({ userType }: InfoPageProps) {
       <button className="info-back-btn" onClick={() => navigate("/")}>
         Volver
       </button>
+
+      {/* Contenedor para agrupar los botones de la esquina superior */}
+      <div className="landing-top-buttons" style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "10px" }}>
+        <button className="landing-login-btn" onClick={() => navigate("/auth/login")}>
+          Login
+          <ProfileIcon className="landing-login-icon" aria-hidden />
+        </button>
+
+        {/* Nuevo botón de Cerrar sesión */}
+        <button className="landing-login-btn" onClick={() => navigate("/auth/logout")} style={{ backgroundColor: "#ff4d4d", color: "white" }}>
+          Cerrar sesión
+        </button>
+      </div>
 
       <div className="info-header">
         <h1 className="info-title">

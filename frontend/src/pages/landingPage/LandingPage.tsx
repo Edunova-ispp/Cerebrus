@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import logo from "../../assets/logo.png";
@@ -45,13 +46,40 @@ const cards = [
 
 function LandingPage() {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+    setIsLoggedIn(false);
+  };
 
   return (
     <div className="landing-page">
-      <button className="landing-login-btn" onClick={() => navigate("/login")}>
-        Login
-        <ProfileIcon className="landing-login-icon" aria-hidden />
-      </button>
+
+      {/* Botones de la esquina superior derecha */}
+      <div className="landing-top-buttons">
+        {isLoggedIn && (
+          <button className="landing-login-btn" onClick={() => navigate("/misCursos")}>
+            Mis Cursos
+          </button>
+        )}
+        {isLoggedIn ? (
+          <button
+            className="landing-login-btn landing-logout-btn"
+            onClick={handleLogout}
+          >
+            Cerrar sesión
+          </button>
+        ) : (
+          <button className="landing-login-btn" onClick={() => navigate("/auth/login")}>
+            Login
+            <ProfileIcon className="landing-login-icon" aria-hidden />
+          </button>
+        )}
+      </div>
+
       {/* Header row */}
       <div className="landing-header">
         <h1 className="landing-title">
