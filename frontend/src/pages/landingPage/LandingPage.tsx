@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LandingPage.css";
 import logo from "../../assets/logo.png";
@@ -45,21 +46,38 @@ const cards = [
 
 function LandingPage() {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+    setIsLoggedIn(false);
+  };
 
   return (
     <div className="landing-page">
-      
-      {/* Contenedor para agrupar los botones de la esquina superior */}
-      <div className="landing-top-buttons" style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "10px" }}>
-        <button className="landing-login-btn" onClick={() => navigate("/auth/login")}>
-          Login
-          <ProfileIcon className="landing-login-icon" aria-hidden />
-        </button>
 
-        {/* Nuevo botón de Cerrar sesión */}
-        <button className="landing-login-btn" onClick={() => navigate("/auth/logout")} style={{ backgroundColor: "#ff4d4d", color: "white" }}>
-          Cerrar sesión
-        </button>
+      {/* Botones de la esquina superior derecha */}
+      <div className="landing-top-buttons">
+        {isLoggedIn && (
+          <button className="landing-login-btn" onClick={() => navigate("/misCursos")}>
+            Mis Cursos
+          </button>
+        )}
+        {isLoggedIn ? (
+          <button
+            className="landing-login-btn landing-logout-btn"
+            onClick={handleLogout}
+          >
+            Cerrar sesión
+          </button>
+        ) : (
+          <button className="landing-login-btn" onClick={() => navigate("/auth/login")}>
+            Login
+            <ProfileIcon className="landing-login-icon" aria-hidden />
+          </button>
+        )}
       </div>
 
       {/* Header row */}

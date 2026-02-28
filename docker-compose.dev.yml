@@ -44,6 +44,7 @@ services:
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
       WDS_SOCKET_PORT: "5173"
+      VITE_API_URL: "http://localhost:8080"
     volumes:
       - ./frontend:/app:cached
       - /app/node_modules

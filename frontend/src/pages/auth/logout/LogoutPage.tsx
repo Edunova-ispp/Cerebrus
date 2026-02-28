@@ -6,9 +6,10 @@ const Logout = () => {
   const navigate = useNavigate();
 
   const sendLogoutRequest = () => {
-    localStorage.removeItem('token'); 
-    
-    navigate('/auth/login'); 
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    localStorage.removeItem('role');
+    navigate('/auth/login');
   };
 
   return (
