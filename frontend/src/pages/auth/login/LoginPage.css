@@ -1,0 +1,136 @@
+/* Contenedor principal (fondo beige claro) */
+.login-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #F4F1E1; /* Color crema del fondo */
+  font-family: 'Pixelify Sans', sans-serif;
+  padding: 20px;
+}
+
+/* Caja delimitadora (opcional, si quieres la línea fina de la imagen) */
+.login-box {
+  width: 100%;
+  max-width: 650px;
+  border: 1px solid #7a7a7a;
+  padding: 40px 20px;
+  background-color: #F4F1E1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Header / Logo */
+.login-header {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.login-logo {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Formulario */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  align-items: center;
+}
+
+/* Envoltorio de los inputs amarillos */
+.pixel-input-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: #FFF3C7; /* Amarillo clarito */
+  border: 2px solid #1A1A1A; /* Borde oscuro */
+  border-radius: 16px;
+  padding: 0 20px;
+  width: 100%;
+  max-width: 550px;
+  box-sizing: border-box;
+}
+
+.pixel-input-wrapper label {
+  font-size: 24px;
+  color: #1A1A1A;
+  margin-right: 10px;
+  white-space: nowrap; /* Evita que el label salte de línea */
+}
+
+.pixel-input-wrapper input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 24px;
+  color: #1A1A1A;
+  padding: 15px 0;
+  outline: none;
+}
+
+/* Estilo de error */
+.login-error-msg {
+  color: #D10057;
+  font-size: 18px;
+  background-color: rgba(209, 0, 87, 0.1);
+  padding: 10px 20px;
+  border: 2px solid #D10057;
+  border-radius: 12px;
+  text-align: center;
+  width: 100%;
+  max-width: 550px;
+}
+
+/* Contenedor de botones inferiores */
+.login-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+  gap: 15px;
+}
+
+/* Botón Iniciar Sesión (Naranja) */
+.pixel-btn-submit {
+  background-color: #F3C47E; /* Naranja/Crema */
+  border: 2px solid #1A1A1A;
+  border-radius: 16px;
+  padding: 12px 40px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 28px;
+  color: #1A1A1A;
+  cursor: pointer;
+  transition: transform 0.1s ease, filter 0.2s ease;
+}
+
+.pixel-btn-submit:hover {
+  filter: brightness(1.05);
+}
+
+.pixel-btn-submit:active {
+  transform: scale(0.96); /* Efecto de presionar botón */
+}
+
+/* Texto de registro */
+.login-register-text {
+  margin: 0;
+  font-size: 22px;
+  color: #1A1A1A;
+}
+
+.login-register-text span {
+  font-weight: bold;
+  color: #000638;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.login-register-text span:hover {
+  color: #D10057;
+  text-decoration: underline;
+}
