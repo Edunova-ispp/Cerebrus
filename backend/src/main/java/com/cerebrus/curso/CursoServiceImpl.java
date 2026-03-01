@@ -12,14 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividadalumno.ActividadAlumno;
+import com.cerebrus.actividadalumno.ActividadAlumnoProgreso;
 import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
 import com.cerebrus.actividadalumno.EstadoActividad;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
-import com.cerebrus.actividad.ActividadRepository;
-import com.cerebrus.actividadalumno.ActividadAlumnoProgreso;
-import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
-import com.cerebrus.actividadalumno.ActividadAlumnoProgreso;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
@@ -122,18 +119,18 @@ public class CursoServiceImpl implements CursoService {
     @Transactional
     @Override
     public Curso crearCurso(String titulo, String descripcion, String imagen){
-        Usuario usuario = usuarioService.findCurrentUser();
-        if (!(usuario instanceof Maestro)){
+        Usuario usuarioActual = usuarioService.findCurrentUser();
+        if (!(usuarioActual instanceof Maestro)){
             throw new AccessDeniedException("Solo un maestro puede crear cursos");
         }
-        
+
 
         Curso curso = new Curso();
         curso.setTitulo(titulo);
         curso.setDescripcion(descripcion);
         curso.setImagen(imagen);
         curso.setVisibilidad(false);
-        Maestro maestro = (Maestro) usuario;   
+        Maestro maestro = (Maestro) usuarioActual;
         curso.setMaestro(maestro);
         String codigo;
         while(true){
@@ -149,6 +146,26 @@ public class CursoServiceImpl implements CursoService {
     @Override
     public Curso getCursoById(Long id) {
         return cursoRepository.findByID(id);
+    }
+
+    @Transactional
+    @Override
+    public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen) {
+        Curso curso = cursoRepository.findByID(id);
+        if (curso == null) {
+            throw new RuntimeException("404 Not Found");
+        }
+        Usuario usuario = usuarioService.findCurrentUser();
+        if (!(usuario instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede actualizar cursos");
+        }
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("Solo el propietario del curso puede actualizarlo");
+        }
+        curso.setTitulo(titulo);
+        curso.setDescripcion(descripcion);
+        curso.setImagen(imagen);
+        return cursoRepository.save(curso);
     }
 
     @Override

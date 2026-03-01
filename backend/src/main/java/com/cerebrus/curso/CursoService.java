@@ -13,4 +13,5 @@ public interface CursoService {
     Curso getCursoById(Long id);
     Curso cambiarVisibilidad(Long id);
     ProgresoDTO getProgreso(Long cursoId);
+    Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen);
 }
