@@ -5,10 +5,12 @@ import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 
+import java.io.Console;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties.Apiversion.Use;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
@@ -25,17 +27,20 @@ import org.springframework.web.client.RestTemplate;
 public class IaConnectionServiceImpl implements IaConnectionService {
     private final RestTemplate restTemplate;
     private final UsuarioService usuarioService;
+   
  
     @Autowired
-    public IaConnectionServiceImpl(RestTemplate restTemplate , UsuarioService usuarioService) {
+    public IaConnectionServiceImpl(RestTemplate restTemplate, UsuarioService usuarioService) {
+                                 
         this.restTemplate = restTemplate;
         this.usuarioService = usuarioService;
+       
     }
 
-    private final String apiKey = "AIzaSyCRLnqn2g-5Ovt9an-7yu1WnD-Uq7KMcUw";
+    @Value("${GOOGLE_API_KEY}") 
+    private String apiKey;
     // Usamos gemini-1.5-flash por su velocidad y gratuidad
-    private final String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
-
+    
     private static final String JSON_TEORIA = """
             {
             "tipo": "TEORICA",
@@ -161,7 +166,7 @@ public class IaConnectionServiceImpl implements IaConnectionService {
     
      @Override
     public String generarActividad(TipoAct tipoActividad, String prompt) {
-       
+       System.out.println("APIkey " + apiKey);
         Usuario usuario = usuarioService.findCurrentUser();
         if(!(usuario instanceof Maestro)){
             throw new IllegalArgumentException("403 Forbidden");
@@ -176,9 +181,10 @@ public class IaConnectionServiceImpl implements IaConnectionService {
         Map<String, Object> body = Map.of("contents", List.of(contents));
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-
+       
         try {
-            
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+
             ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
             
             
@@ -188,29 +194,44 @@ public class IaConnectionServiceImpl implements IaConnectionService {
             List parts = (List) content.get("parts");
             Map firstPart = (Map) parts.get(0);
             String respuesta = (String) firstPart.get("text");
+          
            if (!validateActivityResponse(respuesta, tipoActividad)) {
-              throw new IllegalArgumentException("400 Bad Request");
+              throw new IllegalArgumentException("respuesta no válida: " + respuesta);
             }
             return respuesta;
         } catch (Exception e) {
-            throw new IllegalArgumentException("500 Internal Server Error");
+            throw new IllegalArgumentException("500 API Server Error: " + e.getMessage());
         }
          
     }
     
+    private String cleanJsonResponse(String response) {
+        return response
+            .replaceAll("^```(?:json)?\\n?", "")
+            .replaceAll("\\n?```$", "")
+            .trim();
+    }
+    
     private Boolean validateActivityResponse(String response, TipoAct tipoActividad) {
         try {
-            Map<String, Object> jsonResponse = new com.fasterxml.jackson.databind.ObjectMapper().readValue(response, Map.class);
-            String tipo = (String) jsonResponse.get("tipo");
             
+            String cleanedResponse = cleanJsonResponse(response);
+          
+            Map<String, Object> jsonResponse = new com.fasterxml.jackson.databind.ObjectMapper().readValue(cleanedResponse, Map.class);
+           
+            String tipo = (String) jsonResponse.get("tipo");
+          
             if (!tipo.equals(tipoActividad.name())) {
-            throw new IllegalArgumentException("400 Bad Request");
+            throw new IllegalArgumentException("400 Bad Request tipo equivocado: "+jsonResponse);
+
             }
+            
             
             switch (tipoActividad) {
                 case TEORIA:
                     if (!jsonResponse.containsKey("titulo") || !jsonResponse.containsKey("descripcion")) {
-                        throw new IllegalArgumentException("400 Bad Request");
+                        System.out.println("Respuesta JSON inválida para actividad teórica: " + jsonResponse);
+                        throw new IllegalArgumentException("400 Bad Request mal actividad teoria: "+jsonResponse);
                     }
                     break;
                 case TEST:
@@ -259,7 +280,7 @@ public class IaConnectionServiceImpl implements IaConnectionService {
             
             return true;
         } catch (Exception e) {
-            throw new IllegalArgumentException("400 Bad Request");
+            throw new IllegalArgumentException("400 Bad Request: " + e.getMessage());
         }
        
     }
