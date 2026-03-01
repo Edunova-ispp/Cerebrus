@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cerebrus.actividad.Actividad;
 import com.cerebrus.usuario.Alumno;
 
 import jakarta.validation.Valid;
@@ -165,6 +166,50 @@ public class CursoController {
             return ResponseEntity.ok(cursoActualizado);
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("404 Not Found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            } else if (e.getMessage().equals("403 Forbidden")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
+    @GetMapping("/{id}/NotasMedias")
+    public ResponseEntity<Map<Integer,Integer>> obtenerNotasMedias(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(cursoService.getNotaMediaPorActividad(id));
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("404 Not Found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            } else if (e.getMessage().equals("403 Forbidden")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
+
+    @GetMapping("/{id}/NotasMedias/max")
+    public ResponseEntity<Map<Actividad,Double>> obtenerNotaMediaMaxima(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(cursoService.CalcularNotaMediaActividadMasAlta(id));
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("404 Not Found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            } else if (e.getMessage().equals("403 Forbidden")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
+
+    @GetMapping("/{id}/NotasMedias/min")
+    public ResponseEntity<Map<Actividad,Double>> obtenerNotaMediaMinima(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(cursoService.CalcularNotaMediaActividadMasBaja(id));
         } catch (RuntimeException e) {
             if (e.getMessage().equals("404 Not Found")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
