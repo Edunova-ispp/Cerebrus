@@ -66,4 +66,46 @@ public class IaConnectionController {
             this.descripcion = descripcion;
         }
     }
+
+    public static class GenerarActividadRequest {
+        private String tipoActividad;
+        private String prompt;
+        private String descripcion;
+
+        public String getTipoActividad() {
+            return tipoActividad;
+        }
+
+        public void setTipoActividad(String tipoActividad) {
+            this.tipoActividad = tipoActividad;
+        }
+
+        public String getPrompt() {
+            return prompt;
+        }
+
+        public void setPrompt(String prompt) {
+            this.prompt = prompt;
+        }
+
+        public String getDescripcion() {
+            return descripcion;
+        }
+
+        public void setDescripcion(String descripcion) {
+            this.descripcion = descripcion;
+        }
+    }
+
+    @PostMapping(value = "/generar", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> generarActividad(@RequestBody GenerarActividadRequest request) {
+       
+            TipoAct tipoAct = TipoAct.valueOf(request.getTipoActividad().toUpperCase());
+
+            String prompt = request.getPrompt() != null ? request.getPrompt() : request.getDescripcion();
+
+            String json = iaConnectionService.generarActividad(tipoAct, prompt);
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(json);
+        
+    }
 }

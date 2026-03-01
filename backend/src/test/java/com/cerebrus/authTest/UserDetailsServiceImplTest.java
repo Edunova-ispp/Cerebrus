@@ -48,7 +48,7 @@ class UserDetailsServiceImplTest {
 		assertThat(result).isInstanceOf(UserDetailsImpl.class);
 		assertThat(result.getUsername()).isEqualTo("alumno1");
 		assertThat(result.getPassword()).isEqualTo("pass");
-		assertThat(roles(result)).containsExactly("ROLE_ALUMNO");
+		assertThat(roles(result)).containsExactly("ALUMNO");
 	}
 
     // Test para verificar que se lanza una excepción al intentar cargar un usuario inexistente
@@ -79,7 +79,7 @@ class UserDetailsServiceImplTest {
 
 		verify(usuarioRepository).findByNombreUsuarioOrCorreoElectronico(email, email);
 		assertThat(result.getUsername()).isEqualTo("alumno2");
-		assertThat(roles(result)).containsExactly("ROLE_ALUMNO");
+		assertThat(roles(result)).containsExactly("ALUMNO");
 	}
 
     // Método auxiliar para extraer los roles de un UserDetails

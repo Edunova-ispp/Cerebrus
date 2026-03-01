@@ -29,7 +29,7 @@ class UserDetailsImplTest {
         assertThat(userDetails.getId()).isEqualTo(1L);
         assertThat(userDetails.getUsername()).isEqualTo("alumno1");
         assertThat(userDetails.getPassword()).isEqualTo("pass");
-        assertThat(roles(userDetails)).containsExactly("ROLE_ALUMNO");
+        assertThat(roles(userDetails)).containsExactly("ALUMNO");
     }
 
     // Test para verificar que el método build asigna correctamente el rol de Maestro cuando el usuario 
@@ -46,7 +46,7 @@ class UserDetailsImplTest {
         assertThat(userDetails.getId()).isEqualTo(2L);
         assertThat(userDetails.getUsername()).isEqualTo("maestro1");
         assertThat(userDetails.getPassword()).isEqualTo("pass");
-        assertThat(roles(userDetails)).containsExactly("ROLE_MAESTRO");
+        assertThat(roles(userDetails)).containsExactly("MAESTRO");
     }
 
     // Test para verificar que el método build asigna correctamente el rol de Director cuando el usuario 
@@ -63,7 +63,7 @@ class UserDetailsImplTest {
         assertThat(userDetails.getId()).isEqualTo(3L);
         assertThat(userDetails.getUsername()).isEqualTo("director1");
         assertThat(userDetails.getPassword()).isEqualTo("pass");
-        assertThat(roles(userDetails)).containsExactly("ROLE_DIRECTOR");
+        assertThat(roles(userDetails)).containsExactly("DIRECTOR");
     }
 
     // Test para verificar que el método build asigna un rol genérico de "USUARIO" si el usuario no es 
@@ -81,7 +81,7 @@ class UserDetailsImplTest {
         assertThat(userDetails.getId()).isEqualTo(4L);
         assertThat(userDetails.getUsername()).isEqualTo("usuario1");
         assertThat(userDetails.getPassword()).isEqualTo("pass");
-        assertThat(roles(userDetails)).containsExactly("ROLE_USUARIO");
+        assertThat(roles(userDetails)).containsExactly("USUARIO");
     }
 
     // Verificar que equals y hashCode se basan solo en el id

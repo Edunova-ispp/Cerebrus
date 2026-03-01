@@ -17,7 +17,6 @@ import com.cerebrus.respuesta.Respuesta;
 import com.cerebrus.respuesta.RespuestaRepository;
 import com.cerebrus.respuesta.RespuestaService;
 import com.cerebrus.usuario.Alumno;
-import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 
