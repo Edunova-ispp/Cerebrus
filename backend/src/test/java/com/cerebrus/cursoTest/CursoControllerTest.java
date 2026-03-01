@@ -24,6 +24,8 @@ import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoController;
 import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.ProgresoDTO;
+import com.cerebrus.estadisticas.EstadisticasMaestroController;
+import com.cerebrus.estadisticas.EstadisticasMaestroServiceImpl;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Maestro;
 
@@ -35,6 +37,12 @@ class CursoControllerTest {
 
     @InjectMocks
     private CursoController cursoController;
+
+    @Mock
+    private EstadisticasMaestroServiceImpl estadisticasMaestroService;
+
+    @InjectMocks
+    private EstadisticasMaestroController estadisticasMaestroController;
 
     private Maestro maestro;
     private Curso curso;
@@ -110,9 +118,9 @@ class CursoControllerTest {
         Map<Alumno, Integer> puntos = Map.of(alumno, 100);
 
         when(cursoService.getCursoById(10L)).thenReturn(curso);
-        when(cursoService.calcularTotalPuntosCursoPorAlumno(curso)).thenReturn(puntos);
+        when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(curso)).thenReturn(puntos);
 
-        ResponseEntity<Map<Alumno, Integer>> respuesta = cursoController.obtenerPuntosCurso(10L);
+        ResponseEntity<Map<Alumno, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).containsEntry(alumno, 100);
@@ -122,10 +130,10 @@ class CursoControllerTest {
     @Test
     void obtenerPuntosCurso_accesoNoPermitido_retorna403() {
         when(cursoService.getCursoById(10L)).thenReturn(curso);
-        when(cursoService.calcularTotalPuntosCursoPorAlumno(curso))
+        when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(curso))
                 .thenThrow(new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos"));
 
-        ResponseEntity<Map<Alumno, Integer>> respuesta = cursoController.obtenerPuntosCurso(10L);
+        ResponseEntity<Map<Alumno, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
@@ -135,7 +143,7 @@ class CursoControllerTest {
     void obtenerPuntosCurso_cursoNoExiste_retorna404() {
         when(cursoService.getCursoById(99L)).thenThrow(new RuntimeException("404 Not Found"));
 
-        ResponseEntity<Map<Alumno, Integer>> respuesta = cursoController.obtenerPuntosCurso(99L);
+        ResponseEntity<Map<Alumno, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(99L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -145,7 +153,7 @@ class CursoControllerTest {
     void obtenerPuntosCurso_errorInesperado_retorna500() {
         when(cursoService.getCursoById(10L)).thenThrow(new RuntimeException("Error interno"));
 
-        ResponseEntity<Map<Alumno, Integer>> respuesta = cursoController.obtenerPuntosCurso(10L);
+        ResponseEntity<Map<Alumno, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
