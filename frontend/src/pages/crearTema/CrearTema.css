@@ -1,0 +1,156 @@
+.crear-tema-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  min-height: 100vh;
+  box-sizing: border-box;
+  background-color: #FAF6ED;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  z-index: 10;
+}
+
+.crear-tema-main {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.crear-tema-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 80px 20px 20px;
+  box-sizing: border-box;
+}
+
+.crear-tema-banner {
+  background-color: #8C52FF;
+  color: white;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.8rem;
+  padding: 15px 40px;
+  border: 4px solid #000;
+  border-radius: 50px;
+  box-shadow: 6px 6px 0px #000;
+  margin-bottom: 30px;
+  text-align: center;
+  width: 100%;
+  max-width: 650px;
+  box-sizing: border-box;
+}
+
+.crear-tema-box {
+  width: 100%;
+  max-width: 450px;
+  background-color: #C3004F;
+  border: 4px solid #000;
+  border-radius: 35px;
+  padding: 30px 40px 40px;
+  box-shadow: 10px 10px 0px #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.crear-tema-title {
+  font-size: 1.8rem;
+  color: #FFFFFF;
+  font-family: 'Pixelify Sans', sans-serif;
+  margin: 0 0 20px;
+  text-align: center;
+}
+
+.crear-tema-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.crear-tema-error {
+  background-color: #ff4d4d;
+  color: #fff;
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1rem;
+  margin-bottom: 14px;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Reutiliza el mismo estilo de CrearCurso */
+.pixel-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.pixel-input-wrapper label {
+  font-size: 1.4rem;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-weight: bold;
+  margin-bottom: 5px;
+  margin-left: 10px;
+  color: #fff;
+}
+
+.pixel-input-wrapper input {
+  background-color: #FCEF91;
+  border: 4px solid #000;
+  border-radius: 25px;
+  padding: 12px 20px;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.1rem;
+  outline: none;
+}
+
+/* Botones */
+.crear-tema-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.pixel-btn-submit {
+  background-color: #FCEF91;
+  border: 4px solid #000;
+  border-radius: 25px;
+  padding: 12px 36px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.3rem;
+  font-weight: bold;
+  box-shadow: 5px 5px 0 #000;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.pixel-btn-submit:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 #000; }
+.pixel-btn-submit:active { transform: translate(1px, 1px); box-shadow: 3px 3px 0 #000; }
+.pixel-btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.pixel-btn-cancelar {
+  background-color: #E8D5B5;
+  border: 4px solid #000;
+  border-radius: 25px;
+  padding: 12px 36px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.3rem;
+  font-weight: bold;
+  box-shadow: 5px 5px 0 #000;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.pixel-btn-cancelar:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 #000; }
+.pixel-btn-cancelar:active { transform: translate(1px, 1px); box-shadow: 3px 3px 0 #000; }
+.pixel-btn-cancelar:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }

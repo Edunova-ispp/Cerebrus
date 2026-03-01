@@ -7,6 +7,21 @@ export interface Curso {
   visibilidad: boolean;
 }
 
+export interface Actividad {
+  id: number;
+  titulo: string;
+  descripcion: string | null;
+  puntuacion: number;
+  posicion: number;
+}
+
+export interface Tema {
+  id: number;
+  titulo: string;
+  curso: Curso;
+  actividades: Actividad[];
+}
+
 export interface ProgresoAlumno {
   estado: 'SIN_EMPEZAR' | 'EMPEZADA' | 'TERMINADA';
   puntos: number;

@@ -85,7 +85,7 @@ public class TemaController {
         }
     }
 
-    @GetMapping("/curso/{cursoId}")
+    @GetMapping("/curso/{cursoId}/alumno")
     public ResponseEntity<List<TemaDTO>> ObtenerTemasPorCursoAlumno(@PathVariable Integer cursoId) {
         List<Tema> temas = temaService.ObtenerTemasPorCursoAlumno(cursoId);
         List<TemaDTO> temasDTO = temas.stream().map(tema -> {
@@ -94,4 +94,15 @@ public class TemaController {
         }).toList();
         return ResponseEntity.ok(temasDTO);
     }
+
+    @GetMapping("/curso/{cursoId}/maestro")
+    public ResponseEntity<List<TemaDTO>> ObtenerTemasPorCursoMaestro(@PathVariable Integer cursoId) {
+        List<Tema> temas = temaService.ObtenerTemasPorCursoMaestro(cursoId);
+        List<TemaDTO> temasDTO = temas.stream().map(tema -> {
+            List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
+            return new TemaDTO(tema, actividades);
+        }).toList();
+        return ResponseEntity.ok(temasDTO);
+    }
 }
+

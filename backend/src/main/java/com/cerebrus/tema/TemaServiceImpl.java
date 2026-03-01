@@ -12,6 +12,8 @@ import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.MaestroRepository;
+import com.cerebrus.usuario.Usuario;
+import com.cerebrus.usuario.UsuarioService;
 
 @Service
 @Transactional
@@ -21,13 +23,15 @@ public class TemaServiceImpl implements TemaService {
     private final CursoServiceImpl cursoService;
     private final CursoRepository cursoRepository;
     private final MaestroRepository maestroRepository;
+    private final UsuarioService usuarioService;
 
     @Autowired
-    public TemaServiceImpl(TemaRepository temaRepository, CursoRepository cursoRepository, MaestroRepository maestroRepository, CursoServiceImpl cursoService) {
+    public TemaServiceImpl(TemaRepository temaRepository, CursoRepository cursoRepository, MaestroRepository maestroRepository, CursoServiceImpl cursoService, UsuarioService usuarioService) {
         this.temaRepository = temaRepository;
         this.cursoRepository = cursoRepository;
         this.maestroRepository = maestroRepository;
         this.cursoService = cursoService;
+        this.usuarioService = usuarioService;
     }
 
     @Override
@@ -71,6 +75,16 @@ public class TemaServiceImpl implements TemaService {
             throw new AccessDeniedException("El alumno logueado no está inscrito en este curso.");
         } else {
             return temaRepository.findByCursoId(cursoId);
+        }
+    }
+
+    @Override
+    public List<Tema> ObtenerTemasPorCursoMaestro(Integer cursoId) {
+        Usuario usuario = usuarioService.findCurrentUser(); 
+        if(usuario instanceof Maestro){
+            return temaRepository.findByCursoId(cursoId);
+        } else {
+            throw new AccessDeniedException("El usuario no es un maestro.");
         }
     }
 }
