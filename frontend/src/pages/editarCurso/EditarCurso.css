@@ -1,0 +1,139 @@
+/* ===== CONTENEDOR PRINCIPAL (CENTRADO TOTAL) ===== */
+.crear-curso-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 40px 20px;
+  min-height: calc(100vh - 80px); /* Ajusta según el alto de tu Navbar */
+  box-sizing: border-box;
+}
+
+/* ===== BANNER SUPERIOR MORADO ===== */
+.crear-curso-welcome-banner {
+  background-color: #8C52FF;
+  color: white;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.8rem;
+  padding: 15px 40px;
+  border: 4px solid #000;
+  border-radius: 50px; /* Estilo píldora */
+  box-shadow: 6px 6px 0px #000;
+  margin-bottom: 30px;
+  text-align: center;
+  width: 100%;
+  max-width: 650px;
+  box-sizing: border-box;
+}
+
+/* ===== CAJA MAGENTA ===== */
+.crear-curso-box {
+  width: 100%;
+  max-width: 450px;
+  background-color: #C3004F;
+  border: 4px solid #000;
+  border-radius: 35px;
+  padding: 30px 40px 40px;
+  box-shadow: 10px 10px 0px #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.crear-curso-title {
+  font-size: 1.8rem;
+  color: #FFFFFF;
+  font-family: 'Pixelify Sans', sans-serif;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+/* ===== LABELS AMARILLAS (ENCIMA DEL INPUT) ===== */
+.pixel-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.pixel-input-wrapper label {
+  font-size: 1.5rem;
+  color: #F8E697; /* El amarillo de la foto */
+  font-family: 'Pixelify Sans', sans-serif;
+  font-weight: bold;
+  margin-bottom: 8px; /* Espacio para que flote arriba */
+  margin-left: 10px;
+}
+
+/* ===== INPUTS Y TEXTAREA ===== */
+.pixel-input-wrapper input,
+.crear-curso-textarea {
+  background-color: #FCEF91;
+  border: 4px solid #000;
+  border-radius: 25px;
+  padding: 12px 20px;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.1rem;
+  outline: none;
+}
+
+.crear-curso-textarea {
+  min-height: 100px;
+  resize: none;
+}
+
+/* ===== ÁREA DE IMAGEN (Estilo Drag & Drop / URL) ===== */
+.crear-curso-preview-placeholder {
+  background-color: #FFD98E; /* Color melocotón */
+  border: 3px dashed #000;
+  border-radius: 30px;
+  width: 100%;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Imagen dentro del preview si existe */
+.crear-curso-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 25px;
+  border: 4px solid #000;
+  margin-top: 10px;
+}
+
+/* ===== BOTÓN SUBMIT ===== */
+.pixel-btn-submit {
+  background-color: #FCEF91;
+  border: 4px solid #000;
+  border-radius: 25px;
+  padding: 12px 48px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-top: 25px;
+  box-shadow: 5px 5px 0 #000;
+  cursor: pointer;
+  align-self: center;
+  transition: all 0.1s ease;
+}
+
+.pixel-btn-submit:active {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.pixel-btn-submit:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}

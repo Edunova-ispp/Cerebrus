@@ -1,6 +1,7 @@
 package com.cerebrus.auth;
 
 import com.cerebrus.auth.payload.request.SignupRequest;
+import com.cerebrus.organizacion.Organizacion;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Director;
 import com.cerebrus.usuario.Maestro;
@@ -8,7 +9,6 @@ import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
@@ -16,7 +16,8 @@ public class AuthService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UsuarioRepository usuarioRepository, 
+                       PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -29,13 +30,17 @@ public class AuthService {
         return usuarioRepository.existsByCorreoElectronico(email);
     }
 
-    @Transactional
     public void registrarUsuario(SignupRequest request) {
-        Usuario nuevoUsuario;
+        Usuario nuevoUsuario = null;
 
-        switch (request.getTipoUsuario().toUpperCase()) {
+        String tipo = request.getTipoUsuario().toUpperCase();
+
+        switch (tipo) {
             case "ALUMNO":
-                nuevoUsuario = new Alumno();
+                Alumno alumno = new Alumno();
+                Integer puntosIniciales = (request.getPuntos() != null) ? request.getPuntos() : 0;
+                alumno.setPuntos(puntosIniciales);
+                nuevoUsuario = alumno;
                 break;
             case "MAESTRO":
                 nuevoUsuario = new Maestro();
@@ -52,7 +57,7 @@ public class AuthService {
         nuevoUsuario.setSegundoApellido(request.getSegundoApellido());
         nuevoUsuario.setNombreUsuario(request.getUsername());
         nuevoUsuario.setCorreoElectronico(request.getEmail());
-        
+        nuevoUsuario.setOrganizacion(new Organizacion(request.getOrganizacion()));
         nuevoUsuario.setContrasena(passwordEncoder.encode(request.getPassword()));
 
         usuarioRepository.save(nuevoUsuario);

@@ -1,0 +1,178 @@
+/* ===== REGISTER PAGE ===== */
+.register-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #F9EED4;
+  font-family: 'Pixelify Sans', sans-serif;
+  padding: 24px 20px;
+  box-sizing: border-box;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 700px;
+  background-color: #E285A9;
+  border: 4px solid #000;
+  border-radius: 20px;
+  padding: 32px 40px 36px;
+  box-shadow: 8px 8px 0px #000;
+  box-sizing: border-box;
+}
+
+.register-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+
+.register-mascot {
+  height: 70px;
+  width: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(4px 4px 0 #000);
+}
+
+.register-text-logo {
+  font-size: 2.2rem;
+  color: #FFF294;
+  -webkit-text-stroke: 2px #000;
+  text-shadow: 4px 4px 0 #000;
+  margin: 0;
+  letter-spacing: 2px;
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+.register-form-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 2-column grid for paired fields */
+.register-fields-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.register-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.register-label {
+  font-size: 1.1rem;
+  color: #1A1A1A;
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+.register-input {
+  width: 100%;
+  padding: 11px 14px;
+  background-color: #FFF3C7;
+  border: 3px solid #000;
+  border-radius: 12px;
+  box-sizing: border-box;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.1rem;
+  color: #1A1A1A;
+  box-shadow: 3px 3px 0 #000;
+  outline: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.register-input:focus {
+  border-color: #7a0030;
+  background-color: #fff;
+}
+
+.register-input option {
+  background-color: #FFF3C7;
+}
+
+.register-feedback {
+  font-size: 1rem;
+  text-align: center;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 3px solid;
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+.register-feedback-error {
+  color: #7a0030 !important;
+  background-color: rgba(255, 210, 210, 0.9);
+  border-color: #7a0030;
+  box-shadow: 3px 3px 0 #7a0030;
+}
+
+.register-feedback-success {
+  color: #004f00;
+  background-color: rgba(180, 255, 180, 0.9);
+  border-color: #004f00;
+  box-shadow: 3px 3px 0 #004f00;
+}
+
+.register-submit-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.register-submit-btn {
+  background-color: #FFF294;
+  border: 3px solid #000;
+  border-radius: 14px;
+  padding: 12px 48px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1A1A1A;
+  cursor: pointer;
+  box-shadow: 5px 5px 0 #000;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.register-submit-btn:hover {
+  background-color: #ffe87a;
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 #000;
+}
+
+.register-submit-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.register-footer-text {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #1A1A1A;
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+.register-link {
+  color: #000638;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.register-link:hover {
+  color: #7a0030;
+}
+
+@media (max-width: 560px) {
+  .register-fields-row {
+    grid-template-columns: 1fr;
+  }
+  .register-card {
+    padding: 24px 20px 28px;
+  }
+}
