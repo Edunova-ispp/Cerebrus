@@ -58,7 +58,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
       <NavbarMisCursos />
 
       <main className="ltp-main">
-        <button className="ltp-volver" onClick={() => navigate(-1)}>
+        <button className="ltp-volver" onClick={() => navigate(`/cursos/${id ?? curso?.id}`)}>
           ← Volver a información del curso
         </button>
 
@@ -85,7 +85,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
                     >
                       <span className="ltp-item-titulo">{tema.titulo}</span>
                       <div className="ltp-item-acciones">
-                        <button className="ltp-btn-icono" title="Editar" onClick={(e) => { e.stopPropagation(); }}>✏️</button>
+                        <button className="ltp-btn-icono" title="Editar" onClick={(e) => { e.stopPropagation(); navigate(`/cursos/${id ?? curso?.id}/temas/${tema.id}/editar`);}}>✏️</button>
                         <button className="ltp-btn-icono" title="Borrar" onClick={(e) => { e.stopPropagation(); }}>🗑️</button>
                       </div>
                     </div>

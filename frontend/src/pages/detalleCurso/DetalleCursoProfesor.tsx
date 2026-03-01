@@ -15,7 +15,7 @@ export default function DetalleCursoProfesor({ curso }: Props) {
       <NavbarMisCursos />
 
       <main className="detalle-profesor-main">
-        <button className="detalle-volver" onClick={() => navigate(-1)}>
+        <button className="detalle-volver" onClick={() => navigate(`/misCursos`)}>
           ← Volver
         </button>
 

@@ -124,6 +124,7 @@
 .ltp-item-titulo {
   flex: 1;
   overflow: hidden;
+  color: #000;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

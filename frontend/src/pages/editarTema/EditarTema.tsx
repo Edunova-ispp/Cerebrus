@@ -3,10 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
-import './CrearTema.css';
+import './EditarTema.css';
 
-export default function CrearTema() {
-  const { id: cursoId } = useParams<{ id: string }>();
+export default function EditarTema() {
+  const { temaId } = useParams<{ temaId: string }>();
   const [titulo, setTitulo] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,16 +30,15 @@ export default function CrearTema() {
 
     setLoading(true);
     try {
-      await apiFetch(`/api/temas?maestroId=${maestroId}`, {
-        method: 'POST',
+      await apiFetch(`/api/temas/${temaId}?maestroId=${maestroId}`, {
+        method: 'PUT',
         body: JSON.stringify({
-          titulo: titulo.trim(),
-          cursoId: Number(cursoId),
+          nuevoTitulo: titulo.trim()
         }),
       });
-      navigate(`/cursos/${cursoId}/temas`);
+      navigate(-1);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear el tema');
+      setError(err instanceof Error ? err.message : 'Error al editar el tema');
     } finally {
       setLoading(false);
     }
@@ -52,11 +51,11 @@ export default function CrearTema() {
       <main className="crear-tema-main">
         <div className="crear-tema-container">
           <div className="crear-tema-banner">
-            Bienvenido al creador de temas
+            Bienvenido al editor de temas
           </div>
 
           <div className="crear-tema-box">
-            <h1 className="crear-tema-title">Crear Nuevo Tema</h1>
+            <h1 className="crear-tema-title">Editar Tema</h1>
 
             {error && <div className="crear-tema-error">{error}</div>}
 
@@ -88,7 +87,7 @@ export default function CrearTema() {
                   className="pixel-btn-submit"
                   disabled={loading}
                 >
-                  {loading ? 'Creando...' : 'Crear Tema'}
+                  {loading ? 'Editando...' : 'Editar Tema'}
                 </button>
               </div>
             </form>
