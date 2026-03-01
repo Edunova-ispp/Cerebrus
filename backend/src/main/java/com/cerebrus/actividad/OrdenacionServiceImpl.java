@@ -15,4 +15,9 @@ public class OrdenacionServiceImpl implements OrdenacionService {
     public OrdenacionServiceImpl(OrdenacionRepository ordenacionRepository) {
         this.ordenacionRepository = ordenacionRepository;
     }
+
+    @Override 
+    public Ordenacion encontrarOrdenacionPorId(Long id) {
+        return ordenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
+    }
 }

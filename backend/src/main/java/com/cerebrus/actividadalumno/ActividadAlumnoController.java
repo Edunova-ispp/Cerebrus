@@ -78,8 +78,15 @@ public class ActividadAlumnoController {
 
     @PutMapping("/corregir-manualmente/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumno> corregirActividadAlumno(@PathVariable Long id, @RequestBody Integer nuevaNota, @RequestBody List<Long> nuevasCorreccionesRespuestasIds) {
-        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumno(id, nuevaNota, nuevasCorreccionesRespuestasIds);
+    public ResponseEntity<ActividadAlumno> corregirActividadAlumnoManual(@PathVariable Long id, @RequestBody Integer nuevaNota, @RequestBody List<Long> nuevasCorreccionesRespuestasIds) {
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoManual(id, nuevaNota, nuevasCorreccionesRespuestasIds);
+        return new ResponseEntity<>(actividadAlumnoActualizada, HttpStatus.OK);
+    }
+
+    @PutMapping("/corregir-automaticamente/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ActividadAlumno> corregirActividadAlumnoAutomaticamente(@PathVariable Long id, @RequestBody List<Long> respuestasIds) {
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamente(id, respuestasIds);
         return new ResponseEntity<>(actividadAlumnoActualizada, HttpStatus.OK);
     }
 

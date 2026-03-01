@@ -1,6 +1,8 @@
 package com.cerebrus.respuestaalumno;
 
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -8,10 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividadalumno.ActividadAlumno;
 import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
+import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
 import com.cerebrus.respuesta.Respuesta;
 import com.cerebrus.respuesta.RespuestaRepository;
+import com.cerebrus.respuesta.RespuestaService;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
@@ -26,16 +30,18 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     private final ActividadAlumnoRepository actividadAlumnoRepository;
     private final PreguntaRepository preguntaRepository;
     private final RespuestaRepository respuestaRepository;
+    private final RespuestaService respuestaService;
     private final UsuarioService usuarioService;
 
     @Autowired
     public RespAlumnoGeneralServiceImpl(RespAlumnoGeneralRepository respAlumnoGeneralRepository, 
         ActividadAlumnoRepository actividadAlumnoRepository, PreguntaRepository preguntaRepository, 
-        RespuestaRepository respuestaRepository, UsuarioService usuarioService) {
+        RespuestaRepository respuestaRepository, RespuestaService respuestaService, UsuarioService usuarioService) {
         this.respAlumnoGeneralRepository = respAlumnoGeneralRepository;
         this.actividadAlumnoRepository = actividadAlumnoRepository;
         this.preguntaRepository = preguntaRepository;
         this.respuestaRepository = respuestaRepository;
+        this.respuestaService = respuestaService;
         this.usuarioService = usuarioService;
     }
 
@@ -88,5 +94,24 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     public void deleteRespAlumnoGeneral(Long id) {
         RespAlumnoGeneral respAlumnoGeneral = respAlumnoGeneralRepository.findById(id).orElseThrow(() -> new RuntimeException("La respuesta del alumno no existe"));
         respAlumnoGeneralRepository.delete(respAlumnoGeneral);
+    }
+
+    @Override
+    public Boolean corregirRespuestaAlumnoGeneral(Long id) {
+        RespAlumnoGeneral respuestaAlumno = respAlumnoGeneralRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("RespuestaAlumnoGeneral", "id", id));
+        List<Respuesta> respuestas = respuestaService.encontrarRespuestasPorPreguntaId(respuestaAlumno.getPregunta().getId());
+        Boolean esCorrecta = false;
+
+        for (Respuesta r : respuestas) {
+            if (r.getRespuesta().equals(respuestaAlumno.getRespuesta()) && r.getCorrecta()) {
+                respuestaAlumno.setCorrecta(r.getCorrecta());
+                respAlumnoGeneralRepository.save(respuestaAlumno);
+                esCorrecta = r.getCorrecta();
+                break;
+            }
+        }
+
+        return esCorrecta;
     }
 }
