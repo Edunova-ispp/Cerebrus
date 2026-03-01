@@ -8,9 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
-import com.cerebrus.inscripcion.InscripcionRepository;
 import com.cerebrus.usuario.Alumno;
-import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 
 @Service

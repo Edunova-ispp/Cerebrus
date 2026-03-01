@@ -166,8 +166,8 @@ CREATE TABLE respuesta (
 CREATE TABLE punto_imagen (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     respuesta TEXT NOT NULL,
-    pixel_x INT NOT NULL,
-    pixel_y INT NOT NULL,
+    pixelx INT NOT NULL,
+    pixely INT NOT NULL,
     marcar_imagen_id BIGINT NOT NULL,
     FOREIGN KEY (marcar_imagen_id) REFERENCES marcar_imagen(id) ON DELETE CASCADE
 );
@@ -228,8 +228,8 @@ CREATE TABLE resp_alumno_ordenacion_valores (
 CREATE TABLE resp_alumno_punto_imagen (
     id BIGINT PRIMARY KEY,
     respuesta TEXT NOT NULL,
-    pixel_x INT NOT NULL,
-    pixel_y INT NOT NULL,
+    pixelx INT NOT NULL,
+    pixely INT NOT NULL,
     marcar_imagen_id BIGINT NOT NULL,
     FOREIGN KEY (id) REFERENCES respuesta_alumno(id) ON DELETE CASCADE
 );

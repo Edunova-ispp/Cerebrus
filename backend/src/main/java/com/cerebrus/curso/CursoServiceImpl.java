@@ -168,48 +168,6 @@ public class CursoServiceImpl implements CursoService {
         return cursoRepository.save(curso);
     }
 
-    @Override
-    public Map<Alumno, Integer> calcularTotalPuntosCursoPorAlumno(Curso curso) {
-        Usuario usuario = usuarioService.findCurrentUser();
-        if (!(usuario instanceof Maestro)){
-            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
-        }
-        
-        if(!curso.getMaestro().getId().equals(usuario.getId())){
-            throw new  AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
-        }
-
-        Map<Alumno, Integer> puntosPorAlumno = new HashMap<>();
-        List<Inscripcion> inscripciones = curso.getInscripciones();
-
-        for (Inscripcion inscripcion : inscripciones) {
-            Alumno alumno = inscripcion.getAlumno();
-            int totalPuntos = 0;
-            List<Tema> temas = curso.getTemas();
-            for (Tema tema : temas) {
-
-                List<Actividad> actividades = actividadRepository.findByTemaId(tema.getId());
-
-                for (Actividad actividad : actividades) {
-
-                    ActividadAlumno actividadAlumno = actividad.getActividadesAlumno().stream()
-                            .filter(aa -> aa.getAlumno().getId().equals(alumno.getId()))
-                            .findFirst()
-                            .orElse(null);
-
-                    if (actividadAlumno != null &&
-                        actividadAlumno.getEstadoActividad().equals(EstadoActividad.TERMINADA)) {
-                        totalPuntos += actividad.getPuntuacion();
-                    }
-                }
-            }
-
-            puntosPorAlumno.put(alumno, totalPuntos);
-        }
-        return puntosPorAlumno;
-        }
-
-
     public ProgresoDTO getProgreso(Long cursoId) {
         Curso curso = cursoRepository.findByID(cursoId);
         if (curso == null) {
