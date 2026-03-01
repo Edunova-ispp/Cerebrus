@@ -250,6 +250,84 @@ public class CursoServiceImpl implements CursoService {
         return new ProgresoDTO("SIN_EMPEZAR", 0);
     }
 
+    @Override
+    public Map<Integer,Integer> getNotaMediaPorActividad(Long cursoId) {
+        Curso curso = cursoRepository.findByID(cursoId);
+        if (curso == null) {
+            throw new RuntimeException("404 Not Found");
+        }
+
+        Usuario usuario = usuarioService.findCurrentUser();
+        if (!(usuario instanceof Maestro)) {
+            throw new RuntimeException("403 Forbidden");
+        }
+
+        List<Actividad> actividades = actividadRepository.findByCursoId(cursoId);
+        List<Integer> notasMedias=actividades.stream()
+                .map(actividad -> {
+                    List<ActividadAlumno> alumnosActividad = actividadAlumnoRepository.findByActividadId(actividad.getId());
+                    if (alumnosActividad.isEmpty()) {
+                        return 0;
+                    }
+                    double media = alumnosActividad.stream()
+                            .filter(aa -> aa.getEstadoActividad().equals(EstadoActividad.TERMINADA))
+                            .mapToInt(aa -> actividad.getPuntuacion())
+                            .average()
+                            .orElse(0);
+                    return (int) Math.round(media);
+                })
+                .toList();
+        Map<Integer,Integer> mapaNotasMedias = new HashMap<>();
+        for (int i = 0; i < actividades.size(); i++) {
+            mapaNotasMedias.put(i, notasMedias.get(i));
+        }
+        return mapaNotasMedias;
+    }
+
+    @Override
+    public Map<Actividad,Double> CalcularNotaMediaActividadMasAlta(Long cursoId) {
+        Curso curso = cursoRepository.findByID(cursoId);
+        
+
+        Map<Integer,Integer> notasMedias = getNotaMediaPorActividad(cursoId);
+        List<Actividad> actividades = actividadRepository.findByCursoId(cursoId);
+        double maxNotaMedia = notasMedias.values().stream()
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
+        Map<Actividad,Double> resultado = new HashMap<>();
+        for (int i = 0; i < actividades.size(); i++) {
+            if (notasMedias.get(i) == maxNotaMedia) {
+                resultado.put(actividades.get(i), (double) maxNotaMedia);
+            }
+        }
+        return resultado;
+
+        
+      
+        
+    }
+
+    @Override
+    public Map<Actividad,Double> CalcularNotaMediaActividadMasBaja(Long cursoId) {
+        Curso curso = cursoRepository.findByID(cursoId);
+       
+
+        Map<Integer,Integer> notasMedias = getNotaMediaPorActividad(cursoId);
+        List<Actividad> actividades = actividadRepository.findByCursoId(cursoId);
+        double minNotaMedia = notasMedias.values().stream()
+                .mapToInt(Integer::intValue)
+                .min()
+                .orElse(0);
+        Map<Actividad,Double> resultado = new HashMap<>();
+        for (int i = 0; i < actividades.size(); i++) {
+            if (notasMedias.get(i) == minNotaMedia) {
+                resultado.put(actividades.get(i), (double) minNotaMedia);
+            }
+        }
+        return resultado;
+    }
+
 }
 
 
