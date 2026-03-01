@@ -110,8 +110,8 @@ export default function CrearCurso() {
                 </div>
               )}
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="pixel-btn-submit"
                 disabled={loading}
               >
