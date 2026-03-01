@@ -1,0 +1,5 @@
+# Ignore environment variable files (secrets)
+.env
+.env.*
+!.env.example
+!.env.template

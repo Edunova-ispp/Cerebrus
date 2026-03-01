@@ -1,6 +1,5 @@
 package com.cerebrus.actividadalumno;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,4 +67,5 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         actividadAlumnoRepository.delete(actividadAlumno);
     }
+
 }
