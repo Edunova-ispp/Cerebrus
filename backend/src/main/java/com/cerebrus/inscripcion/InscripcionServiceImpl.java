@@ -38,13 +38,13 @@ public class InscripcionServiceImpl implements InscripcionService {
                 if (inscripcionRepository.findByAlumnoIdAndCursoId(alumno.getId(), cursoRepository.findByCodigo(codigoCurso).getId()) != null) {
                     throw new RuntimeException("400 Bad Request");
                 } else {
-            Inscripcion inscripcion = new Inscripcion();
-            inscripcion.setAlumno(alumno);
-            Curso curso=cursoRepository.findByCodigo(codigoCurso);
-            inscripcion.setCurso(curso);
-            inscripcion.setPuntos(0);
-            inscripcion.setFechaInscripcion(LocalDate.now());
-            return inscripcionRepository.save(inscripcion);
+                    Inscripcion inscripcion = new Inscripcion();
+                    inscripcion.setAlumno(alumno);
+                    Curso curso=cursoRepository.findByCodigo(codigoCurso);
+                    inscripcion.setCurso(curso);
+                    inscripcion.setPuntos(0);
+                    inscripcion.setFechaInscripcion(LocalDate.now());
+                    return inscripcionRepository.save(inscripcion);
                 }
             }
         } else {
