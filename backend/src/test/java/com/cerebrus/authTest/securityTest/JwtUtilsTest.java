@@ -43,7 +43,7 @@ class JwtUtilsTest {
                 7L,
                 "alumno1",
                 "pass",
-                List.of(new SimpleGrantedAuthority("ROLE_ALUMNO")));
+                List.of(new SimpleGrantedAuthority("ALUMNO")));
         when(authentication.getPrincipal()).thenReturn(principal);
 
         String token = jwtUtils.generateJwtToken(authentication);
@@ -62,7 +62,7 @@ class JwtUtilsTest {
 
         @SuppressWarnings("unchecked")
         List<String> authorities = (List<String>) claims.get("authorities");
-        assertThat(authorities).containsExactly("ROLE_ALUMNO");
+        assertThat(authorities).containsExactly("ALUMNO");
     }
 
     // Test para verificar que un token malformado no es válido
@@ -112,7 +112,7 @@ class JwtUtilsTest {
                 1L,
                 "usuario1",
                 "pass",
-                List.of(new SimpleGrantedAuthority("ROLE_USUARIO")));
+                List.of(new SimpleGrantedAuthority("USUARIO")));
         when(authentication.getPrincipal()).thenReturn(principal);
 
         String tokenConOtraFirma = jwtUtilsFirmador.generateJwtToken(authentication);
@@ -131,7 +131,7 @@ class JwtUtilsTest {
                 1L,
                 "usuario1",
                 "pass",
-                List.of(new SimpleGrantedAuthority("ROLE_USUARIO")));
+                List.of(new SimpleGrantedAuthority("USUARIO")));
         when(authentication.getPrincipal()).thenReturn(principal);
 
         String tokenExpirado = jwtUtils.generateJwtToken(authentication);
@@ -154,7 +154,7 @@ class JwtUtilsTest {
                 1L,
                 "usuario1",
                 "pass",
-                List.of(new SimpleGrantedAuthority("ROLE_USUARIO")));
+                List.of(new SimpleGrantedAuthority("USUARIO")));
         when(authentication.getPrincipal()).thenReturn(principal);
 
         String tokenConOtraFirma = jwtUtilsFirmador.generateJwtToken(authentication);
