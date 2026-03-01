@@ -7,6 +7,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.tema.Tema;
+import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
@@ -19,12 +22,14 @@ public class OrdenacionServiceImpl implements OrdenacionService {
 
     private final OrdenacionRepository ordenacionRepository;
     private final UsuarioService usuarioService;
+    private final TemaRepository temaRepository;
 
     @Autowired
     public OrdenacionServiceImpl(OrdenacionRepository ordenacionRepository,
-        UsuarioService usuarioService) {
+        UsuarioService usuarioService, TemaRepository temaRepository) {
         this.ordenacionRepository = ordenacionRepository;
         this.usuarioService = usuarioService;
+        this.temaRepository = temaRepository;
     }
 
     @Override
@@ -37,12 +42,15 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede crear actividades de ordenación");
         }
+
+        Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
         
         Ordenacion ordenacion = new Ordenacion();
         ordenacion.setTitulo(titulo);
         ordenacion.setDescripcion(descripcion);
         ordenacion.setPuntuacion(puntuacion);
         ordenacion.setImagen(imagen);
+        ordenacion.setTema(tema);
         if(respVisible.equals(Boolean.TRUE)){
             ordenacion.setRespVisible(true);
             ordenacion.setComentariosRespVisible(comentariosRespVisible);
@@ -77,6 +85,8 @@ public class OrdenacionServiceImpl implements OrdenacionService {
             throw new AccessDeniedException("Solo un maestro puede actualizar actividades de ordenación");
         }
 
+        Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
+
         Ordenacion ordenacion = ordenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
         ordenacion.setTitulo(titulo);
         ordenacion.setDescripcion(descripcion);
@@ -88,6 +98,7 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         } else {
             ordenacion.setComentariosRespVisible(null);
         }
+        ordenacion.setTema(tema);
         ordenacion.setPosicion(posicion);
         ordenacion.setValores(valores);
         ordenacion.setVersion(ordenacion.getVersion() + 1);
