@@ -1,4 +1,4 @@
-package com.cerebrus.curso;
+package com.cerebrus.cursoTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,6 +27,10 @@ import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividadalumno.ActividadAlumno;
 import com.cerebrus.actividadalumno.ActividadAlumnoProgreso;
 import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
+import com.cerebrus.curso.Curso;
+import com.cerebrus.curso.CursoRepository;
+import com.cerebrus.curso.CursoServiceImpl;
+import com.cerebrus.curso.ProgresoDTO;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.respuestaalumno.RespuestaAlumno;
 import com.cerebrus.tema.Tema;
