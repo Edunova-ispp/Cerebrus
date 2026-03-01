@@ -95,7 +95,7 @@ class AuthTokenFilterTest {
 				7L,
 				"alumno1",
 				"pass",
-				List.of(new SimpleGrantedAuthority("ROLE_ALUMNO")));
+				List.of(new SimpleGrantedAuthority("ALUMNO")));
 		when(userDetailsService.loadUserByUsername("alumno1")).thenReturn(userDetails);
 
 		authTokenFilter.doFilter(request, response, filterChain);
@@ -103,7 +103,7 @@ class AuthTokenFilterTest {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		assertThat(auth).isNotNull();
 		assertThat(auth.getPrincipal()).isSameAs(userDetails);
-		assertThat(auth.getAuthorities()).extracting(a -> a.getAuthority()).containsExactly("ROLE_ALUMNO");
+		assertThat(auth.getAuthorities()).extracting(a -> a.getAuthority()).containsExactly("ALUMNO");
 
 		verify(filterChain).doFilter(request, response);
 		verify(jwtUtils).validateJwtToken("token-valido");
