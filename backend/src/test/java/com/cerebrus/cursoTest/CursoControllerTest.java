@@ -1,4 +1,4 @@
-package com.cerebrus.curso;
+package com.cerebrus.cursoTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,6 +21,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.cerebrus.curso.Curso;
+import com.cerebrus.curso.CursoController;
+import com.cerebrus.curso.CursoServiceImpl;
+import com.cerebrus.curso.ProgresoDTO;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Maestro;
 
