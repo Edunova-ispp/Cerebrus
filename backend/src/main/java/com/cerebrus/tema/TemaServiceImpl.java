@@ -7,6 +7,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cerebrus.actividad.Actividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.CursoRepository;
@@ -14,6 +15,7 @@ import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.MaestroRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.actividad.ActividadRepository;;
 
 @Service
 @Transactional
@@ -24,14 +26,16 @@ public class TemaServiceImpl implements TemaService {
     private final CursoRepository cursoRepository;
     private final MaestroRepository maestroRepository;
     private final UsuarioService usuarioService;
+    private final ActividadRepository actividadRepository;
 
     @Autowired
-    public TemaServiceImpl(TemaRepository temaRepository, CursoRepository cursoRepository, MaestroRepository maestroRepository, CursoServiceImpl cursoService, UsuarioService usuarioService) {
+    public TemaServiceImpl(TemaRepository temaRepository, CursoRepository cursoRepository, MaestroRepository maestroRepository, CursoServiceImpl cursoService, UsuarioService usuarioService, ActividadRepository actividadRepository) {
         this.temaRepository = temaRepository;
         this.cursoRepository = cursoRepository;
         this.maestroRepository = maestroRepository;
         this.cursoService = cursoService;
         this.usuarioService = usuarioService;
+        this.actividadRepository = actividadRepository;
     }
 
     @Override
@@ -85,6 +89,22 @@ public class TemaServiceImpl implements TemaService {
             return temaRepository.findByCursoId(cursoId);
         } else {
             throw new AccessDeniedException("El usuario no es un maestro.");
+        }
+    }
+
+    @Override
+    public void eliminarTema(Long temaId) {
+        
+        Tema tema = temaRepository.findById(temaId)
+                .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado"));
+
+        Usuario usuario = usuarioService.findCurrentUser(); 
+        if(usuario instanceof Maestro && tema.getCurso().getMaestro().getId().equals(usuario.getId())){
+            List<Actividad> actividades = actividadRepository.findByTemaId(temaId);
+            actividades.forEach(actividad -> actividadRepository.delete(actividad));
+            temaRepository.delete(tema);
+        } else {
+            throw new IllegalArgumentException("El usuario no tiene permiso para eliminar este tema.");
         }
     }
 }

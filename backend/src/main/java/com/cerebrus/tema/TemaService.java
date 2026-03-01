@@ -11,4 +11,6 @@ public interface TemaService {
     Tema crearTema(String titulo, Long cursoId, Long maestroId);
 
     Tema renombrarTema(Long temaId, String nuevoTitulo, Long maestroId);
+
+    void eliminarTema(Long temaId);
 }
