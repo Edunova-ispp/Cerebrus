@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cerebrus.inscripcion.Inscripcion;
+import com.cerebrus.organizacion.Organizacion;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.usuario.Maestro;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -18,6 +19,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
@@ -55,12 +57,24 @@ public class Curso {
     @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Inscripcion> inscripciones = new ArrayList<>();
 
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organizacion_id", nullable = false)
+    private Organizacion organizacion;
+
+    @PrePersist
+    public void asignarOrganizacionAutomatica() {
+        if (this.maestro != null && this.maestro.getOrganizacion() != null) {
+            this.organizacion = this.maestro.getOrganizacion();
+        }
+    }
+
     // Constructores
     public Curso() {
     }
 
     public Curso(String titulo, String descripcion, String imagen, String codigo,
-                 Boolean visibilidad, Maestro maestro) {
+                Boolean visibilidad, Maestro maestro) {
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.imagen = imagen;
@@ -140,6 +154,14 @@ public class Curso {
 
     public void setInscripciones(List<Inscripcion> inscripciones) {
         this.inscripciones = inscripciones;
+    }
+
+    public Organizacion getOrganizacion() {
+        return organizacion;
+    }
+
+    public void setOrganizacion(Organizacion organizacion) {
+        this.organizacion = organizacion;
     }
 
     @Override
