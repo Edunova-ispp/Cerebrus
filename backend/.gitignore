@@ -34,3 +34,6 @@ build/
 
 # Variables de entorno y secretos
 .env
+.env.*
+!.env.example
+!.env.template
