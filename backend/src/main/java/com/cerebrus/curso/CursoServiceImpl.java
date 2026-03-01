@@ -50,8 +50,7 @@ public class CursoServiceImpl implements CursoService {
         // y que son visibles.
 
 
-        //TODO:obtener el usuario logueado, se ha asumido un metodo obtenerUsuarioLogueado().
-       
+        
         Usuario usuario = usuarioService.findCurrentUser(); 
         if (usuario instanceof Maestro) {
              return cursoRepository.findByMaestroId(usuario.getId());
@@ -75,7 +74,7 @@ public class CursoServiceImpl implements CursoService {
         if(curso==null){
             throw new RuntimeException("404 Not Found");
         }
-        //TODO:obtener el usuario logueado, se ha asumido un metodo obtenerUsuarioLogueado().
+       
         Usuario usuario = usuarioService.findCurrentUser(); 
         if(usuario instanceof Maestro){
             if(!curso.getMaestro().getId().equals(usuario.getId())){
