@@ -96,6 +96,7 @@ CREATE TABLE actividad (
     puntuacion INT NOT NULL,
     imagen VARCHAR(255),
     resp_visible BOOLEAN NOT NULL,
+    comentarios_resp_visible VARCHAR(255),
     posicion INT NOT NULL,
     version INT NOT NULL,
     tema_id BIGINT NOT NULL,

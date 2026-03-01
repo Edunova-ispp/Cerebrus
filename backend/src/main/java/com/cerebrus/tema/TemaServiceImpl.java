@@ -66,7 +66,7 @@ public class TemaServiceImpl implements TemaService {
     }
 
     @Override
-    public List<Tema> ObtenerTemasPorCursoAlumno(Integer cursoId) {
+    public List<Tema> ObtenerTemasPorCursoAlumno(Long cursoId) {
         //Esta funcion devuelve una lista con todos los temas de un curso, 
         // si el usuario está inscrito en el curso, si no lo está devuelve una excepcion 403 Forbidden.
         List<Curso> cursos = cursoService.ObtenerCursosUsuarioLogueado();
@@ -79,7 +79,7 @@ public class TemaServiceImpl implements TemaService {
     }
 
     @Override
-    public List<Tema> ObtenerTemasPorCursoMaestro(Integer cursoId) {
+    public List<Tema> ObtenerTemasPorCursoMaestro(Long cursoId) {
         Usuario usuario = usuarioService.findCurrentUser(); 
         if(usuario instanceof Maestro){
             return temaRepository.findByCursoId(cursoId);

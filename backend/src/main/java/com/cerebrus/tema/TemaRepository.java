@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
 public interface TemaRepository extends JpaRepository<Tema, Long> {
 
     @Query("SELECT t FROM Tema t WHERE t.curso.id = :cursoId")
-    List<Tema> findByCursoId(@Param("cursoId") Integer cursoId);
+    List<Tema> findByCursoId(@Param("cursoId") Long cursoId);
 
 }
