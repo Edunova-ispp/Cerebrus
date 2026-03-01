@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -156,6 +157,21 @@ public class CursoController {
             }
         }
     }
+
+    @DeleteMapping("/{id}")
+public ResponseEntity<Void> eliminarCurso(@PathVariable Long id) {
+    try {
+        cursoService.eliminarCurso(id);
+        return ResponseEntity.noContent().build();
+    } catch (AccessDeniedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    } catch (RuntimeException e) {
+        if (e.getMessage().equals("404 Not Found")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
 
    
 }

@@ -1,6 +1,7 @@
 .curso-card {
+  position: relative;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
   border: 4px solid #000;
   background: #FFF;
   cursor: pointer;
@@ -148,4 +149,30 @@
 
 .curso-card__toggle input:checked + .curso-card__toggle-slider::before {
   transform: translate(22px, -50%);
+}
+
+.curso-card__delete-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #c0392b;
+  color: white;
+  border: 3px solid #000;
+  border-radius: 4px;
+  width: 44px;
+  height: 28px;
+  font-size: 1rem;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.curso-card__delete-btn:hover {
+  background: #e74c3c;
+  transform: scale(1.1);
 }

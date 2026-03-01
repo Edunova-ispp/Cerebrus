@@ -162,10 +162,13 @@ export default function EditarCurso() {
               </div>
 
               {imagen && (
-                <div className="crear-curso-preview">
-                  <img src={imagen} alt="Vista previa del curso" />
-                </div>
-              )}
+  <div className="crear-curso-preview">
+    <img
+      src={imagen}
+      alt="Vista previa del curso"
+style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain', display: 'block', margin: '0 auto' }}    />
+  </div>
+    )}
 
               <button
                 type="submit"
@@ -173,6 +176,7 @@ export default function EditarCurso() {
               >
                 Guardar Cambios
               </button>
+              
             </form>
           </div>
         </div>
