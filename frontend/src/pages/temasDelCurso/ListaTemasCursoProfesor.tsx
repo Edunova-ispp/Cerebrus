@@ -51,6 +51,23 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
 
   const navigate = useNavigate();
 
+  const handleEliminarTema = async (temaId: number) => {
+    try {
+      await apiFetch(`/api/temas/${temaId}`, { method: 'DELETE' });
+      // Elimina el tema del estado local
+      setTemas(prev => {
+        const nuevaLista = prev.filter(t => t.id !== temaId);
+        // Si el tema borrado era el seleccionado, selecciona el primero
+        if (temaSeleccionado?.id === temaId) {
+          setTemaSeleccionado(nuevaLista[0] ?? null);
+        }
+        return nuevaLista;
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error al eliminar el tema");
+    }
+  };
+
   const actividades = temaSeleccionado?.actividades ?? [];
 
   return (
@@ -86,7 +103,9 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
                       <span className="ltp-item-titulo">{tema.titulo}</span>
                       <div className="ltp-item-acciones">
                         <button className="ltp-btn-icono" title="Editar" onClick={(e) => { e.stopPropagation(); navigate(`/cursos/${id ?? curso?.id}/temas/${tema.id}/editar`);}}>✏️</button>
-                        <button className="ltp-btn-icono" title="Borrar" onClick={(e) => { e.stopPropagation(); }}>🗑️</button>
+                        <button className="ltp-btn-icono" title="Borrar" onClick={(e) => { e.stopPropagation();
+                          handleEliminarTema(tema.id);
+                        }}>🗑️</button>
                       </div>
                     </div>
                   ))
@@ -95,7 +114,6 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
               <button className="ltp-btn-añadir" onClick={() => navigate(`/cursos/${id ?? curso?.id}/temas/crear`)}>+ Añadir tema</button>
             </div>
 
-            {/* Panel derecho: Actividades del tema seleccionado */}
             <div className="ltp-panel">
               <div className="ltp-lista">
                 {actividades.length === 0 ? (
