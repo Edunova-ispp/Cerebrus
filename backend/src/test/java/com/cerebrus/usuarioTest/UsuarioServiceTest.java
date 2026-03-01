@@ -130,7 +130,7 @@ class UsuarioServiceTest {
 
 		assertThatThrownBy(() -> usuarioService.findByUsername("missing", "missing@cerebrus.com"))
 				.isInstanceOf(ResourceNotFoundException.class)
-				.hasMessageContaining("Usuario not found");
+				.hasMessageContaining("No se ha encontrado una entidad del tipo Usuario con campo username or email: 'missing / missing@cerebrus.com'");
 	}
 
     // Test para verificar que el método findById devuelve el usuario encontrado por id
@@ -152,7 +152,7 @@ class UsuarioServiceTest {
 
 		assertThatThrownBy(() -> usuarioService.findById(404L))
 				.isInstanceOf(ResourceNotFoundException.class)
-				.hasMessageContaining("Usuario not found")
+				.hasMessageContaining("No se ha encontrado una entidad del tipo Usuario con campo id: '404'")
 				.hasMessageContaining("id");
 	}
 
@@ -192,7 +192,7 @@ class UsuarioServiceTest {
 
 		assertThatThrownBy(() -> usuarioService.findCurrentUser())
 				.isInstanceOf(ResourceNotFoundException.class)
-				.hasMessageContaining("Usuario not found")
+				.hasMessageContaining("No se ha encontrado una entidad del tipo Usuario con campo NombreUsuario: 'currentUser'")
 				.hasMessageContaining("NombreUsuario");
 	}
 
@@ -311,7 +311,7 @@ class UsuarioServiceTest {
 
 		assertThatThrownBy(() -> usuarioService.updateUser(incoming, 999L))
 				.isInstanceOf(ResourceNotFoundException.class)
-				.hasMessageContaining("Usuario not found")
+				.hasMessageContaining("No se ha encontrado una entidad del tipo Usuario con campo id: '999'")
 				.hasMessageContaining("id");
 		verify(usuarioRepository, never()).save(any());
 		verify(passwordEncoder, never()).encode(any());
@@ -336,7 +336,7 @@ class UsuarioServiceTest {
 
 		assertThatThrownBy(() -> usuarioService.deleteUser(1234L))
 				.isInstanceOf(ResourceNotFoundException.class)
-				.hasMessageContaining("Usuario not found")
+				.hasMessageContaining("No se ha encontrado una entidad del tipo Usuario con campo id: '1234'")
 				.hasMessageContaining("id");
 		verify(usuarioRepository, never()).delete(any());
 	}
