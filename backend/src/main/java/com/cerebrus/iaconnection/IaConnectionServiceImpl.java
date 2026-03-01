@@ -37,10 +37,10 @@ public class IaConnectionServiceImpl implements IaConnectionService {
        
     }
 
-    private final String apiKey = "AIzaSyCRLnqn2g-5Ovt9an-7yu1WnD-Uq7KMcUw";
+    @Value("${GOOGLE_API_KEY}") 
+    private String apiKey;
     // Usamos gemini-1.5-flash por su velocidad y gratuidad
-    private final String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
-
+    
     private static final String JSON_TEORIA = """
             {
             "tipo": "TEORICA",
@@ -166,7 +166,7 @@ public class IaConnectionServiceImpl implements IaConnectionService {
     
      @Override
     public String generarActividad(TipoAct tipoActividad, String prompt) {
-       
+       System.out.println("APIkey " + apiKey);
         Usuario usuario = usuarioService.findCurrentUser();
         if(!(usuario instanceof Maestro)){
             throw new IllegalArgumentException("403 Forbidden");
@@ -183,7 +183,8 @@ public class IaConnectionServiceImpl implements IaConnectionService {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
        
         try {
-            
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+
             ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
             
             
