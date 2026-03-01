@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -129,4 +128,53 @@ public class CursoController {
             }
         }
     }
+
+    public static class ActualizarCursoRequest {
+        @NotBlank(message = "El título no puede estar vacío")
+        private String titulo;
+
+        private String descripcion;
+        private String imagen;
+
+        public String getTitulo() { return titulo; }
+        public void setTitulo(String titulo) { this.titulo = titulo; }
+
+        public String getDescripcion() { return descripcion; }
+        public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+
+        public String getImagen() { return imagen; }
+        public void setImagen(String imagen) { this.imagen = imagen; }
+
+        public ActualizarCursoRequest() {}
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Curso> actualizarCurso(
+            @PathVariable Long id,
+            @RequestBody @Valid ActualizarCursoRequest request) {
+        try {
+            if (id == null || id <= 0) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            Curso cursoActualizado = cursoService.actualizarCurso(
+                    id,
+                    request.getTitulo(),
+                    request.getDescripcion(),
+                    request.getImagen()
+            );
+            return ResponseEntity.ok(cursoActualizado);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("404 Not Found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            } else if (e.getMessage().equals("403 Forbidden")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
+
+   
 }
