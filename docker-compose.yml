@@ -42,9 +42,9 @@ services:
       - "3000:80"
   
   mi-app-spring:
-  image: mi-usuario/mi-app:latest
-  ports:
-    - "8080:8080"
+    image: mi-usuario/mi-app:latest
+    ports:
+      - "8080:8080"
 
 volumes:
   dbdata:
