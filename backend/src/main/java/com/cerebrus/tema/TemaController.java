@@ -93,7 +93,8 @@ public ResponseEntity<TemaDTO> obtenerTemaPorId(@PathVariable Long temaId) {
         Tema tema = temaService.obtenerTemaPorId(temaId);
         // Aprovechamos tu lógica de Actividades para devolver el DTO completo
         List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
-        return ResponseEntity.ok(new TemaDTO(tema, actividades));
+        List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
+        return ResponseEntity.ok(new TemaDTO(tema, actividadesDTO));
     } catch (IllegalArgumentException e) {
         return ResponseEntity.notFound().build();
     }
