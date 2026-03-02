@@ -46,53 +46,45 @@ export default function CrearTema() {
   };
 
   return (
-    <div className="crear-tema-page">
+    <div className="crear-tema-page"> {/* Reutilizamos la clase de página */}
       <NavbarMisCursos />
 
       <main className="crear-tema-main">
-        <div className="crear-tema-container">
-          <div className="crear-tema-banner">
-            Bienvenido al creador de temas
-          </div>
+        {/* Botón Volver alineado a la izquierda */}
+        <button className="detalle-volver" onClick={() => navigate(-1)}>
+          ← Volver
+        </button>
 
-          <div className="crear-tema-box">
-            <h1 className="crear-tema-title">Crear Nuevo Tema</h1>
+        <h2 className="welcome-text">Bienvenido al creador de temas</h2>
 
-            {error && <div className="crear-tema-error">{error}</div>}
+        <div className="crear-tema-card">
+          <form onSubmit={handleSubmit} className="crear-tema-layout-simple">
+            <div className="input-group">
+              <label htmlFor="titulo">Título del tema</label>
+              <input
+                id="titulo"
+                type="text"
+                value={titulo}
+                onChange={(e) => setTitulo(e.target.value)}
+                className="pixel-input"
+                placeholder="Ej: Introducción a la programación..."
+                disabled={loading}
+                autoFocus
+              />
+            </div>
 
-            <form onSubmit={handleSubmit} className="crear-tema-form">
-              <div className="pixel-input-wrapper">
-                <label style={{color: '#000'}} htmlFor="titulo">Título del tema:</label>
-                <input
-                  id="titulo"
-                  type="text"
-                  value={titulo}
-                  onChange={(e) => setTitulo(e.target.value)}
-                  placeholder="Ingresa el título del tema"
-                  disabled={loading}
-                  autoFocus
-                />
-              </div>
+            {error && <p className="error-msg">{error}</p>}
 
-              <div className="crear-tema-actions">
-                <button
-                  type="button"
-                  className="pixel-btn-cancelar"
-                  onClick={() => navigate(-1)}
-                  disabled={loading}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="pixel-btn-submit"
-                  disabled={loading}
-                >
-                  {loading ? 'Creando...' : 'Crear Tema'}
-                </button>
-              </div>
-            </form>
-          </div>
+            <div className="crear-tema-actions-row">
+              <button
+                type="submit"
+                className="pixel-btn-submit-main"
+                disabled={loading}
+              >
+                {loading ? 'Creando...' : 'Crear Tema'}
+              </button>
+            </div>
+          </form>
         </div>
       </main>
     </div>

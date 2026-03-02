@@ -15,13 +15,13 @@ export default function DetalleCursoProfesor({ curso }: Props) {
       <NavbarMisCursos />
 
       <main className="detalle-profesor-main">
-        <button className="detalle-volver" onClick={() => navigate(`/misCursos`)}>
-          ← Volver
-        </button>
+  <button className="detalle-volver" onClick={() => navigate(`/misCursos`)}>
+    ← Volver
+  </button>
 
-        <div className="detalle-profesor-banner">
-          Código del curso: <strong>{curso.codigo}</strong>
-        </div>
+  <div className="detalle-profesor-banner1">
+    Código del curso: <strong>{curso.codigo}</strong>
+  </div>
 
         <div className="detalle-profesor-actions-container">
           
