@@ -1,5 +1,6 @@
 package com.cerebrus.curso;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -207,6 +208,54 @@ public class CursoServiceImpl implements CursoService {
 
         return new ProgresoDTO("SIN_EMPEZAR", 0);
     }
+
+    @Override
+    public List<Integer> getNotaMediaPorActividad(Long cursoId) {
+        Curso curso = cursoRepository.findByID(cursoId);
+        if (curso == null) {
+            throw new RuntimeException("404 Not Found");
+        }
+
+        Usuario usuario = usuarioService.findCurrentUser();
+        if (!(usuario instanceof Maestro)) {
+            throw new RuntimeException("403 Forbidden");
+        }
+        
+        List<ActividadAlumno> actividades = actividadAlumnoRepository.findByCursoID(cursoId);
+        System.out.println("Actividades encontradas para el curso ID " + cursoId + ": " + actividades.size());
+        List<Integer> notasMedias = new ArrayList<>();
+        List<Long> actividadesIds = new ArrayList<>();
+        for (ActividadAlumno aa : actividades) {
+            if (!actividadesIds.contains(aa.getActividad().getId())) {
+                actividadesIds.add(aa.getActividad().getId());
+            }
+        }
+        for (Long actividadId : actividadesIds) {
+        
+            int sumaNotas = 0;
+            int contadorNotas = 0;
+            for (ActividadAlumno aa : actividades) {
+                if (aa.getActividad().getId().equals(actividadId) && aa.getNota() != null) {
+                    sumaNotas += aa.getNota();
+                    contadorNotas++;
+                }
+            }
+            int notaMedia = contadorNotas > 0 ? sumaNotas / contadorNotas : 0;
+            notasMedias.add(notaMedia);
+        }
+
+        return notasMedias;
+        
+            }
+
+        
+        
+        
+        
+       
+        
+    
+
 
 }
 
