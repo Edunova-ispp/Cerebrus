@@ -48,4 +48,11 @@ public class ActividadServiceImpl implements ActividadService {
         //Esta funcion devuelve una lista con todas las actividades de un tema, 
         return actividadRepository.findByTemaId(temaId);
     }
+
+    @Override
+    public void deleteActividad(Long id) {
+        Actividad actividad = actividadRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada"));
+        actividadRepository.delete(actividad);
+    }
 }

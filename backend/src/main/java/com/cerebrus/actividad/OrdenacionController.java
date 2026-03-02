@@ -31,7 +31,7 @@ public class OrdenacionController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Ordenacion> crearActOrdenacion(@RequestBody @Valid Ordenacion ordenacion) {
+    public ResponseEntity<Long> crearActOrdenacion(@RequestBody @Valid Ordenacion ordenacion) {
         
         Ordenacion ordenacionCreada = ordenacionService.crearActOrdenacion(
             ordenacion.getTitulo(),
@@ -45,17 +45,23 @@ public class OrdenacionController {
             ordenacion.getValores()
         );
 
-        return new ResponseEntity<>(ordenacionCreada, HttpStatus.CREATED);
+        return new ResponseEntity<>(ordenacionCreada.getId(), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Ordenacion> readOrdenacion(@PathVariable Long id) {
+    public ResponseEntity<OrdenacionDTO> readOrdenacion(@PathVariable Long id) {
         Ordenacion ordenacion = ordenacionService.readOrdenacion(id);
-        return new ResponseEntity<>(ordenacion, HttpStatus.OK);
+        return new ResponseEntity<>(toDto(ordenacion), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/maestro")
+    public ResponseEntity<OrdenacionDTO> readOrdenacionMaestro(@PathVariable Long id) {
+        Ordenacion ordenacion = ordenacionService.readOrdenacionMaestro(id);
+        return new ResponseEntity<>(toDto(ordenacion), HttpStatus.OK);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Ordenacion> updateActOrdenacion(@PathVariable Long id,
+    public ResponseEntity<Long> updateActOrdenacion(@PathVariable Long id,
          @RequestBody @Valid Ordenacion ordenacion) {
         Ordenacion ordenacionActualizada = ordenacionService.updateActOrdenacion(
             id,
@@ -69,7 +75,7 @@ public class OrdenacionController {
             ordenacion.getPosicion(),
             ordenacion.getValores()
         );
-        return new ResponseEntity<>(ordenacionActualizada, HttpStatus.OK);
+        return new ResponseEntity<>(ordenacionActualizada.getId(), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -77,5 +83,20 @@ public class OrdenacionController {
     public ResponseEntity<Void> deleteActOrdenacion(@PathVariable Long id) {
         ordenacionService.deleteActOrdenacion(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    private static OrdenacionDTO toDto(Ordenacion ordenacion) {
+        return new OrdenacionDTO(
+            ordenacion.getId(),
+            ordenacion.getTitulo(),
+            ordenacion.getDescripcion(),
+            ordenacion.getPuntuacion(),
+            ordenacion.getImagen(),
+            ordenacion.getRespVisible(),
+            ordenacion.getComentariosRespVisible(),
+            ordenacion.getPosicion(),
+            ordenacion.getTema() == null ? null : ordenacion.getTema().getId(),
+            ordenacion.getValores()
+        );
     }
 }

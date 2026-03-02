@@ -7,6 +7,7 @@ public interface OrdenacionService {
         Integer puntuacion, String imagen, Long temaId, Boolean respVisible, 
         String comentariosRespVisible, Integer posicion, List<String> valores);
     Ordenacion readOrdenacion(Long id);
+    Ordenacion readOrdenacionMaestro(Long id);
     Ordenacion updateActOrdenacion(Long id, String titulo, String descripcion, 
         Integer puntuacion, String imagen, Long temaId, Boolean respVisible, 
         String comentariosRespVisible, Integer posicion, List<String> valores);

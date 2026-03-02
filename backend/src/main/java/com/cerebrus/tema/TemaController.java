@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadService;
+import com.cerebrus.actividad.ActividadDTO;
 
 @RestController
 @RequestMapping("/api/temas")
@@ -92,7 +93,8 @@ public ResponseEntity<TemaDTO> obtenerTemaPorId(@PathVariable Long temaId) {
         Tema tema = temaService.obtenerTemaPorId(temaId);
         // Aprovechamos tu lógica de Actividades para devolver el DTO completo
         List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
-        return ResponseEntity.ok(new TemaDTO(tema, actividades));
+        List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
+        return ResponseEntity.ok(new TemaDTO(tema, actividadesDTO));
     } catch (IllegalArgumentException e) {
         return ResponseEntity.notFound().build();
     }
@@ -103,7 +105,8 @@ public ResponseEntity<TemaDTO> obtenerTemaPorId(@PathVariable Long temaId) {
         List<Tema> temas = temaService.ObtenerTemasPorCursoAlumno(cursoId);
         List<TemaDTO> temasDTO = temas.stream().map(tema -> {
             List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
-            return new TemaDTO(tema, actividades);
+            List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
+            return new TemaDTO(tema, actividadesDTO);
         }).toList();
         return ResponseEntity.ok(temasDTO);
     }
@@ -113,7 +116,8 @@ public ResponseEntity<TemaDTO> obtenerTemaPorId(@PathVariable Long temaId) {
         List<Tema> temas = temaService.ObtenerTemasPorCursoMaestro(cursoId);
         List<TemaDTO> temasDTO = temas.stream().map(tema -> {
             List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
-            return new TemaDTO(tema, actividades);
+            List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
+            return new TemaDTO(tema, actividadesDTO);
         }).toList();
         return ResponseEntity.ok(temasDTO);
     }

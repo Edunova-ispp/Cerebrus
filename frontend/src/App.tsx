@@ -15,6 +15,8 @@ import Placeholder from "./pages/placeholder/placeholder";
 import ListaTemasCursoProfesor from "./pages/temasDelCurso/ListaTemasCursoProfesor";
 import CrearTema from "./pages/crearTema/CrearTema";
 import EditarTema from "./pages/editarTema/EditarTema";
+import EditarActividad from "./pages/editarActividad/EditarActividad";
+import OrdenacionAlumno from "./pages/ordenacionAlumno/OrdenacionAlumno";
 import MediasCurso from "./pages/estadisticasCurso/MediasCurso";
 
 function App() {
@@ -33,10 +35,14 @@ function App() {
       <Route path="/cursos/:id/temas"    element={<ListaTemasCursoProfesor />} />
       <Route path="/cursos/:id/temas/crear" element={<CrearTema />} />
       <Route path="/cursos/:id/temas/:temaId/editar" element={<EditarTema />} />
+      <Route path="/cursos/:id/temas/:temaId/actividades/:actividadId/editar" element={<EditarActividad />} />
       <Route path="/auth/login"    element={<LoginPage />} />
       <Route path="/auth/register"    element={<RegisterPage />} />
       <Route path="/auth/logout"    element={<LogoutPage />} />
       <Route path="/cursos/:id/temas/:temaId/actividades/crear" element={<CrearActividad />} />
+
+      {/* Alumno: resolver actividad de ordenación */}
+      <Route path="/ordenaciones/:ordenacionId/alumno" element={<OrdenacionAlumno />} />
       <Route path="/estadisticas/:id" element={<EstadisticasCurso />} />
       <Route path="/medias/:id" element={<MediasCurso />} />
     </Routes>

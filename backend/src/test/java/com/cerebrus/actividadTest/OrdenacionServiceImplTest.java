@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,9 @@ import org.springframework.security.access.AccessDeniedException;
 import com.cerebrus.actividad.Ordenacion;
 import com.cerebrus.actividad.OrdenacionRepository;
 import com.cerebrus.actividad.OrdenacionServiceImpl;
+import com.cerebrus.curso.Curso;
+import com.cerebrus.tema.Tema;
+import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
@@ -33,6 +37,9 @@ class OrdenacionServiceImplTest {
     private OrdenacionRepository ordenacionRepository;
 
     @Mock
+    private TemaRepository temaRepository;
+
+    @Mock
     private UsuarioService usuarioService;
 
     @InjectMocks
@@ -42,11 +49,27 @@ class OrdenacionServiceImplTest {
     private Usuario usuarioNoMaestro;
     private Ordenacion ordenacion;
     private List<String> valores;
+    private Tema tema;
 
     @BeforeEach
     void setUp() {
         maestro = new Maestro();
         usuarioNoMaestro = new Usuario() {};
+
+        // Tema de prueba existente (necesario porque el servicio valida que temaId exista)
+        Curso curso = new Curso();
+        curso.setId(1L);
+        curso.setTitulo("Curso test");
+        curso.setCodigo("COD-TEST");
+        curso.setVisibilidad(true);
+
+        tema = new Tema();
+        tema.setId(1L);
+        tema.setTitulo("Tema test");
+        tema.setCurso(curso);
+
+        // Hay tests que no tocan TemaRepository (read/delete/access denied), así que este stub debe ser lenient.
+        lenient().when(temaRepository.findById(1L)).thenReturn(Optional.of(tema));
 
         valores = new ArrayList<>(List.of("Primero", "Segundo", "Tercero"));
 
