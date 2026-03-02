@@ -1,10 +1,13 @@
 package com.cerebrus.actividadalumno;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.List;
 
 import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +23,8 @@ import com.cerebrus.respuestaalumno.RespAlumnoOrdenacionService;
 import com.cerebrus.respuestaalumno.RespuestaAlumno;
 import com.cerebrus.respuestaalumno.RespuestaAlumnoService;
 import com.cerebrus.usuario.AlumnoRepository;
+import com.cerebrus.usuario.Usuario;
+import com.cerebrus.usuario.UsuarioService;
 
 @Service
 @Transactional
@@ -32,11 +37,13 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     private final RespAlumnoGeneralService respAlumnoGeneralService;
     private final OrdenacionService ordenacionService; 
     private final RespAlumnoOrdenacionService respAlumnoOrdenacionService;
+    private final UsuarioService usuarioService;
 
     @Autowired
     public ActividadAlumnoServiceImpl(ActividadAlumnoRepository actividadAlumnoRepository, 
         ActividadRepository actividadRepository, AlumnoRepository alumnoRepository, RespuestaAlumnoService respuestaAlumnoService,
-        RespAlumnoGeneralService respAlumnoGeneralService, OrdenacionService ordenacionService, RespAlumnoOrdenacionService respAlumnoOrdenacionService) {
+        RespAlumnoGeneralService respAlumnoGeneralService, OrdenacionService ordenacionService, 
+        RespAlumnoOrdenacionService respAlumnoOrdenacionService, UsuarioService usuarioService) {
         this.actividadAlumnoRepository = actividadAlumnoRepository;
         this.actividadRepository = actividadRepository;
         this.alumnoRepository = alumnoRepository;
@@ -44,18 +51,26 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         this.respAlumnoGeneralService = respAlumnoGeneralService;
         this.ordenacionService = ordenacionService;
         this.respAlumnoOrdenacionService = respAlumnoOrdenacionService;
+        this.usuarioService = usuarioService;
     }
 
     @Override
     @Transactional
     public ActividadAlumno crearActividadAlumno(Integer tiempo, Integer puntuacion, LocalDateTime inicio,
         LocalDateTime acabada, Integer nota, Integer numAbandonos, Long alumnoId, Long actId) {
+
+        // Idempotente: si ya existe la pareja (alumno, actividad), devolvemos la existente.
+        Optional<ActividadAlumno> existing = actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumnoId, actId);
+        if (existing.isPresent()) {
+            return existing.get();
+        }
         
         Actividad actividad = actividadRepository.findById(actId).orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
         Alumno alumno = alumnoRepository.findById(alumnoId).orElseThrow(() -> new ResourceNotFoundException("El alumno no existe"));
 
         ActividadAlumno actividadAlumno = new ActividadAlumno(tiempo, puntuacion, 
             inicio, acabada, nota, numAbandonos, alumno, actividad);
+
         return actividadAlumnoRepository.save(actividadAlumno);
     }
 
@@ -63,6 +78,29 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     @Transactional(readOnly = true)
     public ActividadAlumno readActividadAlumno(Long id) {
         return actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<ActividadAlumno> readActividadAlumnoByAlumnoIdAndActividadId(Long alumnoId, Long actividadId) {
+        return actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumnoId, actividadId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Integer ensureActividadAlumno(Long actividadId) {
+        // Devuelve 1 si existe ActividadAlumno para el alumno autenticado y actividadId; si no 0.
+        // No debe lanzar error si no existe.
+        try {
+            Usuario current = usuarioService.findCurrentUser();
+            if (current == null || current.getId() == null) {
+                return 0;
+            }
+            Long alumnoId = current.getId();
+            return actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumnoId, actividadId).isPresent() ? 1 : 0;
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     @Override
@@ -84,6 +122,32 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     public void deleteActividadAlumno(Long id) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         actividadAlumnoRepository.delete(actividadAlumno);
+    }
+
+    @Override
+    @Transactional
+    public ActividadAlumno abandonarActividadAlumno(Long actividadAlumnoId) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede abandonar su actividad");
+        }
+
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actividadAlumnoId)
+            .orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
+
+        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
+            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes modificar una ActividadAlumno que no es tuya");
+        }
+
+        // Si ya está acabada, no contamos abandono.
+        if (actividadAlumno.getEstadoActividad() == EstadoActividad.TERMINADA) {
+            return actividadAlumno;
+        }
+
+        Integer prev = actividadAlumno.getNumAbandonos() == null ? 0 : actividadAlumno.getNumAbandonos();
+        actividadAlumno.setNumAbandonos(prev + 1);
+        return actividadAlumnoRepository.save(actividadAlumno);
     }
 
     @Override
@@ -185,4 +249,5 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         actividadAlumno.setPuntuacion(puntuacionFinal);
         actividadAlumno.setNota(notaFinal);
     }
+  
 }

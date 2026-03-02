@@ -54,8 +54,9 @@ public class RespAlumnoOrdenacionController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<RespAlumnoOrdenacion> readRespAlumnoOrdenacion(@PathVariable Long id) {
+    public ResponseEntity<RespAlumnoOrdenacionDTO> readRespAlumnoOrdenacion(@PathVariable Long id) {
         RespAlumnoOrdenacion respAlumnoOrdenacion = respAlumnoOrdenacionService.readRespAlumnoOrdenacion(id);
-        return new ResponseEntity<>(respAlumnoOrdenacion, HttpStatus.OK);
+        RespAlumnoOrdenacionDTO dto = new RespAlumnoOrdenacionDTO(respAlumnoOrdenacion.getId(), respAlumnoOrdenacion.getCorrecta());
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 }
