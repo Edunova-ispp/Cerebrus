@@ -1,5 +1,7 @@
 package com.cerebrus.actividadalumno;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -73,4 +75,35 @@ public class ActividadAlumnoController {
         actividadAlumnoService.deleteActividadAlumno(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/corregir-manualmente/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoManual(@PathVariable Long id, @RequestBody CorreccionManualDTO correccionManualDTO) {
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoManual(id, correccionManualDTO.getNuevaNota(), correccionManualDTO.getNuevasCorreccionesRespuestasIds());
+        ActividadAlumnoDTO actividadAlumnoDTO = new ActividadAlumnoDTO(
+            actividadAlumnoActualizada.getTiempo(),
+            actividadAlumnoActualizada.getPuntuacion(),
+            actividadAlumnoActualizada.getNota(),
+            actividadAlumnoActualizada.getNumAbandonos(),
+            actividadAlumnoActualizada.getAlumno().getId(),
+            actividadAlumnoActualizada.getActividad().getId()
+        );
+        return new ResponseEntity<>(actividadAlumnoDTO, HttpStatus.OK);
+    }
+
+    @PutMapping("/corregir-automaticamente/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoAutomaticamente(@PathVariable Long id, @RequestBody List<Long> respuestasIds) {
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamente(id, respuestasIds);
+        ActividadAlumnoDTO actividadAlumnoDTO = new ActividadAlumnoDTO(
+            actividadAlumnoActualizada.getTiempo(),
+            actividadAlumnoActualizada.getPuntuacion(),
+            actividadAlumnoActualizada.getNota(),
+            actividadAlumnoActualizada.getNumAbandonos(),
+            actividadAlumnoActualizada.getAlumno().getId(),
+            actividadAlumnoActualizada.getActividad().getId()
+        );
+        return new ResponseEntity<>(actividadAlumnoDTO, HttpStatus.OK);
+    }
+
 }

@@ -11,4 +11,6 @@ public interface OrdenacionService {
         Integer puntuacion, String imagen, Long temaId, Boolean respVisible, 
         String comentariosRespVisible, Integer posicion, List<String> valores);
     void deleteActOrdenacion(Long id);
+    Ordenacion encontrarOrdenacionPorId(Long id);
+
 }

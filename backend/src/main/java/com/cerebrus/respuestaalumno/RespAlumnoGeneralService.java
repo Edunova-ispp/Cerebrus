@@ -5,4 +5,5 @@ public interface RespAlumnoGeneralService {
     RespAlumnoGeneral readRespAlumnoGeneral(Long id);
     RespAlumnoGeneral updateRespAlumnoGeneral(Long id, Boolean correcta, Long actAlumnoId, String respuesta, Long preguntaId);
     void deleteRespAlumnoGeneral(Long id);
+    Boolean corregirRespuestaAlumnoGeneral(Long id);
 }
