@@ -9,6 +9,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mariadb://db:3306/cerebrus
       SPRING_DATASOURCE_USERNAME: cerebrus
       SPRING_DATASOURCE_PASSWORD: cerebrus
+      GOOGLE_API_KEY: ${GEMINI_API_KEY}
       # si tu app usa estas vars en perfil docker, también las dejamos:
       DB_URL: jdbc:mariadb://db:3306/cerebrus
       DB_USER: cerebrus
@@ -25,3 +26,5 @@ services:
     volumes:
       - ./frontend:/app
     command: sh -lc "npm ci && npm test --if-present"
+
+      

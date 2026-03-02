@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cerebrus.suscripcion.Suscripcion;
-import com.cerebrus.usuario.Director;
 import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 

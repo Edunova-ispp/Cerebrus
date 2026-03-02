@@ -5,5 +5,6 @@ import com.cerebrus.TipoAct;
 public interface IaConnectionService {
     
     String generarMockActividad(TipoAct tipoActividad, String prompt);
+    String generarActividad(TipoAct tipoActividad, String prompt);
 
 }

@@ -8,9 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
-import com.cerebrus.inscripcion.InscripcionRepository;
 import com.cerebrus.usuario.Alumno;
-import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 
 @Service
@@ -40,13 +38,13 @@ public class InscripcionServiceImpl implements InscripcionService {
                 if (inscripcionRepository.findByAlumnoIdAndCursoId(alumno.getId(), cursoRepository.findByCodigo(codigoCurso).getId()) != null) {
                     throw new RuntimeException("400 Bad Request");
                 } else {
-            Inscripcion inscripcion = new Inscripcion();
-            inscripcion.setAlumno(alumno);
-            Curso curso=cursoRepository.findByCodigo(codigoCurso);
-            inscripcion.setCurso(curso);
-            inscripcion.setPuntos(0);
-            inscripcion.setFechaInscripcion(LocalDate.now());
-            return inscripcionRepository.save(inscripcion);
+                    Inscripcion inscripcion = new Inscripcion();
+                    inscripcion.setAlumno(alumno);
+                    Curso curso=cursoRepository.findByCodigo(codigoCurso);
+                    inscripcion.setCurso(curso);
+                    inscripcion.setPuntos(0);
+                    inscripcion.setFechaInscripcion(LocalDate.now());
+                    return inscripcionRepository.save(inscripcion);
                 }
             }
         } else {

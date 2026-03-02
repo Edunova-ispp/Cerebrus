@@ -37,14 +37,14 @@ public class UserDetailsImpl implements UserDetails {
 
     public static UserDetailsImpl build(Usuario user) {
         
-        String nombreRol = "ROLE_USUARIO"; 
+        String nombreRol = "USUARIO"; 
 
         if (user instanceof Alumno) {
-            nombreRol = "ROLE_ALUMNO";
+            nombreRol = "ALUMNO";
         } else if (user instanceof Maestro) {
-            nombreRol = "ROLE_MAESTRO";
+            nombreRol = "MAESTRO";
         } else if (user instanceof Director) {
-            nombreRol = "ROLE_DIRECTOR";
+            nombreRol = "DIRECTOR";
         }
 
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(nombreRol));

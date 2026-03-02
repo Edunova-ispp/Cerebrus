@@ -31,6 +31,7 @@ import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.ProgresoDTO;
+import com.cerebrus.estadisticas.EstadisticasMaestroServiceImpl;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.respuestaalumno.RespuestaAlumno;
 import com.cerebrus.tema.Tema;
@@ -47,6 +48,9 @@ class CursoServiceImplTest {
 
     @Mock
     private UsuarioService usuarioService;
+
+    @Mock
+    private EstadisticasMaestroServiceImpl estadisticasMaestroService;
 
     @Mock
     private ActividadAlumnoRepository actividadAlumnoRepository;
@@ -389,78 +393,6 @@ class CursoServiceImplTest {
                 .hasMessage("Solo el propietario del curso puede actualizarlo");
 
         verify(cursoRepository, never()).save(any());
-    }
-
-    // -------------------------------------------------------
-    // calcularTotalPuntosCursoPorAlumno
-    // -------------------------------------------------------
-
-    // Test para verificar que calcularTotalPuntosCursoPorAlumno retorna mapa vacío cuando el curso no tiene inscripciones
-    @Test
-    void calcularTotalPuntosCursoPorAlumno_sinInscripciones_retornaMapaVacio() {
-        curso.setInscripciones(new ArrayList<>());
-        when(usuarioService.findCurrentUser()).thenReturn(maestro);
-
-        Map<Alumno, Integer> resultado = cursoService.calcularTotalPuntosCursoPorAlumno(curso);
-
-        assertThat(resultado).isEmpty();
-    }
-
-    // Test para verificar que calcularTotalPuntosCursoPorAlumno retorna 0 puntos cuando el alumno no tiene actividades terminadas
-    @Test
-    void calcularTotalPuntosCursoPorAlumno_alumnoSinActividadesTerminadas_retornaCeroPuntos() {
-        Inscripcion inscripcion = new Inscripcion(0, LocalDate.now(), alumno, curso);
-        curso.setInscripciones(List.of(inscripcion));
-        curso.setTemas(new ArrayList<>());
-        when(usuarioService.findCurrentUser()).thenReturn(maestro);
-
-        Map<Alumno, Integer> resultado = cursoService.calcularTotalPuntosCursoPorAlumno(curso);
-
-        assertThat(resultado).containsEntry(alumno, 0);
-    }
-
-    // Test para verificar que calcularTotalPuntosCursoPorAlumno suma correctamente los puntos de actividades terminadas
-    // getEstadoActividad() es calculado: para que devuelva TERMINADA necesita respuestasAlumno con última respuesta correcta
-    @Test
-    void calcularTotalPuntosCursoPorAlumno_actividadesTerminadas_sumaPuntosCorrectamente() {
-        Actividad actividad = crearActividad(50);
-        ActividadAlumno actividadAlumno = crearActividadAlumnoTerminada(alumno);
-        actividad.setActividadesAlumno(List.of(actividadAlumno));
-
-        Tema tema = new Tema();
-        tema.setId(1L);
-
-        Inscripcion inscripcion = new Inscripcion(0, LocalDate.now(), alumno, curso);
-        curso.setInscripciones(List.of(inscripcion));
-        curso.setTemas(List.of(tema));
-
-        when(usuarioService.findCurrentUser()).thenReturn(maestro);
-        when(actividadRepository.findByTemaId(1L)).thenReturn(List.of(actividad));
-
-        Map<Alumno, Integer> resultado = cursoService.calcularTotalPuntosCursoPorAlumno(curso);
-
-        assertThat(resultado).containsEntry(alumno, 50);
-    }
-
-    // Test para verificar que calcularTotalPuntosCursoPorAlumno lanza AccessDeniedException cuando el usuario no es Maestro
-    @Test
-    void calcularTotalPuntosCursoPorAlumno_usuarioNoMaestro_lanzaAccessDeniedException() {
-        when(usuarioService.findCurrentUser()).thenReturn(alumno);
-
-        assertThatThrownBy(() -> cursoService.calcularTotalPuntosCursoPorAlumno(curso))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("Solo un maestro puede visualizar los puntos de los alumnos");
-    }
-
-    // Test para verificar que calcularTotalPuntosCursoPorAlumno lanza AccessDeniedException cuando el maestro no es propietario
-    @Test
-    void calcularTotalPuntosCursoPorAlumno_maestroNoPropietario_lanzaAccessDeniedException() {
-        Maestro otroMaestro = crearMaestro(99L);
-        when(usuarioService.findCurrentUser()).thenReturn(otroMaestro);
-
-        assertThatThrownBy(() -> cursoService.calcularTotalPuntosCursoPorAlumno(curso))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
     }
 
     // -------------------------------------------------------

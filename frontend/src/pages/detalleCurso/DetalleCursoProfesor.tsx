@@ -15,7 +15,7 @@ export default function DetalleCursoProfesor({ curso }: Props) {
       <NavbarMisCursos />
 
       <main className="detalle-profesor-main">
-        <button className="detalle-volver" onClick={() => navigate(-1)}>
+        <button className="detalle-volver" onClick={() => navigate(`/misCursos`)}>
           ← Volver
         </button>
 
@@ -24,7 +24,14 @@ export default function DetalleCursoProfesor({ curso }: Props) {
         </div>
 
         <div className="detalle-profesor-row">
-          <div className="detalle-placeholder-box">Mapa del curso</div>
+          <div className="detalle-placeholder-box">
+            <button
+            className="detalle-editar-btn"
+            onClick={() => navigate(`/cursos/${curso.id}/temas`)}
+          >
+            Mapa del curso
+          </button>
+          </div>
           <div className="detalle-placeholder-box">Estadísticas</div>
         </div>
 

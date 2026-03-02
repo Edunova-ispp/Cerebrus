@@ -48,25 +48,6 @@ public class CursoController {
         }
     }
 
-    @GetMapping("/{id}/puntos")
-    public ResponseEntity<Map<Alumno, Integer>> obtenerPuntosCurso(@PathVariable Long id) {
-        try {
-            Curso curso = cursoService.getCursoById(id);
-            Map<Alumno, Integer> puntosPorAlumno = cursoService.calcularTotalPuntosCursoPorAlumno(curso);
-            return ResponseEntity.ok(puntosPorAlumno);
-        } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (RuntimeException e) {
-            if (e.getMessage().equals("404 Not Found")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            } else if (e.getMessage().equals("403 Forbidden")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
-        }
-    }
-
     public static class CrearCursoRequest {
 
         @NotBlank

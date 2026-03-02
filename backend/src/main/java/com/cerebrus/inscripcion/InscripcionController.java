@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cerebrus.inscripcion.InscripcionService;
 
 @RestController
 @RequestMapping("/api/inscripciones")
@@ -24,19 +23,21 @@ public class InscripcionController {
     }
 
     @PostMapping("/inscribe")
-    public ResponseEntity<Inscripcion> inscribirAlumno(@RequestParam String codigoCurso) {
-         try {
-            return ResponseEntity.ok(inscripcionService.CrearInscripcion(codigoCurso));
+    public ResponseEntity<String> inscribirAlumno(@RequestParam String codigoCurso) {
+        try {
+            inscripcionService.CrearInscripcion(codigoCurso);
+            
+            return ResponseEntity.ok("¡Alumno inscrito correctamente en el curso!");
+            
         } catch (RuntimeException e) {
             if (e.getMessage().equals("404 Not Found")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("El curso no existe");
             } else if (e.getMessage().equals("400 Bad Request")) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El alumno ya está inscrito en este curso");
             } else if(e.getMessage().equals("401 Unauthorized")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
-            }else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No autorizado");
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno");
             }
         }
     }

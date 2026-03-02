@@ -136,7 +136,7 @@ class AuthControllerTest {
 
 		Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
 		UserDetailsImpl principal = new UserDetailsImpl(7L, "alumno1", "pass",
-				List.of(new SimpleGrantedAuthority("ROLE_ALUMNO")));
+				List.of(new SimpleGrantedAuthority("ALUMNO")));
 
 		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
 				.thenReturn(authentication);
@@ -158,7 +158,7 @@ class AuthControllerTest {
 		assertThat(body.getToken()).isEqualTo("jwt-token");
 		assertThat(body.getId()).isEqualTo(7L);
 		assertThat(body.getUsername()).isEqualTo("alumno1");
-		assertThat(body.getRoles()).containsExactly("ROLE_ALUMNO");
+		assertThat(body.getRoles()).containsExactly("ALUMNO");
 		assertThat(body.getType()).isEqualTo("Bearer");
 	}
 

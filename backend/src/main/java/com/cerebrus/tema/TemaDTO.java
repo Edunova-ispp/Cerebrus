@@ -1,11 +1,7 @@
 package com.cerebrus.tema;
 
 import java.util.List;
-
 import com.cerebrus.actividad.Actividad;
-import com.cerebrus.curso.Curso;
-
-import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,21 +11,22 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TemaDTO {
     
-    @Id
-    private Long id;
+    private Long id; 
 
     private String titulo;
 
-    private Curso curso;
+    private Long cursoId; 
 
     private List<Actividad> actividades;
 
     public TemaDTO(Tema tema, List<Actividad> actividades) {
         this.id = tema.getId();
         this.titulo = tema.getTitulo();
-        this.curso = tema.getCurso();
+        
+        if (tema.getCurso() != null) {
+            this.cursoId = tema.getCurso().getId();
+        }
+        
         this.actividades = actividades;
     }
-
-    
 }

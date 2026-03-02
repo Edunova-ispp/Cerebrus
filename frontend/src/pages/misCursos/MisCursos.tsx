@@ -73,8 +73,8 @@ export default function MisCursos() {
       setJoinSuccess("¡Te has unido al curso correctamente!");
       setCodigoCurso("");
       await loadCursos();
-    } catch {
-      setJoinError("No se pudo unir al curso. Revisa el código.");
+    } catch (error) {
+      setJoinError("No se pudo realizar la inscripción al curso. Revisa el código.");
     } finally {
       setJoinLoading(false);
     }

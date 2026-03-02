@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -85,8 +86,8 @@ public class TemaController {
         }
     }
 
-    @GetMapping("/curso/{cursoId}")
-    public ResponseEntity<List<TemaDTO>> ObtenerTemasPorCursoAlumno(@PathVariable Integer cursoId) {
+    @GetMapping("/curso/{cursoId}/alumno")
+    public ResponseEntity<List<TemaDTO>> ObtenerTemasPorCursoAlumno(@PathVariable Long cursoId) {
         List<Tema> temas = temaService.ObtenerTemasPorCursoAlumno(cursoId);
         List<TemaDTO> temasDTO = temas.stream().map(tema -> {
             List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
@@ -94,4 +95,25 @@ public class TemaController {
         }).toList();
         return ResponseEntity.ok(temasDTO);
     }
+
+    @GetMapping("/curso/{cursoId}/maestro")
+    public ResponseEntity<List<TemaDTO>> ObtenerTemasPorCursoMaestro(@PathVariable Long cursoId) {
+        List<Tema> temas = temaService.ObtenerTemasPorCursoMaestro(cursoId);
+        List<TemaDTO> temasDTO = temas.stream().map(tema -> {
+            List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
+            return new TemaDTO(tema, actividades);
+        }).toList();
+        return ResponseEntity.ok(temasDTO);
+    }
+
+    @DeleteMapping("/{temaId}")
+    public ResponseEntity<Void> eliminarTema(@PathVariable Long temaId) {
+        try {
+            temaService.eliminarTema(temaId);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }
+
