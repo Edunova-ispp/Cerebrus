@@ -64,7 +64,7 @@ export default function EstadisticasCurso() {
 
       setEstadisticas(Array.from(alumnosMap.values()));
     } catch (err) {
-      setError('Error al cargar las estadísticas');
+      setError((err as Error).message || 'Error cargando las medias');
     } finally {
       setLoading(false);
     }
@@ -113,6 +113,9 @@ export default function EstadisticasCurso() {
         <button className="btn-medias-pixel" onClick={cargarEstadisticas}>
           Actualizar ↻
         </button>
+    <button className="btn-medias-pixel" onClick={() => navigate(`/medias/${id}`)}>
+      Medias
+    </button>
       </main>
     </div>
   );

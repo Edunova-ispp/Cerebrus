@@ -1,6 +1,6 @@
 .estadisticas-page {
   min-height: 100vh;
-  background-color: #F9F5E7; /* Fondo crema de la imagen */
+  background-color: #F9F5E7;
   display: flex;
   flex-direction: column;
 }
@@ -13,7 +13,6 @@
   width: 100%;
 }
 
-/* Botón Volver estilo imagen */
 .btn-volver-pixel {
   align-self: flex-start;
   background-color: #FCEF91;
@@ -88,16 +87,16 @@
   text-align: center;
 }
 
-/* Botón inferior (Medias/Actualizar) */
 .btn-medias-pixel {
   background-color: #FCEF91;
   border: 3px solid #000;
   border-radius: 15px;
-  padding: 10px 25px;
+  padding: 10px 20px;
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1.5rem;
   cursor: pointer;
   box-shadow: 4px 4px 0px #000;
+  margin-bottom: 10px;
 }
 
 .btn-medias-pixel:active {
@@ -107,3 +106,63 @@
 
 .stats-error-msg { color: #C3004F; text-align: center; font-weight: bold; }
 .stats-info-msg { text-align: center; font-style: italic; }
+
+.layout-estadisticas {
+  display: flex;
+  gap: 20px;
+  width: 95%;
+  max-width: 1100px;
+  height: 480px;
+  margin: 20px auto;
+}
+
+.panel-temas, .panel-actividades {
+  background-color: #FFF9C4;
+  border: 3px solid #000;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 6px 6px 0px rgba(0,0,0,0.1);
+}
+
+.panel-temas { flex: 1; display: flex; flex-direction: column; }
+.panel-actividades { flex: 1.5; overflow-y: auto; }
+
+.lista-temas-scroll {
+  list-style: none;
+  padding: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.item-tema-pixel, .item-actividad-pixel {
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 2px solid #000;
+  background-color: #fff;
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+.item-tema-pixel { cursor: pointer; transition: 0.2s; }
+.item-tema-pixel:hover { transform: translateX(5px); }
+.item-tema-pixel.active { background-color: #FCEF91; box-shadow: 4px 4px 0px #000; }
+
+.item-actividad-pixel {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.badge-numero {
+  background-color: #000;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.botones-footer {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  margin-top: 25px;
+}
