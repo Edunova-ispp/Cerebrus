@@ -15,4 +15,12 @@ public interface ActividadAlumnoRepository extends JpaRepository<ActividadAlumno
     @Query("SELECT aa.inicio AS inicio, aa.acabada AS acabada FROM ActividadAlumno aa WHERE aa.alumno = :alumno AND aa.actividad.tema.curso.id = :cursoId")
     List<ActividadAlumnoProgreso> findProgresoByAlumnoAndCursoId(@Param("alumno") Alumno alumno, @Param("cursoId") Long cursoId);
 
+    @Query("SELECT aa.actividad FROM ActividadAlumno aa WHERE aa.id = :actividadId")
+    List<ActividadAlumno> findByActividadId(@Param("actividadId") Long actividadId);
+
+    @Query("SELECT aa FROM ActividadAlumno aa WHERE aa.actividad.tema.curso.id = :cursoId")
+    List<ActividadAlumno> findByCursoID(Long cursoId);
+
+
+
 }

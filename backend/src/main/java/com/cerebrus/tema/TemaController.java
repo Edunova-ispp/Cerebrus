@@ -86,6 +86,18 @@ public class TemaController {
         }
     }
 
+    @GetMapping("/{temaId}")
+public ResponseEntity<TemaDTO> obtenerTemaPorId(@PathVariable Long temaId) {
+    try {
+        Tema tema = temaService.obtenerTemaPorId(temaId);
+        // Aprovechamos tu lógica de Actividades para devolver el DTO completo
+        List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
+        return ResponseEntity.ok(new TemaDTO(tema, actividades));
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.notFound().build();
+    }
+}
+
     @GetMapping("/curso/{cursoId}/alumno")
     public ResponseEntity<List<TemaDTO>> ObtenerTemasPorCursoAlumno(@PathVariable Long cursoId) {
         List<Tema> temas = temaService.ObtenerTemasPorCursoAlumno(cursoId);

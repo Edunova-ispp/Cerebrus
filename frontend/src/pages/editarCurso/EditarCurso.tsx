@@ -3,18 +3,27 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import '../crearCurso/CrearCurso.css';
 
-export default function EditarCurso() {
-    const [titulo, setTitulo] = useState('');
-    const [descripcion, setDescripcion] = useState('');
-    const [imagen, setImagen] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [loadingUpdate, setLoadingUpdate] = useState(false);
+function getInitials(titulo: string): string {
+  return titulo
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+}
 
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const token = localStorage.getItem('token');
-    const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+export default function EditarCurso() {
+  const [titulo, setTitulo] = useState('');
+  const [descripcion, setDescripcion] = useState('');
+  const [imagen, setImagen] = useState('');
+  const [error, setError] = useState('');
+  const [imagenError, setImagenError] = useState(false); // Estado para controlar si la URL de imagen falla
+  const [loading, setLoading] = useState(true);
+  const [loadingUpdate, setLoadingUpdate] = useState(false);
+
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
+  const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
   // Cargar los datos del curso al iniciar
   useEffect(() => {
@@ -81,15 +90,15 @@ export default function EditarCurso() {
       if (response.ok) {
         alert('¡Curso actualizado exitosamente!');
         navigate('/miscursos');
-      } else {
+        } else {
         if (response.status === 404) {
           setError('El curso no existe.');
         } else if (response.status === 403) {
           setError('No tienes permiso para editar este curso.');
-        } else {
-          setError('Error al actualizar el curso.');
-        }
+      } else {
+        setError('Error al actualizar el curso.');
       }
+    }
     } catch (err) {
       setError('Error de conexión: ' + (err instanceof Error ? err.message : 'Error desconocido'));
     } finally {
@@ -102,13 +111,7 @@ export default function EditarCurso() {
       <div className="crear-curso-page">
         <NavbarMisCursos />
         <main className="crear-curso-main">
-          <div className="crear-curso-container">
-            <div className="crear-curso-box">
-              <p style={{ fontFamily: "'Pixelify Sans', sans-serif", fontSize: '1.2rem', color: '#0F1338' }}>
-                Cargando curso...
-              </p>
-            </div>
-          </div>
+          <p className="welcome-text">Cargando datos del curso...</p>
         </main>
       </div>
     );
@@ -119,62 +122,83 @@ export default function EditarCurso() {
       <NavbarMisCursos />
       
       <main className="crear-curso-main">
-        <div className="crear-curso-container">
-          <div className="crear-curso-box">
-            <h1 className="crear-curso-title">Editar Curso</h1>
-            
-            {error && <div className="crear-curso-error">{error}</div>}
+        <button className="detalle-volver" onClick={() => navigate(`/cursos/${id}`)}>
+          ← Volver
+        </button>
 
-            <form onSubmit={handleSubmit} className="crear-curso-form">
-              <div className="pixel-input-wrapper">
-                <label htmlFor="titulo">Título del curso:</label>
+        <h2 className="welcome-text">Editar detalles del curso</h2>
+
+        <div className="crear-curso-card">
+          <form onSubmit={handleSubmit} className="crear-curso-layout">
+            
+            {/* Columna Izquierda: Formulario */}
+            <div className="form-column">
+              <div className="input-group">
+                <label htmlFor="titulo">Título</label>
                 <input
                   id="titulo"
                   type="text"
                   value={titulo}
                   onChange={(e) => setTitulo(e.target.value)}
-                  placeholder="Título del curso"
+                  className="pixel-input"
                   disabled={loadingUpdate}
                 />
               </div>
 
-              <div className="pixel-input-wrapper">
-                <label htmlFor="descripcion">Descripción:</label>
+              <div className="input-group">
+                <label htmlFor="descripcion">Descripción</label>
                 <textarea
                   id="descripcion"
                   value={descripcion}
                   onChange={(e) => setDescripcion(e.target.value)}
-                  placeholder="Descripción del curso (opcional)"
+                  className="pixel-textarea"
                   disabled={loadingUpdate}
-                  className="crear-curso-textarea"
                 />
               </div>
 
-              <div className="pixel-input-wrapper">
-                <label htmlFor="imagen">URL Imagen:</label>
+              <div className="input-group">
+                <label htmlFor="imagen">URL Imagen</label>
                 <input
                   id="imagen"
                   type="text"
                   value={imagen}
-                  onChange={(e) => setImagen(e.target.value)}
-                  placeholder="URL de la imagen (opcional)"
+                  onChange={(e) => { setImagen(e.target.value); setImagenError(false); }}
+                  className="pixel-input"
+                  placeholder="https://..."
+                  disabled={loadingUpdate}
                 />
               </div>
+            </div>
 
-              {imagen && (
-                <div className="crear-curso-preview">
-                  <img src={imagen} alt="Vista previa del curso" />
+            {/* Columna Derecha: Preview y Botón */}
+            <div className="actions-column">
+              <div className="image-preview-group">
+                <label>Vista previa</label>
+                <div className="pixel-drop-zone">
+                  {imagen && !imagenError ? (
+                    <img 
+                      src={imagen} 
+                      alt="Preview" 
+                      className="pixel-preview-img"
+                      onError={() => setImagenError(true)} 
+                    />
+                  ) : (
+                    <div className="pixel-fallback-box">
+                      <span className="pixel-fallback-initials">
+                        {titulo ? getInitials(titulo) : "?"}
+                      </span>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
 
-              <button
-                type="submit"
-                className="pixel-btn-submit"
-              >
-                Guardar Cambios
+              <button type="submit" className="pixel-btn-submit-main" disabled={loadingUpdate}>
+                {loadingUpdate ? 'Guardando...' : 'Guardar cambios'}
               </button>
-            </form>
-          </div>
+              
+              {error && <p className="error-msg" style={{marginTop: '10px'}}>{error}</p>}
+            </div>
+          </form>
         </div>
       </main>
     </div>
