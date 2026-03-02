@@ -25,11 +25,11 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
-  const [imagen, setImagen] = useState('');
   const [respVisible, setRespVisible] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
   const [posicion, setPosicion] = useState('');
   const [ordenItems, setOrdenItems] = useState<string[]>(['']);
+  const [ordenItemsKind, setOrdenItemsKind] = useState<'words' | 'images'>('words');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -42,7 +42,6 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
-    setImagen(initialValues.imagen ?? '');
     setRespVisible(Boolean(initialValues.respVisible));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
     setPosicion(String(initialValues.posicion ?? ''));
@@ -121,7 +120,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
           titulo: titulo.trim(),
           descripcion: descripcion.trim() || '',
           puntuacion: puntuacionNum,
-          imagen: imagen.trim() || '',
+          imagen: '',
           tema: { id: temaIdNum },
           respVisible,
           comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
@@ -197,19 +196,6 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
           </div>
 
           <div>
-            <label className="ca-text" htmlFor="imagen">
-              Imagen (URL)
-            </label>
-            <input
-              type="text"
-              id="imagen"
-              value={imagen}
-              onChange={(e) => setImagen(e.target.value)}
-              style={{ width: '100%' }}
-            />
-          </div>
-
-          <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <label className="ca-text" htmlFor="posicion" style={{ whiteSpace: 'nowrap' }}>
                 Posición
@@ -251,9 +237,9 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
             </div>
           )}
 
-          <button className="ca-text" type="button" disabled>
+          {/*<button className="ca-text" type="button" disabled>
             Generar con IA
-          </button>
+          </button>*/}
         </div>
       </div>
 
@@ -265,12 +251,39 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
           Actividad de ordenación. El alumno debe organizar los valores siguiendo un criterio determinado. Introduzca los valores en el orden correcto y Cerebrus reorganizará los valores aleatoriamente para sus alumnos.
         </p>
 
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button
+            className="ca-text"
+            type="button"
+            disabled={ordenItemsKind === 'words'}
+            onClick={() => setOrdenItemsKind('words')}
+          >
+            Palabras
+          </button>
+
+          <button
+            className="ca-text"
+            type="button"
+            disabled={ordenItemsKind === 'images'}
+            onClick={() => setOrdenItemsKind('images')}
+          >
+            Imágenes
+          </button>
+        </div>
+
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, width: '100%' }}>
           {ordenItems.map((v, i) => (
             <div key={i} style={{ border: '1px solid black', padding: 8 }}>
+              {ordenItemsKind === 'images' && v.trim() && (
+                <img
+                  src={v.trim()}
+                  alt={`Elemento ${i + 1}`}
+                  style={{ width: 56, height: 56, objectFit: 'cover', display: 'block', marginBottom: 8 }}
+                />
+              )}
               <input
-                type="text"
-                placeholder={`Elemento ${i + 1}`}
+                type={ordenItemsKind === 'images' ? 'url' : 'text'}
+                placeholder={ordenItemsKind === 'images' ? `URL imagen ${i + 1}` : `Elemento ${i + 1}`}
                 value={v}
                 onChange={(e) => {
                   const copia = [...ordenItems];

@@ -1,5 +1,7 @@
 package com.cerebrus.actividadalumno;
 
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,30 +33,30 @@ public class ActividadAlumnoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<ActividadAlumno> crearActividadAlumno(@RequestBody @Valid ActividadAlumno actividadAlumno) {
+    public ResponseEntity<ActividadAlumnoDTO> crearActividadAlumno(@RequestBody @Valid ActividadAlumnoDTO actividadAlumno) {
         ActividadAlumno actividadAlumnoCreada = actividadAlumnoService.crearActividadAlumno(
-            actividadAlumno.getTiempo(),
-            actividadAlumno.getPuntuacion(),
-            actividadAlumno.getInicio(),
-            actividadAlumno.getAcabada(),
-            actividadAlumno.getNota(),
-            actividadAlumno.getNumAbandonos(),
-            actividadAlumno.getAlumno().getId(),
-            actividadAlumno.getActividad().getId()
+            actividadAlumno.getTiempo() == null ? 0 : actividadAlumno.getTiempo(),
+            actividadAlumno.getPuntuacion() == null ? 0 : actividadAlumno.getPuntuacion(),
+            actividadAlumno.getInicio() == null ? LocalDateTime.now() : actividadAlumno.getInicio(),
+            actividadAlumno.getAcabada() == null ? LocalDateTime.of(1970, 1, 1, 0, 0) : actividadAlumno.getAcabada(),
+            actividadAlumno.getNota() == null ? 0 : actividadAlumno.getNota(),
+            actividadAlumno.getNumAbandonos() == null ? 0 : actividadAlumno.getNumAbandonos(),
+            actividadAlumno.getAlumnoId(),
+            actividadAlumno.getActividadId()
         );
-        return new ResponseEntity<>(actividadAlumnoCreada, HttpStatus.CREATED);
+        return new ResponseEntity<>(toDto(actividadAlumnoCreada), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumno> readActividadAlumno(@PathVariable Long id) {
+    public ResponseEntity<ActividadAlumnoDTO> readActividadAlumno(@PathVariable Long id) {
         ActividadAlumno actividadAlumno = actividadAlumnoService.readActividadAlumno(id);
-        return new ResponseEntity<>(actividadAlumno, HttpStatus.OK);
+        return new ResponseEntity<>(toDto(actividadAlumno), HttpStatus.OK);
     }
 
     @PutMapping("/update/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumno> updateActividadAlumno(@PathVariable Long id, @RequestBody @Valid ActividadAlumno actividadAlumno) {
+    public ResponseEntity<ActividadAlumnoDTO> updateActividadAlumno(@PathVariable Long id, @RequestBody @Valid ActividadAlumnoDTO actividadAlumno) {
         ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.updateActividadAlumno(
             id,
             actividadAlumno.getTiempo(),
@@ -64,7 +66,7 @@ public class ActividadAlumnoController {
             actividadAlumno.getNota(),
             actividadAlumno.getNumAbandonos()
         );
-        return new ResponseEntity<>(actividadAlumnoActualizada, HttpStatus.OK);
+        return new ResponseEntity<>(toDto(actividadAlumnoActualizada), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -72,5 +74,37 @@ public class ActividadAlumnoController {
     public ResponseEntity<Void> deleteActividadAlumno(@PathVariable Long id) {
         actividadAlumnoService.deleteActividadAlumno(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/ensure/{actividadId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Integer> ensureActividadAlumno(@PathVariable Long actividadId) {
+        Integer exists = actividadAlumnoService.ensureActividadAlumno(actividadId);
+        return new ResponseEntity<>(exists, HttpStatus.OK);
+    }
+
+    @GetMapping("/alumno/{alumnoId}/actividad/{actividadId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ActividadAlumnoDTO> readActividadAlumnoByAlumnoIdAndActividadId(
+        @PathVariable Long alumnoId,
+        @PathVariable Long actividadId
+    ) {
+        return actividadAlumnoService.readActividadAlumnoByAlumnoIdAndActividadId(alumnoId, actividadId)
+            .map(aa -> new ResponseEntity<>(toDto(aa), HttpStatus.OK))
+            .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    private static ActividadAlumnoDTO toDto(ActividadAlumno aa) {
+        return new ActividadAlumnoDTO(
+            aa.getId(),
+            aa.getTiempo(),
+            aa.getPuntuacion(),
+            aa.getInicio(),
+            aa.getAcabada(),
+            aa.getNota(),
+            aa.getNumAbandonos(),
+            aa.getAlumno() == null ? null : aa.getAlumno().getId(),
+            aa.getActividad() == null ? null : aa.getActividad().getId()
+        );
     }
 }

@@ -15,6 +15,7 @@ import ListaTemasCursoProfesor from "./pages/temasDelCurso/ListaTemasCursoProfes
 import CrearTema from "./pages/crearTema/CrearTema";
 import EditarTema from "./pages/editarTema/EditarTema";
 import EditarActividad from "./pages/editarActividad/EditarActividad";
+import OrdenacionAlumno from "./pages/ordenacionAlumno/OrdenacionAlumno";
 
 function App() {
   return (
@@ -37,6 +38,9 @@ function App() {
       <Route path="/auth/register"    element={<RegisterPage />} />
       <Route path="/auth/logout"    element={<LogoutPage />} />
       <Route path="/cursos/:id/temas/:temaId/actividades/crear" element={<CrearActividad />} />
+
+      {/* Alumno: resolver actividad de ordenación */}
+      <Route path="/ordenaciones/:ordenacionId/alumno" element={<OrdenacionAlumno />} />
     </Routes>
   );
 }
