@@ -9,7 +9,9 @@ export default function CrearCurso() {
   const [imagen, setImagen] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [imagenError, setImagenError] = useState(false);
   const navigate = useNavigate();
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +21,7 @@ export default function CrearCurso() {
       setError('El título del curso es requerido');
       return;
     }
+    
 
     setLoading(true);
 
@@ -98,17 +101,26 @@ export default function CrearCurso() {
                   id="imagen"
                   type="text"
                   value={imagen}
-                  onChange={(e) => setImagen(e.target.value)}
-                  placeholder="URL de la imagen (opcional)"
+                  onChange={(e) => { setImagen(e.target.value); setImagenError(false); }}                  placeholder="URL de la imagen (opcional)"
                   disabled={loading}
                 />
               </div>
 
-              {imagen && (
-                <div className="crear-curso-preview">
-                  <img src={imagen} alt="Vista previa" />
-                </div>
-              )}
+               {imagen && (
+  <div className="crear-curso-preview">
+    {imagenError ? (
+      <div className="crear-curso-error" style={{ fontFamily: "'Pixelify Sans', sans-serif" }}>
+          URL de imagen inválida o no accesible
+      </div>    ) : (
+      <img
+        src={imagen}
+        alt="Vista previa del curso"
+        style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain', display: 'block', margin: '0 auto' }}
+        onError={() => setImagenError(true)}
+      />
+    )}
+  </div>
+)}
 
               <button
                 type="submit"

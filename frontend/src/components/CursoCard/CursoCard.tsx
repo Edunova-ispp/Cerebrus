@@ -15,10 +15,10 @@ interface CursoCardProps {
   readonly isMaestro?: boolean;
   readonly onToggleVisibilidad?: (id: number) => void;
   readonly onCardClick?: () => void;
+  readonly onEliminar?: (id: number) => void;
 }
 
-export default function CursoCard({ curso, isMaestro = false, onToggleVisibilidad, onCardClick }: CursoCardProps) {
-  return (
+export default function CursoCard({ curso, isMaestro = false, onToggleVisibilidad, onCardClick, onEliminar }: CursoCardProps) {  return (
     <motion.div
       className="curso-card"
       whileHover={{ scale: 1.05 }}
@@ -26,6 +26,19 @@ export default function CursoCard({ curso, isMaestro = false, onToggleVisibilida
       onClick={onCardClick}
       style={{ cursor: onCardClick ? "pointer" : undefined }}
     >
+      {isMaestro && onEliminar && (
+        <button
+          className="curso-card__delete-btn"
+          onClick={(e) => {
+          e.stopPropagation();
+          if (confirm("¿Estás seguro de que quieres borrar este curso?")) {
+            onEliminar(curso.id);
+          }
+        }}
+      >
+    ✕
+  </button>
+)}
       <div className="curso-card__cover">
         {curso.imagen ? (
           <img

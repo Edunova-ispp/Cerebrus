@@ -80,6 +80,15 @@ export default function MisCursos() {
     }
   };
 
+  const handleEliminar = async (id: number) => {
+  try {
+    await apiFetch(`/api/cursos/${id}`, { method: "DELETE" });
+    setCursos((prev) => prev.filter((c) => c.id !== id));
+  } catch {
+    setError("Error al eliminar el curso.");
+  }
+};
+
   const handleToggleVisibilidad = async (id: number) => {
     try {
       const updated = await toggleVisibilidadCurso(id);
@@ -144,6 +153,7 @@ export default function MisCursos() {
                   curso={curso}
                   isMaestro={isMaestro}
                   onToggleVisibilidad={handleToggleVisibilidad}
+                  onEliminar={isMaestro ? handleEliminar : undefined}
                   onCardClick={() => navigate(`/cursos/${curso.id}`, { state: { curso } })}
                 />
               ))}
