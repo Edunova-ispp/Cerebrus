@@ -13,6 +13,6 @@ public interface CursoService {
     Curso cambiarVisibilidad(Long id);
     ProgresoDTO getProgreso(Long cursoId);
     Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen);
+    void eliminarCurso(Long id);
     List<Integer> getNotaMediaPorActividad(Long cursoId);
-   
 }

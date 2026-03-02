@@ -68,6 +68,21 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
     }
   };
 
+  const handleEliminarActividad = async (actividadId: number) => {
+  try {
+    await apiFetch(`/api/actividades/${actividadId}`, { method: 'DELETE' });
+    setTemaSeleccionado(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        actividades: prev.actividades?.filter(a => a.id !== actividadId) ?? []
+      };
+    });
+  } catch (e) {
+    setError(e instanceof Error ? e.message : "Error al eliminar la actividad");
+  }
+};
+
   const actividades = temaSeleccionado?.actividades ?? [];
 
   return (
@@ -102,10 +117,8 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
                     >
                       <span className="ltp-item-titulo">{tema.titulo}</span>
                       <div className="ltp-item-acciones">
-                        <button className="ltp-btn-icono" title="Editar" onClick={(e) => { e.stopPropagation(); navigate(`/cursos/${id ?? curso?.id}/temas/${tema.id}/editar`);}}>✏️</button>
-                        <button className="ltp-btn-icono" title="Borrar" onClick={(e) => { e.stopPropagation();
-                          handleEliminarTema(tema.id);
-                        }}>🗑️</button>
+                        <button className="ltp-btn-icono" title="Editar" onClick={(e) => { e.stopPropagation(); navigate(`/cursos/${id ?? curso?.id}/temas/${tema.id}/editar`);}}>✎</button>                        
+                        <button className="ltp-btn-icono" title="Borrar" onClick={(e) => { e.stopPropagation(); handleEliminarTema(tema.id); }}>🗑</button>
                       </div>
                     </div>
                   ))
@@ -120,19 +133,19 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
                   <p className="ltp-vacio">No hay actividades en este tema</p>
                 ) : (
                   actividades.map((act) => (
-                    <div key={act.id} className="ltp-item">
-                      <span className="ltp-item-titulo">{act.titulo}</span>
-                      <div className="ltp-item-acciones">
-                        <button className="ltp-btn-icono" title="Editar">✏️</button>
-                        <button className="ltp-btn-icono" title="Borrar">🗑️</button>
-                      </div>
-                    </div>
-                  ))
+  <div key={act.id} className="ltp-item">
+    <span className="ltp-item-titulo">{act.titulo}</span>
+    <div className="ltp-item-acciones">
+      <button className="ltp-btn-icono" title="Editar" onClick={(e) => { e.stopPropagation(); navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado?.id}/actividades/${act.id}/editar`);}}>✎</button>
+      <button className="ltp-btn-icono" title="Borrar" onClick={(e) => { e.stopPropagation(); handleEliminarActividad(act.id); }}>🗑</button>
+    </div>
+  </div>
+))
                 )}
               </div>
-                {temaSeleccionado && (
-                  <button className="ltp-btn-añadir">+ Añadir actividad</button>
-                )}
+                <button className="ltp-btn-añadir" onClick={() => navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/crear`)}>
+                  + Añadir actividad
+                </button>
             
             </div>
           </div>
