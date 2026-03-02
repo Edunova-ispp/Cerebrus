@@ -14,4 +14,5 @@ public interface CursoService {
     ProgresoDTO getProgreso(Long cursoId);
     Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen);
     void eliminarCurso(Long id);
+    List<Integer> getNotaMediaPorActividad(Long cursoId);
 }

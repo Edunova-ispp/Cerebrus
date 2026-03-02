@@ -3,6 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import './CrearCurso.css';
 
+function getInitials(titulo: string): string {
+  return titulo
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
 export default function CrearCurso() {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -11,7 +19,6 @@ export default function CrearCurso() {
   const [loading, setLoading] = useState(false);
   const [imagenError, setImagenError] = useState(false);
   const navigate = useNavigate();
-  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,6 +28,8 @@ export default function CrearCurso() {
       setError('El título del curso es requerido');
       return;
     }
+
+    
     
 
     setLoading(true);
@@ -61,76 +70,81 @@ export default function CrearCurso() {
       <NavbarMisCursos />
       
       <main className="crear-curso-main">
-        <div className="crear-curso-container">
-          <div className="crear-curso-welcome-banner">
-            Bienvenido al creador de cursos
-              </div>
-          <div className="crear-curso-box">
-            <h1 className="crear-curso-title">Crear Nuevo Curso</h1>
-            
-            {error && <div className="crear-curso-error">{error}</div>}
+        <button className="detalle-volver" onClick={() => navigate('/miscursos')}>
+          ← Volver
+        </button>
+        <div className="crear-curso-header">
+           <h2 className="welcome-text">Bienvenido al creador de cursos</h2>
+        </div>
 
-            <form onSubmit={handleSubmit} className="crear-curso-form">
-              <div className="pixel-input-wrapper">
-                <label htmlFor="titulo">Título del curso:</label>
-                <input
-                  id="titulo"
-                  type="text"
-                  value={titulo}
-                  onChange={(e) => setTitulo(e.target.value)}
-                  placeholder="Ingresa el título del curso"
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="pixel-input-wrapper">
-                <label htmlFor="descripcion">Descripción:</label>
-                <textarea
-                  id="descripcion"
-                  value={descripcion}
-                  onChange={(e) => setDescripcion(e.target.value)}
-                  placeholder="Descripción del curso (opcional)"
-                  disabled={loading}
-                  className="crear-curso-textarea"
-                />
-              </div>
-
-              <div className="pixel-input-wrapper">
-                <label htmlFor="imagen">URL Imagen:</label>
-                <input
-                  id="imagen"
-                  type="text"
-                  value={imagen}
-                  onChange={(e) => { setImagen(e.target.value); setImagenError(false); }}                  placeholder="URL de la imagen (opcional)"
-                  disabled={loading}
-                />
-              </div>
-
-               {imagen && (
-  <div className="crear-curso-preview">
-    {imagenError ? (
-      <div className="crear-curso-error" style={{ fontFamily: "'Pixelify Sans', sans-serif" }}>
-          URL de imagen inválida o no accesible
-      </div>    ) : (
-      <img
-        src={imagen}
-        alt="Vista previa del curso"
-        style={{ maxWidth: '100%', maxHeight: '200px', objectFit: 'contain', display: 'block', margin: '0 auto' }}
-        onError={() => setImagenError(true)}
+        <div className="crear-curso-card">
+          <form onSubmit={handleSubmit} className="crear-curso-layout">
+  {/* Columna Izquierda */}
+  <div className="form-column">
+    <div className="input-group">
+      <label htmlFor="titulo">Título</label>
+      <input
+        id="titulo"
+        type="text"
+        value={titulo}
+        onChange={(e) => setTitulo(e.target.value)}
+        className="pixel-input"
+        placeholder="Nombre del curso..."
       />
-    )}
-  </div>
-)}
+    </div>
 
-              <button
-                type="submit"
-                className="pixel-btn-submit"
-                disabled={loading}
-              >
-                {loading ? 'Creando...' : 'Crear Curso'}
-              </button>
-            </form>
+    <div className="input-group">
+      <label htmlFor="descripcion">Descripción</label>
+      <textarea
+        id="descripcion"
+        value={descripcion}
+        onChange={(e) => setDescripcion(e.target.value)}
+        className="pixel-textarea"
+        placeholder="¿De qué trata el curso?"
+      />
+    </div>
+
+    <div className="input-group">
+      <label htmlFor="imagen">URL Imagen</label>
+      <input
+        id="imagen"
+        type="text"
+        value={imagen}
+        onChange={(e) => { setImagen(e.target.value); setImagenError(false); }}
+        className="pixel-input"
+        placeholder="https://... <opcional>"
+      />
+    </div>
+  </div>
+
+  {/* Columna Derecha */}
+  <div className="actions-column">
+    <div className="image-preview-group">
+      <label>Vista previa</label>
+      <div className="pixel-drop-zone">
+        {imagen && !imagenError ? (
+          <img 
+            src={imagen} 
+            alt="Preview" 
+            className="pixel-preview-img"
+            onError={() => setImagenError(true)} 
+          />
+        ) : (
+          <div className="pixel-fallback-box">
+            <span className="pixel-fallback-initials">
+              {titulo ? getInitials(titulo) : "?"}
+            </span>
           </div>
+        )}
+      </div>
+    </div>
+
+    <button type="submit" className="pixel-btn-submit-main" disabled={loading}>
+      {loading ? 'Creando...' : 'Crear curso'}
+    </button>
+  </div>
+</form>
+          {error && <p className="error-msg">{error}</p>}
         </div>
       </main>
     </div>
