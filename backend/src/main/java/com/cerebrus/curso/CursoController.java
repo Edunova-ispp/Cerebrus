@@ -153,21 +153,22 @@ public class CursoController {
             }
         }
     }
-    @GetMapping("/{id}/NotasMedias")
-    public ResponseEntity<List<Integer>> obtenerNotasMedias(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(cursoService.getNotaMediaPorActividad(id));
-        } catch (RuntimeException e) {
-            if (e.getMessage().equals("404 Not Found")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            } else if (e.getMessage().equals("403 Forbidden")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
+@GetMapping("/{id}/NotasMedias/{temaId}")
+public ResponseEntity<List<Integer>> obtenerNotasMedias(
+        @PathVariable Long id,
+        @PathVariable Long temaId) {
+    try {
+        return ResponseEntity.ok(cursoService.getNotaMediaPorActividad(id, temaId));
+    } catch (RuntimeException e) {
+        String msg = e.getMessage();
+        if ("404 Not Found".equals(msg)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } else if ("403 Forbidden".equals(msg)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+}
 
-
-   
 }

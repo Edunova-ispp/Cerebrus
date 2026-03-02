@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import './EstadisticasCurso.css';
 
@@ -64,7 +64,7 @@ export default function EstadisticasCurso() {
 
       setEstadisticas(Array.from(alumnosMap.values()));
     } catch (err) {
-      setError('Error al cargar las estadísticas');
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -113,6 +113,11 @@ export default function EstadisticasCurso() {
         <button className="btn-medias-pixel" onClick={cargarEstadisticas}>
           Actualizar ↻
         </button>
+        <button 
+        className="btn-medias-pixel" 
+    onClick={() => navigate(`/mediasCurso/${id}`)}>
+    Medias del curso
+    </button>
       </main>
     </div>
   );

@@ -14,6 +14,7 @@ import Placeholder from "./pages/placeholder/placeholder";
 import ListaTemasCursoProfesor from "./pages/temasDelCurso/ListaTemasCursoProfesor";
 import CrearTema from "./pages/crearTema/CrearTema";
 import EditarTema from "./pages/editarTema/EditarTema";
+import MediasCurso from "./pages/estadisticasCurso/MediasCurso";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
       <Route path="/auth/register"    element={<RegisterPage />} />
       <Route path="/auth/logout"    element={<LogoutPage />} />
       <Route path="/estadisticas/:id" element={<EstadisticasCurso />} />
+      <Route path="/mediasCurso/:id" element={<MediasCurso />} />
     </Routes>
   );
 }
