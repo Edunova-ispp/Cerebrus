@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
+import './OrdenacionAlumno.css';
 
 type OrdenacionDTO = {
   readonly id: number;
@@ -214,113 +216,100 @@ export default function OrdenacionAlumno() {
   };
 
   if (loading) {
-    return <p className="ca-text">Cargando...</p>;
+    return (
+      <div className="ordenacion-alumno-page">
+        <NavbarMisCursos />
+        <main className="ordenacion-alumno-main">
+          <p className="ca-text">Cargando...</p>
+        </main>
+      </div>
+    );
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: 900, margin: '0 auto' }}>
-      {error && (
-        <p className="ca-text" style={{ marginTop: 0 }}>
-          {error}
-        </p>
-      )}
+    <div className="ordenacion-alumno-page">
+      <NavbarMisCursos />
 
-      {ordenacion && (
-        <div className="ca-contenedor-blanco" style={{ gap: 16 }}>
-          <h2 style={{ margin: 0 }}>{ordenacion.titulo}</h2>
-          {ordenacion.descripcion && <p className="ca-text" style={{ margin: 0 }}>{ordenacion.descripcion}</p>}
-
-          <p className="ca-text" style={{ margin: 0 }}>
-            Reordena los elementos y envía tu respuesta.
+      <main className="ordenacion-alumno-main">
+        {error && (
+          <p className="ca-text" style={{ marginTop: 0 }}>
+            {error}
           </p>
+        )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {items.map((value, index) => (
-              <div
-                key={`${value}-${index}`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                  gap: 12,
-                  border: '1px solid black',
-                  padding: 8,
-                }}
-              >
-                <div style={{ width: 24, textAlign: 'right' }}>{index + 1}.</div>
+        {ordenacion && (
+          <>
+            <div className="ord-top">
+              <button className="ord-exit-btn" type="button" onClick={() => navigate(-1)}>
+                Salir del curso
+              </button>
 
-                <div
-                  style={{
-                    flex: 1,
-                    minWidth: 0,
-                    textAlign: 'left',
-                    display: 'flex',
-                    justifyContent: 'flex-start',
-                    alignItems: 'center',
-                  }}
-                >
-                  {isImageString(value) ? (
-                    <img
-                      src={value}
-                      alt={`Elemento ${index + 1}`}
-                      style={{ width: 72, height: 72, objectFit: 'cover', display: 'block' }}
-                    />
-                  ) : (
-                    <div className="ca-text" style={{ width: '100%' }}>
-                      {value}
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    className="ca-text"
-                    type="button"
-                    disabled={index === 0}
-                    onClick={() => setItems((prev) => moveItem(prev, index, index - 1))}
-                  >
-                    ↑
-                  </button>
-                  <button
-                    className="ca-text"
-                    type="button"
-                    disabled={index === items.length - 1}
-                    onClick={() => setItems((prev) => moveItem(prev, index, index + 1))}
-                  >
-                    ↓
-                  </button>
-                </div>
+              <div className="ord-title-banner">
+                <h1 className="ord-title">{ordenacion.titulo}</h1>
               </div>
-            ))}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
-            <button
-              className="ca-btn-guardar"
-              type="button"
-              disabled={submitting || items.length === 0 || !actividadAlumnoId}
-              onClick={handleSubmit}
-            >
-              {submitting ? 'Enviando...' : 'Enviar respuesta'}
-            </button>
-          </div>
-
-          {feedback && (
-            <div>
-              <p className="ca-text" style={{ marginTop: 0 }}>
-                {feedback.correcta ? 'Tu respuesta es correcta.' : 'Tu respuesta es incorrecta.'}
-              </p>
-              {ordenacion.respVisible && feedback.comentario && (
-                <p className="ca-text" style={{ marginTop: 0 }}>
-                  {feedback.comentario}
-                </p>
-              )}
             </div>
-          )}
-        </div>
-      )}
 
-      {!ordenacion && !error && <p className="ca-text">No se encontró la ordenación.</p>}
+            {ordenacion.descripcion && <p className="ord-description">{ordenacion.descripcion}</p>}
+
+            <div className="ord-items">
+              {items.map((value, index) => (
+                <div key={`${value}-${index}`} className="ord-item">
+                  <div className="ord-item-index">{index + 1}.</div>
+
+                  <div className="ord-item-value">
+                    {isImageString(value) ? (
+                      <img src={value} alt={`Elemento ${index + 1}`} className="ord-item-img" />
+                    ) : (
+                      <div className="ord-item-text">{value}</div>
+                    )}
+                  </div>
+
+                  <div className="ord-item-actions">
+                    <button
+                      className="ord-arrow-btn"
+                      type="button"
+                      disabled={index === 0}
+                      onClick={() => setItems((prev) => moveItem(prev, index, index - 1))}
+                    >
+                      ↑
+                    </button>
+                    <button
+                      className="ord-arrow-btn"
+                      type="button"
+                      disabled={index === items.length - 1}
+                      onClick={() => setItems((prev) => moveItem(prev, index, index + 1))}
+                    >
+                      ↓
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="ord-bottom">
+              <div className="ord-bottom-inner">
+                {feedback && (
+                  <div className="ord-feedback">
+                    <div>{feedback.correcta ? 'Tu respuesta es correcta.' : 'Tu respuesta es incorrecta.'}</div>
+                    {ordenacion.respVisible && feedback.comentario && <div>{feedback.comentario}</div>}
+                  </div>
+                )}
+
+                <button
+                  className="ca-btn-guardar"
+                  type="button"
+                  disabled={submitting || items.length === 0 || !actividadAlumnoId}
+                  onClick={handleSubmit}
+                >
+                  {submitting ? 'Enviando...' : 'Enviar'}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {!ordenacion && !error && <p className="ca-text">No se encontró la ordenación.</p>}
+      </main>
     </div>
   );
 }
