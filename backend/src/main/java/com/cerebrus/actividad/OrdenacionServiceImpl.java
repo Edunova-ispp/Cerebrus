@@ -76,6 +76,27 @@ public class OrdenacionServiceImpl implements OrdenacionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Ordenacion readOrdenacionMaestro(Long id) {
+
+        Usuario u = usuarioService.findCurrentUser();
+        if (!(u instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede leer actividades de ordenación para edición");
+        }
+
+        Ordenacion ordenacion = ordenacionRepository.findWithValoresById(id)
+            .orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
+
+        // Fuerza la inicialización dentro de la transacción (por si el provider ignora el EntityGraph)
+        ordenacion.getValores().size();
+        if (ordenacion.getTema() != null) {
+            ordenacion.getTema().getId();
+        }
+
+        return ordenacion;
+    }
+
+    @Override
     public Ordenacion updateActOrdenacion(Long id, String titulo, String descripcion, 
         Integer puntuacion, String imagen, Long temaId, Boolean respVisible, 
         String comentariosRespVisible, Integer posicion, List<String> valores) {

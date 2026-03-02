@@ -49,9 +49,15 @@ public class OrdenacionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Ordenacion> readOrdenacion(@PathVariable Long id) {
+    public ResponseEntity<OrdenacionDTO> readOrdenacion(@PathVariable Long id) {
         Ordenacion ordenacion = ordenacionService.readOrdenacion(id);
-        return new ResponseEntity<>(ordenacion, HttpStatus.OK);
+        return new ResponseEntity<>(toDto(ordenacion), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/maestro")
+    public ResponseEntity<OrdenacionDTO> readOrdenacionMaestro(@PathVariable Long id) {
+        Ordenacion ordenacion = ordenacionService.readOrdenacionMaestro(id);
+        return new ResponseEntity<>(toDto(ordenacion), HttpStatus.OK);
     }
 
     @PutMapping("/update/{id}")
@@ -77,5 +83,20 @@ public class OrdenacionController {
     public ResponseEntity<Void> deleteActOrdenacion(@PathVariable Long id) {
         ordenacionService.deleteActOrdenacion(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    private static OrdenacionDTO toDto(Ordenacion ordenacion) {
+        return new OrdenacionDTO(
+            ordenacion.getId(),
+            ordenacion.getTitulo(),
+            ordenacion.getDescripcion(),
+            ordenacion.getPuntuacion(),
+            ordenacion.getImagen(),
+            ordenacion.getRespVisible(),
+            ordenacion.getComentariosRespVisible(),
+            ordenacion.getPosicion(),
+            ordenacion.getTema() == null ? null : ordenacion.getTema().getId(),
+            ordenacion.getValores()
+        );
     }
 }

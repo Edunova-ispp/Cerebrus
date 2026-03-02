@@ -23,6 +23,7 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.actividad.Ordenacion;
 import com.cerebrus.actividad.OrdenacionController;
+import com.cerebrus.actividad.OrdenacionDTO;
 import com.cerebrus.actividad.OrdenacionService;
 import com.cerebrus.tema.Tema;
 
@@ -113,7 +114,7 @@ class OrdenacionControllerTest {
     void readOrdenacion_existente_retorna200ConOrdenacion() {
         when(ordenacionService.readOrdenacion(10L)).thenReturn(ordenacionGuardada);
 
-        ResponseEntity<Ordenacion> respuesta = ordenacionController.readOrdenacion(10L);
+                ResponseEntity<OrdenacionDTO> respuesta = ordenacionController.readOrdenacion(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).isNotNull();
@@ -127,7 +128,7 @@ class OrdenacionControllerTest {
         ordenacionGuardada.setValores(new ArrayList<>());
         when(ordenacionService.readOrdenacion(10L)).thenReturn(ordenacionGuardada);
 
-        ResponseEntity<Ordenacion> respuesta = ordenacionController.readOrdenacion(10L);
+                ResponseEntity<OrdenacionDTO> respuesta = ordenacionController.readOrdenacion(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody().getValores()).isEmpty();

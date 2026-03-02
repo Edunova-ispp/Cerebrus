@@ -14,7 +14,7 @@ import EditarCurso from "./pages/editarCurso/EditarCurso";
 import ListaTemasCursoProfesor from "./pages/temasDelCurso/ListaTemasCursoProfesor";
 import CrearTema from "./pages/crearTema/CrearTema";
 import EditarTema from "./pages/editarTema/EditarTema";
-import CrearOrdenacion from "./pages/crearOrdenacion/CrearOrdenacion";
+import EditarActividad from "./pages/editarActividad/EditarActividad";
 
 function App() {
   return (
@@ -32,7 +32,7 @@ function App() {
       <Route path="/cursos/:id/temas"    element={<ListaTemasCursoProfesor />} />
       <Route path="/cursos/:id/temas/crear" element={<CrearTema />} />
       <Route path="/cursos/:id/temas/:temaId/editar" element={<EditarTema />} />
-      <Route path="/cursos/:id/temas/:temaId/actividades/ordenacion/crear" element={<CrearOrdenacion />} />
+      <Route path="/cursos/:id/temas/:temaId/actividades/:actividadId/editar" element={<EditarActividad />} />
       <Route path="/auth/login"    element={<LoginPage />} />
       <Route path="/auth/register"    element={<RegisterPage />} />
       <Route path="/auth/logout"    element={<LogoutPage />} />

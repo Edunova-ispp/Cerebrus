@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
-import './CrearActividad.css';
+import { OrdenacionForm } from './OrdenacionForm';
+import './crearActividad.css';
 
 const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden'];
 
 export default function CrearActividad() {
-  const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+  const { id: cursoId } = useParams<{ id: string; temaId: string }>();
   const navigate = useNavigate();
+  const [tipoSeleccionado, setTipoSeleccionado] = useState<string | null>(null);
 
   return (
     <div className="ca-page">
@@ -17,17 +20,23 @@ export default function CrearActividad() {
             Volver al Mapa
           </button>
           {TIPOS.map((tipo) => (
-            <button key={tipo} className="ca-sidebar-btn">
+            <button
+              key={tipo}
+              className="ca-sidebar-btn"
+              type="button"
+              onClick={() => setTipoSeleccionado(tipo)}
+            >
               {tipo}
             </button>
           ))}
         </div>
 
         <div className="ca-contenido">
-          <p className="ca-proximamente">Selecciona un tipo de actividad</p>
-          <button className="ca-btn-guardar" >
-            Guardar
-          </button>
+          {tipoSeleccionado === 'Poner en orden' ? (
+            <OrdenacionForm />
+          ) : (
+            <p className="ca-proximamente">Selecciona un tipo de actividad</p>
+          )}
         </div>
       </main>
     </div>
