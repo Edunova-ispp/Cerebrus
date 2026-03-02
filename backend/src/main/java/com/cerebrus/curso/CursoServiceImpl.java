@@ -208,6 +208,23 @@ public class CursoServiceImpl implements CursoService {
         return new ProgresoDTO("SIN_EMPEZAR", 0);
     }
 
+    @Transactional
+@Override
+public void eliminarCurso(Long id) {
+    Curso curso = cursoRepository.findByID(id);
+    if (curso == null) {
+        throw new RuntimeException("404 Not Found");
+    }
+    Usuario usuario = usuarioService.findCurrentUser();
+    if (!(usuario instanceof Maestro)) {
+        throw new AccessDeniedException("Solo un maestro puede eliminar cursos");
+    }
+    if (!curso.getMaestro().getId().equals(usuario.getId())) {
+        throw new AccessDeniedException("Solo el propietario puede eliminar este curso");
+    }
+    cursoRepository.delete(curso);
+}
+
 }
 
 

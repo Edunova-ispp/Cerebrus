@@ -144,12 +144,13 @@
   width: 32px;
   height: 32px;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 1.2rem;
   box-shadow: 2px 2px 0px #000;
   transition: transform 0.1s;
   display: flex;
   align-items: center;
   justify-content: center;
+
 }
 .ltp-btn-icono:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0px #000; }
 .ltp-btn-icono:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px #000; }
