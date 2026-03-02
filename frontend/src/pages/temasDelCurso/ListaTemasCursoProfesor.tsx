@@ -70,7 +70,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
 
   const handleEliminarActividad = async (actividadId: number) => {
   try {
-    await apiFetch(`/api/actividades/${actividadId}`, { method: 'DELETE' });
+    await apiFetch(`/api/actividades/delete/${actividadId}`, { method: 'DELETE' });
     setTemaSeleccionado(prev => {
       if (!prev) return prev;
       return {
