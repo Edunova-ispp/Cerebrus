@@ -5,7 +5,7 @@ import './CrearActividad.css';
 const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden'];
 
 export default function CrearActividad() {
-  const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+  const { id: cursoId } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   return (
