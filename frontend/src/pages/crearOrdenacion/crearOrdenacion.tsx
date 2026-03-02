@@ -1,7 +1,10 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
+import './CrearOrdenacion.css';
+
+const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden'];
 
 export default function CrearOrdenacion() {
   const [titulo, setTitulo] = useState('');
@@ -10,12 +13,13 @@ export default function CrearOrdenacion() {
   const [imagen, setImagen] = useState('');
   const [respVisible, setRespVisible] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
-  const [temaId, setTemaId] = useState('');
   const [posicion, setPosicion] = useState('');
   const [valoresRaw, setValoresRaw] = useState('');
+  const [ordenItems, setOrdenItems] = useState<string[]>(['']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { id: cursoId, temaId: temaId } = useParams<{ id: string; temaId: string }>();
 
   const valores = useMemo(() => {
     return valoresRaw
@@ -38,13 +42,42 @@ export default function CrearOrdenacion() {
       return;
     }
 
-    if (!temaId.trim()) {
-      setError('El id del tema es requerido');
+    const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
+    if (Number.isNaN(puntuacionNum)) {
+      setError('La puntuación debe ser un número válido');
+      return;
+    }
+
+    if (!temaId) {
+      setError('Falta el id del tema en la URL');
+      return;
+    }
+
+    const temaIdNum = Number.parseInt(temaId, 10);
+    if (Number.isNaN(temaIdNum)) {
+      setError('El id del tema debe ser un número válido');
+      return;
+    }
+
+    if (!cursoId) {
+      setError('Falta el id del curso en la URL');
+      return;
+    }
+
+    const cursoIdNum = Number.parseInt(cursoId, 10);
+    if (Number.isNaN(cursoIdNum)) {
+      setError('El id del curso debe ser un número válido');
       return;
     }
 
     if (!posicion.trim()) {
       setError('La posición es requerida');
+      return;
+    }
+
+    const posicionNum = Number.parseInt(posicion.trim(), 10);
+    if (Number.isNaN(posicionNum)) {
+      setError('La posición debe ser un número válido');
       return;
     }
 
@@ -61,18 +94,18 @@ export default function CrearOrdenacion() {
         body: JSON.stringify({
           titulo: titulo.trim(),
           descripcion: descripcion.trim() || '',
-          puntuacion: parseInt(puntuacion.trim(), 10) || 0,
+          puntuacion: puntuacionNum,
           imagen: imagen.trim() || '',
-          tema: { id: parseInt(temaId.trim(), 10) },
-          respVisible: respVisible,
-          comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || '') : null,
-          posicion: parseInt(posicion.trim(), 10),
+          tema: { id: temaIdNum },
+          respVisible,
+          comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
+          posicion: posicionNum,
           valores,
         }),
       });
 
         alert('¡Actividad de ordenación creada exitosamente!');
-        navigate('/misCursos');
+        navigate(`/cursos/${cursoIdNum}/temas`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear la actividad de ordenación');
     } finally {
@@ -81,112 +114,180 @@ export default function CrearOrdenacion() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="ca-page">
       <NavbarMisCursos />
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Crear Actividad de Ordenación</h1>
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-          {error && <p className="text-red-500 mb-4">{error}</p>}
-          <div className="mb-4">
-            <label htmlFor="titulo" className="block text-sm font-medium text-gray-700">Título</label>
-            <input
-              type="text"
-              id="titulo"
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700">Descripción</label>
-            <textarea
-              id="descripcion"
-              value={descripcion}
-              onChange={(e) => setDescripcion(e.target.value)}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="puntuacion" className="block text-sm font-medium text-gray-700">Puntuación</label>
-            <input
-              type="number"
-              id="puntuacion"
-              value={puntuacion}
-              onChange={(e) => setPuntuacion(e.target.value)}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="imagen" className="block text-sm font-medium text-gray-700">Imagen (URL)</label>
-            <input
-              type="text"
-              id="imagen"
-              value={imagen}
-              onChange={(e) => setImagen(e.target.value)}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="temaId" className="block text-sm font-medium text-gray-700">Id del tema</label>
-            <input
-              type="number"
-              id="temaId"
-              value={temaId}
-              onChange={(e) => setTemaId(e.target.value)}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="posicion" className="block text-sm font-medium text-gray-700">Posición</label>
-            <input
-              type="number"
-              id="posicion"
-              value={posicion}
-              onChange={(e) => setPosicion(e.target.value)}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="valores" className="block text-sm font-medium text-gray-700">Valores (uno por línea)</label>
-            <textarea
-              id="valores"
-              value={valoresRaw}
-              onChange={(e) => setValoresRaw(e.target.value)}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              rows={6}
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="respVisible" className="block text-sm font-medium text-gray-700">¿Respuesta visible?</label>
-            <input
-              type="checkbox"
-              id="respVisible"
-              checked={respVisible}
-              onChange={(e) => setRespVisible(e.target.checked)}
-              className=""
-            />
-          </div>
-          {respVisible && (
-            <div className="mb-4">
-              <label htmlFor="comentariosRespVisible" className="block text-sm font-medium text-gray-700">Comentarios de respuesta visibles</label>
-              <input
-                type="text"
-                id="comentariosRespVisible"
-                value={comentariosRespVisible}
-                onChange={(e) => setComentariosRespVisible(e.target.value)}
-                className={`mt-1 block w-full border ${error ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm p-2`}
-              />
-            </div>
-          )}
-          {loading ? (
-            <button type='button' disabled>Loading...</button>
-          ) : (
-            <button type='submit' disabled={loading} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
-                Crear Actividad de Ordenación
+      <main className="ca-main">
+          <div className="ca-sidebar">
+            <button className="ca-sidebar-btn" onClick={() => navigate(`/cursos/${cursoId}/temas`)}>
+              Volver al Mapa
             </button>
-          )}
-        </form>
-      </div>
+            {TIPOS.map((tipo) => (
+              <button key={tipo} className="ca-sidebar-btn">
+                {tipo}
+              </button>
+            ))}
+          </div>
+
+          {/* Zona derecha */}
+            <div className="ca-contenido">
+              <p className="ca-proximamente">
+                Selecciona un tipo de actividad
+              </p>
+                <form onSubmit={handleSubmit}>
+                {error && <p>{error}</p>}
+
+                {/* Recuadro superior */}
+                <div
+                  className="ca-contenedor-blanco"
+                >
+                  {/* Izquierda: título + descripción */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div>
+                      <label>Título</label>
+                      <input
+                        type="text"
+                        id="titulo"
+                        value={titulo}
+                        onChange={(e) => setTitulo(e.target.value)}
+                        className='.ca-contenedor'
+                      />
+                    </div>
+
+                    <div>
+                      <label>Descripción</label>
+                      <textarea
+                        id="descripcion"
+                        value={descripcion}
+                        onChange={(e) => setDescripcion(e.target.value)}
+                        rows={3}
+                        className='.ca-contenedor'
+                      />
+                    </div>
+                  </div>
+
+                  {/* Derecha: puntuación, correcciones visibles, IA */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div>
+                      <label>Puntuación</label>
+                      <input
+                        type="number"
+                        id="puntuacion"
+                        value={puntuacion}
+                        onChange={(e) => setPuntuacion(e.target.value)}
+                        className='.ca-contenedor'
+                      />
+                    </div>
+
+                    <div>
+                      <label>Imagen (URL)</label>
+                      <input
+                        type="text"
+                        id="imagen"
+                        value={imagen}
+                        onChange={(e) => setImagen(e.target.value)}
+                        className='.ca-contenedor'
+                      />
+                    </div>
+
+                    <div>
+                      <label>Posición</label>
+                      <input
+                        type="number"
+                        id="posicion"
+                        value={posicion}
+                        onChange={(e) => setPosicion(e.target.value)}
+                        className='.ca-contenedor'
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <input
+                        type="checkbox"
+                        id="respVisible"
+                        checked={respVisible}
+                        onChange={(e) => setRespVisible(e.target.checked)}
+                      />
+                      <label htmlFor="respVisible">Correcciones visibles</label>
+                    </div>
+
+                    {respVisible && (
+                      <div>
+                        <label>Comentarios</label>
+                        <input
+                          type="text"
+                          id="comentariosRespVisible"
+                          value={comentariosRespVisible}
+                          onChange={(e) => setComentariosRespVisible(e.target.value)}
+                          className='.ca-contenedor'
+                        />
+                      </div>
+                    )}
+
+                    <button type="button">Generar con IA</button>
+                  </div>
+                </div>
+
+                {/* Recuadro inferior: orden */}
+                <div
+                  className="ca-contenedor-blanco"
+                >
+                  {/* Selector palabras / imágenes */}
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button type="button">Palabras</button>
+                    <button type="button">Imágenes</button>
+                  </div>
+
+                  {/* Inputs ordenados */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {ordenItems.map((v, i) => (
+                      <div key={i} style={{ border: '1px solid black', padding: '8px' }}>
+                        <input
+                          type="text"
+                          placeholder={`Elemento ${i + 1}`}
+                          value={v}
+                          onChange={(e) => {
+                            const copia = [...ordenItems];
+                            copia[i] = e.target.value;
+                            setOrdenItems(copia);
+                            setValoresRaw(copia.join('\n'));
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Backspace' && v === '' && ordenItems.length > 1) {
+                              const copia = ordenItems.filter((_, idx) => idx !== i);
+                              setOrdenItems(copia);
+                              setValoresRaw(copia.join('\n'));
+                            }
+                          }}
+                        />
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nuevo = [...ordenItems, ''];
+                        setOrdenItems(nuevo);
+                        setValoresRaw(nuevo.join('\n'));
+                      }}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Botón guardar */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  {loading ? (
+                    <button type="button" disabled>
+                      Guardando...
+                    </button>
+                  ) : (
+                    <button type="submit" className="ca-btn-guardar">Guardar</button>
+                  )}
+                </div>
+              </form>
+            </div>
+      </main>
     </div>
   );
 }

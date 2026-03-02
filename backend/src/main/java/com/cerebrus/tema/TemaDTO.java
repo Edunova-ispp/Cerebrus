@@ -1,7 +1,7 @@
 package com.cerebrus.tema;
 
 import java.util.List;
-import com.cerebrus.actividad.Actividad;
+import com.cerebrus.actividad.ActividadDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,9 +17,9 @@ public class TemaDTO {
 
     private Long cursoId; 
 
-    private List<Actividad> actividades;
+    private List<ActividadDTO> actividades;
 
-    public TemaDTO(Tema tema, List<Actividad> actividades) {
+    public TemaDTO(Tema tema, List<ActividadDTO> actividades) {
         this.id = tema.getId();
         this.titulo = tema.getTitulo();
         

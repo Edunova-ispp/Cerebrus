@@ -31,7 +31,7 @@ public class OrdenacionController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Ordenacion> crearActOrdenacion(@RequestBody @Valid Ordenacion ordenacion) {
+    public ResponseEntity<Long> crearActOrdenacion(@RequestBody @Valid Ordenacion ordenacion) {
         
         Ordenacion ordenacionCreada = ordenacionService.crearActOrdenacion(
             ordenacion.getTitulo(),
@@ -45,7 +45,7 @@ public class OrdenacionController {
             ordenacion.getValores()
         );
 
-        return new ResponseEntity<>(ordenacionCreada, HttpStatus.CREATED);
+        return new ResponseEntity<>(ordenacionCreada.getId(), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -55,7 +55,7 @@ public class OrdenacionController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Ordenacion> updateActOrdenacion(@PathVariable Long id,
+    public ResponseEntity<Long> updateActOrdenacion(@PathVariable Long id,
          @RequestBody @Valid Ordenacion ordenacion) {
         Ordenacion ordenacionActualizada = ordenacionService.updateActOrdenacion(
             id,
@@ -69,7 +69,7 @@ public class OrdenacionController {
             ordenacion.getPosicion(),
             ordenacion.getValores()
         );
-        return new ResponseEntity<>(ordenacionActualizada, HttpStatus.OK);
+        return new ResponseEntity<>(ordenacionActualizada.getId(), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")

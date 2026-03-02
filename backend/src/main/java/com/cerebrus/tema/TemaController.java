@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadService;
+import com.cerebrus.actividad.ActividadDTO;
 
 @RestController
 @RequestMapping("/api/temas")
@@ -91,7 +92,8 @@ public class TemaController {
         List<Tema> temas = temaService.ObtenerTemasPorCursoAlumno(cursoId);
         List<TemaDTO> temasDTO = temas.stream().map(tema -> {
             List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
-            return new TemaDTO(tema, actividades);
+            List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
+            return new TemaDTO(tema, actividadesDTO);
         }).toList();
         return ResponseEntity.ok(temasDTO);
     }
@@ -101,7 +103,8 @@ public class TemaController {
         List<Tema> temas = temaService.ObtenerTemasPorCursoMaestro(cursoId);
         List<TemaDTO> temasDTO = temas.stream().map(tema -> {
             List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
-            return new TemaDTO(tema, actividades);
+            List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
+            return new TemaDTO(tema, actividadesDTO);
         }).toList();
         return ResponseEntity.ok(temasDTO);
     }

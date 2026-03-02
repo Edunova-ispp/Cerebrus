@@ -83,12 +83,11 @@ class OrdenacionControllerTest {
                 eq(1L), eq(false), eq(null), eq(1), any()))
                 .thenReturn(ordenacionGuardada);
 
-        ResponseEntity<Ordenacion> respuesta = ordenacionController.crearActOrdenacion(ordenacionRequest);
+        ResponseEntity<Long> respuesta = ordenacionController.crearActOrdenacion(ordenacionRequest);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(respuesta.getBody()).isNotNull();
-        assertThat(respuesta.getBody().getId()).isEqualTo(10L);
-        assertThat(respuesta.getBody().getTitulo()).isEqualTo("Ordena los planetas");
+        assertThat(respuesta.getBody()).isEqualTo(10L);
         verify(ordenacionService).crearActOrdenacion(
                 eq("Ordena los planetas"), eq("Descripción"), eq(100), eq("img.png"),
                 eq(1L), eq(false), eq(null), eq(1), any());
@@ -164,11 +163,10 @@ class OrdenacionControllerTest {
                 .thenReturn(actualizada);
 
         ordenacionRequest.setTitulo("Nuevo título");
-        ResponseEntity<Ordenacion> respuesta = ordenacionController.updateActOrdenacion(10L, ordenacionRequest);
+        ResponseEntity<Long> respuesta = ordenacionController.updateActOrdenacion(10L, ordenacionRequest);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(respuesta.getBody().getTitulo()).isEqualTo("Nuevo título");
-        assertThat(respuesta.getBody().getVersion()).isEqualTo(2);
+        assertThat(respuesta.getBody()).isEqualTo(10L);
     }
 
     // Test para verificar que updateActOrdenacion propaga AccessDeniedException cuando el service la lanza
