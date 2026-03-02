@@ -54,7 +54,7 @@ public class ActividadAlumno {
     @JoinColumn(name = "alumno_id", nullable = false)
     private Alumno alumno;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "actividad_id", nullable = false)
     private Actividad actividad;
 
