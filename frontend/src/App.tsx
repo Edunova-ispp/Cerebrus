@@ -7,6 +7,7 @@ import DeployTesting from "./pages/deployTesting/DeployTesting";
 import DetalleCurso from "./pages/detalleCurso/DetalleCurso";
 import InfoPage from "./pages/infoPage/InfoPage";
 import LandingPage from "./pages/landingPage/LandingPage";
+import CrearActividad from "./pages/crearActividad/crearActividad.tsx";
 import MisCursos from "./pages/misCursos/MisCursos";
 import Placeholder from "./pages/placeholder/placeholder";
 import EditarCurso from "./pages/editarCurso/EditarCurso";
@@ -33,6 +34,7 @@ function App() {
       <Route path="/auth/login"    element={<LoginPage />} />
       <Route path="/auth/register"    element={<RegisterPage />} />
       <Route path="/auth/logout"    element={<LogoutPage />} />
+      <Route path="/cursos/:id/temas/:temaId/actividades/crear" element={<CrearActividad />} />
     </Routes>
   );
 }

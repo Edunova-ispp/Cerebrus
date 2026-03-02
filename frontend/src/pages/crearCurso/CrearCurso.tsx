@@ -21,6 +21,7 @@ export default function CrearCurso() {
       setError('El título del curso es requerido');
       return;
     }
+    
 
     setLoading(true);
 

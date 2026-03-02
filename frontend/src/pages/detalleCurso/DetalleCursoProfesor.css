@@ -51,8 +51,8 @@
 }
 
 /* Banner de código */
-.detalle-profesor-banner {
-  background: #E285A9;
+.detalle-profesor-banner1 {
+  background: #ffefcb;
   border: 4px solid #000;
   border-radius: 16px;
   box-shadow: 6px 6px 0px #000;
@@ -63,6 +63,9 @@
   color: #000;
   text-align: center;
   letter-spacing: 1px;
+  width: 100%;
+  max-width: 600px;
+  box-sizing: border-box;
 }
 
 /* Fila de cajas */
@@ -93,22 +96,27 @@
 /* Botón editar */
 .detalle-profesor-actions {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
   width: 100%;
+  max-width: 600px;
 }
 
 .detalle-editar-btn {
-  background: #E285A9;
+  width: 100%;
+  background: #F5D49A !important;
   color: #000;
   border: 4px solid #000;
   border-radius: 16px;
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1.3rem;
   font-weight: bold;
-  padding: 10px 40px;
+  padding: 18px 40px;
   cursor: pointer;
   box-shadow: 5px 5px 0px #000;
   transition: transform 0.1s;
+  text-align: center;
 }
 
 .detalle-editar-btn:hover {
