@@ -22,6 +22,7 @@ import org.springframework.security.access.AccessDeniedException;
 import com.cerebrus.actividad.Ordenacion;
 import com.cerebrus.actividad.OrdenacionRepository;
 import com.cerebrus.actividad.OrdenacionServiceImpl;
+import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
@@ -31,6 +32,9 @@ class OrdenacionServiceImplTest {
 
     @Mock
     private OrdenacionRepository ordenacionRepository;
+
+    @Mock
+    private TemaRepository temaRepository;
 
     @Mock
     private UsuarioService usuarioService;
