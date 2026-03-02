@@ -102,4 +102,9 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         }
         ordenacionRepository.deleteById(id);
     }
+
+    @Override 
+    public Ordenacion encontrarOrdenacionPorId(Long id) {
+        return ordenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
+    }
 }
