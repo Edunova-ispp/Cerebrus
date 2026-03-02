@@ -5,11 +5,12 @@ import RegisterPage from "./pages/auth/register/RegisterPage";
 import CrearCurso from "./pages/crearCurso/CrearCurso";
 import DeployTesting from "./pages/deployTesting/DeployTesting";
 import DetalleCurso from "./pages/detalleCurso/DetalleCurso";
+import EditarCurso from "./pages/editarCurso/EditarCurso";
+import EstadisticasCurso from "./pages/estadisticasCurso/EstadisticasCurso";
 import InfoPage from "./pages/infoPage/InfoPage";
 import LandingPage from "./pages/landingPage/LandingPage";
 import MisCursos from "./pages/misCursos/MisCursos";
 import Placeholder from "./pages/placeholder/placeholder";
-import EditarCurso from "./pages/editarCurso/EditarCurso";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
       <Route path="/auth/login"    element={<LoginPage />} />
       <Route path="/auth/register"    element={<RegisterPage />} />
       <Route path="/auth/logout"    element={<LogoutPage />} />
+      <Route path="/estadisticas/:id" element={<EstadisticasCurso />} />
     </Routes>
   );
 }

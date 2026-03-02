@@ -23,18 +23,29 @@ export default function DetalleCursoProfesor({ curso }: Props) {
           Código del curso: <strong>{curso.codigo}</strong>
         </div>
 
-        <div className="detalle-profesor-row">
-          <div className="detalle-placeholder-box">Mapa del curso</div>
-          <div className="detalle-placeholder-box">Estadísticas</div>
-        </div>
-
-        <div className="detalle-profesor-actions">
+        <div className="detalle-profesor-actions-container">
+          
           <button
-            className="detalle-editar-btn"
+            className="detalle-action-btn mapa-btn"
+            onClick={() => navigate(`/mapa/${curso.id}`)}
+          >
+            Mapa del curso
+          </button>
+
+          <button
+            className="detalle-action-btn estadisticas-btn"
+            onClick={() => navigate(`/estadisticas/${curso.id}`)}
+          >
+            Estadísticas
+          </button>
+
+          <button
+            className="detalle-action-btn editar-btn"
             onClick={() => navigate(`/editarCurso/${curso.id}`)}
           >
-            Editar
+            Editar curso
           </button>
+          
         </div>
       </main>
     </div>

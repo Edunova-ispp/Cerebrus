@@ -1,0 +1,109 @@
+.estadisticas-page {
+  min-height: 100vh;
+  background-color: #F9F5E7; /* Fondo crema de la imagen */
+  display: flex;
+  flex-direction: column;
+}
+
+.estadisticas-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  width: 100%;
+}
+
+/* Botón Volver estilo imagen */
+.btn-volver-pixel {
+  align-self: flex-start;
+  background-color: #FCEF91;
+  border: 2px solid #000;
+  border-radius: 20px;
+  padding: 5px 15px;
+  font-family: 'Pixelify Sans', sans-serif;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.estadisticas-titulo-curso {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 3rem;
+  color: #1A2B4E;
+  margin-bottom: 20px;
+}
+
+/* El recuadro amarillo de la imagen */
+.estadisticas-yellow-card {
+  background-color: #FFF9C4; /* Amarillo claro */
+  border: 2px solid #000;
+  border-radius: 30px;
+  width: 90%;
+  max-width: 800px;
+  min-height: 300px;
+  padding: 40px;
+  box-shadow: inset -4px -4px 0px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.pixel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.2rem;
+}
+
+.table-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pixel-table th {
+  padding: 10px;
+  border-bottom: 2px solid #000;
+  border-left: 2px solid #000;
+  text-align: center;
+}
+
+.pixel-table th:first-child {
+  border-left: none;
+  text-align: left;
+}
+
+.pixel-table td {
+  padding: 15px 10px;
+  border-bottom: 1px solid #999;
+  border-left: 2px solid #000;
+}
+
+.pixel-table td:first-child {
+  border-left: none;
+}
+
+.pixel-table tr:last-child td {
+  border-bottom: none;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Botón inferior (Medias/Actualizar) */
+.btn-medias-pixel {
+  background-color: #FCEF91;
+  border: 3px solid #000;
+  border-radius: 15px;
+  padding: 10px 25px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 4px 4px 0px #000;
+}
+
+.btn-medias-pixel:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000;
+}
+
+.stats-error-msg { color: #C3004F; text-align: center; font-weight: bold; }
+.stats-info-msg { text-align: center; font-style: italic; }
