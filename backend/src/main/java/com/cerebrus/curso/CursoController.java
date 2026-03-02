@@ -1,7 +1,6 @@
 package com.cerebrus.curso;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,8 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.cerebrus.usuario.Alumno;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -156,6 +153,21 @@ public class CursoController {
             }
         }
     }
+    @GetMapping("/{id}/NotasMedias")
+    public ResponseEntity<List<Integer>> obtenerNotasMedias(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(cursoService.getNotaMediaPorActividad(id));
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("404 Not Found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            } else if (e.getMessage().equals("403 Forbidden")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
+
 
    
 }
