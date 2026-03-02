@@ -37,11 +37,13 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     private final RespAlumnoGeneralService respAlumnoGeneralService;
     private final OrdenacionService ordenacionService; 
     private final RespAlumnoOrdenacionService respAlumnoOrdenacionService;
+    private final UsuarioService usuarioService;
 
     @Autowired
     public ActividadAlumnoServiceImpl(ActividadAlumnoRepository actividadAlumnoRepository, 
         ActividadRepository actividadRepository, AlumnoRepository alumnoRepository, RespuestaAlumnoService respuestaAlumnoService,
-        RespAlumnoGeneralService respAlumnoGeneralService, OrdenacionService ordenacionService, RespAlumnoOrdenacionService respAlumnoOrdenacionService) {
+        RespAlumnoGeneralService respAlumnoGeneralService, OrdenacionService ordenacionService, 
+        RespAlumnoOrdenacionService respAlumnoOrdenacionService, UsuarioService usuarioService) {
         this.actividadAlumnoRepository = actividadAlumnoRepository;
         this.actividadRepository = actividadRepository;
         this.alumnoRepository = alumnoRepository;
@@ -49,6 +51,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         this.respAlumnoGeneralService = respAlumnoGeneralService;
         this.ordenacionService = ordenacionService;
         this.respAlumnoOrdenacionService = respAlumnoOrdenacionService;
+        this.usuarioService = usuarioService;
     }
 
     @Override
