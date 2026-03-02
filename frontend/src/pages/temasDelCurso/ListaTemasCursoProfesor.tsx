@@ -127,27 +127,56 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
               <button className="ltp-btn-añadir" onClick={() => navigate(`/cursos/${id ?? curso?.id}/temas/crear`)}>+ Añadir tema</button>
             </div>
 
-            <div className="ltp-panel">
-              <div className="ltp-lista">
-                {actividades.length === 0 ? (
-                  <p className="ltp-vacio">No hay actividades en este tema</p>
-                ) : (
-                  actividades.map((act) => (
-  <div key={act.id} className="ltp-item">
-    <span className="ltp-item-titulo">{act.titulo}</span>
-    <div className="ltp-item-acciones">
-      <button className="ltp-btn-icono" title="Editar" onClick={(e) => { e.stopPropagation(); navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado?.id}/actividades/${act.id}/editar`);}}>✎</button>
-      <button className="ltp-btn-icono" title="Borrar" onClick={(e) => { e.stopPropagation(); handleEliminarActividad(act.id); }}>🗑</button>
-    </div>
-  </div>
-))
-                )}
-              </div>
-                <button className="ltp-btn-añadir" onClick={() => navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/crear`)}>
-                  + Añadir actividad
+            {/* Panel derecho: Actividades */}
+<div className="ltp-panel">
+  {temaSeleccionado ? (
+    <>
+      <div className="ltp-lista">
+        {actividades.length === 0 ? (
+          <p className="ltp-vacio">No hay actividades en este tema</p>
+        ) : (
+          actividades.map((act) => (
+            <div key={act.id} className="ltp-item">
+              <span className="ltp-item-titulo">{act.titulo}</span>
+              <div className="ltp-item-acciones">
+                <button 
+                  className="ltp-btn-icono" 
+                  title="Editar" 
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/${act.id}/editar`);
+                  }}
+                >
+                  ✎
                 </button>
-            
+                <button 
+                  className="ltp-btn-icono" 
+                  title="Borrar" 
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    handleEliminarActividad(act.id); 
+                  }}
+                >
+                  🗑
+                </button>
+              </div>
             </div>
+          ))
+        )}
+      </div>
+      <button 
+        className="ltp-btn-añadir" 
+        onClick={() => navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/crear`)}
+      >
+        + Añadir actividad
+      </button>
+    </>
+  ) : (
+    <div className="ltp-vacio-seleccion">
+      <p className="ltp-vacio">Crea un tema para crear sus actividades</p>
+    </div>
+  )}
+</div>
           </div>
         )}
       </main>

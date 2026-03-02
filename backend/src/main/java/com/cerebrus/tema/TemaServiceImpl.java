@@ -93,6 +93,12 @@ public class TemaServiceImpl implements TemaService {
     }
 
     @Override
+public Tema obtenerTemaPorId(Long temaId) {
+    return temaRepository.findById(temaId)
+            .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado con ID: " + temaId));
+}
+
+    @Override
     public void eliminarTema(Long temaId) {
         
         Tema tema = temaRepository.findById(temaId)
