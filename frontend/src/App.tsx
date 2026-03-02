@@ -11,6 +11,9 @@ import InfoPage from "./pages/infoPage/InfoPage";
 import LandingPage from "./pages/landingPage/LandingPage";
 import MisCursos from "./pages/misCursos/MisCursos";
 import Placeholder from "./pages/placeholder/placeholder";
+import ListaTemasCursoProfesor from "./pages/temasDelCurso/ListaTemasCursoProfesor";
+import CrearTema from "./pages/crearTema/CrearTema";
+import EditarTema from "./pages/editarTema/EditarTema";
 
 function App() {
   return (
@@ -25,6 +28,9 @@ function App() {
       <Route path="/editarCurso/:id" element={<EditarCurso />} />
       <Route path="/mapa/:id"      element={<Placeholder />} />
       <Route path="/cursos/:id"    element={<DetalleCurso />} />
+      <Route path="/cursos/:id/temas"    element={<ListaTemasCursoProfesor />} />
+      <Route path="/cursos/:id/temas/crear" element={<CrearTema />} />
+      <Route path="/cursos/:id/temas/:temaId/editar" element={<EditarTema />} />
       <Route path="/auth/login"    element={<LoginPage />} />
       <Route path="/auth/register"    element={<RegisterPage />} />
       <Route path="/auth/logout"    element={<LogoutPage />} />
