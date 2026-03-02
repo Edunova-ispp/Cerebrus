@@ -2,22 +2,22 @@ package com.cerebrus.respuestaalumno;
 
 public class RespAlumnoOrdenacionCreateResponse {
 
-    private RespAlumnoOrdenacion respAlumnoOrdenacion;
+    private RespAlumnoOrdenacionDTO respAlumnoOrdenacion;
     private String comentario;
 
     public RespAlumnoOrdenacionCreateResponse() {
     }
 
-    public RespAlumnoOrdenacionCreateResponse(RespAlumnoOrdenacion respAlumnoOrdenacion, String comentario) {
+    public RespAlumnoOrdenacionCreateResponse(RespAlumnoOrdenacionDTO respAlumnoOrdenacion, String comentario) {
         this.respAlumnoOrdenacion = respAlumnoOrdenacion;
         this.comentario = comentario;
     }
 
-    public RespAlumnoOrdenacion getRespAlumnoOrdenacion() {
+    public RespAlumnoOrdenacionDTO getRespAlumnoOrdenacion() {
         return respAlumnoOrdenacion;
     }
 
-    public void setRespAlumnoOrdenacion(RespAlumnoOrdenacion respAlumnoOrdenacion) {
+    public void setRespAlumnoOrdenacion(RespAlumnoOrdenacionDTO respAlumnoOrdenacion) {
         this.respAlumnoOrdenacion = respAlumnoOrdenacion;
     }
 

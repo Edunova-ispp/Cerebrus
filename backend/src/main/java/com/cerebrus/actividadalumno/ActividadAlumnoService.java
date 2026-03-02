@@ -9,6 +9,7 @@ public interface ActividadAlumnoService {
     ActividadAlumno readActividadAlumno(Long id);
     Optional<ActividadAlumno> readActividadAlumnoByAlumnoIdAndActividadId(Long alumnoId, Long actividadId);
     Integer ensureActividadAlumno(Long actividadId);
+        ActividadAlumno abandonarActividadAlumno(Long actividadAlumnoId);
     ActividadAlumno updateActividadAlumno(Long id, Integer tiempo, Integer puntuacion,
          LocalDateTime inicio, LocalDateTime acabada, Integer nota, Integer numAbandonos);
     void deleteActividadAlumno(Long id);

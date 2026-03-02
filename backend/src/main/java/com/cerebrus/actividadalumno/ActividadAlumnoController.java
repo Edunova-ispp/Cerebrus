@@ -94,6 +94,13 @@ public class ActividadAlumnoController {
             .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @PostMapping("/{id}/abandon")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ActividadAlumnoDTO> abandonarActividadAlumno(@PathVariable Long id) {
+        ActividadAlumno updated = actividadAlumnoService.abandonarActividadAlumno(id);
+        return new ResponseEntity<>(toDto(updated), HttpStatus.OK);
+    }
+
     private static ActividadAlumnoDTO toDto(ActividadAlumno aa) {
         return new ActividadAlumnoDTO(
             aa.getId(),

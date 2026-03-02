@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,6 +103,32 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     public void deleteActividadAlumno(Long id) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         actividadAlumnoRepository.delete(actividadAlumno);
+    }
+
+    @Override
+    @Transactional
+    public ActividadAlumno abandonarActividadAlumno(Long actividadAlumnoId) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede abandonar su actividad");
+        }
+
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actividadAlumnoId)
+            .orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
+
+        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
+            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes modificar una ActividadAlumno que no es tuya");
+        }
+
+        // Si ya está acabada, no contamos abandono.
+        if (actividadAlumno.getEstadoActividad() == EstadoActividad.TERMINADA) {
+            return actividadAlumno;
+        }
+
+        Integer prev = actividadAlumno.getNumAbandonos() == null ? 0 : actividadAlumno.getNumAbandonos();
+        actividadAlumno.setNumAbandonos(prev + 1);
+        return actividadAlumnoRepository.save(actividadAlumno);
     }
 
 }

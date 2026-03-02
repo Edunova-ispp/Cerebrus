@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 
@@ -61,8 +61,12 @@ function moveItem<T>(items: readonly T[], fromIndex: number, toIndex: number): T
 
 export default function OrdenacionAlumno() {
   const { ordenacionId } = useParams<{ ordenacionId: string }>();
+  const navigate = useNavigate();
 
   const initInFlightRef = useRef(false);
+  const completedRef = useRef(false);
+  const abandonReportedRef = useRef(false);
+  const actividadAlumnoIdRef = useRef<number | null>(null);
 
   const [ordenacion, setOrdenacion] = useState<OrdenacionDTO | null>(null);
   const [items, setItems] = useState<string[]>([]);
@@ -76,6 +80,24 @@ export default function OrdenacionAlumno() {
     if (!ordenacionId) return NaN;
     return Number.parseInt(ordenacionId, 10);
   }, [ordenacionId]);
+
+  useEffect(() => {
+    actividadAlumnoIdRef.current = actividadAlumnoId;
+  }, [actividadAlumnoId]);
+
+  useEffect(() => {
+    return () => {
+      const id = actividadAlumnoIdRef.current;
+      if (!id) return;
+      if (completedRef.current) return;
+      if (abandonReportedRef.current) return;
+
+      abandonReportedRef.current = true;
+      apiFetch(`/api/actividades-alumno/${id}/abandon`, { method: 'POST' }).catch(() => {
+        // Silencioso: no queremos bloquear el navigation/unmount por errores aquí.
+      });
+    };
+  }, []);
 
   useEffect(() => {
     const run = async () => {
@@ -171,6 +193,13 @@ export default function OrdenacionAlumno() {
       const data = (await res.json()) as RespAlumnoOrdenacionCreateResponse;
       const correcta = Boolean(data?.respAlumnoOrdenacion?.correcta);
       const comentario = typeof data?.comentario === 'string' ? data.comentario : '';
+
+      if (correcta) {
+        completedRef.current = true;
+        window.alert('Tu respuesta es correcta.');
+        navigate(-1);
+        return;
+      }
 
       setFeedback({
         correcta,

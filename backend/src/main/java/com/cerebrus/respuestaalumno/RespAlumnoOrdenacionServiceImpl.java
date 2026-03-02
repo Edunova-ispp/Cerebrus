@@ -1,5 +1,6 @@
 package com.cerebrus.respuestaalumno;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,7 @@ public class RespAlumnoOrdenacionServiceImpl implements RespAlumnoOrdenacionServ
 
         List<String> valoresCorrectos = ordenacion.getValores();
         Boolean correcta = valoresAlum.equals(valoresCorrectos);
+        Integer numFallosAntes = actividadAlumno.getNumFallos();
         String comentario = null;
         if (ordenacion.getRespVisible()) {
             comentario = ordenacion.getComentariosRespVisible();
@@ -62,7 +64,22 @@ public class RespAlumnoOrdenacionServiceImpl implements RespAlumnoOrdenacionServ
         respAlumnoOrdenacion.setCorrecta(correcta);
         respAlumnoOrdenacionRepository.save(respAlumnoOrdenacion);
 
-        return new RespAlumnoOrdenacionCreateResponse(respAlumnoOrdenacion, comentario);
+        // Si la respuesta es correcta, cerramos la ActividadAlumno y calculamos nota/puntuación.
+        if (Boolean.TRUE.equals(correcta)) {
+            actividadAlumno.setAcabada(LocalDateTime.now());
+            actividadAlumno.setPuntuacion(ordenacion.getPuntuacion());
+
+            int notaCalculada = 10 - (numFallosAntes == null ? 0 : numFallosAntes.intValue());
+            if (notaCalculada < 1) {
+                notaCalculada = 1;
+            }
+            actividadAlumno.setNota(notaCalculada);
+
+            actividadAlumnoRepository.save(actividadAlumno);
+        }
+
+        RespAlumnoOrdenacionDTO dto = new RespAlumnoOrdenacionDTO(respAlumnoOrdenacion.getId(), respAlumnoOrdenacion.getCorrecta());
+        return new RespAlumnoOrdenacionCreateResponse(dto, comentario);
     }
 
     @Override
