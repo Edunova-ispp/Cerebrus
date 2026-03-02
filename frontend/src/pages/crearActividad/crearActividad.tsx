@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
-import './CrearActividad.css';
+import './crearActividad.css';
 
 const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden'];
 
