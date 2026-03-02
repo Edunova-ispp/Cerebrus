@@ -13,4 +13,6 @@ public interface TemaService {
     Tema renombrarTema(Long temaId, String nuevoTitulo, Long maestroId);
 
     void eliminarTema(Long temaId);
+
+    Tema obtenerTemaPorId(Long temaId);
 }
