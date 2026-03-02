@@ -1,5 +1,6 @@
 package com.cerebrus.estadisticas;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -54,17 +55,16 @@ public class EstadisticasMaestroController {
     }
 
     @GetMapping("/cursos/{cursoId}/puntos")
-    public ResponseEntity<Map<Alumno, Integer>> obtenerPuntosCurso(@PathVariable Long cursoId) {
+    public ResponseEntity<HashMap<String, Integer>> obtenerPuntosCurso(@PathVariable Long cursoId) {
         try {
-            Curso curso = cursoService.getCursoById(cursoId);
-            Map<Alumno, Integer> puntosPorAlumno = estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(curso);
+            HashMap<String, Integer> puntosPorAlumno = estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(cursoId);
             if(puntosPorAlumno.isEmpty()) {
-                return ResponseEntity.ok(Map.of());
+                return ResponseEntity.ok(new HashMap<>());
             }
             return ResponseEntity.ok(puntosPorAlumno);
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (RuntimeException e) {
+        }catch (RuntimeException e) {
             if (e.getMessage().equals("404 Not Found")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             } else if (e.getMessage().equals("403 Forbidden")) {
@@ -73,5 +73,6 @@ public class EstadisticasMaestroController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
         }
+
     }
 }

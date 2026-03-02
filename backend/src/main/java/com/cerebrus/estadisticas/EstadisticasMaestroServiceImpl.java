@@ -15,6 +15,7 @@ import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividadalumno.ActividadAlumno;
 import com.cerebrus.actividadalumno.EstadoActividad;
 import com.cerebrus.curso.Curso;
+import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.usuario.Alumno;
@@ -28,12 +29,14 @@ public class EstadisticasMaestroServiceImpl {
     private final EstadisticasMaestroRepository estadisticasRepository;
     private final UsuarioService usuarioService;
     private final ActividadRepository actividadRepository;
+    private final CursoRepository cursoRepository;
 
     @Autowired
-    public EstadisticasMaestroServiceImpl(EstadisticasMaestroRepository estadisticasRepository, UsuarioService usuarioService, ActividadRepository actividadRepository) {
+    public EstadisticasMaestroServiceImpl(EstadisticasMaestroRepository estadisticasRepository, UsuarioService usuarioService, ActividadRepository actividadRepository, CursoRepository cursoRepository) {
          this.estadisticasRepository = estadisticasRepository;
          this.usuarioService = usuarioService;
          this.actividadRepository = actividadRepository;
+         this.cursoRepository = cursoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -61,8 +64,10 @@ public class EstadisticasMaestroServiceImpl {
 
 
     @Transactional(readOnly = true)
-    public Map<Alumno, Integer> calcularTotalPuntosCursoPorAlumno(Curso curso) {
+    public HashMap<String, Integer> calcularTotalPuntosCursoPorAlumno(Long cursoId) {
         Usuario usuario = usuarioService.findCurrentUser();
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
         if (!(usuario instanceof Maestro)){
             throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
         }
@@ -71,9 +76,9 @@ public class EstadisticasMaestroServiceImpl {
             throw new  AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
         }
 
-        Map<Alumno, Integer> puntosPorAlumno = new HashMap<>();
+        HashMap<String, Integer> puntosPorAlumno = new HashMap<>();
         List<Inscripcion> inscripciones = curso.getInscripciones();
-
+        
         for (Inscripcion inscripcion : inscripciones) {
             Alumno alumno = inscripcion.getAlumno();
             int totalPuntos = 0;
@@ -96,7 +101,7 @@ public class EstadisticasMaestroServiceImpl {
                 }
             }
 
-            puntosPorAlumno.put(alumno, totalPuntos);
+            puntosPorAlumno.put(alumno.getNombre(), totalPuntos);
         }
         return puntosPorAlumno;
         }
