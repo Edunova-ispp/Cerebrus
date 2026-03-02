@@ -19,9 +19,6 @@ export default function CrearCurso() {
   const [loading, setLoading] = useState(false);
   const [imagenError, setImagenError] = useState(false);
   const navigate = useNavigate();
-  
-
-  const placeholderImage = "https://via.placeholder.com/150?text=Arrastra+un+archivo+aquí"; // O tu SVG local
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
