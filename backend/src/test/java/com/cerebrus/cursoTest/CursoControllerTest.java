@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -115,25 +116,24 @@ class CursoControllerTest {
     void obtenerPuntosCurso_maestroPropietario_retorna200ConPuntos() {
         Alumno alumno = new Alumno();
         alumno.setId(2L);
-        Map<Alumno, Integer> puntos = Map.of(alumno, 100);
+        HashMap<String, Integer> puntos = new HashMap<>();
+        puntos.put("Alumno 2", 100);
 
-        when(cursoService.getCursoById(10L)).thenReturn(curso);
-        when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(curso)).thenReturn(puntos);
+        when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(10L)).thenReturn(puntos);
 
-        ResponseEntity<Map<Alumno, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(10L);
+        ResponseEntity<HashMap<String, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(respuesta.getBody()).containsEntry(alumno, 100);
+        assertThat(respuesta.getBody()).containsEntry("Alumno 2", 100);
     }
 
     // Test para verificar que obtenerPuntosCurso retorna 403 cuando el service lanza AccessDeniedException
     @Test
     void obtenerPuntosCurso_accesoNoPermitido_retorna403() {
-        when(cursoService.getCursoById(10L)).thenReturn(curso);
-        when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(curso))
+        when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(10L))
                 .thenThrow(new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos"));
 
-        ResponseEntity<Map<Alumno, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(10L);
+        ResponseEntity<HashMap<String, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
@@ -141,9 +141,9 @@ class CursoControllerTest {
     // Test para verificar que obtenerPuntosCurso retorna 404 cuando el service lanza RuntimeException con mensaje 404
     @Test
     void obtenerPuntosCurso_cursoNoExiste_retorna404() {
-        when(cursoService.getCursoById(99L)).thenThrow(new RuntimeException("404 Not Found"));
+        when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(99L)).thenThrow(new RuntimeException("404 Not Found"));
 
-        ResponseEntity<Map<Alumno, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(99L);
+        ResponseEntity<HashMap<String, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(99L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -151,9 +151,9 @@ class CursoControllerTest {
     // Test para verificar que obtenerPuntosCurso retorna 500 cuando el service lanza una RuntimeException inesperada
     @Test
     void obtenerPuntosCurso_errorInesperado_retorna500() {
-        when(cursoService.getCursoById(10L)).thenThrow(new RuntimeException("Error interno"));
+        when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(10L)).thenThrow(new RuntimeException("Error interno"));
 
-        ResponseEntity<Map<Alumno, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(10L);
+        ResponseEntity<HashMap<String, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
