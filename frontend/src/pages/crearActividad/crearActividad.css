@@ -63,7 +63,8 @@
   box-shadow: 6px 6px 0px #000;
   padding: 32px;
   min-height: 400px;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   font-family: 'Pixelify Sans', sans-serif;
   color: #000;
 }

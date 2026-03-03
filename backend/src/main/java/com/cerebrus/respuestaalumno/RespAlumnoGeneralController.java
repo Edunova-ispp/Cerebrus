@@ -30,12 +30,11 @@ public class RespAlumnoGeneralController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<RespAlumnoGeneralCreateResponse> crearRespAlumnoGeneral(@RequestBody @Valid RespAlumnoGeneral respAlumnoGeneral) {
+    public ResponseEntity<RespAlumnoGeneralCreateResponse> crearRespAlumnoGeneral(@RequestBody @Valid RespAlumnoGeneralRequest request) {
         RespAlumnoGeneralCreateResponse respAlumnoGeneralCreada = respAlumnoGeneralService.crearRespAlumnoGeneral(
-            respAlumnoGeneral.getActividadAlumno().getId(),
-            respAlumnoGeneral.getRespuesta(),
-            respAlumnoGeneral.getPregunta().getId()
+            request.getActividadAlumnoId(),
+            request.getRespuestaId(),
+            request.getPreguntaId()
         );
         return new ResponseEntity<>(respAlumnoGeneralCreada, HttpStatus.CREATED);
     }

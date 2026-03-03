@@ -83,6 +83,9 @@ export default function MediasCurso() {
         <button className="btn-volver-pixel" onClick={() => navigate(-1)}>← Volver</button>
         <h1 className="estadisticas-titulo-curso">Medias del Curso</h1>
 
+        {loading && <p className="msg-placeholder">Cargando datos...</p>}
+        {error && <p className="msg-placeholder" style={{ color: 'red' }}>{error}</p>}
+
         <div className="layout-estadisticas">
           {/* PANEL IZQUIERDO: TEMAS */}
           <aside className="panel-temas">

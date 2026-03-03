@@ -14,6 +14,9 @@ public interface RespuestaRepository extends JpaRepository<Respuesta, Long> {
     @Query("select r from Respuesta r where r.respuesta = :respuesta")
     Optional<Respuesta> findByRespuesta(@Param("respuesta") String respuesta);
 
+    @Query("select r from Respuesta r where r.respuesta = :respuesta and r.pregunta.id = :preguntaId")
+    Optional<Respuesta> findByRespuestaAndPreguntaId(@Param("respuesta") String respuesta, @Param("preguntaId") Long preguntaId);
+
     @Query("select r from Respuesta r where r.pregunta.id = :preguntaId")
     List<Respuesta> findRespuestaByPreguntaId(@Param("preguntaId") Long preguntaId);
 
