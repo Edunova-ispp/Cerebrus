@@ -27,7 +27,7 @@ export default function DetalleCursoProfesor({ curso }: Props) {
     <button className="detalle-editar-btn" onClick={() => navigate(`/cursos/${curso.id}/temas`)}>
       Mapa del curso
     </button>
-    <button className="detalle-editar-btn">
+    <button className="detalle-editar-btn" onClick={() => navigate(`/estadisticas/${curso.id}`)}>
       Estadísticas
     </button>
     <button className="detalle-editar-btn" onClick={() => navigate(`/editarCurso/${curso.id}`)}>
