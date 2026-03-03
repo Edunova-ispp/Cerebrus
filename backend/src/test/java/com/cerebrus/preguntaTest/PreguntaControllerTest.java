@@ -181,7 +181,7 @@ class PreguntaControllerTest {
         when(preguntaService.updatePregunta(any(), any(), any()))
                 .thenThrow(new AccessDeniedException("Solo un maestro puede actualizar preguntas"));
 
-        assertThatThrownBy(() -> preguntaController.updatePregunta(10L, preguntaRequest))
+assertThatThrownBy(() -> preguntaController.updatePregunta(10L, preguntaGuardada))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede actualizar preguntas");
     }
@@ -192,7 +192,7 @@ class PreguntaControllerTest {
         when(preguntaService.updatePregunta(any(), any(), any()))
                 .thenThrow(new ResourceNotFoundException("La pregunta no existe"));
 
-        assertThatThrownBy(() -> preguntaController.updatePregunta(99L, preguntaRequest))
+assertThatThrownBy(() -> preguntaController.updatePregunta(99L, preguntaGuardada))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("La pregunta no existe");
     }

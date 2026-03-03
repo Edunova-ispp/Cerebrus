@@ -112,7 +112,7 @@ public class RespuestaControllerTest {
 
 		when(respuestaService.crearRespuesta(eq("Texto"), eq("img"), isNull(), eq(8L))).thenReturn(created);
 
-		ResponseEntity<Respuesta> response = controller.crearRespuesta(request);
+		ResponseEntity<Long> response = controller.crearRespuesta(request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(response.getBody()).isEqualTo(2L);

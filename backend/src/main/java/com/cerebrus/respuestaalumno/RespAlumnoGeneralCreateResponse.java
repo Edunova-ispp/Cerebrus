@@ -6,22 +6,22 @@ package com.cerebrus.respuestaalumno;
  */
 public class RespAlumnoGeneralCreateResponse {
 
-    private boolean correcta;
+    private Boolean correcta;
     private String comentario;
 
     public RespAlumnoGeneralCreateResponse() {
     }
 
-    public RespAlumnoGeneralCreateResponse(boolean correcta, String comentario) {
+    public RespAlumnoGeneralCreateResponse(Boolean correcta, String comentario) {
         this.correcta = correcta;
         this.comentario = comentario;
     }
 
-    public boolean isCorrecta() {
+    public Boolean getCorrecta() {
         return correcta;
     }
 
-    public void setCorrecta(boolean correcta) {
+    public void setCorrecta(Boolean correcta) {
         this.correcta = correcta;
     }
 

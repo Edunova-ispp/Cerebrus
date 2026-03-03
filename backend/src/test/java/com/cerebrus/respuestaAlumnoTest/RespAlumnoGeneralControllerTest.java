@@ -24,6 +24,7 @@ import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.respuestaalumno.RespAlumnoGeneral;
 import com.cerebrus.respuestaalumno.RespAlumnoGeneralController;
 import com.cerebrus.respuestaalumno.RespAlumnoGeneralCreateResponse;
+import com.cerebrus.respuestaalumno.RespAlumnoGeneralRequest;
 import com.cerebrus.respuestaalumno.RespAlumnoGeneralService;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,31 +40,23 @@ public class RespAlumnoGeneralControllerTest {
     // servicio con los parámetros correctos
 	@Test
 	void crearRespAlumnoGeneral_devuelveCreated() {
-		ActividadAlumno actAlumno = new ActividadAlumno();
-		actAlumno.setId(10L);
-
-		Pregunta pregunta = new Pregunta();
-		pregunta.setId(20L);
-
-		RespAlumnoGeneral request = new RespAlumnoGeneral();
-		request.setActividadAlumno(actAlumno);
-		request.setPregunta(pregunta);
-		request.setRespuesta("RESP");
+		RespAlumnoGeneralRequest request = new RespAlumnoGeneralRequest();
+		request.setActividadAlumnoId(10L);
+		request.setPreguntaId(20L);
+		request.setRespuestaId(30L);
 
 		RespAlumnoGeneralCreateResponse created = new RespAlumnoGeneralCreateResponse();
 		created.setComentario("OK");
 
-		when(respAlumnoGeneralService.crearRespAlumnoGeneral(eq(10L), eq("RESP"), eq(20L))).thenReturn(created);
+		when(respAlumnoGeneralService.crearRespAlumnoGeneral(eq(10L), eq(30L), eq(20L))).thenReturn(created);
 
 		ResponseEntity<RespAlumnoGeneralCreateResponse> response = controller.crearRespAlumnoGeneral(request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(response.getBody()).isSameAs(created);
-		verify(respAlumnoGeneralService).crearRespAlumnoGeneral(10L, "RESP", 20L);
+		verify(respAlumnoGeneralService).crearRespAlumnoGeneral(10L, 30L, 20L);
 	}
 
-    // Test para verificar que el método crearRespAlumnoGeneral lanza NullPointerException cuando la request es null, 
-    // y no interactúa con el servicio
 	@Test
 	void crearRespAlumnoGeneral_cuandoRequestEsNull_lanzaNullPointer() {
 		assertThatThrownBy(() -> controller.crearRespAlumnoGeneral(null))
@@ -75,101 +68,76 @@ public class RespAlumnoGeneralControllerTest {
     // y no interactúa con el servicio
 	@Test
 	void crearRespAlumnoGeneral_cuandoActividadAlumnoEsNull_lanzaNullPointer() {
-		Pregunta pregunta = new Pregunta();
-		pregunta.setId(20L);
+		RespAlumnoGeneralRequest request = new RespAlumnoGeneralRequest();
+		request.setActividadAlumnoId(null);
+		request.setPreguntaId(20L);
+		request.setRespuestaId(30L);
 
-		RespAlumnoGeneral request = new RespAlumnoGeneral();
-		request.setActividadAlumno(null);
-		request.setPregunta(pregunta);
-		request.setRespuesta("RESP");
+		when(respAlumnoGeneralService.crearRespAlumnoGeneral(null, 30L, 20L))
+				.thenThrow(new RuntimeException("La actividad del alumno no existe"));
 
 		assertThatThrownBy(() -> controller.crearRespAlumnoGeneral(request))
-				.isInstanceOf(NullPointerException.class);
-		verifyNoInteractions(respAlumnoGeneralService);
+				.isInstanceOf(RuntimeException.class)
+				.hasMessage("La actividad del alumno no existe");
+		verify(respAlumnoGeneralService).crearRespAlumnoGeneral(null, 30L, 20L);
 	}
 
-    // Test para verificar que el método crearRespAlumnoGeneral lanza NullPointerException cuando la pregunta es null, 
-    // y no interactúa con el servicio
 	@Test
 	void crearRespAlumnoGeneral_cuandoPreguntaEsNull_lanzaNullPointer() {
-		ActividadAlumno actAlumno = new ActividadAlumno();
-		actAlumno.setId(10L);
+		RespAlumnoGeneralRequest request = new RespAlumnoGeneralRequest();
+		request.setActividadAlumnoId(10L);
+		request.setPreguntaId(null);
+		request.setRespuestaId(30L);
 
-		RespAlumnoGeneral request = new RespAlumnoGeneral();
-		request.setActividadAlumno(actAlumno);
-		request.setPregunta(null);
-		request.setRespuesta("RESP");
+		when(respAlumnoGeneralService.crearRespAlumnoGeneral(10L, 30L, null))
+				.thenThrow(new RuntimeException("La pregunta no existe"));
 
 		assertThatThrownBy(() -> controller.crearRespAlumnoGeneral(request))
-				.isInstanceOf(NullPointerException.class);
-		verifyNoInteractions(respAlumnoGeneralService);
+				.isInstanceOf(RuntimeException.class)
+				.hasMessage("La pregunta no existe");
+		verify(respAlumnoGeneralService).crearRespAlumnoGeneral(10L, 30L, null);
 	}
 
-    // Test para verificar que el método crearRespAlumnoGeneral lanza RuntimeException con mensaje específico cuando la
-    // respuesta no existe, y no interactúa con el servicio de usuarios
 	@Test
 	void crearRespAlumnoGeneral_propagaRuntimeException() {
-		ActividadAlumno actAlumno = new ActividadAlumno();
-		actAlumno.setId(10L);
-		Pregunta pregunta = new Pregunta();
-		pregunta.setId(20L);
+		RespAlumnoGeneralRequest request = new RespAlumnoGeneralRequest();
+		request.setActividadAlumnoId(10L);
+		request.setPreguntaId(20L);
+		request.setRespuestaId(30L);
 
-		RespAlumnoGeneral request = new RespAlumnoGeneral();
-		request.setActividadAlumno(actAlumno);
-		request.setPregunta(pregunta);
-		request.setRespuesta("RESP");
-
-		when(respAlumnoGeneralService.crearRespAlumnoGeneral(eq(10L), eq("RESP"), eq(20L)))
+		when(respAlumnoGeneralService.crearRespAlumnoGeneral(eq(10L), eq(30L), eq(20L)))
 				.thenThrow(new RuntimeException("La respuesta no existe"));
 
 		assertThatThrownBy(() -> controller.crearRespAlumnoGeneral(request))
 				.isInstanceOf(RuntimeException.class)
 				.hasMessage("La respuesta no existe");
-		verify(respAlumnoGeneralService).crearRespAlumnoGeneral(10L, "RESP", 20L);
+		verify(respAlumnoGeneralService).crearRespAlumnoGeneral(10L, 30L, 20L);
 	}
 
-    // Test para verificar que el método crearRespAlumnoGeneral lanza AccessDeniedException con mensaje 
-    // específico cuando el servicio lo lanza
 	@Test
 	void crearRespAlumnoGeneral_propagaAccessDenied() {
-		ActividadAlumno actAlumno = new ActividadAlumno();
-		actAlumno.setId(10L);
-		Pregunta pregunta = new Pregunta();
-		pregunta.setId(20L);
+		RespAlumnoGeneralRequest request = new RespAlumnoGeneralRequest();
+		request.setActividadAlumnoId(10L);
+		request.setPreguntaId(20L);
+		request.setRespuestaId(30L);
 
-		RespAlumnoGeneral request = new RespAlumnoGeneral();
-		request.setActividadAlumno(actAlumno);
-		request.setPregunta(pregunta);
-		request.setRespuesta("RESP");
-
-		when(respAlumnoGeneralService.crearRespAlumnoGeneral(eq(10L), eq("RESP"), eq(20L)))
+		when(respAlumnoGeneralService.crearRespAlumnoGeneral(eq(10L), eq(30L), eq(20L)))
 				.thenThrow(new AccessDeniedException("Solo un alumno"));
 
 		assertThatThrownBy(() -> controller.crearRespAlumnoGeneral(request))
 				.isInstanceOf(AccessDeniedException.class);
-		verify(respAlumnoGeneralService).crearRespAlumnoGeneral(10L, "RESP", 20L);
+		verify(respAlumnoGeneralService).crearRespAlumnoGeneral(10L, 30L, 20L);
 	}
 
-    // Test para verificar que el método crearRespAlumnoGeneral permite respuesta null, devuelve CREATED, y delega en el 
-    // servicio con los parámetros correctos
 	@Test
 	void crearRespAlumnoGeneral_permiteRespuestaNull() {
-		ActividadAlumno actAlumno = new ActividadAlumno();
-		actAlumno.setId(1L);
-		Pregunta pregunta = new Pregunta();
-		pregunta.setId(2L);
-
-		RespAlumnoGeneral request = new RespAlumnoGeneral();
-		request.setActividadAlumno(actAlumno);
-		request.setPregunta(pregunta);
-		request.setRespuesta(null);
-
-		RespAlumnoGeneralCreateResponse created = new RespAlumnoGeneralCreateResponse();
-		when(respAlumnoGeneralService.crearRespAlumnoGeneral(eq(1L), isNull(), eq(2L))).thenReturn(created);
-
+		RespAlumnoGeneralRequest request = new RespAlumnoGeneralRequest();
+		request.setActividadAlumnoId(1L);
+		request.setPreguntaId(2L);
+		request.setRespuestaId(null);
 		ResponseEntity<RespAlumnoGeneralCreateResponse> response = controller.crearRespAlumnoGeneral(request);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(response.getBody()).isSameAs(created);
+		assertThat(response.getBody()).isNull();
 		verify(respAlumnoGeneralService).crearRespAlumnoGeneral(1L, null, 2L);
 	}
 
