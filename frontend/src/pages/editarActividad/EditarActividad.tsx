@@ -40,7 +40,7 @@ type GeneralTestMaestroDTO = {
 type ActivityKind = 'ordenacion' | 'test' | null;
 
 export default function EditarActividad() {
-  const { id: cursoId, temaId, actividadId } = useParams<{
+  const { id: cursoId, actividadId } = useParams<{
     id: string;
     temaId: string;
     actividadId: string;
@@ -55,9 +55,6 @@ export default function EditarActividad() {
 
   useEffect(() => {
     if (!actividadId) return;
-
-    setLoading(true);
-    setError(null);
 
     // Try test endpoint first; if it fails, fall back to ordenacion
     apiFetch(`/api/generales/test/${actividadId}/maestro`)
