@@ -102,13 +102,25 @@ public ResponseEntity<Actividad> crearActividadTeoria(@RequestBody CrearActivida
     }
 
     @GetMapping("/{id}/maestro")
-public ResponseEntity<Actividad> getActividadMaestro(@PathVariable Long id) {
+public ResponseEntity<TeoriaDTO> getActividadMaestro(@PathVariable Long id) {
     try {
         Actividad actividad = actividadService.encontrarActividadPorId(id);
-        return ResponseEntity.ok(actividad);
+        return ResponseEntity.ok(toTeoriaDto(actividad));
     } catch (IllegalArgumentException e) {
         return ResponseEntity.notFound().build();
     }
+}
+
+private static TeoriaDTO toTeoriaDto(Actividad actividad) {
+    return new TeoriaDTO(
+        actividad.getId(),
+        actividad.getTitulo(),
+        actividad.getDescripcion(),
+        actividad.getPuntuacion(),
+        actividad.getImagen(),
+        actividad.getPosicion(),
+        actividad.getTema() == null ? null : actividad.getTema().getId()
+    );
 }
 
     @PutMapping("/teoria/{id}")
