@@ -6,28 +6,36 @@
 }
 
 .estadisticas-main {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 24px 60px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
-  width: 100%;
+  gap: 28px;
 }
 
 .btn-volver-pixel {
   align-self: flex-start;
-  background-color: #FCEF91;
-  border: 2px solid #000;
-  border-radius: 20px;
-  padding: 5px 15px;
+  background: #E8D5B5;
+  color: #000;
+  border: 3px solid #000;
+  border-radius: 12px;
   font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.1rem;
+  padding: 6px 18px;
   cursor: pointer;
-  margin-bottom: 10px;
+  box-shadow: 3px 3px 0px #000;
+  transition: transform 0.1s;
 }
 
 .estadisticas-titulo-curso {
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 3rem;
-  color: #1A2B4E;
+  color: #000000;
   margin-bottom: 20px;
 }
 

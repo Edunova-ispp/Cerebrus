@@ -18,6 +18,7 @@ import EditarTema from "./pages/editarTema/EditarTema";
 import EditarActividad from "./pages/editarActividad/EditarActividad";
 import OrdenacionAlumno from "./pages/ordenacionAlumno/OrdenacionAlumno";
 import MediasCurso from "./pages/estadisticasCurso/MediasCurso";
+import TeoriaAlumno from "./pages/TeoriaAlumno/TeoriaAlumno";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
       <Route path="/auth/logout"    element={<LogoutPage />} />
       <Route path="/cursos/:id/temas/:temaId/actividades/crear" element={<CrearActividad />} />
       <Route path="/ordenaciones/:ordenacionId/alumno" element={<OrdenacionAlumno />} />
+      <Route path="/actividades/teoria/:actividadId" element={<TeoriaAlumno />} />
       <Route path="/estadisticas/:id" element={<EstadisticasCurso />} />
       <Route path="/medias/:id" element={<MediasCurso />} />
     </Routes>
