@@ -241,7 +241,7 @@ export default function OrdenacionAlumno() {
           <>
             <div className="ord-top">
               <button className="ord-exit-btn" type="button" onClick={() => navigate(-1)}>
-                Salir del curso
+                Salir
               </button>
 
               <div className="ord-title-banner">
