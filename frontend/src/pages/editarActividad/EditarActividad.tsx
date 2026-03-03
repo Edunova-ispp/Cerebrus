@@ -30,6 +30,11 @@ type GeneralTestMaestroDTO = {
   posicion: number;
   version: number;
   temaId: number;
+  preguntas: {
+    id: number;
+    pregunta: string;
+    respuestas: { id: number; respuesta: string; correcta: boolean }[];
+  }[];
 };
 
 type ActivityKind = 'ordenacion' | 'test' | null;
@@ -102,6 +107,7 @@ export default function EditarActividad() {
         comentariosRespVisible: generalTest.comentariosRespVisible,
         posicion: generalTest.posicion,
         version: generalTest.version,
+        preguntas: generalTest.preguntas ?? [],
       }
     : undefined;
 

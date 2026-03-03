@@ -46,7 +46,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
 
     @Override
     @Transactional
-    public RespAlumnoGeneralCreateResponse crearRespAlumnoGeneral(Long actAlumnoId, String respuesta, Long preguntaId) {
+    public RespAlumnoGeneralCreateResponse crearRespAlumnoGeneral(Long actAlumnoId, Long respuestaId, Long preguntaId) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Alumno)) {
@@ -55,18 +55,19 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
 
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actAlumnoId).orElseThrow(() -> new RuntimeException("La actividad del alumno no existe"));
         Pregunta pregunta = preguntaRepository.findById(preguntaId).orElseThrow(() -> new RuntimeException("La pregunta no existe"));
-        Respuesta respuestaObj = respuestaRepository.findByRespuesta(respuesta).orElseThrow(() -> new RuntimeException("La respuesta no existe"));
+        Respuesta respuestaObj = respuestaRepository.findById(respuestaId).orElseThrow(() -> new RuntimeException("La respuesta no existe"));
         Boolean correcta = respuestaObj.getCorrecta();
-        String comentariosRespVisible = null;
-        if(pregunta.getActividad().getRespVisible()) {
+        String respuestaTexto = respuestaObj.getRespuesta();
+        String comentariosRespVisible;
+        if (pregunta.getActividad().getRespVisible()) {
             comentariosRespVisible = pregunta.getActividad().getComentariosRespVisible();
         } else {
             comentariosRespVisible = "";
         }
 
-        RespAlumnoGeneral respAlumnoGeneral = new RespAlumnoGeneral(correcta, actividadAlumno, respuesta, pregunta);
-        RespAlumnoGeneral respAlumnoGeneralGuardada = respAlumnoGeneralRepository.save(respAlumnoGeneral);
-        return new RespAlumnoGeneralCreateResponse(respAlumnoGeneralGuardada, comentariosRespVisible);
+        RespAlumnoGeneral respAlumnoGeneralEntity = new RespAlumnoGeneral(correcta, actividadAlumno, respuestaTexto, pregunta);
+        respAlumnoGeneralRepository.save(respAlumnoGeneralEntity);
+        return new RespAlumnoGeneralCreateResponse(correcta, comentariosRespVisible);
     }
 
     @Override

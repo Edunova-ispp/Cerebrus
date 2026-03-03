@@ -12,6 +12,8 @@ const RegisterPage = () => {
   const [organizacion, setOrganizacion] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [tipoUsuario, setTipoUsuario] = useState('ALUMNO');
   const [puntos, setPuntos] = useState('');
 
@@ -151,11 +153,21 @@ const RegisterPage = () => {
           <div className="register-fields-row">
             <div className="register-field-group">
               <label className="register-label">Contraseña:</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="register-input" />
+              <div className="pw-input-wrap">
+                <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required className="register-input" />
+                <button type="button" className="pw-toggle-btn" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? 'Ocultar' : 'Mostrar'}>
+                  {showPassword ? '🙈' : '👁'}
+                </button>
+              </div>
             </div>
             <div className="register-field-group">
               <label className="register-label">Confirmar contraseña:</label>
-              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="register-input" />
+              <div className="pw-input-wrap">
+                <input type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="register-input" />
+                <button type="button" className="pw-toggle-btn" onClick={() => setShowConfirmPassword((v) => !v)} aria-label={showConfirmPassword ? 'Ocultar' : 'Mostrar'}>
+                  {showConfirmPassword ? '🙈' : '👁'}
+                </button>
+              </div>
             </div>
           </div>
 

@@ -1,9 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
 import './TestForm.css';
 
 export type TestFormMode = 'create' | 'edit';
+
+export interface TestFormInitialPregunta {
+  readonly id: number;
+  readonly pregunta: string;
+  readonly respuestas: readonly {
+    readonly id: number;
+    readonly respuesta: string;
+    readonly correcta: boolean;
+  }[];
+}
 
 export interface TestFormInitialValues {
   readonly titulo: string;
@@ -14,14 +24,17 @@ export interface TestFormInitialValues {
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly version: number;
+  readonly preguntas?: readonly TestFormInitialPregunta[];
 }
 
 interface QuestionOption {
+  id?: number;
   text: string;
   correcta: boolean;
 }
 
 interface Question {
+  id?: number;
   text: string;
   options: QuestionOption[];
 }
@@ -51,6 +64,9 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Tracks original server-loaded preguntas for deletion detection in edit mode
+  const originalQuestionsRef = useRef<TestFormInitialPregunta[]>([]);
+
   const navigate = useNavigate();
   const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
 
@@ -62,6 +78,21 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
     setImagen(initialValues.imagen ?? '');
     setRespVisible(Boolean(initialValues.respVisible));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
+
+    if (initialValues.preguntas && initialValues.preguntas.length > 0) {
+      originalQuestionsRef.current = [...initialValues.preguntas];
+      setQuestions(
+        initialValues.preguntas.map((p) => ({
+          id: p.id,
+          text: p.pregunta,
+          options: p.respuestas.map((r) => ({
+            id: r.id,
+            text: r.respuesta,
+            correcta: r.correcta,
+          })),
+        })),
+      );
+    }
   }, [initialValues]);
 
   // ── Question / option state helpers ──────────────────────────────────────
@@ -119,21 +150,19 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
     if (!cursoId) return 'Falta el id del curso en la URL';
 
-    if (mode === 'create') {
-      if (questions.length === 0) return 'Añade al menos una pregunta';
+    if (questions.length === 0) return 'Añade al menos una pregunta';
 
-      for (let qi = 0; qi < questions.length; qi++) {
-        const q = questions[qi];
-        if (!q.text.trim()) return `La pregunta ${qi + 1} no tiene texto`;
-        if (q.options.length < 2)
-          return `La pregunta ${qi + 1} debe tener al menos 2 opciones`;
-        for (let oi = 0; oi < q.options.length; oi++) {
-          if (!q.options[oi].text.trim())
-            return `La opción ${oi + 1} de la pregunta ${qi + 1} está vacía`;
-        }
-        if (!q.options.some((o) => o.correcta))
-          return `Marca la respuesta correcta en la pregunta ${qi + 1}`;
+    for (let qi = 0; qi < questions.length; qi++) {
+      const q = questions[qi];
+      if (!q.text.trim()) return `La pregunta ${qi + 1} no tiene texto`;
+      if (q.options.length < 2)
+        return `La pregunta ${qi + 1} debe tener al menos 2 opciones`;
+      for (let oi = 0; oi < q.options.length; oi++) {
+        if (!q.options[oi].text.trim())
+          return `La opción ${oi + 1} de la pregunta ${qi + 1} está vacía`;
       }
+      if (!q.options.some((o) => o.correcta))
+        return `Marca la respuesta correcta en la pregunta ${qi + 1}`;
     }
 
     if (mode === 'edit' && !generalId) return 'Falta el id de la actividad a editar';
@@ -203,7 +232,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
           );
         }
       } else {
-        // Edit – metadata only
+        // Edit – metadata
         await apiFetch(`/api/generales/update/${generalId}`, {
           method: 'PUT',
           body: JSON.stringify({
@@ -213,12 +242,84 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
             imagen: imagen.trim() || null,
             tema: { id: temaIdNum },
             respVisible,
-            // Always send a string to avoid NPE in the service (updateActGeneral checks .isBlank())
             comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || '') : '',
             posicion: initialValues?.posicion ?? 0,
             version: initialValues?.version ?? 1,
           }),
         });
+
+        // Edit – questions: delete removed, update existing, create new
+        const currentQuestionIds = new Set(questions.filter((q) => q.id).map((q) => q.id!));
+        for (const orig of originalQuestionsRef.current) {
+          if (!currentQuestionIds.has(orig.id)) {
+            await apiFetch(`/api/preguntas/delete/${orig.id}`, { method: 'DELETE' });
+          }
+        }
+
+        for (const q of questions) {
+          if (q.id) {
+            // Existing question – update text
+            await apiFetch(`/api/preguntas/update/${q.id}`, {
+              method: 'PUT',
+              body: JSON.stringify({ pregunta: q.text.trim(), imagen: null }),
+            });
+
+            const origQ = originalQuestionsRef.current.find((o) => o.id === q.id);
+            const currentOptIds = new Set(q.options.filter((o) => o.id).map((o) => o.id!));
+
+            // Delete removed options
+            for (const origR of origQ?.respuestas ?? []) {
+              if (!currentOptIds.has(origR.id)) {
+                await apiFetch(`/api/respuestas/delete/${origR.id}`, { method: 'DELETE' });
+              }
+            }
+
+            // Update existing / create new options
+            await Promise.all(
+              q.options.map((opt) => {
+                if (opt.id) {
+                  return apiFetch(`/api/respuestas/update/${opt.id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                      respuesta: opt.text.trim(),
+                      imagen: null,
+                      correcta: opt.correcta,
+                    }),
+                  });
+                }
+                return apiFetch('/api/respuestas', {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    respuesta: opt.text.trim(),
+                    imagen: null,
+                    correcta: opt.correcta,
+                    pregunta: { id: q.id },
+                  }),
+                });
+              }),
+            );
+          } else {
+            // New question – create then create all its options
+            const pregRes = await apiFetch('/api/preguntas', {
+              method: 'POST',
+              body: JSON.stringify({ pregunta: q.text.trim(), imagen: null, actividadId: generalId }),
+            });
+            const newPregId = (await pregRes.json()) as number;
+            await Promise.all(
+              q.options.map((opt) =>
+                apiFetch('/api/respuestas', {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    respuesta: opt.text.trim(),
+                    imagen: null,
+                    correcta: opt.correcta,
+                    pregunta: { id: newPregId },
+                  }),
+                }),
+              ),
+            );
+          }
+        }
       }
 
       navigate(`/cursos/${cursoId}/temas`);
@@ -336,12 +437,11 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
         </div>
       </div>
 
-      {/* ── BOTTOM: Questions (create mode only) ── */}
-      {mode === 'create' && (
-        <div
-          className="ca-contenedor-blanco tf-questions"
-          style={{ marginTop: 16, flexDirection: 'column', alignItems: 'stretch' }}
-        >
+      {/* ── BOTTOM: Questions ── */}
+      <div
+        className="ca-contenedor-blanco tf-questions"
+        style={{ marginTop: 16, flexDirection: 'column', alignItems: 'stretch' }}
+      >
           <p className="ca-ordenacion-help" style={{ marginTop: 0, marginBottom: 12 }}>
             Añade las preguntas y opciones. Marca cuál es la correcta con{' '}
             <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
@@ -417,7 +517,6 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
             + Añadir pregunta
           </button>
         </div>
-      )}
 
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
         <button className="ca-btn-guardar" type="submit" disabled={loading}>

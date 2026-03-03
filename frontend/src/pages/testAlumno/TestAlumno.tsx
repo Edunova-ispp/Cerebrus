@@ -33,10 +33,7 @@ type GeneralTestDTO = {
 };
 
 type RespAlumnoGeneralCreateResponse = {
-  readonly respAlumnoGeneral: {
-    readonly id: number;
-    readonly correcta: boolean;
-  };
+  readonly correcta: boolean;
   readonly comentario: string;
 };
 
@@ -74,7 +71,8 @@ export default function TestAlumno() {
 
   const [test, setTest] = useState<GeneralTestDTO | null>(null);
   const [actividadAlumnoId, setActividadAlumnoId] = useState<number | null>(null);
-  const [selections, setSelections] = useState<Map<number, string>>(new Map());
+  // preguntaId → selected respuesta ID (not text, to avoid duplicate-text false-matches)
+  const [selections, setSelections] = useState<Map<number, number>>(new Map());
   const [results, setResults] = useState<Map<number, QuestionResult>>(new Map());
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -176,9 +174,9 @@ export default function TestAlumno() {
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
-  const handleSelect = (preguntaId: number, respuestaText: string) => {
+  const handleSelect = (preguntaId: number, respuestaId: number) => {
     if (submitted) return;
-    setSelections((prev) => new Map(prev).set(preguntaId, respuestaText));
+    setSelections((prev) => new Map(prev).set(preguntaId, respuestaId));
   };
 
   const handleSubmit = async () => {
@@ -189,18 +187,19 @@ export default function TestAlumno() {
     try {
       const resultEntries = await Promise.all(
         test.preguntas.map(async (p) => {
-          const selectedText = selections.get(p.id)!;
+          const selectedId = selections.get(p.id)!;
+          const selectedText = p.respuestas.find((r) => r.id === selectedId)?.respuesta ?? '';
           const res = await apiFetch('/api/respuestas-alumno-general', {
             method: 'POST',
             body: JSON.stringify({
-              actividadAlumno: { id: actividadAlumnoId },
-              respuesta: selectedText,
-              pregunta: { id: p.id },
+              actividadAlumnoId,
+              preguntaId: p.id,
+              respuestaId: selectedId,
             }),
           });
           const data = (await res.json()) as RespAlumnoGeneralCreateResponse;
           const result: QuestionResult = {
-            correcta: Boolean(data?.respAlumnoGeneral?.correcta),
+            correcta: Boolean(data?.correcta),
             comentario: typeof data?.comentario === 'string' ? data.comentario : '',
             selectedText,
           };
@@ -286,7 +285,7 @@ export default function TestAlumno() {
             <div className="ta-questions">
               {test.preguntas.map((pregunta, qi) => {
                 const result = results.get(pregunta.id);
-                const selectedText = selections.get(pregunta.id);
+                const selectedId = selections.get(pregunta.id);
 
                 return (
                   <div key={pregunta.id} className="ta-question-card">
@@ -303,7 +302,7 @@ export default function TestAlumno() {
 
                     <div className="ta-options">
                       {pregunta.respuestas.map((r, oi) => {
-                        const isSelected = selectedText === r.respuesta;
+                        const isSelected = selectedId === r.id;
                         let optClass = 'ta-option';
                         if (submitted && result) {
                           if (isSelected) {
@@ -318,7 +317,7 @@ export default function TestAlumno() {
                             key={r.id}
                             type="button"
                             className={optClass}
-                            onClick={() => handleSelect(pregunta.id, r.respuesta)}
+                            onClick={() => handleSelect(pregunta.id, r.id)}
                             disabled={submitted}
                           >
                             <span className="ta-option-letter">{String.fromCharCode(65 + oi)}.</span>

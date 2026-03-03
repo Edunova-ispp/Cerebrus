@@ -18,6 +18,7 @@ import EditarTema from "./pages/editarTema/EditarTema";
 import EditarActividad from "./pages/editarActividad/EditarActividad";
 import OrdenacionAlumno from "./pages/ordenacionAlumno/OrdenacionAlumno";
 import TestAlumno from "./pages/testAlumno/TestAlumno";
+import MapaCurso from "./pages/mapaCurso/MapaCurso";
 import MediasCurso from "./pages/estadisticasCurso/MediasCurso";
 
 function App() {
@@ -31,7 +32,7 @@ function App() {
       <Route path="/misCursos"     element={<MisCursos />} />
       <Route path="/crearCurso"    element={<CrearCurso />} />
       <Route path="/editarCurso/:id" element={<EditarCurso />} />
-      <Route path="/mapa/:id"      element={<Placeholder />} />
+      <Route path="/mapa/:id"      element={<MapaCurso />} />
       <Route path="/cursos/:id"    element={<DetalleCurso />} />
       <Route path="/cursos/:id/temas"    element={<ListaTemasCursoProfesor />} />
       <Route path="/cursos/:id/temas/crear" element={<CrearTema />} />
