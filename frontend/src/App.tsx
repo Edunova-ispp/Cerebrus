@@ -40,8 +40,6 @@ function App() {
       <Route path="/auth/register"    element={<RegisterPage />} />
       <Route path="/auth/logout"    element={<LogoutPage />} />
       <Route path="/cursos/:id/temas/:temaId/actividades/crear" element={<CrearActividad />} />
-
-      {/* Alumno: resolver actividad de ordenación */}
       <Route path="/ordenaciones/:ordenacionId/alumno" element={<OrdenacionAlumno />} />
       <Route path="/estadisticas/:id" element={<EstadisticasCurso />} />
       <Route path="/medias/:id" element={<MediasCurso />} />

@@ -1,9 +1,6 @@
 package com.cerebrus.curso;
 
 import java.util.List;
-import java.util.Map;
-
-import com.cerebrus.usuario.Alumno;
 
 public interface CursoService {
     List<String> obtenerDetallesCurso(Long id);

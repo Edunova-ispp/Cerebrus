@@ -20,65 +20,71 @@ export default function MediasCurso() {
   
   const [temas, setTemas] = useState<Tema[]>([]);
   const [temaSeleccionado, setTemaSeleccionado] = useState<Tema | null>(null);
+  const [mapaNotas, setMapaNotas] = useState<Map<number, number>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    cargarDatosEstructurales();
+    cargarTodo();
   }, [id]);
 
-  const cargarDatosEstructurales = async () => {
+  const cargarTodo = async () => {
     setLoading(true);
     setError('');
     try {
       const token = localStorage.getItem('token');
       const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
-      // Cargamos los temas y sus actividades usando el endpoint de maestro
-      const res = await fetch(`${apiBase}/api/temas/curso/${id}/maestro`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      // Peticiones al backend
+      const [resEstructura, resNotas] = await Promise.all([
+        fetch(`${apiBase}/api/temas/curso/${id}/maestro`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${apiBase}/api/cursos/${id}/NotasMedias`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+      ]);
+
+      if (!resEstructura.ok || !resNotas.ok) throw new Error("Error al obtener datos");
+      
+      const temasData: Tema[] = await resEstructura.json();
+      const notasData: number[] = await resNotas.json(); // List<Integer> del backend
+
+      // Sincronización: El backend calcula las notas recorriendo las actividades únicas
+      // Creamos un mapa: ActividadID -> NotaMedia
+      const nuevoMapa = new Map<number, number>();
+      let notaIdx = 0;
+
+      // Recorremos la estructura de temas para asignar las notas en orden
+      temasData.forEach(tema => {
+        tema.actividades.forEach(act => {
+          if (notaIdx < notasData.length) {
+            nuevoMapa.set(act.id, notasData[notaIdx]);
+            notaIdx++;
+          }
+        });
       });
 
-      if (!res.ok) throw new Error("Error al obtener la estructura del curso");
-      
-      const temasData = await res.json();
-      
-      if (temasData && temasData.length > 0) {
-        setTemas(temasData);
-        setTemaSeleccionado(temasData[0]); // Seleccionamos el primero por defecto
-      } else {
-        setTemas([]);
-      }
+      setMapaNotas(nuevoMapa);
+      setTemas(temasData);
+      if (temasData.length > 0) setTemaSeleccionado(temasData[0]);
+
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar datos');
+      setError(err instanceof Error ? err.message : 'Error de conexión');
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return (
-    <div className="estadisticas-page">
-      <NavbarMisCursos />
-      <main className="estadisticas-main">
-        <div className="stats-info-msg">Cargando estructura del curso...</div>
-      </main>
-    </div>
-  );
-
   return (
     <div className="estadisticas-page">
       <NavbarMisCursos />
-      
       <main className="estadisticas-main">
-        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
-          ← Volver
-        </button>
-
-        <h1 className="estadisticas-titulo-curso">Contenido del Curso</h1>
-
-        {error && <div className="stats-error-msg">{error}</div>}
+        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>← Volver</button>
+        <h1 className="estadisticas-titulo-curso">Medias del Curso</h1>
 
         <div className="layout-estadisticas">
+          {/* PANEL IZQUIERDO: TEMAS */}
           <aside className="panel-temas">
             <h3>Temas</h3>
             {temas.length === 0 ? (
@@ -98,34 +104,40 @@ export default function MediasCurso() {
             )}
           </aside>
 
+          {/* PANEL DERECHO: ACTIVIDADES */}
           <section className="panel-actividades">
             {!temaSeleccionado ? (
-              <div className="msg-placeholder">Selecciona un tema para ver sus actividades</div>
+              <p className="msg-placeholder">Selecciona un tema</p>
             ) : (
               <>
-                <h3>Actividades de: {temaSeleccionado.titulo}</h3>
-                {temaSeleccionado.actividades.length === 0 ? (
-                  <p className="msg-placeholder">No hay actividades en este tema aún.</p>
-                ) : (
-                  <ul className="lista-actividades-simple">
+                <h3>{temaSeleccionado.titulo}</h3>
+                <table className="pixel-table">
+                  <thead>
+                    <tr>
+                      <th>Nº</th>
+                      <th>Actividad</th>
+                      <th>Nota Media</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {temaSeleccionado.actividades.map((act, index) => (
-                      <li key={act.id} className="item-actividad-pixel">
-                        <span className="badge-numero">{index + 1}</span>
-                        {act.titulo}
-                      </li>
+                      <tr key={act.id}>
+                        <td className="text-center">{index + 1}</td>
+                        <td>{act.titulo}</td>
+                        <td className="text-center font-bold">
+                          {mapaNotas.get(act.id) ?? 0}
+                        </td>
+                      </tr>
                     ))}
-                  </ul>
-                )}
+                  </tbody>
+                </table>
               </>
             )}
           </section>
         </div>
 
-        {/* CONTENEDOR DE BOTONES CON SEPARACIÓN */}
         <div className="botones-footer">
-          <button className="btn-medias-pixel" onClick={cargarDatosEstructurales}>
-            Actualizar ↻
-          </button>
+          <button className="btn-medias-pixel" onClick={cargarTodo}>Actualizar ↻</button>
         </div>
       </main>
     </div>
