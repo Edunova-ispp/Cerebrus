@@ -149,10 +149,10 @@ class GeneralControllerTest {
 		when(generalService.crearTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(true), eq("c"), any()))
 				.thenReturn(creada);
 
-		ResponseEntity<General> response = generalController.crearTipoTest(request);
+		ResponseEntity<Long> response = generalController.crearTipoTest(request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(response.getBody()).isSameAs(creada);
+		assertThat(response.getBody()).isEqualTo(99L);
 
 		verify(generalService).crearTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(true), eq("c"),
 				preguntasIdCaptor.capture());

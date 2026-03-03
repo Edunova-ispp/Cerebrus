@@ -10,6 +10,7 @@ public class ActividadDTO {
     private final String descripcion;
     private final Integer puntuacion;
     private final Integer posicion;
+    private final String tipo;
 
     public ActividadDTO(Actividad actividad) {
         this.id = actividad.getId();
@@ -17,5 +18,9 @@ public class ActividadDTO {
         this.descripcion = actividad.getDescripcion();
         this.puntuacion = actividad.getPuntuacion();
         this.posicion = actividad.getPosicion();
+        this.tipo = actividad instanceof General ? "general"
+                  : actividad instanceof Ordenacion ? "ordenacion"
+                  : actividad instanceof MarcarImagen ? "marcarImagen"
+                  : "otro";
     }
 }

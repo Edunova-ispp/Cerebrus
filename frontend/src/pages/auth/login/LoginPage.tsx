@@ -8,6 +8,7 @@ export type UserType = "alumno" | "profesor" | "dueno";
 const Login = () => {
   const [identificador, setIdentificador] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   
   const navigate = useNavigate();
@@ -86,11 +87,19 @@ const Login = () => {
             <label htmlFor="password">Contraseña:</label>
             <input 
               id="password"
-              type="password" 
+              type={showPassword ? 'text' : 'password'}
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               required 
             />
+            <button
+              type="button"
+              className="login-pw-toggle"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            >
+              {showPassword ? '🙈' : '👁'}
+            </button>
           </div>
 
           {/* MENSAJE DE ERROR */}

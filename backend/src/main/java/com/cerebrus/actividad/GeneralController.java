@@ -51,7 +51,7 @@ public class GeneralController {
 
     @PostMapping("/test")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<General> crearTipoTest(@RequestBody @Valid General general) {
+    public ResponseEntity<Long> crearTipoTest(@RequestBody @Valid General general) {
 
         List<Long> preguntasId = general.getPreguntas().stream()
             .map(Pregunta::getId)
@@ -67,7 +67,17 @@ public class GeneralController {
             preguntasId
         );
 
-        return new ResponseEntity<>(generalCreada, HttpStatus.CREATED);
+        return new ResponseEntity<>(generalCreada.getId(), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/test/{id}")
+    public ResponseEntity<GeneralTestDTO> readTipoTest(@PathVariable Long id) {
+        return ResponseEntity.ok(generalService.readTipoTest(id));
+    }
+
+    @GetMapping("/test/{id}/maestro")
+    public ResponseEntity<GeneralTestMaestroDTO> readTipoTestMaestro(@PathVariable Long id) {
+        return ResponseEntity.ok(generalService.readTipoTestMaestro(id));
     }
 
     @GetMapping("/{id}")

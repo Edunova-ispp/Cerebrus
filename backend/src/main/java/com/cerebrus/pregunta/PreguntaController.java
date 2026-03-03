@@ -31,13 +31,13 @@ public class PreguntaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Pregunta> crearPregunta(@RequestBody @Valid Pregunta pregunta) {
+    public ResponseEntity<Long> crearPregunta(@RequestBody @Valid PreguntaRequest request) {
         Pregunta preguntaCreada = preguntaService.crearPregunta(
-            pregunta.getPregunta(),
-            pregunta.getImagen(),
-            pregunta.getActividad().getId()
+            request.getPregunta(),
+            request.getImagen(),
+            request.getActividadId()
         );
-        return new ResponseEntity<>(preguntaCreada, HttpStatus.CREATED);
+        return new ResponseEntity<>(preguntaCreada.getId(), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")

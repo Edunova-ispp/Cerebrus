@@ -66,7 +66,7 @@ class RespAlumnoGeneralServiceImplTest {
     void crearRespAlumnoGeneral_cuandoUsuarioNoEsAlumno_lanzaAccessDenied_yNoTocaRepos() {
         when(usuarioService.findCurrentUser()).thenReturn(new Maestro());
 
-        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(1L, "A", 2L))
+        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(1L, 99L, 2L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessageContaining("Solo un alumno");
 
@@ -80,7 +80,7 @@ class RespAlumnoGeneralServiceImplTest {
     void crearRespAlumnoGeneral_cuandoUsuarioEsNull_lanzaAccessDenied_yNoTocaRepos() {
         when(usuarioService.findCurrentUser()).thenReturn(null);
 
-        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(1L, "A", 2L))
+        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(1L, 99L, 2L))
                 .isInstanceOf(AccessDeniedException.class);
 
         verify(usuarioService).findCurrentUser();
@@ -108,20 +108,17 @@ class RespAlumnoGeneralServiceImplTest {
 
         Respuesta respuestaObj = new Respuesta();
         respuestaObj.setId(30L);
+        respuestaObj.setRespuesta("RESP");
         respuestaObj.setCorrecta(true);
-        when(respuestaRepository.findByRespuesta("RESP")).thenReturn(Optional.of(respuestaObj));
+        when(respuestaRepository.findById(30L)).thenReturn(Optional.of(respuestaObj));
 
         when(respAlumnoGeneralRepository.save(any(RespAlumnoGeneral.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        RespAlumnoGeneralCreateResponse response = service.crearRespAlumnoGeneral(10L, "RESP", 20L);
+        RespAlumnoGeneralCreateResponse response = service.crearRespAlumnoGeneral(10L, 30L, 20L);
 
         assertThat(response).isNotNull();
         assertThat(response.getComentario()).isEqualTo("Buen trabajo");
-        assertThat(response.getRespAlumnoGeneral()).isNotNull();
-        assertThat(response.getRespAlumnoGeneral().getCorrecta()).isTrue();
-        assertThat(response.getRespAlumnoGeneral().getRespuesta()).isEqualTo("RESP");
-        assertThat(response.getRespAlumnoGeneral().getActividadAlumno()).isSameAs(actAlumno);
-        assertThat(response.getRespAlumnoGeneral().getPregunta()).isSameAs(pregunta);
+        assertThat(response.getCorrecta()).isTrue();
 
         verify(respAlumnoGeneralRepository).save(respAlumnoGeneralCaptor.capture());
         RespAlumnoGeneral saved = respAlumnoGeneralCaptor.getValue();
@@ -148,15 +145,16 @@ class RespAlumnoGeneralServiceImplTest {
         when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
 
         Respuesta respuestaObj = new Respuesta();
+        respuestaObj.setRespuesta("X");
         respuestaObj.setCorrecta(false);
-        when(respuestaRepository.findByRespuesta("X")).thenReturn(Optional.of(respuestaObj));
+        when(respuestaRepository.findById(50L)).thenReturn(Optional.of(respuestaObj));
 
         when(respAlumnoGeneralRepository.save(any(RespAlumnoGeneral.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        RespAlumnoGeneralCreateResponse response = service.crearRespAlumnoGeneral(1L, "X", 2L);
+        RespAlumnoGeneralCreateResponse response = service.crearRespAlumnoGeneral(1L, 50L, 2L);
 
         assertThat(response.getComentario()).isEqualTo("");
-        assertThat(response.getRespAlumnoGeneral().getCorrecta()).isFalse();
+        assertThat(response.getCorrecta()).isFalse();
         verify(actividad, never()).getComentariosRespVisible();
     }
 
@@ -177,12 +175,13 @@ class RespAlumnoGeneralServiceImplTest {
         when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
 
         Respuesta respuestaObj = new Respuesta();
+        respuestaObj.setRespuesta("X");
         respuestaObj.setCorrecta(true);
-        when(respuestaRepository.findByRespuesta("X")).thenReturn(Optional.of(respuestaObj));
+        when(respuestaRepository.findById(50L)).thenReturn(Optional.of(respuestaObj));
 
         when(respAlumnoGeneralRepository.save(any(RespAlumnoGeneral.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        RespAlumnoGeneralCreateResponse response = service.crearRespAlumnoGeneral(1L, "X", 2L);
+        RespAlumnoGeneralCreateResponse response = service.crearRespAlumnoGeneral(1L, 50L, 2L);
 
         assertThat(response.getComentario()).isNull();
     }
@@ -202,10 +201,11 @@ class RespAlumnoGeneralServiceImplTest {
         when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
 
         Respuesta respuestaObj = new Respuesta();
+        respuestaObj.setRespuesta("X");
         respuestaObj.setCorrecta(true);
-        when(respuestaRepository.findByRespuesta("X")).thenReturn(Optional.of(respuestaObj));
+        when(respuestaRepository.findById(50L)).thenReturn(Optional.of(respuestaObj));
 
-        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(1L, "X", 2L))
+        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(1L, 50L, 2L))
                 .isInstanceOf(NullPointerException.class);
 
         verify(respAlumnoGeneralRepository, never()).save(any());
@@ -219,7 +219,7 @@ class RespAlumnoGeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
         when(actividadAlumnoRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(1L, "X", 2L))
+        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(1L, 50L, 2L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La actividad del alumno no existe");
     }
@@ -232,7 +232,7 @@ class RespAlumnoGeneralServiceImplTest {
         when(actividadAlumnoRepository.findById(1L)).thenReturn(Optional.of(new ActividadAlumno()));
         when(preguntaRepository.findById(2L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(1L, "X", 2L))
+        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(1L, 50L, 2L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La pregunta no existe");
     }
@@ -246,9 +246,9 @@ class RespAlumnoGeneralServiceImplTest {
         Pregunta pregunta = new Pregunta();
         when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
 
-        when(respuestaRepository.findByRespuesta("X")).thenReturn(Optional.empty());
+        when(respuestaRepository.findById(50L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(1L, "X", 2L))
+        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(1L, 50L, 2L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La respuesta no existe");
     }
@@ -269,14 +269,15 @@ class RespAlumnoGeneralServiceImplTest {
         when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
 
         Respuesta respuestaObj = new Respuesta();
+        respuestaObj.setRespuesta("X");
         respuestaObj.setCorrecta(null);
-        when(respuestaRepository.findByRespuesta("X")).thenReturn(Optional.of(respuestaObj));
+        when(respuestaRepository.findById(50L)).thenReturn(Optional.of(respuestaObj));
 
         when(respAlumnoGeneralRepository.save(any(RespAlumnoGeneral.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        RespAlumnoGeneralCreateResponse response = service.crearRespAlumnoGeneral(1L, "X", 2L);
+        RespAlumnoGeneralCreateResponse response = service.crearRespAlumnoGeneral(1L, 50L, 2L);
 
-        assertThat(response.getRespAlumnoGeneral().getCorrecta()).isNull();
+        assertThat(response.getCorrecta()).isNull();
         verify(respAlumnoGeneralRepository).save(respAlumnoGeneralCaptor.capture());
         assertThat(respAlumnoGeneralCaptor.getValue().getCorrecta()).isNull();
     }

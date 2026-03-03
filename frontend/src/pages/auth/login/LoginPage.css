@@ -150,3 +150,20 @@
 .login-register-text span:hover {
   color: #7a0030;
 }
+
+/* Password toggle button */
+.login-pw-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0 4px;
+  line-height: 1;
+  color: #555;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+.login-pw-toggle:hover {
+  opacity: 0.7;
+}

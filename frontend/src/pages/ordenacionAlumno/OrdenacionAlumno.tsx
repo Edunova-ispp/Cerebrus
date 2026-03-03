@@ -235,7 +235,7 @@ export default function OrdenacionAlumno() {
               {/* Botón salir con espada */}
               <button className="ord-exit-btn" type="button" onClick={() => navigate(-1)}>
       <img src={espadaImg} alt="" className="ord-exit-icon" />
-      Salir del curso
+      Salir
     </button>
 
               {/* Banner título */}
