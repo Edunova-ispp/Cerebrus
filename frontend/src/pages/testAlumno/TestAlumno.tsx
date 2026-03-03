@@ -79,6 +79,9 @@ export default function TestAlumno() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Pagination: which question is currently shown
+  const [currentIndex, setCurrentIndex] = useState(0);
+
   const testIdNum = useMemo(() => {
     if (!testId) return NaN;
     return Number.parseInt(testId, 10);
@@ -172,11 +175,26 @@ export default function TestAlumno() {
     return test.preguntas.every((p) => selections.has(p.id));
   }, [test, selections]);
 
+  const totalPreguntas = test?.preguntas.length ?? 0;
+  const isLastQuestion = currentIndex === totalPreguntas - 1;
+  const isFirstQuestion = currentIndex === 0;
+  // Progress: 0% on question 1, 100% on last question
+  const progressPct = totalPreguntas <= 1 ? 100 : (currentIndex / (totalPreguntas - 1)) * 100;
+  const dragonReached = currentIndex === totalPreguntas - 1 && totalPreguntas > 1;
+
   // ── Handlers ──────────────────────────────────────────────────────────────
 
   const handleSelect = (preguntaId: number, respuestaId: number) => {
     if (submitted) return;
     setSelections((prev) => new Map(prev).set(preguntaId, respuestaId));
+  };
+
+  const handleNext = () => {
+    if (currentIndex < totalPreguntas - 1) setCurrentIndex((i) => i + 1);
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) setCurrentIndex((i) => i - 1);
   };
 
   const handleSubmit = async () => {
@@ -211,6 +229,8 @@ export default function TestAlumno() {
       const resultsMap = new Map<number, QuestionResult>(resultEntries);
       setResults(resultsMap);
       setSubmitted(true);
+      // Reset to first question so user can review from the beginning
+      setCurrentIndex(0);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Error enviando las respuestas';
       setError(msg);
@@ -241,6 +261,8 @@ export default function TestAlumno() {
     );
   }
 
+  const currentPregunta = test?.preguntas[currentIndex];
+
   return (
     <div className="test-alumno-page">
       <NavbarMisCursos />
@@ -252,118 +274,177 @@ export default function TestAlumno() {
           </p>
         )}
 
-        {test && (
+        {test && currentPregunta && (
           <>
             {/* ── Header ── */}
             <div className="ta-top">
               <button className="ta-exit-btn" type="button" onClick={() => navigate(-1)}>
-                Salir del curso
+                Salir
               </button>
               <div className="ta-title-banner">
                 <h1 className="ta-title">{test.titulo}</h1>
               </div>
             </div>
 
-            {test.descripcion && <p className="ta-description">{test.descripcion}</p>}
-
-            {test.imagen && (
-              <div className="ta-activity-img-wrap">
-                <img src={test.imagen} alt={test.titulo} className="ta-activity-img" />
-              </div>
-            )}
-
             {/* ── Score banner after submit ── */}
             {submitted && score && (
-              <div className={`ta-score-banner ${score.correct === score.total ? 'ta-score-banner--perfect' : ''}`}>
+              <div
+                className={`ta-score-banner ${
+                  score.correct === score.total ? 'ta-score-banner--perfect' : ''
+                }`}
+              >
                 {score.correct === score.total
-                  ? `¡Perfecto! ${score.correct} / ${score.total} correctas`
+                  ? `¡Perfecto! ${score.correct} / ${score.total} correctas 🏆`
                   : `${score.correct} / ${score.total} correctas`}
               </div>
             )}
 
-            {/* ── Questions ── */}
-            <div className="ta-questions">
-              {test.preguntas.map((pregunta, qi) => {
-                const result = results.get(pregunta.id);
-                const selectedId = selections.get(pregunta.id);
-
-                return (
-                  <div key={pregunta.id} className="ta-question-card">
-                    <div className="ta-question-num">Pregunta {qi + 1}</div>
-                    <p className="ta-question-text">{pregunta.pregunta}</p>
-
-                    {pregunta.imagen && (
-                      <img
-                        src={pregunta.imagen}
-                        alt={`Pregunta ${qi + 1}`}
-                        className="ta-question-img"
-                      />
-                    )}
-
-                    <div className="ta-options">
-                      {pregunta.respuestas.map((r, oi) => {
-                        const isSelected = selectedId === r.id;
-                        let optClass = 'ta-option';
-                        if (submitted && result) {
-                          if (isSelected) {
-                            optClass += result.correcta ? ' ta-option--correct' : ' ta-option--wrong';
-                          }
-                        } else if (isSelected) {
-                          optClass += ' ta-option--selected';
-                        }
-
-                        return (
-                          <button
-                            key={r.id}
-                            type="button"
-                            className={optClass}
-                            onClick={() => handleSelect(pregunta.id, r.id)}
-                            disabled={submitted}
-                          >
-                            <span className="ta-option-letter">{String.fromCharCode(65 + oi)}.</span>
-                            <span className="ta-option-text">{r.respuesta}</span>
-                            {submitted && isSelected && (
-                              <span className="ta-option-icon">
-                                {result?.correcta ? '✓' : '✗'}
-                              </span>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {submitted && result && test.respVisible && result.comentario && (
-                      <div className="ta-feedback-comment">{result.comentario}</div>
-                    )}
-                  </div>
-                );
-              })}
+            {/* ── Battle progress bar ── */}
+            <div className="ta-battle-bar">
+              <span className="ta-wizard" title="Mago">🧙</span>
+              <div className="ta-progress-track">
+                <div
+                  className="ta-progress-fill"
+                  style={{ width: `${progressPct}%` }}
+                />
+                {!submitted && progressPct > 0 && (
+                  <div
+                    className="ta-spell-head"
+                    style={{ left: `calc(${progressPct}% - 10px)` }}
+                  />
+                )}
+              </div>
+              <span
+                className={`ta-dragon${dragonReached ? ' ta-dragon--shaking' : ''}`}
+                title="Dragón"
+              >
+                🐉
+              </span>
             </div>
 
-            {/* ── Submit / Done bar ── */}
-            <div className="ta-bottom">
-              {!submitted ? (
-                <button
-                  className="ca-btn-guardar"
-                  type="button"
-                  disabled={submitting || !allAnswered || !actividadAlumnoId}
-                  onClick={handleSubmit}
-                >
-                  {submitting ? 'Enviando...' : 'Enviar respuestas'}
-                </button>
+            {/* ── Question counter ── */}
+            <div className="ta-question-counter">
+              <span className="ta-question-counter-text">
+                Pregunta {currentIndex + 1} de {totalPreguntas}
+              </span>
+              {selections.has(currentPregunta.id) && (
+                <span className="ta-answered-badge">
+                  {submitted
+                    ? results.get(currentPregunta.id)?.correcta
+                      ? '✓ Correcta'
+                      : '✗ Incorrecta'
+                    : '✓ Respondida'}
+                </span>
+              )}
+            </div>
+
+            {/* ── Current question card ── */}
+            <div className="ta-question-card">
+              <p className="ta-question-text">{currentPregunta.pregunta}</p>
+
+              {currentPregunta.imagen && (
+                <img
+                  src={currentPregunta.imagen}
+                  alt={`Pregunta ${currentIndex + 1}`}
+                  className="ta-question-img"
+                />
+              )}
+
+              <div className="ta-options">
+                {currentPregunta.respuestas.map((r, oi) => {
+                  const selectedId = selections.get(currentPregunta.id);
+                  const isSelected = selectedId === r.id;
+                  const result = results.get(currentPregunta.id);
+
+                  let optClass = 'ta-option';
+                  if (submitted && result) {
+                    if (isSelected) {
+                      optClass += result.correcta ? ' ta-option--correct' : ' ta-option--wrong';
+                    }
+                  } else if (isSelected) {
+                    optClass += ' ta-option--selected';
+                  }
+
+                  return (
+                    <button
+                      key={r.id}
+                      type="button"
+                      className={optClass}
+                      onClick={() => handleSelect(currentPregunta.id, r.id)}
+                      disabled={submitted}
+                    >
+                      <span className="ta-option-letter">{String.fromCharCode(65 + oi)}.</span>
+                      <span className="ta-option-text">{r.respuesta}</span>
+                      {submitted && isSelected && (
+                        <span className="ta-option-icon">{result?.correcta ? '✓' : '✗'}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {submitted &&
+                results.get(currentPregunta.id) &&
+                test.respVisible &&
+                results.get(currentPregunta.id)!.comentario && (
+                  <div className="ta-feedback-comment">
+                    💬 {results.get(currentPregunta.id)!.comentario}
+                  </div>
+                )}
+            </div>
+
+            {/* ── Navigation buttons ── */}
+            <div className="ta-nav-buttons">
+              <button
+                type="button"
+                className="ta-nav-btn ta-nav-btn--prev"
+                onClick={handlePrev}
+                disabled={isFirstQuestion}
+              >
+                ← Anterior
+              </button>
+
+              {isLastQuestion ? (
+                submitted ? (
+                  <button
+                    type="button"
+                    className="ta-nav-btn ta-nav-btn--finish"
+                    onClick={() => navigate(-1)}
+                  >
+                    Volver al curso
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="ta-nav-btn ta-nav-btn--submit"
+                    onClick={handleSubmit}
+                    disabled={submitting || !allAnswered || !actividadAlumnoId}
+                    title={
+                      !allAnswered
+                        ? 'Responde todas las preguntas antes de enviar'
+                        : ''
+                    }
+                  >
+                    {submitting ? 'Enviando...' : '¡Enviar respuestas!'}
+                  </button>
+                )
               ) : (
                 <button
-                  className="ca-btn-guardar"
                   type="button"
-                  onClick={() => navigate(-1)}
+                  className="ta-nav-btn ta-nav-btn--next"
+                  onClick={handleNext}
                 >
-                  Volver
+                  Siguiente →
                 </button>
               )}
-              {!allAnswered && !submitted && (
-                <p className="ta-hint">Responde todas las preguntas para poder enviar.</p>
-              )}
             </div>
+
+            {/* Hint when on last question but not all answered */}
+            {!submitted && !allAnswered && isLastQuestion && (
+              <p className="ta-hint">
+                Responde todas las preguntas para enviar. Usa ← Anterior para revisar.
+              </p>
+            )}
           </>
         )}
 
