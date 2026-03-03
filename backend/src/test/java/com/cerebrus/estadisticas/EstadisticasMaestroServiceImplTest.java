@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividadalumno.ActividadAlumno;
 import com.cerebrus.curso.Curso;
+import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.usuario.Alumno;
@@ -34,6 +36,9 @@ class EstadisticasMaestroServiceImplTest {
 
     @Mock
     private EstadisticasMaestroRepository estadisticasRepository;
+
+    @Mock
+    private CursoRepository cursoRepository;
 
     @Mock
     private UsuarioService usuarioService;
@@ -51,7 +56,7 @@ class EstadisticasMaestroServiceImplTest {
     @BeforeEach
     void setUp() {
         maestro = crearMaestro(1L);
-        alumno = crearAlumno(2L);
+        alumno = crearAlumno(2L, "Alumno 1");
         curso = crearCurso(10L, "Matemáticas", maestro, true);
     }
 
@@ -59,8 +64,9 @@ class EstadisticasMaestroServiceImplTest {
     void calcularTotalPuntosCursoPorAlumno_sinInscripciones_retornaMapaVacio() {
         curso.setInscripciones(new ArrayList<>());
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        when(cursoRepository.findById(10L)).thenReturn(java.util.Optional.of(curso));
 
-        Map<Alumno, Integer> resultado = estadisticasService.calcularTotalPuntosCursoPorAlumno(curso);
+        HashMap<String, Integer> resultado = estadisticasService.calcularTotalPuntosCursoPorAlumno(10L);
         assertThat(resultado).isEmpty();
     }
 
@@ -79,16 +85,18 @@ class EstadisticasMaestroServiceImplTest {
 
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(actividadRepository.findByTemaId(1L)).thenReturn(List.of(actividad));
+        when(cursoRepository.findById(10L)).thenReturn(java.util.Optional.of(curso));
 
-        Map<Alumno, Integer> resultado = estadisticasService.calcularTotalPuntosCursoPorAlumno(curso);
-        assertThat(resultado).containsEntry(alumno, 50);
+        HashMap<String, Integer> resultado = estadisticasService.calcularTotalPuntosCursoPorAlumno(10L);
+        assertThat(resultado).containsEntry("Alumno 1", 50);
     }
 
     @Test
     void calcularTotalPuntosCursoPorAlumno_usuarioNoMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        when(cursoRepository.findById(10L)).thenReturn(java.util.Optional.of(curso));
 
-        assertThatThrownBy(() -> estadisticasService.calcularTotalPuntosCursoPorAlumno(curso))
+        assertThatThrownBy(() -> estadisticasService.calcularTotalPuntosCursoPorAlumno(10L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede visualizar los puntos de los alumnos");
     }
@@ -97,8 +105,10 @@ class EstadisticasMaestroServiceImplTest {
     void calcularTotalPuntosCursoPorAlumno_maestroNoPropietario_lanzaAccessDeniedException() {
         Maestro otroMaestro = crearMaestro(99L);
         when(usuarioService.findCurrentUser()).thenReturn(otroMaestro);
+        when(cursoRepository.findById(10L)).thenReturn(java.util.Optional.of(curso));
 
-        assertThatThrownBy(() -> estadisticasService.calcularTotalPuntosCursoPorAlumno(curso))
+
+        assertThatThrownBy(() -> estadisticasService.calcularTotalPuntosCursoPorAlumno(10L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
     }
@@ -111,9 +121,10 @@ class EstadisticasMaestroServiceImplTest {
         return m;
     }
 
-    private static Alumno crearAlumno(Long id) {
+    private static Alumno crearAlumno(Long id, String nombre) {
         Alumno a = new Alumno();
         a.setId(id);
+        a.setNombre(nombre);
         a.setPuntos(0);
         return a;
     }

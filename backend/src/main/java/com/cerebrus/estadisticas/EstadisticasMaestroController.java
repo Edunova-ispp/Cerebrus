@@ -1,17 +1,21 @@
 package com.cerebrus.estadisticas;
 
-import com.cerebrus.curso.Curso;
-import com.cerebrus.curso.CursoRepository;
-import com.cerebrus.curso.CursoService;
-import com.cerebrus.usuario.Alumno;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-import java.util.Optional;
+import com.cerebrus.curso.Curso;
+import com.cerebrus.curso.CursoRepository;
+import com.cerebrus.curso.CursoService;
+import com.cerebrus.usuario.Alumno;
 
 @RestController
 @RequestMapping("/api/estadisticas")
@@ -51,14 +55,16 @@ public class EstadisticasMaestroController {
     }
 
     @GetMapping("/cursos/{cursoId}/puntos")
-    public ResponseEntity<Map<Alumno, Integer>> obtenerPuntosCurso(@PathVariable Long id) {
+    public ResponseEntity<HashMap<String, Integer>> obtenerPuntosCurso(@PathVariable Long cursoId) {
         try {
-            Curso curso = cursoService.getCursoById(id);
-            Map<Alumno, Integer> puntosPorAlumno = estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(curso);
+            HashMap<String, Integer> puntosPorAlumno = estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(cursoId);
+            if(puntosPorAlumno.isEmpty()) {
+                return ResponseEntity.ok(new HashMap<>());
+            }
             return ResponseEntity.ok(puntosPorAlumno);
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (RuntimeException e) {
+        }catch (RuntimeException e) {
             if (e.getMessage().equals("404 Not Found")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             } else if (e.getMessage().equals("403 Forbidden")) {
@@ -67,5 +73,6 @@ public class EstadisticasMaestroController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
         }
+
     }
 }
