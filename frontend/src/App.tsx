@@ -11,7 +11,6 @@ import InfoPage from "./pages/infoPage/InfoPage";
 import LandingPage from "./pages/landingPage/LandingPage";
 import CrearActividad from "./pages/crearActividad/crearActividad.tsx";
 import MisCursos from "./pages/misCursos/MisCursos";
-import Placeholder from "./pages/placeholder/placeholder";
 import ListaTemasCursoProfesor from "./pages/temasDelCurso/ListaTemasCursoProfesor";
 import CrearTema from "./pages/crearTema/CrearTema";
 import EditarTema from "./pages/editarTema/EditarTema";

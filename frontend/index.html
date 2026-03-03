@@ -9,5 +9,18 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      window.__WATCHBUG_CONFIG__ = {
+          enabled: true,
+          admin: true,
+          services: {
+              sentry: true, 
+              logrocket: true,
+              supabase: true
+          },
+          apiEndpoint: "http://localhost:5000/watchbug/report"
+      };
+    </script>
+    <script src="/watchbug-widget.js"></script>
   </body>
 </html>
