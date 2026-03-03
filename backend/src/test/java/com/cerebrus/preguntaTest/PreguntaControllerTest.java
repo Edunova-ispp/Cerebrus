@@ -24,6 +24,7 @@ import com.cerebrus.actividad.Actividad;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaController;
+import com.cerebrus.pregunta.PreguntaRequest;
 import com.cerebrus.pregunta.PreguntaService;
 import com.cerebrus.respuesta.Respuesta;
 
@@ -37,7 +38,7 @@ class PreguntaControllerTest {
     private PreguntaController preguntaController;
 
     private Actividad actividad;
-    private Pregunta preguntaRequest;
+    private PreguntaRequest preguntaRequest;
     private Pregunta preguntaGuardada;
 
     @BeforeEach
@@ -46,7 +47,10 @@ class PreguntaControllerTest {
         actividad = new Actividad() {};
         actividad.setId(1L);
 
-        preguntaRequest = new Pregunta("¿Cuánto es 2+2?", "img.png", actividad);
+        preguntaRequest = new PreguntaRequest();
+        preguntaRequest.setPregunta("¿Cuánto es 2+2?");
+        preguntaRequest.setImagen("img.png");
+        preguntaRequest.setActividadId(1L);
 
         preguntaGuardada = new Pregunta("¿Cuánto es 2+2?", "img.png", actividad);
         preguntaGuardada.setId(10L);
@@ -57,27 +61,28 @@ class PreguntaControllerTest {
     void crearPregunta_requestValido_retorna201ConPregunta() {
         when(preguntaService.crearPregunta("¿Cuánto es 2+2?", "img.png", 1L)).thenReturn(preguntaGuardada);
 
-        ResponseEntity<Pregunta> respuesta = preguntaController.crearPregunta(preguntaRequest);
+        ResponseEntity<Long> respuesta = preguntaController.crearPregunta(preguntaRequest);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(respuesta.getBody()).isNotNull();
-        assertThat(respuesta.getBody().getId()).isEqualTo(10L);
-        assertThat(respuesta.getBody().getPregunta()).isEqualTo("¿Cuánto es 2+2?");
+        assertThat(respuesta.getBody()).isEqualTo(10L);
         verify(preguntaService).crearPregunta("¿Cuánto es 2+2?", "img.png", 1L);
     }
 
     // Test para verificar que crearPregunta retorna 201 cuando la imagen es null
     @Test
     void crearPregunta_sinImagen_retorna201() {
-        Pregunta reqSinImagen = new Pregunta("¿Capital de Francia?", null, actividad);
+        PreguntaRequest reqSinImagen = new PreguntaRequest();
+        reqSinImagen.setPregunta("¿Capital de Francia?");
+        reqSinImagen.setImagen(null);
+        reqSinImagen.setActividadId(1L);
         Pregunta savedSinImagen = new Pregunta("¿Capital de Francia?", null, actividad);
         savedSinImagen.setId(11L);
         when(preguntaService.crearPregunta("¿Capital de Francia?", null, 1L)).thenReturn(savedSinImagen);
 
-        ResponseEntity<Pregunta> respuesta = preguntaController.crearPregunta(reqSinImagen);
+        ResponseEntity<Long> respuesta = preguntaController.crearPregunta(reqSinImagen);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(respuesta.getBody().getImagen()).isNull();
+        assertThat(respuesta.getBody()).isEqualTo(11L);
     }
 
     // Test para verificar que crearPregunta propaga AccessDeniedException cuando el service la lanza

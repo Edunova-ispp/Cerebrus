@@ -35,8 +35,6 @@ public class Pregunta {
     @JoinColumn(name = "actividad_id", nullable = false)
     private Actividad actividad;
 
-    
-
     @OneToMany(mappedBy = "pregunta", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Respuesta> respuestas = new ArrayList<>();
 

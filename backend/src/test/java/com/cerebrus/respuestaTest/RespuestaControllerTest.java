@@ -55,10 +55,10 @@ public class RespuestaControllerTest {
 
 		when(respuestaService.crearRespuesta(eq("Opción A"), eq("img.png"), eq(true), eq(10L))).thenReturn(created);
 
-		ResponseEntity<Respuesta> response = controller.crearRespuesta(request);
+		ResponseEntity<Long> response = controller.crearRespuesta(request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(response.getBody()).isSameAs(created);
+		assertThat(response.getBody()).isEqualTo(99L);
 		verify(respuestaService).crearRespuesta("Opción A", "img.png", true, 10L);
 	}
 
@@ -88,10 +88,10 @@ public class RespuestaControllerTest {
 
 		when(respuestaService.crearRespuesta(eq("Texto"), eq(null), eq(false), eq(7L))).thenReturn(created);
 
-		ResponseEntity<Respuesta> response = controller.crearRespuesta(request);
+		ResponseEntity<Long> response = controller.crearRespuesta(request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(response.getBody()).isSameAs(created);
+		assertThat(response.getBody()).isEqualTo(1L);
 		verify(respuestaService).crearRespuesta("Texto", null, false, 7L);
 	}
 
@@ -115,7 +115,7 @@ public class RespuestaControllerTest {
 		ResponseEntity<Respuesta> response = controller.crearRespuesta(request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-		assertThat(response.getBody()).isSameAs(created);
+		assertThat(response.getBody()).isEqualTo(2L);
 		verify(respuestaService).crearRespuesta("Texto", "img", null, 8L);
 	}
 
