@@ -5,8 +5,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,14 +28,20 @@ public class ActividadController {
     }
 
     @PostMapping("/teoria")
-    public ResponseEntity<Actividad> crearActividadTeoria(@RequestBody CrearActividadTeoriaRequest request, @RequestParam Long maestroId) {
-        try {
-            Actividad actividad = actividadService.crearActividadTeoria(request.getTitulo(), request.getDescripcion(), request.getPuntuacion(), request.getImagen(), request.getTemaId(), maestroId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(actividad);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+public ResponseEntity<Actividad> crearActividadTeoria(@RequestBody CrearActividadTeoriaRequest request) {
+    try {
+        Actividad actividad = actividadService.crearActividadTeoria(
+            request.getTitulo(), 
+            request.getDescripcion(), 
+            request.getPuntuacion(), 
+            request.getImagen(), 
+            request.getTemaId()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(actividad);
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().build();
     }
+}
 
     public static class CrearActividadTeoriaRequest {
         private String titulo;
@@ -92,4 +100,31 @@ public class ActividadController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/{id}/maestro")
+public ResponseEntity<Actividad> getActividadMaestro(@PathVariable Long id) {
+    try {
+        Actividad actividad = actividadService.encontrarActividadPorId(id);
+        return ResponseEntity.ok(actividad);
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.notFound().build();
+    }
+}
+
+    @PutMapping("/teoria/{id}")
+public ResponseEntity<Actividad> updateActividadTeoria(
+        @PathVariable Long id,
+        @RequestBody CrearActividadTeoriaRequest request) {
+    try {
+        Actividad actividad = actividadService.updateActividadTeoria(
+            id,
+            request.getTitulo(),
+            request.getDescripcion()
+        );
+        return ResponseEntity.ok(actividad);
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().build();
+    }
+}
+    
 }
