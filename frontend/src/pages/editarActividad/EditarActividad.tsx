@@ -62,13 +62,14 @@ export default function EditarActividad() {
   const [generalTest, setGeneralTest] = useState<GeneralTestMaestroDTO | null>(null);
 
   useEffect(() => {
+    const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     if (!actividadId) return;
 
     setLoading(true);
     setError(null);
 
     // 1. Intentar test
-    apiFetch(`/api/generales/test/${actividadId}/maestro`)
+    apiFetch(`${apiBase}/api/generales/test/${actividadId}/maestro`)
       .then((r) => r.json())
       .then((data: GeneralTestMaestroDTO) => {
         setGeneralTest(data);
@@ -77,7 +78,7 @@ export default function EditarActividad() {
       })
       .catch(() => {
         // 2. Intentar ordenación
-        apiFetch(`/api/ordenaciones/${actividadId}/maestro`)
+        apiFetch(`${apiBase}/api/ordenaciones/${actividadId}/maestro`)
           .then((r) => r.json())
           .then((data: OrdenacionDTO) => {
             setOrdenacion(data);
@@ -86,7 +87,7 @@ export default function EditarActividad() {
           })
           .catch(() => {
             // 3. Intentar teoría
-            apiFetch(`/api/actividades/${actividadId}/maestro`)
+            apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`)
               .then((r) => r.json())
               .then((data: TeoriaDTO) => {
                 setTeoria(data);

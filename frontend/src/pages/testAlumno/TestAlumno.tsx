@@ -83,7 +83,7 @@ export default function TestAlumno() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-
+  const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
   // Pagination: which question is currently shown
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -103,7 +103,7 @@ export default function TestAlumno() {
       const id = actividadAlumnoIdRef.current;
       if (!id || completedRef.current || abandonReportedRef.current) return;
       abandonReportedRef.current = true;
-      apiFetch(`/api/actividades-alumno/${id}/abandon`, { method: 'POST' }).catch(() => {});
+      apiFetch(`${apiBase}/api/actividades-alumno/${id}/abandon`, { method: 'POST' }).catch(() => {});
     };
   }, []);
 
@@ -125,7 +125,7 @@ export default function TestAlumno() {
 
       try {
         // 1. Load test (respuestas already shuffled by backend)
-        const testRes = await apiFetch(`/api/generales/test/${testIdNum}`);
+        const testRes = await apiFetch(`${apiBase}/api/generales/test/${testIdNum}`);
         const testData = (await testRes.json()) as GeneralTestDTO;
         setTest(testData);
 
@@ -135,12 +135,12 @@ export default function TestAlumno() {
           throw new Error('No se pudo identificar al alumno. Inicia sesión de nuevo.');
         }
 
-        const ensureRes = await apiFetch(`/api/actividades-alumno/ensure/${testData.id}`);
+        const ensureRes = await apiFetch(`${apiBase}/api/actividades-alumno/ensure/${testData.id}`);
         const ensureValue = (await ensureRes.json()) as unknown;
         const exists = ensureValue === 1 || ensureValue === '1' || ensureValue === true;
 
         if (!exists) {
-          const createAA = await apiFetch('/api/actividades-alumno', {
+          const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
             method: 'POST',
             body: JSON.stringify({ alumnoId, actividadId: testData.id }),
           });
@@ -152,7 +152,7 @@ export default function TestAlumno() {
           }
         } else {
           const getAA = await apiFetch(
-            `/api/actividades-alumno/alumno/${alumnoId}/actividad/${testData.id}`,
+            `${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${testData.id}`,
           );
           const aaData = (await getAA.json()) as ActividadAlumnoDTO;
           if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
@@ -213,7 +213,7 @@ export default function TestAlumno() {
         test.preguntas.map(async (p) => {
           const selectedId = selections.get(p.id)!;
 
-          const res = await apiFetch('/api/respuestas-alumno-general', {
+          const res = await apiFetch(`${apiBase}/api/respuestas-alumno-general`, {
             method: 'POST',
             body: JSON.stringify({
               actividadAlumnoId,
@@ -234,7 +234,7 @@ export default function TestAlumno() {
 );
 
       if (respuestasIds.length > 0) {
-    await apiFetch(`/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
+    await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
       method: 'PUT',
       body: JSON.stringify(respuestasIds),
     });

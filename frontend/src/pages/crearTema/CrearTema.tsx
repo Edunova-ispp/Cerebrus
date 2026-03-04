@@ -30,7 +30,8 @@ export default function CrearTema() {
 
     setLoading(true);
     try {
-      await apiFetch(`/api/temas?maestroId=${maestroId}`, {
+      const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+      await apiFetch(`${apiBase}/api/temas?maestroId=${maestroId}`, {
         method: 'POST',
         body: JSON.stringify({
           titulo: titulo.trim(),
