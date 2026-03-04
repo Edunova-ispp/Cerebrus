@@ -133,7 +133,12 @@ public class ActividadAlumnoController {
 
     @PutMapping("/corregir-automaticamente/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoAutomaticamente(@PathVariable Long id, @RequestBody List<Long> respuestasIds) {
+    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoAutomaticamente(
+        @PathVariable Long id,
+        @RequestBody(required = false) List<Long> respuestasIds
+    ) {
+        // cuando la petición no envía cuerpo el parámetro llega como null, el
+        // servicio se encarga de recopilar los ids a partir de las respuestas
         ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamente(id, respuestasIds);
         ActividadAlumnoDTO actividadAlumnoDTO = new ActividadAlumnoDTO(
             actividadAlumnoActualizada.getTiempo(),

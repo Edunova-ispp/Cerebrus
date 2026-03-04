@@ -191,36 +191,53 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         } else if(actividad instanceof Ordenacion) {
             corregirActividadAlumnoAutomaticamenteOrdenacion(actividadAlumno, respuestasIds, actividad);
         } else {
-            throw new IllegalArgumentException("Tipo de actividad no soportado para corrección automática");
-        }
+        // CASO PARA TEORÍA: Simplemente marcamos como terminada y damos la puntuación base
+        actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 1);
+        actividadAlumno.setNota(10); // Nota máxima por leer
+        actividadAlumno.setAcabada(LocalDateTime.now());
+    } 
         return actividadAlumnoRepository.save(actividadAlumno);
     }
 
-    @Override
-    public void corregirActividadAlumnoAutomaticamenteGeneral(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
-        Integer puntuacionTotal = actividad.getPuntuacion();
-        Integer notaTotal = 10;
-        Integer puntuacionFinal = 0;
-        Integer notaFinal = 0;
-        Integer numRespuestas = respuestasIds.size();
-        Integer puntuacionPorRespuesta = numRespuestas > 0 ? puntuacionTotal / numRespuestas : 0;
-        Integer notaPorRespuesta = numRespuestas > 0 ? notaTotal / numRespuestas : 0;
-        for (Long respuestaId: respuestasIds) {
-            RespuestaAlumno respuestaAlumno = respuestaAlumnoService.encontrarRespuestaAlumnoPorId(respuestaId);
-            if(respuestaAlumno == null) {
-                throw new ResourceNotFoundException("RespuestaAlumno", "id", respuestaId);
-            } else if (!respuestaAlumno.getActividadAlumno().getId().equals(actividadAlumno.getId())) {
-                throw new IllegalArgumentException("La respuesta con id " + respuestaId + " no pertenece a la actividad del alumno con id " + actividadAlumno.getId());
-            }
+@Override
+public void corregirActividadAlumnoAutomaticamenteGeneral(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
+    // 1. Obtenemos el número REAL de preguntas que tiene el test
+    // Usamos la colección de la entidad actividad
+General actividadGeneral = (General) actividad;
+int numPreguntasTotales = actividadGeneral.getPreguntas().size();    
+    if (numPreguntasTotales == 0) {
+        actividadAlumno.setPuntuacion(0);
+        actividadAlumno.setNota(0);
+        return;
+    }
+
+    int puntuacionMaximaActividad = (actividad.getPuntuacion() != null) ? actividad.getPuntuacion() : 0;
+    double notaMaxima = 10.0;
+    
+    // 2. Calculamos el valor de CADA pregunta basándonos en el TOTAL del test
+    double valorPuntoPorPregunta = (double) puntuacionMaximaActividad / numPreguntasTotales;
+    double valorNotaPorPregunta = notaMaxima / numPreguntasTotales;
+
+    double puntuacionAcumulada = 0;
+    double notaAcumulada = 0;
+
+    if (respuestasIds != null) {
+        for (Long respuestaId : respuestasIds) {
+            // Este método DEBE comparar la respuesta del alumno con la correcta en la DB
             boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(respuestaId);
+            
             if (esCorrecta) {
-                puntuacionFinal += puntuacionPorRespuesta;
-                notaFinal += notaPorRespuesta;
+                puntuacionAcumulada += valorPuntoPorPregunta;
+                notaAcumulada += valorNotaPorPregunta;
             }
         }
-        actividadAlumno.setPuntuacion(puntuacionFinal);
-        actividadAlumno.setNota(notaFinal);
     }
+
+    // 3. Guardar y redondear
+    actividadAlumno.setPuntuacion((int) Math.round(puntuacionAcumulada));
+    actividadAlumno.setNota((int) Math.round(notaAcumulada));
+    actividadAlumno.setAcabada(LocalDateTime.now());
+}
 
     @Override
     public void corregirActividadAlumnoAutomaticamenteOrdenacion(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {

@@ -163,45 +163,55 @@ public class CursoServiceImpl implements CursoService {
     }
 
     public ProgresoDTO getProgreso(Long cursoId) {
-        Curso curso = cursoRepository.findByID(cursoId);
-        if (curso == null) {
-            throw new RuntimeException("404 Not Found");
-        }
+    Curso curso = cursoRepository.findByID(cursoId);
+    if (curso == null) {
+        throw new RuntimeException("404 Not Found");
+    }
 
-        Usuario usuario = usuarioService.findCurrentUser();
-        if (!(usuario instanceof Alumno alumno)) {
-            throw new RuntimeException("403 Forbidden");
-        }
+    Usuario usuario = usuarioService.findCurrentUser();
+    if (!(usuario instanceof Alumno alumno)) {
+        throw new RuntimeException("403 Forbidden");
+    }
 
-        long totalActividades = actividadRepository.countByCursoId(cursoId);
-        if (totalActividades == 0) {
-            return new ProgresoDTO("SIN_EMPEZAR", 0);
-        }
-
-        List<ActividadAlumnoProgreso> registros = actividadAlumnoRepository.findProgresoByAlumnoAndCursoId(alumno, cursoId);
-
-        if (registros.isEmpty()) {
-            return new ProgresoDTO("SIN_EMPEZAR", 0);
-        }
-
-        long acabadas = registros.stream()
-                .filter(aa -> aa.getAcabada() != null)
-                .count();
-
-        if (acabadas == totalActividades) {
-            return new ProgresoDTO("TERMINADA", 0);
-        }
-
-        long conInicio = registros.stream()
-                .filter(aa -> aa.getInicio() != null)
-                .count();
-
-        if (conInicio > 0) {
-            return new ProgresoDTO("EMPEZADA", 0);
-        }
-
+    long totalActividades = actividadRepository.countByCursoId(cursoId);
+    if (totalActividades == 0) {
         return new ProgresoDTO("SIN_EMPEZAR", 0);
     }
+
+    List<ActividadAlumnoProgreso> registros = actividadAlumnoRepository.findProgresoByAlumnoAndCursoId(alumno, cursoId);
+
+    if (registros.isEmpty()) {
+        return new ProgresoDTO("SIN_EMPEZAR", 0);
+    }
+
+    // 1. CALCULAMOS LA SUMA TOTAL DE PUNTOS
+    // Sumamos el campo 'puntuacion' de todas las actividades que tengan valor
+    int puntosTotales = registros.stream()
+            .filter(aa -> aa.getPuntuacion() != null)
+            .mapToInt(aa -> aa.getPuntuacion())
+            .sum();
+
+    // 2. CALCULAMOS EL ESTADO
+    long acabadas = registros.stream()
+            .filter(aa -> aa.getAcabada() != null)
+            .count();
+
+    if (acabadas == totalActividades) {
+        // Pasamos la suma real de puntos en lugar de 0
+        return new ProgresoDTO("TERMINADA", puntosTotales);
+    }
+
+    long conInicio = registros.stream()
+            .filter(aa -> aa.getInicio() != null)
+            .count();
+
+    if (conInicio > 0) {
+        // Pasamos la suma real de puntos en lugar de 0
+        return new ProgresoDTO("EMPEZADA", puntosTotales);
+    }
+
+    return new ProgresoDTO("SIN_EMPEZAR", puntosTotales);
+}
 
     @Transactional
 @Override
