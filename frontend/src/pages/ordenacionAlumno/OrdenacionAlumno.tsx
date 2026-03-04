@@ -182,8 +182,19 @@ export default function OrdenacionAlumno() {
           valoresAlum: items,
         }),
       });
+if (!res.ok) throw new Error('Error al guardar la respuesta');
+
 
       const data = (await res.json()) as RespAlumnoOrdenacionCreateResponse;
+      const respuestaId = data?.respAlumnoOrdenacion?.id;
+      if (respuestaId) {
+        // 3. LLAMADA CRÍTICA: Corregir automáticamente la actividad (PUT)
+        // Mandamos el ID en un array tal como espera el controlador
+        await apiFetch(`/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
+          method: 'PUT',
+          body: JSON.stringify([respuestaId]),
+        });
+      }
       const correcta = Boolean(data?.respAlumnoOrdenacion?.correcta);
       const comentario = typeof data?.comentario === 'string' ? data.comentario : '';
 
@@ -229,6 +240,7 @@ export default function OrdenacionAlumno() {
         )}
 
         {ordenacion && (
+          
           <>
             <div className="ord-top">
 
