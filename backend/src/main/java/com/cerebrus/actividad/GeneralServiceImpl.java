@@ -95,6 +95,10 @@ public class GeneralServiceImpl implements GeneralService {
         General general = generalRepository.findByIdWithPreguntas(id)
             .orElseThrow(() -> new ResourceNotFoundException("Actividad tipo test no encontrada"));
 
+        if (general.getTipo() != TipoActGeneral.TEST) {
+            throw new ResourceNotFoundException("La actividad no es de tipo test");
+        }
+
         List<PreguntaDTO> preguntasDTO = general.getPreguntas().stream().map(pregunta -> {
             List<RespuestaDTO> respuestasDTO = CerebrusUtils.shuffleCollection(pregunta.getRespuestas())
                 .stream()
@@ -117,11 +121,15 @@ public class GeneralServiceImpl implements GeneralService {
     public GeneralTestMaestroDTO readTipoTestMaestro(Long id) {
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
-            throw new AccessDeniedException("Solo un maestro puede leer actividades tipo test para edici\u00f3n");
+            throw new AccessDeniedException("Solo un maestro puede leer actividades tipo test para edición");
         }
 
         General general = generalRepository.findByIdWithPreguntas(id)
             .orElseThrow(() -> new ResourceNotFoundException("Actividad tipo test no encontrada"));
+
+        if (general.getTipo() != TipoActGeneral.TEST) {
+            throw new ResourceNotFoundException("La actividad no es de tipo test");
+        }
 
         // Force lazy load of respuestas within the open transaction
         general.getPreguntas().forEach(p -> p.getRespuestas().size());

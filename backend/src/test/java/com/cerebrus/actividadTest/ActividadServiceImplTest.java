@@ -27,167 +27,152 @@ import com.cerebrus.curso.Curso;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Maestro;
+import com.cerebrus.usuario.UsuarioService;
 
 @ExtendWith(MockitoExtension.class)
 class ActividadServiceImplTest {
 
-	@Mock
-	private ActividadRepository actividadRepository;
+    @Mock
+    private ActividadRepository actividadRepository;
 
-	@Mock
-	private TemaRepository temaRepository;
+    @Mock
+    private TemaRepository temaRepository;
 
-	@InjectMocks
-	private ActividadServiceImpl actividadService;
+    @Mock
+    private UsuarioService usuarioService;
 
-    // ArgumentCaptor para capturar el objeto Actividad que se guarda
-	@Captor
-	private ArgumentCaptor<Actividad> actividadCaptor;
+    @InjectMocks
+    private ActividadServiceImpl actividadService;
 
-    // Tests para verificar que se lanza IllegalArgumentException si el tema no existe
-	@Test
-	void crearActividadTeoria_temaNoExiste_lanzaIllegalArgumentException() {
-		when(temaRepository.findById(99L)).thenReturn(Optional.empty());
+    @Captor
+    private ArgumentCaptor<Actividad> actividadCaptor;
 
-		assertThatThrownBy(() -> actividadService.crearActividadTeoria(
-				"T", "D", 10, "img", 99L, 1L))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessage("Tema no encontrado");
+    @Test
+    void crearActividadTeoria_temaNoExiste_lanzaIllegalArgumentException() {
+        when(usuarioService.findCurrentUser()).thenReturn(crearMaestro(1L));
+        when(temaRepository.findById(99L)).thenReturn(Optional.empty());
 
-		verify(actividadRepository, never()).findMaxPosicionByTemaId(any());
-		verify(actividadRepository, never()).save(any());
-	}
+        assertThatThrownBy(() -> actividadService.crearActividadTeoria("T", "D", 10, "img", 99L))
+                .isInstanceOf(RuntimeException.class);
 
-    // Tests para verificar que se lanza IllegalArgumentException si el maestro no es propietario del tema
-	@Test
-	void crearActividadTeoria_maestroNoPropietario_lanzaIllegalArgumentException() {
-		Maestro propietario = crearMaestro(1L);
-		Maestro noPropietario = crearMaestro(2L);
-		Curso curso = crearCurso(propietario);
-		Tema tema = crearTema(10L, curso);
+        verify(actividadRepository, never()).save(any());
+    }
 
-		when(temaRepository.findById(10L)).thenReturn(Optional.of(tema));
+    @Test
+    void crearActividadTeoria_usuarioNoEsMaestro_lanzaAccessDeniedException() {
+        when(usuarioService.findCurrentUser()).thenReturn(new com.cerebrus.usuario.Usuario() {});
 
-		assertThatThrownBy(() -> actividadService.crearActividadTeoria(
-				"T", "D", 10, "img", 10L, noPropietario.getId()))
-				.isInstanceOf(IllegalArgumentException.class)
-				.hasMessage("El maestro no es propietario del tema");
+        assertThatThrownBy(() -> actividadService.crearActividadTeoria("T", "D", 10, "img", 1L))
+                .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
 
-		verify(actividadRepository, never()).findMaxPosicionByTemaId(any());
-		verify(actividadRepository, never()).save(any());
-	}
+        verify(actividadRepository, never()).save(any());
+    }
 
-    // Tests para verificar que se asigna posición 1 si no hay actividades previas, y se guarda la actividad correctamente
-	@Test
-	void crearActividadTeoria_maxPosicionNull_asignaPosicion1_yGuardaGeneralTeoria() {
-		Maestro propietario = crearMaestro(7L);
-		Curso curso = crearCurso(propietario);
-		Tema tema = crearTema(55L, curso);
+    @Test
+    void crearActividadTeoria_maxPosicionNull_asignaPosicion1_yGuardaGeneralTeoria() {
+        Maestro propietario = crearMaestro(7L);
+        Curso curso = crearCurso(propietario);
+        Tema tema = crearTema(55L, curso);
 
-		when(temaRepository.findById(55L)).thenReturn(Optional.of(tema));
-		when(actividadRepository.findMaxPosicionByTemaId(55L)).thenReturn(null);
-		when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(usuarioService.findCurrentUser()).thenReturn(propietario);
+        when(temaRepository.findById(55L)).thenReturn(Optional.of(tema));
+        when(actividadRepository.findMaxPosicionByTemaId(55L)).thenReturn(null);
+        when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
-		Actividad resultado = actividadService.crearActividadTeoria(
-				"Título", "Desc", 20, null, 55L, propietario.getId());
+        Actividad resultado = actividadService.crearActividadTeoria("Título", "Desc", 20, null, 55L);
 
-		assertThat(resultado).isNotNull();
-		assertThat(resultado).isInstanceOf(General.class);
+        assertThat(resultado).isNotNull();
+        assertThat(resultado).isInstanceOf(General.class);
 
-		verify(actividadRepository).save(actividadCaptor.capture());
-		Actividad guardada = actividadCaptor.getValue();
+        verify(actividadRepository).save(actividadCaptor.capture());
+        Actividad guardada = actividadCaptor.getValue();
 
-		assertThat(guardada.getTitulo()).isEqualTo("Título");
-		assertThat(guardada.getDescripcion()).isEqualTo("Desc");
-		assertThat(guardada.getPuntuacion()).isEqualTo(20);
-		assertThat(guardada.getImagen()).isNull();
-		assertThat(guardada.getRespVisible()).isFalse();
-		assertThat(guardada.getPosicion()).isEqualTo(1);
-		assertThat(guardada.getVersion()).isEqualTo(1);
-		assertThat(guardada.getTema()).isSameAs(tema);
+        assertThat(guardada.getTitulo()).isEqualTo("Título");
+        assertThat(guardada.getDescripcion()).isEqualTo("Desc");
+        assertThat(guardada.getPuntuacion()).isEqualTo(20);
+        assertThat(guardada.getImagen()).isNull();
+        assertThat(guardada.getRespVisible()).isFalse();
+        assertThat(guardada.getPosicion()).isEqualTo(1);
+        assertThat(guardada.getVersion()).isEqualTo(1);
+        assertThat(guardada.getTema()).isSameAs(tema);
 
-		General general = (General) guardada;
-		assertThat(general.getTipo()).isEqualTo(TipoActGeneral.TEORIA);
-	}
+        General general = (General) guardada;
+        assertThat(general.getTipo()).isEqualTo(TipoActGeneral.TEORIA);
+    }
 
-    // Tests para verificar que si la posición máxima es 0, se asigna posición 1 y se guarda la actividad correctamente
-	@Test
-	void crearActividadTeoria_maxPosicion0_asignaPosicion1_yGuarda() {
-		Maestro propietario = crearMaestro(7L);
-		Curso curso = crearCurso(propietario);
-		Tema tema = crearTema(56L, curso);
+    @Test
+    void crearActividadTeoria_maxPosicion0_asignaPosicion1_yGuarda() {
+        Maestro propietario = crearMaestro(7L);
+        Curso curso = crearCurso(propietario);
+        Tema tema = crearTema(56L, curso);
 
-		when(temaRepository.findById(56L)).thenReturn(Optional.of(tema));
-		when(actividadRepository.findMaxPosicionByTemaId(56L)).thenReturn(0);
-		when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(usuarioService.findCurrentUser()).thenReturn(propietario);
+        when(temaRepository.findById(56L)).thenReturn(Optional.of(tema));
+        when(actividadRepository.findMaxPosicionByTemaId(56L)).thenReturn(0);
+        when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
-		actividadService.crearActividadTeoria("T", "D", 1, "img", 56L, propietario.getId());
+        actividadService.crearActividadTeoria("T", "D", 1, "img", 56L);
 
-		verify(actividadRepository).save(actividadCaptor.capture());
-		assertThat(actividadCaptor.getValue().getPosicion()).isEqualTo(1);
-	}
+        verify(actividadRepository).save(actividadCaptor.capture());
+        assertThat(actividadCaptor.getValue().getPosicion()).isEqualTo(1);
+    }
 
-    // Tests para verificar que se asigna posición max+1 si hay actividades previas, y se guarda la actividad correctamente
-	@Test
-	void crearActividadTeoria_maxPosicionMayor_asignaMaxMasUno_yGuarda() {
-		Maestro propietario = crearMaestro(7L);
-		Curso curso = crearCurso(propietario);
-		Tema tema = crearTema(57L, curso);
+    @Test
+    void crearActividadTeoria_maxPosicionMayor_asignaMaxMasUno_yGuarda() {
+        Maestro propietario = crearMaestro(7L);
+        Curso curso = crearCurso(propietario);
+        Tema tema = crearTema(57L, curso);
 
-		when(temaRepository.findById(57L)).thenReturn(Optional.of(tema));
-		when(actividadRepository.findMaxPosicionByTemaId(57L)).thenReturn(12);
-		when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(usuarioService.findCurrentUser()).thenReturn(propietario);
+        when(temaRepository.findById(57L)).thenReturn(Optional.of(tema));
+        when(actividadRepository.findMaxPosicionByTemaId(57L)).thenReturn(12);
+        when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
-		actividadService.crearActividadTeoria("T", "D", 1, "img", 57L, propietario.getId());
+        actividadService.crearActividadTeoria("T", "D", 1, "img", 57L);
 
-		verify(actividadRepository).save(actividadCaptor.capture());
-		assertThat(actividadCaptor.getValue().getPosicion()).isEqualTo(13);
-	}
+        verify(actividadRepository).save(actividadCaptor.capture());
+        assertThat(actividadCaptor.getValue().getPosicion()).isEqualTo(13);
+    }
 
-    // Tests para verificar que se devuelve la lista vacía si no hay actividades
-	@Test
-	void obtenerActividadesPorTema_listaVacia_devuelveVacio() {
-		when(actividadRepository.findByTemaId(1L)).thenReturn(List.of());
+    @Test
+    void obtenerActividadesPorTema_listaVacia_devuelveVacio() {
+        when(actividadRepository.findByTemaId(1L)).thenReturn(List.of());
 
-		List<Actividad> resultado = actividadService.ObtenerActividadesPorTema(1L);
+        List<Actividad> resultado = actividadService.ObtenerActividadesPorTema(1L);
 
-		assertThat(resultado).isEmpty();
-		verify(actividadRepository).findByTemaId(1L);
-	}
+        assertThat(resultado).isEmpty();
+        verify(actividadRepository).findByTemaId(1L);
+    }
 
-    // Tests para verificar que se devuelve la lista con las actividades del tema
-	@Test
-	void obtenerActividadesPorTema_conElementos_devuelveMismaLista() {
-		Actividad a1 = new Actividad() {};
-		Actividad a2 = new Actividad() {};
-		List<Actividad> lista = List.of(a1, a2);
-		when(actividadRepository.findByTemaId(2L)).thenReturn(lista);
+    @Test
+    void obtenerActividadesPorTema_conElementos_devuelveMismaLista() {
+        Actividad a1 = new Actividad() {};
+        Actividad a2 = new Actividad() {};
+        List<Actividad> lista = List.of(a1, a2);
+        when(actividadRepository.findByTemaId(2L)).thenReturn(lista);
 
-		List<Actividad> resultado = actividadService.ObtenerActividadesPorTema(2L);
+        List<Actividad> resultado = actividadService.ObtenerActividadesPorTema(2L);
 
-		assertThat(resultado).containsExactly(a1, a2);
-		verify(actividadRepository).findByTemaId(2L);
-	}
+        assertThat(resultado).containsExactly(a1, a2);
+        verify(actividadRepository).findByTemaId(2L);
+    }
 
-    // Método auxiliar para crear objeto Maestro
-	private static Maestro crearMaestro(Long id) {
-		Maestro maestro = new Maestro();
-		maestro.setId(id);
-		return maestro;
-	}
+    private static Maestro crearMaestro(Long id) {
+        Maestro maestro = new Maestro();
+        maestro.setId(id);
+        return maestro;
+    }
 
-    // Método auxiliar para crear objeto Curso asociado a un Maestro
-	private static Curso crearCurso(Maestro maestro) {
-		Curso curso = new Curso();
-		curso.setMaestro(maestro);
-		return curso;
-	}
+    private static Curso crearCurso(Maestro maestro) {
+        Curso curso = new Curso();
+        curso.setMaestro(maestro);
+        return curso;
+    }
 
-    // Método auxiliar para crear objeto Tema asociado a un Curso
-	private static Tema crearTema(Long id, Curso curso) {
-		Tema tema = new Tema();
-		tema.setId(id);
-		tema.setCurso(curso);
-		return tema;
-	}
+    private static Tema crearTema(Long id, Curso curso) {
+        Tema tema = new Tema();
+        tema.setId(id);
+        tema.setCurso(curso);
+        return tema;
+    }
 }

@@ -66,9 +66,13 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         }
 
         RespAlumnoGeneral respAlumnoGeneralEntity = new RespAlumnoGeneral(correcta, actividadAlumno, respuestaTexto, pregunta);
-        respAlumnoGeneralRepository.save(respAlumnoGeneralEntity);
-        return new RespAlumnoGeneralCreateResponse(correcta, comentariosRespVisible);
-    }
+    
+    // IMPORTANTE: Guardamos y capturamos la entidad persistida (que ya tiene ID)
+    RespAlumnoGeneral guardada = respAlumnoGeneralRepository.save(respAlumnoGeneralEntity);
+
+    // Pasamos guardada.getId() al constructor
+    return new RespAlumnoGeneralCreateResponse(guardada.getId(), correcta, comentariosRespVisible);
+}
 
     @Override
     @Transactional(readOnly = true)

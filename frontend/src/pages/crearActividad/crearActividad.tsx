@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { OrdenacionForm } from './OrdenacionForm';
+import { TeoriaForm } from './TeoriaForm';
+
 import { TestForm } from './TestForm';
 import './crearActividad.css';
 
@@ -33,10 +35,13 @@ export default function CrearActividad() {
         </div>
 
         <div className="ca-contenido">
+
           {tipoSeleccionado === 'Poner en orden' ? (
             <OrdenacionForm />
           ) : tipoSeleccionado === 'Tipo test' ? (
             <TestForm mode="create" />
+          ) : tipoSeleccionado === 'Teoría'? (
+            <TeoriaForm mode="create" />
           ) : (
             <p className="ca-proximamente">Selecciona un tipo de actividad</p>
           )}

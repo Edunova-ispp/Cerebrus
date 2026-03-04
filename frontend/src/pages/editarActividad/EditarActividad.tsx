@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { OrdenacionForm, type OrdenacionFormInitialValues } from '../crearActividad/OrdenacionForm';
+import { TeoriaForm } from '../crearActividad/TeoriaForm';
 import { TestForm, type TestFormInitialValues } from '../crearActividad/TestForm';
 import '../crearActividad/crearActividad.css';
 
@@ -17,6 +18,12 @@ type OrdenacionDTO = {
   posicion: number;
   temaId: number;
   valores: string[];
+};
+
+type TeoriaDTO = {
+  id: number;
+  titulo: string;
+  descripcion: string | null;
 };
 
 type GeneralTestMaestroDTO = {
@@ -37,7 +44,7 @@ type GeneralTestMaestroDTO = {
   }[];
 };
 
-type ActivityKind = 'ordenacion' | 'test' | null;
+type ActivityKind = 'ordenacion' | 'test' | 'teoria' | null;
 
 export default function EditarActividad() {
   const { id: cursoId, actividadId } = useParams<{
@@ -51,32 +58,47 @@ export default function EditarActividad() {
   const [error, setError] = useState<string | null>(null);
   const [kind, setKind] = useState<ActivityKind>(null);
   const [ordenacion, setOrdenacion] = useState<OrdenacionDTO | null>(null);
+  const [teoria, setTeoria] = useState<TeoriaDTO | null>(null);
   const [generalTest, setGeneralTest] = useState<GeneralTestMaestroDTO | null>(null);
 
   useEffect(() => {
     if (!actividadId) return;
 
-    // Try test endpoint first; if it fails, fall back to ordenacion
+    setLoading(true);
+    setError(null);
+
+    // 1. Intentar test
     apiFetch(`/api/generales/test/${actividadId}/maestro`)
       .then((r) => r.json())
       .then((data: GeneralTestMaestroDTO) => {
         setGeneralTest(data);
         setKind('test');
+        setLoading(false);
       })
       .catch(() => {
-        // Not a test activity — try ordenacion
-        return apiFetch(`/api/ordenaciones/${actividadId}/maestro`)
+        // 2. Intentar ordenación
+        apiFetch(`/api/ordenaciones/${actividadId}/maestro`)
           .then((r) => r.json())
           .then((data: OrdenacionDTO) => {
             setOrdenacion(data);
             setKind('ordenacion');
+            setLoading(false);
+          })
+          .catch(() => {
+            // 3. Intentar teoría
+            apiFetch(`/api/actividades/${actividadId}/maestro`)
+              .then((r) => r.json())
+              .then((data: TeoriaDTO) => {
+                setTeoria(data);
+                setKind('teoria');
+              })
+              .catch((e) => {
+                const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
+                setError(msg);
+              })
+              .finally(() => setLoading(false));
           });
-      })
-      .catch((e) => {
-        const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
-        setError(msg);
-      })
-      .finally(() => setLoading(false));
+      });
   }, [actividadId]);
 
   const actividadIdNum = actividadId ? Number.parseInt(actividadId, 10) : NaN;
@@ -108,6 +130,41 @@ export default function EditarActividad() {
       }
     : undefined;
 
+  const renderForm = () => {
+    if (kind === 'test' && generalTest) {
+      return (
+        <TestForm
+          mode="edit"
+          generalId={actividadIdNum}
+          initialValues={testInitialValues}
+        />
+      );
+    }
+
+    if (kind === 'ordenacion' && ordenacion) {
+      return (
+        <OrdenacionForm
+          mode="edit"
+          ordenacionId={actividadIdNum}
+          initialValues={ordenacionInitialValues}
+        />
+      );
+    }
+
+    if (kind === 'teoria' && teoria) {
+      return (
+        <TeoriaForm
+          mode="edit"
+          actividadId={actividadIdNum}
+          initialTitulo={teoria.titulo}
+          initialDescripcion={teoria.descripcion ?? ''}
+        />
+      );
+    }
+
+    return <p className="ca-text">Edición no disponible para este tipo de actividad.</p>;
+  };
+
   return (
     <div className="ca-page">
       <NavbarMisCursos />
@@ -124,28 +181,8 @@ export default function EditarActividad() {
 
         <div className="ca-contenido">
           {loading && <p className="ca-text">Cargando actividad...</p>}
-
           {!loading && error && <p className="ca-text">{error}</p>}
-
-          {!loading && !error && kind === 'ordenacion' && ordenacion && (
-            <OrdenacionForm
-              mode="edit"
-              ordenacionId={actividadIdNum}
-              initialValues={ordenacionInitialValues}
-            />
-          )}
-
-          {!loading && !error && kind === 'test' && generalTest && (
-            <TestForm
-              mode="edit"
-              generalId={actividadIdNum}
-              initialValues={testInitialValues}
-            />
-          )}
-
-          {!loading && !error && kind === null && (
-            <p className="ca-text">Edición no disponible para este tipo de actividad.</p>
-          )}
+          {!loading && !error && renderForm()}
         </div>
       </main>
     </div>

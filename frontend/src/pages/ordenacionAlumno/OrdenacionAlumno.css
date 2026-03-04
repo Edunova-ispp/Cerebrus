@@ -165,3 +165,85 @@
   text-align: right;
   max-width: 760px;
 }
+/* Rey y bocadillo */
+
+.ord-content-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.ord-left-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.ord-king-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.ord-king-img {
+  width: 110px;
+  image-rendering: pixelated;
+}
+
+.ord-speech-bubble {
+  position: relative;
+  background: #fffde0;
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 0.95rem;
+  color: #000;
+  box-shadow: 3px 3px 0 #000;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ord-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 7px solid transparent;
+  border-top-color: #000;
+}
+
+.ord-speech-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #fffde0;
+  z-index: 1;
+}
+
+/* Icono espada en botón salir */
+.ord-exit-icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* Subtítulo en banner */
+.ord-subtitle {
+  margin: 4px 0 0;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1rem;
+  color: #ffffffcc;
+}
