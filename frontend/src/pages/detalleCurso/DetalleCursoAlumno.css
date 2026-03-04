@@ -1,0 +1,214 @@
+.detalle-alumno-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  min-height: 100vh;
+  box-sizing: border-box;
+  background-color: #FAF6ED;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  z-index: 10;
+}
+
+.detalle-alumno-main {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 24px 60px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+/* Botón Volver */
+.detalle-volver {
+  align-self: flex-start;
+  background: #E8D5B5;
+  color: #000;
+  border: 3px solid #000;
+  border-radius: 12px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.1rem;
+  padding: 6px 18px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0px #000;
+  transition: transform 0.1s;
+}
+
+.detalle-volver:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0px #000;
+}
+
+.detalle-volver:active {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0px #000;
+}
+
+/* Imagen / cover */
+.detalle-alumno-cover {
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 16/9;
+  border: 4px solid #000;
+  border-radius: 16px;
+  box-shadow: 6px 6px 0px #000;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #E285A9;
+}
+
+.detalle-alumno-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detalle-alumno-initials {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 4rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 3px 3px 0px #000;
+}
+
+/* Info del curso */
+.detalle-alumno-info {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+
+.detalle-alumno-titulo {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: bold;
+  color: #0F1338;
+  margin: 0;
+}
+
+.detalle-alumno-descripcion {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.1rem;
+  color: #444;
+  margin: 0;
+}
+
+/* Div de acción principal */
+.detalle-alumno-accion {
+  width: 100%;
+  max-width: 480px;
+  min-height: 120px;
+  border: 4px solid #000;
+  border-radius: 20px;
+  box-shadow: 6px 6px 0px #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 2rem;
+  font-weight: bold;
+  transition: transform 0.1s;
+}
+
+.detalle-alumno-accion:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0px #000;
+}
+
+.detalle-alumno-accion:active {
+  transform: translate(1px, 1px);
+  box-shadow: 4px 4px 0px #000;
+}
+
+.detalle-alumno-accion--comenzar {
+  background: #A7E3A0;
+  color: #000;
+}
+
+.detalle-alumno-accion--continuar {
+  background: #A0C8E3;
+  color: #000;
+}
+
+.detalle-alumno-accion--acabado {
+  background: #E8D5B5;
+  color: #555;
+  cursor: default;
+}
+
+.detalle-alumno-accion--acabado:hover {
+  transform: none;
+  box-shadow: 6px 6px 0px #000;
+}
+
+/* Modal de finalización */
+.detalle-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.detalle-modal {
+  background: #FAF6ED;
+  border: 4px solid #000;
+  border-radius: 24px;
+  box-shadow: 8px 8px 0px #000;
+  padding: 40px 48px;
+  max-width: 460px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.detalle-modal__title {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #0F1338;
+  margin: 0;
+}
+
+.detalle-modal__puntos {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.3rem;
+  color: #444;
+  margin: 0;
+}
+
+.detalle-modal__close {
+  background: #E285A9;
+  color: #000;
+  border: 4px solid #000;
+  border-radius: 14px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 8px 32px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0px #000;
+  transition: transform 0.1s;
+}
+
+.detalle-modal__close:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
+}

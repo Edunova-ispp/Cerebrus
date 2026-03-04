@@ -1,0 +1,224 @@
+.tf-form,
+.tf-form * {
+  font-family: 'Pixelify Sans', sans-serif;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.tf-error {
+  color: #c0392b;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+/* ── Header columns ──────────────────────────────────────────── */
+
+.tf-header {
+  gap: 24px;
+}
+
+.tf-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.tf-img-preview {
+  display: block;
+  margin-top: 8px;
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  border: 2px solid #000;
+  border-radius: 8px;
+}
+
+/* ── Question blocks ─────────────────────────────────────────── */
+
+.tf-questions {
+  gap: 20px;
+}
+
+.tf-question-block {
+  background: #FFF8EE;
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tf-question-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tf-question-label {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.tf-question-input {
+  width: 100%;
+  background: #FFF;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1rem;
+  color: #000;
+}
+
+.tf-question-input:focus {
+  outline: none;
+  border-color: #7C4DFF;
+}
+
+/* ── Options ─────────────────────────────────────────────────── */
+
+.tf-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tf-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFF;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 6px 10px;
+  transition: background 0.15s;
+}
+
+.tf-option--correct {
+  background: #d4f7d4;
+  border-color: #27ae60;
+}
+
+.tf-option-letter {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-weight: bold;
+  font-size: 1rem;
+  min-width: 22px;
+  color: #555;
+}
+
+.tf-option--correct .tf-option-letter {
+  color: #1a7a40;
+}
+
+.tf-option-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1rem;
+  color: #000;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.tf-option-input:focus {
+  outline: none;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+
+.tf-btn-correct {
+  background: #eee;
+  color: #555;
+  border: 2px solid #999;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.tf-btn-correct:hover {
+  background: #d4f7d4;
+  border-color: #27ae60;
+}
+
+.tf-btn-correct--active {
+  background: #27ae60;
+  color: #fff;
+  border-color: #1a7a40;
+}
+
+.tf-btn-remove-option {
+  background: transparent;
+  color: #c0392b;
+  border: 2px solid #c0392b;
+  border-radius: 6px;
+  padding: 4px 7px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.tf-btn-remove-option:hover {
+  background: #fdecea;
+}
+
+.tf-btn-remove-question {
+  background: transparent;
+  color: #c0392b;
+  border: 2px solid #c0392b;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.tf-btn-remove-question:hover {
+  background: #fdecea;
+}
+
+.tf-btn-add-option {
+  align-self: flex-start;
+  background: transparent;
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.tf-btn-add-option:hover {
+  background: #F5E6CC;
+}
+
+.tf-btn-add-question {
+  background: #F5D49A;
+  color: #000;
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 10px 24px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 4px 4px 0px #000;
+  transition: transform 0.1s;
+  align-self: flex-start;
+  margin-top: 8px;
+}
+
+.tf-btn-add-question:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
+}

@@ -1,0 +1,65 @@
+name: PR -> Discord (close)
+
+on:
+  pull_request:
+    branches: ["trunk"]
+    types: [closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-discord-close-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete Discord message and remove marker comment
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+            set -euo pipefail
+            MARKER="<!-- discord-pr-message -->"
+
+            comments=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" --paginate)
+
+            marker_body=$(echo "$comments" | jq -r --arg m "$MARKER" '
+            map(select(.body | contains($m))) | .[0].body // empty
+            ')
+            marker_comment_id=$(echo "$comments" | jq -r --arg m "$MARKER" '
+            map(select(.body | contains($m))) | .[0].id // empty
+            ')
+
+            msg_id=$(printf "%s" "$marker_body" | sed -nE 's/.*discord_message_id=([0-9]+).*/\1/p')
+
+            echo "marker_comment_id=${marker_comment_id:-<none>}"
+            echo "discord_message_id=${msg_id:-<none>}"
+
+            if [ -z "${msg_id:-}" ]; then
+            echo "No stored Discord message id found. Nothing to delete."
+            exit 0
+            fi
+
+            webhook_id=$(echo "$DISCORD_WEBHOOK_URL" | cut -d'/' -f6)
+            webhook_token=$(echo "$DISCORD_WEBHOOK_URL" | cut -d'/' -f7)
+
+            delete_url="https://discord.com/api/webhooks/${webhook_id}/${webhook_token}/messages/${msg_id}"
+            echo "Delete URL: $delete_url"
+
+            status=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$delete_url")
+            echo "Discord DELETE status: $status"
+
+            if [ "$status" != "204" ] && [ "$status" != "200" ] && [ "$status" != "404" ]; then
+            echo "Discord delete failed."
+            exit 1
+            fi
+
+            if [ -n "${marker_comment_id:-}" ]; then
+            gh api -X DELETE "repos/${REPO}/issues/comments/${marker_comment_id}" >/dev/null || true
+            fi

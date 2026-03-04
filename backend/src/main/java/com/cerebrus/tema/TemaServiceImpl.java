@@ -1,0 +1,116 @@
+package com.cerebrus.tema;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.cerebrus.actividad.Actividad;
+import com.cerebrus.curso.Curso;
+import com.cerebrus.curso.CursoServiceImpl;
+import com.cerebrus.curso.CursoRepository;
+import com.cerebrus.usuario.Maestro;
+import com.cerebrus.usuario.MaestroRepository;
+import com.cerebrus.usuario.Usuario;
+import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.actividad.ActividadRepository;;
+
+@Service
+@Transactional
+public class TemaServiceImpl implements TemaService {
+
+    private final TemaRepository temaRepository;
+    private final CursoServiceImpl cursoService;
+    private final CursoRepository cursoRepository;
+    private final MaestroRepository maestroRepository;
+    private final UsuarioService usuarioService;
+    private final ActividadRepository actividadRepository;
+
+    @Autowired
+    public TemaServiceImpl(TemaRepository temaRepository, CursoRepository cursoRepository, MaestroRepository maestroRepository, CursoServiceImpl cursoService, UsuarioService usuarioService, ActividadRepository actividadRepository) {
+        this.temaRepository = temaRepository;
+        this.cursoRepository = cursoRepository;
+        this.maestroRepository = maestroRepository;
+        this.cursoService = cursoService;
+        this.usuarioService = usuarioService;
+        this.actividadRepository = actividadRepository;
+    }
+
+    @Override
+    public Tema crearTema(String titulo, Long cursoId, Long maestroId) {
+        // Verificar que el curso existe y pertenece al maestro
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
+
+        Maestro maestro = maestroRepository.findById(maestroId)
+                .orElseThrow(() -> new IllegalArgumentException("Maestro no encontrado"));
+
+        if (!curso.getMaestro().getId().equals(maestroId)) {
+            throw new IllegalArgumentException("El maestro no es propietario del curso");
+        }
+
+        Tema tema = new Tema(titulo, curso);
+        return temaRepository.save(tema);
+    }
+
+    @Override
+    public Tema renombrarTema(Long temaId, String nuevoTitulo, Long maestroId) {
+        // Verificar que el tema existe y pertenece a un curso del maestro
+        Tema tema = temaRepository.findById(temaId)
+                .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado"));
+
+        if (!tema.getCurso().getMaestro().getId().equals(maestroId)) {
+            throw new IllegalArgumentException("El maestro no es propietario del tema");
+        }
+
+        tema.setTitulo(nuevoTitulo);
+        return temaRepository.save(tema);
+    }
+
+    @Override
+    public List<Tema> ObtenerTemasPorCursoAlumno(Long cursoId) {
+        //Esta funcion devuelve una lista con todos los temas de un curso, 
+        // si el usuario está inscrito en el curso, si no lo está devuelve una excepcion 403 Forbidden.
+        List<Curso> cursos = cursoService.ObtenerCursosUsuarioLogueado();
+        boolean estaInscrito = cursos.stream().anyMatch(c -> c.getId().equals(cursoId));
+        if(!estaInscrito){
+            throw new AccessDeniedException("El alumno logueado no está inscrito en este curso.");
+        } else {
+            return temaRepository.findByCursoId(cursoId);
+        }
+    }
+
+    @Override
+    public List<Tema> ObtenerTemasPorCursoMaestro(Long cursoId) {
+        Usuario usuario = usuarioService.findCurrentUser(); 
+        if(usuario instanceof Maestro){
+            return temaRepository.findByCursoId(cursoId);
+        } else {
+            throw new AccessDeniedException("El usuario no es un maestro.");
+        }
+    }
+
+    @Override
+public Tema obtenerTemaPorId(Long temaId) {
+    return temaRepository.findById(temaId)
+            .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado con ID: " + temaId));
+}
+
+    @Override
+    public void eliminarTema(Long temaId) {
+        
+        Tema tema = temaRepository.findById(temaId)
+                .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado"));
+
+        Usuario usuario = usuarioService.findCurrentUser(); 
+        if(usuario instanceof Maestro && tema.getCurso().getMaestro().getId().equals(usuario.getId())){
+            List<Actividad> actividades = actividadRepository.findByTemaId(temaId);
+            actividades.forEach(actividad -> actividadRepository.delete(actividad));
+            temaRepository.delete(tema);
+        } else {
+            throw new IllegalArgumentException("El usuario no tiene permiso para eliminar este tema.");
+        }
+    }
+}

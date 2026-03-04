@@ -1,193 +1,54 @@
-import { useEffect, useState, useMemo} from "react";
-import "./App.css";
-
-type TestEntity = {
-  id: number;
-  name: string;
-};
+import { Route, Routes } from "react-router-dom";
+import LoginPage from "./pages/auth/login/LoginPage";
+import LogoutPage from "./pages/auth/logout/LogoutPage";
+import RegisterPage from "./pages/auth/register/RegisterPage";
+import CrearCurso from "./pages/crearCurso/CrearCurso";
+import DeployTesting from "./pages/deployTesting/DeployTesting";
+import DetalleCurso from "./pages/detalleCurso/DetalleCurso";
+import EditarCurso from "./pages/editarCurso/EditarCurso";
+import EstadisticasCurso from "./pages/estadisticasCurso/EstadisticasCurso";
+import InfoPage from "./pages/infoPage/InfoPage";
+import LandingPage from "./pages/landingPage/LandingPage";
+import CrearActividad from "./pages/crearActividad/crearActividad.tsx";
+import MisCursos from "./pages/misCursos/MisCursos";
+import ListaTemasCursoProfesor from "./pages/temasDelCurso/ListaTemasCursoProfesor";
+import CrearTema from "./pages/crearTema/CrearTema";
+import EditarTema from "./pages/editarTema/EditarTema";
+import EditarActividad from "./pages/editarActividad/EditarActividad";
+import OrdenacionAlumno from "./pages/ordenacionAlumno/OrdenacionAlumno";
+import TestAlumno from "./pages/testAlumno/TestAlumno";
+import MapaCurso from "./pages/mapaCurso/MapaCurso";
+import MediasCurso from "./pages/estadisticasCurso/MediasCurso";
+import TeoriaAlumno from "./pages/TeoriaAlumno/TeoriaAlumno";
 
 function App() {
-  const API_BASE = useMemo(() => (import.meta.env.VITE_API_URL ?? "").trim(), []);
-  const [items, setItems] = useState<TestEntity[]>([]);
-  const [name, setName] = useState<string>("");
-  const [loadingInsert, setLoadingInsert] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-
-  const loadAll = async () => {
-    setError("");
-    try {
-      const res = await fetch(`${API_BASE}api/test`);
-      if (!res.ok) throw new Error(`GET /api/test -> ${res.status}`);
-      const data = await res.json();
-      setItems(Array.isArray(data) ? data : []);
-    } catch (e: any) {
-      console.error(e);
-      setError(e?.message ?? "Error cargando datos");
-    } finally {
-    }
-  };
-
-  const insert = async () => {
-    const trimmed = name.trim();
-    if (!trimmed) {
-      setError("Escribe un nombre antes de insertar.");
-      return;
-    }
-
-    setError("");
-    setLoadingInsert(true);
-    try {
-      // Si tu backend acepta query param "name"
-      const res = await fetch(`${API_BASE}api/test?name=${encodeURIComponent(trimmed)}`, {
-        method: "POST",
-      });
-      if (!res.ok) throw new Error(`POST /api/test -> ${res.status}`);
-      const newItem: TestEntity = await res.json();
-
-      // Optimista: lo añadimos y limpiamos input
-      setItems(prev => [...prev, newItem]);
-      setName("");
-    } catch (e: any) {
-      console.error(e);
-      setError(e?.message ?? "Error insertando");
-    } finally {
-      setLoadingInsert(false);
-    }
-  };
-
-  useEffect(() => {
-    loadAll();
-  }, []);
-
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "grid",
-        placeItems: "center",
-        padding: 24,
-      }}
-    >
-      <div
-        style={{
-          width: "min(900px, 100%)",
-          background: "rgba(255,255,255,0.06)",
-          border: "1px solid rgba(255,255,255,0.12)",
-          borderRadius: 16,
-          padding: 24,
-          backdropFilter: "blur(6px)",
-        }}
-      >
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 20 }}>
-          <h1 style={{ margin: 0, fontSize: 56, letterSpacing: 2 }}>
-            cerebrus
-          </h1>
-          <p style={{ marginTop: 8, opacity: 0.85, fontSize: 16 }}>
-            Prueba de conexion frontend + backend + db
-          </p>
-        </div>
+    <Routes>
+      <Route path="/deploy_testing" element={<DeployTesting />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/infoAlumnos"   element={<InfoPage userType="alumno" />} />
+      <Route path="/infoProfesores" element={<InfoPage userType="profesor" />} />
+      <Route path="/infoDueños"    element={<InfoPage userType="dueno" />} />
+      <Route path="/misCursos"     element={<MisCursos />} />
+      <Route path="/crearCurso"    element={<CrearCurso />} />
+      <Route path="/editarCurso/:id" element={<EditarCurso />} />
+      <Route path="/mapa/:id"      element={<MapaCurso />} />
+      <Route path="/cursos/:id"    element={<DetalleCurso />} />
+      <Route path="/cursos/:id/temas"    element={<ListaTemasCursoProfesor />} />
+      <Route path="/cursos/:id/temas/crear" element={<CrearTema />} />
+      <Route path="/cursos/:id/temas/:temaId/editar" element={<EditarTema />} />
+      <Route path="/cursos/:id/temas/:temaId/actividades/:actividadId/editar" element={<EditarActividad />} />
+      <Route path="/auth/login"    element={<LoginPage />} />
+      <Route path="/auth/register"    element={<RegisterPage />} />
+      <Route path="/auth/logout"    element={<LogoutPage />} />
+      <Route path="/cursos/:id/temas/:temaId/actividades/crear" element={<CrearActividad />} />
+      <Route path="/ordenaciones/:ordenacionId/alumno" element={<OrdenacionAlumno />} />
+      <Route path="/actividades/teoria/:actividadId" element={<TeoriaAlumno />} />
 
-        {/* Controls */}
-        <div
-          style={{
-            display: "grid",
-            gap: 12,
-            gridTemplateColumns: "1fr",
-            marginBottom: 18,
-          }}
-        >
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <input
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Nombre para insertar en BD"
-              style={{
-                flex: "1 1 320px",
-                padding: "10px 12px",
-                borderRadius: 10,
-                border: "1px solid rgba(255,255,255,0.18)",
-                background: "rgba(0,0,0,0.25)",
-                color: "inherit",
-                outline: "none",
-              }}
-              onKeyDown={e => {
-                if (e.key === "Enter") insert();
-              }}
-              disabled={loadingInsert}
-            />
-
-            <button
-              onClick={insert}
-              disabled={loadingInsert}
-              style={{
-                padding: "10px 14px",
-                borderRadius: 10,
-                border: "1px solid rgba(255,255,255,0.18)",
-                background: "rgba(255,255,255,0.12)",
-                color: "inherit",
-                cursor: loadingInsert ? "not-allowed" : "pointer",
-                minWidth: 180,
-              }}
-            >
-              {loadingInsert ? "Insertando..." : "Insertar en la BD"}
-            </button>
-          </div>
-
-          {error && (
-            <div
-              style={{
-                padding: 12,
-                borderRadius: 10,
-                border: "1px solid rgba(255,80,80,0.45)",
-                background: "rgba(255,80,80,0.10)",
-              }}
-            >
-              {error}
-            </div>
-          )}
-        </div>
-
-        {/* List */}
-        <div
-          style={{
-            borderTop: "1px solid rgba(255,255,255,0.12)",
-            paddingTop: 16,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "baseline",
-              gap: 12,
-              marginBottom: 10,
-            }}
-          >
-            <h2 style={{ margin: 0, fontSize: 18, opacity: 0.9 }}>
-              Datos en la base de datos
-            </h2>
-            <span style={{ opacity: 0.7 }}>
-              Total: <strong>{items.length}</strong>
-            </span>
-          </div>
-
-          {items.length === 0 ? (
-            <div style={{ opacity: 0.75 }}>
-              No hay datos todavía. Inserta uno arriba.
-            </div>
-          ) : (
-            <ul style={{ margin: 0, paddingLeft: 18 }}>
-              {items.map(i => (
-                <li key={i.id}>
-                  <strong>#{i.id}</strong> — {i.name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-    </div>
+      <Route path="/generales/test/:testId/alumno" element={<TestAlumno />} />
+      <Route path="/estadisticas/:id" element={<EstadisticasCurso />} />
+      <Route path="/medias/:id" element={<MediasCurso />} />
+    </Routes>
   );
 }
 

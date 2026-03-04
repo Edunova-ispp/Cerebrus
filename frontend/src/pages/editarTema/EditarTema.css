@@ -1,0 +1,101 @@
+/* Unificación total de Tipografía */
+.crear-tema-page, 
+.crear-tema-page *, 
+.crear-tema-page input, 
+.crear-tema-page button, 
+.crear-tema-page label {
+  font-family: 'Pixelify Sans', sans-serif !important;
+}
+
+.crear-tema-page {
+  background-color: #FAF6ED;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.crear-tema-main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 10px 20px; /* Pegado arriba */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centra la tarjeta en la pantalla */
+}
+
+
+.detalle-volver:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000;
+}
+
+.welcome-text {
+  text-align: center; /* Título centrado igual que la tarjeta */
+  margin: 0 0 20px 0;
+  font-size: 1.8rem;
+  width: 100%;
+}
+
+.crear-tema-card {
+  background: white;
+  border: 4px solid #000;
+  border-radius: 24px;
+  padding: 35px;
+  width: 100%;
+  max-width: 500px; /* Tamaño ajustado */
+  box-sizing: border-box;
+  box-shadow: 8px 8px 0px #000;
+}
+
+.crear-tema-layout-simple {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: left; /* Texto de la tarjeta a la izquierda */
+}
+
+.input-group label {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.pixel-input {
+  background-color: #FDF8E1;
+  border: 4px solid #000;
+  border-radius: 12px;
+  padding: 12px 15px;
+  font-size: 1.1rem;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.pixel-btn-submit-main {
+  background-color: hsl(35, 100%, 80%);
+  border: 4px solid #000;
+  border-radius: 12px;
+  padding: 12px 30px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 5px 5px 0px #000;
+  margin-top: 10px;
+}
+
+.pixel-btn-submit-main:active {
+  transform: translate(2px, 2px);
+  box-shadow: 3px 3px 0px #000;
+}
+
+.error-msg {
+  color: #d4006a;
+  font-weight: bold;
+  margin: 0;
+}
+
+.loading-text {
+  text-align: center;
+  font-size: 1.2rem;
+}

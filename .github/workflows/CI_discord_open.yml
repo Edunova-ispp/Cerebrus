@@ -1,0 +1,58 @@
+name: PR Discord open
+
+on:
+  pull_request:
+    branches: ["trunk"]
+    types: [opened, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-discord-open-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post message to Discord and store message id in PR comment
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          MARKER="<!-- discord-pr-message -->"
+
+          # Send message (wait=true returns message JSON with id)
+          payload=$(jq -n --arg content "Nuevo pull request: ${PR_URL} hecho por ${AUTHOR}" '{content: $content}')
+          resp=$(curl -sS -X POST "${DISCORD_WEBHOOK_URL}?wait=true" \
+            -H "Content-Type: application/json" \
+            -d "$payload")
+
+          msg_id=$(echo "$resp" | jq -r '.id // empty')
+          if [ -z "$msg_id" ]; then
+            echo "Discord did not return message id. Response:"
+            echo "$resp"
+            exit 1
+          fi
+
+          # Create/update marker comment
+          comments=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" --paginate)
+          existing_id=$(echo "$comments" | jq -r --arg m "$MARKER" '
+            map(select(.body | contains($m))) | .[0].id // empty
+          ')
+
+          body="${MARKER}
+          discord_message_id=${msg_id}"
+
+          if [ -n "$existing_id" ]; then
+            gh api -X PATCH "repos/${REPO}/issues/comments/${existing_id}" -f body="$body" >/dev/null
+          else
+            gh api -X POST "repos/${REPO}/issues/${PR_NUMBER}/comments" -f body="$body" >/dev/null
+          fi
