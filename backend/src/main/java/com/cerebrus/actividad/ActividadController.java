@@ -107,4 +107,14 @@ public class ActividadController {
         public Long getTemaId() { return temaId; }
         public void setTemaId(Long temaId) { this.temaId = temaId; }
     }
+
+    @GetMapping("/{id}/alumno")
+public ResponseEntity<TeoriaDTO> getActividadAlumno(@PathVariable Long id) {
+    try {
+        Actividad actividad = actividadService.encontrarActividadPorId(id);
+        return ResponseEntity.ok(toTeoriaDto(actividad));
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.notFound().build();
+    }
+}
 }

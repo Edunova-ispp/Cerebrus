@@ -18,9 +18,13 @@ public class ActividadDTO {
         this.descripcion = actividad.getDescripcion();
         this.puntuacion = actividad.getPuntuacion();
         this.posicion = actividad.getPosicion();
-        this.tipo = actividad instanceof General ? "general"
-                  : actividad instanceof Ordenacion ? "ordenacion"
-                  : actividad instanceof MarcarImagen ? "marcarImagen"
-                  : "otro";
-    }
+        if (actividad instanceof General) {
+        this.tipo = ((General) actividad).getTipo().toString().toLowerCase();
+    } else if (actividad instanceof Ordenacion) {
+        this.tipo = "ordenacion";
+    } else if (actividad instanceof MarcarImagen) {
+        this.tipo = "marcarImagen";
+    } else {
+        this.tipo = "otro";
+    }}
 }
