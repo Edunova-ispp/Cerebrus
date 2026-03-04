@@ -559,6 +559,8 @@ class CursoServiceImplTest {
             public LocalDateTime getInicio() { return inicio; }
             @Override
             public LocalDateTime getAcabada() { return acabada; }
+            @Override
+            public Integer getPuntuacion() { return 0; }
         };
     }
 }
