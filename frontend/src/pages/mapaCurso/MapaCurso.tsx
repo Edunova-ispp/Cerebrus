@@ -43,6 +43,9 @@ export default function MapaCurso() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  void loading;
+  void error;
+
   // 2. CORRECCIÓN: El Map ahora guarda objetos de tipo CompletionInfo
   const [completionMap, setCompletionMap] = useState<Map<number, CompletionInfo>>(new Map());
 
