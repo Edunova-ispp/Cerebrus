@@ -18,8 +18,8 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
     ...(options.headers as Record<string, string> | undefined),
   };
 
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const res = await fetch(`${apiBase}${normalizedPath}`, { ...options, headers });
+  const normalizedPath = path ? path : `/${path}`;
+  const res = await fetch(`${normalizedPath}`, { ...options, headers });
 
   if (!res.ok) {
     throw new Error(`${options.method ?? "GET"} ${path} → ${res.status}`);
