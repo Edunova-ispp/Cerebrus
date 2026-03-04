@@ -100,11 +100,12 @@
   gap: 10px;
 }
 
-.ta-wizard {
-  font-size: 2.4rem;
-  line-height: 1;
+.ta-knight-img {
+  width: 70px;        /* Mismo tamaño que el dragón para mantener simetría */
+  height: 70px;
+  object-fit: contain;
   flex-shrink: 0;
-  filter: drop-shadow(2px 2px 0 #000);
+  filter: drop-shadow(2px 2px 0 #000); /* Mantiene el borde estilo pixel art */
 }
 
 .ta-dragon {
@@ -133,7 +134,7 @@
 .ta-progress-track {
   flex: 1;
   position: relative;
-  height: 30px;
+  height: 20px;
   background: #FFF8EE;
   border: 3px solid #000;
   border-radius: 8px;
@@ -177,7 +178,7 @@
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1rem;
   font-weight: bold;
-  color: #7C4DFF;
+  color: #D10057;
   letter-spacing: 0.04em;
 }
 
@@ -258,8 +259,8 @@
 }
 
 .ta-option--selected {
-  background: #e0d4ff;
-  border-color: #7C4DFF;
+  background: #e93f86;
+  border-color: #ff4db5;
 }
 
 .ta-option--correct {
@@ -362,7 +363,7 @@
 }
 
 .ta-nav-btn--next {
-  background: #7C4DFF;
+  background: #fff48d;
   color: #fff;
 }
 
@@ -382,10 +383,7 @@
   background: #e8a0b8;
 }
 
-.ta-nav-btn--finish {
-  background: #1a7a40;
-  color: #fff;
-}
+
 
 .ta-hint {
   font-family: 'Pixelify Sans', sans-serif;
@@ -393,4 +391,19 @@
   color: #888;
   margin: 0;
   text-align: center;
+}
+/* Estilos para la nueva imagen del dragón */
+.ta-dragon-img {
+  width: 50px;       /* Ajusta el tamaño según tu imagen */
+  height: 50px;      /* Ajusta el tamaño según tu imagen */
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(2px 2px 0 #000);
+  transition: filter 0.3s, transform 0.3s;
+}
+
+/* Mantener la animación de temblor para la imagen */
+.ta-dragon--shaking {
+  animation: ta-dragon-shake 0.55s ease;
+  filter: drop-shadow(0 0 8px #ff4500) drop-shadow(2px 2px 0 #000);
 }

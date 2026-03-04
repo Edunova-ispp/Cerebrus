@@ -4,6 +4,10 @@ import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 import './TestAlumno.css';
+import dragonImg from '../../assets/props/dragon.png';
+import caballeroImg from '../../assets/props/caballero.png';
+import espadaImg from '../../assets/props/espada.png';
+
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -33,6 +37,7 @@ type GeneralTestDTO = {
 };
 
 type RespAlumnoGeneralCreateResponse = {
+  readonly id: number;
   readonly correcta: boolean;
   readonly comentario: string;
 };
@@ -203,10 +208,11 @@ export default function TestAlumno() {
     setSubmitting(true);
 
     try {
+      const respuestasIds: number[] = [];
       const resultEntries = await Promise.all(
         test.preguntas.map(async (p) => {
           const selectedId = selections.get(p.id)!;
-          const selectedText = p.respuestas.find((r) => r.id === selectedId)?.respuesta ?? '';
+
           const res = await apiFetch('/api/respuestas-alumno-general', {
             method: 'POST',
             body: JSON.stringify({
@@ -216,14 +222,25 @@ export default function TestAlumno() {
             }),
           });
           const data = (await res.json()) as RespAlumnoGeneralCreateResponse;
-          const result: QuestionResult = {
-            correcta: Boolean(data?.correcta),
-            comentario: typeof data?.comentario === 'string' ? data.comentario : '',
-            selectedText,
-          };
-          return [p.id, result] as [number, QuestionResult];
-        }),
-      );
+          if (data.id) {
+      respuestasIds.push(data.id);
+    }
+         return [p.id, {
+      correcta: Boolean(data?.correcta),
+      comentario: data?.comentario || '',
+      selectedText: p.respuestas.find((r) => r.id === selectedId)?.respuesta ?? '',
+    }] as [number, QuestionResult];
+  })
+);
+
+      if (respuestasIds.length > 0) {
+    await apiFetch(`/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
+      method: 'PUT',
+      body: JSON.stringify(respuestasIds),
+    });
+}
+
+      
 
       completedRef.current = true;
       const resultsMap = new Map<number, QuestionResult>(resultEntries);
@@ -278,9 +295,11 @@ export default function TestAlumno() {
           <>
             {/* ── Header ── */}
             <div className="ta-top">
-              <button className="ta-exit-btn" type="button" onClick={() => navigate(-1)}>
-                Salir
-              </button>
+              {/* Botón salir con espada */}
+                            <button className="ord-exit-btn" type="button" onClick={() => navigate(-1)}>
+                    <img src={espadaImg} alt="" className="ord-exit-icon" />
+                    Salir
+                  </button>
               <div className="ta-title-banner">
                 <h1 className="ta-title">{test.titulo}</h1>
               </div>
@@ -301,7 +320,12 @@ export default function TestAlumno() {
 
             {/* ── Battle progress bar ── */}
             <div className="ta-battle-bar">
-              <span className="ta-wizard" title="Mago">🧙</span>
+              <img 
+    src={caballeroImg} 
+    alt="Caballero" 
+    className="ta-knight-img" 
+    title="Caballero" 
+  />
               <div className="ta-progress-track">
                 <div
                   className="ta-progress-fill"
@@ -314,12 +338,11 @@ export default function TestAlumno() {
                   />
                 )}
               </div>
-              <span
-                className={`ta-dragon${dragonReached ? ' ta-dragon--shaking' : ''}`}
-                title="Dragón"
-              >
-                🐉
-              </span>
+              <img 
+    src={dragonImg} 
+    alt="Dragón" 
+    className={`ta-dragon-img ${dragonReached ? ' ta-dragon--shaking' : ''}`}
+  />
             </div>
 
             {/* ── Question counter ── */}
@@ -408,7 +431,7 @@ export default function TestAlumno() {
                 submitted ? (
                   <button
                     type="button"
-                    className="ta-nav-btn ta-nav-btn--finish"
+                    className="ca-btn-guardar"
                     onClick={() => navigate(-1)}
                   >
                     Volver al curso
@@ -431,7 +454,7 @@ export default function TestAlumno() {
               ) : (
                 <button
                   type="button"
-                  className="ta-nav-btn ta-nav-btn--next"
+                  className="ca-btn-guardar"
                   onClick={handleNext}
                 >
                   Siguiente →
