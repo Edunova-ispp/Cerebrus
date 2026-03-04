@@ -42,6 +42,12 @@ function isImageString(value: string): boolean {
   const trimmed = value.trim();
   if (!trimmed) return false;
   if (/^data:image\//i.test(trimmed)) return true;
+
+  // Aceptar rutas relativas (Vite/NGINX) si parecen imagen por extensión.
+  // Ejemplos: /seed/ordenacion/html.svg, seed/ordenacion/html.svg
+  const pathLike = trimmed.split('#')[0]?.split('?')[0]?.toLowerCase() ?? '';
+  if (/\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(pathLike)) return true;
+
   try {
     const url = new URL(trimmed);
     const path = url.pathname.toLowerCase();
