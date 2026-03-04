@@ -1,12 +1,11 @@
-const API_BASE = () => (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
-
+const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 export async function toggleVisibilidadCurso(id: number): Promise<import('../types/curso').Curso> {
-  const res = await apiFetch(`/api/cursos/${id}/visibilidad`, { method: "PATCH" });
+  const res = await apiFetch(`${apiBase}/api/cursos/${id}/visibilidad`, { method: "PATCH" });
   return res.json();
 }
 
 export async function fetchProgresoAlumno(cursoId: number): Promise<import('../types/curso').ProgresoAlumno> {
-  const res = await apiFetch(`/api/cursos/${cursoId}/progreso`);
+  const res = await apiFetch(`${apiBase}/api/cursos/${cursoId}/progreso`);
   return res.json();
 }
 
@@ -20,7 +19,7 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
   };
 
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const res = await fetch(`${API_BASE()}${normalizedPath}`, { ...options, headers });
+  const res = await fetch(`${apiBase}${normalizedPath}`, { ...options, headers });
 
   if (!res.ok) {
     throw new Error(`${options.method ?? "GET"} ${path} → ${res.status}`);

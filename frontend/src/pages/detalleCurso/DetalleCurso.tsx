@@ -27,9 +27,10 @@ export default function DetalleCurso() {
   useEffect(() => {
     const load = async () => {
       try {
+        const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
         const cursoData = stateFromNav
           ? stateFromNav
-          : await apiFetch("/api/cursos")
+          : await apiFetch(`${apiBase}/api/cursos`)
               .then((r) => r.json())
               .then((data: Curso[]) => data.find((c) => String(c.id) === id) ?? null);
 

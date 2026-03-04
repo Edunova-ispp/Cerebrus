@@ -187,9 +187,10 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
 
     setLoading(true);
     try {
+      const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
       if (mode === 'create') {
         // Step 1 – create the General (test) shell with no questions
-        const generalRes = await apiFetch('/api/generales/test', {
+        const generalRes = await apiFetch(`${apiBase}/api/generales/test`, {
           method: 'POST',
           body: JSON.stringify({
             titulo: titulo.trim(),
@@ -206,7 +207,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
 
         // Step 2 – create questions sequentially (each must reference the general id)
         for (const q of questions) {
-          const pregRes = await apiFetch('/api/preguntas', {
+          const pregRes = await apiFetch(`${apiBase}/api/preguntas`, {
             method: 'POST',
             body: JSON.stringify({
               pregunta: q.text.trim(),
@@ -219,7 +220,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
           // Step 3 – create options for this question in parallel
           await Promise.all(
             q.options.map((opt) =>
-              apiFetch('/api/respuestas', {
+              apiFetch(`${apiBase}/api/respuestas`, {
                 method: 'POST',
                 body: JSON.stringify({
                   respuesta: opt.text.trim(),
@@ -233,7 +234,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
         }
       } else {
         // Edit – metadata
-        await apiFetch(`/api/generales/update/${generalId}`, {
+        await apiFetch(`${apiBase}/api/generales/update/${generalId}`, {
           method: 'PUT',
           body: JSON.stringify({
             titulo: titulo.trim(),
@@ -252,14 +253,14 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
         const currentQuestionIds = new Set(questions.filter((q) => q.id).map((q) => q.id!));
         for (const orig of originalQuestionsRef.current) {
           if (!currentQuestionIds.has(orig.id)) {
-            await apiFetch(`/api/preguntas/delete/${orig.id}`, { method: 'DELETE' });
+            await apiFetch(`${apiBase}/api/preguntas/delete/${orig.id}`, { method: 'DELETE' });
           }
         }
 
         for (const q of questions) {
           if (q.id) {
             // Existing question – update text
-            await apiFetch(`/api/preguntas/update/${q.id}`, {
+            await apiFetch(`${apiBase}/api/preguntas/update/${q.id}`, {
               method: 'PUT',
               body: JSON.stringify({ pregunta: q.text.trim(), imagen: null }),
             });
@@ -270,7 +271,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
             // Delete removed options
             for (const origR of origQ?.respuestas ?? []) {
               if (!currentOptIds.has(origR.id)) {
-                await apiFetch(`/api/respuestas/delete/${origR.id}`, { method: 'DELETE' });
+                await apiFetch(`${apiBase}/api/respuestas/delete/${origR.id}`, { method: 'DELETE' });
               }
             }
 
@@ -278,7 +279,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
             await Promise.all(
               q.options.map((opt) => {
                 if (opt.id) {
-                  return apiFetch(`/api/respuestas/update/${opt.id}`, {
+                  return apiFetch(`${apiBase}/api/respuestas/update/${opt.id}`, {
                     method: 'PUT',
                     body: JSON.stringify({
                       respuesta: opt.text.trim(),
@@ -287,7 +288,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
                     }),
                   });
                 }
-                return apiFetch('/api/respuestas', {
+                return apiFetch(`${apiBase}/api/respuestas`, {
                   method: 'POST',
                   body: JSON.stringify({
                     respuesta: opt.text.trim(),
@@ -300,14 +301,14 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
             );
           } else {
             // New question – create then create all its options
-            const pregRes = await apiFetch('/api/preguntas', {
+            const pregRes = await apiFetch(`${apiBase}/api/preguntas`, {
               method: 'POST',
               body: JSON.stringify({ pregunta: q.text.trim(), imagen: null, actividadId: generalId }),
             });
             const newPregId = (await pregRes.json()) as number;
             await Promise.all(
               q.options.map((opt) =>
-                apiFetch('/api/respuestas', {
+                apiFetch(`${apiBase}/api/respuestas`, {
                   method: 'POST',
                   body: JSON.stringify({
                     respuesta: opt.text.trim(),

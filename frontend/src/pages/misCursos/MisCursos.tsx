@@ -26,7 +26,7 @@ export default function MisCursos() {
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [joinSuccess, setJoinSuccess] = useState<string | null>(null);
-
+  const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const isMaestro = getCurrentUserRoles().some((r) =>
@@ -37,7 +37,7 @@ export default function MisCursos() {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiFetch("/api/cursos");
+      const res = await apiFetch(`${apiBase}/api/cursos`);
       const data = await res.json();
       setCursos(Array.isArray(data) ? data : []);
     } catch (e) {
@@ -60,6 +60,7 @@ export default function MisCursos() {
   }, [token]);
 
   const handleJoin = async () => {
+    const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     const codigo = codigoCurso.trim();
     if (!codigo) return;
     setJoinLoading(true);
@@ -67,7 +68,7 @@ export default function MisCursos() {
     setJoinSuccess(null);
     try {
       await apiFetch(
-        `/api/inscripciones/inscribe?codigoCurso=${encodeURIComponent(codigo)}`,  
+        `${apiBase}/api/inscripciones/inscribe?codigoCurso=${encodeURIComponent(codigo)}`,  
         { method: "POST" }
       );
       setJoinSuccess("¡Te has unido al curso correctamente!");
@@ -82,7 +83,7 @@ export default function MisCursos() {
 
   const handleEliminar = async (id: number) => {
   try {
-    await apiFetch(`/api/cursos/${id}`, { method: "DELETE" });
+    await apiFetch(`${apiBase}/api/cursos/${id}`, { method: "DELETE" });
     setCursos((prev) => prev.filter((c) => c.id !== id));
   } catch {
     setError("Error al eliminar el curso.");

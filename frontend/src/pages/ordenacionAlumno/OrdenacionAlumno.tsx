@@ -83,7 +83,8 @@ export default function OrdenacionAlumno() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
   const [feedback, setFeedback] = useState<{ correcta: boolean; comentario?: string } | null>(null);
-
+  const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+  
   const ordenacionIdNum = useMemo(() => {
     if (!ordenacionId) return NaN;
     return Number.parseInt(ordenacionId, 10);
@@ -100,7 +101,7 @@ export default function OrdenacionAlumno() {
       if (completedRef.current) return;
       if (abandonReportedRef.current) return;
       abandonReportedRef.current = true;
-      apiFetch(`/api/actividades-alumno/${id}/abandon`, { method: 'POST' }).catch(() => {});
+      apiFetch(`${apiBase}/api/actividades-alumno/${id}/abandon`, { method: 'POST' }).catch(() => {});
     };
   }, []);
 
@@ -121,7 +122,7 @@ export default function OrdenacionAlumno() {
       setFeedback(null);
 
       try {
-        const ordRes = await apiFetch(`/api/ordenaciones/${ordenacionIdNum}`);
+        const ordRes = await apiFetch(`${apiBase}/api/ordenaciones/${ordenacionIdNum}`);
         const ordData = (await ordRes.json()) as OrdenacionDTO;
         setOrdenacion(ordData);
         setItems(Array.isArray(ordData.valores) ? [...ordData.valores] : []);
@@ -129,12 +130,12 @@ export default function OrdenacionAlumno() {
         const alumnoId = getCurrentUserIdFromJwt();
         if (!alumnoId) throw new Error('No se pudo identificar al alumno conectado. Inicia sesión de nuevo.');
 
-        const ensureRes = await apiFetch(`/api/actividades-alumno/ensure/${ordData.id}`);
+        const ensureRes = await apiFetch(`${apiBase}/api/actividades-alumno/ensure/${ordData.id}`);
         const ensureValue = (await ensureRes.json()) as unknown;
         const exists = ensureValue === 1 || ensureValue === '1' || ensureValue === true;
 
         if (!exists) {
-          const createAA = await apiFetch(`/api/actividades-alumno`, {
+          const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
             method: 'POST',
             body: JSON.stringify({ alumnoId, actividadId: ordData.id }),
           });
@@ -145,7 +146,7 @@ export default function OrdenacionAlumno() {
             throw new Error('Respuesta inválida al crear ActividadAlumno');
           }
         } else {
-          const getAA = await apiFetch(`/api/actividades-alumno/alumno/${alumnoId}/actividad/${ordData.id}`);
+          const getAA = await apiFetch(`${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${ordData.id}`);
           const aaData = (await getAA.json()) as ActividadAlumnoDTO;
           if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
             setActividadAlumnoId(aaData.id);
@@ -180,7 +181,7 @@ export default function OrdenacionAlumno() {
 
     setSubmitting(true);
     try {
-      const res = await apiFetch('/api/respuestas-alumno-ordenacion', {
+      const res = await apiFetch(`${apiBase}/api/respuestas-alumno-ordenacion`, {
         method: 'POST',
         body: JSON.stringify({
           actividadAlumno: { id: actividadAlumnoId },
@@ -196,7 +197,7 @@ if (!res.ok) throw new Error('Error al guardar la respuesta');
       if (respuestaId) {
         // 3. LLAMADA CRÍTICA: Corregir automáticamente la actividad (PUT)
         // Mandamos el ID en un array tal como espera el controlador
-        await apiFetch(`/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
+        await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
           method: 'PUT',
           body: JSON.stringify([respuestaId]),
         });
