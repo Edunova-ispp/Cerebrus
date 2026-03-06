@@ -67,6 +67,7 @@ export default function CursoCard({ curso, isMaestro = false, onToggleVisibilida
               className="curso-card__toggle"
               aria-label="Visibilidad del curso"
               onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
             >
               <input
                 type="checkbox"

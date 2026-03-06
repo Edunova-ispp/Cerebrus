@@ -114,6 +114,9 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
                         temaSeleccionado?.id === tema.id ? " ltp-item--activo" : ""
                       }`}
                       onClick={() => setTemaSeleccionado(tema)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setTemaSeleccionado(tema); }}
+                      role="button"
+                      tabIndex={0}
                     >
                       <span className="ltp-item-titulo">{tema.titulo}</span>
                       <div className="ltp-item-acciones">

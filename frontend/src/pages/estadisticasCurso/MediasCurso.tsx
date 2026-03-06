@@ -99,6 +99,9 @@ export default function MediasCurso() {
                     key={tema.id}
                     className={`btn-medias-pixel ${temaSeleccionado?.id === tema.id ? 'active' : ''}`}
                     onClick={() => setTemaSeleccionado(tema)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setTemaSeleccionado(tema); }}
+                    role="button"
+                    tabIndex={0}
                   >
                     {tema.titulo}
                   </li>
