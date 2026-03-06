@@ -109,9 +109,7 @@ export default function MediasCurso() {
 
           {/* PANEL DERECHO: ACTIVIDADES */}
           <section className="panel-actividades">
-            {!temaSeleccionado ? (
-              <p className="msg-placeholder">Selecciona un tema</p>
-            ) : (
+            {temaSeleccionado ? (
               <>
                 <h3>{temaSeleccionado.titulo}</h3>
                 <table className="pixel-table">
@@ -135,6 +133,8 @@ export default function MediasCurso() {
                   </tbody>
                 </table>
               </>
+            ) : (
+              <p className="msg-placeholder">Selecciona un tema</p>
             )}
           </section>
         </div>

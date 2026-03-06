@@ -107,7 +107,7 @@ function InfoPage({ userType }: InfoPageProps) {
       <div className="info-sections">
         {sections.map(({ key, reverseOverride }, idx) => {
           const s = SECTIONS[key];
-          const reverse = reverseOverride !== undefined ? reverseOverride : s.reverse;
+          const reverse = reverseOverride ?? s.reverse;
           const textFrom  = reverse ? 80 : -80;
           const videoFrom = reverse ? -80 : 80;
           return (

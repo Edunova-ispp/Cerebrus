@@ -139,7 +139,17 @@ export default function TestAlumno() {
         const ensureValue = (await ensureRes.json()) as unknown;
         const exists = ensureValue === 1 || ensureValue === '1' || ensureValue === true;
 
-        if (!exists) {
+        if (exists) {
+          const getAA = await apiFetch(
+            `${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${testData.id}`,
+          );
+          const aaData = (await getAA.json()) as ActividadAlumnoDTO;
+          if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+            setActividadAlumnoId(aaData.id);
+          } else {
+            throw new Error('Respuesta inválida al obtener ActividadAlumno');
+          }
+        } else {
           const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
             method: 'POST',
             body: JSON.stringify({ alumnoId, actividadId: testData.id }),
@@ -149,16 +159,6 @@ export default function TestAlumno() {
             setActividadAlumnoId(aaData.id);
           } else {
             throw new Error('Respuesta inválida al crear ActividadAlumno');
-          }
-        } else {
-          const getAA = await apiFetch(
-            `${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${testData.id}`,
-          );
-          const aaData = (await getAA.json()) as ActividadAlumnoDTO;
-          if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
-            setActividadAlumnoId(aaData.id);
-          } else {
-            throw new Error('Respuesta inválida al obtener ActividadAlumno');
           }
         }
       } catch (e) {
@@ -443,9 +443,9 @@ export default function TestAlumno() {
                     onClick={handleSubmit}
                     disabled={submitting || !allAnswered || !actividadAlumnoId}
                     title={
-                      !allAnswered
-                        ? 'Responde todas las preguntas antes de enviar'
-                        : ''
+                      allAnswered
+                        ? ''
+                        : 'Responde todas las preguntas antes de enviar'
                     }
                   >
                     {submitting ? 'Enviando...' : '¡Enviar respuestas!'}
