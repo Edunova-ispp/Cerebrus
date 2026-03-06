@@ -52,7 +52,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
     return ordenItems.map((v) => v.trim()).filter(Boolean);
   }, [ordenItems]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 

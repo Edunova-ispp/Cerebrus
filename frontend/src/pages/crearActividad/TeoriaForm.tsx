@@ -23,7 +23,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialTitulo = '', i
     setDescripcion(initialDescripcion);
   }, [initialTitulo, initialDescripcion]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setLoading(true);
