@@ -280,6 +280,44 @@ export default function TestAlumno() {
 
   const currentPregunta = test?.preguntas[currentIndex];
 
+  let lastQuestionButton: React.ReactNode;
+  if (submitted) {
+    lastQuestionButton = (
+      <button
+        type="button"
+        className="ca-btn-guardar"
+        onClick={() => navigate(-1)}
+      >
+        Volver al curso
+      </button>
+    );
+  } else {
+    lastQuestionButton = (
+      <button
+        type="button"
+        className="ta-nav-btn ta-nav-btn--submit"
+        onClick={handleSubmit}
+        disabled={submitting || !allAnswered || !actividadAlumnoId}
+        title={
+          allAnswered
+            ? ''
+            : 'Responde todas las preguntas antes de enviar'
+        }
+      >
+        {submitting ? 'Enviando...' : '¡Enviar respuestas!'}
+      </button>
+    );
+  }
+
+  let answeredBadgeText: string | null = null;
+  if (currentPregunta && selections.has(currentPregunta.id)) {
+    if (submitted) {
+      answeredBadgeText = results.get(currentPregunta.id)?.correcta ? '✓ Correcta' : '✗ Incorrecta';
+    } else {
+      answeredBadgeText = '✓ Respondida';
+    }
+  }
+
   return (
     <div className="test-alumno-page">
       <NavbarMisCursos />
@@ -352,11 +390,7 @@ export default function TestAlumno() {
               </span>
               {selections.has(currentPregunta.id) && (
                 <span className="ta-answered-badge">
-                  {submitted
-                    ? results.get(currentPregunta.id)?.correcta
-                      ? '✓ Correcta'
-                      : '✗ Incorrecta'
-                    : '✓ Respondida'}
+                  {answeredBadgeText}
                 </span>
               )}
             </div>
@@ -428,29 +462,7 @@ export default function TestAlumno() {
               </button>
 
               {isLastQuestion ? (
-                submitted ? (
-                  <button
-                    type="button"
-                    className="ca-btn-guardar"
-                    onClick={() => navigate(-1)}
-                  >
-                    Volver al curso
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="ta-nav-btn ta-nav-btn--submit"
-                    onClick={handleSubmit}
-                    disabled={submitting || !allAnswered || !actividadAlumnoId}
-                    title={
-                      allAnswered
-                        ? ''
-                        : 'Responde todas las preguntas antes de enviar'
-                    }
-                  >
-                    {submitting ? 'Enviando...' : '¡Enviar respuestas!'}
-                  </button>
-                )
+                lastQuestionButton
               ) : (
                 <button
                   type="button"
