@@ -25,7 +25,7 @@ export default function TeoriaAlumno() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [actividadAlumnoId, setActividadAlumnoId] = useState<number | null>(null);
-
+  const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
   useEffect(() => {
     if (!actividadId) return;
     const id = Number.parseInt(actividadId, 10);
@@ -34,7 +34,7 @@ export default function TeoriaAlumno() {
       try {
         setLoading(true);
         // 1. Cargar datos de la teoría
-        const res = await apiFetch(`/api/actividades/${id}/alumno`);
+        const res = await apiFetch(`${apiBase}/api/actividades/${id}/alumno`);
         if (!res.ok) throw new Error(); 
     const data = await res.json();
     setTeoria(data);
@@ -44,7 +44,7 @@ export default function TeoriaAlumno() {
         const alumnoId = user?.id || user?.userId || user?.sub;
 
         if (alumnoId) {
-          const createRes = await apiFetch(`/api/actividades-alumno`, {
+          const createRes = await apiFetch(`${apiBase}/api/actividades-alumno`, {
             method: 'POST',
             body: JSON.stringify({ alumnoId, actividadId: id }),
           });
@@ -66,7 +66,7 @@ export default function TeoriaAlumno() {
     if (actividadAlumnoId) {
       try {
         // Marcamos como acabada en el servidor
-        await apiFetch(`/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
+        await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
           method: 'PUT',
           body: JSON.stringify([]), // Lista vacía porque no hay respuestas que corregir
         });

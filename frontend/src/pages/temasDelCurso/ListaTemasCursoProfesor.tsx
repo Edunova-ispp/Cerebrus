@@ -16,7 +16,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
   const [temaSeleccionado, setTemaSeleccionado] = useState<Tema | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
   // Si no llegó curso como prop, lo carga por el id de la URL
   useEffect(() => {
     if (cursoProp) {
@@ -24,7 +24,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
       return;
     }
     if (!id) return;
-    apiFetch("/api/cursos")
+    apiFetch(`${apiBase}/api/cursos`)
       .then((r) => r.json())
       .then((data: Curso[]) => {
         const encontrado = data.find((c) => String(c.id) === id) ?? null;
@@ -38,7 +38,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
     if (!curso) return;
     setLoading(true);
     setError(null);
-    apiFetch(`/api/temas/curso/${curso.id}/maestro`)
+    apiFetch(`${apiBase}/api/temas/curso/${curso.id}/maestro`)
       .then((r) => r.json())
       .then((data) => {
         const lista: Tema[] = Array.isArray(data) ? data : [];
@@ -53,7 +53,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
 
   const handleEliminarTema = async (temaId: number) => {
     try {
-      await apiFetch(`/api/temas/${temaId}`, { method: 'DELETE' });
+      await apiFetch(`${apiBase}/api/temas/${temaId}`, { method: 'DELETE' });
       // Elimina el tema del estado local
       setTemas(prev => {
         const nuevaLista = prev.filter(t => t.id !== temaId);
@@ -70,7 +70,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
 
   const handleEliminarActividad = async (actividadId: number) => {
   try {
-    await apiFetch(`/api/actividades/delete/${actividadId}`, { method: 'DELETE' });
+    await apiFetch(`${apiBase}/api/actividades/delete/${actividadId}`, { method: 'DELETE' });
     setTemaSeleccionado(prev => {
       if (!prev) return prev;
       return {

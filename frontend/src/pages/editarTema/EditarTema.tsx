@@ -15,13 +15,14 @@ export default function EditarTema() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     const cargarDatos = async () => {
       try {
         setLoading(true);
         // Intentamos traer el tema. 
         // Si tu API no soporta GET /api/temas/:id, 
         // podrías traer todos los temas del curso y buscar el que coincida.
-        const response = await apiFetch(`/api/temas/${temaId}`);
+        const response = await apiFetch(`${apiBase}/api/temas/${temaId}`);
         
         if (!response.ok) throw new Error("No se pudo obtener el tema");
         
@@ -50,8 +51,9 @@ export default function EditarTema() {
     }
 
     setEditando(true);
+    const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     try {
-      await apiFetch(`/api/temas/${temaId}?maestroId=${maestroId}`, {
+      await apiFetch(`${apiBase}/api/temas/${temaId}?maestroId=${maestroId}`, {
         method: 'PUT',
         body: JSON.stringify({ nuevoTitulo: titulo.trim() }),
       });

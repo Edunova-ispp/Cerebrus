@@ -50,9 +50,10 @@ export default function MapaCurso() {
   const [completionMap, setCompletionMap] = useState<Map<number, CompletionInfo>>(new Map());
 
   useEffect(() => {
+    const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     if (!cursoId) return;
     setLoading(true);
-    apiFetch(`/api/temas/curso/${cursoId}/alumno`)
+    apiFetch(`${apiBase}/api/temas/curso/${cursoId}/alumno`)
       .then((r) => r.json())
       .then((data: TemaDTO[]) => {
         setTemas(Array.isArray(data) ? data : []);
@@ -63,6 +64,7 @@ export default function MapaCurso() {
   }, [cursoId]);
 
   useEffect(() => {
+    const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     const tema = temas[selectedIndex];
     if (!tema || tema.actividades.length === 0) return;
 
@@ -74,7 +76,7 @@ export default function MapaCurso() {
 
     Promise.all(
       unchecked.map((act) =>
-        apiFetch(`/api/actividades-alumno/alumno/${alumnoId}/actividad/${act.id}`)
+        apiFetch(`${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${act.id}`)
           .then(async (r) => {
             if (r.status === 404) return { id: act.id, info: { done: false, terminada: false } };
             const data = await r.json();

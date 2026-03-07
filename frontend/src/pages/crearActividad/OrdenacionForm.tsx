@@ -106,7 +106,8 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
 
     setLoading(true);
     try {
-      const url = mode === 'edit' ? `/api/ordenaciones/update/${ordenacionId}` : '/api/ordenaciones';
+      const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+      const url = mode === 'edit' ? `${apiBase}/api/ordenaciones/update/${ordenacionId}` : `${apiBase}/api/ordenaciones`;
       const method = mode === 'edit' ? 'PUT' : 'POST';
 
       if (mode === 'edit' && !ordenacionId) {

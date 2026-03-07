@@ -29,10 +29,11 @@ export function TeoriaForm({ mode = 'create', actividadId, initialTitulo = '', i
     setLoading(true);
 
     try {
+      const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
       if (mode === 'edit') {
         if (!actividadId) throw new Error('ID de actividad no encontrado');
-
-        await apiFetch(`/api/actividades/teoria/${actividadId}`, {
+        
+        await apiFetch(`${apiBase}/api/actividades/teoria/${actividadId}`, {
           method: 'PUT',
           body: JSON.stringify({
             titulo: titulo.trim(),
@@ -44,7 +45,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialTitulo = '', i
         if (!temaIdNum) throw new Error('ID de tema no encontrado');
         if (!cursoId) throw new Error('ID de curso no encontrado');
 
-        await apiFetch('/api/actividades/teoria', {
+        await apiFetch(`${apiBase}/api/actividades/teoria`, {
           method: 'POST',
           body: JSON.stringify({
             titulo: titulo.trim(),
