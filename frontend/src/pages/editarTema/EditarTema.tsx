@@ -40,7 +40,7 @@ export default function EditarTema() {
     cargarDatos();
   }, [temaId]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const userInfo = getCurrentUserInfo();
     const maestroId = userInfo?.id;

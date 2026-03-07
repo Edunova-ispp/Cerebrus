@@ -14,6 +14,12 @@ export default function CrearActividad() {
   const navigate = useNavigate();
   const [tipoSeleccionado, setTipoSeleccionado] = useState<string | null>(null);
 
+  const formContent =
+    tipoSeleccionado === 'Poner en orden' ? <OrdenacionForm /> :
+    tipoSeleccionado === 'Tipo test' ? <TestForm mode="create" /> :
+    tipoSeleccionado === 'Teoría' ? <TeoriaForm mode="create" /> :
+    <p className="ca-proximamente">Selecciona un tipo de actividad</p>;
+
   return (
     <div className="ca-page">
       <NavbarMisCursos />
@@ -35,16 +41,7 @@ export default function CrearActividad() {
         </div>
 
         <div className="ca-contenido">
-
-          {tipoSeleccionado === 'Poner en orden' ? (
-            <OrdenacionForm />
-          ) : tipoSeleccionado === 'Tipo test' ? (
-            <TestForm mode="create" />
-          ) : tipoSeleccionado === 'Teoría'? (
-            <TeoriaForm mode="create" />
-          ) : (
-            <p className="ca-proximamente">Selecciona un tipo de actividad</p>
-          )}
+          {formContent}
         </div>
       </main>
     </div>
