@@ -77,7 +77,7 @@ function InfoPage({ userType }: InfoPageProps) {
   return (
     <div className="info-page">
       <button className="info-back-btn" onClick={() => navigate("/")}>
-        Volver
+        ←
       </button>
 
       
