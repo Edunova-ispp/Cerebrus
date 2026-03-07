@@ -123,7 +123,7 @@ export default function EditarCurso() {
       
       <main className="crear-curso-main">
         <button className="detalle-volver" onClick={() => navigate(`/cursos/${id}`)}>
-          ← Volver
+          ← 
         </button>
 
         <h2 className="welcome-text">Editar detalles del curso</h2>

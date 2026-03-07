@@ -80,7 +80,7 @@ export default function MediasCurso() {
     <div className="estadisticas-page">
       <NavbarMisCursos />
       <main className="estadisticas-main">
-        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>← Volver</button>
+        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>←</button>
         <h1 className="estadisticas-titulo-curso">Medias del Curso</h1>
 
         {loading && <p className="msg-placeholder">Cargando datos...</p>}

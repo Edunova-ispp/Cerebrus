@@ -68,7 +68,7 @@ export default function EditarTema() {
       <NavbarMisCursos />
       <main className="crear-tema-main">
         <button className="detalle-volver" onClick={() => navigate(-1)}>
-          ← Volver
+          ←
         </button>
 
         <h2 className="welcome-text">Bienvenido al editor de temas</h2>

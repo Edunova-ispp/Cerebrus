@@ -17,7 +17,7 @@ const TITLE = [
   { char: "b", cls: "primary" },
   { char: "r", cls: "secondary" },
   { char: "u", cls: "accent" },
-  { char: "s", cls: "primary" },
+  { char: "s", cls: "accent" },
 ];
 
 const cards = [
