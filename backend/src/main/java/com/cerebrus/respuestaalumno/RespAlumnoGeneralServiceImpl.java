@@ -118,4 +118,23 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
 
         return esCorrecta;
     }
+
+    public boolean corregirRespuestaAlumnoGeneralTest(Long id) {
+        RespAlumnoGeneral respuestaAlumno = respAlumnoGeneralRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("RespuestaAlumnoGeneral", "id", id));
+        List<Respuesta> respuestas = respuestaService.encontrarRespuestasPorPreguntaId(respuestaAlumno.getPregunta().getId());
+        Boolean esCorrecta = false;
+        System.out.println("Respuesta del alumno: " + respuestaAlumno.getRespuesta());
+        for (Respuesta r : respuestas) {
+                System.out.println("Respuesta correcta: " + r.getRespuesta() + " - Correcta: " + r.getCorrecta());
+                if(r.getRespuesta().equals(respuestaAlumno.getRespuesta()) ) {
+                   esCorrecta = true;
+                }
+        }
+        
+           
+        
+
+        return esCorrecta;
+    }
 }
