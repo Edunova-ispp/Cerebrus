@@ -53,7 +53,7 @@ export default function CrearTema() {
       <main className="crear-tema-main">
         {/* Botón Volver alineado a la izquierda */}
         <button className="detalle-volver" onClick={() => navigate(-1)}>
-          ← Volver
+          ← 
         </button>
 
         <h2 className="welcome-text">Bienvenido al creador de temas</h2>
