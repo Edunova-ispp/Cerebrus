@@ -1,5 +1,6 @@
 package com.cerebrus.actividad;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,13 +9,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.TamanoTablero;
+import com.cerebrus.actividadalumno.ActividadAlumno;
+import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadalumno.ActividadAlumnoService;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
 import com.cerebrus.respuesta.Respuesta;
 import com.cerebrus.respuesta.RespuestaRepository;
+import com.cerebrus.respuestaalumno.RespAlumnoGeneral;
+import com.cerebrus.respuestaalumno.RespAlumnoGeneralRepository;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
+import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
@@ -30,15 +37,21 @@ public class TableroServiceImpl implements TableroService {
     private final PreguntaRepository preguntaRepository;
     private final RespuestaRepository respuestaRepository;
     private final UsuarioService usuarioService;
+    private final ActividadAlumnoService actividadAlumnoService;
+    private final RespAlumnoGeneralRepository respuestaAlumnoRepository;
+    private final ActividadAlumnoRepository actividadAlumnoRepository;
 
     @Autowired
-    public TableroServiceImpl(TableroRepository tableroRepository, ActividadRepository actividadRepository, TemaRepository temaRepository, PreguntaRepository preguntaRepository, RespuestaRepository respuestaRepository, UsuarioService usuarioService) {
+    public TableroServiceImpl(TableroRepository tableroRepository, ActividadRepository actividadRepository, TemaRepository temaRepository, PreguntaRepository preguntaRepository, RespuestaRepository respuestaRepository, UsuarioService usuarioService, ActividadAlumnoService actividadAlumnoService, RespAlumnoGeneralRepository respuestaAlumnoRepository, ActividadAlumnoRepository actividadAlumnoRepository) {
         this.actividadRepository = actividadRepository;
         this.tableroRepository = tableroRepository;
         this.temaRepository = temaRepository;
         this.preguntaRepository = preguntaRepository;
         this.respuestaRepository = respuestaRepository;
         this.usuarioService = usuarioService;
+        this.actividadAlumnoService = actividadAlumnoService;
+        this.respuestaAlumnoRepository = respuestaAlumnoRepository;
+        this.actividadAlumnoRepository = actividadAlumnoRepository;
     }
 
     @Override
@@ -82,6 +95,7 @@ public class TableroServiceImpl implements TableroService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TableroDTO getTablero(Long tableroId) {
         Tablero tablero = tableroRepository.findById(tableroId).orElseThrow(() -> new ResourceNotFoundException("Tablero no encontrado"));
         Usuario u = usuarioService.findCurrentUser();
@@ -97,6 +111,7 @@ public class TableroServiceImpl implements TableroService {
     }
 
     @Override
+    @Transactional
     public void eliminarTablero(Long tableroId) {
         Tablero tablero = tableroRepository.findById(tableroId).orElseThrow(() -> new ResourceNotFoundException("Tablero no encontrado"));
         Usuario u = usuarioService.findCurrentUser();
@@ -112,6 +127,7 @@ public class TableroServiceImpl implements TableroService {
     }
 
     @Override
+    @Transactional
     public TableroDTO actualizarTablero(Long id, TableroRequest tablero) {
         Tablero tableroExistente = tableroRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Tablero no encontrado"));
         Usuario u = usuarioService.findCurrentUser();
@@ -149,5 +165,41 @@ public class TableroServiceImpl implements TableroService {
 
         Tablero tableroActualizado = tableroRepository.save(tableroExistente);
         return TableroDTO.fromEntity(tableroActualizado);
+    }
+
+    @Override
+    @Transactional
+    public String crearRespuestaAPreguntaTablero(String respuesta, Long tableroId, Long preguntaId) {
+        Tablero tablero = tableroRepository.findById(tableroId).orElseThrow(() -> new ResourceNotFoundException("Tablero no encontrado"));
+        Pregunta pregunta = preguntaRepository.findById(preguntaId).orElseThrow(() -> new ResourceNotFoundException("Pregunta no encontrada"));
+        Usuario u = usuarioService.findCurrentUser();
+
+        if (u instanceof Alumno) {
+            Alumno alumno = (Alumno) u;
+            if (!tablero.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
+                throw new AccessDeniedException("No tienes permiso para responder a este tablero porque no esta inscrito");
+            }
+
+            Boolean correcta = pregunta.getRespuestas().get(0).getRespuesta().toLowerCase().strip().equals(respuesta.toLowerCase().strip());
+            ActividadAlumno actividadAlumno = actividadAlumnoService.crearActividadAlumno(0, 0, LocalDateTime.now(), null, 0, 0, alumno.getId(), tablero.getId());
+            RespAlumnoGeneral respuestaAlumno = new RespAlumnoGeneral(correcta, actividadAlumno, respuesta, pregunta);
+            respuestaAlumno =  respuestaAlumnoRepository.save(respuestaAlumno);
+            actividadAlumno.getRespuestasAlumno().add(respuestaAlumno);
+            actividadAlumno = actividadAlumnoRepository.save(actividadAlumno);
+            if(correcta  && tablero.getPreguntas().get(tablero.getPreguntas().size()-1).getId().equals(pregunta.getId())) {
+                actividadAlumno.setAcabada(LocalDateTime.now());
+                //TODO: Añadir como se corrigen exactamente estas actividades para poder setear la nota.
+                actividadAlumnoRepository.save(actividadAlumno);
+            }
+            if(pregunta.getActividad().getRespVisible()) {
+                return correcta ? "Respuesta correcta" : "Respuesta incorrecta. La respuesta correcta es: " + pregunta.getRespuestas().get(0).getRespuesta();
+            } else {
+                return correcta ? "Respuesta correcta" : "Respuesta incorrecta";
+            }
+
+        } else {
+            throw new AccessDeniedException("Solo un alumno puede responder a actividades de tablero");
+        }
+        
     }
 }

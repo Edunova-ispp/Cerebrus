@@ -12,4 +12,6 @@ public interface TableroService {
 
     TableroDTO actualizarTablero(Long id, TableroRequest tablero);
 
+    String crearRespuestaAPreguntaTablero(String respuesta, Long tableroId, Long preguntaId);
+
 }

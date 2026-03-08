@@ -105,4 +105,22 @@ public class TableroController {
         
     }
 
+    @PostMapping("/{tableroId}/{preguntaId}")
+    public ResponseEntity<String> crearRespuestaAPreguntaTablero(@RequestBody String respuesta, @PathVariable Long tableroId, @PathVariable Long preguntaId) {
+        try {
+            String mensaje = tableroService.crearRespuestaAPreguntaTablero(respuesta, tableroId, preguntaId);
+            return ResponseEntity.ok(mensaje);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        
+        
+        
+    }
+    
+
 }
