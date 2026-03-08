@@ -123,4 +123,52 @@ public class GeneralController {
         generalService.deleteActividad(id);
         return ResponseEntity.noContent().build();
     }
+
+     @PostMapping("/clasificacion")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<Long> crearTipoClasificacion(@RequestBody @Valid General general) {
+
+        List<Long> preguntasId = general.getPreguntas().stream()
+            .map(Pregunta::getId)
+            .toList();
+        
+        General generalCreada = generalService.crearGeneralClasificacion(
+            general.getTitulo(),
+            general.getDescripcion(),
+            general.getPuntuacion(),
+            general.getTema().getId(),
+            general.getRespVisible(),
+            general.getComentariosRespVisible(),
+            preguntasId
+        );
+
+        return new ResponseEntity<>(generalCreada.getId(), HttpStatus.CREATED);
+    }
+    
+    @GetMapping("/clasificacion/{id}/maestro")
+    public ResponseEntity<GeneralClasificacionMaestroDTO> readTipoClasificacionMaestro(@PathVariable Long id) {
+        return ResponseEntity.ok(generalService.readTipoClasificacionMaestro(id));
+    }
+
+    @GetMapping("/clasificacion/{id}")
+    public ResponseEntity<GeneralClasificacionDTO> readTipoClasificacion(@PathVariable Long id) {
+        return ResponseEntity.ok(generalService.readTipoClasificacion(id));
+    }
+
+    @PutMapping("/clasificacion/update/{id}")
+    public ResponseEntity<GeneralClasificacionMaestroDTO> updateTipoClasificacion(@PathVariable Long id, @RequestBody @Valid General general){
+        GeneralClasificacionMaestroDTO actualizado = generalService.updateTipoClasificacion(
+            id,
+            general.getTitulo(),
+            general.getDescripcion(),
+            general.getPuntuacion(),
+            general.getRespVisible(),
+            general.getComentariosRespVisible(),
+            general.getPreguntas().stream().map(Pregunta::getId).toList(),
+            general.getPosicion(),
+            general.getVersion(),
+            general.getTema().getId()
+        );
+        return ResponseEntity.ok(actualizado);
+    }
 }
