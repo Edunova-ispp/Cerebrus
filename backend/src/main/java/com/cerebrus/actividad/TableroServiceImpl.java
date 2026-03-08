@@ -179,7 +179,10 @@ public class TableroServiceImpl implements TableroService {
             if (!tablero.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
                 throw new AccessDeniedException("No tienes permiso para responder a este tablero porque no esta inscrito");
             }
-
+            if(!tablero.getPreguntas().stream().anyMatch(p -> p.getId().equals(preguntaId))) {
+                throw new AccessDeniedException("La pregunta no pertenece a este tablero");
+            }
+            
             Boolean correcta = pregunta.getRespuestas().get(0).getRespuesta().toLowerCase().strip().equals(respuesta.toLowerCase().strip());
             ActividadAlumno actividadAlumno = actividadAlumnoService.crearActividadAlumno(0, 0, LocalDateTime.now(), null, 0, 0, alumno.getId(), tablero.getId());
             RespAlumnoGeneral respuestaAlumno = new RespAlumnoGeneral(correcta, actividadAlumno, respuesta, pregunta);
@@ -188,7 +191,8 @@ public class TableroServiceImpl implements TableroService {
             actividadAlumno = actividadAlumnoRepository.save(actividadAlumno);
             if(correcta  && tablero.getPreguntas().get(tablero.getPreguntas().size()-1).getId().equals(pregunta.getId())) {
                 actividadAlumno.setAcabada(LocalDateTime.now());
-                //TODO: Añadir como se corrigen exactamente estas actividades para poder setear la nota.
+                actividadAlumno.setNota(10);
+                actividadAlumno.setPuntuacion(tablero.getPuntuacion());
                 actividadAlumnoRepository.save(actividadAlumno);
             }
             if(pregunta.getActividad().getRespVisible()) {
