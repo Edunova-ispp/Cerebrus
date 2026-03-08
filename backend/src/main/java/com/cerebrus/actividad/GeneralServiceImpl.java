@@ -221,7 +221,7 @@ public class GeneralServiceImpl implements GeneralService {
     @Override
     @Transactional
     public General crearGeneralClasificacion(String titulo, String descripcion, Integer puntuacion, Long temaId, 
-        Boolean respVisible, String comentariosRespVisible,List<Long> preguntasId) {
+        Boolean respVisible, String comentariosRespVisible) {
         
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -229,17 +229,8 @@ public class GeneralServiceImpl implements GeneralService {
         }
         General clasificacion = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
         clasificacion.setTipo(TipoActGeneral.CLASIFICACION);
-        List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
+       
 
-        for(Pregunta p : preguntas){
-            List<Respuesta> respuestas = p.getRespuestas();
-            for(Respuesta r : respuestas){
-                if(!r.getCorrecta()){
-                    throw new IllegalArgumentException("Las preguntas de una actividad de clasificación no pueden tener respuestas incorrectas");
-                }
-            }
-        }
-        clasificacion.setPreguntas(preguntas);
         General creada = generalRepository.save(clasificacion);
         
        

@@ -128,9 +128,7 @@ public class GeneralController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Long> crearTipoClasificacion(@RequestBody @Valid General general) {
 
-        List<Long> preguntasId = general.getPreguntas().stream()
-            .map(Pregunta::getId)
-            .toList();
+    
         
         General generalCreada = generalService.crearGeneralClasificacion(
             general.getTitulo(),
@@ -138,8 +136,7 @@ public class GeneralController {
             general.getPuntuacion(),
             general.getTema().getId(),
             general.getRespVisible(),
-            general.getComentariosRespVisible(),
-            preguntasId
+            general.getComentariosRespVisible()
         );
 
         return new ResponseEntity<>(generalCreada.getId(), HttpStatus.CREATED);
