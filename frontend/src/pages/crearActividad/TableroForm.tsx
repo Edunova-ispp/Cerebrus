@@ -136,7 +136,7 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
           method: 'PUT',
           body: JSON.stringify(buildPayload()),
         });
-        setSuccess('Tablero actualizado correctamente');
+        navigate(`/cursos/${cursoId}/temas`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar el tablero');

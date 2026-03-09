@@ -78,7 +78,6 @@ export default function EditarActividad() {
   const [teoria, setTeoria] = useState<TeoriaDTO | null>(null);
   const [generalTest, setGeneralTest] = useState<GeneralTestMaestroDTO | null>(null);
   const [tablero, setTablero] = useState<TableroDTO | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
@@ -105,27 +104,28 @@ export default function EditarActividad() {
             setLoading(false);
           })
           .catch(() => {
-            // 3. Intentar teoría
-            apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`)
+            // 3. Intentar tablero
+            apiFetch(`${apiBase}/api/tableros/${actividadId}`)
               .then((r) => r.json())
-              .then((data: TeoriaDTO) => {
-                setTeoria(data);
-                setKind('teoria');
+              .then((data: TableroDTO) => {
+                setTablero(data);
+                setKind('tablero');
                 setLoading(false);
               })
-              .catch((e) => {
-                // 4. Intentar tablero
-                apiFetch(`${apiBase}/api/tableros/${actividadId}`)
+              .catch(() => {
+                // 4. Intentar teoría
+                apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`)
                   .then((r) => r.json())
-                  .then((data: TableroDTO) => {
-                    setTablero(data);
-                    setKind('tablero');
+                  .then((data: TeoriaDTO) => {
+                    setTeoria(data);
+                    setKind('teoria');
+                    setLoading(false);
                   })
-                  .catch((e2) => {
-                    const msg = e2 instanceof Error ? e2.message : e instanceof Error ? e.message : 'No se pudo cargar la actividad';
+                  .catch((e) => {
+                    const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
                     setError(msg);
-                  })
-                  .finally(() => setLoading(false));
+                    setLoading(false);
+                  });
               });
           });
       });
@@ -145,21 +145,6 @@ export default function EditarActividad() {
         })),
       }
     : undefined;
-
-  const handleEliminarTablero = async () => {
-    if (!tablero || !window.confirm('¿Seguro que quieres eliminar este tablero? Esta acción no se puede deshacer.')) return;
-    const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
-    setDeleting(true);
-    try {
-      await apiFetch(`${apiBase}/api/tableros/${tablero.id}`, { method: 'DELETE' });
-      navigate(`/cursos/${cursoId}/temas`);
-    } catch {
-      setError('No se pudo eliminar el tablero');
-    } finally {
-      setDeleting(false);
-    }
-  };
-
 
   const ordenacionInitialValues: OrdenacionFormInitialValues | undefined = ordenacion
     ? {
@@ -247,17 +232,6 @@ export default function EditarActividad() {
           >
             Volver al Mapa
           </button>
-          {kind === 'tablero' && tablero && (
-            <button
-              className="ca-sidebar-btn"
-              type="button"
-              style={{ color: '#c0392b' }}
-              disabled={deleting}
-              onClick={handleEliminarTablero}
-            >
-              {deleting ? 'Eliminando...' : 'Eliminar tablero'}
-            </button>
-          )}
         </div>
 
         <div className="ca-contenido">
