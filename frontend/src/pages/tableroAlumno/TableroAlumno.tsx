@@ -137,50 +137,39 @@ export default function TableroAlumno() {
     }
   };
 
-  // ── Build cells ────────────────────────────────────────
+  // ── Build cells (expanded grid: 2n-1 × 2n-1) ───────────
 
   const modalQIdx =
     modalCell !== null ? cellToQIndex(modalCell[0], modalCell[1], size) : null;
   const modalQuestion = modalQIdx !== null ? tablero.preguntas[modalQIdx] : null;
 
-  const cells: React.ReactElement[] = [];
+  const gridItems: React.ReactElement[] = [];
+  const gridDim = size * 2 - 1;
+
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
       const isCerbero = r === cr && c === cc;
       const qIdx = cellToQIndex(r, c, size);
       const isAnswered = qIdx !== null && answeredSet.has(qIdx);
       const isClickable = qIdx !== null && !isAnswered && isNeighbor(cr, cc, r, c) && !isComplete;
-      const isModalOpen =
-        modalCell !== null && modalCell[0] === r && modalCell[1] === c;
+      const isModalOpen = modalCell !== null && modalCell[0] === r && modalCell[1] === c;
       const isDark = (r + c) % 2 === 1;
 
-      cells.push(
+      // ── Cell ──
+      gridItems.push(
         <div
-          key={`${r}-${c}`}
+          key={`cell-${r}-${c}`}
           className={[
             'ta-cell',
             isDark ? 'ta-cell--dark' : 'ta-cell--light',
             isClickable ? 'ta-cell--clickable' : '',
-          ]
-            .join(' ')
-            .trim()}
+          ].join(' ').trim()}
+          style={{ gridRow: r * 2 + 1, gridColumn: c * 2 + 1 }}
           onClick={() => handleCellClick(r, c)}
           role={isClickable ? 'button' : undefined}
           tabIndex={isClickable ? 0 : undefined}
           onKeyDown={(e) => e.key === 'Enter' && handleCellClick(r, c)}
-          aria-label={
-            isCerbero
-              ? 'Posición actual de Cerbero'
-              : isAnswered
-              ? `Pregunta ${(qIdx ?? 0) + 1} respondida`
-              : isClickable
-              ? `Responder pregunta ${(qIdx ?? 0) + 1}`
-              : qIdx !== null
-              ? `Pregunta ${qIdx + 1} bloqueada`
-              : undefined
-          }
         >
-          {/* Cerbero character */}
           {isCerbero && (
             <img
               src={perritoImg}
@@ -188,18 +177,13 @@ export default function TableroAlumno() {
               alt="Cerbero"
             />
           )}
-
-          {/* Question card */}
           {qIdx !== null && !isCerbero && (
             <div
               className={[
                 'ta-qcard',
-                isAnswered
-                  ? 'ta-qcard--done'
-                  : isModalOpen
-                  ? 'ta-qcard--selected'
-                  : isClickable
-                  ? 'ta-qcard--neighbor'
+                isAnswered ? 'ta-qcard--done'
+                  : isModalOpen ? 'ta-qcard--selected'
+                  : isClickable ? 'ta-qcard--neighbor'
                   : 'ta-qcard--locked',
               ].join(' ')}
             >
@@ -208,6 +192,28 @@ export default function TableroAlumno() {
           )}
         </div>
       );
+
+      // ── Horizontal connector (right) ──
+      if (c < size - 1) {
+        gridItems.push(
+          <div
+            key={`h-${r}-${c}`}
+            className="ta-connector ta-connector--h"
+            style={{ gridRow: r * 2 + 1, gridColumn: c * 2 + 2 }}
+          />
+        );
+      }
+
+      // ── Vertical connector (below) ──
+      if (r < size - 1) {
+        gridItems.push(
+          <div
+            key={`v-${r}-${c}`}
+            className="ta-connector ta-connector--v"
+            style={{ gridRow: r * 2 + 2, gridColumn: c * 2 + 1 }}
+          />
+        );
+      }
     }
   }
 
@@ -247,9 +253,9 @@ export default function TableroAlumno() {
           <div className="ta-board-wrap">
             <div
               className="ta-board"
-              style={{ gridTemplateColumns: `repeat(${size}, 1fr)` }}
+              style={{ gridTemplateColumns: `repeat(${gridDim}, auto)` }}
             >
-              {cells}
+              {gridItems}
             </div>
           </div>
 

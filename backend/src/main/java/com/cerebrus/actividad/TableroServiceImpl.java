@@ -182,7 +182,11 @@ public class TableroServiceImpl implements TableroService {
                 throw new AccessDeniedException("La pregunta no pertenece a este tablero");
             }
             
-            Boolean correcta = pregunta.getRespuestas().get(0).getRespuesta().toLowerCase().strip().equals(respuesta.toLowerCase().strip());
+            String cleanedRespuesta = respuesta.strip();
+            if (cleanedRespuesta.startsWith("\"") && cleanedRespuesta.endsWith("\"")) {
+                cleanedRespuesta = cleanedRespuesta.substring(1, cleanedRespuesta.length() - 1);
+            }
+            Boolean correcta = pregunta.getRespuestas().get(0).getRespuesta().toLowerCase().strip().equals(cleanedRespuesta.toLowerCase().strip());
             ActividadAlumno actividadAlumno = actividadAlumnoService.crearActividadAlumno(0, 0, LocalDateTime.now(), null, 0, 0, alumno.getId(), tablero.getId());
             RespAlumnoGeneral respuestaAlumno = new RespAlumnoGeneral(correcta, actividadAlumno, respuesta, pregunta);
             respuestaAlumno =  respuestaAlumnoRepository.save(respuestaAlumno);
