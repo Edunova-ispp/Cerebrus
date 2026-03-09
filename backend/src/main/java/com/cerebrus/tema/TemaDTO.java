@@ -1,7 +1,9 @@
 package com.cerebrus.tema;
 
 import java.util.List;
-import com.cerebrus.actividad.ActividadDTO;
+
+import com.cerebrus.actividad.DTO.ActividadDTO;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
