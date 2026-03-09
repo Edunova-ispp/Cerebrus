@@ -32,4 +32,17 @@ public class PreguntaDTO {
     public List<RespuestaDTO> getRespuestas() {
         return respuestas;
     }
+
+    public static PreguntaDTO fromEntity(Pregunta pregunta) {
+        List<RespuestaDTO> respuestasDTO = pregunta.getRespuestas().stream()
+            .map(RespuestaDTO::fromEntity)
+            .toList();
+
+        return new PreguntaDTO(
+            pregunta.getId(),
+            pregunta.getPregunta(),
+            pregunta.getImagen(),
+            respuestasDTO
+        );
+    }
 }
