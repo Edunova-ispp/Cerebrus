@@ -2,15 +2,16 @@ package com.cerebrus.actividadalumno;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 
-import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cerebrus.TipoActGeneral;
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.actividad.ActividadRepository;
@@ -18,6 +19,7 @@ import com.cerebrus.actividad.General;
 import com.cerebrus.actividad.Ordenacion;
 import com.cerebrus.actividad.OrdenacionService;
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.respuestaalumno.RespAlumnoGeneral;
 import com.cerebrus.respuestaalumno.RespAlumnoGeneralService;
 import com.cerebrus.respuestaalumno.RespAlumnoOrdenacionService;
 import com.cerebrus.respuestaalumno.RespuestaAlumno;
@@ -186,8 +188,12 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     public ActividadAlumno corregirActividadAlumnoAutomaticamente(Long id, List<Long> respuestasIds) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         Actividad actividad = actividadAlumno.getActividad();
-        if(actividad instanceof General) {
-            corregirActividadAlumnoAutomaticamenteGeneral(actividadAlumno, respuestasIds, actividad);
+        if(actividad instanceof General){
+            if (((General) actividad).getTipo() == TipoActGeneral.TEST) {
+                corregirActividadAlumnoAutomaticamenteGeneral(actividadAlumno, respuestasIds, actividad);
+            } else if (((General) actividad).getTipo() == TipoActGeneral.CARTA){
+                corregirActividadAlumnoAutomaticamenteCartaGeneral(actividadAlumno, respuestasIds, actividad);
+            }
         } else if(actividad instanceof Ordenacion) {
             corregirActividadAlumnoAutomaticamenteOrdenacion(actividadAlumno, respuestasIds, actividad);
         } else {
@@ -238,6 +244,63 @@ int numPreguntasTotales = actividadGeneral.getPreguntas().size();
     actividadAlumno.setNota((int) Math.round(notaAcumulada));
     actividadAlumno.setAcabada(LocalDateTime.now());
 }
+
+    @Override
+    public void corregirActividadAlumnoAutomaticamenteCartaGeneral(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
+        General actividadGeneral = (General) actividad;
+        int totalPreguntas = actividadGeneral.getPreguntas().size();
+
+        if (totalPreguntas == 0) {
+            actividadAlumno.setPuntuacion(0);
+            actividadAlumno.setNota(0);
+            actividadAlumno.setAcabada(LocalDateTime.now());
+            return;
+        }
+
+        if (respuestasIds == null || respuestasIds.size() != totalPreguntas) {
+            throw new IllegalArgumentException("El número de respuestas no coincide con el número de preguntas");
+        }
+
+        Set<Long> respuestasUnicas = new HashSet<>(respuestasIds);
+        if (respuestasUnicas.size() != respuestasIds.size()) {
+            throw new IllegalArgumentException("Hay respuestas duplicadas");
+        }
+
+        Set<Long> preguntasRespondidas = new HashSet<>();
+        int aciertos = 0;
+
+        for (Long respuestaAlumnoId : respuestasIds) {
+            RespAlumnoGeneral respAlumno = respAlumnoGeneralService.readRespAlumnoGeneral(respuestaAlumnoId);
+
+            if (!respAlumno.getActividadAlumno().getId().equals(actividadAlumno.getId())) {
+                throw new IllegalArgumentException("Una de las respuestas no pertenece a esta actividad del alumno");
+            }
+
+            if (!actividadGeneral.getPreguntas().contains(respAlumno.getPregunta())) {
+                throw new IllegalArgumentException("Una de las respuestas no pertenece a una pregunta de esta actividad");
+            }
+
+            Long preguntaId = respAlumno.getPregunta().getId();
+            if (!preguntasRespondidas.add(preguntaId)) {
+                throw new IllegalArgumentException("Hay varias respuestas para la misma pregunta");
+            }
+
+            boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(respuestaAlumnoId);
+            if (esCorrecta) {
+                aciertos++;
+            }
+        }
+    
+    int puntuacionMaxima = actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 0;
+    double proporcion = (double) aciertos / totalPreguntas;
+
+    int puntuacionFinal = (int) Math.round(proporcion * puntuacionMaxima);
+    int notaFinal = (int) Math.round(proporcion * 10);
+
+    actividadAlumno.setPuntuacion(puntuacionFinal);
+    actividadAlumno.setNota(notaFinal);
+    actividadAlumno.setAcabada(LocalDateTime.now());
+    }
 
     @Override
     public void corregirActividadAlumnoAutomaticamenteOrdenacion(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
