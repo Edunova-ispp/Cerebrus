@@ -150,4 +150,28 @@ public class ActividadAlumnoController {
         );
         return new ResponseEntity<>(actividadAlumnoDTO, HttpStatus.OK);
     }
+
+        @PutMapping("/corregir-automaticamente-general-clasificacion/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoAutomaticamenteGeneralClasificacion(
+        @PathVariable Long id,
+        @RequestBody(required = false) List<Long> respuestasIds
+    ) {
+
+       
+        
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(id, respuestasIds);
+        ActividadAlumnoDTO actividadAlumnoDTO = new ActividadAlumnoDTO(
+            actividadAlumnoActualizada.getId(),
+            actividadAlumnoActualizada.getTiempo(),
+            actividadAlumnoActualizada.getPuntuacion(),
+            actividadAlumnoActualizada.getInicio(),
+            actividadAlumnoActualizada.getAcabada(),
+            actividadAlumnoActualizada.getNota(),
+            actividadAlumnoActualizada.getNumAbandonos(),
+            actividadAlumnoActualizada.getAlumno().getId(),
+            actividadAlumnoActualizada.getActividad().getId()
+        );
+        return new ResponseEntity<>(actividadAlumnoDTO, HttpStatus.OK);
+    }
 }

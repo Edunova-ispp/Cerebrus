@@ -26,7 +26,7 @@ export default function DetalleCursoAlumno({ curso, progreso }: Props) {
 
       <main className="detalle-alumno-main">
         <button className="detalle-volver" onClick={() => navigate(-1)}>
-          ← Volver
+          ← 
         </button>
 
         <div className="detalle-alumno-cover">
