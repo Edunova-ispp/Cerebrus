@@ -3,6 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import perritoImg from '../../assets/props/perritoCerberito.png';
+import mapaIcon from '../../assets/icons/mapa.svg';
+import caballeroImg from '../../assets/props/caballeroGanador.png';
+import mounstruoImg from '../../assets/props/mounstroMuerto.png';
+import hombreMisteriosoImg from '../../assets/props/hombreMisterioso.png';
 import './TableroAlumno.css';
 
 // ── Types ─────────────────────────────────────────────────
@@ -32,6 +36,10 @@ function cellToQIndex(r: number, c: number, size: number): number | null {
 function isNeighbor(r1: number, c1: number, r2: number, c2: number): boolean {
   return Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1;
 }
+
+// ── Dot counts (change these to taste) ────────────────────
+const DOTS_3x3 = 4;  // dots in horizontal connectors for 3×3 board
+const DOTS_4x4 = 5;  // dots in horizontal connectors for 4×4 board
 
 // ── Component ─────────────────────────────────────────────
 
@@ -128,7 +136,7 @@ export default function TableroAlumno() {
         newSet.add(qIdx);
         setAnsweredSet(newSet);
         setCerberoPos([mr, mc]);
-        setTimeout(closeModal, 950);
+        setTimeout(closeModal, 800);
       }
     } catch {
       setFeedback({ correct: false, msg: 'Error al enviar la respuesta' });
@@ -145,6 +153,7 @@ export default function TableroAlumno() {
 
   const gridItems: React.ReactElement[] = [];
   const gridDim = size * 2 - 1;
+  const hDots = tablero.tamano ? DOTS_3x3 : DOTS_4x4;
 
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
@@ -152,7 +161,6 @@ export default function TableroAlumno() {
       const qIdx = cellToQIndex(r, c, size);
       const isAnswered = qIdx !== null && answeredSet.has(qIdx);
       const isClickable = qIdx !== null && !isAnswered && isNeighbor(cr, cc, r, c) && !isComplete;
-      const isModalOpen = modalCell !== null && modalCell[0] === r && modalCell[1] === c;
       const isDark = (r + c) % 2 === 1;
 
       // ── Cell ──
@@ -161,8 +169,9 @@ export default function TableroAlumno() {
           key={`cell-${r}-${c}`}
           className={[
             'ta-cell',
-            isDark ? 'ta-cell--dark' : 'ta-cell--light',
+            (isCerbero || (r === 0 && c === 0)) ? 'ta-cell--cerbero' : (isDark ? 'ta-cell--dark' : 'ta-cell--light'),
             isClickable ? 'ta-cell--clickable' : '',
+            !isCerbero && isAnswered ? 'ta-cell--done' : '',
           ].join(' ').trim()}
           style={{ gridRow: r * 2 + 1, gridColumn: c * 2 + 1 }}
           onClick={() => handleCellClick(r, c)}
@@ -178,17 +187,9 @@ export default function TableroAlumno() {
             />
           )}
           {qIdx !== null && !isCerbero && (
-            <div
-              className={[
-                'ta-qcard',
-                isAnswered ? 'ta-qcard--done'
-                  : isModalOpen ? 'ta-qcard--selected'
-                  : isClickable ? 'ta-qcard--neighbor'
-                  : 'ta-qcard--locked',
-              ].join(' ')}
-            >
+            <span className={`ta-cell-label${isDark ? ' ta-cell-label--light' : ' ta-cell-label--dark'}`}>
               {isAnswered ? '✓' : '?'}
-            </div>
+            </span>
           )}
         </div>
       );
@@ -200,7 +201,11 @@ export default function TableroAlumno() {
             key={`h-${r}-${c}`}
             className="ta-connector ta-connector--h"
             style={{ gridRow: r * 2 + 1, gridColumn: c * 2 + 2 }}
-          />
+          >
+            {Array.from({ length: hDots }).map((_, i) => (
+              <span key={i} className="ta-dot" />
+            ))}
+          </div>
         );
       }
 
@@ -226,16 +231,16 @@ export default function TableroAlumno() {
         <div className="ta-wrapper">
 
           {/* Header */}
+          <button className="ta-map-btn" onClick={() => navigate(-1)}>
+            <img src={mapaIcon} alt="Mapa" className="ta-map-icon" />
+            <span>Mapa</span>
+          </button>
           <div className="ta-header">
-            <button className="ta-back-btn" onClick={() => navigate(-1)}>
-              ← Mapa
-            </button>
             <span className="ta-title">{tablero.titulo}</span>
-            <span className="ta-badge">{tablero.tamano ? 'A3' : 'A4'}</span>
           </div>
-
           {/* Progress */}
           <div className="ta-progress">
+            <img src={hombreMisteriosoImg} alt="Hombre misterioso" className="ta-progress-avatar" />
             <span className="ta-progress-label">
               {answeredSet.size} / {completionTarget}
             </span>
@@ -253,7 +258,10 @@ export default function TableroAlumno() {
           <div className="ta-board-wrap">
             <div
               className="ta-board"
-              style={{ gridTemplateColumns: `repeat(${gridDim}, auto)` }}
+              style={{
+                gridTemplateColumns: Array.from({length: gridDim}, (_, i) => i % 2 === 0 ? 'auto' : '1fr').join(' '),
+                gridTemplateRows: Array.from({length: gridDim}, (_, i) => i % 2 === 0 ? 'auto' : '80px').join(' '),
+              }}
             >
               {gridItems}
             </div>
@@ -266,13 +274,19 @@ export default function TableroAlumno() {
             </p>
           )}
 
-          {/* Completion */}
+          {/* Completion popup */}
           {isComplete && (
-            <div className="ta-done">
-              <p className="ta-done-text">¡Tablero completado!</p>
-              <button className="ta-done-btn" onClick={() => navigate(-1)}>
-                Volver al mapa
-              </button>
+            <div className="ta-done-overlay">
+              <div className="ta-done-popup">
+                <h2 className="ta-done-title">¡HAS COMPLETADO EL TABLERO!</h2>
+                <div className="ta-done-imgs">
+                  <img src={caballeroImg} alt="Caballero ganador" className="ta-done-caballero" />
+                  <img src={mounstruoImg} alt="Monstruo derrotado" className="ta-done-monstruo" />
+                </div>
+                <button className="ta-done-btn" onClick={() => navigate(-1)}>
+                  Continuar
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -305,7 +319,7 @@ export default function TableroAlumno() {
                     : 'ta-modal-feedback--err'
                 }`}
               >
-                {feedback.msg}
+                {feedback.correct ? '¡Correcto! ✓' : feedback.msg}
               </p>
             )}
             <button

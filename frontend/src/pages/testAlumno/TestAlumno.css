@@ -142,16 +142,6 @@
   box-shadow: 3px 3px 0 #000;
 }
 
-.ta-progress-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background: linear-gradient(90deg, #5b21b6, #7C4DFF, #c4b5fd);
-  border-radius: 5px;
-  transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 12px 3px rgba(124, 77, 255, 0.7);
-}
 
 .ta-spell-head {
   position: absolute;

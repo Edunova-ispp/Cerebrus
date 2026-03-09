@@ -21,7 +21,8 @@
   align-items: center;
   gap: 16px;
   width: 100%;
-  max-width: 480px;
+  max-width: 900px;
+  position: relative;
 }
 
 /* ── Header bar ────────────────────────────────────────────── */
@@ -57,6 +58,38 @@
   transform: translate(-1px, -1px);
 }
 
+.ta-map-btn {
+  position: absolute;
+  left: -170px;
+  top: 0;
+  background: #b49aff;
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 6px 14px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.55rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 3px 3px 0 #000;
+  color: #000;
+  transition: color 0.15s;
+  z-index: 1;
+}
+.ta-map-btn:hover {
+  color: var(--color-accent, #FFF294);
+}
+.ta-map-icon {
+  width: 42px;
+  height: 42px;
+  transition: filter 0.15s;
+}
+.ta-map-btn:hover .ta-map-icon {
+  filter: brightness(0) saturate(100%) invert(88%) sepia(60%) saturate(400%) hue-rotate(350deg) brightness(105%);
+}
+
 .ta-title {
   flex: 1;
   font-size: 0.95rem;
@@ -88,6 +121,13 @@
   width: 100%;
 }
 
+.ta-progress-avatar {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+
 .ta-progress-label {
   font-size: 0.85rem;
   font-weight: bold;
@@ -98,7 +138,7 @@
 .ta-progress-track {
   flex: 1;
   height: 12px;
-  background: #ddd;
+  background: #fbf5d5;
   border: 2px solid #000;
   border-radius: 6px;
   overflow: hidden;
@@ -114,31 +154,34 @@
 /* ── Board wrapper ─────────────────────────────────────────── */
 
 .ta-board-wrap {
-  background: #FFF8EE;
+  background: #FFF8C9;
   border: 3px solid #000;
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 16px;
+  padding: 36px 40px;
   box-shadow: 6px 6px 0 #000;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .ta-board {
   display: grid;
   gap: 0;
+  width: 100%;
 }
 
 /* ── Cells ─────────────────────────────────────────────────── */
 
 .ta-cell {
-  width: 72px;
-  height: 72px;
+  width: 116px;
+  height: 116px;
   border: 2.5px solid #000;
-  border-radius: 10px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: default;
   position: relative;
-  transition: filter 0.12s;
+  transition: filter 0.12s, box-shadow 0.25s ease;
 }
 
 .ta-cell--light {
@@ -149,50 +192,112 @@
   background: #1a1a1a;
 }
 
+.ta-cell--cerbero {
+  background: var(--color-primary, #D10057);
+}
+
 .ta-cell--clickable {
   cursor: pointer;
 }
 
-.ta-cell--clickable:hover {
-  filter: brightness(1.12);
+/* dark cell hover: accent glow */
+.ta-cell--dark.ta-cell--clickable:hover {
+  background: #2a2a2a;
+  box-shadow: 0 0 10px 3px var(--color-accent, #FFF294), 2px 2px 0 #000;
+}
+.ta-cell--dark.ta-cell--clickable:hover .ta-cell-label {
+  color: var(--color-accent, #FFF294);
+}
+
+/* light cell hover: accent-dark glow */
+.ta-cell--light.ta-cell--clickable:hover {
+  background: #f5f5f5;
+  box-shadow: 0 0 10px 3px var(--color-accent-dark, #ffe62b), 2px 2px 0 #000;
+}
+.ta-cell--light.ta-cell--clickable:hover .ta-cell-label {
+  color: var(--color-accent-dark, #ffe62b);
+}
+
+/* ── Cell label (? / ✓) ───────────────────────────────────── */
+
+.ta-cell-label {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 2.6rem;
+  font-weight: bold;
+  pointer-events: none;
+  transition: color 0.15s;
+  animation: ta-wobble 2.4s ease-in-out infinite;
+}
+
+.ta-cell-label--light {
+  color: #fff;
+}
+
+.ta-cell-label--dark {
+  color: #111;
+}
+
+.ta-cell--done .ta-cell-label {
+  animation: none;
+}
+
+@keyframes ta-wobble {
+  0%, 100% { transform: rotate(-6deg); }
+  50%       { transform: rotate(6deg); }
 }
 
 /* ── Dot connectors ────────────────────────────────────────── */
 
+/* connectors fill their grid cell entirely */
 .ta-connector {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  width: 100%;
+  height: 100%;
 }
 
 .ta-connector--h {
-  width: 28px;
-  height: 72px;
   flex-direction: row;
+  justify-content: space-evenly;
 }
 
 .ta-connector--v {
-  width: 72px;
-  height: 28px;
   flex-direction: column;
+  gap: 0;
 }
 
-.ta-connector::before,
-.ta-connector::after {
+/* vertical: single centered dot via ::before only */
+.ta-connector--v::before {
   content: '';
-  width: 5px;
-  height: 5px;
-  background: #aaa;
+  width: 13px;
+  height: 13px;
+  background: var(--color-accent, #FFF294);
+  border: 2px solid #000;
   border-radius: 50%;
+  box-shadow: 2px 2px 0 #000;
+}
+
+.ta-connector--v::after {
+  display: none;
+}
+
+/* horizontal dots rendered as <span class="ta-dot"> */
+.ta-dot {
+  width: 13px;
+  height: 13px;
+  background:  var(--color-accent);
+  border: 2px solid #000;
+  border-radius: 50%;
+  box-shadow: 2px 2px 0 #000;
   flex-shrink: 0;
 }
 
 /* ── Character ─────────────────────────────────────────────── */
 
 .ta-char {
-  width: 54px;
-  height: 54px;
+  width: 100px;
+  height: 100px;
   object-fit: contain;
   image-rendering: pixelated;
   pointer-events: none;
@@ -207,50 +312,32 @@
   to   { transform: translateY(-6px); }
 }
 
-/* ── Question cards ────────────────────────────────────────── */
+/* ── Cell label (? / ✓) ─────────────────────────────────────── */
 
-.ta-qcard {
-  width: 46px;
-  height: 46px;
-  border: 2.5px solid #000;
-  border-radius: 10px;
+.ta-cell-label {
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.2rem;
+  font-size: 2.6rem;
   font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 2px 2px 0 #000;
-  pointer-events: none; /* click handled by cell */
-  transition: transform 0.1s, background 0.12s;
+  pointer-events: none;
+  transition: color 0.15s;
+  animation: ta-wobble 2.4s ease-in-out infinite;
 }
 
-.ta-qcard--locked {
-  background: #444;
-  color: #999;
+.ta-cell-label--light {
+  color: #fff;
 }
 
-.ta-qcard--neighbor {
-  background: var(--color-accent, #FFF294);
-  color: #000;
-  animation: ta-pulse 800ms ease-in-out infinite;
+.ta-cell-label--dark {
+  color: #111;
 }
 
-.ta-qcard--selected {
-  background: var(--color-accent-dark, #ffe62b);
-  color: #000;
-  transform: scale(1.1);
-  box-shadow: 3px 3px 0 #000;
+.ta-cell--done .ta-cell-label {
+  animation: none;
 }
 
-.ta-qcard--done {
-  background: #000;
-  color: var(--color-accent, #FFF294);
-}
-
-@keyframes ta-pulse {
-  0%, 100% { transform: scale(1); box-shadow: 2px 2px 0 #000; }
-  50%       { transform: scale(1.12); box-shadow: 3px 3px 0 #000; }
+@keyframes ta-wobble {
+  0%, 100% { transform: rotate(-6deg); }
+  50%       { transform: rotate(6deg); }
 }
 
 /* ── Hint & info ───────────────────────────────────────────── */
@@ -273,39 +360,81 @@
   color: #c0392b;
 }
 
-/* ── Done ──────────────────────────────────────────────────── */
+/* ── Done popup ────────────────────────────────────────────── */
 
-.ta-done {
+.ta-done-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.ta-done-popup {
+  background: var(--color-primary, #D10057);
+  border: 3px solid #000;
+  border-radius: 18px;
+  padding: 28px 32px 24px;
+  width: min(480px, 90vw);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  text-align: center;
+  gap: 8px;
+  box-shadow: 6px 6px 0 #000;
+  position: relative;
 }
 
-.ta-done-text {
-  font-size: 1.4rem;
+.ta-done-title {
+  font-size: 3.2rem;
   font-weight: bold;
+  color: var(--color-accent);
   margin: 0;
+  text-shadow: 3px 3px 0 #000;
+  text-align: center;
+  -webkit-text-stroke: 1px #000;
+}
+
+
+.ta-done-imgs {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0;
+  margin: 8px 0;
+}
+
+.ta-done-caballero {
+  width: 280px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.ta-done-monstruo {
+  width: 220px;
+  height: auto;
+  image-rendering: pixelated;
 }
 
 .ta-done-btn {
-  background: var(--color-accent, #FFF294);
-  border: 3px solid #000;
+   background: #FFF394;
+  color: #000;
+  border: 2px solid #FFFAD6;
   border-radius: 12px;
-  padding: 10px 30px;
+  padding: 12px;
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1rem;
+  font-size: 2.05rem;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 4px 4px 0 #000;
+  box-shadow: 4px 4px 0 #D6BD00;
   transition: background 0.12s, transform 0.1s, box-shadow 0.1s;
+
 }
 
 .ta-done-btn:hover {
-  background: var(--color-accent-dark, #ffe62b);
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 #000;
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 #D6BD00;
 }
 
 /* ── Modal overlay ─────────────────────────────────────────── */
@@ -323,51 +452,57 @@
 .ta-modal {
   background: #e8336e;
   border: 3px solid #000;
-  border-radius: 14px;
-  padding: 20px 22px;
+  border-radius: 18px;
+  padding: 22px 20px 20px;
   width: min(340px, 90vw);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   box-shadow: 6px 6px 0 #000;
 }
 
 .ta-modal-title {
-  font-size: 1.1rem;
+  font-size: 3.2rem;
   font-weight: bold;
-  color: #fff;
+  color: color-mix(in srgb, var(--color-secondary, #7C4DFF) 35%, #fff);
   margin: 0;
+  text-shadow: 4px 4px 0 #000;
   text-align: center;
-  -webkit-text-stroke: 1px #000;
   letter-spacing: 1px;
+  -webkit-text-stroke: 1px #000;
 }
 
 .ta-modal-q {
-  background: var(--color-accent, #FFF294);
+  background: color-mix(in srgb, var(--color-secondary, #7C4DFF) 35%, #fff);
   border: 2px solid #000;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 1rem;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 2rem;
   font-weight: bold;
+  
   color: #000;
   margin: 0;
   text-align: center;
 }
 
 .ta-modal-label {
-  font-size: 0.9rem;
+  font-size: 2.7rem;
   font-weight: bold;
-  color: #fff;
-  -webkit-text-stroke: 0.5px #000;
+  -webkit-text-stroke: 1px #000;
+  text-shadow: 3px 3px 0 #000;
+
+  color: var(--color-accent, #FFF294);
+  text-align: center;
+  margin: 0;
 }
 
 .ta-modal-input {
   background: var(--color-accent, #FFF294);
-  border: 2px solid #000;
-  border-radius: 8px;
-  padding: 8px 12px;
+  border: 2px solid #000000;
+  border-radius: 10px;
+  padding: 10px 14px;
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1rem;
+  font-size: 2rem;
   color: #000;
   width: 100%;
   box-sizing: border-box;
@@ -382,15 +517,17 @@
 .ta-modal-feedback {
   margin: 0;
   font-size: 0.9rem;
-  padding: 7px 10px;
+  padding: 8px 12px;
   border-radius: 8px;
   border: 2px solid #000;
   text-align: center;
+  font-weight: bold;
 }
 
 .ta-modal-feedback--ok {
-  background: #c8f7c5;
-  color: #155724;
+  background: var(--color-accent, #FFF294);
+  border-color: var(--color-accent-dark, #ffe62b);
+  color: #000;
 }
 
 .ta-modal-feedback--err {
@@ -399,23 +536,23 @@
 }
 
 .ta-modal-btn {
-  background: var(--color-accent, #FFF294);
+  background: #FFF394;
   color: #000;
-  border: 2.5px solid #000;
-  border-radius: 10px;
-  padding: 10px;
+  border: 2px solid #FFFAD6;
+  border-radius: 12px;
+  padding: 12px;
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1rem;
+  font-size: 2.05rem;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 3px 3px 0 #000;
+  box-shadow: 4px 4px 0 #D6BD00;
   transition: background 0.12s, transform 0.1s, box-shadow 0.1s;
 }
 
 .ta-modal-btn:hover:not(:disabled) {
-  background: var(--color-accent-dark, #ffe62b);
-  transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0 #000;
+  transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 #D6BD00;
+
 }
 
 .ta-modal-btn:disabled {
@@ -425,11 +562,6 @@
   transform: none;
 }
 
-  min-height: 100vh;
-  font-family: 'Pixelify Sans', sans-serif;
-  display: flex;
-  flex-direction: column;
-}
 
 .ta-main {
   flex: 1;
@@ -444,8 +576,8 @@
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  width: 100%;
-  max-width: 560px;
+  width: 130%;
+  max-width: 900px;
 }
 
 /* ── Header bar ────────────────────────────────────────────── */
@@ -458,13 +590,13 @@
   background: var(--color-secondary, #7C4DFF);
   border: 3px solid #000;
   border-radius: 12px;
-  padding: 8px 16px;
+  padding: 0px 16px;
   box-shadow: 4px 4px 0 #000;
   box-sizing: border-box;
 }
 
 .ta-title {
-  font-size: 1.05rem;
+  font-size: 3rem;
   font-weight: bold;
   color: var(--color-accent, #FFF294);
   -webkit-text-stroke: 1px #000;
@@ -483,13 +615,7 @@
 
 /* ── Board wrapper ─────────────────────────────────────────── */
 
-.ta-board-wrap {
-  background: #FFF8EE;
-  border: 3px solid #000;
-  border-radius: 14px;
-  padding: 18px;
-  box-shadow: 6px 6px 0 #000;
-}
+
 
 .ta-board {
   display: grid;
@@ -504,6 +630,7 @@
   border: 2px solid #000;
   border-radius: 8px;
   display: flex;
+  box-shadow: 2px 2px 0 #63636369;
   align-items: center;
   justify-content: center;
 }
@@ -738,40 +865,7 @@
   color: #c0392b;
 }
 
-/* ── Finished state ────────────────────────────────────────── */
-
-.ta-done {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  text-align: center;
-}
-
-.ta-done-text {
-  font-size: 1.4rem;
-  font-weight: bold;
-  margin: 0;
-}
-
-.ta-done-btn {
-  background: var(--color-accent, #FFF294);
-  border: 3px solid #000;
-  border-radius: 12px;
-  padding: 10px 32px;
-  font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.1rem;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 4px 4px 0 #000;
-  transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
-}
-
-.ta-done-btn:hover {
-  background: var(--color-accent-dark, #ffe62b);
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 #000;
-}
+/* ── Finished state (responsive duplicate — kept for compat) ── */
 
 /* ── Misc ──────────────────────────────────────────────────── */
 
