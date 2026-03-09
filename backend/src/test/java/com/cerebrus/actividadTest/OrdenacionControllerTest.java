@@ -23,8 +23,8 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.actividad.Ordenacion;
 import com.cerebrus.actividad.OrdenacionController;
-import com.cerebrus.actividad.OrdenacionDTO;
 import com.cerebrus.actividad.OrdenacionService;
+import com.cerebrus.actividad.DTO.OrdenacionDTO;
 import com.cerebrus.tema.Tema;
 
 @ExtendWith(MockitoExtension.class)

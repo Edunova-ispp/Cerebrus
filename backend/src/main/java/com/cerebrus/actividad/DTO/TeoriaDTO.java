@@ -1,4 +1,4 @@
-package com.cerebrus.actividad;
+package com.cerebrus.actividad.DTO;
 
 public class TeoriaDTO {
 
