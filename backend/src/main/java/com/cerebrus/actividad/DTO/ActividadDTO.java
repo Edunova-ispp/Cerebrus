@@ -1,4 +1,9 @@
-package com.cerebrus.actividad;
+package com.cerebrus.actividad.DTO;
+
+import com.cerebrus.actividad.Actividad;
+import com.cerebrus.actividad.General;
+import com.cerebrus.actividad.MarcarImagen;
+import com.cerebrus.actividad.Ordenacion;
 
 import lombok.Getter;
 

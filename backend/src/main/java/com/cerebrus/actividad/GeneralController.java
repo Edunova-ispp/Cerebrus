@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cerebrus.actividad.DTO.GeneralTestDTO;
+import com.cerebrus.actividad.DTO.GeneralTestMaestroDTO;
 import com.cerebrus.pregunta.Pregunta;
 
 import jakarta.validation.Valid;
@@ -80,6 +82,27 @@ public class GeneralController {
         return ResponseEntity.ok(generalService.readTipoTestMaestro(id));
     }
 
+    @PostMapping("/carta/maestro")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<General> crearTipoCarta(@RequestBody @Valid General general) {
+
+    List<Long> preguntasId = general.getPreguntas().stream()
+        .map(Pregunta::getId)
+        .toList();
+
+    General generalCreada = generalService.crearTipoCarta(
+        general.getTitulo(),
+        general.getDescripcion(),
+        general.getPuntuacion(),
+        general.getTema().getId(),
+        general.getRespVisible(),
+        general.getComentariosRespVisible(),
+        preguntasId
+    );
+
+    return new ResponseEntity<>(generalCreada, HttpStatus.CREATED);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<General> readActividad(@PathVariable Long id){
         return ResponseEntity.ok(generalService.readActividad(id));
@@ -115,6 +138,25 @@ public class GeneralController {
             general.getVersion(),
             general.getTema().getId()
         );
+        return ResponseEntity.ok(actualizado);
+    }
+
+    @PutMapping("/carta/update/{id}")
+    public ResponseEntity<General> updateTipoCarta(@PathVariable Long id, @RequestBody @Valid General general) {
+
+        General actualizado = generalService.updateTipoCarta(
+        id,
+        general.getTitulo(),
+        general.getDescripcion(),
+        general.getPuntuacion(),
+        general.getRespVisible(),
+        general.getComentariosRespVisible(),
+        general.getPreguntas().stream().map(Pregunta::getId).toList(),
+        general.getPosicion(),
+        general.getVersion(),
+        general.getTema().getId()
+        );
+
         return ResponseEntity.ok(actualizado);
     }
 

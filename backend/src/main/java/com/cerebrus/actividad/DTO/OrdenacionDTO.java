@@ -1,4 +1,4 @@
-package com.cerebrus.actividad;
+package com.cerebrus.actividad.DTO;
 
 import java.util.List;
 
