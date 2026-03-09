@@ -48,20 +48,20 @@
 
 .tf-input {
   width: 100%;
-  background: transparent;
+  background: var(--color-accent);
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 10px;
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1rem;
   color: #000;
-  transition: border-color 0.15s;
+  transition: background 0.15s;
 }
 
 .tf-input:hover,
 .tf-input:focus {
   outline: none;
-  border-color: var(--color-accent);
+  background: var(--color-accent-dark);
 }
 
 .tf-input-sm {
@@ -122,20 +122,20 @@
 
 .tf-question-input {
   width: 100%;
-  background: transparent;
+  background: var(--color-accent);
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 10px;
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1rem;
   color: #000;
-  transition: border-color 0.15s;
+  transition: background 0.15s;
 }
 
 .tf-question-input:hover,
 .tf-question-input:focus {
   outline: none;
-  border-color: var(--color-accent);
+  background: var(--color-accent-dark);
 }
 
 /* ── Options ─────────────────────────────────────────────────── */
@@ -165,12 +165,12 @@
 }
 
 .tf-option--correct .tf-option-letter {
-  color: #1a7a40;
+  color: #000;
 }
 
 .tf-option-input {
   flex: 1;
-  background: transparent;
+  background: var(--color-accent);
   border: 2px solid #000;
   border-radius: 8px;
   padding: 6px 10px;
@@ -178,18 +178,18 @@
   font-size: 1rem;
   color: #000;
   min-width: 0;
-  transition: border-color 0.15s;
+  transition: background 0.15s;
 }
 
 .tf-option-input:hover,
 .tf-option-input:focus {
   outline: none;
-  border-color: var(--color-accent);
+  background: var(--color-accent-dark);
 }
 
 .tf-option--correct .tf-option-input {
-  border-color: #27ae60;
-  background: #edfaed;
+  border-color: #000;
+  background: var(--color-accent-dark);
 }
 
 /* ── Buttons ─────────────────────────────────────────────────── */
@@ -214,9 +214,9 @@
 }
 
 .tf-btn-correct--active {
-  background: #27ae60;
-  color: #fff;
-  border-color: #1a7a40;
+  background: var(--color-accent-dark);
+  color: #000;
+  border-color: #000;
 }
 
 .tf-btn-remove-option {

@@ -111,6 +111,7 @@ export default function EditarActividad() {
               .then((data: TeoriaDTO) => {
                 setTeoria(data);
                 setKind('teoria');
+                setLoading(false);
               })
               .catch((e) => {
                 // 4. Intentar tablero

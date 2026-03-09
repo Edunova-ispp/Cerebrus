@@ -37,27 +37,28 @@
 
 .tbl-input {
   width: 100%;
-  background: #fff;
+  background: var(--color-accent);
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 10px;
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1rem;
   color: #000;
+  transition: background 0.15s;
 }
 
 .tbl-input:hover {
-  border-color: var(--color-accent);
+  background: var(--color-accent-dark);
 }
 
 .tbl-input:focus {
   outline: none;
-  border-color: var(--color-accent);
+  background: var(--color-accent-dark);
 }
 
 .tbl-textarea {
   width: 100%;
-  background: #fff;
+  background: var(--color-accent);
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 10px;
@@ -65,15 +66,16 @@
   font-size: 1rem;
   color: #000;
   resize: vertical;
+  transition: background 0.15s;
 }
 
 .tbl-textarea:hover {
-  border-color: var(--color-accent);
+  background: var(--color-accent-dark);
 }
 
 .tbl-textarea:focus {
   outline: none;
-  border-color: var(--color-accent);
+  background: var(--color-accent-dark);
 }
 
 /* ── Secciones ─────────────────────────────────────────────── */
@@ -194,12 +196,17 @@
 }
 
 .tbl-respuesta-input {
-  background: #f0fff4 !important;
-  border-color: #27ae60 !important;
+  background: var(--color-accent) !important;
+  border-color: #000 !important;
+}
+
+.tbl-respuesta-input:hover {
+  background: var(--color-accent-dark) !important;
 }
 
 .tbl-respuesta-input:focus {
-  border-color: #1a7a40 !important;
+  background: var(--color-accent-dark) !important;
+  border-color: #000 !important;
 }
 
 /* ── Feedback ──────────────────────────────────────────────── */

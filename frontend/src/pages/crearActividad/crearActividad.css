@@ -89,16 +89,6 @@
   color: #000;
 }
 
-.ca-contenido input:hover,
-.ca-contenido textarea:hover {
-  border-color: var(--color-accent);
-}
-
-.ca-contenido input:focus,
-.ca-contenido textarea:focus {
-  outline: none;
-  border-color: var(--color-accent);
-}
 
 .ca-ordenacion-form,
 .ca-ordenacion-form * {
