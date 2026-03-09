@@ -50,7 +50,6 @@ export function TeoriaForm({ mode = 'create', actividadId, initialTitulo = '', i
           body: JSON.stringify({
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
-            puntuacion: 1,
             imagen: '',
             temaId: temaIdNum,
           }),
