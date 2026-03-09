@@ -25,6 +25,36 @@ public class ActividadController {
         this.actividadService = actividadService;
     }
 
+    @GetMapping("/{id}/maestro")
+    public ResponseEntity<TeoriaDTO> getActividadMaestro(@PathVariable Long id) {
+        try {
+            Actividad actividad = actividadService.encontrarActividadPorIdMaestro(id);
+            return ResponseEntity.ok(toTeoriaDto(actividad));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{id}/alumno")
+    public ResponseEntity<TeoriaDTO> getActividadAlumno(@PathVariable Long id) {
+        try {
+            Actividad actividad = actividadService.encontrarActividadPorIdAlumno(id);
+            return ResponseEntity.ok(toTeoriaDto(actividad));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> eliminarActividad(@PathVariable Long id) {
+        try {
+            actividadService.deleteActividad(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @PostMapping("/teoria")
     public ResponseEntity<TeoriaDTO> crearActividadTeoria(@RequestBody CrearActividadTeoriaRequest request) {
         try {
@@ -54,26 +84,6 @@ public class ActividadController {
             return ResponseEntity.ok(toTeoriaDto(actividad));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @GetMapping("/{id}/maestro")
-    public ResponseEntity<TeoriaDTO> getActividadMaestro(@PathVariable Long id) {
-        try {
-            Actividad actividad = actividadService.encontrarActividadPorId(id);
-            return ResponseEntity.ok(toTeoriaDto(actividad));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> eliminarActividad(@PathVariable Long id) {
-        try {
-            actividadService.deleteActividad(id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
         }
     }
 
@@ -108,13 +118,5 @@ public class ActividadController {
         public void setTemaId(Long temaId) { this.temaId = temaId; }
     }
 
-    @GetMapping("/{id}/alumno")
-public ResponseEntity<TeoriaDTO> getActividadAlumno(@PathVariable Long id) {
-    try {
-        Actividad actividad = actividadService.encontrarActividadPorId(id);
-        return ResponseEntity.ok(toTeoriaDto(actividad));
-    } catch (IllegalArgumentException e) {
-        return ResponseEntity.notFound().build();
-    }
-}
+   
 }

@@ -17,4 +17,11 @@ public class RespuestaDTO {
     public String getRespuesta() {
         return respuesta;
     }
+
+    public static RespuestaDTO fromEntity(Respuesta respuesta) {
+        return new RespuestaDTO(
+            respuesta.getId(),
+            respuesta.getRespuesta()
+        );
+    }
 }
