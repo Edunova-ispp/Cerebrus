@@ -1,5 +1,7 @@
 package com.cerebrus.actividadalumno;
 
+import java.sql.Time;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.List;
@@ -15,11 +17,15 @@ import com.cerebrus.actividad.Actividad;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.General;
+import com.cerebrus.actividad.MarcarImagen;
+import com.cerebrus.actividad.MarcarImagenService;
 import com.cerebrus.actividad.Ordenacion;
 import com.cerebrus.actividad.OrdenacionService;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.respuestaalumno.RespAlumnoGeneralService;
 import com.cerebrus.respuestaalumno.RespAlumnoOrdenacionService;
+import com.cerebrus.respuestaalumno.RespAlumnoPuntoImagen;
+import com.cerebrus.respuestaalumno.RespAlumnoPuntoImagenService;
 import com.cerebrus.respuestaalumno.RespuestaAlumno;
 import com.cerebrus.respuestaalumno.RespuestaAlumnoService;
 import com.cerebrus.usuario.AlumnoRepository;
@@ -38,12 +44,15 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     private final OrdenacionService ordenacionService; 
     private final RespAlumnoOrdenacionService respAlumnoOrdenacionService;
     private final UsuarioService usuarioService;
+    private final MarcarImagenService marcarImagenService;
+    private final RespAlumnoPuntoImagenService respAlumnoPuntoImagenService;
 
     @Autowired
     public ActividadAlumnoServiceImpl(ActividadAlumnoRepository actividadAlumnoRepository, 
         ActividadRepository actividadRepository, AlumnoRepository alumnoRepository, RespuestaAlumnoService respuestaAlumnoService,
         RespAlumnoGeneralService respAlumnoGeneralService, OrdenacionService ordenacionService, 
-        RespAlumnoOrdenacionService respAlumnoOrdenacionService, UsuarioService usuarioService) {
+        RespAlumnoOrdenacionService respAlumnoOrdenacionService, UsuarioService usuarioService, 
+        MarcarImagenService marcarImagenService, RespAlumnoPuntoImagenService respAlumnoPuntoImagenService) {
         this.actividadAlumnoRepository = actividadAlumnoRepository;
         this.actividadRepository = actividadRepository;
         this.alumnoRepository = alumnoRepository;
@@ -52,6 +61,8 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         this.ordenacionService = ordenacionService;
         this.respAlumnoOrdenacionService = respAlumnoOrdenacionService;
         this.usuarioService = usuarioService;
+        this.marcarImagenService = marcarImagenService;
+        this.respAlumnoPuntoImagenService = respAlumnoPuntoImagenService;
     }
 
     @Override
@@ -186,58 +197,65 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     public ActividadAlumno corregirActividadAlumnoAutomaticamente(Long id, List<Long> respuestasIds) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         Actividad actividad = actividadAlumno.getActividad();
+        LocalDateTime finalActividad = LocalDateTime.now();
+        LocalDateTime inicioActividad = actividadAlumno.getInicio() != null? actividadAlumno.getInicio() : finalActividad;
+        actividadAlumno.setAcabada(finalActividad);
+        Integer tiempoSegundos = (int) Duration.between(inicioActividad, finalActividad).getSeconds();
+        actividadAlumno.setTiempo(tiempoSegundos);
         if(actividad instanceof General) {
             corregirActividadAlumnoAutomaticamenteGeneral(actividadAlumno, respuestasIds, actividad);
         } else if(actividad instanceof Ordenacion) {
             corregirActividadAlumnoAutomaticamenteOrdenacion(actividadAlumno, respuestasIds, actividad);
-        } else {
+        } else if(actividad instanceof MarcarImagen){
+            corregirActividadAlumnoAutomaticamenteMarcarImagen(actividadAlumno, respuestasIds, actividad);
+        } else {    
         // CASO PARA TEORÍA: Simplemente marcamos como terminada y damos la puntuación base
         actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 1);
         actividadAlumno.setNota(10); // Nota máxima por leer
         actividadAlumno.setAcabada(LocalDateTime.now());
-    } 
+        } 
         return actividadAlumnoRepository.save(actividadAlumno);
     }
 
-@Override
-public void corregirActividadAlumnoAutomaticamenteGeneral(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
-    // 1. Obtenemos el número REAL de preguntas que tiene el test
-    // Usamos la colección de la entidad actividad
-General actividadGeneral = (General) actividad;
-int numPreguntasTotales = actividadGeneral.getPreguntas().size();    
-    if (numPreguntasTotales == 0) {
-        actividadAlumno.setPuntuacion(0);
-        actividadAlumno.setNota(0);
-        return;
-    }
+    @Override
+    public void corregirActividadAlumnoAutomaticamenteGeneral(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
+        // 1. Obtenemos el número REAL de preguntas que tiene el test
+        // Usamos la colección de la entidad actividad
+        General actividadGeneral = (General) actividad;
+        int numPreguntasTotales = actividadGeneral.getPreguntas().size();    
+        if (numPreguntasTotales == 0) {
+            actividadAlumno.setPuntuacion(0);
+            actividadAlumno.setNota(0);
+            return;
+        }
 
-    int puntuacionMaximaActividad = (actividad.getPuntuacion() != null) ? actividad.getPuntuacion() : 0;
-    double notaMaxima = 10.0;
-    
-    // 2. Calculamos el valor de CADA pregunta basándonos en el TOTAL del test
-    double valorPuntoPorPregunta = (double) puntuacionMaximaActividad / numPreguntasTotales;
-    double valorNotaPorPregunta = notaMaxima / numPreguntasTotales;
+        int puntuacionMaximaActividad = (actividad.getPuntuacion() != null) ? actividad.getPuntuacion() : 0;
+        double notaMaxima = 10.0;
+        
+        // 2. Calculamos el valor de CADA pregunta basándonos en el TOTAL del test
+        double valorPuntoPorPregunta = (double) puntuacionMaximaActividad / numPreguntasTotales;
+        double valorNotaPorPregunta = notaMaxima / numPreguntasTotales;
 
-    double puntuacionAcumulada = 0;
-    double notaAcumulada = 0;
+        double puntuacionAcumulada = 0;
+        double notaAcumulada = 0;
 
-    if (respuestasIds != null) {
-        for (Long respuestaId : respuestasIds) {
-            // Este método DEBE comparar la respuesta del alumno con la correcta en la DB
-            boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(respuestaId);
-            
-            if (esCorrecta) {
-                puntuacionAcumulada += valorPuntoPorPregunta;
-                notaAcumulada += valorNotaPorPregunta;
+        if (respuestasIds != null) {
+            for (Long respuestaId : respuestasIds) {
+                // Este método DEBE comparar la respuesta del alumno con la correcta en la DB
+                boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(respuestaId);
+                
+                if (esCorrecta) {
+                    puntuacionAcumulada += valorPuntoPorPregunta;
+                    notaAcumulada += valorNotaPorPregunta;
+                }
             }
         }
-    }
 
-    // 3. Guardar y redondear
-    actividadAlumno.setPuntuacion((int) Math.round(puntuacionAcumulada));
-    actividadAlumno.setNota((int) Math.round(notaAcumulada));
-    actividadAlumno.setAcabada(LocalDateTime.now());
-}
+        // 3. Guardar y redondear
+        actividadAlumno.setPuntuacion((int) Math.round(puntuacionAcumulada));
+        actividadAlumno.setNota((int) Math.round(notaAcumulada));
+        actividadAlumno.setAcabada(LocalDateTime.now());
+    }
 
     @Override
     public void corregirActividadAlumnoAutomaticamenteOrdenacion(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
@@ -263,6 +281,35 @@ int numPreguntasTotales = actividadGeneral.getPreguntas().size();
         Integer numPosicionesCorrectas = respAlumnoOrdenacionService.obtenerNumPosicionesCorrectas(respuestasIds.get(0));
         puntuacionFinal = puntuacionPorRespuesta * numPosicionesCorrectas;
         notaFinal = notaPorRespuesta * numPosicionesCorrectas;
+        actividadAlumno.setPuntuacion(puntuacionFinal);
+        actividadAlumno.setNota(notaFinal);
+    }
+
+    @Override
+    public void corregirActividadAlumnoAutomaticamenteMarcarImagen(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
+        MarcarImagen actividadMarcarImagen = marcarImagenService.obtenerMarcarImagenPorId(actividad.getId());
+        Integer puntuacionTotal = actividadMarcarImagen.getPuntuacion();
+        Integer notaTotal = 10;
+        Integer puntuacionFinal = 0;
+        Integer notaFinal = 0;
+        Integer numPuntos = actividadMarcarImagen.getPuntosImagen().size();
+        Integer puntuacionPorRespuesta = numPuntos > 0 ? puntuacionTotal / numPuntos : 0;
+        Integer notaPorRespuesta = numPuntos > 0 ? notaTotal / numPuntos : 0;
+
+        for (Long respuestaId : respuestasIds) {
+            RespAlumnoPuntoImagen respuestaAlumno = respAlumnoPuntoImagenService.encontrarRespuestaAlumnoPuntoImagenPorId(respuestaId);
+            actividadAlumno.getRespuestasAlumno().add(respuestaAlumno);
+            if(respuestaAlumno == null) {
+                throw new ResourceNotFoundException("RespAlumnoPuntoImagen", "id", respuestaId);
+            } else if (!respuestaAlumno.getActividadAlumno().getId().equals(actividadAlumno.getId())) {
+                throw new IllegalArgumentException("La respuesta con id " + respuestaId + " no pertenece a la actividad del alumno con id " + actividadAlumno.getId());
+            }
+            boolean esCorrecta = respAlumnoPuntoImagenService.corregirRespuestaAlumnoPuntoImagen(respuestaId);
+            if (esCorrecta) {
+                puntuacionFinal += puntuacionPorRespuesta;
+                notaFinal += notaPorRespuesta;
+            }
+        }
         actividadAlumno.setPuntuacion(puntuacionFinal);
         actividadAlumno.setNota(notaFinal);
     }
