@@ -105,6 +105,7 @@ export default function MapaCurso() {
     if (tipoReal === 'TEORIA') navigate(`/actividades/teoria/${act.id}`);
     else if (tipoReal === 'TEST' || tipoReal === 'GENERAL') navigate(`/generales/test/${act.id}/alumno`);
     else if (tipoReal === 'ORDENACION') navigate(`/ordenaciones/${act.id}/alumno`);
+    else if (tipoReal === 'TABLERO') navigate(`/tableros/${act.id}/alumno`);
   };
 
   const selectedTema = temas[selectedIndex] ?? null;
@@ -143,7 +144,7 @@ export default function MapaCurso() {
                       const puntosObtenidos = info?.puntuacionObtenida ?? 0;
                       
                       const tipo = act.tipo.toUpperCase();
-                      const navigable = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA'].includes(tipo);
+                      const navigable = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'TABLERO'].includes(tipo);
 
                       return (
                         <button

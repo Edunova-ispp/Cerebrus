@@ -6,7 +6,6 @@ import { getCurrentUserInfo } from '../../types/curso';
 import './TestAlumno.css';
 import dragonImg from '../../assets/props/dragon.png';
 import caballeroImg from '../../assets/props/caballero.png';
-import espadaImg from '../../assets/props/espada.png';
 
 
 // ── Types ─────────────────────────────────────────────────────────────────
@@ -335,7 +334,6 @@ export default function TestAlumno() {
             <div className="ta-top">
               {/* Botón salir con espada */}
                             <button className="ord-exit-btn" type="button" onClick={() => navigate(-1)}>
-                    <img src={espadaImg} alt="" className="ord-exit-icon" />
                     Salir
                   </button>
               <div className="ta-title-banner">
