@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cerebrus.actividad.DTO.GeneralCartaDTO;
+import com.cerebrus.actividad.DTO.GeneralCartaMaestroDTO;
+import com.cerebrus.actividad.DTO.GeneralDTO;
 import com.cerebrus.actividad.DTO.GeneralTestDTO;
 import com.cerebrus.actividad.DTO.GeneralTestMaestroDTO;
 import com.cerebrus.pregunta.Pregunta;
@@ -82,25 +85,35 @@ public class GeneralController {
         return ResponseEntity.ok(generalService.readTipoTestMaestro(id));
     }
 
+      @GetMapping("/test/{id}")
+    public ResponseEntity<GeneralCartaDTO> readTipoCarta(@PathVariable Long id) {
+        return ResponseEntity.ok(generalService.readTipoCarta(id));
+    }
+
+    @GetMapping("/test/{id}/maestro")
+    public ResponseEntity<GeneralCartaMaestroDTO> readTipoCartaMaestro(@PathVariable Long id) {
+        return ResponseEntity.ok(generalService.readTipoCartaMaestro(id));
+    }
+
     @PostMapping("/carta/maestro")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<General> crearTipoCarta(@RequestBody @Valid General general) {
+    public ResponseEntity<Long> crearTipoCarta(@RequestBody @Valid General general) {
 
-    List<Long> preguntasId = general.getPreguntas().stream()
-        .map(Pregunta::getId)
-        .toList();
+        List<Long> preguntasId = general.getPreguntas().stream()
+            .map(Pregunta::getId)
+            .toList();
 
-    General generalCreada = generalService.crearTipoCarta(
-        general.getTitulo(),
-        general.getDescripcion(),
-        general.getPuntuacion(),
-        general.getTema().getId(),
-        general.getRespVisible(),
-        general.getComentariosRespVisible(),
-        preguntasId
-    );
+        General generalCreada = generalService.crearTipoCarta(
+            general.getTitulo(),
+            general.getDescripcion(),
+            general.getPuntuacion(),
+            general.getTema().getId(),
+            general.getRespVisible(),
+            general.getComentariosRespVisible(),
+            preguntasId
+        );
 
-    return new ResponseEntity<>(generalCreada, HttpStatus.CREATED);
+        return new ResponseEntity<>(generalCreada.getId(), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -125,8 +138,8 @@ public class GeneralController {
     }
     
     @PutMapping("/test/update/{id}")
-    public ResponseEntity<General> updateTipoTest(@PathVariable Long id, @RequestBody @Valid General general){
-        General actualizado = generalService.updateTipoTest(
+    public ResponseEntity<GeneralTestDTO> updateTipoTest(@PathVariable Long id, @RequestBody @Valid General general){
+        generalService.updateTipoTest(
             id,
             general.getTitulo(),
             general.getDescripcion(),
@@ -138,13 +151,15 @@ public class GeneralController {
             general.getVersion(),
             general.getTema().getId()
         );
-        return ResponseEntity.ok(actualizado);
+
+        // Return a DTO to avoid lazy-loading serialization issues
+        return ResponseEntity.ok(generalService.readTipoTest(id));
     }
 
     @PutMapping("/carta/update/{id}")
-    public ResponseEntity<General> updateTipoCarta(@PathVariable Long id, @RequestBody @Valid General general) {
+    public ResponseEntity<GeneralCartaDTO> updateTipoCarta(@PathVariable Long id, @RequestBody @Valid General general) {
 
-        General actualizado = generalService.updateTipoCarta(
+        generalService.updateTipoCarta(
         id,
         general.getTitulo(),
         general.getDescripcion(),
@@ -157,7 +172,7 @@ public class GeneralController {
         general.getTema().getId()
         );
 
-        return ResponseEntity.ok(actualizado);
+        return ResponseEntity.ok(generalService.readTipoCarta(id));
     }
 
     @DeleteMapping("/delete/{id}")

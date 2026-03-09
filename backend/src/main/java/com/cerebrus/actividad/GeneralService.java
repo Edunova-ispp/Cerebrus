@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.cerebrus.actividad.DTO.GeneralCartaDTO;
 import com.cerebrus.actividad.DTO.GeneralCartaMaestroDTO;
+import com.cerebrus.actividad.DTO.GeneralDTO;
 import com.cerebrus.actividad.DTO.GeneralTestDTO;
 import com.cerebrus.actividad.DTO.GeneralTestMaestroDTO;
 
