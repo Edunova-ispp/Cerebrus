@@ -85,9 +85,13 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
     if (mode === 'create' && !temaId) return 'Falta el id del tema en la URL';
     if (mode === 'edit' && !tableroId) return 'Falta el id del tablero a editar';
     const expected = tamano ? PREGUNTAS_3X3 : PREGUNTAS_4X4;
+    const textosSeen = new Set<string>();
     for (let i = 0; i < expected; i++) {
       if (!preguntas[i]?.pregunta.trim()) return `La pregunta ${i + 1} está vacía`;
       if (!preguntas[i]?.respuesta.trim()) return `La respuesta de la pregunta ${i + 1} está vacía`;
+      const clave = preguntas[i].pregunta.trim().toLowerCase();
+      if (textosSeen.has(clave)) return `Pregunta repetida: "${preguntas[i].pregunta.trim()}" (pregunta ${i + 1})`;
+      textosSeen.add(clave);
     }
     return null;
   };

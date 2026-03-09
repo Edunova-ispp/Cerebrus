@@ -342,96 +342,81 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
       <div className="tf-header">
         <div className="tf-col">
           <div>
-            <label className="ca-text" htmlFor="tf-titulo">
-              Título
-            </label>
+            <label className="tf-label" htmlFor="tf-titulo">Título *</label>
             <input
               type="text"
               id="tf-titulo"
+              className="tf-input"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
-              style={{ width: '100%' }}
+              placeholder="Título del test"
             />
           </div>
 
           <div>
-            <label className="ca-text" htmlFor="tf-descripcion">
-              Descripción
-            </label>
+            <label className="tf-label" htmlFor="tf-descripcion">Descripción</label>
             <textarea
               id="tf-descripcion"
+              className="tf-input"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               rows={3}
-              style={{ width: '100%' }}
+              placeholder="Descripción opcional"
             />
           </div>
 
           <div>
-            <label className="ca-text" htmlFor="tf-imagen">
-              URL de imagen (opcional)
-            </label>
+            <label className="tf-label" htmlFor="tf-imagen">URL de imagen (opcional)</label>
             <input
               type="url"
               id="tf-imagen"
+              className="tf-input"
               value={imagen}
               onChange={(e) => setImagen(e.target.value)}
               placeholder="https://..."
-              style={{ width: '100%' }}
             />
             {imagen.trim() && (
               <img
                 src={imagen.trim()}
                 alt="Preview"
                 className="tf-img-preview"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-                onLoad={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'block';
-                }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                onLoad={(e) => { (e.target as HTMLImageElement).style.display = 'block'; }}
               />
             )}
           </div>
         </div>
 
         <div className="tf-col">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label className="ca-text" htmlFor="tf-puntuacion" style={{ whiteSpace: 'nowrap' }}>
-              Puntuación
-            </label>
+          <div>
+            <label className="tf-label" htmlFor="tf-puntuacion">Puntuación *</label>
             <input
               type="number"
               id="tf-puntuacion"
+              className="tf-input tf-input-sm"
               value={puntuacion}
               onChange={(e) => setPuntuacion(e.target.value)}
-              style={{ width: 90 }}
             />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <label className="tf-check-label">
             <input
               type="checkbox"
-              id="tf-respVisible"
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            <label className="ca-text" htmlFor="tf-respVisible">
-              Correcciones visibles
-            </label>
-          </div>
+            Mostrar correcciones al alumno
+          </label>
 
           {respVisible && (
             <div>
-              <label className="ca-text" htmlFor="tf-comentarios">
-                Comentarios
-              </label>
+              <label className="tf-label" htmlFor="tf-comentarios">Comentarios</label>
               <input
                 type="text"
                 id="tf-comentarios"
+                className="tf-input"
                 value={comentariosRespVisible}
                 onChange={(e) => setComentariosRespVisible(e.target.value)}
-                style={{ width: '100%' }}
               />
             </div>
           )}
@@ -440,9 +425,8 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
 
       {/* ── BOTTOM: Questions ── */}
       <div className="tf-questions">
-          <p className="ca-ordenacion-help" style={{ marginTop: 0, marginBottom: 12 }}>
-            Añade las preguntas y opciones. Marca cuál es la correcta con{' '}
-            <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
+          <p className="tf-help">
+            Añade las preguntas y opciones. Marca cuál es la correcta con <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
           </p>
 
           {questions.map((q, qi) => (
