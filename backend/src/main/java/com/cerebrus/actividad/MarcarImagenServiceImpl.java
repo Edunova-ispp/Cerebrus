@@ -62,6 +62,7 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
         else if(marcarImagenDTO.getComentariosRespVisible() != null && (marcarImagenDTO.getComentariosRespVisible().isBlank() || marcarImagenDTO.getComentariosRespVisible().isEmpty())){
             marcarImagen.setComentariosRespVisible(null);
         } else {
+            marcarImagen.setRespVisible(true);
             marcarImagen.setComentariosRespVisible(marcarImagenDTO.getComentariosRespVisible());
         }
         marcarImagen.setVersion(1);
@@ -129,6 +130,7 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
         else if(marcarImagenDTO.getComentariosRespVisible() != null && (marcarImagenDTO.getComentariosRespVisible().isBlank() || marcarImagenDTO.getComentariosRespVisible().isEmpty())){
             marcarImagenAActualizar.setComentariosRespVisible(null);
         } else {
+            marcarImagenAActualizar.setRespVisible(true);
             marcarImagenAActualizar.setComentariosRespVisible(marcarImagenDTO.getComentariosRespVisible());
         }
         marcarImagenAActualizar.setVersion(marcarImagenAActualizar.getVersion() + 1);

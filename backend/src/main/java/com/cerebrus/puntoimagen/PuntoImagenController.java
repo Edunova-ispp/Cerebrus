@@ -25,8 +25,8 @@ public class PuntoImagenController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<PuntoImagen> obtenerPuntoImagenPorId(@PathVariable Long id) {
-        return new ResponseEntity<>(puntoImagenService.obtenerPuntoImagenPorId(id), HttpStatus.OK);
+    public ResponseEntity<PuntoImagenDTO> obtenerPuntoImagenPorId(@PathVariable Long id) {
+        return new ResponseEntity<>(toPuntoImagenDTO(puntoImagenService.obtenerPuntoImagenPorId(id)), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
@@ -34,5 +34,14 @@ public class PuntoImagenController {
     public ResponseEntity<Void> eliminarPuntoImagen(@PathVariable Long id) {
         puntoImagenService.eliminarPuntoImagen(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private static PuntoImagenDTO toPuntoImagenDTO(PuntoImagen puntoImagen) {
+        return new PuntoImagenDTO(
+                puntoImagen.getId(),
+                puntoImagen.getRespuesta(),
+                puntoImagen.getPixelX(),
+                puntoImagen.getPixelY()
+        );
     }
 }
