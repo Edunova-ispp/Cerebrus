@@ -17,10 +17,10 @@ import jakarta.persistence.Table;
 @Table(name = "marcar_imagen")
 public class MarcarImagen extends Actividad {
 
-    @Column(nullable = false)
-    private String imagen;
+    @Column(nullable = false, name = "imagen_a_marcar")
+    private String imagenAMarcar;
 
-    @OneToMany(mappedBy = "marcarImagen", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "marcarImagen", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<PuntoImagen> puntosImagen = new ArrayList<>();
 
     // Constructores
@@ -28,19 +28,19 @@ public class MarcarImagen extends Actividad {
         super();
     }
 
-    public MarcarImagen(String titulo, String descripcion, Integer puntuacion, String imagenActividad,
-                        Boolean respVisible, Integer posicion, Integer version, Tema tema, String imagen) {
-        super(titulo, descripcion, puntuacion, imagenActividad, respVisible, posicion, version, tema);
-        this.imagen = imagen;
+    public MarcarImagen(String titulo, String descripcion, Integer puntuacion, String imagen,
+                        Boolean respVisible, Integer posicion, Integer version, Tema tema, String imagenAMarcar) {
+        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema);
+        this.imagenAMarcar = imagenAMarcar;
     }
 
     // Getters y Setters
-    public String getImagen() {
-        return imagen;
+    public String getImagenAMarcar() {
+        return imagenAMarcar;
     }
 
-    public void setImagen(String imagen) {
-        this.imagen = imagen;
+    public void setImagenAMarcar(String imagenAMarcar) {
+        this.imagenAMarcar = imagenAMarcar;
     }
 
     public List<PuntoImagen> getPuntosImagen() {
@@ -56,7 +56,7 @@ public class MarcarImagen extends Actividad {
         return "MarcarImagen{" +
                 "id=" + getId() +
                 ", titulo='" + getTitulo() + '\'' +
-                ", imagen='" + imagen + '\'' +
+                ", imagenAMarcar='" + getImagenAMarcar() + '\'' +
                 '}';
     }
 }
