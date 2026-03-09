@@ -85,17 +85,17 @@ public class GeneralController {
         return ResponseEntity.ok(generalService.readTipoTestMaestro(id));
     }
 
-      @GetMapping("/test/{id}")
+      @GetMapping("/cartas/{id}")
     public ResponseEntity<GeneralCartaDTO> readTipoCarta(@PathVariable Long id) {
         return ResponseEntity.ok(generalService.readTipoCarta(id));
     }
 
-    @GetMapping("/test/{id}/maestro")
+    @GetMapping("/cartas/{id}/maestro")
     public ResponseEntity<GeneralCartaMaestroDTO> readTipoCartaMaestro(@PathVariable Long id) {
         return ResponseEntity.ok(generalService.readTipoCartaMaestro(id));
     }
 
-    @PostMapping("/carta/maestro")
+    @PostMapping("/cartas/maestro")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Long> crearTipoCarta(@RequestBody @Valid General general) {
 
@@ -156,7 +156,7 @@ public class GeneralController {
         return ResponseEntity.ok(generalService.readTipoTest(id));
     }
 
-    @PutMapping("/carta/update/{id}")
+    @PutMapping("/cartas/update/{id}")
     public ResponseEntity<GeneralCartaDTO> updateTipoCarta(@PathVariable Long id, @RequestBody @Valid General general) {
 
         generalService.updateTipoCarta(
