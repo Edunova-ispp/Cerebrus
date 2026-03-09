@@ -24,13 +24,18 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
       return;
     }
     if (!id) return;
+    setLoading(true);
     apiFetch(`${apiBase}/api/cursos`)
       .then((r) => r.json())
       .then((data: Curso[]) => {
         const encontrado = data.find((c) => String(c.id) === id) ?? null;
+        if (!encontrado) {
+          setError("Curso no encontrado o no pertenece al maestro");
+        }
         setCurso(encontrado);
       })
-      .catch(() => setError("Error cargando el curso"));
+      .catch(() => setError("Error cargando el curso"))
+      .finally(() => setLoading(false));
   }, [id, cursoProp]);
 
   // Carga temas cuando ya tenemos el curso
