@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import perritoImg from '../../assets/props/perritoCerberito.png';
-import caballeroImg from '../../assets/props/caballero.png';
 import './TableroAlumno.css';
 
 // ── Types ─────────────────────────────────────────────────
@@ -20,25 +19,18 @@ type TableroAlumnoDTO = {
 
 // ── Helpers ───────────────────────────────────────────────
 
-/** Snake path: (0,0)→(0,1)→…→(0,n-1)→(1,n-1)→(1,n-2)→… */
-function buildSnakePath(size: number): [number, number][] {
-  const path: [number, number][] = [];
-  for (let r = 0; r < size; r++) {
-    for (let step = 0; step < size; step++) {
-      const c = r % 2 === 0 ? step : size - 1 - step;
-      path.push([r, c]);
-    }
-  }
-  return path;
+/**
+ * Maps a grid cell (r,c) to a question index.
+ * Cell (0,0) is Cerbero's start and has no question → returns null.
+ * All other cells in row-major order map to preguntas[0], preguntas[1], …
+ */
+function cellToQIndex(r: number, c: number, size: number): number | null {
+  if (r === 0 && c === 0) return null;
+  return r * size + c - 1;
 }
 
-interface EdgePos { row: number; col: number; horizontal: boolean; }
-
-function edgePos(path: [number, number][], i: number): EdgePos {
-  const [r1, c1] = path[i];
-  const [r2, c2] = path[i + 1];
-  if (r1 === r2) return { row: r1, col: Math.min(c1, c2), horizontal: true };
-  return { row: Math.min(r1, r2), col: c1, horizontal: false };
+function isNeighbor(r1: number, c1: number, r2: number, c2: number): boolean {
+  return Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1;
 }
 
 // ── Component ─────────────────────────────────────────────
@@ -50,85 +42,33 @@ export default function TableroAlumno() {
   const [tablero, setTablero] = useState<TableroAlumnoDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [answered, setAnswered] = useState<boolean[]>([]);
-  const [activeIdx, setActiveIdx] = useState<number | null>(null);
+
+  // Game state
+  const [cerberoPos, setCerberoPos] = useState<[number, number]>([0, 0]);
+  const [answeredSet, setAnsweredSet] = useState<Set<number>>(new Set());
+
+  // Modal state
+  const [modalCell, setModalCell] = useState<[number, number] | null>(null);
   const [inputAnswer, setInputAnswer] = useState('');
-  const [feedback, setFeedback] = useState<string | null>(null);
-  const [feedbackCorrect, setFeedbackCorrect] = useState(false);
+  const [feedback, setFeedback] = useState<{ correct: boolean; msg: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
   useEffect(() => {
     if (!tableroId) return;
-    setLoading(true);
     apiFetch(`${apiBase}/api/tableros/${tableroId}`)
       .then((r) => r.json())
-      .then((data: TableroAlumnoDTO) => {
-        setTablero(data);
-        setAnswered(new Array(data.preguntas.length).fill(false));
-      })
+      .then((data: TableroAlumnoDTO) => setTablero(data))
       .catch((e) => setError(e instanceof Error ? e.message : 'Error al cargar el tablero'))
       .finally(() => setLoading(false));
   }, [tableroId, apiBase]);
-
-  const size = tablero ? (tablero.tamano ? 3 : 4) : 3;
-  const path = buildSnakePath(size);
-  const totalCells = size * size;
-  const gridDim = size * 2 - 1;
-
-  const nextUnanswered = answered.indexOf(false);
-  const allDone = answered.length > 0 && answered.every(Boolean);
-
-  const handleEdgeClick = (ei: number) => {
-    if (ei !== nextUnanswered) return;
-    setActiveIdx(ei);
-    setInputAnswer('');
-    setFeedback(null);
-  };
-
-  const handleSubmit = async () => {
-    if (activeIdx === null || !tablero || submitting) return;
-    const q = tablero.preguntas[activeIdx];
-    setSubmitting(true);
-    try {
-      const res = await apiFetch(`${apiBase}/api/tableros/${tablero.id}/${q.id}`, {
-        method: 'POST',
-        body: JSON.stringify(inputAnswer.trim()),
-      });
-      const msg = await res.text();
-      const correct =
-        msg.toLowerCase().includes('correcta') && !msg.toLowerCase().includes('incorrecta');
-      setFeedback(msg);
-      setFeedbackCorrect(correct);
-      if (correct) {
-        setAnswered((prev) => {
-          const next = [...prev];
-          next[activeIdx] = true;
-          return next;
-        });
-        setTimeout(() => {
-          setActiveIdx(null);
-          setFeedback(null);
-        }, 1100);
-      }
-    } catch {
-      setFeedback('Error al enviar la respuesta');
-      setFeedbackCorrect(false);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // ── Render ─────────────────────────────────────────────
 
   if (loading)
     return (
       <div className="ta-page">
         <NavbarMisCursos />
-        <main className="ta-main">
-          <p className="ta-info-msg">Cargando tablero...</p>
-        </main>
+        <main className="ta-main"><p className="ta-info-msg">Cargando tablero...</p></main>
       </div>
     );
 
@@ -142,152 +82,236 @@ export default function TableroAlumno() {
       </div>
     );
 
+  const size = tablero.tamano ? 3 : 4;
+  // 3×3 completes at 6 correct, 4×4 at 10 correct (provisional)
+  const completionTarget = tablero.tamano ? 6 : 10;
+  const isComplete = answeredSet.size >= completionTarget;
+  const [cr, cc] = cerberoPos;
+
+  // ── Interaction ────────────────────────────────────────
+
+  const handleCellClick = (r: number, c: number) => {
+    if (isComplete) return;
+    const qIdx = cellToQIndex(r, c, size);
+    if (qIdx === null) return;                      // cerbero's own cell
+    if (answeredSet.has(qIdx)) return;              // already answered
+    if (!isNeighbor(cr, cc, r, c)) return;          // not adjacent
+    setModalCell([r, c]);
+    setInputAnswer('');
+    setFeedback(null);
+  };
+
+  const closeModal = () => {
+    if (submitting) return;
+    setModalCell(null);
+    setFeedback(null);
+    setInputAnswer('');
+  };
+
+  const handleSubmit = async () => {
+    if (!modalCell || !tablero || submitting) return;
+    const [mr, mc] = modalCell;
+    const qIdx = cellToQIndex(mr, mc, size)!;
+    const q = tablero.preguntas[qIdx];
+    setSubmitting(true);
+    try {
+      const res = await apiFetch(`${apiBase}/api/tableros/${tablero.id}/${q.id}`, {
+        method: 'POST',
+        body: JSON.stringify(inputAnswer.trim()),
+      });
+      const msg = await res.text();
+      const correct =
+        msg.toLowerCase().includes('correcta') && !msg.toLowerCase().includes('incorrecta');
+      setFeedback({ correct, msg });
+      if (correct) {
+        const newSet = new Set(answeredSet);
+        newSet.add(qIdx);
+        setAnsweredSet(newSet);
+        setCerberoPos([mr, mc]);
+        setTimeout(closeModal, 950);
+      }
+    } catch {
+      setFeedback({ correct: false, msg: 'Error al enviar la respuesta' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // ── Build cells ────────────────────────────────────────
+
+  const modalQIdx =
+    modalCell !== null ? cellToQIndex(modalCell[0], modalCell[1], size) : null;
+  const modalQuestion = modalQIdx !== null ? tablero.preguntas[modalQIdx] : null;
+
+  const cells: React.ReactElement[] = [];
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      const isCerbero = r === cr && c === cc;
+      const qIdx = cellToQIndex(r, c, size);
+      const isAnswered = qIdx !== null && answeredSet.has(qIdx);
+      const isClickable = qIdx !== null && !isAnswered && isNeighbor(cr, cc, r, c) && !isComplete;
+      const isModalOpen =
+        modalCell !== null && modalCell[0] === r && modalCell[1] === c;
+      const isDark = (r + c) % 2 === 1;
+
+      cells.push(
+        <div
+          key={`${r}-${c}`}
+          className={[
+            'ta-cell',
+            isDark ? 'ta-cell--dark' : 'ta-cell--light',
+            isClickable ? 'ta-cell--clickable' : '',
+          ]
+            .join(' ')
+            .trim()}
+          onClick={() => handleCellClick(r, c)}
+          role={isClickable ? 'button' : undefined}
+          tabIndex={isClickable ? 0 : undefined}
+          onKeyDown={(e) => e.key === 'Enter' && handleCellClick(r, c)}
+          aria-label={
+            isCerbero
+              ? 'Posición actual de Cerbero'
+              : isAnswered
+              ? `Pregunta ${(qIdx ?? 0) + 1} respondida`
+              : isClickable
+              ? `Responder pregunta ${(qIdx ?? 0) + 1}`
+              : qIdx !== null
+              ? `Pregunta ${qIdx + 1} bloqueada`
+              : undefined
+          }
+        >
+          {/* Cerbero character */}
+          {isCerbero && (
+            <img
+              src={perritoImg}
+              className={`ta-char${isComplete ? ' ta-char--victory' : ''}`}
+              alt="Cerbero"
+            />
+          )}
+
+          {/* Question card */}
+          {qIdx !== null && !isCerbero && (
+            <div
+              className={[
+                'ta-qcard',
+                isAnswered
+                  ? 'ta-qcard--done'
+                  : isModalOpen
+                  ? 'ta-qcard--selected'
+                  : isClickable
+                  ? 'ta-qcard--neighbor'
+                  : 'ta-qcard--locked',
+              ].join(' ')}
+            >
+              {isAnswered ? '✓' : '?'}
+            </div>
+          )}
+        </div>
+      );
+    }
+  }
+
+  // ── Render ─────────────────────────────────────────────
+
   return (
     <div className="ta-page">
       <NavbarMisCursos />
       <main className="ta-main">
         <div className="ta-wrapper">
 
-          {/* ── Header ── */}
+          {/* Header */}
           <div className="ta-header">
+            <button className="ta-back-btn" onClick={() => navigate(-1)}>
+              ← Mapa
+            </button>
             <span className="ta-title">{tablero.titulo}</span>
-            <span className="ta-badge">{tablero.tamano ? '3×3' : '4×4'}</span>
+            <span className="ta-badge">{tablero.tamano ? 'A3' : 'A4'}</span>
           </div>
 
-          {/* ── Board ── */}
+          {/* Progress */}
+          <div className="ta-progress">
+            <span className="ta-progress-label">
+              {answeredSet.size} / {completionTarget}
+            </span>
+            <div className="ta-progress-track">
+              <div
+                className="ta-progress-fill"
+                style={{
+                  width: `${Math.min(100, (answeredSet.size / completionTarget) * 100)}%`,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Board */}
           <div className="ta-board-wrap">
             <div
               className="ta-board"
-              style={{
-                gridTemplateColumns: `repeat(${gridDim}, auto)`,
-                gridTemplateRows: `repeat(${gridDim}, auto)`,
-              }}
+              style={{ gridTemplateColumns: `repeat(${size}, 1fr)` }}
             >
-              {/* Cells */}
-              {Array.from({ length: totalCells }, (_, pidx) => {
-                const [r, c] = path[pidx];
-                const isDark = (r + c) % 2 === 1;
-                const isStart = pidx === 0;
-                const isEnd = pidx === totalCells - 1;
-                return (
-                  <div
-                    key={`cell-${pidx}`}
-                    className={`ta-cell ${isDark ? 'ta-cell--dark' : 'ta-cell--light'}`}
-                    style={{ gridRow: r * 2 + 1, gridColumn: c * 2 + 1 }}
-                  >
-                    {isStart && <img src={perritoImg} className="ta-char" alt="inicio" />}
-                    {isEnd && allDone && <img src={caballeroImg} className="ta-char" alt="fin" />}
-                    {isEnd && !allDone && (
-                      <img
-                        src={caballeroImg}
-                        className="ta-char ta-char--dimmed"
-                        alt="fin"
-                      />
-                    )}
-                  </div>
-                );
-              })}
-
-              {/* Edges (questions) */}
-              {tablero.preguntas.map((_, ei) => {
-                const { row, col, horizontal } = edgePos(path, ei);
-                const gridRow = horizontal ? row * 2 + 1 : row * 2 + 2;
-                const gridCol = horizontal ? col * 2 + 2 : col * 2 + 1;
-                const isAnswered = answered[ei];
-                const isActive = ei === nextUnanswered;
-                const isSelected = ei === activeIdx;
-
-                return (
-                  <div
-                    key={`edge-${ei}`}
-                    className={`ta-edge ${horizontal ? 'ta-edge--h' : 'ta-edge--v'}`}
-                    style={{ gridRow, gridColumn: gridCol }}
-                  >
-                    <button
-                      type="button"
-                      className={`ta-qcard ${
-                        isAnswered
-                          ? 'ta-qcard--done'
-                          : isSelected
-                          ? 'ta-qcard--selected'
-                          : isActive
-                          ? 'ta-qcard--active'
-                          : 'ta-qcard--locked'
-                      }`}
-                      onClick={() => handleEdgeClick(ei)}
-                      disabled={isAnswered || (!isActive)}
-                      aria-label={
-                        isAnswered
-                          ? `Pregunta ${ei + 1} respondida`
-                          : isActive
-                          ? `Responder pregunta ${ei + 1}`
-                          : `Pregunta ${ei + 1} bloqueada`
-                      }
-                    >
-                      {isAnswered ? '✓' : '?'}
-                    </button>
-                  </div>
-                );
-              })}
+              {cells}
             </div>
           </div>
 
-          {/* ── Question panel ── */}
-          {activeIdx !== null && !allDone && (
-            <div className="ta-panel">
-              <p className="ta-panel-num">
-                Pregunta {activeIdx + 1} / {tablero.preguntas.length}
-              </p>
-              <p className="ta-panel-q">{tablero.preguntas[activeIdx].pregunta}</p>
-              <div className="ta-panel-row">
-                <input
-                  className="ta-panel-input"
-                  type="text"
-                  value={inputAnswer}
-                  onChange={(e) => setInputAnswer(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && !submitting && handleSubmit()}
-                  placeholder="Tu respuesta..."
-                  maxLength={200}
-                  autoFocus
-                />
-                <button
-                  className="ta-panel-btn"
-                  onClick={handleSubmit}
-                  disabled={submitting || !inputAnswer.trim()}
-                >
-                  {submitting ? '…' : 'Enviar'}
-                </button>
-              </div>
-              {feedback && (
-                <p
-                  className={`ta-panel-feedback ${
-                    feedbackCorrect ? 'ta-panel-feedback--ok' : 'ta-panel-feedback--err'
-                  }`}
-                >
-                  {feedback}
-                </p>
-              )}
-            </div>
+          {/* Hint */}
+          {!isComplete && !modalCell && (
+            <p className="ta-hint">
+              Pulsa una casilla <strong>?</strong> adyacente a Cerbero para responder
+            </p>
           )}
 
-          {/* ── Finished ── */}
-          {allDone && (
+          {/* Completion */}
+          {isComplete && (
             <div className="ta-done">
               <p className="ta-done-text">¡Tablero completado!</p>
               <button className="ta-done-btn" onClick={() => navigate(-1)}>
-                Volver
+                Volver al mapa
               </button>
             </div>
           )}
-
-          {/* ── Hint ── */}
-          {activeIdx === null && !allDone && nextUnanswered >= 0 && (
-            <p className="ta-hint">
-              Haz clic en el <strong>?</strong> resaltado para avanzar por el tablero.
-            </p>
-          )}
         </div>
       </main>
+
+      {/* Question modal */}
+      {modalCell && modalQuestion && (
+        <div
+          className="ta-modal-overlay"
+          onClick={(e) => e.target === e.currentTarget && closeModal()}
+        >
+          <div className="ta-modal">
+            <h3 className="ta-modal-title">Pregunta</h3>
+            <p className="ta-modal-q">{modalQuestion.pregunta}</p>
+            <label className="ta-modal-label">Solución</label>
+            <input
+              className="ta-modal-input"
+              type="text"
+              value={inputAnswer}
+              onChange={(e) => setInputAnswer(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !submitting && handleSubmit()}
+              maxLength={200}
+              autoFocus
+            />
+            {feedback && (
+              <p
+                className={`ta-modal-feedback ${
+                  feedback.correct
+                    ? 'ta-modal-feedback--ok'
+                    : 'ta-modal-feedback--err'
+                }`}
+              >
+                {feedback.msg}
+              </p>
+            )}
+            <button
+              className="ta-modal-btn"
+              onClick={handleSubmit}
+              disabled={submitting || !inputAnswer.trim()}
+            >
+              {submitting ? '…' : 'Enviar'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -104,9 +104,8 @@ public class TableroServiceImpl implements TableroService {
             if (!tablero.getTema().getCurso().getMaestro().getId().equals(maestro.getId())) {
                 throw new AccessDeniedException("No tienes permiso para acceder a este tablero");
             }
-        } else {
-            throw new AccessDeniedException("Solo un maestro puede acceder a actividades de tablero");
         }
+        // Alumnos can access tablero data to play the activity
         return TableroDTO.fromEntity(tablero);
     }
 
