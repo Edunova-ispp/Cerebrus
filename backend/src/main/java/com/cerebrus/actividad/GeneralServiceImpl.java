@@ -1,5 +1,6 @@
 package com.cerebrus.actividad;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +13,12 @@ import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaDTO;
 import com.cerebrus.pregunta.PreguntaMaestroDTO;
+import com.cerebrus.respuesta.Respuesta;
 import com.cerebrus.respuesta.RespuestaDTO;
 import com.cerebrus.respuesta.RespuestaMaestroDTO;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
+import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
@@ -214,4 +217,178 @@ public class GeneralServiceImpl implements GeneralService {
         General general = generalRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Actividad tipo test no encontrada"));
         generalRepository.delete(general);
     }
+
+    @Override
+    @Transactional
+    public General crearGeneralClasificacion(String titulo, String descripcion, Integer puntuacion, Long temaId, 
+        Boolean respVisible, String comentariosRespVisible) {
+        
+        Usuario u = usuarioService.findCurrentUser();
+        if (!(u instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede crear actividades");
+        }
+        General clasificacion = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
+        clasificacion.setTipo(TipoActGeneral.CLASIFICACION);
+       
+
+        General creada = generalRepository.save(clasificacion);
+        
+       
+         return creada;
+        
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public GeneralClasificacionMaestroDTO readTipoClasificacionMaestro(Long id) {
+        Usuario u = usuarioService.findCurrentUser();
+        if (!(u instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede leer actividades tipo clasificación para edición");
+        }
+      
+
+        General general = generalRepository.findByIdWithPreguntas(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Actividad tipo clasificación no encontrada"));
+            
+           
+       
+        if (general.getTipo() != TipoActGeneral.CLASIFICACION) {
+            throw new ResourceNotFoundException("La actividad no es de tipo clasificación");
+        }
+        
+         general.getPreguntas().forEach(p -> p.getRespuestas().size());
+        
+        List<PreguntaMaestroDTO> preguntasDTO = general.getPreguntas().stream().map(pregunta -> {
+            List<RespuestaMaestroDTO> respuestasDTO = pregunta.getRespuestas().stream()
+                .map(r -> new RespuestaMaestroDTO(r.getId(), r.getRespuesta(), r.getCorrecta()))
+                .toList();
+            return new PreguntaMaestroDTO(pregunta.getId(), pregunta.getPregunta(), pregunta.getImagen(), respuestasDTO);
+        }).toList();
+        
+    
+
+        return new GeneralClasificacionMaestroDTO(
+            general.getId(), general.getTitulo(), general.getDescripcion(),
+            general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
+            general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
+            general.getTema() == null ? null : general.getTema().getId(),
+            preguntasDTO
+        );
+
+
+}
+
+@Override
+@Transactional
+public GeneralClasificacionDTO readTipoClasificacion(Long id) {
+    Usuario u = usuarioService.findCurrentUser();
+        if (!(u instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede leer actividades tipo clasificación para realizarlas");
+        }
+      
+
+        General general = generalRepository.findByIdWithPreguntas(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Actividad tipo clasificación no encontrada"));
+        System.out.println("Actividad encontrada: " + general.getTitulo());
+        if (general.getTipo() != TipoActGeneral.CLASIFICACION) {
+            throw new ResourceNotFoundException("La actividad no es de tipo clasificación");
+        }
+        
+         general.getPreguntas().forEach(p -> p.getRespuestas().size());
+         List<Respuesta> respuestas = new ArrayList<>();
+        for (Pregunta p : general.getPreguntas()) {
+            respuestas.addAll(p.getRespuestas());
+         }
+         boolean bienBarajadas = false;
+         List<PreguntaDTO> preguntasDTO = new ArrayList<>();
+         while(!bienBarajadas){
+         List<RespuestaDTO> respuestasBarajadas = CerebrusUtils.shuffleCollection(respuestas).stream()
+                .map(r -> new RespuestaDTO(r.getId(), r.getRespuesta()))
+                .toList();;
+        
+       
+        
+        Integer i=0;
+        for(Pregunta p : general.getPreguntas()){
+            List<RespuestaDTO> Seleccionadas=new ArrayList<>();
+     
+           Integer total=respuestasBarajadas.size()/general.getPreguntas().size();
+           
+              while(Seleccionadas.size()<total){
+                RespuestaDTO r = respuestasBarajadas.get(i);
+                
+             
+                    Seleccionadas.add(r);
+               
+                i++;
+                
+              }
+                preguntasDTO.add(new PreguntaDTO(p.getId(), p.getPregunta(), p.getImagen(), Seleccionadas));
+
+
+        }
+        for(PreguntaDTO pd : preguntasDTO){
+           
+            for(RespuestaDTO rd : pd.getRespuestas()){
+                for (Pregunta p : general.getPreguntas()){
+                    for(Respuesta r : p.getRespuestas()){
+                        if(r.getId().equals(rd.getId())){
+                            bienBarajadas = true;
+                            break;
+
+                        
+                        } else {
+                            bienBarajadas = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+  
+
+    return new GeneralClasificacionDTO(
+        general.getId(), general.getTitulo(), general.getDescripcion(),
+        general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
+        general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
+        general.getTema() == null ? null : general.getTema().getId(),
+        preguntasDTO
+    );
+}
+
+ @Override
+ @Transactional
+    public GeneralClasificacionMaestroDTO updateTipoClasificacion(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
+        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId) {
+     
+        Usuario u = usuarioService.findCurrentUser();
+        if (!(u instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede actualizar actividades tipo clasificación");
+        }
+        System.out.println("Actualizando tipo clasificación: " + id);
+
+        General tipoClasificacion = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
+            posicion, version, temaId);
+            System.out.println("Actividad base actualizada, procesando preguntas...");
+        if(preguntasId != null){
+            List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
+                for(Pregunta p : preguntas){
+                    List<Respuesta> respuestas = p.getRespuestas();
+                    for(Respuesta r : respuestas){
+                        if(!r.getCorrecta()){
+                            throw new IllegalArgumentException("Las preguntas de una actividad de clasificación no pueden tener respuestas incorrectas");
+                        }
+                    }
+                }
+            tipoClasificacion.getPreguntas().clear();
+            tipoClasificacion.getPreguntas().addAll(preguntas);
+        }
+        System.out.println("Preguntas actualizadas, guardando actividad...");
+        General actualizado = generalRepository.save(tipoClasificacion);
+        System.out.println("Actividad guardada: " + actualizado.getTitulo());
+
+        return readTipoClasificacionMaestro(actualizado.getId());
+    }
+
+   
 }
