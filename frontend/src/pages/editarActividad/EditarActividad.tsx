@@ -5,6 +5,7 @@ import { apiFetch } from '../../utils/api';
 import { OrdenacionForm, type OrdenacionFormInitialValues } from '../crearActividad/OrdenacionForm';
 import { TeoriaForm } from '../crearActividad/TeoriaForm';
 import { TestForm, type TestFormInitialValues } from '../crearActividad/TestForm';
+import { TableroForm, type TableroFormInitialValues } from '../crearActividad/TableroForm';
 import '../crearActividad/crearActividad.css';
 
 type OrdenacionDTO = {
@@ -44,7 +45,23 @@ type GeneralTestMaestroDTO = {
   }[];
 };
 
-type ActivityKind = 'ordenacion' | 'test' | 'teoria' | null;
+type TableroDTO = {
+  id: number;
+  titulo: string;
+  descripcion: string | null;
+  puntuacion: number;
+  tamano: boolean;
+  posicion: number;
+  temaId: number;
+  respVisible: boolean;
+  preguntas: {
+    id: number;
+    pregunta: string;
+    respuestas: { id: number; respuesta: string; correcta: boolean }[];
+  }[];
+};
+
+type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | null;
 
 export default function EditarActividad() {
   const { id: cursoId, actividadId } = useParams<{
@@ -60,6 +77,8 @@ export default function EditarActividad() {
   const [ordenacion, setOrdenacion] = useState<OrdenacionDTO | null>(null);
   const [teoria, setTeoria] = useState<TeoriaDTO | null>(null);
   const [generalTest, setGeneralTest] = useState<GeneralTestMaestroDTO | null>(null);
+  const [tablero, setTablero] = useState<TableroDTO | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
@@ -94,15 +113,52 @@ export default function EditarActividad() {
                 setKind('teoria');
               })
               .catch((e) => {
-                const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
-                setError(msg);
-              })
-              .finally(() => setLoading(false));
+                // 4. Intentar tablero
+                apiFetch(`${apiBase}/api/tableros/${actividadId}`)
+                  .then((r) => r.json())
+                  .then((data: TableroDTO) => {
+                    setTablero(data);
+                    setKind('tablero');
+                  })
+                  .catch((e2) => {
+                    const msg = e2 instanceof Error ? e2.message : e instanceof Error ? e.message : 'No se pudo cargar la actividad';
+                    setError(msg);
+                  })
+                  .finally(() => setLoading(false));
+              });
           });
       });
   }, [actividadId]);
 
-  const actividadIdNum = actividadId ? Number.parseInt(actividadId, 10) : NaN;
+  const tableroInitialValues: TableroFormInitialValues | undefined = tablero
+    ? {
+        titulo: tablero.titulo,
+        descripcion: tablero.descripcion,
+        puntuacion: tablero.puntuacion,
+        respVisible: tablero.respVisible,
+        tamano: tablero.tamano,
+        temaId: tablero.temaId,
+        preguntas: tablero.preguntas.map((p) => ({
+          pregunta: p.pregunta,
+          respuesta: p.respuestas[0]?.respuesta ?? '',
+        })),
+      }
+    : undefined;
+
+  const handleEliminarTablero = async () => {
+    if (!tablero || !window.confirm('¿Seguro que quieres eliminar este tablero? Esta acción no se puede deshacer.')) return;
+    const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
+    setDeleting(true);
+    try {
+      await apiFetch(`${apiBase}/api/tableros/${tablero.id}`, { method: 'DELETE' });
+      navigate(`/cursos/${cursoId}/temas`);
+    } catch {
+      setError('No se pudo eliminar el tablero');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
 
   const ordenacionInitialValues: OrdenacionFormInitialValues | undefined = ordenacion
     ? {
@@ -130,6 +186,8 @@ export default function EditarActividad() {
         preguntas: generalTest.preguntas ?? [],
       }
     : undefined;
+
+  const actividadIdNum = actividadId ? Number.parseInt(actividadId, 10) : NaN;
 
   const renderForm = () => {
     if (kind === 'test' && generalTest) {
@@ -163,6 +221,16 @@ export default function EditarActividad() {
       );
     }
 
+    if (kind === 'tablero' && tablero) {
+      return (
+        <TableroForm
+          mode="edit"
+          tableroId={tableroInitialValues ? tablero.id : undefined}
+          initialValues={tableroInitialValues}
+        />
+      );
+    }
+
     return <p className="ca-text">Edición no disponible para este tipo de actividad.</p>;
   };
 
@@ -178,6 +246,17 @@ export default function EditarActividad() {
           >
             Volver al Mapa
           </button>
+          {kind === 'tablero' && tablero && (
+            <button
+              className="ca-sidebar-btn"
+              type="button"
+              style={{ color: '#c0392b' }}
+              disabled={deleting}
+              onClick={handleEliminarTablero}
+            >
+              {deleting ? 'Eliminando...' : 'Eliminar tablero'}
+            </button>
+          )}
         </div>
 
         <div className="ca-contenido">

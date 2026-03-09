@@ -14,7 +14,11 @@
 /* ── Header columns ──────────────────────────────────────────── */
 
 .tf-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: 24px;
+  margin-bottom: 20px;
 }
 
 .tf-col {
@@ -38,7 +42,11 @@
 /* ── Question blocks ─────────────────────────────────────────── */
 
 .tf-questions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   gap: 20px;
+  margin-bottom: 20px;
 }
 
 .tf-question-block {
@@ -65,7 +73,7 @@
 
 .tf-question-input {
   width: 100%;
-  background: #FFF;
+  background: transparent;
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 10px;
@@ -74,9 +82,13 @@
   color: #000;
 }
 
+.tf-question-input:hover {
+  border-color: var(--color-accent);
+}
+
 .tf-question-input:focus {
   outline: none;
-  border-color: #7C4DFF;
+  border-color: var(--color-accent);
 }
 
 /* ── Options ─────────────────────────────────────────────────── */
@@ -91,11 +103,15 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #FFF;
+  background: transparent;
   border: 2px solid #000;
   border-radius: 8px;
   padding: 6px 10px;
   transition: background 0.15s;
+}
+
+.tf-option:hover:not(.tf-option--correct) {
+  background: var(--color-accent);
 }
 
 .tf-option--correct {
@@ -145,8 +161,9 @@
 }
 
 .tf-btn-correct:hover {
-  background: #d4f7d4;
-  border-color: #27ae60;
+  background: var(--color-accent-dark);
+  border-color: #000;
+  color: #000;
 }
 
 .tf-btn-correct--active {
@@ -187,7 +204,7 @@
 
 .tf-btn-add-option {
   align-self: flex-start;
-  background: transparent;
+  background: var(--color-accent);
   color: #000;
   border: 2px solid #000;
   border-radius: 8px;
@@ -199,11 +216,11 @@
 }
 
 .tf-btn-add-option:hover {
-  background: #F5E6CC;
+  background: var(--color-accent-dark);
 }
 
 .tf-btn-add-question {
-  background: #F5D49A;
+  background: var(--color-accent);
   color: #000;
   border: 3px solid #000;
   border-radius: 12px;
@@ -219,6 +236,7 @@
 }
 
 .tf-btn-add-question:hover {
+  background: var(--color-accent-dark);
   transform: translate(-2px, -2px);
   box-shadow: 6px 6px 0px #000;
 }

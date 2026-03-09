@@ -32,14 +32,14 @@
 }
 
 .login-logo {
-  height: 80px;
+  height: 120px;
   object-fit: contain;
   image-rendering: pixelated;
   filter: drop-shadow(4px 4px 0 #000);
 }
 
 .login-title {
-  font-size: 2.2rem;
+  font-size: 3.2rem;
   color: #FFF294;
   -webkit-text-stroke: 2px #000;
   text-shadow: 4px 4px 0 #000;

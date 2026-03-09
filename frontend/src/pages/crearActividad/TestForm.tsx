@@ -339,7 +339,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
       {error && <p className="ca-text tf-error">{error}</p>}
 
       {/* ── TOP: Metadata ── */}
-      <div className="ca-contenedor-blanco tf-header">
+      <div className="tf-header">
         <div className="tf-col">
           <div>
             <label className="ca-text" htmlFor="tf-titulo">
@@ -439,10 +439,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
       </div>
 
       {/* ── BOTTOM: Questions ── */}
-      <div
-        className="ca-contenedor-blanco tf-questions"
-        style={{ marginTop: 16, flexDirection: 'column', alignItems: 'stretch' }}
-      >
+      <div className="tf-questions">
           <p className="ca-ordenacion-help" style={{ marginTop: 0, marginBottom: 12 }}>
             Añade las preguntas y opciones. Marca cuál es la correcta con{' '}
             <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
@@ -519,7 +516,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
           </button>
         </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+      <div className="ca-form-footer">
         <button className="ca-btn-guardar" type="submit" disabled={loading}>
           {loading ? 'Guardando...' : 'Guardar'}
         </button>

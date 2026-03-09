@@ -48,8 +48,8 @@
   color: #000;
   transition: background 0.15s;
 }
-.ca-sidebar-btn:hover { background: #F5E6CC; }
-.ca-sidebar-btn--activo { font-weight: bold; background: #F5E6CC; }
+.ca-sidebar-btn:hover { background: var(--color-accent-dark); }
+.ca-sidebar-btn--activo { font-weight: bold; background: var(--color-accent); }
 
 .ca-contenido {
   flex: 1;
@@ -89,9 +89,15 @@
   color: #000;
 }
 
+.ca-contenido input:hover,
+.ca-contenido textarea:hover {
+  border-color: var(--color-accent);
+}
+
 .ca-contenido input:focus,
 .ca-contenido textarea:focus {
   outline: none;
+  border-color: var(--color-accent);
 }
 
 .ca-ordenacion-form,
@@ -102,7 +108,7 @@
 
 .ca-ordenacion-form button.ca-text {
   color: #000 !important;
-  background: #FFF8EE;
+  background: var(--color-accent);
   border: 2px solid #000;
   border-radius: 8px;
   padding: 6px 10px;
@@ -110,7 +116,7 @@
 }
 
 .ca-ordenacion-form button.ca-text:hover {
-  background: #F5E6CC;
+  background: var(--color-accent-dark);
 }
 
 .ca-ordenacion-form button.ca-text:disabled {
@@ -138,14 +144,14 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  background: #FFF;
-  border: 2px solid #000;
-  border-radius: 8px;
-  padding: 32px;
+  background: transparent;
+  border: none;
+  padding: 0 0 20px 0;
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
   flex-wrap: wrap;
+  gap: 24px;
 }
 
 .ca-contenedor {
@@ -153,10 +159,9 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  background: #FFF8EE;
-  border: 2px solid #000;
-  border-radius: 8px;
-  padding: 32px;
+  background: transparent;
+  border: none;
+  padding: 0 0 20px 0;
 }
 
 .ca-proximamente {
@@ -178,5 +183,11 @@
   box-shadow: 5px 5px 0px #000;
   transition: transform 0.1s;
 }
-.ca-btn-guardar:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0px #000; }
+.ca-btn-guardar:hover { background: var(--color-accent-dark); transform: translate(-2px, -2px); box-shadow: 7px 7px 0px #000; }
 .ca-btn-guardar:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.ca-form-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
