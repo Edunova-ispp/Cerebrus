@@ -13,7 +13,7 @@ const Login = () => {
   
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
@@ -115,7 +115,13 @@ const Login = () => {
               Iniciar sesión
             </button>
             <p className="login-register-text">
-              ¿No tienes cuenta? <span onClick={() => navigate('/auth/register')}>Regístrate</span>
+              ¿No tienes cuenta?{' '}
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate('/auth/register')}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate('/auth/register'); }}
+              >Regístrate</span>
             </p>
           </div>
 

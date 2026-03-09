@@ -28,7 +28,7 @@
 /* Botón Volver */
 .detalle-volver {
   align-self: flex-start;
-  background: #E8D5B5;
+  background: var(--color-accent);
   color: #000;
   border: 3px solid #000;
   border-radius: 12px;

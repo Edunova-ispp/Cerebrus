@@ -17,7 +17,7 @@ const TITLE = [
   { char: "b", cls: "primary" },
   { char: "r", cls: "secondary" },
   { char: "u", cls: "accent" },
-  { char: "s", cls: "primary" },
+  { char: "s", cls: "accent" },
 ];
 
 const cards = [
@@ -95,7 +95,15 @@ function LandingPage() {
       {/* Cards row */}
       <div className="landing-cards">
         {cards.map((card, i) => (
-          <div key={i} className="landing-card-wrapper" onClick={() => navigate(card.route)} style={{ cursor: "pointer" }}>
+          <div
+            key={i}
+            className="landing-card-wrapper"
+            onClick={() => navigate(card.route)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(card.route); }}
+            role="button"
+            tabIndex={0}
+            style={{ cursor: "pointer" }}
+          >
             <div className="landing-card-images">
               {card.images.map((src, j) => (
                 <img key={j} src={src} alt="" />

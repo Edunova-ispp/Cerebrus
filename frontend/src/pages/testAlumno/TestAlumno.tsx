@@ -139,7 +139,17 @@ export default function TestAlumno() {
         const ensureValue = (await ensureRes.json()) as unknown;
         const exists = ensureValue === 1 || ensureValue === '1' || ensureValue === true;
 
-        if (!exists) {
+        if (exists) {
+          const getAA = await apiFetch(
+            `${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${testData.id}`,
+          );
+          const aaData = (await getAA.json()) as ActividadAlumnoDTO;
+          if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+            setActividadAlumnoId(aaData.id);
+          } else {
+            throw new Error('Respuesta inválida al obtener ActividadAlumno');
+          }
+        } else {
           const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
             method: 'POST',
             body: JSON.stringify({ alumnoId, actividadId: testData.id }),
@@ -149,16 +159,6 @@ export default function TestAlumno() {
             setActividadAlumnoId(aaData.id);
           } else {
             throw new Error('Respuesta inválida al crear ActividadAlumno');
-          }
-        } else {
-          const getAA = await apiFetch(
-            `${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${testData.id}`,
-          );
-          const aaData = (await getAA.json()) as ActividadAlumnoDTO;
-          if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
-            setActividadAlumnoId(aaData.id);
-          } else {
-            throw new Error('Respuesta inválida al obtener ActividadAlumno');
           }
         }
       } catch (e) {
@@ -280,6 +280,44 @@ export default function TestAlumno() {
 
   const currentPregunta = test?.preguntas[currentIndex];
 
+  let lastQuestionButton: React.ReactNode;
+  if (submitted) {
+    lastQuestionButton = (
+      <button
+        type="button"
+        className="ca-btn-guardar"
+        onClick={() => navigate(-1)}
+      >
+        Volver al curso
+      </button>
+    );
+  } else {
+    lastQuestionButton = (
+      <button
+        type="button"
+        className="ta-nav-btn ta-nav-btn--submit"
+        onClick={handleSubmit}
+        disabled={submitting || !allAnswered || !actividadAlumnoId}
+        title={
+          allAnswered
+            ? ''
+            : 'Responde todas las preguntas antes de enviar'
+        }
+      >
+        {submitting ? 'Enviando...' : '¡Enviar respuestas!'}
+      </button>
+    );
+  }
+
+  let answeredBadgeText: string | null = null;
+  if (currentPregunta && selections.has(currentPregunta.id)) {
+    if (submitted) {
+      answeredBadgeText = results.get(currentPregunta.id)?.correcta ? '✓ Correcta' : '✗ Incorrecta';
+    } else {
+      answeredBadgeText = '✓ Respondida';
+    }
+  }
+
   return (
     <div className="test-alumno-page">
       <NavbarMisCursos />
@@ -352,11 +390,7 @@ export default function TestAlumno() {
               </span>
               {selections.has(currentPregunta.id) && (
                 <span className="ta-answered-badge">
-                  {submitted
-                    ? results.get(currentPregunta.id)?.correcta
-                      ? '✓ Correcta'
-                      : '✗ Incorrecta'
-                    : '✓ Respondida'}
+                  {answeredBadgeText}
                 </span>
               )}
             </div>
@@ -428,29 +462,7 @@ export default function TestAlumno() {
               </button>
 
               {isLastQuestion ? (
-                submitted ? (
-                  <button
-                    type="button"
-                    className="ca-btn-guardar"
-                    onClick={() => navigate(-1)}
-                  >
-                    Volver al curso
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="ta-nav-btn ta-nav-btn--submit"
-                    onClick={handleSubmit}
-                    disabled={submitting || !allAnswered || !actividadAlumnoId}
-                    title={
-                      !allAnswered
-                        ? 'Responde todas las preguntas antes de enviar'
-                        : ''
-                    }
-                  >
-                    {submitting ? 'Enviando...' : '¡Enviar respuestas!'}
-                  </button>
-                )
+                lastQuestionButton
               ) : (
                 <button
                   type="button"

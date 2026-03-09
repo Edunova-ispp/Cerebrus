@@ -40,7 +40,7 @@ export default function EditarTema() {
     cargarDatos();
   }, [temaId]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const userInfo = getCurrentUserInfo();
     const maestroId = userInfo?.id;
@@ -70,7 +70,7 @@ export default function EditarTema() {
       <NavbarMisCursos />
       <main className="crear-tema-main">
         <button className="detalle-volver" onClick={() => navigate(-1)}>
-          ← Volver
+          ←
         </button>
 
         <h2 className="welcome-text">Bienvenido al editor de temas</h2>

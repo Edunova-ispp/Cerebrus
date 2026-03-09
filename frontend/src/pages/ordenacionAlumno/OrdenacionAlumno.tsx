@@ -134,7 +134,15 @@ export default function OrdenacionAlumno() {
         const ensureValue = (await ensureRes.json()) as unknown;
         const exists = ensureValue === 1 || ensureValue === '1' || ensureValue === true;
 
-        if (!exists) {
+        if (exists) {
+          const getAA = await apiFetch(`${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${ordData.id}`);
+          const aaData = (await getAA.json()) as ActividadAlumnoDTO;
+          if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+            setActividadAlumnoId(aaData.id);
+          } else {
+            throw new Error('Respuesta inválida al obtener ActividadAlumno');
+          }
+        } else {
           const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
             method: 'POST',
             body: JSON.stringify({ alumnoId, actividadId: ordData.id }),
@@ -144,14 +152,6 @@ export default function OrdenacionAlumno() {
             setActividadAlumnoId(aaData.id);
           } else {
             throw new Error('Respuesta inválida al crear ActividadAlumno');
-          }
-        } else {
-          const getAA = await apiFetch(`${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${ordData.id}`);
-          const aaData = (await getAA.json()) as ActividadAlumnoDTO;
-          if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
-            setActividadAlumnoId(aaData.id);
-          } else {
-            throw new Error('Respuesta inválida al obtener ActividadAlumno');
           }
         }
       } catch (e) {

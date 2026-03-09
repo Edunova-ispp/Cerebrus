@@ -77,21 +77,10 @@ function InfoPage({ userType }: InfoPageProps) {
   return (
     <div className="info-page">
       <button className="info-back-btn" onClick={() => navigate("/")}>
-        Volver
+        ←
       </button>
 
-      {/* Contenedor para agrupar los botones de la esquina superior */}
-      <div className="landing-top-buttons" style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "10px" }}>
-        <button className="landing-login-btn" onClick={() => navigate("/auth/login")}>
-          Login
-          <ProfileIcon className="landing-login-icon" aria-hidden />
-        </button>
-
-        {/* Nuevo botón de Cerrar sesión */}
-        <button className="landing-login-btn" onClick={() => navigate("/auth/logout")} style={{ backgroundColor: "#ff4d4d", color: "white" }}>
-          Cerrar sesión
-        </button>
-      </div>
+      
 
       <div className="info-header">
         <h1 className="info-title">
@@ -107,7 +96,7 @@ function InfoPage({ userType }: InfoPageProps) {
       <div className="info-sections">
         {sections.map(({ key, reverseOverride }, idx) => {
           const s = SECTIONS[key];
-          const reverse = reverseOverride !== undefined ? reverseOverride : s.reverse;
+          const reverse = reverseOverride ?? s.reverse;
           const textFrom  = reverse ? 80 : -80;
           const videoFrom = reverse ? -80 : 80;
           return (
@@ -139,7 +128,7 @@ function InfoPage({ userType }: InfoPageProps) {
       <div className="info-bottom">
         <motion.button
           className="info-cta-btn"
-          onClick={() => navigate("/login")}
+          onClick={() => navigate("/auth/login")}
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.5 }}

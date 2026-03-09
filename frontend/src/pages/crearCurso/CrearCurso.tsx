@@ -20,7 +20,7 @@ export default function CrearCurso() {
   const [imagenError, setImagenError] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
@@ -71,7 +71,7 @@ export default function CrearCurso() {
       
       <main className="crear-curso-main">
         <button className="detalle-volver" onClick={() => navigate('/miscursos')}>
-          ← Volver
+          ←
         </button>
         <div className="crear-curso-header">
            <h2 className="welcome-text">Bienvenido al creador de cursos</h2>

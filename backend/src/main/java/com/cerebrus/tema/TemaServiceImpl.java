@@ -85,18 +85,26 @@ public class TemaServiceImpl implements TemaService {
     @Override
     public List<Tema> ObtenerTemasPorCursoMaestro(Long cursoId) {
         Usuario usuario = usuarioService.findCurrentUser(); 
-        if(usuario instanceof Maestro){
-            return temaRepository.findByCursoId(cursoId);
-        } else {
+        if(!(usuario instanceof Maestro)) {
             throw new AccessDeniedException("El usuario no es un maestro.");
+        } else {
+
+            List<Tema> temas = temaRepository.findByCursoId(cursoId);
+
+            if (!cursoService.getCursoById(cursoId).getMaestro().getId().equals(usuario.getId())) {
+                throw new AccessDeniedException("El maestro no es propietario del curso.");
+            }
+            return temas;
         }
+        
     }
 
     @Override
-public Tema obtenerTemaPorId(Long temaId) {
-    return temaRepository.findById(temaId)
-            .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado con ID: " + temaId));
-}
+    public Tema obtenerTemaPorId(Long temaId) {
+
+        return temaRepository.findById(temaId)
+                .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado con ID: " + temaId));
+    }
 
     @Override
     public void eliminarTema(Long temaId) {

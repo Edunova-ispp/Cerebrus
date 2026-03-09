@@ -186,6 +186,7 @@ class TemaServiceImplTest {
     @Test
     void obtenerTemasPorCursoMaestro_usuarioEsMaestro_retornaListaTemas() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        when(cursoService.getCursoById(10L)).thenReturn(curso);
         when(temaRepository.findByCursoId(10L)).thenReturn(List.of(tema));
 
         List<Tema> resultado = temaService.ObtenerTemasPorCursoMaestro(10L);

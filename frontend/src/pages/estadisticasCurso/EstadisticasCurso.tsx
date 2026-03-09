@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import './EstadisticasCurso.css';
@@ -70,44 +70,49 @@ export default function EstadisticasCurso() {
     }
   };
 
+  let estadisticasContent: React.ReactNode;
+  if (loading) {
+    estadisticasContent = <div className="stats-info-msg">Cargando...</div>;
+  } else if (error) {
+    estadisticasContent = <div className="stats-error-msg">{error}</div>;
+  } else {
+    estadisticasContent = (
+      <div className="table-scroll-container">
+        <table className="pixel-table">
+          <thead>
+            <tr>
+              <th>Alumno</th>
+              <th>Puntos</th>
+              <th>Nº actividades</th>
+            </tr>
+          </thead>
+          <tbody>
+            {estadisticas.map((stat, index) => (
+              <tr key={index}>
+                <td>{stat.nombre}</td>
+                <td className="text-center">{stat.puntos}</td>
+                <td className="text-center">{stat.actividadesRealizadas}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
   return (
     <div className="estadisticas-page">
       <NavbarMisCursos />
       
       <main className="estadisticas-main">
         <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
-          ← Volver a información del curso
+          ← a información del curso
         </button>
 
         <h1 className="estadisticas-titulo-curso">Estadísticas del Curso</h1>
 
         <div className="estadisticas-yellow-card">
-          {loading ? (
-            <div className="stats-info-msg">Cargando...</div>
-          ) : error ? (
-            <div className="stats-error-msg">{error}</div>
-          ) : (
-            <div className="table-scroll-container">
-              <table className="pixel-table">
-                <thead>
-                  <tr>
-                    <th>Alumno</th>
-                    <th>Puntos</th>
-                    <th>Nº actividades</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {estadisticas.map((stat, index) => (
-                    <tr key={index}>
-                      <td>{stat.nombre}</td>
-                      <td className="text-center">{stat.puntos}</td>
-                      <td className="text-center">{stat.actividadesRealizadas}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          {estadisticasContent}
         </div>
 
         <button className="btn-medias-pixel" onClick={cargarEstadisticas}>

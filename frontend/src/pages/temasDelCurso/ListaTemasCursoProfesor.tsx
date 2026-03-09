@@ -24,13 +24,18 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
       return;
     }
     if (!id) return;
+    setLoading(true);
     apiFetch(`${apiBase}/api/cursos`)
       .then((r) => r.json())
       .then((data: Curso[]) => {
         const encontrado = data.find((c) => String(c.id) === id) ?? null;
+        if (!encontrado) {
+          setError("Curso no encontrado o no pertenece al maestro");
+        }
         setCurso(encontrado);
       })
-      .catch(() => setError("Error cargando el curso"));
+      .catch(() => setError("Error cargando el curso"))
+      .finally(() => setLoading(false));
   }, [id, cursoProp]);
 
   // Carga temas cuando ya tenemos el curso
@@ -91,7 +96,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
 
       <main className="ltp-main">
         <button className="ltp-volver" onClick={() => navigate(`/cursos/${id ?? curso?.id}`)}>
-          ← Volver a información del curso
+          ← a información del curso
         </button>
 
         <h1 className="ltp-titulo">{curso?.titulo}</h1>
@@ -114,6 +119,9 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
                         temaSeleccionado?.id === tema.id ? " ltp-item--activo" : ""
                       }`}
                       onClick={() => setTemaSeleccionado(tema)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setTemaSeleccionado(tema); }}
+                      role="button"
+                      tabIndex={0}
                     >
                       <span className="ltp-item-titulo">{tema.titulo}</span>
                       <div className="ltp-item-acciones">

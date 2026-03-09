@@ -34,43 +34,45 @@ WHERE NOT EXISTS (SELECT 1 FROM organizacion WHERE id = 1003);
 -- ==========================================
 -- 2) USUARIOS (bcrypt para "123456")
 -- ==========================================
+SET @pwd = '$2a$10$eIgfAxokqyUxoafirxjaEuIzI1fQobwLRpy9avG0SOFsr3NLLcLRK';
+
 -- Maestros
 INSERT INTO usuario (id, nombre, primer_apellido, segundo_apellido, nombre_usuario, correo_electronico, contrasena, organizacion_id)
-SELECT 2001, 'Carlos', 'Cerebrus', 'Pro', 'carlos_pro', 'carlos@cerebrus.com', '$2a$10$eIgfAxokqyUxoafirxjaEuIzI1fQobwLRpy9avG0SOFsr3NLLcLRK', 1001
+SELECT 2001, 'Carlos', 'Cerebrus', 'Pro', 'carlos_pro', 'carlos@cerebrus.com', @pwd, 1001
 WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE id = 2001);
 
 INSERT INTO usuario (id, nombre, primer_apellido, segundo_apellido, nombre_usuario, correo_electronico, contrasena, organizacion_id)
-SELECT 2002, 'Severus', 'Snape', 'Prince', 'profe_snape', 'snape@cerebrus.com', '$2a$10$eIgfAxokqyUxoafirxjaEuIzI1fQobwLRpy9avG0SOFsr3NLLcLRK', 1001
+SELECT 2002, 'Severus', 'Snape', 'Prince', 'profe_snape', 'snape@cerebrus.com', @pwd, 1001
 WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE id = 2002);
 
 INSERT INTO usuario (id, nombre, primer_apellido, segundo_apellido, nombre_usuario, correo_electronico, contrasena, organizacion_id)
-SELECT 2003, 'Minerva', 'McGonagall', 'Ross', 'profe_minerva', 'minerva@cerebrus.com', '$2a$10$eIgfAxokqyUxoafirxjaEuIzI1fQobwLRpy9avG0SOFsr3NLLcLRK', 1001
+SELECT 2003, 'Minerva', 'McGonagall', 'Ross', 'profe_minerva', 'minerva@cerebrus.com', @pwd, 1001
 WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE id = 2003);
 
 -- Director
 INSERT INTO usuario (id, nombre, primer_apellido, segundo_apellido, nombre_usuario, correo_electronico, contrasena, organizacion_id)
-SELECT 2004, 'Albus', 'Dumbledore', 'Wulfric', 'director_albus', 'albus@cerebrus.com', '$2a$10$eIgfAxokqyUxoafirxjaEuIzI1fQobwLRpy9avG0SOFsr3NLLcLRK', 1001
+SELECT 2004, 'Albus', 'Dumbledore', 'Wulfric', 'director_albus', 'albus@cerebrus.com', @pwd, 1001
 WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE id = 2004);
 
 -- Alumnos
 INSERT INTO usuario (id, nombre, primer_apellido, segundo_apellido, nombre_usuario, correo_electronico, contrasena, organizacion_id)
-SELECT 2101, 'Harry', 'Potter', 'Evans', 'alumno_harry', 'harry@cerebrus.com', '$2a$10$eIgfAxokqyUxoafirxjaEuIzI1fQobwLRpy9avG0SOFsr3NLLcLRK', 1001
+SELECT 2101, 'Harry', 'Potter', 'Evans', 'alumno_harry', 'harry@cerebrus.com', @pwd, 1001
 WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE id = 2101);
 
 INSERT INTO usuario (id, nombre, primer_apellido, segundo_apellido, nombre_usuario, correo_electronico, contrasena, organizacion_id)
-SELECT 2102, 'Hermione', 'Granger', 'Jean', 'alumno_hermione', 'hermione@cerebrus.com', '$2a$10$eIgfAxokqyUxoafirxjaEuIzI1fQobwLRpy9avG0SOFsr3NLLcLRK', 1001
+SELECT 2102, 'Hermione', 'Granger', 'Jean', 'alumno_hermione', 'hermione@cerebrus.com', @pwd, 1001
 WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE id = 2102);
 
 INSERT INTO usuario (id, nombre, primer_apellido, segundo_apellido, nombre_usuario, correo_electronico, contrasena, organizacion_id)
-SELECT 2103, 'Ron', 'Weasley', 'Bilius', 'alumno_ron', 'ron@cerebrus.com', '$2a$10$eIgfAxokqyUxoafirxjaEuIzI1fQobwLRpy9avG0SOFsr3NLLcLRK', 1001
+SELECT 2103, 'Ron', 'Weasley', 'Bilius', 'alumno_ron', 'ron@cerebrus.com', @pwd, 1001
 WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE id = 2103);
 
 INSERT INTO usuario (id, nombre, primer_apellido, segundo_apellido, nombre_usuario, correo_electronico, contrasena, organizacion_id)
-SELECT 2104, 'Draco', 'Malfoy', 'Lucius', 'alumno_draco', 'draco@cerebrus.com', '$2a$10$eIgfAxokqyUxoafirxjaEuIzI1fQobwLRpy9avG0SOFsr3NLLcLRK', 1001
+SELECT 2104, 'Draco', 'Malfoy', 'Lucius', 'alumno_draco', 'draco@cerebrus.com', @pwd, 1001
 WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE id = 2104);
 
 INSERT INTO usuario (id, nombre, primer_apellido, segundo_apellido, nombre_usuario, correo_electronico, contrasena, organizacion_id)
-SELECT 2105, 'Luna', 'Lovegood', 'Pandora', 'alumno_luna', 'luna@cerebrus.com', '$2a$10$eIgfAxokqyUxoafirxjaEuIzI1fQobwLRpy9avG0SOFsr3NLLcLRK', 1001
+SELECT 2105, 'Luna', 'Lovegood', 'Pandora', 'alumno_luna', 'luna@cerebrus.com', @pwd, 1001
 WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE id = 2105);
 
 -- ==========================================
@@ -115,12 +117,14 @@ WHERE NOT EXISTS (SELECT 1 FROM alumno WHERE id = 2105);
 -- ==========================================
 -- 4) SUSCRIPCIONES (una por organización)
 -- ==========================================
+SET @fecha_inicio = '2026-03-01';
+
 INSERT INTO suscripcion (id, num_maestros, num_alumnos, precio, fecha_inicio, fecha_fin, organizacion_id)
-SELECT 3001, 10, 200, 49.99, '2026-03-01', '2027-03-01', 1001
+SELECT 3001, 10, 200, 49.99, @fecha_inicio, '2027-03-01', 1001
 WHERE NOT EXISTS (SELECT 1 FROM suscripcion WHERE id = 3001);
 
 INSERT INTO suscripcion (id, num_maestros, num_alumnos, precio, fecha_inicio, fecha_fin, organizacion_id)
-SELECT 3002, 5, 80, 19.99, '2026-03-01', '2027-03-01', 1002
+SELECT 3002, 5, 80, 19.99, @fecha_inicio, '2027-03-01', 1002
 WHERE NOT EXISTS (SELECT 1 FROM suscripcion WHERE id = 3002);
 
 -- ==========================================
@@ -147,37 +151,39 @@ SELECT 4005, 'Seguridad Web', 'OWASP Top 10 y buenas prácticas', '/seed/covers/
 WHERE NOT EXISTS (SELECT 1 FROM curso WHERE id = 4005);
 
 -- Si los cursos ya existían de antes con imagen vacía, la rellenamos.
-UPDATE curso SET imagen = '/seed/covers/cover-frontend.svg' WHERE id = 4001 AND (imagen IS NULL OR imagen = '');
-UPDATE curso SET imagen = '/seed/covers/cover-backend.svg' WHERE id = 4002 AND (imagen IS NULL OR imagen = '');
-UPDATE curso SET imagen = '/seed/covers/cover-proyecto.svg' WHERE id = 4003 AND (imagen IS NULL OR imagen = '');
-UPDATE curso SET imagen = '/seed/covers/cover-pociones.svg' WHERE id = 4004 AND (imagen IS NULL OR imagen = '');
-UPDATE curso SET imagen = '/seed/covers/cover-seguridad.svg' WHERE id = 4005 AND (imagen IS NULL OR imagen = '');
+UPDATE curso SET imagen = '/seed/covers/cover-frontend.svg' WHERE id = 4001 AND COALESCE(imagen, '') = '';
+UPDATE curso SET imagen = '/seed/covers/cover-backend.svg' WHERE id = 4002 AND COALESCE(imagen, '') = '';
+UPDATE curso SET imagen = '/seed/covers/cover-proyecto.svg' WHERE id = 4003 AND COALESCE(imagen, '') = '';
+UPDATE curso SET imagen = '/seed/covers/cover-pociones.svg' WHERE id = 4004 AND COALESCE(imagen, '') = '';
+UPDATE curso SET imagen = '/seed/covers/cover-seguridad.svg' WHERE id = 4005 AND COALESCE(imagen, '') = '';
 
 -- ==========================================
 -- 6) INSCRIPCIONES
 -- ==========================================
+SET @fecha_inscripcion = '2026-02-27';
+
 INSERT INTO inscripcion (id, puntos, fecha_inscripcion, alumno_id, curso_id)
-SELECT 4501, 50, '2026-02-27', 2101, 4001
+SELECT 4501, 50, @fecha_inscripcion, 2101, 4001
 WHERE NOT EXISTS (SELECT 1 FROM inscripcion WHERE id = 4501);
 
 INSERT INTO inscripcion (id, puntos, fecha_inscripcion, alumno_id, curso_id)
-SELECT 4502, 0, '2026-02-27', 2101, 4004
+SELECT 4502, 0, @fecha_inscripcion, 2101, 4004
 WHERE NOT EXISTS (SELECT 1 FROM inscripcion WHERE id = 4502);
 
 INSERT INTO inscripcion (id, puntos, fecha_inscripcion, alumno_id, curso_id)
-SELECT 4503, 300, '2026-02-27', 2102, 4001
+SELECT 4503, 300, @fecha_inscripcion, 2102, 4001
 WHERE NOT EXISTS (SELECT 1 FROM inscripcion WHERE id = 4503);
 
 INSERT INTO inscripcion (id, puntos, fecha_inscripcion, alumno_id, curso_id)
-SELECT 4504, 0, '2026-02-27', 2102, 4002
+SELECT 4504, 0, @fecha_inscripcion, 2102, 4002
 WHERE NOT EXISTS (SELECT 1 FROM inscripcion WHERE id = 4504);
 
 INSERT INTO inscripcion (id, puntos, fecha_inscripcion, alumno_id, curso_id)
-SELECT 4505, 0, '2026-02-27', 2102, 4003
+SELECT 4505, 0, @fecha_inscripcion, 2102, 4003
 WHERE NOT EXISTS (SELECT 1 FROM inscripcion WHERE id = 4505);
 
 INSERT INTO inscripcion (id, puntos, fecha_inscripcion, alumno_id, curso_id)
-SELECT 4506, 0, '2026-02-27', 2103, 4002
+SELECT 4506, 0, @fecha_inscripcion, 2103, 4002
 WHERE NOT EXISTS (SELECT 1 FROM inscripcion WHERE id = 4506);
 
 INSERT INTO inscripcion (id, puntos, fecha_inscripcion, alumno_id, curso_id)
@@ -186,11 +192,11 @@ WHERE NOT EXISTS (SELECT 1 FROM inscripcion WHERE id = 4507);
 
 -- Inscripciones extra para estadísticas
 INSERT INTO inscripcion (id, puntos, fecha_inscripcion, alumno_id, curso_id)
-SELECT 4508, 0, '2026-03-01', 2101, 4002
+SELECT 4508, 0, @fecha_inicio, 2101, 4002
 WHERE NOT EXISTS (SELECT 1 FROM inscripcion WHERE id = 4508);
 
 INSERT INTO inscripcion (id, puntos, fecha_inscripcion, alumno_id, curso_id)
-SELECT 4509, 0, '2026-03-01', 2104, 4001
+SELECT 4509, 0, @fecha_inicio, 2104, 4001
 WHERE NOT EXISTS (SELECT 1 FROM inscripcion WHERE id = 4509);
 
 -- ==========================================
@@ -283,16 +289,20 @@ SELECT 6010
 WHERE NOT EXISTS (SELECT 1 FROM ordenacion WHERE id = 6010);
 
 -- Ordenación valores (6002)
+SET @html_tag = '<html>';
+SET @head_tag = '<head>';
+SET @body_tag = '<body>';
+
 INSERT INTO ordenacion_valores (ordenacion_id, valor, orden)
-SELECT 6002, '<html>', 0
+SELECT 6002, @html_tag, 0
 WHERE NOT EXISTS (SELECT 1 FROM ordenacion_valores WHERE ordenacion_id = 6002 AND orden = 0);
 
 INSERT INTO ordenacion_valores (ordenacion_id, valor, orden)
-SELECT 6002, '<head>', 1
+SELECT 6002, @head_tag, 1
 WHERE NOT EXISTS (SELECT 1 FROM ordenacion_valores WHERE ordenacion_id = 6002 AND orden = 1);
 
 INSERT INTO ordenacion_valores (ordenacion_id, valor, orden)
-SELECT 6002, '<body>', 2
+SELECT 6002, @body_tag, 2
 WHERE NOT EXISTS (SELECT 1 FROM ordenacion_valores WHERE ordenacion_id = 6002 AND orden = 2);
 
 -- Ordenación valores con imágenes (6010)
@@ -315,13 +325,16 @@ WHERE NOT EXISTS (SELECT 1 FROM ordenacion_valores WHERE ordenacion_id = 6010 AN
 -- ==========================================
 -- 9) PREGUNTAS / RESPUESTAS (tests)
 -- ==========================================
+SET @htmlnombre = 'HyperText Markup Language';
+SET @inyeccionnombre = 'Inyección de scripts en el navegador';
+
 -- Actividad 6001 (HTML)
 INSERT INTO pregunta (id, pregunta, imagen, actividad_id)
 SELECT 7001, '¿Qué significa HTML?', NULL, 6001
 WHERE NOT EXISTS (SELECT 1 FROM pregunta WHERE id = 7001);
 
 INSERT INTO respuesta (id, respuesta, imagen, correcta, pregunta_id)
-SELECT 7101, 'HyperText Markup Language', NULL, TRUE, 7001
+SELECT 7101, @htmlnombre, NULL, TRUE, 7001
 WHERE NOT EXISTS (SELECT 1 FROM respuesta WHERE id = 7101);
 
 INSERT INTO respuesta (id, respuesta, imagen, correcta, pregunta_id)
@@ -329,12 +342,14 @@ SELECT 7102, 'High Text Machine Language', NULL, FALSE, 7001
 WHERE NOT EXISTS (SELECT 1 FROM respuesta WHERE id = 7102);
 
 -- Actividad 6005 (Java)
+SET @respuestamolde = 'Un molde para objetos';
+
 INSERT INTO pregunta (id, pregunta, imagen, actividad_id)
 SELECT 7002, '¿Qué es una clase en Java?', NULL, 6005
 WHERE NOT EXISTS (SELECT 1 FROM pregunta WHERE id = 7002);
 
 INSERT INTO respuesta (id, respuesta, imagen, correcta, pregunta_id)
-SELECT 7103, 'Un molde para objetos', NULL, TRUE, 7002
+SELECT 7103, @respuestamolde, NULL, TRUE, 7002
 WHERE NOT EXISTS (SELECT 1 FROM respuesta WHERE id = 7103);
 
 INSERT INTO respuesta (id, respuesta, imagen, correcta, pregunta_id)
@@ -347,7 +362,7 @@ SELECT 7003, '¿Qué es XSS?', NULL, 6007
 WHERE NOT EXISTS (SELECT 1 FROM pregunta WHERE id = 7003);
 
 INSERT INTO respuesta (id, respuesta, imagen, correcta, pregunta_id)
-SELECT 7105, 'Inyección de scripts en el navegador', NULL, TRUE, 7003
+SELECT 7105, @inyeccionnombre, NULL, TRUE, 7003
 WHERE NOT EXISTS (SELECT 1 FROM respuesta WHERE id = 7105);
 
 INSERT INTO respuesta (id, respuesta, imagen, correcta, pregunta_id)
@@ -435,7 +450,7 @@ SELECT 9001, TRUE, 8001
 WHERE NOT EXISTS (SELECT 1 FROM respuesta_alumno WHERE id = 9001);
 
 INSERT INTO resp_alumno_general (id, respuesta, pregunta_id)
-SELECT 9001, 'HyperText Markup Language', 7001
+SELECT 9001, @htmlnombre, 7001
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_general WHERE id = 9001);
 
 -- Hermione (8002 ordenación correcta)
@@ -448,15 +463,15 @@ SELECT 9002, 6002
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion WHERE id = 9002);
 
 INSERT INTO resp_alumno_ordenacion_valores (respuesta_id, valor, orden)
-SELECT 9002, '<html>', 0
+SELECT 9002, @html_tag, 0
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion_valores WHERE respuesta_id = 9002 AND orden = 0);
 
 INSERT INTO resp_alumno_ordenacion_valores (respuesta_id, valor, orden)
-SELECT 9002, '<head>', 1
+SELECT 9002, @head_tag, 1
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion_valores WHERE respuesta_id = 9002 AND orden = 1);
 
 INSERT INTO resp_alumno_ordenacion_valores (respuesta_id, valor, orden)
-SELECT 9002, '<body>', 2
+SELECT 9002, @body_tag, 2
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion_valores WHERE respuesta_id = 9002 AND orden = 2);
 
 -- Harry (8004 test HTML)
@@ -465,7 +480,7 @@ SELECT 9004, TRUE, 8004
 WHERE NOT EXISTS (SELECT 1 FROM respuesta_alumno WHERE id = 9004);
 
 INSERT INTO resp_alumno_general (id, respuesta, pregunta_id)
-SELECT 9004, 'HyperText Markup Language', 7001
+SELECT 9004, @htmlnombre, 7001
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_general WHERE id = 9004);
 
 -- Ron (8007 ordenación parcialmente correcta)
@@ -478,15 +493,15 @@ SELECT 9006, 6002
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion WHERE id = 9006);
 
 INSERT INTO resp_alumno_ordenacion_valores (respuesta_id, valor, orden)
-SELECT 9006, '<html>', 0
+SELECT 9006, @html_tag, 0
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion_valores WHERE respuesta_id = 9006 AND orden = 0);
 
 INSERT INTO resp_alumno_ordenacion_valores (respuesta_id, valor, orden)
-SELECT 9006, '<body>', 1
+SELECT 9006, @body_tag, 1
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion_valores WHERE respuesta_id = 9006 AND orden = 1);
 
 INSERT INTO resp_alumno_ordenacion_valores (respuesta_id, valor, orden)
-SELECT 9006, '<head>', 2
+SELECT 9006, @head_tag, 2
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion_valores WHERE respuesta_id = 9006 AND orden = 2);
 
 -- Luna (8008 test OWASP)
@@ -495,7 +510,7 @@ SELECT 9007, TRUE, 8008
 WHERE NOT EXISTS (SELECT 1 FROM respuesta_alumno WHERE id = 9007);
 
 INSERT INTO resp_alumno_general (id, respuesta, pregunta_id)
-SELECT 9007, 'Inyección de scripts en el navegador', 7003
+SELECT 9007, @inyeccionnombre, 7003
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_general WHERE id = 9007);
 
 -- Respuestas extra para estadísticas
@@ -505,7 +520,7 @@ SELECT 9010, TRUE, 8010
 WHERE NOT EXISTS (SELECT 1 FROM respuesta_alumno WHERE id = 9010);
 
 INSERT INTO resp_alumno_general (id, respuesta, pregunta_id)
-SELECT 9010, 'Un molde para objetos', 7002
+SELECT 9010, @respuestamolde, 7002
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_general WHERE id = 9010);
 
 -- 6005 (Java) - Ron incorrecta
@@ -523,7 +538,7 @@ SELECT 9012, TRUE, 8012
 WHERE NOT EXISTS (SELECT 1 FROM respuesta_alumno WHERE id = 9012);
 
 INSERT INTO resp_alumno_general (id, respuesta, pregunta_id)
-SELECT 9012, 'Un molde para objetos', 7002
+SELECT 9012, @respuestamolde, 7002
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_general WHERE id = 9012);
 
 -- 6007 (OWASP) - Hermione correcta
@@ -532,7 +547,7 @@ SELECT 9013, TRUE, 8014
 WHERE NOT EXISTS (SELECT 1 FROM respuesta_alumno WHERE id = 9013);
 
 INSERT INTO resp_alumno_general (id, respuesta, pregunta_id)
-SELECT 9013, 'Inyección de scripts en el navegador', 7003
+SELECT 9013, @inyeccionnombre, 7003
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_general WHERE id = 9013);
 
 -- 6001 (HTML) - Draco incorrecta
@@ -545,6 +560,11 @@ SELECT 9014, 'High Text Machine Language', 7001
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_general WHERE id = 9014);
 
 -- 6010 (Ordenación imágenes) - Hermione correcta
+SET @htmlsvg = '/seed/ordenacion/html.svg';
+SET @csssvg = '/seed/ordenacion/css.svg';
+SET @jssvg = '/seed/ordenacion/js.svg';
+SET @reactsvg = '/seed/ordenacion/react.svg';
+
 INSERT INTO respuesta_alumno (id, correcta, actividad_alumno_id)
 SELECT 9020, TRUE, 8020
 WHERE NOT EXISTS (SELECT 1 FROM respuesta_alumno WHERE id = 9020);
@@ -554,19 +574,19 @@ SELECT 9020, 6010
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion WHERE id = 9020);
 
 INSERT INTO resp_alumno_ordenacion_valores (respuesta_id, valor, orden)
-SELECT 9020, '/seed/ordenacion/html.svg', 0
+SELECT 9020, @htmlsvg, 0
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion_valores WHERE respuesta_id = 9020 AND orden = 0);
 
 INSERT INTO resp_alumno_ordenacion_valores (respuesta_id, valor, orden)
-SELECT 9020, '/seed/ordenacion/css.svg', 1
+SELECT 9020, @csssvg, 1
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion_valores WHERE respuesta_id = 9020 AND orden = 1);
 
 INSERT INTO resp_alumno_ordenacion_valores (respuesta_id, valor, orden)
-SELECT 9020, '/seed/ordenacion/js.svg', 2
+SELECT 9020, @jssvg, 2
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion_valores WHERE respuesta_id = 9020 AND orden = 2);
 
 INSERT INTO resp_alumno_ordenacion_valores (respuesta_id, valor, orden)
-SELECT 9020, '/seed/ordenacion/react.svg', 3
+SELECT 9020, @reactsvg, 3
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion_valores WHERE respuesta_id = 9020 AND orden = 3);
 
 -- 6010 (Ordenación imágenes) - Harry incorrecto (intercambia JS/CSS)
@@ -579,17 +599,17 @@ SELECT 9021, 6010
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion WHERE id = 9021);
 
 INSERT INTO resp_alumno_ordenacion_valores (respuesta_id, valor, orden)
-SELECT 9021, '/seed/ordenacion/html.svg', 0
+SELECT 9021, @htmlsvg, 0
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion_valores WHERE respuesta_id = 9021 AND orden = 0);
 
 INSERT INTO resp_alumno_ordenacion_valores (respuesta_id, valor, orden)
-SELECT 9021, '/seed/ordenacion/js.svg', 1
+SELECT 9021, @jssvg, 1
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion_valores WHERE respuesta_id = 9021 AND orden = 1);
 
 INSERT INTO resp_alumno_ordenacion_valores (respuesta_id, valor, orden)
-SELECT 9021, '/seed/ordenacion/css.svg', 2
+SELECT 9021, @csssvg, 2
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion_valores WHERE respuesta_id = 9021 AND orden = 2);
 
 INSERT INTO resp_alumno_ordenacion_valores (respuesta_id, valor, orden)
-SELECT 9021, '/seed/ordenacion/react.svg', 3
+SELECT 9021, @reactsvg, 3
 WHERE NOT EXISTS (SELECT 1 FROM resp_alumno_ordenacion_valores WHERE respuesta_id = 9021 AND orden = 3);

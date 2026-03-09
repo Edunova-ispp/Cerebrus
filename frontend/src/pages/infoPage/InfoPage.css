@@ -166,8 +166,6 @@
 /* Back button */
 .info-back-btn {
   position: absolute;
-  top: -16px;
-  left: -90px;
   display: flex;
   align-items: center;
   gap: 10px;

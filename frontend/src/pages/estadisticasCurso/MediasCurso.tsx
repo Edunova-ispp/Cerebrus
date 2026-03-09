@@ -80,7 +80,7 @@ export default function MediasCurso() {
     <div className="estadisticas-page">
       <NavbarMisCursos />
       <main className="estadisticas-main">
-        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>← Volver</button>
+        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>←</button>
         <h1 className="estadisticas-titulo-curso">Medias del Curso</h1>
 
         {loading && <p className="msg-placeholder">Cargando datos...</p>}
@@ -99,6 +99,9 @@ export default function MediasCurso() {
                     key={tema.id}
                     className={`btn-medias-pixel ${temaSeleccionado?.id === tema.id ? 'active' : ''}`}
                     onClick={() => setTemaSeleccionado(tema)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setTemaSeleccionado(tema); }}
+                    role="button"
+                    tabIndex={0}
                   >
                     {tema.titulo}
                   </li>
@@ -109,9 +112,7 @@ export default function MediasCurso() {
 
           {/* PANEL DERECHO: ACTIVIDADES */}
           <section className="panel-actividades">
-            {!temaSeleccionado ? (
-              <p className="msg-placeholder">Selecciona un tema</p>
-            ) : (
+            {temaSeleccionado ? (
               <>
                 <h3>{temaSeleccionado.titulo}</h3>
                 <table className="pixel-table">
@@ -135,6 +136,8 @@ export default function MediasCurso() {
                   </tbody>
                 </table>
               </>
+            ) : (
+              <p className="msg-placeholder">Selecciona un tema</p>
             )}
           </section>
         </div>
