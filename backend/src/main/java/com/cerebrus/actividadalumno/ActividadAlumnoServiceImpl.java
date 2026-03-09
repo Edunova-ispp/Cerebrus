@@ -329,5 +329,57 @@ int numPreguntasTotales = actividadGeneral.getPreguntas().size();
         actividadAlumno.setPuntuacion(puntuacionFinal);
         actividadAlumno.setNota(notaFinal);
     }
+
+ @Override  
+public ActividadAlumno corregirActividadAlumnoAutomaticamenteGeneralClasificacion(Long actividadAlumnoId, List<Long> respuestasIds) {
+    ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actividadAlumnoId).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
+   
+General actividadGeneral = (General) actividadRepository.findById(actividadAlumno.getActividad().getId()).orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
+int numPreguntasTotales = actividadGeneral.getPreguntas().size();    
+    if (numPreguntasTotales == 0) {
+        actividadAlumno.setPuntuacion(0);
+        actividadAlumno.setNota(0);
+        return actividadAlumnoRepository.save(actividadAlumno);
+    }
+   
+
+    int puntuacionMaximaActividad = (actividadGeneral.getPuntuacion() != null) ? actividadGeneral.getPuntuacion() : 0;
+    double notaMaxima = 10.0;
+
+    int numRespuestasTotales = actividadGeneral.getPreguntas().stream()
+        .mapToInt(p -> p.getRespuestas().size())
+        .sum();
+    if (numRespuestasTotales == 0) {
+        actividadAlumno.setPuntuacion(0);
+        actividadAlumno.setNota(0);
+        return actividadAlumnoRepository.save(actividadAlumno);
+    }
+
+    double valorPuntoPorPregunta = (double) puntuacionMaximaActividad / numRespuestasTotales;
+    double valorNotaPorPregunta = notaMaxima / numRespuestasTotales;
+
+    double puntuacionAcumulada = 0;
+    double notaAcumulada = 0;
+    
+    if (respuestasIds != null) {
+        for (Long respuestaId : respuestasIds) {
+            
+            boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneralTest(respuestaId);
+            System.out.println("Respuesta ID " + respuestaId + " es correcta? " + esCorrecta);
+            if (esCorrecta) {
+                puntuacionAcumulada += valorPuntoPorPregunta;
+                notaAcumulada += valorNotaPorPregunta;
+            }
+        }
+    }
+    
+
+    
+    actividadAlumno.setPuntuacion((int) Math.round(puntuacionAcumulada));
+    actividadAlumno.setNota((int) Math.round(notaAcumulada));
+    actividadAlumno.setAcabada(LocalDateTime.now());
+
+return actividadAlumnoRepository.save(actividadAlumno);
+}
   
 }

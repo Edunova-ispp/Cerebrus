@@ -13,6 +13,7 @@ import com.cerebrus.usuario.Alumno;
 @Repository
 public interface ActividadAlumnoRepository extends JpaRepository<ActividadAlumno, Long> {
 
+    @Query("SELECT aa FROM ActividadAlumno aa WHERE aa.alumno.id = :alumnoId AND aa.actividad.id = :actividadId")
     Optional<ActividadAlumno> findByAlumnoIdAndActividadId(Long alumnoId, Long actividadId);
 
     @Query("SELECT aa.inicio AS inicio, aa.acabada AS acabada FROM ActividadAlumno aa WHERE aa.alumno = :alumno AND aa.actividad.tema.curso.id = :cursoId")
