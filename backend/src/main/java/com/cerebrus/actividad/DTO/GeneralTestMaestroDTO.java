@@ -1,9 +1,9 @@
-package com.cerebrus.actividad;
+package com.cerebrus.actividad.DTO;
 
-import com.cerebrus.pregunta.PreguntaDTO;
+import com.cerebrus.pregunta.PreguntaMaestroDTO;
 import java.util.List;
 
-public class GeneralTestDTO {
+public class GeneralTestMaestroDTO {
 
     private final Long id;
     private final String titulo;
@@ -15,9 +15,9 @@ public class GeneralTestDTO {
     private final Integer posicion;
     private final Integer version;
     private final Long temaId;
-    private final List<PreguntaDTO> preguntas;
+    private final List<PreguntaMaestroDTO> preguntas;
 
-    public GeneralTestDTO(
+    public GeneralTestMaestroDTO(
             Long id,
             String titulo,
             String descripcion,
@@ -28,7 +28,7 @@ public class GeneralTestDTO {
             Integer posicion,
             Integer version,
             Long temaId,
-            List<PreguntaDTO> preguntas) {
+            List<PreguntaMaestroDTO> preguntas) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
@@ -52,5 +52,5 @@ public class GeneralTestDTO {
     public Integer getPosicion() { return posicion; }
     public Integer getVersion() { return version; }
     public Long getTemaId() { return temaId; }
-    public List<PreguntaDTO> getPreguntas() { return preguntas; }
+    public List<PreguntaMaestroDTO> getPreguntas() { return preguntas; }
 }
