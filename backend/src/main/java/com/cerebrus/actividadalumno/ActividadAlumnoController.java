@@ -162,8 +162,11 @@ public class ActividadAlumnoController {
         
         ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(id, respuestasIds);
         ActividadAlumnoDTO actividadAlumnoDTO = new ActividadAlumnoDTO(
+            actividadAlumnoActualizada.getId(),
             actividadAlumnoActualizada.getTiempo(),
             actividadAlumnoActualizada.getPuntuacion(),
+            actividadAlumnoActualizada.getInicio(),
+            actividadAlumnoActualizada.getAcabada(),
             actividadAlumnoActualizada.getNota(),
             actividadAlumnoActualizada.getNumAbandonos(),
             actividadAlumnoActualizada.getAlumno().getId(),

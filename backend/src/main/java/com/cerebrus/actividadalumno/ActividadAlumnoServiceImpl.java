@@ -282,9 +282,18 @@ int numPreguntasTotales = actividadGeneral.getPreguntas().size();
 
     int puntuacionMaximaActividad = (actividadGeneral.getPuntuacion() != null) ? actividadGeneral.getPuntuacion() : 0;
     double notaMaxima = 10.0;
- 
-    double valorPuntoPorPregunta = (double) puntuacionMaximaActividad / numPreguntasTotales;
-    double valorNotaPorPregunta = notaMaxima / numPreguntasTotales;
+
+    int numRespuestasTotales = actividadGeneral.getPreguntas().stream()
+        .mapToInt(p -> p.getRespuestas().size())
+        .sum();
+    if (numRespuestasTotales == 0) {
+        actividadAlumno.setPuntuacion(0);
+        actividadAlumno.setNota(0);
+        return actividadAlumnoRepository.save(actividadAlumno);
+    }
+
+    double valorPuntoPorPregunta = (double) puntuacionMaximaActividad / numRespuestasTotales;
+    double valorNotaPorPregunta = notaMaxima / numRespuestasTotales;
 
     double puntuacionAcumulada = 0;
     double notaAcumulada = 0;
