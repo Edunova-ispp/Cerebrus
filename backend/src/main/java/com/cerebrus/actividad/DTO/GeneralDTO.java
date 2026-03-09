@@ -41,10 +41,6 @@ public class GeneralDTO {
         this.tipo = tipo;
     }
 
-    public GeneralDTO() {
-        //TODO Auto-generated constructor stub
-    }
-
     public Long getId() {
         return id;
     }
