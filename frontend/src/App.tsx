@@ -20,6 +20,7 @@ import TestAlumno from "./pages/testAlumno/TestAlumno";
 import MapaCurso from "./pages/mapaCurso/MapaCurso";
 import MediasCurso from "./pages/estadisticasCurso/MediasCurso";
 import TeoriaAlumno from "./pages/TeoriaAlumno/TeoriaAlumno";
+import Perfil from "./pages/perfil/Perfil";
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
       <Route path="/generales/test/:testId/alumno" element={<TestAlumno />} />
       <Route path="/estadisticas/:id" element={<EstadisticasCurso />} />
       <Route path="/medias/:id" element={<MediasCurso />} />
+      <Route path="/perfil" element={<Perfil />} />
     </Routes>
   );
 }

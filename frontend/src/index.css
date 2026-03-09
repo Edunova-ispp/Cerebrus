@@ -9,6 +9,7 @@ html, body {
   --color-primary: #D10057;
   --color-secondary: #7C4DFF;
   --color-accent: #FFF294;
+  --color-text: #000638;
 
   font-family: 'Oxygen', 'Pixelify Sans', 'Oxygen', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -56,11 +57,6 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
-}
-
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
 @media (prefers-color-scheme: light) {

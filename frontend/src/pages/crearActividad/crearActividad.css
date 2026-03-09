@@ -166,7 +166,7 @@
 }
 
 .ca-btn-guardar {
-  background: #F5D49A;
+  background: var(--color-accent);;
   color: #000;
   border: 4px solid #000;
   border-radius: 16px;
