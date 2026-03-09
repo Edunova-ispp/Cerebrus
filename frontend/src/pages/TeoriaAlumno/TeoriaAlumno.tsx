@@ -4,6 +4,7 @@ import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso'; // Asegúrate de importar esto
 import maguitoImg from '../../assets/props/maguito.png';
+import mapaIcon from '../../assets/icons/mapa.svg';
 import './TeoriaAlumno.css';
 
 type TeoriaDTO = {
@@ -97,8 +98,9 @@ export default function TeoriaAlumno() {
         {teoria && (
           <>
             <div className="ta-top">
-              <button className="ta-exit-btn" type="button" onClick={() => navigate(-1)}>
-                Salir del curso
+              <button className="ta-map-btn" type="button" onClick={() => navigate(-1)}>
+                <img src={mapaIcon} alt="Mapa" className="ta-map-icon" />
+                <span>Mapa</span>
               </button>
 
               <div className="ta-title-banner">

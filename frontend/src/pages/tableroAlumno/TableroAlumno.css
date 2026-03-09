@@ -58,10 +58,14 @@
   transform: translate(-1px, -1px);
 }
 
-.ta-map-btn {
+.ta-wrapper > .ta-map-btn {
   position: absolute;
   left: -170px;
   top: 0;
+  z-index: 1;
+}
+
+.ta-map-btn {
   background: #b49aff;
   border: 3px solid #000;
   border-radius: 12px;
@@ -76,7 +80,6 @@
   box-shadow: 3px 3px 0 #000;
   color: #000;
   transition: color 0.15s;
-  z-index: 1;
 }
 .ta-map-btn:hover {
   color: var(--color-accent, #FFF294);

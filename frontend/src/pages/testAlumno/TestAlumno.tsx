@@ -4,6 +4,7 @@ import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 import './TestAlumno.css';
+import mapaIcon from '../../assets/icons/mapa.svg';
 import dragonImg from '../../assets/props/dragon.png';
 import caballeroImg from '../../assets/props/caballero.png';
 
@@ -332,10 +333,10 @@ export default function TestAlumno() {
           <>
             {/* ── Header ── */}
             <div className="ta-top">
-              {/* Botón salir con espada */}
-                            <button className="ord-exit-btn" type="button" onClick={() => navigate(-1)}>
-                    Salir
-                  </button>
+              <button className="ta-map-btn" type="button" onClick={() => navigate(-1)}>
+                <img src={mapaIcon} alt="Mapa" className="ta-map-icon" />
+                <span>Mapa</span>
+              </button>
               <div className="ta-title-banner">
                 <h1 className="ta-title">{test.titulo}</h1>
               </div>

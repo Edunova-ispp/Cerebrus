@@ -4,6 +4,7 @@ import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.General;
 import com.cerebrus.actividad.MarcarImagen;
 import com.cerebrus.actividad.Ordenacion;
+import com.cerebrus.actividad.Tablero;
 
 import lombok.Getter;
 

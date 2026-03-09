@@ -138,8 +138,6 @@ public class GeneralController {
     }
     
     @PutMapping("/test/update/{id}")
-    public ResponseEntity<Void> updateTipoTest(@PathVariable Long id, @RequestBody @Valid General general){
-        generalService.updateTipoTest(
     public ResponseEntity<GeneralTestDTO> updateTipoTest(@PathVariable Long id, @RequestBody @Valid General general){
         generalService.updateTipoTest(
             id,
@@ -153,7 +151,6 @@ public class GeneralController {
             general.getVersion(),
             general.getTema().getId()
         );
-        return ResponseEntity.noContent().build();
 
         // Return a DTO to avoid lazy-loading serialization issues
         return ResponseEntity.ok(generalService.readTipoTest(id));
