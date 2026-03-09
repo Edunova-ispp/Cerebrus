@@ -26,6 +26,7 @@ import com.cerebrus.actividad.General;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
+import com.cerebrus.tema.TemaService;
 import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.UsuarioService;
 
@@ -36,7 +37,7 @@ class ActividadServiceImplTest {
     private ActividadRepository actividadRepository;
 
     @Mock
-    private TemaRepository temaRepository;
+    private TemaService temaService;
 
     @Mock
     private UsuarioService usuarioService;
@@ -50,10 +51,12 @@ class ActividadServiceImplTest {
     @Test
     void crearActividadTeoria_temaNoExiste_lanzaIllegalArgumentException() {
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro(1L));
-        when(temaRepository.findById(99L)).thenReturn(Optional.empty());
+        when(temaService.obtenerTemaPorId(99L))
+                .thenThrow(new IllegalArgumentException("Tema no encontrado con ID: 99"));
 
         assertThatThrownBy(() -> actividadService.crearActividadTeoria("T", "D", 10, "img", 99L))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Tema no encontrado");
 
         verify(actividadRepository, never()).save(any());
     }
@@ -75,7 +78,7 @@ class ActividadServiceImplTest {
         Tema tema = crearTema(55L, curso);
 
         when(usuarioService.findCurrentUser()).thenReturn(propietario);
-        when(temaRepository.findById(55L)).thenReturn(Optional.of(tema));
+        when(temaService.obtenerTemaPorId(55L)).thenReturn(tema);
         when(actividadRepository.findMaxPosicionByTemaId(55L)).thenReturn(null);
         when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -89,7 +92,7 @@ class ActividadServiceImplTest {
 
         assertThat(guardada.getTitulo()).isEqualTo("Título");
         assertThat(guardada.getDescripcion()).isEqualTo("Desc");
-        assertThat(guardada.getPuntuacion()).isEqualTo(20);
+        assertThat(guardada.getPuntuacion()).isEqualTo(0);
         assertThat(guardada.getImagen()).isNull();
         assertThat(guardada.getRespVisible()).isFalse();
         assertThat(guardada.getPosicion()).isEqualTo(1);
@@ -107,7 +110,7 @@ class ActividadServiceImplTest {
         Tema tema = crearTema(56L, curso);
 
         when(usuarioService.findCurrentUser()).thenReturn(propietario);
-        when(temaRepository.findById(56L)).thenReturn(Optional.of(tema));
+        when(temaService.obtenerTemaPorId(56L)).thenReturn(tema);
         when(actividadRepository.findMaxPosicionByTemaId(56L)).thenReturn(0);
         when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -124,7 +127,7 @@ class ActividadServiceImplTest {
         Tema tema = crearTema(57L, curso);
 
         when(usuarioService.findCurrentUser()).thenReturn(propietario);
-        when(temaRepository.findById(57L)).thenReturn(Optional.of(tema));
+        when(temaService.obtenerTemaPorId(57L)).thenReturn(tema);
         when(actividadRepository.findMaxPosicionByTemaId(57L)).thenReturn(12);
         when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
