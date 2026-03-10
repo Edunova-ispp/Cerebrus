@@ -172,6 +172,7 @@ export default function MapaCurso() {
     else if (tipoReal === 'TEST' || tipoReal === 'GENERAL') navigate(`/generales/test/${act.id}/alumno`);
     else if (tipoReal === 'ORDENACION') navigate(`/ordenaciones/${act.id}/alumno`);
     else if (tipoReal === 'TABLERO') navigate(`/tableros/${act.id}/alumno`);
+    else if (tipoReal === 'IMAGEN') navigate(`/marcar-imagenes/${act.id}/alumno`);
   };
 
   const selectedTema = temas[selectedIndex] ?? null;
