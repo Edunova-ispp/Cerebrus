@@ -199,7 +199,7 @@ public class RespuestaControllerTest {
 				.isInstanceOf(ResourceNotFoundException.class);
 	}
 
-    // Test para verificar que el método updateRespuesta devuelve OK y delega correctamente al servicio
+    // Test para verificar que el método updateRespuesta devuelve NO_CONTENT y delega correctamente al servicio
 	@Test
 	void updateRespuesta_devuelveOk() {
 		Respuesta request = new Respuesta();
@@ -207,18 +207,10 @@ public class RespuestaControllerTest {
 		request.setImagen("img2.png");
 		request.setCorrecta(false);
 
-		Respuesta updated = new Respuesta();
-		updated.setId(9L);
-		updated.setRespuesta("Nueva");
-		updated.setImagen("img2.png");
-		updated.setCorrecta(false);
+		ResponseEntity<Void> response = controller.updateRespuesta(9L, request);
 
-		when(respuestaService.updateRespuesta(eq(9L), eq("Nueva"), eq("img2.png"), eq(false))).thenReturn(updated);
-
-		ResponseEntity<Respuesta> response = controller.updateRespuesta(9L, request);
-
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(response.getBody()).isSameAs(updated);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+		assertThat(response.getBody()).isNull();
 		verify(respuestaService).updateRespuesta(9L, "Nueva", "img2.png", false);
 	}
 
@@ -232,15 +224,10 @@ public class RespuestaControllerTest {
 		request.setImagen("img2.png");
 		request.setCorrecta(false);
 
-		Respuesta updated = new Respuesta();
-		updated.setId(9L);
+		ResponseEntity<Void> response = controller.updateRespuesta(9L, request);
 
-		when(respuestaService.updateRespuesta(eq(9L), eq("Nueva"), eq("img2.png"), eq(false))).thenReturn(updated);
-
-		ResponseEntity<Respuesta> response = controller.updateRespuesta(9L, request);
-
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(response.getBody()).isSameAs(updated);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+		assertThat(response.getBody()).isNull();
 		verify(respuestaService).updateRespuesta(9L, "Nueva", "img2.png", false);
 	}
 
@@ -262,15 +249,10 @@ public class RespuestaControllerTest {
 		request.setImagen(null);
 		request.setCorrecta(true);
 
-		Respuesta updated = new Respuesta();
-		updated.setId(9L);
+		ResponseEntity<Void> response = controller.updateRespuesta(9L, request);
 
-		when(respuestaService.updateRespuesta(eq(9L), eq("Nueva"), eq(null), eq(true))).thenReturn(updated);
-
-		ResponseEntity<Respuesta> response = controller.updateRespuesta(9L, request);
-
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(response.getBody()).isSameAs(updated);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+		assertThat(response.getBody()).isNull();
 		verify(respuestaService).updateRespuesta(9L, "Nueva", null, true);
 	}
 
