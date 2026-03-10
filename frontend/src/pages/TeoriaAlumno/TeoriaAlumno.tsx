@@ -4,7 +4,8 @@ import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso'; // Asegúrate de importar esto
 import maguitoImg from '../../assets/props/maguito.png';
-import mapaIcon from '../../assets/icons/mapa.svg';
+import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
+import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
 import './TeoriaAlumno.css';
 
 type TeoriaDTO = {
@@ -61,6 +62,8 @@ export default function TeoriaAlumno() {
     run();
   }, [actividadId]);
 
+  const [finished, setFinished] = useState(false);
+
   // Función para finalizar la teoría y sumar el punto/completado
   const handleFinalizar = async () => {
     if (actividadAlumnoId) {
@@ -74,7 +77,7 @@ export default function TeoriaAlumno() {
         console.error("No se pudo marcar como finalizada");
       }
     }
-    navigate(-1);
+    setFinished(true);
   };
 
   if (loading) {
@@ -97,19 +100,10 @@ export default function TeoriaAlumno() {
 
         {teoria && (
           <>
-            <div className="ta-top">
-              <button className="ta-map-btn" type="button" onClick={() => navigate(-1)}>
-                <img src={mapaIcon} alt="Mapa" className="ta-map-icon" />
-                <span>Mapa</span>
-              </button>
-
-              <div className="ta-title-banner">
-                <h1 className="ta-title">{teoria.titulo}</h1>
-                {teoria.descripcion && (
-                  <p className="ta-subtitle">{teoria.descripcion.split('\n')[0]}</p>
-                )}
-              </div>
-            </div>
+            <ActivityHeader
+              title={teoria.titulo}
+              subtitle={teoria.descripcion ? teoria.descripcion.split('\n')[0] : undefined}
+            />
 
             <div className="ta-content-box">
               <div className="ta-text-area">
@@ -137,6 +131,8 @@ export default function TeoriaAlumno() {
         )}
 
         {!teoria && !error && <p className="ca-text">No se encontró la lección.</p>}
+
+        {finished && <CompletionPopup title="¡LECCIÓN COMPLETADA!" onContinue={() => navigate(-1)} />}
       </main>
     </div>
   );

@@ -4,7 +4,8 @@ import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 import kingImg from '../../assets/props/king.png';
-import mapaIcon from '../../assets/icons/mapa.svg';
+import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
+import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
 import './OrdenacionAlumno.css';
 
 type OrdenacionDTO = {
@@ -207,8 +208,7 @@ if (!res.ok) throw new Error('Error al guardar la respuesta');
 
       if (correcta) {
         completedRef.current = true;
-        window.alert('Tu respuesta es correcta.');
-        navigate(-1);
+        setFeedback({ correcta: true, comentario: undefined });
         return;
       }
 
@@ -249,21 +249,7 @@ if (!res.ok) throw new Error('Error al guardar la respuesta');
         {ordenacion && (
           
           <>
-            <div className="ord-top">
-
-              <button className="ord-map-btn" type="button" onClick={() => navigate(-1)}>
-                <img src={mapaIcon} alt="Mapa" className="ord-map-icon" />
-                <span>Mapa</span>
-              </button>
-
-              {/* Banner título */}
-              <div className="ord-title-banner">
-                <h1 className="ord-title">{ordenacion.titulo}</h1>
-                {ordenacion.descripcion && (
-                  <p className="ord-subtitle">{ordenacion.descripcion}</p>
-                )}
-              </div>
-            </div>
+            <ActivityHeader title={ordenacion.titulo} subtitle={ordenacion.descripcion ?? undefined} />
 
             {/* Layout: rey izquierda, items derecha */}
 <div className="ord-content-row">
@@ -344,6 +330,8 @@ if (!res.ok) throw new Error('Error al guardar la respuesta');
         )}
 
         {!ordenacion && !error && <p className="ca-text">No se encontró la ordenación.</p>}
+
+        {feedback?.correcta && <CompletionPopup title="¡ORDENACIÓN COMPLETADA!" onContinue={() => navigate(-1)} />}
       </main>
     </div>
   );

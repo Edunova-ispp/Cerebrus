@@ -22,6 +22,7 @@ import MediasCurso from "./pages/estadisticasCurso/MediasCurso";
 import TeoriaAlumno from "./pages/TeoriaAlumno/TeoriaAlumno";
 import Perfil from "./pages/perfil/Perfil";
 import TableroAlumno from "./pages/tableroAlumno/TableroAlumno";
+import CartaAlumno from "./pages/cartaAlumno/CartaAlumno";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
 
       <Route path="/generales/test/:testId/alumno" element={<TestAlumno />} />
       <Route path="/tableros/:tableroId/alumno" element={<TableroAlumno />} />
+      <Route path="/generales/carta/:cartaId/alumno" element={<CartaAlumno />} />
       <Route path="/estadisticas/:id" element={<EstadisticasCurso />} />
       <Route path="/medias/:id" element={<MediasCurso />} />
       <Route path="/perfil" element={<Perfil />} />

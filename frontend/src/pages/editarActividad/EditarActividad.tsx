@@ -5,6 +5,7 @@ import { apiFetch } from '../../utils/api';
 import { OrdenacionForm, type OrdenacionFormInitialValues } from '../crearActividad/OrdenacionForm';
 import { TeoriaForm } from '../crearActividad/TeoriaForm';
 import { TestForm, type TestFormInitialValues } from '../crearActividad/TestForm';
+import { CartaForm, type CartaFormInitialValues } from '../crearActividad/CartaForm';
 import { TableroForm, type TableroFormInitialValues } from '../crearActividad/TableroForm';
 import '../crearActividad/crearActividad.css';
 
@@ -61,7 +62,25 @@ type TableroDTO = {
   }[];
 };
 
-type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | null;
+type GeneralCartaMaestroDTO = {
+  id: number;
+  titulo: string;
+  descripcion: string | null;
+  puntuacion: number;
+  imagen: string | null;
+  respVisible: boolean;
+  comentariosRespVisible: string | null;
+  posicion: number;
+  version: number;
+  temaId: number;
+  preguntas: {
+    id: number;
+    pregunta: string;
+    respuestas: { id: number; respuesta: string; correcta: boolean }[];
+  }[];
+};
+
+type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'carta' | null;
 
 export default function EditarActividad() {
   const { id: cursoId, actividadId } = useParams<{
@@ -78,6 +97,7 @@ export default function EditarActividad() {
   const [teoria, setTeoria] = useState<TeoriaDTO | null>(null);
   const [generalTest, setGeneralTest] = useState<GeneralTestMaestroDTO | null>(null);
   const [tablero, setTablero] = useState<TableroDTO | null>(null);
+  const [generalCarta, setGeneralCarta] = useState<GeneralCartaMaestroDTO | null>(null);
 
   useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
@@ -104,27 +124,37 @@ export default function EditarActividad() {
             setLoading(false);
           })
           .catch(() => {
-            // 3. Intentar tablero
-            apiFetch(`${apiBase}/api/tableros/${actividadId}`)
+            // 3. Intentar carta
+            apiFetch(`${apiBase}/api/generales/cartas/${actividadId}/maestro`)
               .then((r) => r.json())
-              .then((data: TableroDTO) => {
-                setTablero(data);
-                setKind('tablero');
+              .then((data: GeneralCartaMaestroDTO) => {
+                setGeneralCarta(data);
+                setKind('carta');
                 setLoading(false);
               })
               .catch(() => {
-                // 4. Intentar teoría
-                apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`)
+                // 4. Intentar tablero
+                apiFetch(`${apiBase}/api/tableros/${actividadId}`)
                   .then((r) => r.json())
-                  .then((data: TeoriaDTO) => {
-                    setTeoria(data);
-                    setKind('teoria');
+                  .then((data: TableroDTO) => {
+                    setTablero(data);
+                    setKind('tablero');
                     setLoading(false);
                   })
-                  .catch((e) => {
-                    const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
-                    setError(msg);
-                    setLoading(false);
+                  .catch(() => {
+                    // 5. Intentar teoría
+                    apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`)
+                      .then((r) => r.json())
+                      .then((data: TeoriaDTO) => {
+                        setTeoria(data);
+                        setKind('teoria');
+                        setLoading(false);
+                      })
+                      .catch((e) => {
+                        const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
+                        setError(msg);
+                        setLoading(false);
+                      });
                   });
               });
           });
@@ -173,6 +203,20 @@ export default function EditarActividad() {
       }
     : undefined;
 
+  const cartaInitialValues: CartaFormInitialValues | undefined = generalCarta
+    ? {
+        titulo: generalCarta.titulo,
+        descripcion: generalCarta.descripcion,
+        puntuacion: generalCarta.puntuacion,
+        imagen: generalCarta.imagen,
+        respVisible: generalCarta.respVisible,
+        comentariosRespVisible: generalCarta.comentariosRespVisible,
+        posicion: generalCarta.posicion,
+        version: generalCarta.version,
+        preguntas: generalCarta.preguntas ?? [],
+      }
+    : undefined;
+
   const actividadIdNum = actividadId ? Number.parseInt(actividadId, 10) : NaN;
 
   const renderForm = () => {
@@ -213,6 +257,16 @@ export default function EditarActividad() {
           mode="edit"
           tableroId={tableroInitialValues ? tablero.id : undefined}
           initialValues={tableroInitialValues}
+        />
+      );
+    }
+
+    if (kind === 'carta' && generalCarta) {
+      return (
+        <CartaForm
+          mode="edit"
+          generalId={actividadIdNum}
+          initialValues={cartaInitialValues}
         />
       );
     }
