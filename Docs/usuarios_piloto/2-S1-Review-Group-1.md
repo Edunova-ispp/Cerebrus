@@ -17,8 +17,6 @@
    - [2.4 Gestión de Facturas y Pagos](#24-gestión-de-facturas-y-pagos)
    - [2.5 Reseñas y Valoración de la Convivencia](#25-reseñas-y-valoración-de-la-convivencia)
 3. [Hallazgos Generales y Feedback UI/UX](#3-hallazgos-generales-y-feedback-uiux)
-4. [Condiciones de Fallo (Failure Conditions)](#4-condiciones-de-fallo)
-5. [Registro de Formularios Oficiales](#5-registro-de-formularios-oficiales)
 
 ---
 
