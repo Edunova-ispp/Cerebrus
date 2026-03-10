@@ -43,41 +43,41 @@ Documento de revisión de los entregables y el software desarrollado por el Grup
 
 ### 2.1 Descubrimiento de viviendas
 * **Funcionalidad a probar:** Explorar y expresar interés en viviendas compatibles.
-* **¿Funciona?:** ✅🟨❌
+* **¿Funciona?:** 🟨
 * **Comentarios y errores encontrados:**
-    * [Detallar aquí los hallazgos conjuntos]
+    * No permite borrar una solicitud de Pendiente, pero el botón para borrarlo está, solo que vuelve a salir la vivienda. Mi consejo es que arregléis el botón pero bueno, para salir del paso podéis ocultarlo de mientras con un hidden o algo así y no permitís que se borre, pero si ponéis una funcionalidad debería de funcionar o avisar de que no funciona.
 
 ### 2.2 Evaluación de Candidatos y Match
 * **Funcionalidad a probar:** Evaluar a los interesados y filtrar quiénes pueden acceder al contacto directo o a la reserva de visita.
-* **¿Funciona?:** ✅🟨❌
+* **¿Funciona?:** ✅
 * **Comentarios y errores encontrados:**
-    * [Detallar aquí los hallazgos conjuntos]
+    * Como casero me deja poner o no los pisos a la vista, visibles, y me deja rechazar a inquilinos, así que perfecto.
 
 ### 2.3 Gestión de inmuebles
 * **Funcionalidad a probar:** Dar de alta y mantener la oferta de inmuebles actualizada en la plataforma.
-* **¿Funciona?:** ✅🟨❌
+* **¿Funciona?:** 🟨
 * **Comentarios y errores encontrados:**
-    * [Detallar aquí los hallazgos conjuntos]
+    * Al crear un piso te deja crearlo pero al ir tan lento (lógico, despliegue gratis, no nos podemos quejar tampoco de eso) he clickado 4 o 5 veces por si era cosa de mi navegador, el backend, o no lo sé, y de repente he ido a mi lista de pisos y lo tenia 5 veces creado. Imagino eso, que no está terminado, pero valorad poner un aviso o algo cuando se crea, porque es imposible saber si es por el backend lento, por un error... a saber. 
+    * Pausar y que no lo vean los demás visible va perfecto, ahí sin problema.
+    * En el formulario me deja poner cualquier fecha, lo cual carece un poco de sentido que pueda poner "Fecha disponible" y pueda poner 1901.
 
 ### 2.4 Gestión de Facturas y Pagos
 * **Funcionalidad a probar:** Automatizar la notificación, el reparto y el seguimiento de los pagos de suministros y renta del inmueble.
-* **¿Funciona?:** ✅🟨❌
+* **¿Funciona?:** 🟨
 * **Comentarios y errores encontrados:**
-    * [Detallar aquí los hallazgos conjuntos]
+    * En mi perfil, al darle a facturas, me sale el icono de una campana (supongo que notificación) y marcado como si tuviera una, pero le clicko y no pasa nada, no abre nada, no hace nada.
+    * El pago va perfecto, falta implementar una pasarela de pago, pero lo "mockeado" funciona sin problema.
 
 ### 2.5 Reseñas y Valoración de la Convivencia
 * **Funcionalidad a probar:** Generar un sistema de confianza basado en la experiencia real de convivencia o gestión.
-* **¿Funciona?:** ✅🟨❌
+* **¿Funciona?:** ❌
 * **Comentarios y errores encontrados:**
-    * [Detallar aquí los hallazgos conjuntos]
+    * No está implementado, me comentaron que faltaba modificar un archivo, pero ánimo que tiene buena pinta 💪💪
 
 ---
 
 ## 3. Hallazgos Generales y Feedback UI/UX
 
-*(Añadid aquí vuestras impresiones generales sobre la aplicación: rendimiento, diseño, usabilidad, cosas que os hayan gustado o sugerencias de mejora que no encajen en un caso de uso concreto).*
-
-* [Punto 1]
-* [Punto 2]
-* [Punto 3]
+* El login no persiste. Al recargar la página se pierde. No sé que usáis en el backend pero valorad si cogeis el token JWT o similar y que persista en la caché del navegador, al menos hasta que se cierre el navegador. No es motivo de *Team failure conditions* pero sí que es incómodo.
+* Al hacer login como landlord no me lleva a inicio si no a "mis inmuebles", pero luego existe una pestaña de Inicio. Valorad cambiar el redirect para que tenga lógica.
 
