@@ -46,14 +46,24 @@ type GeneralTestMaestroDTO = {
   }[];
 };
 
+type MarcarImagenPuntoDTO = {
+  id: number;
+  respuesta: string;
+  pixelX: number;
+  pixelY: number;
+};
 
 type MarcarImagenDTO = {
-    imagenActividad: string | null;
-    respVisible: boolean;
-    comentariosRespVisible: string | null;
-    temaId: number;
-    imagenAMarcar: string;
-    puntosImagen: { id: number; respuesta: string; pixelX: number; pixelY: number }[];
+  id: number;
+  titulo: string;
+  descripcion: string | null;
+  puntuacion: number;
+  imagenActividad: string | null;
+  respVisible: boolean;
+  comentariosRespVisible: string | null;
+  temaId: number;
+  imagenAMarcar: string;
+  puntosImagen: MarcarImagenPuntoDTO[];
 };
 
 type TableroDTO = {
@@ -92,64 +102,88 @@ export default function EditarActividad() {
   const [tablero, setTablero] = useState<TableroDTO | null>(null);
 
   useEffect(() => {
-    const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+    const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
     if (!actividadId) return;
 
-    setLoading(true);
-    setError(null);
+    let cancelled = false;
 
-    // 1. Intentar test
-    apiFetch(`${apiBase}/api/generales/test/${actividadId}/maestro`)
-      .then((r) => r.json())
-      .then((data: GeneralTestMaestroDTO) => {
-        setGeneralTest(data);
-        setKind('test');
-        setLoading(false);
-      })
-      .catch(() => {
-        // 2. Intentar ordenación
-        apiFetch(`${apiBase}/api/ordenaciones/${actividadId}/maestro`)
-          .then((r) => r.json())
-          .then((data: OrdenacionDTO) => {
-            setOrdenacion(data);
-            setKind('ordenacion');
-            setLoading(false);
-          })
-          .catch(() => {
-            // 3. Intentar marcar en imagen
-            apiFetch(`${apiBase}/api/marcar-imagenes/${actividadId}`)
-              .then((r) => r.json())
-              .then((data: MarcarImagenDTO) => {
-                setMarcarImagen(data);
-                setKind('marcarImagen');
-                setLoading(false);
-             })
-            .catch(() => {
-            // 4. Intentar tablero
-              apiFetch(`${apiBase}/api/tableros/${actividadId}`)
-                .then((r) => r.json())
-                .then((data: TableroDTO) => {
-                  setTablero(data);
-                  setKind('tablero');
-                  setLoading(false);
-              })
-              .catch(() => {
-                // 5. Intentar teoría
-                apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`)
-                  .then((r) => r.json())
-                  .then((data: TeoriaDTO) => {
-                    setTeoria(data);
-                    setKind('teoria');
-                    setLoading(false);
-                  })
-                  .catch((e) => {
-                    const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
-                    setError(msg);
-                  });
-              })
-              .finally(() => setLoading(false));
-          });
-      });
+    const run = async () => {
+      setLoading(true);
+      setError(null);
+      setKind(null);
+      setOrdenacion(null);
+      setTeoria(null);
+      setGeneralTest(null);
+      setMarcarImagen(null);
+      setTablero(null);
+
+      try {
+        try {
+          const r = await apiFetch(`${apiBase}/api/generales/test/${actividadId}/maestro`);
+          const data = (await r.json()) as GeneralTestMaestroDTO;
+          if (cancelled) return;
+          setGeneralTest(data);
+          setKind('test');
+          return;
+        } catch {
+          // try next kind
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/ordenaciones/${actividadId}/maestro`);
+          const data = (await r.json()) as OrdenacionDTO;
+          if (cancelled) return;
+          setOrdenacion(data);
+          setKind('ordenacion');
+          return;
+        } catch {
+          // try next kind
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/marcar-imagenes/${actividadId}`);
+          const data = (await r.json()) as MarcarImagenDTO;
+          if (cancelled) return;
+          setMarcarImagen(data);
+          setKind('marcarImagen');
+          return;
+        } catch {
+          // try next kind
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/tableros/${actividadId}`);
+          const data = (await r.json()) as TableroDTO;
+          if (cancelled) return;
+          setTablero(data);
+          setKind('tablero');
+          return;
+        } catch {
+          // try next kind
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`);
+          const data = (await r.json()) as TeoriaDTO;
+          if (cancelled) return;
+          setTeoria(data);
+          setKind('teoria');
+          return;
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
+          if (cancelled) return;
+          setError(msg);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+    };
   }, [actividadId]);
 
   const tableroInitialValues: TableroFormInitialValues | undefined = tablero

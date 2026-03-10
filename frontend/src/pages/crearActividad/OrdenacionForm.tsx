@@ -188,7 +188,6 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
               onChange={(e) => setRespVisible(e.target.checked)}
             />
             Correcciones visibles
-          </label>
           {respVisible && (
             <div>
               <label className="of-label" htmlFor="of-comentarios">Comentarios</label>
@@ -202,6 +201,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
             </div>
           )}
         </div>
+      </div>
       </div>
 
       {/* ── Items section ── */}
