@@ -187,15 +187,23 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         Actividad actividad = actividadAlumno.getActividad();
         if(actividad instanceof General) {
-            corregirActividadAlumnoAutomaticamenteGeneral(actividadAlumno, respuestasIds, actividad);
+            // Nota: las actividades de TEORÍA se modelan como General con tipo TEORIA.
+            // No deben corregirse como un test (pueden no tener preguntas).
+            General general = (General) actividad;
+            if (general.getTipo() == com.cerebrus.TipoActGeneral.TEORIA) {
+                actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 1);
+                actividadAlumno.setNota(10); // Nota máxima por leer
+                actividadAlumno.setAcabada(LocalDateTime.now());
+            } else {
+                corregirActividadAlumnoAutomaticamenteGeneral(actividadAlumno, respuestasIds, actividad);
+            }
         } else if(actividad instanceof Ordenacion) {
             corregirActividadAlumnoAutomaticamenteOrdenacion(actividadAlumno, respuestasIds, actividad);
         } else {
-        // CASO PARA TEORÍA: Simplemente marcamos como terminada y damos la puntuación base
-        actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 1);
-        actividadAlumno.setNota(10); // Nota máxima por leer
-        actividadAlumno.setAcabada(LocalDateTime.now());
-    } 
+            // Otros tipos sin corrección automática basada en respuestas.
+            actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 0);
+            actividadAlumno.setAcabada(LocalDateTime.now());
+        }
         return actividadAlumnoRepository.save(actividadAlumno);
     }
 

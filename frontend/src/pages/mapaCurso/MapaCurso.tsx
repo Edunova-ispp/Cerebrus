@@ -5,6 +5,7 @@ import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso'; // Asegúrate de importar esto
 import './MapaCurso.css';
 
+import inicialMapIcon from '../../assets/props/mapa/act_mapa_inicial.svg';
 import abiertaMapIcon from '../../assets/props/mapa/act_mapa_abierta.svg';
 import cartaMapIcon from '../../assets/props/mapa/act_mapa_carta.svg';
 import clasificacionMapIcon from '../../assets/props/mapa/act_mapa_clasificacion.svg';
@@ -13,6 +14,7 @@ import imagenMapIcon from '../../assets/props/mapa/act_mapa_imagen.svg';
 import tableroMapIcon from '../../assets/props/mapa/act_mapa_tablero.svg';
 import teoriaMapIcon from '../../assets/props/mapa/act_mapa_teoria.svg';
 import testMapIcon from '../../assets/props/mapa/act_mapa_test.svg';
+import ordenMapIcon from '../../assets/props/mapa/act_mapa_orden.svg';
 import mascotaMapIcon from '../../assets/props/mapa/mapa_mascota.svg';
 
 type ActividadDTO = {
@@ -37,23 +39,19 @@ type TemaDTO = {
   readonly actividades: ActividadDTO[];
 };
 
-function getActivityIconSrc(tipo: string): string {
+function getActivityIconSrc(tipo: string, posicion: number): string {
   const tipoUpper = (tipo ?? '').toUpperCase();
+  if (posicion === 0) return inicialMapIcon;
   if (tipoUpper.includes('TEORIA')) return teoriaMapIcon;
   if (tipoUpper.includes('TEST') || tipoUpper.includes('GENERAL')) return testMapIcon;
-
-  if (tipoUpper.includes('ORDENACION')) return tableroMapIcon;
+  if (tipoUpper.includes('ORDENACION')) return ordenMapIcon;
   if (tipoUpper.includes('TABLERO')) return tableroMapIcon;
   if (tipoUpper.includes('CRUCIGRAMA')) return crucigramaMapIcon;
   if (tipoUpper.includes('CLASIFICACION')) return clasificacionMapIcon;
   if (tipoUpper.includes('IMAGEN')) return imagenMapIcon;
   if (tipoUpper.includes('CARTA')) return cartaMapIcon;
   if (tipoUpper.includes('ABIERTA')) return abiertaMapIcon;
-
-  if (tipoUpper === 'TEORIA') return teoriaMapIcon;
-  if (tipoUpper === 'TEST' || tipoUpper === 'GENERAL') return testMapIcon;
-  if (tipoUpper === 'ORDENACION') return tableroMapIcon;
-  return testMapIcon;
+  return abiertaMapIcon; // Icono por defecto si no se reconoce el tipo
 }
 
 function getNodeBgColor(index: number): string {
@@ -78,9 +76,6 @@ export default function MapaCurso() {
   const mapContainerRef = useRef<HTMLOListElement | null>(null);
   const [mapRowSize, setMapRowSize] = useState(6);
 
-  void loading;
-  void error;
-
   // 2. CORRECCIÓN: El Map ahora guarda objetos de tipo CompletionInfo
   const [completionMap, setCompletionMap] = useState<Map<number, CompletionInfo>>(new Map());
 
@@ -92,8 +87,6 @@ export default function MapaCurso() {
 
     const compute = () => {
       const width = el.getBoundingClientRect().width;
-      // Simple responsive breakpoints for how many nodes fit per row.
-      // Keep it deterministic and easy to tweak.
       const nextSize = width >= 980 ? 6 : width >= 820 ? 5 : width >= 640 ? 4 : 3;
       setMapRowSize((prev) => (prev === nextSize ? prev : nextSize));
     };
@@ -114,14 +107,25 @@ export default function MapaCurso() {
   useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     if (!cursoId) return;
+    setError('');
     setLoading(true);
+    console.log('[MapaCurso] Cargando temas/actividades', { cursoId });
     apiFetch(`${apiBase}/api/temas/curso/${cursoId}/alumno`)
-      .then((r) => r.json())
+      .then(async (r) => {
+        const data = await r.json();
+        console.log('[MapaCurso] Temas recibidos', data);
+        return data;
+      })
       .then((data: TemaDTO[]) => {
         setTemas(Array.isArray(data) ? data : []);
         setSelectedIndex(0);
       })
-      .catch((e) => setError(e.message))
+      .catch((e) => {
+        console.error('[MapaCurso] Error cargando temas/actividades', e);
+        setTemas([]);
+        setSelectedIndex(0);
+        setError(e instanceof Error ? e.message : String(e));
+      })
       .finally(() => setLoading(false));
   }, [cursoId]);
 
@@ -185,6 +189,53 @@ export default function MapaCurso() {
     return rows;
   }, [sortedActividades, mapRowSize]);
 
+  const unlockedActivityIds = useMemo(() => {
+    const ids = new Set<number>();
+    if (sortedActividades.length === 0) return ids;
+
+    const states = sortedActividades.map((act) => {
+      const info = completionMap.get(act.id);
+      const done = info?.done ?? false;
+      const terminada = info?.terminada ?? false;
+      return {
+        id: act.id,
+        state: terminada ? 'terminada' : done ? 'iniciada' : 'pendiente',
+      } as const;
+    });
+
+    states.forEach((s) => {
+      if (s.state === 'terminada') ids.add(s.id);
+    });
+
+    const firstNotCompletedIndex = states.findIndex((s) => s.state !== 'terminada');
+    if (firstNotCompletedIndex === -1) {
+      // Todo completado: deja todo desbloqueado.
+      states.forEach((s) => ids.add(s.id));
+      return ids;
+    }
+
+    for (let i = 0; i <= firstNotCompletedIndex; i++) ids.add(states[i]!.id);
+    return ids;
+  }, [sortedActividades, completionMap]);
+
+  const mascotaActivityId = useMemo(() => {
+    if (sortedActividades.length === 0) return null;
+
+    const states = sortedActividades.map((act) => {
+      const info = completionMap.get(act.id);
+      const done = info?.done ?? false;
+      const terminada = info?.terminada ?? false;
+      return {
+        id: act.id,
+        state: terminada ? 'terminada' : done ? 'iniciada' : 'pendiente',
+      } as const;
+    });
+
+    const firstNotCompletedIndex = states.findIndex((s) => s.state !== 'terminada');
+    if (firstNotCompletedIndex === -1) return null; // todo terminado
+    return states[firstNotCompletedIndex]!.id;
+  }, [sortedActividades, completionMap]);
+
   return (
     <div className="mapa-page">
       <NavbarMisCursos />
@@ -205,9 +256,32 @@ export default function MapaCurso() {
           </aside>
 
           <section className="mapa-activities">
-            {selectedTema && (
+            {loading && (
+              <p className="mapa-feedback">Cargando actividades...</p>
+            )}
+
+            {!loading && error && (
+              <p className="mapa-feedback mapa-feedback--error">
+                No se pudieron cargar los temas/actividades ({error}).
+              </p>
+            )}
+
+            {!loading && !error && temas.length === 0 && (
+              <p className="mapa-feedback">
+                Este curso todavía no tiene temas o no tienes acceso.
+              </p>
+            )}
+
+            {selectedTema && !loading && !error && (
               <>
                 <h2 className="mapa-activities-title">{selectedTema.titulo}</h2>
+
+                {selectedTema.actividades.length === 0 && (
+                  <p className="mapa-feedback">
+                    Este tema no tiene actividades todavía.
+                  </p>
+                )}
+
                 <ol className="mapa-activities-map" ref={mapContainerRef}>
                   {actividadRows.map((row, rowIndex) => {
                     const reverse = rowIndex % 2 === 1;
@@ -224,27 +298,18 @@ export default function MapaCurso() {
                             const done = info?.done ?? false;
                             const terminada = info?.terminada ?? false;
                             const state = terminada ? 'terminada' : done ? 'iniciada' : 'pendiente';
-                            const locked = state === 'pendiente';
+                            const isUnlocked = unlockedActivityIds.has(act.id);
+                            const locked = !isUnlocked;
 
                             const tipo = (act.tipo ?? '').toUpperCase();
                             const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA'].includes(tipo);
 
-                            const iconSrc = getActivityIconSrc(tipo);
+                            const iconSrc = getActivityIconSrc(tipo, act.posicion);
                             const nodeBg = getNodeBgColor(linearIndex);
 
                             const isLastInRow = localIndex === rowActs.length - 1;
                             const nextAct = !isLastInRow ? rowActs[localIndex + 1] : null;
-                            const nextInfo = nextAct ? completionMap.get(nextAct.id) : undefined;
-                            const nextDone = nextInfo?.done ?? false;
-                            const nextTerminada = nextInfo?.terminada ?? false;
-                            const nextState = nextAct
-                              ? nextTerminada
-                                ? 'terminada'
-                                : nextDone
-                                  ? 'iniciada'
-                                  : 'pendiente'
-                              : null;
-                            const connectorLocked = nextState === 'pendiente';
+                            const connectorLocked = nextAct ? !unlockedActivityIds.has(nextAct.id) : false;
 
                             return (
                               <div key={act.id} className="mapa-map-node">
@@ -266,7 +331,7 @@ export default function MapaCurso() {
                                     />
                                   </button>
 
-                                  {state === 'iniciada' && (
+                                  {mascotaActivityId === act.id && (
                                     <img
                                       className="mapa-map-mascota"
                                       src={mascotaMapIcon}
@@ -296,17 +361,7 @@ export default function MapaCurso() {
                         {rowIndex < actividadRows.length - 1 && rowActs.length > 0 && (
                           (() => {
                             const nextRowFirst = sortedActividades[(rowIndex + 1) * mapRowSize];
-                            const nextRowFirstInfo = nextRowFirst ? completionMap.get(nextRowFirst.id) : undefined;
-                            const nextRowFirstDone = nextRowFirstInfo?.done ?? false;
-                            const nextRowFirstTerminada = nextRowFirstInfo?.terminada ?? false;
-                            const nextRowFirstState = nextRowFirst
-                              ? nextRowFirstTerminada
-                                ? 'terminada'
-                                : nextRowFirstDone
-                                  ? 'iniciada'
-                                  : 'pendiente'
-                              : null;
-                            const turnLocked = nextRowFirstState === 'pendiente';
+                            const turnLocked = nextRowFirst ? !unlockedActivityIds.has(nextRowFirst.id) : false;
 
                             return (
                           <div

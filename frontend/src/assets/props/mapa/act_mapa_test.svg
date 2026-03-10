@@ -1,10 +1,8 @@
 <svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 54" width="66" height="54">
 	<defs>
-		<image  width="44" height="48" id="img1" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAwAgMAAAAX/nByAAAAAXNSR0IB2cksfwAAAAlQTFRFAAAA//OT//OTL8lipgAAAAN0Uk5TAP8BHlUJOgAAAIlJREFUeJzV0MENgzAMQFFbSjYgU3QEkNoNGqnJPuyDD4yQfYLUAaiUhhAbgbhwJKd3+LbkIMhTKDQvsbaJjW4e2eZJwPYDsPE9inUbxEtSjR8SlyQb3QDmwY6hmWBtcuyoGjwt21frLgU22q8YfNxsIpxa/TbzbXtrW5To6Lm4mW7vvr88e/YnfxCnT96M40viAAAAAElFTkSuQmCC"/>
-		<image  width="39" height="25" id="img2" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACcAAAAZAgMAAADPvd97AAAAAXNSR0IB2cksfwAAAAlQTFRFAAAA//OT//OTL8lipgAAAAN0Uk5TAP8BHlUJOgAAACBJREFUeJxjZGBgDWAAgf+MqMzfYKbIkGM2NJCkDdPzAFykHQ5iVwOeAAAAAElFTkSuQmCC"/>
+		<image  width="62" height="53" id="img1" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAD4AAAA1AQMAAAAjyMrEAAAAAXNSR0IB2cksfwAAAAZQTFRFAAAA//OTTWj9ogAAAAJ0Uk5TAP9bkSK1AAAAd0lEQVR4nGNkAAP+t4xojP9/0Rj8H3AxGP8xYDIOojN+coAZ9gfgjMYG7AzmPx8FGIhl2B8AkvgY/w86IBgLFcAM5z8PcTD+ssMYwh9AZuBj8L+FMT5cMIAxdFkgDIa/qAyG/wjGQQeiGfIPMBh3WRhwMPjfojIANEFsktRNyO8AAAAASUVORK5CYII="/>
 	</defs>
 	<style>
 	</style>
-	<use id="Capa 1" href="#img1" x="9" y="5"/>
-	<use id="Capa 1 copy" href="#img2" x="7" y="2"/>
+	<use id="Capa 1" href="#img1" x="3" y="1"/>
 </svg>
