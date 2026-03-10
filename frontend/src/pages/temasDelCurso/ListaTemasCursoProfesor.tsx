@@ -96,7 +96,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
 
       <main className="ltp-main">
         <button className="ltp-volver" onClick={() => navigate(`/cursos/${id ?? curso?.id}`)}>
-          ← a información del curso
+          ← 
         </button>
 
         <h1 className="ltp-titulo">{curso?.titulo}</h1>

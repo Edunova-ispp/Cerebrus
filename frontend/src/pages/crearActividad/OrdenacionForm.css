@@ -1,0 +1,197 @@
+.of-form,
+.of-form * {
+  font-family: 'Pixelify Sans', sans-serif;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+/* ── Sections ──────────────────────────────────────────────── */
+
+.of-meta-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding-bottom: 20px;
+  margin-bottom: 4px;
+}
+
+.of-items-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 20px;
+  margin-bottom: 4px;
+}
+
+/* ── Columns ───────────────────────────────────────────────── */
+
+.of-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+/* ── Labels ────────────────────────────────────────────────── */
+
+.of-label {
+  display: block;
+  font-weight: bold;
+  font-size: 0.95rem;
+  margin-bottom: 3px;
+}
+
+.of-check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+/* ── Inputs ────────────────────────────────────────────────── */
+
+.of-input {
+  width: 100%;
+  background: var(--color-accent);
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1rem;
+  color: #000;
+  transition: background 0.15s;
+}
+
+.of-input:hover,
+.of-input:focus {
+  outline: none;
+  background: var(--color-accent-dark);
+}
+
+.of-input-sm {
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.of-textarea {
+  width: 100%;
+  background: var(--color-accent);
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1rem;
+  color: #000;
+  resize: vertical;
+  transition: background 0.15s;
+}
+
+.of-textarea:hover,
+.of-textarea:focus {
+  outline: none;
+  background: var(--color-accent-dark);
+}
+
+/* ── Row helpers ───────────────────────────────────────────── */
+
+.of-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ── Help text ─────────────────────────────────────────────── */
+
+.of-help {
+  font-size: 0.92rem;
+  line-height: 1.4;
+  margin: 0;
+  color: #555;
+}
+
+/* ── Kind buttons (Palabras / Imágenes) ────────────────────── */
+
+.of-kind-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.of-kind-btn {
+  background: var(--color-accent);
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 6px 16px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.of-kind-btn:hover:not(:disabled) {
+  background: var(--color-accent-dark);
+}
+
+.of-kind-btn:disabled {
+  background: #000;
+  color: var(--color-accent);
+  cursor: default;
+}
+
+/* ── Items grid ─────────────────────────────────────────────── */
+
+.of-items-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  align-items: flex-start;
+}
+
+.of-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.of-item-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  display: block;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* ── Add button ────────────────────────────────────────────── */
+
+.of-btn-add {
+  background: var(--color-accent);
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.15s;
+  align-self: center;
+}
+
+.of-btn-add:hover {
+  background: var(--color-accent-dark);
+}
+
+/* ── Error / success ───────────────────────────────────────── */
+
+.of-error {
+  color: #c0392b;
+  font-size: 0.95rem;
+  margin: 0 0 12px 0;
+}

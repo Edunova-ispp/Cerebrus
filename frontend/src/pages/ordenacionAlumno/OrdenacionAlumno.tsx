@@ -4,7 +4,7 @@ import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 import kingImg from '../../assets/props/king.png';
-import espadaImg from '../../assets/props/espada.png';
+import mapaIcon from '../../assets/icons/mapa.svg';
 import './OrdenacionAlumno.css';
 
 type OrdenacionDTO = {
@@ -251,11 +251,10 @@ if (!res.ok) throw new Error('Error al guardar la respuesta');
           <>
             <div className="ord-top">
 
-              {/* Botón salir con espada */}
-              <button className="ord-exit-btn" type="button" onClick={() => navigate(-1)}>
-      <img src={espadaImg} alt="" className="ord-exit-icon" />
-      Salir
-    </button>
+              <button className="ord-map-btn" type="button" onClick={() => navigate(-1)}>
+                <img src={mapaIcon} alt="Mapa" className="ord-map-icon" />
+                <span>Mapa</span>
+              </button>
 
               {/* Banner título */}
               <div className="ord-title-banner">

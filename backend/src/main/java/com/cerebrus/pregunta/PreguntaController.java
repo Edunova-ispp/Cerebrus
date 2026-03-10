@@ -48,14 +48,14 @@ public class PreguntaController {
     }
 
     @PutMapping("/update/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Pregunta> updatePregunta(@PathVariable Long id, @RequestBody @Valid Pregunta pregunta) {
-        Pregunta preguntaActualizada = preguntaService.updatePregunta(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> updatePregunta(@PathVariable Long id, @RequestBody @Valid Pregunta pregunta) {
+        preguntaService.updatePregunta(
             id,
             pregunta.getPregunta(),
             pregunta.getImagen()
         );
-        return new ResponseEntity<>(preguntaActualizada, HttpStatus.OK);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/delete/{id}")

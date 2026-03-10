@@ -106,7 +106,7 @@ export default function EstadisticasCurso() {
       
       <main className="estadisticas-main">
         <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
-          ← a información del curso
+          ← 
         </button>
 
         <h1 className="estadisticas-titulo-curso">Estadísticas del Curso</h1>

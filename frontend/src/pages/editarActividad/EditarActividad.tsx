@@ -5,6 +5,7 @@ import { apiFetch } from '../../utils/api';
 import { OrdenacionForm, type OrdenacionFormInitialValues } from '../crearActividad/OrdenacionForm';
 import { TeoriaForm } from '../crearActividad/TeoriaForm';
 import { TestForm, type TestFormInitialValues } from '../crearActividad/TestForm';
+import { TableroForm, type TableroFormInitialValues } from '../crearActividad/TableroForm';
 import '../crearActividad/crearActividad.css';
 
 type OrdenacionDTO = {
@@ -44,7 +45,23 @@ type GeneralTestMaestroDTO = {
   }[];
 };
 
-type ActivityKind = 'ordenacion' | 'test' | 'teoria' | null;
+type TableroDTO = {
+  id: number;
+  titulo: string;
+  descripcion: string | null;
+  puntuacion: number;
+  tamano: boolean;
+  posicion: number;
+  temaId: number;
+  respVisible: boolean;
+  preguntas: {
+    id: number;
+    pregunta: string;
+    respuestas: { id: number; respuesta: string; correcta: boolean }[];
+  }[];
+};
+
+type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | null;
 
 export default function EditarActividad() {
   const { id: cursoId, actividadId } = useParams<{
@@ -60,6 +77,7 @@ export default function EditarActividad() {
   const [ordenacion, setOrdenacion] = useState<OrdenacionDTO | null>(null);
   const [teoria, setTeoria] = useState<TeoriaDTO | null>(null);
   const [generalTest, setGeneralTest] = useState<GeneralTestMaestroDTO | null>(null);
+  const [tablero, setTablero] = useState<TableroDTO | null>(null);
 
   useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
@@ -86,23 +104,47 @@ export default function EditarActividad() {
             setLoading(false);
           })
           .catch(() => {
-            // 3. Intentar teoría
-            apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`)
+            // 3. Intentar tablero
+            apiFetch(`${apiBase}/api/tableros/${actividadId}`)
               .then((r) => r.json())
-              .then((data: TeoriaDTO) => {
-                setTeoria(data);
-                setKind('teoria');
+              .then((data: TableroDTO) => {
+                setTablero(data);
+                setKind('tablero');
+                setLoading(false);
               })
-              .catch((e) => {
-                const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
-                setError(msg);
-              })
-              .finally(() => setLoading(false));
+              .catch(() => {
+                // 4. Intentar teoría
+                apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`)
+                  .then((r) => r.json())
+                  .then((data: TeoriaDTO) => {
+                    setTeoria(data);
+                    setKind('teoria');
+                    setLoading(false);
+                  })
+                  .catch((e) => {
+                    const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
+                    setError(msg);
+                    setLoading(false);
+                  });
+              });
           });
       });
   }, [actividadId]);
 
-  const actividadIdNum = actividadId ? Number.parseInt(actividadId, 10) : NaN;
+  const tableroInitialValues: TableroFormInitialValues | undefined = tablero
+    ? {
+        titulo: tablero.titulo,
+        descripcion: tablero.descripcion,
+        puntuacion: tablero.puntuacion,
+        respVisible: tablero.respVisible,
+        tamano: tablero.tamano,
+        temaId: tablero.temaId,
+        preguntas: tablero.preguntas.map((p) => ({
+          pregunta: p.pregunta,
+          respuesta: p.respuestas[0]?.respuesta ?? '',
+        })),
+      }
+    : undefined;
 
   const ordenacionInitialValues: OrdenacionFormInitialValues | undefined = ordenacion
     ? {
@@ -130,6 +172,8 @@ export default function EditarActividad() {
         preguntas: generalTest.preguntas ?? [],
       }
     : undefined;
+
+  const actividadIdNum = actividadId ? Number.parseInt(actividadId, 10) : NaN;
 
   const renderForm = () => {
     if (kind === 'test' && generalTest) {
@@ -159,6 +203,16 @@ export default function EditarActividad() {
           actividadId={actividadIdNum}
           initialTitulo={teoria.titulo}
           initialDescripcion={teoria.descripcion ?? ''}
+        />
+      );
+    }
+
+    if (kind === 'tablero' && tablero) {
+      return (
+        <TableroForm
+          mode="edit"
+          tableroId={tableroInitialValues ? tablero.id : undefined}
+          initialValues={tableroInitialValues}
         />
       );
     }

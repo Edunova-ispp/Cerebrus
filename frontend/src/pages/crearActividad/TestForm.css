@@ -1,4 +1,4 @@
-.tf-form,
+﻿.tf-form,
 .tf-form * {
   font-family: 'Pixelify Sans', sans-serif;
   text-align: left;
@@ -8,13 +8,19 @@
 .tf-error {
   color: #c0392b;
   margin-top: 0;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
 }
 
 /* ── Header columns ──────────────────────────────────────────── */
 
 .tf-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: 24px;
+  padding-bottom: 20px;
+  margin-bottom: 4px;
 }
 
 .tf-col {
@@ -23,6 +29,44 @@
   gap: 12px;
   flex: 1 1 280px;
   min-width: 0;
+}
+
+.tf-label {
+  display: block;
+  font-weight: bold;
+  font-size: 0.95rem;
+  margin-bottom: 3px;
+}
+
+.tf-check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.tf-input {
+  width: 100%;
+  background: var(--color-accent);
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1rem;
+  color: #000;
+  transition: background 0.15s;
+}
+
+.tf-input:hover,
+.tf-input:focus {
+  outline: none;
+  background: var(--color-accent-dark);
+}
+
+.tf-input-sm {
+  width: 90px;
+  flex-shrink: 0;
 }
 
 .tf-img-preview {
@@ -35,20 +79,34 @@
   border-radius: 8px;
 }
 
+/* ── Help text ───────────────────────────────────────────────── */
+
+.tf-help {
+  font-size: 0.92rem;
+  line-height: 1.4;
+  margin: 0 0 16px 0;
+  color: #555;
+}
+
 /* ── Question blocks ─────────────────────────────────────────── */
 
 .tf-questions {
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 20px;
 }
 
 .tf-question-block {
-  background: #FFF8EE;
-  border: 2px solid #000;
-  border-radius: 10px;
-  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding: 16px 0;
+  border-bottom: 2px solid #000;
+}
+
+.tf-question-block:first-of-type {
+  border-top: 2px solid #000;
 }
 
 .tf-question-header {
@@ -58,25 +116,26 @@
 }
 
 .tf-question-label {
-  font-family: 'Pixelify Sans', sans-serif;
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
 }
 
 .tf-question-input {
   width: 100%;
-  background: #FFF;
+  background: var(--color-accent);
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 10px;
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1rem;
   color: #000;
+  transition: background 0.15s;
 }
 
+.tf-question-input:hover,
 .tf-question-input:focus {
   outline: none;
-  border-color: #7C4DFF;
+  background: var(--color-accent-dark);
 }
 
 /* ── Options ─────────────────────────────────────────────────── */
@@ -84,50 +143,53 @@
 .tf-options {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .tf-option {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #FFF;
-  border: 2px solid #000;
-  border-radius: 8px;
-  padding: 6px 10px;
+  padding: 4px 0;
+  border-radius: 6px;
   transition: background 0.15s;
 }
 
-.tf-option--correct {
-  background: #d4f7d4;
-  border-color: #27ae60;
-}
-
 .tf-option-letter {
-  font-family: 'Pixelify Sans', sans-serif;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 0.9rem;
   min-width: 22px;
   color: #555;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 .tf-option--correct .tf-option-letter {
-  color: #1a7a40;
+  color: #000;
 }
 
 .tf-option-input {
   flex: 1;
-  background: transparent;
-  border: none;
+  background: var(--color-accent);
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 6px 10px;
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1rem;
   color: #000;
   min-width: 0;
-  padding: 2px 0;
+  transition: background 0.15s;
 }
 
+.tf-option-input:hover,
 .tf-option-input:focus {
   outline: none;
+  background: var(--color-accent-dark);
+}
+
+.tf-option--correct .tf-option-input {
+  border-color: #000;
+  background: var(--color-accent-dark);
 }
 
 /* ── Buttons ─────────────────────────────────────────────────── */
@@ -135,24 +197,26 @@
 .tf-btn-correct {
   background: #eee;
   color: #555;
-  border: 2px solid #999;
+  border: 2px solid #bbb;
   border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 0.95rem;
+  padding: 5px 10px;
+  font-size: 1rem;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tf-btn-correct:hover {
-  background: #d4f7d4;
-  border-color: #27ae60;
+  background: var(--color-accent);
+  border-color: #000;
+  color: #000;
 }
 
 .tf-btn-correct--active {
-  background: #27ae60;
-  color: #fff;
-  border-color: #1a7a40;
+  background: var(--color-accent-dark);
+  color: #000;
+  border-color: #000;
 }
 
 .tf-btn-remove-option {
@@ -163,6 +227,7 @@
   padding: 4px 7px;
   font-size: 0.85rem;
   cursor: pointer;
+  flex-shrink: 0;
   transition: background 0.15s;
 }
 
@@ -176,7 +241,7 @@
   border: 2px solid #c0392b;
   border-radius: 8px;
   padding: 4px 10px;
-  font-size: 1rem;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: background 0.15s;
 }
@@ -187,23 +252,24 @@
 
 .tf-btn-add-option {
   align-self: flex-start;
-  background: transparent;
+  background: var(--color-accent);
   color: #000;
   border: 2px solid #000;
   border-radius: 8px;
-  padding: 5px 12px;
+  padding: 4px 12px;
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   cursor: pointer;
+  margin-left: 30px;
   transition: background 0.15s;
 }
 
 .tf-btn-add-option:hover {
-  background: #F5E6CC;
+  background: var(--color-accent-dark);
 }
 
 .tf-btn-add-question {
-  background: #F5D49A;
+  background: var(--color-accent);
   color: #000;
   border: 3px solid #000;
   border-radius: 12px;
@@ -213,12 +279,13 @@
   font-weight: bold;
   cursor: pointer;
   box-shadow: 4px 4px 0px #000;
-  transition: transform 0.1s;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
   align-self: flex-start;
-  margin-top: 8px;
+  margin-top: 16px;
 }
 
 .tf-btn-add-question:hover {
+  background: var(--color-accent-dark);
   transform: translate(-2px, -2px);
   box-shadow: 6px 6px 0px #000;
 }
