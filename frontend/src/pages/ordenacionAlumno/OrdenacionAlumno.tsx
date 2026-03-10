@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
+import kingImg from '../../assets/props/king.png';
+import mapaIcon from '../../assets/icons/mapa.svg';
 import './OrdenacionAlumno.css';
 
 type OrdenacionDTO = {
@@ -41,6 +43,11 @@ function isImageString(value: string): boolean {
   if (!trimmed) return false;
   if (/^data:image\//i.test(trimmed)) return true;
 
+  // Aceptar rutas relativas (Vite/NGINX) si parecen imagen por extensión.
+  // Ejemplos: /seed/ordenacion/html.svg, seed/ordenacion/html.svg
+  const pathLike = trimmed.split('#')[0]?.split('?')[0]?.toLowerCase() ?? '';
+  if (/\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(pathLike)) return true;
+
   try {
     const url = new URL(trimmed);
     const path = url.pathname.toLowerCase();
@@ -54,7 +61,6 @@ function moveItem<T>(items: readonly T[], fromIndex: number, toIndex: number): T
   if (fromIndex === toIndex) return [...items];
   if (fromIndex < 0 || fromIndex >= items.length) return [...items];
   if (toIndex < 0 || toIndex >= items.length) return [...items];
-
   const next = [...items];
   const [moved] = next.splice(fromIndex, 1);
   next.splice(toIndex, 0, moved);
@@ -77,7 +83,8 @@ export default function OrdenacionAlumno() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
   const [feedback, setFeedback] = useState<{ correcta: boolean; comentario?: string } | null>(null);
-
+  const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+  
   const ordenacionIdNum = useMemo(() => {
     if (!ordenacionId) return NaN;
     return Number.parseInt(ordenacionId, 10);
@@ -93,11 +100,8 @@ export default function OrdenacionAlumno() {
       if (!id) return;
       if (completedRef.current) return;
       if (abandonReportedRef.current) return;
-
       abandonReportedRef.current = true;
-      apiFetch(`/api/actividades-alumno/${id}/abandon`, { method: 'POST' }).catch(() => {
-        // Silencioso: no queremos bloquear el navigation/unmount por errores aquí.
-      });
+      apiFetch(`${apiBase}/api/actividades-alumno/${id}/abandon`, { method: 'POST' }).catch(() => {});
     };
   }, []);
 
@@ -118,24 +122,28 @@ export default function OrdenacionAlumno() {
       setFeedback(null);
 
       try {
-        const ordRes = await apiFetch(`/api/ordenaciones/${ordenacionIdNum}`);
+        const ordRes = await apiFetch(`${apiBase}/api/ordenaciones/${ordenacionIdNum}`);
         const ordData = (await ordRes.json()) as OrdenacionDTO;
         setOrdenacion(ordData);
         setItems(Array.isArray(ordData.valores) ? [...ordData.valores] : []);
 
         const alumnoId = getCurrentUserIdFromJwt();
-        if (!alumnoId) {
-          throw new Error('No se pudo identificar al alumno conectado. Inicia sesión de nuevo.');
-        }
+        if (!alumnoId) throw new Error('No se pudo identificar al alumno conectado. Inicia sesión de nuevo.');
 
-        // 1) ensure devuelve 0/1 (sin errores si no existe)
-        const ensureRes = await apiFetch(`/api/actividades-alumno/ensure/${ordData.id}`);
+        const ensureRes = await apiFetch(`${apiBase}/api/actividades-alumno/ensure/${ordData.id}`);
         const ensureValue = (await ensureRes.json()) as unknown;
         const exists = ensureValue === 1 || ensureValue === '1' || ensureValue === true;
 
-        if (!exists) {
-          // 2) Si no existe, lo creamos
-          const createAA = await apiFetch(`/api/actividades-alumno`, {
+        if (exists) {
+          const getAA = await apiFetch(`${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${ordData.id}`);
+          const aaData = (await getAA.json()) as ActividadAlumnoDTO;
+          if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+            setActividadAlumnoId(aaData.id);
+          } else {
+            throw new Error('Respuesta inválida al obtener ActividadAlumno');
+          }
+        } else {
+          const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
             method: 'POST',
             body: JSON.stringify({ alumnoId, actividadId: ordData.id }),
           });
@@ -144,15 +152,6 @@ export default function OrdenacionAlumno() {
             setActividadAlumnoId(aaData.id);
           } else {
             throw new Error('Respuesta inválida al crear ActividadAlumno');
-          }
-        } else {
-          // 3) Si existe, recuperamos el DTO para obtener el id
-          const getAA = await apiFetch(`/api/actividades-alumno/alumno/${alumnoId}/actividad/${ordData.id}`);
-          const aaData = (await getAA.json()) as ActividadAlumnoDTO;
-          if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
-            setActividadAlumnoId(aaData.id);
-          } else {
-            throw new Error('Respuesta inválida al obtener ActividadAlumno');
           }
         }
       } catch (e) {
@@ -175,7 +174,6 @@ export default function OrdenacionAlumno() {
       setError('No se ha cargado la actividad de ordenación');
       return;
     }
-
     if (!actividadAlumnoId) {
       setError('No se ha podido inicializar la actividad del alumno');
       return;
@@ -183,7 +181,7 @@ export default function OrdenacionAlumno() {
 
     setSubmitting(true);
     try {
-      const res = await apiFetch('/api/respuestas-alumno-ordenacion', {
+      const res = await apiFetch(`${apiBase}/api/respuestas-alumno-ordenacion`, {
         method: 'POST',
         body: JSON.stringify({
           actividadAlumno: { id: actividadAlumnoId },
@@ -191,8 +189,19 @@ export default function OrdenacionAlumno() {
           valoresAlum: items,
         }),
       });
+if (!res.ok) throw new Error('Error al guardar la respuesta');
+
 
       const data = (await res.json()) as RespAlumnoOrdenacionCreateResponse;
+      const respuestaId = data?.respAlumnoOrdenacion?.id;
+      if (respuestaId) {
+        // 3. LLAMADA CRÍTICA: Corregir automáticamente la actividad (PUT)
+        // Mandamos el ID en un array tal como espera el controlador
+        await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
+          method: 'PUT',
+          body: JSON.stringify([respuestaId]),
+        });
+      }
       const correcta = Boolean(data?.respAlumnoOrdenacion?.correcta);
       const comentario = typeof data?.comentario === 'string' ? data.comentario : '';
 
@@ -238,73 +247,99 @@ export default function OrdenacionAlumno() {
         )}
 
         {ordenacion && (
+          
           <>
             <div className="ord-top">
-              <button className="ord-exit-btn" type="button" onClick={() => navigate(-1)}>
-                Salir
+
+              <button className="ord-map-btn" type="button" onClick={() => navigate(-1)}>
+                <img src={mapaIcon} alt="Mapa" className="ord-map-icon" />
+                <span>Mapa</span>
               </button>
 
+              {/* Banner título */}
               <div className="ord-title-banner">
                 <h1 className="ord-title">{ordenacion.titulo}</h1>
-              </div>
-            </div>
-
-            {ordenacion.descripcion && <p className="ord-description">{ordenacion.descripcion}</p>}
-
-            <div className="ord-items">
-              {items.map((value, index) => (
-                <div key={`${value}-${index}`} className="ord-item">
-                  <div className="ord-item-index">{index + 1}.</div>
-
-                  <div className="ord-item-value">
-                    {isImageString(value) ? (
-                      <img src={value} alt={`Elemento ${index + 1}`} className="ord-item-img" />
-                    ) : (
-                      <div className="ord-item-text">{value}</div>
-                    )}
-                  </div>
-
-                  <div className="ord-item-actions">
-                    <button
-                      className="ord-arrow-btn"
-                      type="button"
-                      disabled={index === 0}
-                      onClick={() => setItems((prev) => moveItem(prev, index, index - 1))}
-                    >
-                      ↑
-                    </button>
-                    <button
-                      className="ord-arrow-btn"
-                      type="button"
-                      disabled={index === items.length - 1}
-                      onClick={() => setItems((prev) => moveItem(prev, index, index + 1))}
-                    >
-                      ↓
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="ord-bottom">
-              <div className="ord-bottom-inner">
-                {feedback && (
-                  <div className="ord-feedback">
-                    <div>{feedback.correcta ? 'Tu respuesta es correcta.' : 'Tu respuesta es incorrecta.'}</div>
-                    {ordenacion.respVisible && feedback.comentario && <div>{feedback.comentario}</div>}
-                  </div>
+                {ordenacion.descripcion && (
+                  <p className="ord-subtitle">{ordenacion.descripcion}</p>
                 )}
-
-                <button
-                  className="ca-btn-guardar"
-                  type="button"
-                  disabled={submitting || items.length === 0 || !actividadAlumnoId}
-                  onClick={handleSubmit}
-                >
-                  {submitting ? 'Enviando...' : 'Enviar'}
-                </button>
               </div>
             </div>
+
+            {/* Layout: rey izquierda, items derecha */}
+<div className="ord-content-row">
+
+  {/* Columna izquierda: botón salir + rey + bocadillo */}
+  <div className="ord-left-col">
+
+    <div className="ord-king-row">
+      <div className="ord-speech-bubble">
+        <span>Esto es un caos</span>
+        <span>Ordena las casillas</span>
+        <span>Ordena el reino</span>
+      </div>
+      <img src={kingImg} alt="Rey" className="ord-king-img" />
+    </div>
+  </div>
+
+  {/* Columna derecha: items + botón enviar */}
+  <div>
+    <div className="ord-items">
+      {items.map((value, index) => (
+        <div key={`${value}-${index}`} className="ord-item">
+          <div className="ord-item-index">{index + 1}.</div>
+
+          <div className="ord-item-value">
+            {isImageString(value) ? (
+              <img src={value} alt={`Elemento ${index + 1}`} className="ord-item-img" />
+            ) : (
+              <div className="ord-item-text">{value}</div>
+            )}
+          </div>
+
+          <div className="ord-item-actions">
+            <button
+              className="ord-arrow-btn"
+              type="button"
+              disabled={index === 0}
+              onClick={() => setItems((prev) => moveItem(prev, index, index - 1))}
+            >
+              ↑
+            </button>
+            <button
+              className="ord-arrow-btn"
+              type="button"
+              disabled={index === items.length - 1}
+              onClick={() => setItems((prev) => moveItem(prev, index, index + 1))}
+            >
+              ↓
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div className="ord-bottom">
+      <div className="ord-bottom-inner">
+        {feedback && (
+          <div className="ord-feedback">
+            <div>{feedback.correcta ? 'Tu respuesta es correcta.' : 'Tu respuesta es incorrecta.'}</div>
+            {ordenacion.respVisible && feedback.comentario && <div>{feedback.comentario}</div>}
+          </div>
+        )}
+        <button
+          className="ca-btn-guardar"
+          type="button"
+          disabled={submitting || items.length === 0 || !actividadAlumnoId}
+          onClick={handleSubmit}
+        >
+          {submitting ? 'Enviando...' : 'Enviar'}
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+            
           </>
         )}
 

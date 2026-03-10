@@ -2,7 +2,7 @@ name: PR Discord open
 
 on:
   pull_request:
-    branches: ["trunk"]
+    branches: ["develop"]
     types: [opened, reopened]
 
 permissions:

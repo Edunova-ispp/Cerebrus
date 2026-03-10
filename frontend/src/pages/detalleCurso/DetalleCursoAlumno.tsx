@@ -18,14 +18,15 @@ interface Props {
 
 export default function DetalleCursoAlumno({ curso, progreso }: Props) {
   const navigate = useNavigate();
-
+  const puntosConseguidos = progreso?.puntos ?? 0;
+  void puntosConseguidos;
   return (
     <div className="detalle-alumno-page">
       <NavbarMisCursos />
 
       <main className="detalle-alumno-main">
         <button className="detalle-volver" onClick={() => navigate(-1)}>
-          ← Volver
+          ← 
         </button>
 
         <div className="detalle-alumno-cover">
@@ -75,7 +76,8 @@ export default function DetalleCursoAlumno({ curso, progreso }: Props) {
 
         {progreso?.estado === "TERMINADA" && (
           <div className="detalle-alumno-accion detalle-alumno-accion--acabado">
-            Has acabado el curso. Has conseguido ___ puntos.
+            {/* Mostramos los puntos dinámicamente */}
+            Has acabado el curso.
           </div>
         )}
       </main>

@@ -32,6 +32,7 @@ public class RespAlumnoGeneralController {
     @PostMapping
     public ResponseEntity<RespAlumnoGeneralCreateResponse> crearRespAlumnoGeneral(@RequestBody @Valid RespAlumnoGeneralRequest request) {
         RespAlumnoGeneralCreateResponse respAlumnoGeneralCreada = respAlumnoGeneralService.crearRespAlumnoGeneral(
+    
             request.getActividadAlumnoId(),
             request.getRespuestaId(),
             request.getPreguntaId()

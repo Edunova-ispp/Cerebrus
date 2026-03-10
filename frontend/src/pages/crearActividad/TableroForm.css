@@ -1,0 +1,232 @@
+.tbl-form,
+.tbl-form * {
+  font-family: 'Pixelify Sans', sans-serif;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+/* ── Datos básicos ─────────────────────────────────────────── */
+
+.tbl-header {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.tbl-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.tbl-label {
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.tbl-label--check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.tbl-input {
+  width: 100%;
+  background: var(--color-accent);
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1rem;
+  color: #000;
+  transition: background 0.15s;
+}
+
+.tbl-input:hover {
+  background: var(--color-accent-dark);
+}
+
+.tbl-input:focus {
+  outline: none;
+  background: var(--color-accent-dark);
+}
+
+.tbl-textarea {
+  width: 100%;
+  background: var(--color-accent);
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1rem;
+  color: #000;
+  resize: vertical;
+  transition: background 0.15s;
+}
+
+.tbl-textarea:hover {
+  background: var(--color-accent-dark);
+}
+
+.tbl-textarea:focus {
+  outline: none;
+  background: var(--color-accent-dark);
+}
+
+/* ── Secciones ─────────────────────────────────────────────── */
+
+.tbl-section {
+  margin-bottom: 28px;
+}
+
+.tbl-section-title {
+  font-weight: bold;
+  font-size: 1.05rem;
+  margin: 0 0 14px 0;
+}
+
+/* ── Selector de tamaño ────────────────────────────────────── */
+
+.tbl-tamano-selector {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.tbl-tamano-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 26px;
+  background: #FFF8EE;
+  border: 3px solid #000;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Pixelify Sans', sans-serif;
+  transition: transform 0.12s, box-shadow 0.12s, background 0.15s;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.tbl-tamano-btn:hover {
+  background: var(--color-accent);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #000;
+}
+
+.tbl-tamano-btn--active {
+  background: var(--color-accent-dark);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #000;
+}
+
+.tbl-tamano-label {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+.tbl-tamano-sub {
+  font-size: 0.82rem;
+  color: #555;
+}
+
+/* ── Mini tablero (preview) ────────────────────────────────── */
+
+.tbl-board-preview {
+  display: grid;
+  gap: 2px;
+  padding: 3px;
+  background: #000;
+  border-radius: 4px;
+}
+
+.tbl-board-cell {
+  width: 18px;
+  height: 18px;
+  background: #f5f0e8;
+  border-radius: 1px;
+}
+
+.tbl-board-cell--dark {
+  background: #4a3728;
+}
+
+/* ── Lista de preguntas ────────────────────────────────────── */
+
+.tbl-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.tbl-q-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.tbl-q-row--header {
+  padding-bottom: 6px;
+  border-bottom: 2px solid #000;
+  margin-bottom: 2px;
+}
+
+.tbl-q-row:not(.tbl-q-row--header):hover {
+  background: rgba(255, 242, 148, 0.25);
+  border-radius: 6px;
+}
+
+.tbl-q-col-label {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.tbl-q-number {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: bold;
+  text-align: center;
+}
+
+.tbl-respuesta-input {
+  background: var(--color-accent) !important;
+  border-color: #000 !important;
+}
+
+.tbl-respuesta-input:hover {
+  background: var(--color-accent-dark) !important;
+}
+
+.tbl-respuesta-input:focus {
+  background: var(--color-accent-dark) !important;
+  border-color: #000 !important;
+}
+
+/* ── Feedback ──────────────────────────────────────────────── */
+
+.tbl-error {
+  color: #c0392b;
+  margin: 8px 0;
+  font-size: 0.95rem;
+}
+
+.tbl-success {
+  color: #27ae60;
+  margin: 8px 0;
+  font-size: 0.95rem;
+}
+
+/* ── Footer ────────────────────────────────────────────────── */
+
+.tbl-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}

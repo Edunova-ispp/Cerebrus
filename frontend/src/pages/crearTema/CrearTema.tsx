@@ -12,7 +12,7 @@ export default function CrearTema() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
@@ -30,7 +30,8 @@ export default function CrearTema() {
 
     setLoading(true);
     try {
-      await apiFetch(`/api/temas?maestroId=${maestroId}`, {
+      const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+      await apiFetch(`${apiBase}/api/temas?maestroId=${maestroId}`, {
         method: 'POST',
         body: JSON.stringify({
           titulo: titulo.trim(),
@@ -52,7 +53,7 @@ export default function CrearTema() {
       <main className="crear-tema-main">
         {/* Botón Volver alineado a la izquierda */}
         <button className="detalle-volver" onClick={() => navigate(-1)}>
-          ← Volver
+          ← 
         </button>
 
         <h2 className="welcome-text">Bienvenido al creador de temas</h2>

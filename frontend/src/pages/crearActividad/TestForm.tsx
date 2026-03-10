@@ -172,7 +172,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
 
   // ── Submit ────────────────────────────────────────────────────────────────
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
@@ -187,9 +187,10 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
 
     setLoading(true);
     try {
+      const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
       if (mode === 'create') {
         // Step 1 – create the General (test) shell with no questions
-        const generalRes = await apiFetch('/api/generales/test', {
+        const generalRes = await apiFetch(`${apiBase}/api/generales/test`, {
           method: 'POST',
           body: JSON.stringify({
             titulo: titulo.trim(),
@@ -206,7 +207,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
 
         // Step 2 – create questions sequentially (each must reference the general id)
         for (const q of questions) {
-          const pregRes = await apiFetch('/api/preguntas', {
+          const pregRes = await apiFetch(`${apiBase}/api/preguntas`, {
             method: 'POST',
             body: JSON.stringify({
               pregunta: q.text.trim(),
@@ -219,7 +220,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
           // Step 3 – create options for this question in parallel
           await Promise.all(
             q.options.map((opt) =>
-              apiFetch('/api/respuestas', {
+              apiFetch(`${apiBase}/api/respuestas`, {
                 method: 'POST',
                 body: JSON.stringify({
                   respuesta: opt.text.trim(),
@@ -233,7 +234,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
         }
       } else {
         // Edit – metadata
-        await apiFetch(`/api/generales/update/${generalId}`, {
+        await apiFetch(`${apiBase}/api/generales/update/${generalId}`, {
           method: 'PUT',
           body: JSON.stringify({
             titulo: titulo.trim(),
@@ -252,14 +253,14 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
         const currentQuestionIds = new Set(questions.filter((q) => q.id).map((q) => q.id!));
         for (const orig of originalQuestionsRef.current) {
           if (!currentQuestionIds.has(orig.id)) {
-            await apiFetch(`/api/preguntas/delete/${orig.id}`, { method: 'DELETE' });
+            await apiFetch(`${apiBase}/api/preguntas/delete/${orig.id}`, { method: 'DELETE' });
           }
         }
 
         for (const q of questions) {
           if (q.id) {
             // Existing question – update text
-            await apiFetch(`/api/preguntas/update/${q.id}`, {
+            await apiFetch(`${apiBase}/api/preguntas/update/${q.id}`, {
               method: 'PUT',
               body: JSON.stringify({ pregunta: q.text.trim(), imagen: null }),
             });
@@ -270,7 +271,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
             // Delete removed options
             for (const origR of origQ?.respuestas ?? []) {
               if (!currentOptIds.has(origR.id)) {
-                await apiFetch(`/api/respuestas/delete/${origR.id}`, { method: 'DELETE' });
+                await apiFetch(`${apiBase}/api/respuestas/delete/${origR.id}`, { method: 'DELETE' });
               }
             }
 
@@ -278,7 +279,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
             await Promise.all(
               q.options.map((opt) => {
                 if (opt.id) {
-                  return apiFetch(`/api/respuestas/update/${opt.id}`, {
+                  return apiFetch(`${apiBase}/api/respuestas/update/${opt.id}`, {
                     method: 'PUT',
                     body: JSON.stringify({
                       respuesta: opt.text.trim(),
@@ -287,7 +288,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
                     }),
                   });
                 }
-                return apiFetch('/api/respuestas', {
+                return apiFetch(`${apiBase}/api/respuestas`, {
                   method: 'POST',
                   body: JSON.stringify({
                     respuesta: opt.text.trim(),
@@ -300,14 +301,14 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
             );
           } else {
             // New question – create then create all its options
-            const pregRes = await apiFetch('/api/preguntas', {
+            const pregRes = await apiFetch(`${apiBase}/api/preguntas`, {
               method: 'POST',
               body: JSON.stringify({ pregunta: q.text.trim(), imagen: null, actividadId: generalId }),
             });
             const newPregId = (await pregRes.json()) as number;
             await Promise.all(
               q.options.map((opt) =>
-                apiFetch('/api/respuestas', {
+                apiFetch(`${apiBase}/api/respuestas`, {
                   method: 'POST',
                   body: JSON.stringify({
                     respuesta: opt.text.trim(),
@@ -338,99 +339,84 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
       {error && <p className="ca-text tf-error">{error}</p>}
 
       {/* ── TOP: Metadata ── */}
-      <div className="ca-contenedor-blanco tf-header">
+      <div className="tf-header">
         <div className="tf-col">
           <div>
-            <label className="ca-text" htmlFor="tf-titulo">
-              Título
-            </label>
+            <label className="tf-label" htmlFor="tf-titulo">Título *</label>
             <input
               type="text"
               id="tf-titulo"
+              className="tf-input"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
-              style={{ width: '100%' }}
+              placeholder="Título del test"
             />
           </div>
 
           <div>
-            <label className="ca-text" htmlFor="tf-descripcion">
-              Descripción
-            </label>
+            <label className="tf-label" htmlFor="tf-descripcion">Descripción</label>
             <textarea
               id="tf-descripcion"
+              className="tf-input"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               rows={3}
-              style={{ width: '100%' }}
+              placeholder="Descripción opcional"
             />
           </div>
 
           <div>
-            <label className="ca-text" htmlFor="tf-imagen">
-              URL de imagen (opcional)
-            </label>
+            <label className="tf-label" htmlFor="tf-imagen">URL de imagen (opcional)</label>
             <input
               type="url"
               id="tf-imagen"
+              className="tf-input"
               value={imagen}
               onChange={(e) => setImagen(e.target.value)}
               placeholder="https://..."
-              style={{ width: '100%' }}
             />
             {imagen.trim() && (
               <img
                 src={imagen.trim()}
                 alt="Preview"
                 className="tf-img-preview"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-                onLoad={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'block';
-                }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                onLoad={(e) => { (e.target as HTMLImageElement).style.display = 'block'; }}
               />
             )}
           </div>
         </div>
 
         <div className="tf-col">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label className="ca-text" htmlFor="tf-puntuacion" style={{ whiteSpace: 'nowrap' }}>
-              Puntuación
-            </label>
+          <div>
+            <label className="tf-label" htmlFor="tf-puntuacion">Puntuación *</label>
             <input
               type="number"
               id="tf-puntuacion"
+              className="tf-input tf-input-sm"
               value={puntuacion}
               onChange={(e) => setPuntuacion(e.target.value)}
-              style={{ width: 90 }}
             />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <label className="tf-check-label">
             <input
               type="checkbox"
-              id="tf-respVisible"
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            <label className="ca-text" htmlFor="tf-respVisible">
-              Correcciones visibles
-            </label>
-          </div>
+            Mostrar correcciones al alumno
+          </label>
 
           {respVisible && (
             <div>
-              <label className="ca-text" htmlFor="tf-comentarios">
-                Comentarios
-              </label>
+              <label className="tf-label" htmlFor="tf-comentarios">Comentarios</label>
               <input
                 type="text"
                 id="tf-comentarios"
+                className="tf-input"
                 value={comentariosRespVisible}
                 onChange={(e) => setComentariosRespVisible(e.target.value)}
-                style={{ width: '100%' }}
               />
             </div>
           )}
@@ -438,13 +424,9 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
       </div>
 
       {/* ── BOTTOM: Questions ── */}
-      <div
-        className="ca-contenedor-blanco tf-questions"
-        style={{ marginTop: 16, flexDirection: 'column', alignItems: 'stretch' }}
-      >
-          <p className="ca-ordenacion-help" style={{ marginTop: 0, marginBottom: 12 }}>
-            Añade las preguntas y opciones. Marca cuál es la correcta con{' '}
-            <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
+      <div className="tf-questions">
+          <p className="tf-help">
+            Añade las preguntas y opciones. Marca cuál es la correcta con <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
           </p>
 
           {questions.map((q, qi) => (
@@ -518,7 +500,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
           </button>
         </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+      <div className="ca-form-footer">
         <button className="ca-btn-guardar" type="submit" disabled={loading}>
           {loading ? 'Guardando...' : 'Guardar'}
         </button>

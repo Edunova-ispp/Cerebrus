@@ -4,6 +4,10 @@ import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 import './TestAlumno.css';
+import mapaIcon from '../../assets/icons/mapa.svg';
+import dragonImg from '../../assets/props/dragon.png';
+import caballeroImg from '../../assets/props/caballero.png';
+
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -33,6 +37,7 @@ type GeneralTestDTO = {
 };
 
 type RespAlumnoGeneralCreateResponse = {
+  readonly id: number;
   readonly correcta: boolean;
   readonly comentario: string;
 };
@@ -78,7 +83,7 @@ export default function TestAlumno() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-
+  const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
   // Pagination: which question is currently shown
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -98,7 +103,7 @@ export default function TestAlumno() {
       const id = actividadAlumnoIdRef.current;
       if (!id || completedRef.current || abandonReportedRef.current) return;
       abandonReportedRef.current = true;
-      apiFetch(`/api/actividades-alumno/${id}/abandon`, { method: 'POST' }).catch(() => {});
+      apiFetch(`${apiBase}/api/actividades-alumno/${id}/abandon`, { method: 'POST' }).catch(() => {});
     };
   }, []);
 
@@ -120,7 +125,7 @@ export default function TestAlumno() {
 
       try {
         // 1. Load test (respuestas already shuffled by backend)
-        const testRes = await apiFetch(`/api/generales/test/${testIdNum}`);
+        const testRes = await apiFetch(`${apiBase}/api/generales/test/${testIdNum}`);
         const testData = (await testRes.json()) as GeneralTestDTO;
         setTest(testData);
 
@@ -130,12 +135,22 @@ export default function TestAlumno() {
           throw new Error('No se pudo identificar al alumno. Inicia sesión de nuevo.');
         }
 
-        const ensureRes = await apiFetch(`/api/actividades-alumno/ensure/${testData.id}`);
+        const ensureRes = await apiFetch(`${apiBase}/api/actividades-alumno/ensure/${testData.id}`);
         const ensureValue = (await ensureRes.json()) as unknown;
         const exists = ensureValue === 1 || ensureValue === '1' || ensureValue === true;
 
-        if (!exists) {
-          const createAA = await apiFetch('/api/actividades-alumno', {
+        if (exists) {
+          const getAA = await apiFetch(
+            `${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${testData.id}`,
+          );
+          const aaData = (await getAA.json()) as ActividadAlumnoDTO;
+          if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+            setActividadAlumnoId(aaData.id);
+          } else {
+            throw new Error('Respuesta inválida al obtener ActividadAlumno');
+          }
+        } else {
+          const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
             method: 'POST',
             body: JSON.stringify({ alumnoId, actividadId: testData.id }),
           });
@@ -144,16 +159,6 @@ export default function TestAlumno() {
             setActividadAlumnoId(aaData.id);
           } else {
             throw new Error('Respuesta inválida al crear ActividadAlumno');
-          }
-        } else {
-          const getAA = await apiFetch(
-            `/api/actividades-alumno/alumno/${alumnoId}/actividad/${testData.id}`,
-          );
-          const aaData = (await getAA.json()) as ActividadAlumnoDTO;
-          if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
-            setActividadAlumnoId(aaData.id);
-          } else {
-            throw new Error('Respuesta inválida al obtener ActividadAlumno');
           }
         }
       } catch (e) {
@@ -203,11 +208,12 @@ export default function TestAlumno() {
     setSubmitting(true);
 
     try {
+      const respuestasIds: number[] = [];
       const resultEntries = await Promise.all(
         test.preguntas.map(async (p) => {
           const selectedId = selections.get(p.id)!;
-          const selectedText = p.respuestas.find((r) => r.id === selectedId)?.respuesta ?? '';
-          const res = await apiFetch('/api/respuestas-alumno-general', {
+
+          const res = await apiFetch(`${apiBase}/api/respuestas-alumno-general`, {
             method: 'POST',
             body: JSON.stringify({
               actividadAlumnoId,
@@ -216,14 +222,25 @@ export default function TestAlumno() {
             }),
           });
           const data = (await res.json()) as RespAlumnoGeneralCreateResponse;
-          const result: QuestionResult = {
-            correcta: Boolean(data?.correcta),
-            comentario: typeof data?.comentario === 'string' ? data.comentario : '',
-            selectedText,
-          };
-          return [p.id, result] as [number, QuestionResult];
-        }),
-      );
+          if (data.id) {
+      respuestasIds.push(data.id);
+    }
+         return [p.id, {
+      correcta: Boolean(data?.correcta),
+      comentario: data?.comentario || '',
+      selectedText: p.respuestas.find((r) => r.id === selectedId)?.respuesta ?? '',
+    }] as [number, QuestionResult];
+  })
+);
+
+      if (respuestasIds.length > 0) {
+    await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
+      method: 'PUT',
+      body: JSON.stringify(respuestasIds),
+    });
+}
+
+      
 
       completedRef.current = true;
       const resultsMap = new Map<number, QuestionResult>(resultEntries);
@@ -263,6 +280,44 @@ export default function TestAlumno() {
 
   const currentPregunta = test?.preguntas[currentIndex];
 
+  let lastQuestionButton: React.ReactNode;
+  if (submitted) {
+    lastQuestionButton = (
+      <button
+        type="button"
+        className="ca-btn-guardar"
+        onClick={() => navigate(-1)}
+      >
+        Volver al curso
+      </button>
+    );
+  } else {
+    lastQuestionButton = (
+      <button
+        type="button"
+        className="ta-nav-btn ta-nav-btn--submit"
+        onClick={handleSubmit}
+        disabled={submitting || !allAnswered || !actividadAlumnoId}
+        title={
+          allAnswered
+            ? ''
+            : 'Responde todas las preguntas antes de enviar'
+        }
+      >
+        {submitting ? 'Enviando...' : '¡Enviar respuestas!'}
+      </button>
+    );
+  }
+
+  let answeredBadgeText: string | null = null;
+  if (currentPregunta && selections.has(currentPregunta.id)) {
+    if (submitted) {
+      answeredBadgeText = results.get(currentPregunta.id)?.correcta ? '✓ Correcta' : '✗ Incorrecta';
+    } else {
+      answeredBadgeText = '✓ Respondida';
+    }
+  }
+
   return (
     <div className="test-alumno-page">
       <NavbarMisCursos />
@@ -278,8 +333,9 @@ export default function TestAlumno() {
           <>
             {/* ── Header ── */}
             <div className="ta-top">
-              <button className="ta-exit-btn" type="button" onClick={() => navigate(-1)}>
-                Salir
+              <button className="ta-map-btn" type="button" onClick={() => navigate(-1)}>
+                <img src={mapaIcon} alt="Mapa" className="ta-map-icon" />
+                <span>Mapa</span>
               </button>
               <div className="ta-title-banner">
                 <h1 className="ta-title">{test.titulo}</h1>
@@ -301,7 +357,12 @@ export default function TestAlumno() {
 
             {/* ── Battle progress bar ── */}
             <div className="ta-battle-bar">
-              <span className="ta-wizard" title="Mago">🧙</span>
+              <img 
+    src={caballeroImg} 
+    alt="Caballero" 
+    className="ta-knight-img" 
+    title="Caballero" 
+  />
               <div className="ta-progress-track">
                 <div
                   className="ta-progress-fill"
@@ -314,12 +375,11 @@ export default function TestAlumno() {
                   />
                 )}
               </div>
-              <span
-                className={`ta-dragon${dragonReached ? ' ta-dragon--shaking' : ''}`}
-                title="Dragón"
-              >
-                🐉
-              </span>
+              <img 
+    src={dragonImg} 
+    alt="Dragón" 
+    className={`ta-dragon-img ${dragonReached ? ' ta-dragon--shaking' : ''}`}
+  />
             </div>
 
             {/* ── Question counter ── */}
@@ -329,11 +389,7 @@ export default function TestAlumno() {
               </span>
               {selections.has(currentPregunta.id) && (
                 <span className="ta-answered-badge">
-                  {submitted
-                    ? results.get(currentPregunta.id)?.correcta
-                      ? '✓ Correcta'
-                      : '✗ Incorrecta'
-                    : '✓ Respondida'}
+                  {answeredBadgeText}
                 </span>
               )}
             </div>
@@ -405,33 +461,11 @@ export default function TestAlumno() {
               </button>
 
               {isLastQuestion ? (
-                submitted ? (
-                  <button
-                    type="button"
-                    className="ta-nav-btn ta-nav-btn--finish"
-                    onClick={() => navigate(-1)}
-                  >
-                    Volver al curso
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="ta-nav-btn ta-nav-btn--submit"
-                    onClick={handleSubmit}
-                    disabled={submitting || !allAnswered || !actividadAlumnoId}
-                    title={
-                      !allAnswered
-                        ? 'Responde todas las preguntas antes de enviar'
-                        : ''
-                    }
-                  >
-                    {submitting ? 'Enviando...' : '¡Enviar respuestas!'}
-                  </button>
-                )
+                lastQuestionButton
               ) : (
                 <button
                   type="button"
-                  className="ta-nav-btn ta-nav-btn--next"
+                  className="ca-btn-guardar"
                   onClick={handleNext}
                 >
                   Siguiente →

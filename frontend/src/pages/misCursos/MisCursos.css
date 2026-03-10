@@ -52,10 +52,11 @@
 }
 
 .join-input {
-  background: #FFF;
-  border: 2px solid #C4A26C;
-  border-radius: 20px;
+  background: var(--color-accent);
+  border: 2px solid #000000;
+  border-radius: 10px;
   color: #000;
+  box-shadow: 2px 2px 0px #000000;
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1.1rem;
   padding: 6px 12px;
@@ -64,10 +65,11 @@
 }
 
 .join-btn {
-  background: #E8D5B5;
+  background: var(--color-accent);
   color: #000;
   border: 2px solid #000;
-  border-radius: 20px;
+  border-radius: 10px;
+  box-shadow: 2px 2px 0px #000000;
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1.1rem;
   padding: 6px 16px;

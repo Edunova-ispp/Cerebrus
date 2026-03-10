@@ -66,9 +66,13 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         }
 
         RespAlumnoGeneral respAlumnoGeneralEntity = new RespAlumnoGeneral(correcta, actividadAlumno, respuestaTexto, pregunta);
-        respAlumnoGeneralRepository.save(respAlumnoGeneralEntity);
-        return new RespAlumnoGeneralCreateResponse(correcta, comentariosRespVisible);
-    }
+    
+    // IMPORTANTE: Guardamos y capturamos la entidad persistida (que ya tiene ID)
+    RespAlumnoGeneral guardada = respAlumnoGeneralRepository.save(respAlumnoGeneralEntity);
+
+    // Pasamos guardada.getId() al constructor
+    return new RespAlumnoGeneralCreateResponse(guardada.getId(), correcta, comentariosRespVisible);
+}
 
     @Override
     @Transactional(readOnly = true)
@@ -111,6 +115,25 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
                 break;
             }
         }
+
+        return esCorrecta;
+    }
+
+    public boolean corregirRespuestaAlumnoGeneralTest(Long id) {
+        RespAlumnoGeneral respuestaAlumno = respAlumnoGeneralRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("RespuestaAlumnoGeneral", "id", id));
+        List<Respuesta> respuestas = respuestaService.encontrarRespuestasPorPreguntaId(respuestaAlumno.getPregunta().getId());
+        Boolean esCorrecta = false;
+        System.out.println("Respuesta del alumno: " + respuestaAlumno.getRespuesta());
+        for (Respuesta r : respuestas) {
+                System.out.println("Respuesta correcta: " + r.getRespuesta() + " - Correcta: " + r.getCorrecta());
+                if(r.getRespuesta().equals(respuestaAlumno.getRespuesta()) ) {
+                   esCorrecta = true;
+                }
+        }
+        
+           
+        
 
         return esCorrecta;
     }

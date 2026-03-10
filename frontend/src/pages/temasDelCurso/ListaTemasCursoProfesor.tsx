@@ -16,7 +16,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
   const [temaSeleccionado, setTemaSeleccionado] = useState<Tema | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
   // Si no llegó curso como prop, lo carga por el id de la URL
   useEffect(() => {
     if (cursoProp) {
@@ -24,13 +24,18 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
       return;
     }
     if (!id) return;
-    apiFetch("/api/cursos")
+    setLoading(true);
+    apiFetch(`${apiBase}/api/cursos`)
       .then((r) => r.json())
       .then((data: Curso[]) => {
         const encontrado = data.find((c) => String(c.id) === id) ?? null;
+        if (!encontrado) {
+          setError("Curso no encontrado o no pertenece al maestro");
+        }
         setCurso(encontrado);
       })
-      .catch(() => setError("Error cargando el curso"));
+      .catch(() => setError("Error cargando el curso"))
+      .finally(() => setLoading(false));
   }, [id, cursoProp]);
 
   // Carga temas cuando ya tenemos el curso
@@ -38,7 +43,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
     if (!curso) return;
     setLoading(true);
     setError(null);
-    apiFetch(`/api/temas/curso/${curso.id}/maestro`)
+    apiFetch(`${apiBase}/api/temas/curso/${curso.id}/maestro`)
       .then((r) => r.json())
       .then((data) => {
         const lista: Tema[] = Array.isArray(data) ? data : [];
@@ -53,7 +58,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
 
   const handleEliminarTema = async (temaId: number) => {
     try {
-      await apiFetch(`/api/temas/${temaId}`, { method: 'DELETE' });
+      await apiFetch(`${apiBase}/api/temas/${temaId}`, { method: 'DELETE' });
       // Elimina el tema del estado local
       setTemas(prev => {
         const nuevaLista = prev.filter(t => t.id !== temaId);
@@ -70,7 +75,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
 
   const handleEliminarActividad = async (actividadId: number) => {
   try {
-    await apiFetch(`/api/actividades/delete/${actividadId}`, { method: 'DELETE' });
+    await apiFetch(`${apiBase}/api/actividades/delete/${actividadId}`, { method: 'DELETE' });
     setTemaSeleccionado(prev => {
       if (!prev) return prev;
       return {
@@ -91,7 +96,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
 
       <main className="ltp-main">
         <button className="ltp-volver" onClick={() => navigate(`/cursos/${id ?? curso?.id}`)}>
-          ← Volver a información del curso
+          ← 
         </button>
 
         <h1 className="ltp-titulo">{curso?.titulo}</h1>
@@ -114,6 +119,9 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp }: Props) {
                         temaSeleccionado?.id === tema.id ? " ltp-item--activo" : ""
                       }`}
                       onClick={() => setTemaSeleccionado(tema)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setTemaSeleccionado(tema); }}
+                      role="button"
+                      tabIndex={0}
                     >
                       <span className="ltp-item-titulo">{tema.titulo}</span>
                       <div className="ltp-item-acciones">
