@@ -16,17 +16,17 @@ public class TableroDTO {
     private final Integer puntuacion;
     private final Boolean tamano;
     private final Integer posicion;
-    private final Long TemaId;
+    private final Long temaId;
     private final Boolean respVisible;
     private final List<PreguntaDTO> preguntas;
-    public TableroDTO(Long id, String titulo, String descripcion, Boolean tamano, Integer posicion, Integer puntuacion, Boolean respVisible, Long TemaId, List<PreguntaDTO> preguntas) {
+    public TableroDTO(Long id, String titulo, String descripcion, Boolean tamano, Integer posicion, Integer puntuacion, Boolean respVisible, Long temaId, List<PreguntaDTO> preguntas) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.puntuacion = puntuacion;
         this.tamano = tamano; // Verdadero para 3x3, falso para 4x4
         this.posicion = posicion;
-        this.TemaId = TemaId;
+        this.temaId = temaId;
         this.respVisible = respVisible;
         this.preguntas = preguntas;
     }

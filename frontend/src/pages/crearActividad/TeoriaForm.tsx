@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import './OrdenacionForm.css';
 
 interface Props {
   mode?: 'create' | 'edit';
@@ -66,47 +67,35 @@ export function TeoriaForm({ mode = 'create', actividadId, initialTitulo = '', i
   };
 
   return (
-    <form onSubmit={handleSubmit} className="ca-ordenacion-form">
-      {error && (
-        <p className="ca-text" style={{ color: '#ff4444', marginBottom: '15px' }}>
-          {error}
-        </p>
-      )}
+    <form onSubmit={handleSubmit} className="of-form">
+      {error && <p className="of-error">{error}</p>}
 
-      <div
-        className="ca-contenedor-blanco"
-        style={{ flexDirection: 'column', alignItems: 'stretch', gap: '16px' }}
-      >
+      <div className="of-meta-section" style={{ flexDirection: 'column' }}>
         <div>
-          <label className="ca-text" htmlFor="titulo">
-            Título de la Lección
-          </label>
+          <label className="of-label" htmlFor="teoria-titulo">Título de la Lección</label>
           <input
             type="text"
-            id="titulo"
+            id="teoria-titulo"
+            className="of-input"
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
-            style={{ width: '100%' }}
             placeholder="Ej: Introducción a la materia"
           />
         </div>
-
         <div>
-          <label className="ca-text" htmlFor="descripcion">
-            Contenido Teórico
-          </label>
+          <label className="of-label" htmlFor="teoria-descripcion">Contenido Teórico</label>
           <textarea
-            id="descripcion"
+            id="teoria-descripcion"
+            className="of-textarea"
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
             rows={10}
-            style={{ width: '100%', resize: 'none' }}
             placeholder="Escribe aquí el contenido..."
           />
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+      <div className="ca-form-footer">
         <button className="ca-btn-guardar" type="submit" disabled={loading}>
           {loading ? 'Guardando...' : 'Guardar Teoría'}
         </button>

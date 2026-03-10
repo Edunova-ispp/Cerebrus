@@ -1,0 +1,35 @@
+.perfil-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  gap: 32px;
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+.perfil-title {
+  font-size: 4rem;
+  color: var(--color-text);
+  paint-order: stroke fill;
+  margin: 0;
+}
+
+.perfil-logout-btn {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--color-text);
+  background-color: var(--color-accent);
+  border: 3px solid var(--color-text);
+  border-radius: 12px;
+  padding: 8px 24px;
+  box-shadow: 4px 4px 0px var(--color-text);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.perfil-logout-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px var(--color-text);
+}
