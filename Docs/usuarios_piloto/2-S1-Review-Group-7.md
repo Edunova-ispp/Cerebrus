@@ -78,7 +78,7 @@ Funcionalidades a probar: Gestión de avisos (CRUD), Recepción de notificacione
     * **Gestión de avisos (CRUD):**
         * **Create:** Funciona sin problema. ✅
         * **Read:** Funciona sin problema. ✅
-        * **Update:** Funciona sin problema. ✅
+        * **Update:** Funciona correctamente. ✅
         * **Delete:** Funciona sin problema. ✅
     * **Recepción de notificaciones:** Funciona sin problema. ✅
 
@@ -86,7 +86,7 @@ Funcionalidades a probar: Gestión de avisos (CRUD), Recepción de notificacione
 ### 2.5 Reservas
 Funcionalidades a probar: Configuración, Panel de gestión, Consulta/Creación, Cancelación propia.
 * **Revisión:**
-    * **Configuración de espacios, horas y aforos:*** Funciona. ✅
+    * **Configuración de espacios, horas y aforos:** Funciona. ✅
     * **Panel de gestión y visualización de reservas:** Funciona. ✅
     * **Consulta/Reserva de espacios:** Funciona. ✅
     * **Cancelación de reservas propias:** Funciona. ✅
@@ -97,7 +97,7 @@ Funcionalidades a probar: Gestión de eventos (CRUD), Inscripción, Gestión de 
     * **Gestión de eventos (CRUD):**
         * **Create:** Funciona. ✅
         * **Read:** Funciona. ✅
-        * **Update:** Funciona. ✅
+        * **Update:** Funciona parcialmente. Si bien es cierto que se puede actualizar sin problema, surege un inconveniente, y es que el sistema permite editar un evento pasado para asignarle una fecha próxima, lo cual no es correcto. 🟨
         * **Delete:** Funciona. ✅
     * **Inscripción:** Funciona. ✅
     * **Gestión de asistencia:** Funciona. ✅ Añadiría que el admin o creador del evento pueda gestionar los asistentes y echarlos si así lo considera. No sé como de complicado es implementarlo pero sería un buen extra, aunque considero que lo que está ya cumple el requisito y el caso de uso.
