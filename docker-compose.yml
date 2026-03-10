@@ -55,6 +55,7 @@ services:
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_KEY=${SUPABASE_KEY}
       - SUPABASE_BUCKET_NAME=watchbug-screenshots
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
 
 volumes:
   dbdata:

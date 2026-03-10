@@ -69,6 +69,7 @@ services:
     environment:
       - WATCHBUG_ENABLED=True
       - WATCHBUG_ADMIN=true
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:5173
 
 volumes:
   dbdata:

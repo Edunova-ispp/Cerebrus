@@ -392,31 +392,34 @@ def create_django_view(watchbug_instance):
     """Crea una view de Django para recibir reportes."""
     handler = ReportHandler(watchbug_instance)
     
+    # Este endpoint REST recibe multipart/form-data desde el widget JS del navegador.
+    # No utiliza cookies de sesión ni autenticación basada en sesión, por lo que
+    # no es susceptible a ataques CSRF. El decorador @csrf_exempt es seguro aquí.
+    from django.views.decorators.csrf import csrf_exempt
+
+    @csrf_exempt
     def django_view(request):
         from django.http import JsonResponse
-        from django.views.decorators.csrf import csrf_exempt
-        
-        @csrf_exempt
-        def _view(request):
-            if request.method != 'POST': return JsonResponse({'error': 'Method not allowed'}, status=405)
-            try:
-                data_str = request.POST.get('data')
-                if not data_str: return JsonResponse({'error': 'No data provided'}, status=400)
-                
-                data = json.loads(data_str)
-                screenshot = None
-                if 'screenshot' in request.FILES:
-                    screenshot = request.FILES['screenshot'].read()
-                
-                report = BugReport(data, screenshot)
-                result = handler.process_report(report)
-                
-                return JsonResponse(result, status=(200 if result['success'] else 500))
-                    
-            except Exception as e:
-                logger.error(f"Error en view Django: {e}", exc_info=True)
-                return JsonResponse({'error': str(e)}, status=500)
-        return _view(request)
+        if request.method != 'POST':
+            return JsonResponse({'error': 'Method not allowed'}, status=405)
+        try:
+            data_str = request.POST.get('data')
+            if not data_str:
+                return JsonResponse({'error': 'No data provided'}, status=400)
+
+            data = json.loads(data_str)
+            screenshot = None
+            if 'screenshot' in request.FILES:
+                screenshot = request.FILES['screenshot'].read()
+
+            report = BugReport(data, screenshot)
+            result = handler.process_report(report)
+
+            return JsonResponse(result, status=(200 if result['success'] else 500))
+
+        except Exception as e:
+            logger.error(f"Error en view Django: {e}", exc_info=True)
+            return JsonResponse({'error': str(e)}, status=500)
     return django_view
 
 

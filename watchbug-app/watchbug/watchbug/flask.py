@@ -50,8 +50,10 @@ def setup_watchbug(app, watchbug_instance=None, prefix='/watchbug', enable_cors=
     if enable_cors:
         try:
             from flask_cors import CORS
-            CORS(app)
-            logger.info("CORS habilitado para toda la aplicación")
+            # Restringimos los orígenes permitidos. Wildcard (*) no es seguro en producción.
+            allowed_origins = [o.strip() for o in os.getenv('CORS_ORIGINS', 'http://localhost:3000,http://localhost:5173').split(',')]
+            CORS(app, origins=allowed_origins)
+            logger.info("CORS habilitado para los orígenes: %s", allowed_origins)
         except ImportError:
             logger.warning("flask-cors no está instalado. Ejecuta: pip install flask-cors")
     

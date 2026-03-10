@@ -13,6 +13,10 @@ RUN pip install ./watchbug/
 # 3. Copiamos el servidor y arrancamos
 COPY app.py .
 
+# Crear usuario sin privilegios para evitar correr como root
+RUN adduser --disabled-password --no-create-home --uid 1001 appuser
+USER appuser
+
 EXPOSE 5000
 
 # Cambia el CMD final para que sea:
