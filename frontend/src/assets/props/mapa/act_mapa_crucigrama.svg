@@ -1,0 +1,20 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 50" width="45" height="50">
+	<defs>
+		<image  width="38" height="45" id="img1" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAtAQMAAAD4NIsuAAAAAXNSR0IB2cksfwAAAAZQTFRF//OTAAAA4cJ2xAAAAAJ0Uk5T/wDltzBKAAAAGElEQVR4nGNkAAFGCGl/gIHh44gjkUIAAOWDT57QsG07AAAAAElFTkSuQmCC"/>
+		<image  width="2" height="43" id="img2" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAArAQMAAABo28uZAAAAAXNSR0IB2cksfwAAAANQTFRF//OTT3V5twAAAA1JREFUeJxjZGCkAQQAB7oALPKrdFEAAAAASUVORK5CYII="/>
+		<image  width="2" height="43" id="img3" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAArAQMAAABo28uZAAAAAXNSR0IB2cksfwAAAANQTFRF//OTT3V5twAAAA1JREFUeJxjZGCkAQQAB7oALPKrdFEAAAAASUVORK5CYII="/>
+		<image  width="37" height="2" id="img4" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACUAAAACAQMAAADl+YfOAAAAAXNSR0IB2cksfwAAAANQTFRF//OTT3V5twAAAA5JREFUeJxjZAABRjAJAAAeAAOfXDu1AAAAAElFTkSuQmCC"/>
+		<image  width="37" height="2" id="img5" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACUAAAACAQMAAADl+YfOAAAAAXNSR0IB2cksfwAAAANQTFRF//OTT3V5twAAAA5JREFUeJxjZAABRjAJAAAeAAOfXDu1AAAAAElFTkSuQmCC"/>
+		<image  width="37" height="2" id="img6" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACUAAAACAQMAAADl+YfOAAAAAXNSR0IB2cksfwAAAANQTFRF//OTT3V5twAAAA5JREFUeJxjZAABRjAJAAAeAAOfXDu1AAAAAElFTkSuQmCC"/>
+		<image  width="37" height="37" id="img7" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACUAAAAlAQMAAAD/ULJAAAAAAXNSR0IB2cksfwAAAAZQTFRFAAAA//OTTWj9ogAAAAJ0Uk5TAP9bkSK1AAAAZ0lEQVR4nGNkYGBg+8VIPMn/geE/E5QkVS/7TzBZ2QAkme8qAEnG9wIg2YoOEGl3CETKPwSR7JVtQJL5rhqQZHwvBjKhog9E2h1iAJLyDxkY/wMN/QklGYCKBEC2VHSASLtDIFLuEQDooDQW6kY2yAAAAABJRU5ErkJggg=="/>
+	</defs>
+	<style>
+	</style>
+	<use id="Capa 1" href="#img1" x="3" y="3"/>
+	<use id="Capa 2" href="#img2" x="15" y="4"/>
+	<use id="Capa 2 copy" href="#img3" x="27" y="3"/>
+	<use id="Capa 3" href="#img4" x="3" y="11"/>
+	<use id="Capa 3 copy" href="#img5" x="4" y="20"/>
+	<use id="Capa 3 copy 2" href="#img6" x="4" y="29"/>
+	<use id="Capa 3 copy 3" href="#img7" x="4" y="7"/>
+</svg>

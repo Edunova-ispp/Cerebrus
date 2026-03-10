@@ -49,15 +49,15 @@ public class RespuestaController {
     }
 
     @PutMapping("/update/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Respuesta> updateRespuesta(@PathVariable Long id, @RequestBody @Valid Respuesta respuesta) {
-        Respuesta respuestaActualizada = respuestaService.updateRespuesta(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> updateRespuesta(@PathVariable Long id, @RequestBody @Valid Respuesta respuesta) {
+        respuestaService.updateRespuesta(
             id,
             respuesta.getRespuesta(),
             respuesta.getImagen(),
             respuesta.getCorrecta()
         );
-        return new ResponseEntity<>(respuestaActualizada, HttpStatus.OK);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/delete/{id}")

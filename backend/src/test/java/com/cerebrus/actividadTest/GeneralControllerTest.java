@@ -228,7 +228,7 @@ class GeneralControllerTest {
     // Tests para verificar que se crea una actividad general con un request válido, y que se llama al servicio con 
     // los campos correctos
 	@Test
-	void updateActGeneral_requestValido_devuelve200() {
+	void updateActGeneral_requestValido() {
 		Tema tema = new Tema();
 		tema.setId(5L);
 
@@ -242,16 +242,9 @@ class GeneralControllerTest {
 		request.setVersion(4);
 		request.setTema(tema);
 
-		General actualizado = new General();
-		actualizado.setId(12L);
+		ResponseEntity<Void> response = generalController.updateActGeneral(12L, request);
 
-		when(generalService.updateActGeneral(12L, "Nuevo", "Desc", 10, false, "c", 3, 4, 5L))
-				.thenReturn(actualizado);
-
-		ResponseEntity<General> response = generalController.updateActGeneral(12L, request);
-
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(response.getBody()).isSameAs(actualizado);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 		verify(generalService).updateActGeneral(12L, "Nuevo", "Desc", 10, false, "c", 3, 4, 5L);
 	}
 
