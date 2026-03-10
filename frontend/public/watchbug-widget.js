@@ -327,18 +327,18 @@
      * capturados. Se llama tras cada error capturado por onerror/unhandledrejection.
      */
     function updateErrorBadge() {
-        var btn = document.getElementById('watchbug-floating-btn');
-        if (!btn) return;
         var count = WatchbugState.errors.length;
         var badge = document.getElementById('watchbug-error-badge');
         if (count > 0) {
             if (!badge) {
                 badge = document.createElement('span');
                 badge.id = 'watchbug-error-badge';
+                // El badge se posiciona como fixed, esquina superior-derecha del botón
+                // (bottom: 20px + 60px alto - 10px overlap = 70px; right: 20px - 10px overlap = 10px)
                 Object.assign(badge.style, {
-                    position: 'absolute',
-                    top: '-6px',
-                    right: '-6px',
+                    position: 'fixed',
+                    bottom: '70px',
+                    right: '10px',
                     minWidth: '20px',
                     height: '20px',
                     borderRadius: '10px',
@@ -351,9 +351,10 @@
                     justifyContent: 'center',
                     padding: '0 4px',
                     pointerEvents: 'none',
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    zIndex: '9999999'
                 });
-                btn.appendChild(badge);
+                document.body.appendChild(badge);
             }
             badge.textContent = count > 99 ? '99+' : String(count);
         } else if (badge) {
