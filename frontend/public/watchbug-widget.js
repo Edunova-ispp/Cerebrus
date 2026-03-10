@@ -299,11 +299,22 @@
                 return;
             }
             
-            const script = document.createElement('script');
-            script.src = '/html2canvas.min.js';
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
+            // Intentar primero desde archivo local; si no existe, usar CDN
+            function tryLoad(src, onFail) {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = onFail;
+                document.head.appendChild(script);
+            }
+
+            tryLoad('/html2canvas.min.js', function() {
+                // Fallback al CDN si el archivo local no existe
+                tryLoad(
+                    'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+                    function() { reject(new Error('No se pudo cargar html2canvas')); }
+                );
+            });
         });
     }
     
@@ -683,7 +694,7 @@
             WatchbugState.capturedScreenshot = await captureScreenshot();
             console.log('[Watchbug] Screenshot capturado:', WatchbugState.capturedScreenshot ? 'Sí' : 'No');
         } catch (error) {
-            console.warn('[Watchbug] Error capturando screenshot:', error);
+            console.warn('[Watchbug] No se pudo cargar html2canvas, el reporte se enviará sin screenshot:', error);
             WatchbugState.capturedScreenshot = null;
         }
         

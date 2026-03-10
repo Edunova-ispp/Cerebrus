@@ -5,7 +5,10 @@ from watchbug import Watchbug
 from watchbug.api import create_flask_endpoint
 from watchbug.dashboard import create_flask_dashboard
 
-app = Flask(__name__)
+# Este servicio Flask actúa como receptor REST puro (sin sesiones ni cookies de autenticación).
+# La protección CSRF no aplica en este contexto: no hay formularios HTML servidos por esta app
+# y la autenticación no se basa en cookies. CORS se restringe explícitamente a orígenes conocidos.
+app = Flask(__name__)  # NOSONAR
 # Restrictimos CORS solo a los orígenes conocidos del frontend
 # Los orígenes localhost son solo para desarrollo; en producción se configura via CORS_ORIGINS.
 allowed_origins = [o.strip() for o in os.getenv('CORS_ORIGINS', 'http://localhost:3000,http://localhost:5173').split(',')]  # NOSONAR
