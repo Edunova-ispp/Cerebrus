@@ -104,9 +104,8 @@ public class TableroServiceImpl implements TableroService {
             if (!tablero.getTema().getCurso().getMaestro().getId().equals(maestro.getId())) {
                 throw new AccessDeniedException("No tienes permiso para acceder a este tablero");
             }
-        } else {
-            throw new AccessDeniedException("Solo un maestro puede acceder a actividades de tablero");
         }
+        // Alumnos can access tablero data to play the activity
         return TableroDTO.fromEntity(tablero);
     }
 
@@ -183,7 +182,11 @@ public class TableroServiceImpl implements TableroService {
                 throw new AccessDeniedException("La pregunta no pertenece a este tablero");
             }
             
-            Boolean correcta = pregunta.getRespuestas().get(0).getRespuesta().toLowerCase().strip().equals(respuesta.toLowerCase().strip());
+            String cleanedRespuesta = respuesta.strip();
+            if (cleanedRespuesta.startsWith("\"") && cleanedRespuesta.endsWith("\"")) {
+                cleanedRespuesta = cleanedRespuesta.substring(1, cleanedRespuesta.length() - 1);
+            }
+            Boolean correcta = pregunta.getRespuestas().get(0).getRespuesta().toLowerCase().strip().equals(cleanedRespuesta.toLowerCase().strip());
             ActividadAlumno actividadAlumno = actividadAlumnoService.crearActividadAlumno(0, 0, LocalDateTime.now(), null, 0, 0, alumno.getId(), tablero.getId());
             RespAlumnoGeneral respuestaAlumno = new RespAlumnoGeneral(correcta, actividadAlumno, respuesta, pregunta);
             respuestaAlumno =  respuestaAlumnoRepository.save(respuestaAlumno);

@@ -209,17 +209,19 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
                 corregirActividadAlumnoAutomaticamenteGeneral(actividadAlumno, respuestasIds, actividad);
             } else if (((General) actividad).getTipo() == TipoActGeneral.CARTA){
                 corregirActividadAlumnoAutomaticamenteCartaGeneral(actividadAlumno, respuestasIds, actividad);
+            } else if (((General) actividad).getTipo() == TipoActGeneral.TEORIA){
+              // CASO PARA TEORÍA: Simplemente marcamos como terminada y damos la puntuación base
+               actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 1);
+               actividadAlumno.setNota(10); // Nota máxima por leer
+               actividadAlumno.setAcabada(LocalDateTime.now());
             }
         } else if(actividad instanceof Ordenacion) {
             corregirActividadAlumnoAutomaticamenteOrdenacion(actividadAlumno, respuestasIds, actividad);
         } else if(actividad instanceof MarcarImagen){
             corregirActividadAlumnoAutomaticamenteMarcarImagen(actividadAlumno, respuestasIds, actividad);
         } else {    
-        // CASO PARA TEORÍA: Simplemente marcamos como terminada y damos la puntuación base
-        actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 1);
-        actividadAlumno.setNota(10); // Nota máxima por leer
-        actividadAlumno.setAcabada(LocalDateTime.now());
-        } 
+        // CASO PARA TEORÍA: se ha movido dentro de instancia de GENERAL porque la actividad de teoria es una actividad general
+        }
         return actividadAlumnoRepository.save(actividadAlumno);
     }
 

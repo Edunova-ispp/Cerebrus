@@ -146,33 +146,28 @@ class PreguntaControllerTest {
                 .hasMessage("La pregunta no existe");
     }
 
-    // Test para verificar que updatePregunta retorna 200 OK con la pregunta actualizada
+    // Test para verificar que updatePregunta retorna 204 NO CONTENT cuando la actualización es exitosa
     @Test
     void updatePregunta_existente_retorna200ConPreguntaActualizada() {
         Pregunta bodyRequest = new Pregunta("¿Nueva?", "nueva.png", actividad);
-        Pregunta actualizada = new Pregunta("¿Nueva?", "nueva.png", actividad);
-        actualizada.setId(10L);
-        when(preguntaService.updatePregunta(10L, "¿Nueva?", "nueva.png")).thenReturn(actualizada);
 
-        ResponseEntity<Pregunta> respuesta = preguntaController.updatePregunta(10L, bodyRequest);
+        ResponseEntity<Void> respuesta = preguntaController.updatePregunta(10L, bodyRequest);
 
-        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(respuesta.getBody().getPregunta()).isEqualTo("¿Nueva?");
-        assertThat(respuesta.getBody().getImagen()).isEqualTo("nueva.png");
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(respuesta.getBody()).isNull();
+        verify(preguntaService).updatePregunta(10L, "¿Nueva?", "nueva.png");
     }
 
-    // Test para verificar que updatePregunta retorna 200 OK cuando la imagen es null
+    // Test para verificar que updatePregunta retorna 204 NO CONTENT cuando la imagen es null
     @Test
     void updatePregunta_imagenNull_retorna200() {
         Pregunta bodyRequest = new Pregunta("Texto nuevo", null, actividad);
-        Pregunta actualizada = new Pregunta("Texto nuevo", null, actividad);
-        actualizada.setId(10L);
-        when(preguntaService.updatePregunta(10L, "Texto nuevo", null)).thenReturn(actualizada);
 
-        ResponseEntity<Pregunta> respuesta = preguntaController.updatePregunta(10L, bodyRequest);
+        ResponseEntity<Void> respuesta = preguntaController.updatePregunta(10L, bodyRequest);
 
-        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(respuesta.getBody().getImagen()).isNull();
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(respuesta.getBody()).isNull();
+        verify(preguntaService).updatePregunta(10L, "Texto nuevo", null);
     }
 
     // Test para verificar que updatePregunta propaga AccessDeniedException cuando el service la lanza

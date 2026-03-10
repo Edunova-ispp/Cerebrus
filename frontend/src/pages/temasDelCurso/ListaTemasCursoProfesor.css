@@ -113,10 +113,10 @@
   border: 2px solid transparent;
 }
 .ltp-item:hover {
-  background: #F5E6CC;
+  background: var(--color-accent);
 }
 .ltp-item--activo {
-  background: #F5E6CC;
+  background: var(--color-accent-dark);
   border: 2px solid #000;
   font-weight: bold;
 }
@@ -171,7 +171,7 @@
   box-shadow: 0 4px 0px #000;
   transition: background 0.15s;
 }
-.ltp-btn-añadir:hover { background: #dfc9a0; }
+.ltp-btn-añadir:hover { background: var(--color-accent-dark); }
 
 .detalle-profesor-main {
   flex: 1;

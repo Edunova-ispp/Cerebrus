@@ -6,6 +6,7 @@ import { OrdenacionForm, type OrdenacionFormInitialValues } from '../crearActivi
 import { MarcarImagenForm, type MarcarImagenFormInitialValues } from '../crearActividad/MarcarImagenForm';
 import { TeoriaForm } from '../crearActividad/TeoriaForm';
 import { TestForm, type TestFormInitialValues } from '../crearActividad/TestForm';
+import { TableroForm, type TableroFormInitialValues } from '../crearActividad/TableroForm';
 import '../crearActividad/crearActividad.css';
 
 type OrdenacionDTO = {
@@ -45,20 +46,33 @@ type GeneralTestMaestroDTO = {
   }[];
 };
 
+
 type MarcarImagenDTO = {
+    imagenActividad: string | null;
+    respVisible: boolean;
+    comentariosRespVisible: string | null;
+    temaId: number;
+    imagenAMarcar: string;
+    puntosImagen: { id: number; respuesta: string; pixelX: number; pixelY: number }[];
+};
+
+type TableroDTO = {
   id: number;
   titulo: string;
   descripcion: string | null;
   puntuacion: number;
-  imagenActividad: string | null;
-  respVisible: boolean;
-  comentariosRespVisible: string | null;
+  tamano: boolean;
+  posicion: number;
   temaId: number;
-  imagenAMarcar: string;
-  puntosImagen: { id: number; respuesta: string; pixelX: number; pixelY: number }[];
+  respVisible: boolean;
+  preguntas: {
+    id: number;
+    pregunta: string;
+    respuestas: { id: number; respuesta: string; correcta: boolean }[];
+  }[];
 };
 
-type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'marcarImagen' | null;
+type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'marcarImagen' | null;
 
 export default function EditarActividad() {
   const { id: cursoId, actividadId } = useParams<{
@@ -75,6 +89,7 @@ export default function EditarActividad() {
   const [teoria, setTeoria] = useState<TeoriaDTO | null>(null);
   const [generalTest, setGeneralTest] = useState<GeneralTestMaestroDTO | null>(null);
   const [marcarImagen, setMarcarImagen] = useState<MarcarImagenDTO | null>(null);
+  const [tablero, setTablero] = useState<TableroDTO | null>(null);
 
   useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
@@ -107,14 +122,25 @@ export default function EditarActividad() {
               .then((data: MarcarImagenDTO) => {
                 setMarcarImagen(data);
                 setKind('marcarImagen');
+                setLoading(false);
+             })
+            .catch(() => {
+            // 4. Intentar tablero
+              apiFetch(`${apiBase}/api/tableros/${actividadId}`)
+                .then((r) => r.json())
+                .then((data: TableroDTO) => {
+                  setTablero(data);
+                  setKind('tablero');
+                  setLoading(false);
               })
               .catch(() => {
-                // 4. Intentar teoría
+                // 5. Intentar teoría
                 apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`)
                   .then((r) => r.json())
                   .then((data: TeoriaDTO) => {
                     setTeoria(data);
                     setKind('teoria');
+                    setLoading(false);
                   })
                   .catch((e) => {
                     const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
@@ -126,7 +152,20 @@ export default function EditarActividad() {
       });
   }, [actividadId]);
 
-  const actividadIdNum = actividadId ? Number.parseInt(actividadId, 10) : NaN;
+  const tableroInitialValues: TableroFormInitialValues | undefined = tablero
+    ? {
+        titulo: tablero.titulo,
+        descripcion: tablero.descripcion,
+        puntuacion: tablero.puntuacion,
+        respVisible: tablero.respVisible,
+        tamano: tablero.tamano,
+        temaId: tablero.temaId,
+        preguntas: tablero.preguntas.map((p) => ({
+          pregunta: p.pregunta,
+          respuesta: p.respuestas[0]?.respuesta ?? '',
+        })),
+      }
+    : undefined;
 
   const ordenacionInitialValues: OrdenacionFormInitialValues | undefined = ordenacion
     ? {
@@ -171,6 +210,8 @@ export default function EditarActividad() {
         })),
       }
     : undefined;
+  
+  const actividadIdNum = actividadId ? Number.parseInt(actividadId, 10) : NaN;
 
   const renderForm = () => {
     if (kind === 'test' && generalTest) {
@@ -210,6 +251,16 @@ export default function EditarActividad() {
           mode="edit"
           marcarImagenId={actividadIdNum}
           initialValues={marcarImagenInitialValues}
+        />
+      );
+    }
+        
+    if (kind === 'tablero' && tablero) {
+      return (
+        <TableroForm
+          mode="edit"
+          tableroId={tableroInitialValues ? tablero.id : undefined}
+          initialValues={tableroInitialValues}
         />
       );
     }

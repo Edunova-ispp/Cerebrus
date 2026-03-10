@@ -4,11 +4,11 @@ import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { OrdenacionForm } from './OrdenacionForm';
 import { TeoriaForm } from './TeoriaForm';
 import { MarcarImagenForm } from './MarcarImagenForm';
-
 import { TestForm } from './TestForm';
+import { TableroForm } from './TableroForm';
 import './crearActividad.css';
 
-const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden', 'Marcar en imagen'];
+const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden', 'Marcar en imagen', 'Tablero'];
 
 export default function CrearActividad() {
   const { id: cursoId } = useParams<{ id: string; temaId: string }>();
@@ -20,6 +20,7 @@ export default function CrearActividad() {
     tipoSeleccionado === 'Tipo test' ? <TestForm mode="create" /> :
     tipoSeleccionado === 'Teoría' ? <TeoriaForm mode="create" /> :
     tipoSeleccionado === 'Marcar en imagen' ? <MarcarImagenForm mode="create" /> :
+    tipoSeleccionado === 'Tablero' ? <TableroForm mode="create" /> :
     <p className="ca-proximamente">Selecciona un tipo de actividad</p>;
 
   return (

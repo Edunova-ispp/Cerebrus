@@ -1,0 +1,462 @@
+/* ── Page structure ─────────────────────────────────────── */
+
+.ta-page {
+  min-height: 100vh;
+  font-family: 'Pixelify Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.ta-main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px 16px;
+}
+
+.ta-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 130%;
+  max-width: 900px;
+  position: relative;
+}
+
+/* ── Map button ────────────────────────────────────────── */
+
+.ta-wrapper > .ta-map-btn {
+  position: absolute;
+  left: -170px;
+  top: 0;
+  z-index: 1;
+}
+
+.ta-map-btn {
+  background: #b49aff;
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 6px 14px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.55rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 3px 3px 0 #000;
+  color: #000;
+  transition: color 0.15s;
+}
+
+.ta-map-btn:hover {
+  color: var(--color-accent, #FFF294);
+}
+
+.ta-map-icon {
+  width: 42px;
+  height: 42px;
+  transition: filter 0.15s;
+}
+
+.ta-map-btn:hover .ta-map-icon {
+  filter: brightness(0) saturate(100%) invert(88%) sepia(60%)
+    saturate(400%) hue-rotate(350deg) brightness(105%);
+}
+
+/* ── Header bar ────────────────────────────────────────── */
+
+.ta-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: var(--color-secondary, #7C4DFF);
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 0 16px;
+  box-shadow: 4px 4px 0 #000;
+  box-sizing: border-box;
+}
+
+.ta-title {
+  font-size: 3rem;
+  font-weight: bold;
+  color: var(--color-accent, #FFF294);
+  -webkit-text-stroke: 1px #000;
+}
+
+/* ── Progress ──────────────────────────────────────────── */
+
+.ta-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.ta-progress-avatar {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+
+.ta-progress-label {
+  font-size: 0.85rem;
+  font-weight: bold;
+  white-space: nowrap;
+  min-width: 48px;
+}
+
+.ta-progress-track {
+  flex: 1;
+  height: 12px;
+  background: #fbf5d5;
+  border: 2px solid #000;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.ta-progress-fill {
+  height: 100%;
+  background: var(--color-accent, #FFF294);
+  border-right: 2px solid #000;
+  transition: width 0.35s ease;
+}
+
+/* ── Board ─────────────────────────────────────────────── */
+
+.ta-board-wrap {
+  background: #FFF8C9;
+  border: 3px solid #000;
+  border-radius: 16px;
+  padding: 20px 40px;
+  box-shadow: 6px 6px 0 #000;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ta-board {
+  display: grid;
+  gap: 0;
+  width: 100%;
+}
+
+/* ── Cells ─────────────────────────────────────────────── */
+
+.ta-cell {
+  width: 80px;
+  height: 80px;
+  border: 2.5px solid #000;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  position: relative;
+  transition: filter 0.12s, box-shadow 0.25s ease;
+}
+
+.ta-cell--light { background: #fff; }
+.ta-cell--dark  { background: #1a1a1a; }
+.ta-cell--cerbero { background: var(--color-primary, #D10057); }
+.ta-cell--clickable { cursor: pointer; }
+
+.ta-cell--dark.ta-cell--clickable:hover {
+  background: #2a2a2a;
+  box-shadow: 0 0 10px 3px var(--color-accent, #FFF294), 2px 2px 0 #000;
+}
+
+.ta-cell--dark.ta-cell--clickable:hover .ta-cell-label {
+  color: var(--color-accent, #FFF294);
+}
+
+.ta-cell--light.ta-cell--clickable:hover {
+  background: #f5f5f5;
+  box-shadow: 0 0 10px 3px var(--color-accent-dark, #ffe62b), 2px 2px 0 #000;
+}
+
+.ta-cell--light.ta-cell--clickable:hover .ta-cell-label {
+  color: var(--color-accent-dark, #ffe62b);
+}
+
+/* ── Cell label (? / checkmark) ────────────────────────── */
+
+.ta-cell-label {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 2.6rem;
+  font-weight: bold;
+  pointer-events: none;
+  transition: color 0.15s;
+  animation: ta-wobble 2.4s ease-in-out infinite;
+}
+
+.ta-cell-label--light { color: #fff; }
+.ta-cell-label--dark  { color: #111; }
+
+.ta-cell--done .ta-cell-label { animation: none; }
+
+@keyframes ta-wobble {
+  0%, 100% { transform: rotate(-6deg); }
+  50%      { transform: rotate(6deg); }
+}
+
+/* ── Dot connectors ────────────────────────────────────── */
+
+.ta-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.ta-connector--h {
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.ta-connector--v {
+  flex-direction: column;
+}
+
+.ta-connector--v::before {
+  content: '';
+  width: 13px;
+  height: 13px;
+  background: var(--color-accent, #FFF294);
+  border: 2px solid #000;
+  border-radius: 50%;
+  box-shadow: 2px 2px 0 #000;
+}
+
+.ta-dot {
+  width: 13px;
+  height: 13px;
+  background: var(--color-accent, #FFF294);
+  border: 2px solid #000;
+  border-radius: 50%;
+  box-shadow: 2px 2px 0 #000;
+  flex-shrink: 0;
+}
+
+/* ── Character ─────────────────────────────────────────── */
+
+.ta-char {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.ta-char--victory {
+  animation: ta-bounce 600ms ease-in-out infinite alternate;
+}
+
+@keyframes ta-bounce {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-6px); }
+}
+
+/* ── Hint & info ───────────────────────────────────────── */
+
+.ta-hint {
+  font-size: 0.9rem;
+  color: #555;
+  text-align: center;
+  margin: 0;
+}
+
+.ta-info-msg {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1rem;
+  color: #555;
+  padding: 40px;
+  text-align: center;
+}
+
+.ta-info-msg--err {
+  color: #c0392b;
+}
+
+/* ── Shared accent button ──────────────────────────────── */
+
+.ta-accent-btn {
+  background: #FFF394;
+  color: #000;
+  border: 2px solid #FFFAD6;
+  border-radius: 12px;
+  padding: 12px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 2.05rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #D6BD00;
+  transition: background 0.12s, transform 0.1s, box-shadow 0.1s;
+}
+
+.ta-accent-btn:hover:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #D6BD00;
+}
+
+.ta-accent-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ── Done popup ────────────────────────────────────────── */
+
+.ta-done-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.ta-done-popup {
+  background: var(--color-primary, #D10057);
+  border: 3px solid #000;
+  border-radius: 18px;
+  padding: 28px 32px 24px;
+  width: min(480px, 90vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 6px 6px 0 #000;
+}
+
+.ta-done-title {
+  font-size: 3.2rem;
+  font-weight: bold;
+  color: var(--color-accent, #FFF294);
+  margin: 0;
+  text-shadow: 3px 3px 0 #000;
+  text-align: center;
+  -webkit-text-stroke: 1px #000;
+}
+
+.ta-done-imgs {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin: 8px 0;
+}
+
+.ta-done-caballero {
+  width: 280px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.ta-done-monstruo {
+  width: 220px;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+/* ── Question modal ────────────────────────────────────── */
+
+.ta-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.ta-modal {
+  background: #e8336e;
+  border: 3px solid #000;
+  border-radius: 18px;
+  padding: 22px 20px 20px;
+  width: min(340px, 90vw);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 6px 6px 0 #000;
+}
+
+.ta-modal-title {
+  font-size: 3.2rem;
+  font-weight: bold;
+  color: color-mix(in srgb, var(--color-secondary, #7C4DFF) 35%, #fff);
+  margin: 0;
+  text-shadow: 4px 4px 0 #000;
+  text-align: center;
+  letter-spacing: 1px;
+  -webkit-text-stroke: 1px #000;
+}
+
+.ta-modal-q {
+  background: color-mix(in srgb, var(--color-secondary, #7C4DFF) 35%, #fff);
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #000;
+  margin: 0;
+  text-align: center;
+}
+
+.ta-modal-label {
+  font-size: 2.7rem;
+  font-weight: bold;
+  -webkit-text-stroke: 1px #000;
+  text-shadow: 3px 3px 0 #000;
+  color: var(--color-accent, #FFF294);
+  text-align: center;
+  margin: 0;
+}
+
+.ta-modal-input {
+  background: var(--color-accent, #FFF294);
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 2rem;
+  color: #000;
+  width: 100%;
+  box-sizing: border-box;
+  transition: background 0.12s;
+}
+
+.ta-modal-input:focus {
+  outline: none;
+  background: var(--color-accent-dark, #ffe62b);
+}
+
+.ta-modal-feedback {
+  margin: 0;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 2px solid #000;
+  text-align: center;
+  font-weight: bold;
+}
+
+.ta-modal-feedback--ok {
+  background: var(--color-accent, #FFF294);
+  border-color: var(--color-accent-dark, #ffe62b);
+  color: #000;
+}
+
+.ta-modal-feedback--err {
+  background: #fff0f0;
+  color: #c0392b;
+}
