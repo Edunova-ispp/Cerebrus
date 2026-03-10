@@ -55,7 +55,7 @@ function getActivityIconSrc(tipo: string, posicion: number): string {
 }
 
 function getNodeBgColor(index: number): string {
-  return index % 2 === 0 ? '#D10057' : 'rgba(124, 77, 255, 0.5)';
+  return index % 2 === 0 ? '#D10057' : '#7C4DFF';
 }
 
 // Helper para el ID del alumno
@@ -232,7 +232,7 @@ export default function MapaCurso() {
     });
 
     const firstNotCompletedIndex = states.findIndex((s) => s.state !== 'terminada');
-    if (firstNotCompletedIndex === -1) return null; // todo terminado
+    if (firstNotCompletedIndex === -1) return states[states.length - 1]!.id; // todo terminado -> última actividad
     return states[firstNotCompletedIndex]!.id;
   }, [sortedActividades, completionMap]);
 
@@ -309,7 +309,9 @@ export default function MapaCurso() {
 
                             const isLastInRow = localIndex === rowActs.length - 1;
                             const nextAct = !isLastInRow ? rowActs[localIndex + 1] : null;
-                            const connectorLocked = nextAct ? !unlockedActivityIds.has(nextAct.id) : false;
+                            const connectorLocked = nextAct
+                              ? !unlockedActivityIds.has(nextAct.id) || mascotaActivityId === nextAct.id
+                              : false;
 
                             return (
                               <div key={act.id} className="mapa-map-node">
@@ -361,7 +363,9 @@ export default function MapaCurso() {
                         {rowIndex < actividadRows.length - 1 && rowActs.length > 0 && (
                           (() => {
                             const nextRowFirst = sortedActividades[(rowIndex + 1) * mapRowSize];
-                            const turnLocked = nextRowFirst ? !unlockedActivityIds.has(nextRowFirst.id) : false;
+                            const turnLocked = nextRowFirst
+                              ? !unlockedActivityIds.has(nextRowFirst.id) || mascotaActivityId === nextRowFirst.id
+                              : false;
 
                             return (
                           <div
