@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
+import espadaImg from '../../assets/props/espada.png';
 import './MarcarImagenAlumno.css';
 
 type PuntoImagenDTO = {
@@ -68,7 +69,12 @@ export default function MarcarImagenAlumno() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
-  const [feedback, setFeedback] = useState<{ correcta: boolean; comentario?: string } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    correcta: boolean;
+    aciertos: number;
+    total: number;
+    comentario?: string;
+  } | null>(null);
   const [selectedPuntoId, setSelectedPuntoId] = useState<number | null>(null);
   const [respuestas, setRespuestas] = useState<Record<number, string>>({});
   const [imageDims, setImageDims] = useState<ImageDims | null>(null);
@@ -111,6 +117,19 @@ export default function MarcarImagenAlumno() {
     const onResize = () => updateImageDims();
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  useEffect(() => {
+    const onMouseDown = (ev: MouseEvent) => {
+      const target = ev.target as HTMLElement | null;
+      if (!target) return;
+      if (target.closest('.mia-point')) return;
+      if (target.closest('.mia-float-card')) return;
+      setSelectedPuntoId(null);
+    };
+
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
   }, []);
 
   useEffect(() => {
@@ -180,10 +199,30 @@ export default function MarcarImagenAlumno() {
 
   const puntos = actividad?.puntosImagen ?? [];
 
+  const selectedPunto = useMemo(() => {
+    if (!selectedPuntoId) return null;
+    return puntos.find((p) => p.id === selectedPuntoId) ?? null;
+  }, [puntos, selectedPuntoId]);
+
   const allAnswered = useMemo(() => {
     if (puntos.length === 0) return false;
     return puntos.every((p) => (respuestas[p.id] ?? '').trim().length > 0);
   }, [puntos, respuestas]);
+
+  const aciertosEstimados = useMemo(() => {
+    if (!actividad) return { aciertos: 0, total: 0 };
+    const total = puntos.length;
+    if (total === 0) return { aciertos: 0, total: 0 };
+
+    const norm = (v: string) => v.trim().toLowerCase();
+    let aciertos = 0;
+    for (const p of puntos) {
+      const alumno = norm(respuestas[p.id] ?? '');
+      const correcta = norm(p.respuesta ?? '');
+      if (alumno && alumno === correcta) aciertos += 1;
+    }
+    return { aciertos, total };
+  }, [actividad, puntos, respuestas]);
 
   const getPointStyle = (p: PuntoImagenDTO): React.CSSProperties => {
     if (!imageDims) return { left: 0, top: 0 };
@@ -191,6 +230,22 @@ export default function MarcarImagenAlumno() {
     const y = (p.pixelY / imageDims.naturalHeight) * imageDims.displayHeight;
     return { left: `${x}px`, top: `${y}px` };
   };
+
+  const floatCardStyle = useMemo((): React.CSSProperties | null => {
+    if (!selectedPunto || !imageDims) return null;
+
+    const xRaw = (selectedPunto.pixelX / imageDims.naturalWidth) * imageDims.displayWidth;
+    const yRaw = (selectedPunto.pixelY / imageDims.naturalHeight) * imageDims.displayHeight;
+
+    const approxHalfCardWidth = 140;
+    const x = Math.min(Math.max(xRaw, approxHalfCardWidth), Math.max(approxHalfCardWidth, imageDims.displayWidth - approxHalfCardWidth));
+    const y = Math.min(Math.max(yRaw + 18, 16), Math.max(16, imageDims.displayHeight - 16));
+
+    return {
+      left: `${x}px`,
+      top: `${y}px`,
+    };
+  }, [imageDims, selectedPunto]);
 
   const handleSubmit = async () => {
     setError('');
@@ -241,15 +296,12 @@ export default function MarcarImagenAlumno() {
       const nota = typeof aa?.nota === 'number' ? aa.nota : 0;
       const correcta = nota >= 10;
 
-      if (correcta) {
-        completedRef.current = true;
-        window.alert('Tu respuesta es correcta.');
-        navigate(-1);
-        return;
-      }
+      if (correcta) completedRef.current = true;
 
       setFeedback({
-        correcta: false,
+        correcta,
+        aciertos: aciertosEstimados.aciertos,
+        total: aciertosEstimados.total,
         comentario: actividad.respVisible ? actividad.comentariosRespVisible ?? undefined : undefined,
       });
     } catch (e) {
@@ -275,18 +327,40 @@ export default function MarcarImagenAlumno() {
     <div className="marcar-imagen-alumno-page">
       <NavbarMisCursos />
 
-      <main className="marcar-imagen-alumno-main">
-        <div className="mia-top">
-          <button className="mia-exit" type="button" onClick={() => navigate(-1)}>
-            Salir
-          </button>
-          {actividad && (
-            <div className="mia-title">
-              <h1 className="mia-h1">{actividad.titulo}</h1>
-              {actividad.descripcion && <p className="mia-desc">{actividad.descripcion}</p>}
+      {feedback && (
+        <div className="mia-alert-overlay" role="dialog" aria-modal="true">
+          <div className="mia-alert" onMouseDown={(ev) => ev.stopPropagation()}>
+            <div className="mia-alert-title">
+              {feedback.correcta ? '¡Correcto!' : `¡${feedback.aciertos}/${feedback.total} aciertos!`}
             </div>
-          )}
+            {actividad?.respVisible && feedback.comentario && !feedback.correcta && (
+              <div className="mia-alert-comment">{feedback.comentario}</div>
+            )}
+
+            <button className="ca-btn-guardar" type="button" onClick={() => navigate(-1)}>
+              Volver
+            </button>
+          </div>
         </div>
+      )}
+
+      <main className="marcar-imagen-alumno-main">
+        {actividad && (
+          <>
+            <div className="mia-top">
+              <button className="mia-exit-btn" type="button" onClick={() => navigate(-1)}>
+                <img src={espadaImg} alt="" className="mia-exit-icon" />
+                Salir
+              </button>
+
+              <div className="mia-title-banner">
+                <h1 className="mia-title-text">{actividad.titulo}</h1>
+              </div>
+            </div>
+
+            {actividad.descripcion && <p className="mia-description">{actividad.descripcion}</p>}
+          </>
+        )}
 
         {error && (
           <p className="ca-text" style={{ marginTop: 0 }}>
@@ -299,7 +373,8 @@ export default function MarcarImagenAlumno() {
         {actividad && (
           <>
             <div className="mia-image-section">
-              <div className="mia-image-frame">
+              <p className="mia-instruction">¡Selecciona los puntos dentro de la foto para poder escribir las respuestas!</p>
+              <div className="mia-image-frame" onMouseDown={() => setSelectedPuntoId(null)}>
                 <img
                   ref={imageRef}
                   src={actividad.imagenAMarcar}
@@ -324,77 +399,57 @@ export default function MarcarImagenAlumno() {
                         type="button"
                         className={`mia-point ${statusClass}`}
                         style={getPointStyle(p)}
-                        onClick={() => setSelectedPuntoId(p.id)}
-                        title={`Punto ${idx + 1}`}
+                        onMouseDown={(ev) => {
+                          ev.stopPropagation();
+                        }}
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          setSelectedPuntoId(p.id);
+                        }}
+                        aria-label={`Punto ${idx + 1}`}
                       >
-                        {idx + 1}
                       </button>
                     );
                   })}
                 </div>
-              </div>
-            </div>
 
-            <div className="mia-cards-section">
-              <h2 className="mia-h2">Respuestas</h2>
-              <div className="mia-cards">
-                {puntos.map((p, idx) => {
-                  const hasAnswer = (respuestas[p.id] ?? '').trim().length > 0;
-                  const isSelected = selectedPuntoId === p.id;
-                  const cardClass = isSelected
-                    ? 'mia-card--selected'
-                    : hasAnswer
-                      ? 'mia-card--answered'
-                      : 'mia-card--unanswered';
-
-                  return (
-                    <div
-                      key={p.id}
-                      className={`mia-card ${cardClass}`}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => setSelectedPuntoId(p.id)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') setSelectedPuntoId(p.id);
-                      }}
-                    >
-                      <div className="mia-card-title">Punto {idx + 1}</div>
-                      <input
-                        className="mia-input"
-                        type="text"
-                        value={respuestas[p.id] ?? ''}
-                        placeholder="Escribe tu respuesta"
-                        onFocus={() => setSelectedPuntoId(p.id)}
-                        onChange={(e) =>
-                          setRespuestas((prev) => ({
-                            ...prev,
-                            [p.id]: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                  );
-                })}
+                {selectedPunto && floatCardStyle && (
+                  <div
+                    className="mia-float-card"
+                    style={floatCardStyle}
+                    onMouseDown={(ev) => ev.stopPropagation()}
+                  >
+                    <div className="mia-float-title">Respuesta</div>
+                    <input
+                      className="mia-float-input"
+                      type="text"
+                      value={respuestas[selectedPunto.id] ?? ''}
+                      placeholder="Escribe tu respuesta"
+                      onChange={(e) =>
+                        setRespuestas((prev) => ({
+                          ...prev,
+                          [selectedPunto.id]: e.target.value,
+                        }))
+                      }
+                      autoFocus
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="mia-bottom">
               <div className="mia-bottom-inner">
-                {feedback && (
-                  <div className="mia-feedback">
-                    <div>{feedback.correcta ? 'Tu respuesta es correcta.' : 'Tu respuesta es incorrecta.'}</div>
-                    {actividad.respVisible && feedback.comentario && <div>{feedback.comentario}</div>}
-                  </div>
+                {!feedback && (
+                  <button
+                    className="ca-btn-guardar"
+                    type="button"
+                    disabled={submitting || !actividadAlumnoId || !allAnswered}
+                    onClick={handleSubmit}
+                  >
+                    {submitting ? 'Enviando...' : 'Enviar respuesta'}
+                  </button>
                 )}
-
-                <button
-                  className="ca-btn-guardar"
-                  type="button"
-                  disabled={submitting || !actividadAlumnoId || !allAnswered}
-                  onClick={handleSubmit}
-                >
-                  {submitting ? 'Enviando...' : 'Enviar respuesta'}
-                </button>
               </div>
             </div>
           </>
