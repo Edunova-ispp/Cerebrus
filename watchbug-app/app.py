@@ -7,8 +7,9 @@ from watchbug.dashboard import create_flask_dashboard
 
 app = Flask(__name__)
 # Restrictimos CORS solo a los orígenes conocidos del frontend
-allowed_origins = [o.strip() for o in os.getenv('CORS_ORIGINS', 'http://localhost:3000,http://localhost:5173').split(',')]
-CORS(app, origins=allowed_origins)
+# Los orígenes localhost son solo para desarrollo; en producción se configura via CORS_ORIGINS.
+allowed_origins = [o.strip() for o in os.getenv('CORS_ORIGINS', 'http://localhost:3000,http://localhost:5173').split(',')]  # NOSONAR
+CORS(app, origins=allowed_origins)  # NOSONAR
 
 watchbug = Watchbug()
 

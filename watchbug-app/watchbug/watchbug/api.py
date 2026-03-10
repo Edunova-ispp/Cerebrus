@@ -160,7 +160,7 @@ class ReportHandler:
             try:
                 # Generar nombre único
                 timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
-                url_hash = hashlib.md5(report.url.encode()).hexdigest()[:8]
+                url_hash = hashlib.md5(report.url.encode(), usedforsecurity=False).hexdigest()[:8]  # NOSONAR - solo para nombre de archivo único
                 filename = f"{timestamp}_{url_hash}.png"
                 
                 # API Endpoint de Storage (POST /storage/v1/object/{bucket}/{filename})
@@ -397,7 +397,7 @@ def create_django_view(watchbug_instance):
     # no es susceptible a ataques CSRF. El decorador @csrf_exempt es seguro aquí.
     from django.views.decorators.csrf import csrf_exempt
 
-    @csrf_exempt
+    @csrf_exempt  # NOSONAR - endpoint REST sin sesiones/cookies, no susceptible a CSRF
     def django_view(request):
         from django.http import JsonResponse
         if request.method != 'POST':

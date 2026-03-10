@@ -39,6 +39,8 @@
     
     // Exponer estado para debugging
     window.WatchbugState = WatchbugState;
+    // Exponer updateErrorBadge para que el ErrorBoundary de React pueda actualizarlo
+    window.updateErrorBadge = function() { updateErrorBadge(); };
     
     // ============================================
     // LogRocket - Carga Dinámica
@@ -121,6 +123,7 @@
             stack: error ? error.stack : null,
             timestamp: new Date().toISOString()
         });
+        updateErrorBadge();
         
         // Llamar al handler original si existe
         if (originalOnError) {
@@ -139,6 +142,7 @@
             stack: event.reason ? event.reason.stack : null,
             timestamp: new Date().toISOString()
         });
+        updateErrorBadge();
     });
     
     /**
@@ -303,6 +307,49 @@
         });
     }
     
+    // ============================================
+    // Badge de errores en el botón flotante
+    // ============================================
+
+    /**
+     * Actualiza el badge rojo sobre el botón 🐛 con el número de errores JS
+     * capturados. Se llama tras cada error capturado por onerror/unhandledrejection.
+     */
+    function updateErrorBadge() {
+        var btn = document.getElementById('watchbug-floating-btn');
+        if (!btn) return;
+        var count = WatchbugState.errors.length;
+        var badge = document.getElementById('watchbug-error-badge');
+        if (count > 0) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.id = 'watchbug-error-badge';
+                Object.assign(badge.style, {
+                    position: 'absolute',
+                    top: '-6px',
+                    right: '-6px',
+                    minWidth: '20px',
+                    height: '20px',
+                    borderRadius: '10px',
+                    background: '#dc3545',
+                    color: 'white',
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0 4px',
+                    pointerEvents: 'none',
+                    boxSizing: 'border-box'
+                });
+                btn.appendChild(badge);
+            }
+            badge.textContent = count > 99 ? '99+' : String(count);
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+
     // ============================================
     // UI del Widget - Botón Flotante
     // ============================================
@@ -565,8 +612,9 @@
                 <ul style="margin: 0; padding-left: 20px; color: #888;">
                     <li>URL actual y hora</li>
                     <li>Captura de pantalla de la página</li>
-                    <li>Errores de consola (${WatchbugState.consoleErrors.length})</li>
-                    <li>Errores de red (${WatchbugState.networkErrors.length})</li>
+                    <li>Errores de JavaScript (<span id="watchbug-js-err-count">0</span>)</li>
+                    <li>Errores de consola (<span id="watchbug-console-err-count">0</span>)</li>
+                    <li>Errores de red (<span id="watchbug-network-err-count">0</span>)</li>
                     ${WATCHBUG_CONFIG.services.sentry ? '<li>Event ID de Sentry</li>' : ''}
                     ${WATCHBUG_CONFIG.services.logrocket ? '<li>Sesión de LogRocket</li>' : ''}
                 </ul>
@@ -639,9 +687,17 @@
             WatchbugState.capturedScreenshot = null;
         }
         
-        // Ahora sí, mostrar el modal
+        // Ahora sí, mostrar el modal con los contadores actualizados
         const overlay = document.getElementById('watchbug-overlay');
         overlay.style.display = 'flex';
+
+        // Actualizar contadores con el estado actual en tiempo real
+        const jsErrEl = document.getElementById('watchbug-js-err-count');
+        const consoleErrEl = document.getElementById('watchbug-console-err-count');
+        const networkErrEl = document.getElementById('watchbug-network-err-count');
+        if (jsErrEl) jsErrEl.textContent = WatchbugState.errors.length;
+        if (consoleErrEl) consoleErrEl.textContent = WatchbugState.consoleErrors.length;
+        if (networkErrEl) networkErrEl.textContent = WatchbugState.networkErrors.length;
         
         // Focus en el textarea
         setTimeout(() => {
@@ -792,6 +848,7 @@
         // Crear UI
         document.body.appendChild(createFloatingButton());
         document.body.appendChild(createReportModal());
+        updateErrorBadge(); // actualizar badge por si hubo errores antes de que el DOM estuviese listo
         
         // Crear botón de grabación si LogRocket está en modo manual
         if (WATCHBUG_CONFIG.services.logrocket && WATCHBUG_CONFIG.logrocketManual) {

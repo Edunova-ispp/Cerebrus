@@ -1,3 +1,4 @@
+import { Component } from "react";
 import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/auth/login/LoginPage";
 import LogoutPage from "./pages/auth/logout/LogoutPage";
@@ -23,9 +24,56 @@ import TeoriaAlumno from "./pages/TeoriaAlumno/TeoriaAlumno";
 import Perfil from "./pages/perfil/Perfil";
 import TableroAlumno from "./pages/tableroAlumno/TableroAlumno";
 
+// ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
+class WatchbugErrorBoundary extends Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    const ws = (window as any).WatchbugState;
+    if (ws) {
+      ws.errors.push({
+        type: 'react',
+        message: error.message,
+        stack: (error.stack ?? '') + '\n\nComponent Stack:\n' + info.componentStack,
+        timestamp: new Date().toISOString(),
+      });
+      // Actualizar badge si el widget ya está montado
+      if (typeof (window as any).updateErrorBadge === 'function') {
+        (window as any).updateErrorBadge();
+      }
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '40px', textAlign: 'center' }}>
+          <h2>Algo salió mal</h2>
+          <p>Usa el botón 🐛 para reportar el problema.</p>
+          <button onClick={() => this.setState({ hasError: false })}>
+            Reintentar
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function App() {
   return (
-    <Routes>
+    <WatchbugErrorBoundary>
+      <Routes>
       <Route path="/deploy_testing" element={<DeployTesting />} />
       <Route path="/" element={<LandingPage />} />
       <Route path="/infoAlumnos"   element={<InfoPage userType="alumno" />} />
@@ -53,6 +101,7 @@ function App() {
       <Route path="/medias/:id" element={<MediasCurso />} />
       <Route path="/perfil" element={<Perfil />} />
     </Routes>
+    </WatchbugErrorBoundary>
   );
 }
 
