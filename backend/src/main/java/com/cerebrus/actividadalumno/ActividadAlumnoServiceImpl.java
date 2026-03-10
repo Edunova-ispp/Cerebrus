@@ -1,25 +1,33 @@
 package com.cerebrus.actividadalumno;
 
+import java.sql.Time;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 
-import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cerebrus.TipoActGeneral;
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.General;
+import com.cerebrus.actividad.MarcarImagen;
+import com.cerebrus.actividad.MarcarImagenService;
 import com.cerebrus.actividad.Ordenacion;
 import com.cerebrus.actividad.OrdenacionService;
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.respuestaalumno.RespAlumnoGeneral;
 import com.cerebrus.respuestaalumno.RespAlumnoGeneralService;
 import com.cerebrus.respuestaalumno.RespAlumnoOrdenacionService;
+import com.cerebrus.respuestaalumno.RespAlumnoPuntoImagen;
+import com.cerebrus.respuestaalumno.RespAlumnoPuntoImagenService;
 import com.cerebrus.respuestaalumno.RespuestaAlumno;
 import com.cerebrus.respuestaalumno.RespuestaAlumnoService;
 import com.cerebrus.usuario.AlumnoRepository;
@@ -38,12 +46,15 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     private final OrdenacionService ordenacionService; 
     private final RespAlumnoOrdenacionService respAlumnoOrdenacionService;
     private final UsuarioService usuarioService;
+    private final MarcarImagenService marcarImagenService;
+    private final RespAlumnoPuntoImagenService respAlumnoPuntoImagenService;
 
     @Autowired
     public ActividadAlumnoServiceImpl(ActividadAlumnoRepository actividadAlumnoRepository, 
         ActividadRepository actividadRepository, AlumnoRepository alumnoRepository, RespuestaAlumnoService respuestaAlumnoService,
         RespAlumnoGeneralService respAlumnoGeneralService, OrdenacionService ordenacionService, 
-        RespAlumnoOrdenacionService respAlumnoOrdenacionService, UsuarioService usuarioService) {
+        RespAlumnoOrdenacionService respAlumnoOrdenacionService, UsuarioService usuarioService, 
+        MarcarImagenService marcarImagenService, RespAlumnoPuntoImagenService respAlumnoPuntoImagenService) {
         this.actividadAlumnoRepository = actividadAlumnoRepository;
         this.actividadRepository = actividadRepository;
         this.alumnoRepository = alumnoRepository;
@@ -52,6 +63,8 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         this.ordenacionService = ordenacionService;
         this.respAlumnoOrdenacionService = respAlumnoOrdenacionService;
         this.usuarioService = usuarioService;
+        this.marcarImagenService = marcarImagenService;
+        this.respAlumnoPuntoImagenService = respAlumnoPuntoImagenService;
     }
 
     @Override
@@ -186,66 +199,128 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     public ActividadAlumno corregirActividadAlumnoAutomaticamente(Long id, List<Long> respuestasIds) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         Actividad actividad = actividadAlumno.getActividad();
-        if(actividad instanceof General) {
-            // Nota: las actividades de TEORÍA se modelan como General con tipo TEORIA.
-            // No deben corregirse como un test (pueden no tener preguntas).
-            General general = (General) actividad;
-            if (general.getTipo() == com.cerebrus.TipoActGeneral.TEORIA) {
-                actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 1);
-                actividadAlumno.setNota(10); // Nota máxima por leer
-                actividadAlumno.setAcabada(LocalDateTime.now());
-            } else {
+        LocalDateTime finalActividad = LocalDateTime.now();
+        LocalDateTime inicioActividad = actividadAlumno.getInicio() != null? actividadAlumno.getInicio() : finalActividad;
+        actividadAlumno.setAcabada(finalActividad);
+        Integer tiempoSegundos = (int) Duration.between(inicioActividad, finalActividad).getSeconds();
+        actividadAlumno.setTiempo(tiempoSegundos);
+        if(actividad instanceof General){
+            if (((General) actividad).getTipo() == TipoActGeneral.TEST) {
                 corregirActividadAlumnoAutomaticamenteGeneral(actividadAlumno, respuestasIds, actividad);
+            } else if (((General) actividad).getTipo() == TipoActGeneral.CARTA){
+                corregirActividadAlumnoAutomaticamenteCartaGeneral(actividadAlumno, respuestasIds, actividad);
+            } else if (((General) actividad).getTipo() == TipoActGeneral.TEORIA){
+              // CASO PARA TEORÍA: Simplemente marcamos como terminada y damos la puntuación base
+               actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 1);
+               actividadAlumno.setNota(10); // Nota máxima por leer
+               actividadAlumno.setAcabada(LocalDateTime.now());
             }
         } else if(actividad instanceof Ordenacion) {
             corregirActividadAlumnoAutomaticamenteOrdenacion(actividadAlumno, respuestasIds, actividad);
-        } else {
-            // Otros tipos sin corrección automática basada en respuestas.
-            actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 0);
-            actividadAlumno.setAcabada(LocalDateTime.now());
+        } else if(actividad instanceof MarcarImagen){
+            corregirActividadAlumnoAutomaticamenteMarcarImagen(actividadAlumno, respuestasIds, actividad);
+        } else {    
+        // CASO PARA TEORÍA: se ha movido dentro de instancia de GENERAL porque la actividad de teoria es una actividad general
         }
         return actividadAlumnoRepository.save(actividadAlumno);
     }
 
-@Override
-public void corregirActividadAlumnoAutomaticamenteGeneral(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
-    // 1. Obtenemos el número REAL de preguntas que tiene el test
-    // Usamos la colección de la entidad actividad
-General actividadGeneral = (General) actividad;
-int numPreguntasTotales = actividadGeneral.getPreguntas().size();    
-    if (numPreguntasTotales == 0) {
-        actividadAlumno.setPuntuacion(0);
-        actividadAlumno.setNota(0);
-        return;
-    }
+    @Override
+    public void corregirActividadAlumnoAutomaticamenteGeneral(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
+        // 1. Obtenemos el número REAL de preguntas que tiene el test
+        // Usamos la colección de la entidad actividad
+        General actividadGeneral = (General) actividad;
+        int numPreguntasTotales = actividadGeneral.getPreguntas().size();    
+        if (numPreguntasTotales == 0) {
+            actividadAlumno.setPuntuacion(0);
+            actividadAlumno.setNota(0);
+            return;
+        }
 
-    int puntuacionMaximaActividad = (actividad.getPuntuacion() != null) ? actividad.getPuntuacion() : 0;
-    double notaMaxima = 10.0;
-    
-    // 2. Calculamos el valor de CADA pregunta basándonos en el TOTAL del test
-    double valorPuntoPorPregunta = (double) puntuacionMaximaActividad / numPreguntasTotales;
-    double valorNotaPorPregunta = notaMaxima / numPreguntasTotales;
+        int puntuacionMaximaActividad = (actividad.getPuntuacion() != null) ? actividad.getPuntuacion() : 0;
+        double notaMaxima = 10.0;
+        
+        // 2. Calculamos el valor de CADA pregunta basándonos en el TOTAL del test
+        double valorPuntoPorPregunta = (double) puntuacionMaximaActividad / numPreguntasTotales;
+        double valorNotaPorPregunta = notaMaxima / numPreguntasTotales;
 
-    double puntuacionAcumulada = 0;
-    double notaAcumulada = 0;
+        double puntuacionAcumulada = 0;
+        double notaAcumulada = 0;
 
-    if (respuestasIds != null) {
-        for (Long respuestaId : respuestasIds) {
-            // Este método DEBE comparar la respuesta del alumno con la correcta en la DB
-            boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(respuestaId);
-            
-            if (esCorrecta) {
-                puntuacionAcumulada += valorPuntoPorPregunta;
-                notaAcumulada += valorNotaPorPregunta;
+        if (respuestasIds != null) {
+            for (Long respuestaId : respuestasIds) {
+                // Este método DEBE comparar la respuesta del alumno con la correcta en la DB
+                boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(respuestaId);
+                
+                if (esCorrecta) {
+                    puntuacionAcumulada += valorPuntoPorPregunta;
+                    notaAcumulada += valorNotaPorPregunta;
+                }
             }
         }
-    }
 
     // 3. Guardar y redondear
     actividadAlumno.setPuntuacion((int) Math.round(puntuacionAcumulada));
     actividadAlumno.setNota((int) Math.round(notaAcumulada));
     actividadAlumno.setAcabada(LocalDateTime.now());
-}
+    }
+
+    @Override
+    public void corregirActividadAlumnoAutomaticamenteCartaGeneral(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
+        General actividadGeneral = (General) actividad;
+        int totalPreguntas = actividadGeneral.getPreguntas().size();
+
+        if (totalPreguntas == 0) {
+            actividadAlumno.setPuntuacion(0);
+            actividadAlumno.setNota(0);
+            actividadAlumno.setAcabada(LocalDateTime.now());
+            return;
+        }
+
+        if (respuestasIds == null || respuestasIds.size() != totalPreguntas) {
+            throw new IllegalArgumentException("El número de respuestas no coincide con el número de preguntas");
+        }
+
+        Set<Long> respuestasUnicas = new HashSet<>(respuestasIds);
+        if (respuestasUnicas.size() != respuestasIds.size()) {
+            throw new IllegalArgumentException("Hay respuestas duplicadas");
+        }
+
+        Set<Long> preguntasRespondidas = new HashSet<>();
+        int aciertos = 0;
+
+        for (Long respuestaAlumnoId : respuestasIds) {
+            RespAlumnoGeneral respAlumno = respAlumnoGeneralService.readRespAlumnoGeneral(respuestaAlumnoId);
+
+            if (!respAlumno.getActividadAlumno().getId().equals(actividadAlumno.getId())) {
+                throw new IllegalArgumentException("Una de las respuestas no pertenece a esta actividad del alumno");
+            }
+
+            if (!actividadGeneral.getPreguntas().contains(respAlumno.getPregunta())) {
+                throw new IllegalArgumentException("Una de las respuestas no pertenece a una pregunta de esta actividad");
+            }
+
+            Long preguntaId = respAlumno.getPregunta().getId();
+            if (!preguntasRespondidas.add(preguntaId)) {
+                throw new IllegalArgumentException("Hay varias respuestas para la misma pregunta");
+            }
+
+            boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(respuestaAlumnoId);
+            if (esCorrecta) {
+                aciertos++;
+            }
+        }
+    
+    int puntuacionMaxima = actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 0;
+    double proporcion = (double) aciertos / totalPreguntas;
+
+    int puntuacionFinal = (int) Math.round(proporcion * puntuacionMaxima);
+    int notaFinal = (int) Math.round(proporcion * 10);
+
+    actividadAlumno.setPuntuacion(puntuacionFinal);
+    actividadAlumno.setNota(notaFinal);
+    actividadAlumno.setAcabada(LocalDateTime.now());
+    }
 
     @Override
     public void corregirActividadAlumnoAutomaticamenteOrdenacion(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
@@ -273,6 +348,87 @@ int numPreguntasTotales = actividadGeneral.getPreguntas().size();
         notaFinal = notaPorRespuesta * numPosicionesCorrectas;
         actividadAlumno.setPuntuacion(puntuacionFinal);
         actividadAlumno.setNota(notaFinal);
+    }
+
+    @Override
+    public void corregirActividadAlumnoAutomaticamenteMarcarImagen(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
+        MarcarImagen actividadMarcarImagen = marcarImagenService.obtenerMarcarImagenPorId(actividad.getId());
+        Integer puntuacionTotal = actividadMarcarImagen.getPuntuacion();
+        Integer notaTotal = 10;
+        Integer puntuacionFinal = 0;
+        Integer notaFinal = 0;
+        Integer numPuntos = actividadMarcarImagen.getPuntosImagen().size();
+        Integer puntuacionPorRespuesta = numPuntos > 0 ? puntuacionTotal / numPuntos : 0;
+        Integer notaPorRespuesta = numPuntos > 0 ? notaTotal / numPuntos : 0;
+
+        for (Long respuestaId : respuestasIds) {
+            RespAlumnoPuntoImagen respuestaAlumno = respAlumnoPuntoImagenService.encontrarRespuestaAlumnoPuntoImagenPorId(respuestaId);
+            actividadAlumno.getRespuestasAlumno().add(respuestaAlumno);
+            if(respuestaAlumno == null) {
+                throw new ResourceNotFoundException("RespAlumnoPuntoImagen", "id", respuestaId);
+            } else if (!respuestaAlumno.getActividadAlumno().getId().equals(actividadAlumno.getId())) {
+                throw new IllegalArgumentException("La respuesta con id " + respuestaId + " no pertenece a la actividad del alumno con id " + actividadAlumno.getId());
+            }
+            boolean esCorrecta = respAlumnoPuntoImagenService.corregirRespuestaAlumnoPuntoImagen(respuestaId);
+            if (esCorrecta) {
+                puntuacionFinal += puntuacionPorRespuesta;
+                notaFinal += notaPorRespuesta;
+            }
+        }
+        actividadAlumno.setPuntuacion(puntuacionFinal);
+        actividadAlumno.setNota(notaFinal);
+    }
+
+    @Override  
+    public ActividadAlumno corregirActividadAlumnoAutomaticamenteGeneralClasificacion(Long actividadAlumnoId, List<Long> respuestasIds) {
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actividadAlumnoId).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
+    
+        General actividadGeneral = (General) actividadRepository.findById(actividadAlumno.getActividad().getId()).orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
+        int numPreguntasTotales = actividadGeneral.getPreguntas().size();    
+        if (numPreguntasTotales == 0) {
+            actividadAlumno.setPuntuacion(0);
+            actividadAlumno.setNota(0);
+            return actividadAlumnoRepository.save(actividadAlumno);
+        }
+    
+
+        int puntuacionMaximaActividad = (actividadGeneral.getPuntuacion() != null) ? actividadGeneral.getPuntuacion() : 0;
+        double notaMaxima = 10.0;
+
+        int numRespuestasTotales = actividadGeneral.getPreguntas().stream()
+            .mapToInt(p -> p.getRespuestas().size())
+            .sum();
+        if (numRespuestasTotales == 0) {
+            actividadAlumno.setPuntuacion(0);
+            actividadAlumno.setNota(0);
+            return actividadAlumnoRepository.save(actividadAlumno);
+        }
+
+        double valorPuntoPorPregunta = (double) puntuacionMaximaActividad / numRespuestasTotales;
+        double valorNotaPorPregunta = notaMaxima / numRespuestasTotales;
+
+        double puntuacionAcumulada = 0;
+        double notaAcumulada = 0;
+        
+        if (respuestasIds != null) {
+            for (Long respuestaId : respuestasIds) {
+                
+                boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneralTest(respuestaId);
+                System.out.println("Respuesta ID " + respuestaId + " es correcta? " + esCorrecta);
+                if (esCorrecta) {
+                    puntuacionAcumulada += valorPuntoPorPregunta;
+                    notaAcumulada += valorNotaPorPregunta;
+                }
+            }
+        }
+        
+
+        
+        actividadAlumno.setPuntuacion((int) Math.round(puntuacionAcumulada));
+        actividadAlumno.setNota((int) Math.round(notaAcumulada));
+        actividadAlumno.setAcabada(LocalDateTime.now());
+
+        return actividadAlumnoRepository.save(actividadAlumno);
     }
   
 }

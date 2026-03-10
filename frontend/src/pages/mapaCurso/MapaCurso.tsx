@@ -240,7 +240,7 @@ export default function MapaCurso() {
     <div className="mapa-page">
       <NavbarMisCursos />
       <main className="mapa-main">
-        <button className="detalle-volver" onClick={() => navigate(-1)}>← Volver</button>
+        <button className="detalle-volver" onClick={() => navigate(-1)}>←</button>
         <div className="mapa-layout">
           <aside className="mapa-sidebar">
             <h2 className="mapa-sidebar-title">Temas</h2>

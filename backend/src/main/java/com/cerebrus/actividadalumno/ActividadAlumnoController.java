@@ -120,15 +120,7 @@ public class ActividadAlumnoController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoManual(@PathVariable Long id, @RequestBody CorreccionManualDTO correccionManualDTO) {
         ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoManual(id, correccionManualDTO.getNuevaNota(), correccionManualDTO.getNuevasCorreccionesRespuestasIds());
-        ActividadAlumnoDTO actividadAlumnoDTO = new ActividadAlumnoDTO(
-            actividadAlumnoActualizada.getTiempo(),
-            actividadAlumnoActualizada.getPuntuacion(),
-            actividadAlumnoActualizada.getNota(),
-            actividadAlumnoActualizada.getNumAbandonos(),
-            actividadAlumnoActualizada.getAlumno().getId(),
-            actividadAlumnoActualizada.getActividad().getId()
-        );
-        return new ResponseEntity<>(actividadAlumnoDTO, HttpStatus.OK);
+        return new ResponseEntity<>(toDto(actividadAlumnoActualizada), HttpStatus.OK);
     }
 
     @PutMapping("/corregir-automaticamente/{id}")
@@ -140,9 +132,25 @@ public class ActividadAlumnoController {
         // cuando la petición no envía cuerpo el parámetro llega como null, el
         // servicio se encarga de recopilar los ids a partir de las respuestas
         ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamente(id, respuestasIds);
+        return new ResponseEntity<>(toDto(actividadAlumnoActualizada), HttpStatus.OK);
+    }
+
+        @PutMapping("/corregir-automaticamente-general-clasificacion/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoAutomaticamenteGeneralClasificacion(
+        @PathVariable Long id,
+        @RequestBody(required = false) List<Long> respuestasIds
+    ) {
+
+       
+        
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(id, respuestasIds);
         ActividadAlumnoDTO actividadAlumnoDTO = new ActividadAlumnoDTO(
+            actividadAlumnoActualizada.getId(),
             actividadAlumnoActualizada.getTiempo(),
             actividadAlumnoActualizada.getPuntuacion(),
+            actividadAlumnoActualizada.getInicio(),
+            actividadAlumnoActualizada.getAcabada(),
             actividadAlumnoActualizada.getNota(),
             actividadAlumnoActualizada.getNumAbandonos(),
             actividadAlumnoActualizada.getAlumno().getId(),
