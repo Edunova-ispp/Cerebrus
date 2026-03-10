@@ -39,7 +39,7 @@ class WatchbugErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    const ws = (window as any).WatchbugState;
+    const ws = (globalThis as any).WatchbugState;
     if (ws) {
       ws.errors.push({
         type: 'react',
@@ -48,8 +48,8 @@ class WatchbugErrorBoundary extends Component<
         timestamp: new Date().toISOString(),
       });
       // Actualizar badge si el widget ya está montado
-      if (typeof (window as any).updateErrorBadge === 'function') {
-        (window as any).updateErrorBadge();
+      if (typeof (globalThis as any).updateErrorBadge === 'function') {
+        (globalThis as any).updateErrorBadge();
       }
     }
   }

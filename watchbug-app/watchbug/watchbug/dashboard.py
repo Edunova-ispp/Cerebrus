@@ -222,7 +222,7 @@ class DashboardData:
             total = len(reports)
             
             # Calcular reportes de hoy
-            today = datetime.utcnow().date()
+            today = datetime.now(timezone.utc).date()
             reports_today = sum(
                 1 for r in reports 
                 if datetime.fromisoformat(r['created_at'].replace('Z', '+00:00')).date() == today

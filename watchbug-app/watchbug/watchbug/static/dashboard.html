@@ -146,6 +146,7 @@
         
         .service-card.disabled .btn {
             background: #cbd5e0;
+            color: #4a5568;
             cursor: not-allowed;
         }
         
@@ -242,12 +243,12 @@
         
         .badge.warning {
             background: #feebc8;
-            color: #c05621;
+            color: #7b341e;
         }
         
         .badge.success {
             background: #c6f6d5;
-            color: #276749;
+            color: #1a4731;
         }
         
         .badge.info {
@@ -272,6 +273,7 @@
         
         .screenshot-btn:disabled {
             background: #cbd5e0;
+            color: #4a5568;
             cursor: not-allowed;
         }
         
@@ -311,6 +313,10 @@
             cursor: pointer;
             color: #a0aec0;
             transition: color 0.2s;
+            background: none;
+            border: none;
+            padding: 0;
+            line-height: 1;
         }
         
         .modal-close:hover {
@@ -338,7 +344,7 @@
         
         .error-message {
             background: #fed7d7;
-            color: #c53030;
+            color: #742a2a;
             padding: 15px 20px;
             border-radius: 8px;
             margin: 20px 0;
@@ -444,14 +450,14 @@
     <!-- Modal para detalles del reporte -->
     <div class="modal" id="report-modal">
         <div class="modal-content">
-            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <button class="modal-close" onclick="closeModal()" aria-label="Cerrar modal">&times;</button>
             <div id="modal-body">
                 <div class="loading">Cargando detalles...</div>
             </div>
         </div>
     </div>
     
-    <script>
+    <script type="module">
         // Estado global
         let allReports = [];
         let serviceLinks = {};
@@ -892,7 +898,14 @@
         });
         
         // Cargar dashboard al iniciar
-        loadDashboard();
+        await loadDashboard();
+        
+        // Exponer funciones usadas en manejadores onclick del HTML dinámico
+        globalThis.viewReport = viewReport;
+        globalThis.viewScreenshot = viewScreenshot;
+        globalThis.closeModal = closeModal;
+        globalThis.exportReportToClipboard = exportReportToClipboard;
+        globalThis.copyReportForAI = copyReportForAI;
         
         // Auto-refresh desactivado - actualiza manualmente con F5 si necesitas
         // setInterval(loadReports, 30000);

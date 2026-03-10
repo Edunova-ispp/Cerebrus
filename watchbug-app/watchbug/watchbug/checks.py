@@ -44,14 +44,17 @@ SENTRY_DSN_PATTERN = re.compile(
 )
 
 LOGROCKET_ID_PATTERN = re.compile(
-    r'^[a-z0-9\-]+/[a-z0-9\-]+$',
+    r'^[a-z0-9-]+/[a-z0-9-]+$',
     re.IGNORECASE
 )
 
 SUPABASE_URL_PATTERN = re.compile(
-    r'^https://[a-zA-Z0-9\-]+\.supabase\.co$',
+    r'^https://[a-z0-9-]+\.supabase\.co$',
     re.IGNORECASE
 )
+
+# Mensaje para funciones de conectividad no implementadas
+_CONNECTIVITY_NOT_IMPLEMENTED = "Test de conectividad online no implementado aún (Milestone 3)"
 
 # El key de Supabase es un JWT (formato: header.payload.signature)
 SUPABASE_KEY_PATTERN = re.compile(
@@ -206,80 +209,50 @@ def validate_supabase_credentials(url: Optional[str], key: Optional[str]) -> Val
     )
 
 
-def check_sentry_connection(dsn: str) -> ValidationResult:
+def check_sentry_connection(_dsn: str) -> ValidationResult:
     """
-    Verifica la conectividad con Sentry enviando un evento de prueba.
-    
-    TODO: Implementar en Milestone 3 cuando tengamos credenciales reales.
+    Verifica la conectividad con Sentry.
     
     Args:
-        dsn: El DSN de Sentry ya validado
+        _dsn: El DSN de Sentry ya validado (no utilizado en esta implementación)
         
     Returns:
         ValidationResult con resultado de la prueba de conectividad
     """
-    # TODO: Implementar test real
-    # try:
-    #     import sentry_sdk
-    #     sentry_sdk.init(dsn=dsn, before_send=lambda event, hint: None)
-    #     sentry_sdk.capture_message("Watchbug health check", level="info")
-    #     return ValidationResult(ServiceStatus.CONNECTED, "Conexión a Sentry exitosa")
-    # except Exception as e:
-    #     return ValidationResult(ServiceStatus.CONNECTION_FAILED, f"Error conectando a Sentry: {str(e)}")
-    
     return ValidationResult(
         ServiceStatus.UNTESTED,
-        "Test de conectividad online no implementado aún (TODO: Milestone 3)"
+        _CONNECTIVITY_NOT_IMPLEMENTED
     )
 
 
-def check_logrocket_connection(logrocket_id: str) -> ValidationResult:
+def check_logrocket_connection(_logrocket_id: str) -> ValidationResult:
     """
     Verifica que el proyecto de LogRocket exista.
     
-    TODO: Implementar en Milestone 3 cuando tengamos credenciales reales.
-    
     Args:
-        logrocket_id: El ID de LogRocket ya validado
+        _logrocket_id: El ID de LogRocket ya validado (no utilizado en esta implementación)
         
     Returns:
         ValidationResult con resultado de la prueba de conectividad
     """
-    # TODO: Implementar test real
-    # LogRocket no tiene SDK oficial de Python, pero podríamos verificar
-    # que el script JS esté disponible en su CDN:
-    # https://cdn.logrocket.com/{logrocket_id}/logrocket.min.js
-    
     return ValidationResult(
         ServiceStatus.UNTESTED,
-        "Test de conectividad online no implementado aún (TODO: Milestone 3)"
+        _CONNECTIVITY_NOT_IMPLEMENTED
     )
 
 
-def check_supabase_connection(url: str, key: str) -> ValidationResult:
+def check_supabase_connection(_url: str, _key: str) -> ValidationResult:
     """
-    Verifica la conectividad con Supabase intentando una operación simple.
-    
-    TODO: Implementar en Milestone 3 cuando tengamos credenciales reales.
+    Verifica la conectividad con Supabase.
     
     Args:
-        url: La URL de Supabase ya validada
-        key: La API key de Supabase ya validada
+        _url: La URL de Supabase ya validada (no utilizado en esta implementación)
+        _key: La API key de Supabase ya validada (no utilizado en esta implementación)
         
     Returns:
         ValidationResult con resultado de la prueba de conectividad
     """
-    # TODO: Implementar test real
-    # try:
-    #     from supabase import create_client
-    #     client = create_client(url, key)
-    #     # Intentar obtener sesión o hacer query simple
-    #     # client.auth.get_session()
-    #     return ValidationResult(ServiceStatus.CONNECTED, "Conexión a Supabase exitosa")
-    # except Exception as e:
-    #     return ValidationResult(ServiceStatus.CONNECTION_FAILED, f"Error conectando a Supabase: {str(e)}")
-    
     return ValidationResult(
         ServiceStatus.UNTESTED,
-        "Test de conectividad online no implementado aún (TODO: Milestone 3)"
+        _CONNECTIVITY_NOT_IMPLEMENTED
     )

@@ -9,13 +9,15 @@ import os
 import json
 import logging
 from typing import Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import httpx  # Usamos httpx directamente para evitar dependencias pesadas
 
 logger = logging.getLogger("watchbug.api")
 
 # Variable global para rastrear si Sentry ya fue inicializado
 _sentry_initialized = False
+
+_NO_DATA_PROVIDED = 'No data provided'
 
 
 class BugReport:
@@ -24,7 +26,7 @@ class BugReport:
     def __init__(self, data: Dict[str, Any], screenshot: Optional[bytes] = None):
         self.comment = data.get('comment', '')
         self.url = data.get('url', '')
-        self.timestamp = data.get('timestamp', datetime.utcnow().isoformat())
+        self.timestamp = data.get('timestamp', datetime.now(timezone.utc).isoformat())
         self.user_agent = data.get('userAgent', '')
         self.viewport = data.get('viewport', {})
         self.errors = data.get('errors', [])
@@ -81,7 +83,7 @@ class ReportHandler:
             # Enviar a Sentry si está habilitado
             if self.watchbug.services['sentry']['enabled']:
                 try:
-                    print(f"   🔥 Sentry: Enviando reporte...")
+                    print("   🔥 Sentry: Enviando reporte...")
                     sentry_event_id = self._send_to_sentry(report)
                     result['services_used'].append('sentry')
                     result['sentry_event_id'] = sentry_event_id
@@ -95,11 +97,11 @@ class ReportHandler:
             # Enviar a LogRocket si está habilitado
             if self.watchbug.services['logrocket']['enabled'] and report.logrocket_session_url:
                 try:
-                    print(f"   📹 LogRocket: Enriqueciendo sesión...")
+                    print("   📹 LogRocket: Enriqueciendo sesión...")
                     self._enrich_logrocket_session(report)
                     result['services_used'].append('logrocket')
                     result['logrocket_session_url'] = report.logrocket_session_url
-                    print(f"   📹 LogRocket: ✓ Sesión enriquecida")
+                    print("   📹 LogRocket: ✓ Sesión enriquecida")
                 except Exception as e:
                     print(f"   📹 LogRocket: ✗ Error: {str(e)}")
                     logger.error(f"Error enriqueciendo LogRocket: {e}", exc_info=True)
@@ -108,7 +110,7 @@ class ReportHandler:
             # Subir a Supabase si está habilitado
             if self.watchbug.services['supabase']['enabled']:
                 try:
-                    print(f"   💾 Supabase: Guardando...")
+                    print("   💾 Supabase: Guardando...")
                     supabase_id = self._save_to_supabase(report)
                     result['report_id'] = supabase_id
                     result['services_used'].append('supabase')
@@ -141,7 +143,7 @@ class ReportHandler:
         key = config['key']
         
         if not url or not key:
-            raise Exception("Credenciales Supabase incompletas o no configuradas")
+            raise ValueError("Credenciales Supabase incompletas o no configuradas")
 
         # Headers comunes para autenticación
         headers = {
@@ -159,7 +161,7 @@ class ReportHandler:
         if report.screenshot:
             try:
                 # Generar nombre único
-                timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+                timestamp = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
                 url_hash = hashlib.md5(report.url.encode(), usedforsecurity=False).hexdigest()[:8]  # NOSONAR - solo para nombre de archivo único
                 filename = f"{timestamp}_{url_hash}.png"
                 
@@ -234,7 +236,7 @@ class ReportHandler:
             result = resp.json()
             
         if not result or len(result) == 0:
-            raise Exception("Supabase no retornó ID después del insert")
+            raise RuntimeError("Supabase no retornó ID después del insert")
             
         return result[0]['id']
     
@@ -249,14 +251,14 @@ class ReportHandler:
             import sentry_sdk
             from sentry_sdk import capture_message
         except ImportError:
-            raise Exception("sentry-sdk no está instalado. Ejecuta: pip install sentry-sdk")
+            raise ImportError("sentry-sdk no está instalado. Ejecuta: pip install sentry-sdk")
         
         # Configurar Sentry con el DSN
         config = self.watchbug.services['sentry']
         dsn = config['dsn']
         
         if not dsn:
-            raise Exception("Sentry DSN no configurado")
+            raise ValueError("Sentry DSN no configurado")
         
         # Inicializar Sentry solo una vez y ANTES de que Flask inicie
         # Si estamos en modo debug y no está inicializado, advertir
@@ -328,7 +330,6 @@ class ReportHandler:
         # Si quisiéramos hacer algo adicional, podríamos usar la API de LogRocket
         # pero requeriría credenciales adicionales (API Key)
         # Por ahora, solo capturamos la URL de sesión para vincularla
-        pass
 
 
 # ============================================
@@ -349,7 +350,7 @@ def create_flask_endpoint(watchbug_instance):
             data_str = request.form.get('data')
             if not data_str:
                 logger.error("No se recibió el campo 'data'")
-                return jsonify({'error': 'No data provided'}), 400
+                return jsonify({'error': _NO_DATA_PROVIDED}), 400
             
             # Parsear JSON
             try:
@@ -405,7 +406,7 @@ def create_django_view(watchbug_instance):
         try:
             data_str = request.POST.get('data')
             if not data_str:
-                return JsonResponse({'error': 'No data provided'}, status=400)
+                return JsonResponse({'error': _NO_DATA_PROVIDED}, status=400)
 
             data = json.loads(data_str)
             screenshot = None
@@ -432,7 +433,7 @@ def create_fastapi_endpoint(watchbug_instance):
         try:
             form = await request.form()
             data_str = form.get('data')
-            if not data_str: return JSONResponse({'error': 'No data provided'}, status_code=400)
+            if not data_str: return JSONResponse({'error': _NO_DATA_PROVIDED}, status_code=400)
             
             data = json.loads(data_str)
             screenshot = None

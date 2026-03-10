@@ -46,6 +46,42 @@ def get_status_icon(status: ServiceStatus) -> tuple[str, str]:
     return status_map.get(status, ("?", ""))
 
 
+def _print_service_result(service_name: str, result) -> None:
+    """Imprime el resultado de validación de un servicio con formato y color."""
+    icon, color = get_status_icon(result.status)
+    service_display = service_name.capitalize().ljust(12)
+    print_colored(f"{icon} {service_display}", color)
+    if result.message:
+        for line in result.message.split('\n'):
+            print(f"   {line}")
+    if result.details:
+        print_colored(f"   Detalles: {result.details}", Colors.GRAY)
+    print()
+
+
+def _print_check_summary(valid_count: int, total_count: int) -> None:
+    """Imprime el resumen final de la validación de servicios."""
+    print_colored("─" * 50, Colors.GRAY)
+    if valid_count == 0:
+        print_colored(
+            f"⚠ Ningún servicio configurado correctamente ({valid_count}/{total_count})",
+            Colors.YELLOW
+        )
+        print("\nWatchbug no funcionará hasta que configures al menos un servicio.")
+        print("Tip: Copia .env.example a .env y añade tus credenciales")
+    elif valid_count < total_count:
+        print_colored(
+            f"⚠ Algunos servicios requieren atención ({valid_count}/{total_count} válidos)",
+            Colors.YELLOW
+        )
+    else:
+        print_colored(
+            f"✓ Todos los servicios configurados correctamente ({valid_count}/{total_count})",
+            Colors.GREEN
+        )
+    print()
+
+
 def cmd_check(online: bool = False, service: Optional[str] = None):
     """
     Comando 'check': Valida la configuración de servicios.
@@ -83,48 +119,28 @@ def cmd_check(online: bool = False, service: Optional[str] = None):
     print()
     
     for service_name, result in results.items():
-        icon, color = get_status_icon(result.status)
-        service_display = service_name.capitalize().ljust(12)
-        
-        print_colored(f"{icon} {service_display}", color)
-        
-        # Mostrar mensaje con indentación
-        if result.message:
-            lines = result.message.split('\n')
-            for line in lines:
-                print(f"   {line}")
-        
-        # Mostrar detalles adicionales si existen
-        if result.details:
-            print_colored(f"   Detalles: {result.details}", Colors.GRAY)
-        
-        print()
+        _print_service_result(service_name, result)
     
     # Resumen final
     valid_count = sum(1 for r in results.values() if r.is_valid())
     total_count = len(results)
-    
-    print_colored("─" * 50, Colors.GRAY)
-    
-    if valid_count == 0:
-        print_colored(
-            f"⚠ Ningún servicio configurado correctamente ({valid_count}/{total_count})",
-            Colors.YELLOW
-        )
-        print("\nWatchbug no funcionará hasta que configures al menos un servicio.")
-        print("Tip: Copia .env.example a .env y añade tus credenciales")
-    elif valid_count < total_count:
-        print_colored(
-            f"⚠ Algunos servicios requieren atención ({valid_count}/{total_count} válidos)",
-            Colors.YELLOW
-        )
-    else:
-        print_colored(
-            f"✓ Todos los servicios configurados correctamente ({valid_count}/{total_count})",
-            Colors.GREEN
-        )
-    
-    print()
+    _print_check_summary(valid_count, total_count)
+
+
+def _get_service_status_text(service_info: dict) -> tuple[str, str]:
+    """Determina el texto de estado y color para un servicio dado su info de configuración."""
+    if not service_info['enabled']:
+        return "Desactivado", Colors.GRAY
+    if not service_info['configured']:
+        return "Sin configurar", Colors.YELLOW
+    if service_info['validation']:
+        val_status = service_info['validation']['status']
+        if val_status == 'valid_format':
+            return "Configurado (no probado)", Colors.GREEN
+        if val_status == 'connected':
+            return "Conectado", Colors.GREEN
+        return val_status.replace('_', ' ').title(), Colors.YELLOW
+    return "No verificado", Colors.BLUE
 
 
 def cmd_status():
@@ -160,29 +176,7 @@ def cmd_status():
     # Estado de cada servicio
     for service_name, service_info in status['services'].items():
         service_display = service_name.capitalize().ljust(12)
-        
-        # Determinar estado
-        if not service_info['enabled']:
-            status_text = "Desactivado"
-            color = Colors.GRAY
-        elif not service_info['configured']:
-            status_text = "Sin configurar"
-            color = Colors.YELLOW
-        elif service_info['validation']:
-            val_status = service_info['validation']['status']
-            if val_status == 'valid_format':
-                status_text = "Configurado (no probado)"
-                color = Colors.GREEN
-            elif val_status == 'connected':
-                status_text = "Conectado"
-                color = Colors.GREEN
-            else:
-                status_text = val_status.replace('_', ' ').title()
-                color = Colors.YELLOW
-        else:
-            status_text = "No verificado"
-            color = Colors.BLUE
-        
+        status_text, color = _get_service_status_text(service_info)
         print_colored(f"  {service_display}: {status_text}", color)
     
     print()
