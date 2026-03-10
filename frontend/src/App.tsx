@@ -20,6 +20,7 @@ import TestAlumno from "./pages/testAlumno/TestAlumno";
 import MapaCurso from "./pages/mapaCurso/MapaCurso";
 import MediasCurso from "./pages/estadisticasCurso/MediasCurso";
 import TeoriaAlumno from "./pages/TeoriaAlumno/TeoriaAlumno";
+import MarcarImagenAlumno from "./pages/marcarImagenAlumno/MarcarImagenAlumno";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
       <Route path="/auth/logout"    element={<LogoutPage />} />
       <Route path="/cursos/:id/temas/:temaId/actividades/crear" element={<CrearActividad />} />
       <Route path="/ordenaciones/:ordenacionId/alumno" element={<OrdenacionAlumno />} />
+      <Route path="/marcar-imagenes/:marcarImagenId/alumno" element={<MarcarImagenAlumno />} />
       <Route path="/actividades/teoria/:actividadId" element={<TeoriaAlumno />} />
 
       <Route path="/generales/test/:testId/alumno" element={<TestAlumno />} />

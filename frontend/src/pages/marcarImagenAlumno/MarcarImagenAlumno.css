@@ -1,0 +1,153 @@
+.marcar-imagen-alumno-page {
+  min-height: 100vh;
+}
+
+.marcar-imagen-alumno-main {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mia-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.mia-exit {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.mia-title {
+  flex: 1;
+}
+
+.mia-h1 {
+  margin: 0;
+}
+
+.mia-desc {
+  margin: 6px 0 0;
+  opacity: 0.85;
+}
+
+.mia-image-section {
+  width: 100%;
+}
+
+.mia-image-frame {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.mia-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+}
+
+.mia-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mia-point {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+  color: #111;
+  font-weight: 700;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.mia-point--unanswered {
+  background: #7C4DFF;
+  color: #ffffff;
+}
+
+.mia-point--selected {
+  background: #FFF294;
+}
+
+.mia-point--answered {
+  background: #E0AE00;
+}
+
+.mia-cards-section {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.mia-h2 {
+  margin: 0 0 10px;
+}
+
+.mia-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.mia-card {
+  border-radius: 10px;
+  padding: 12px;
+  border: 2px solid transparent;
+}
+
+.mia-card--unanswered {
+  border-color: #7C4DFF;
+}
+
+.mia-card--selected {
+  border-color: #FFF294;
+}
+
+.mia-card--answered {
+  border-color: #E0AE00;
+}
+
+.mia-card-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.mia-input {
+  width: 100%;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  padding: 8px 10px;
+}
+
+.mia-bottom {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.mia-bottom-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.mia-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

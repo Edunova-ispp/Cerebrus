@@ -59,7 +59,7 @@ public class OrdenacionServiceImpl implements OrdenacionService {
             ordenacion.setComentariosRespVisible(null);
         }
         ordenacion.setVersion(1);
-        ordenacion.setPosicion(posicion);
+        ordenacion.setPosicion(tema.getActividades().size());
         ordenacion.setValores(valores);
         return ordenacionRepository.save(ordenacion);
     }
