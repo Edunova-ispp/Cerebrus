@@ -86,10 +86,10 @@ Funcionalidades a probar: Gestión de avisos (CRUD), Recepción de notificacione
 ### 2.5 Reservas
 Funcionalidades a probar: Configuración, Panel de gestión, Consulta/Creación, Cancelación propia.
 * **Revisión:**
-    * **Configuración de espacios, horas y aforos:*** [Texto]
-    * **Panel de gestión y visualización de reservas:** [Texto]
-    * **Consulta/Reserva de espacios:** [Texto]
-    * **Cancelación de reservas propias:** [Texto]
+    * **Configuración de espacios, horas y aforos:*** Funciona. ✅
+    * **Panel de gestión y visualización de reservas:** Funciona. ✅
+    * **Consulta/Reserva de espacios:** Funciona. ✅
+    * **Cancelación de reservas propias:** Funciona. ✅
 
 ### 2.6 Eventos
 Funcionalidades a probar: Gestión de eventos (CRUD), Inscripción, Gestión de asistencia.
@@ -136,6 +136,7 @@ Los he ido mencionando punto por punto para tenerlo más organizado, pero coment
 * Quitaría los módulos no implementados, los escondería. Comentadlos en el código, aunque quede algo cutre, ponerle un "hidden"... ni idea.
 * La interfaz  y las vistas me gustan, son sobrias, elegantes, y no sobrecargas.
 * Me gusta que sea casi SPA, Single Page Application, lo hace más segura frente a ataques de URL.
+* Las reservas de espacio están genial pero añadiría el detalle de poder reservar para otro día, aunque sea solo para el día siguiente, pero que no te obligue a que sea para el día actual, por si es tarde y el usuario quiere reservar para el día siguiente.
 
 
 
