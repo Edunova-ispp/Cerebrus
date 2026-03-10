@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { OrdenacionForm, type OrdenacionFormInitialValues } from '../crearActividad/OrdenacionForm';
+import { MarcarImagenForm, type MarcarImagenFormInitialValues } from '../crearActividad/MarcarImagenForm';
 import { TeoriaForm } from '../crearActividad/TeoriaForm';
 import { TestForm, type TestFormInitialValues } from '../crearActividad/TestForm';
 import '../crearActividad/crearActividad.css';
@@ -44,7 +45,20 @@ type GeneralTestMaestroDTO = {
   }[];
 };
 
-type ActivityKind = 'ordenacion' | 'test' | 'teoria' | null;
+type MarcarImagenDTO = {
+  id: number;
+  titulo: string;
+  descripcion: string | null;
+  puntuacion: number;
+  imagenActividad: string | null;
+  respVisible: boolean;
+  comentariosRespVisible: string | null;
+  temaId: number;
+  imagenAMarcar: string;
+  puntosImagen: { id: number; respuesta: string; pixelX: number; pixelY: number }[];
+};
+
+type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'marcarImagen' | null;
 
 export default function EditarActividad() {
   const { id: cursoId, actividadId } = useParams<{
@@ -60,6 +74,7 @@ export default function EditarActividad() {
   const [ordenacion, setOrdenacion] = useState<OrdenacionDTO | null>(null);
   const [teoria, setTeoria] = useState<TeoriaDTO | null>(null);
   const [generalTest, setGeneralTest] = useState<GeneralTestMaestroDTO | null>(null);
+  const [marcarImagen, setMarcarImagen] = useState<MarcarImagenDTO | null>(null);
 
   useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
@@ -86,16 +101,25 @@ export default function EditarActividad() {
             setLoading(false);
           })
           .catch(() => {
-            // 3. Intentar teoría
-            apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`)
+            // 3. Intentar marcar en imagen
+            apiFetch(`${apiBase}/api/marcar-imagenes/${actividadId}`)
               .then((r) => r.json())
-              .then((data: TeoriaDTO) => {
-                setTeoria(data);
-                setKind('teoria');
+              .then((data: MarcarImagenDTO) => {
+                setMarcarImagen(data);
+                setKind('marcarImagen');
               })
-              .catch((e) => {
-                const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
-                setError(msg);
+              .catch(() => {
+                // 4. Intentar teoría
+                apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`)
+                  .then((r) => r.json())
+                  .then((data: TeoriaDTO) => {
+                    setTeoria(data);
+                    setKind('teoria');
+                  })
+                  .catch((e) => {
+                    const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
+                    setError(msg);
+                  });
               })
               .finally(() => setLoading(false));
           });
@@ -131,6 +155,23 @@ export default function EditarActividad() {
       }
     : undefined;
 
+  const marcarImagenInitialValues: MarcarImagenFormInitialValues | undefined = marcarImagen
+    ? {
+        titulo: marcarImagen.titulo,
+        descripcion: marcarImagen.descripcion,
+        puntuacion: marcarImagen.puntuacion,
+        respVisible: marcarImagen.respVisible,
+        comentariosRespVisible: marcarImagen.comentariosRespVisible,
+        imagenAMarcar: marcarImagen.imagenAMarcar,
+        puntosImagen: (marcarImagen.puntosImagen ?? []).map((p) => ({
+          id: p.id,
+          respuesta: p.respuesta,
+          pixelX: p.pixelX,
+          pixelY: p.pixelY,
+        })),
+      }
+    : undefined;
+
   const renderForm = () => {
     if (kind === 'test' && generalTest) {
       return (
@@ -159,6 +200,16 @@ export default function EditarActividad() {
           actividadId={actividadIdNum}
           initialTitulo={teoria.titulo}
           initialDescripcion={teoria.descripcion ?? ''}
+        />
+      );
+    }
+
+    if (kind === 'marcarImagen' && marcarImagen) {
+      return (
+        <MarcarImagenForm
+          mode="edit"
+          marcarImagenId={actividadIdNum}
+          initialValues={marcarImagenInitialValues}
         />
       );
     }
