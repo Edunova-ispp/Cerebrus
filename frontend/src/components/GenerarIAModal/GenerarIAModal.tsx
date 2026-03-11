@@ -96,7 +96,7 @@ export default function GenerarIAModal({
       <div className="iam-modal" role="dialog" aria-modal="true">
         <h2 className="iam-title">Generar con IA</h2>
 
-        <label style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>
+        <label style={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
           Describe de qué trata la actividad
         </label>
         <textarea
