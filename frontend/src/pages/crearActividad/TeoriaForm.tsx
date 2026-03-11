@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import './OrdenacionForm.css';
 
 interface Props {
@@ -15,6 +16,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialTitulo = '', i
   const [descripcion, setDescripcion] = useState(initialDescripcion);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [iaModalOpen, setIaModalOpen] = useState(false);
 
   const navigate = useNavigate();
   const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
@@ -66,9 +68,21 @@ export function TeoriaForm({ mode = 'create', actividadId, initialTitulo = '', i
     }
   };
 
+  const handleIAResult = (data: Record<string, unknown>) => {
+    if (data.titulo) setTitulo(data.titulo as string);
+    if (data.descripcion) setDescripcion(data.descripcion as string);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="of-form">
       {error && <p className="of-error">{error}</p>}
+
+      <GenerarIAModal
+        tipoActividad="TEORIA"
+        open={iaModalOpen}
+        onClose={() => setIaModalOpen(false)}
+        onResult={handleIAResult}
+      />
 
       <div className="of-meta-section" style={{ flexDirection: 'column' }}>
         <div>
@@ -95,9 +109,10 @@ export function TeoriaForm({ mode = 'create', actividadId, initialTitulo = '', i
         </div>
       </div>
 
-      <div className="ca-form-footer">
-        <button className="ca-btn-guardar" type="submit" disabled={loading}>
-          {loading ? 'Guardando...' : 'Guardar Teoría'}
+      <div className="ca-form-footer">        <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+          Generar con IA
+        </button>        <button className="ca-btn-guardar" type="submit" disabled={loading}>
+          {loading ? 'Guardando...' : 'Guardar'}
         </button>
       </div>
     </form>
