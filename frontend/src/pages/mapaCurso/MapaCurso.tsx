@@ -40,7 +40,6 @@ type TemaDTO = {
 
 function getActivityIconSrc(tipo: string, posicion: number): string {
   const tipoUpper = (tipo ?? '').toUpperCase();
-  if (posicion === 0) return inicialMapIcon;
   if (tipoUpper.includes('TEORIA')) return teoriaMapIcon;
   if (tipoUpper.includes('TEST') || tipoUpper.includes('GENERAL')) return testMapIcon;
   if (tipoUpper.includes('ORDENACION')) return ordenMapIcon;
@@ -50,6 +49,7 @@ function getActivityIconSrc(tipo: string, posicion: number): string {
   if (tipoUpper.includes('IMAGEN')) return imagenMapIcon;
   if (tipoUpper.includes('CARTA')) return cartaMapIcon;
   if (tipoUpper.includes('ABIERTA')) return abiertaMapIcon;
+  if (posicion === 0) return inicialMapIcon;
   return abiertaMapIcon; // Icono por defecto si no se reconoce el tipo
 }
 
@@ -178,6 +178,7 @@ useEffect(() => {
     else if (tipoReal === 'TEST' || tipoReal === 'GENERAL') navigate(`/generales/test/${act.id}/alumno`);
     else if (tipoReal === 'ORDENACION') navigate(`/ordenaciones/${act.id}/alumno`);
     else if (tipoReal === 'TABLERO') navigate(`/tableros/${act.id}/alumno`);
+    else if (tipoReal === 'CARTA') navigate(`/generales/carta/${act.id}/alumno`);
     else if (tipoReal === 'MARCARIMAGEN') navigate(`/marcar-imagenes/${act.id}/alumno`);
     else if (tipoReal === 'CLASIFICACION') navigate(`/clasificaciones/${act.id}/alumno`);
   };
@@ -311,7 +312,7 @@ useEffect(() => {
                             const locked = !isUnlocked;
 
                             const tipo = (act.tipo ?? '').toUpperCase();
-                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'CLASIFICACION', 'MARCARIMAGEN', 'TABLERO'].includes(tipo);
+                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'CLASIFICACION', 'MARCARIMAGEN', 'TABLERO', 'CARTA'].includes(tipo);
 
                             const iconSrc = getActivityIconSrc(tipo, act.posicion);
                             const nodeBg = getNodeBgColor(linearIndex);

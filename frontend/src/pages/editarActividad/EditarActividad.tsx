@@ -8,6 +8,7 @@ import { OrdenacionForm, type OrdenacionFormInitialValues } from '../crearActivi
 import { MarcarImagenForm, type MarcarImagenFormInitialValues } from '../crearActividad/MarcarImagenForm';
 import { TeoriaForm } from '../crearActividad/TeoriaForm';
 import { TestForm, type TestFormInitialValues } from '../crearActividad/TestForm';
+import { CartaForm, type CartaFormInitialValues } from '../crearActividad/CartaForm';
 import { TableroForm, type TableroFormInitialValues } from '../crearActividad/TableroForm';
 
 type OrdenacionDTO = {
@@ -97,7 +98,26 @@ type ClasificacionMaestroDTO = {
   preguntas: ClasificacionFormInitialPregunta[];
 };
 
-type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'marcarImagen' | 'clasificacion' | null;
+type GeneralCartaMaestroDTO = {
+  id: number;
+  titulo: string;
+  descripcion: string | null;
+  puntuacion: number;
+  imagen: string | null;
+  respVisible: boolean;
+  comentariosRespVisible: string | null;
+  posicion: number;
+  version: number;
+  temaId: number;
+  preguntas: {
+    id: number;
+    pregunta: string;
+    imagen: string | null;
+    respuestas: { id: number; respuesta: string; correcta: boolean }[];
+  }[];
+};
+
+type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'marcarImagen' | 'clasificacion' | 'carta' | null;
 
 export default function EditarActividad() {
   const { id: cursoId, actividadId } = useParams<{
@@ -115,6 +135,7 @@ export default function EditarActividad() {
   const [generalTest, setGeneralTest] = useState<GeneralTestMaestroDTO | null>(null);
   const [marcarImagen, setMarcarImagen] = useState<MarcarImagenDTO | null>(null);
   const [tablero, setTablero] = useState<TableroDTO | null>(null);
+  const [generalCarta, setGeneralCarta] = useState<GeneralCartaMaestroDTO | null>(null);
   const [clasificacion, setClasificacion] = useState<ClasificacionMaestroDTO | null>(null);
 
   useEffect(() => {
@@ -132,6 +153,7 @@ export default function EditarActividad() {
       setGeneralTest(null);
       setMarcarImagen(null);
       setTablero(null);
+      setGeneralCarta(null);
       setClasificacion(null);
 
       try {
@@ -152,6 +174,17 @@ export default function EditarActividad() {
           if (cancelled) return;
           setOrdenacion(data);
           setKind('ordenacion');
+          return;
+        } catch {
+          // try next kind
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/generales/cartas/${actividadId}/maestro`);
+          const data = (await r.json()) as GeneralCartaMaestroDTO;
+          if (cancelled) return;
+          setGeneralCarta(data);
+          setKind('carta');
           return;
         } catch {
           // try next kind
@@ -256,6 +289,20 @@ export default function EditarActividad() {
       }
     : undefined;
 
+  const cartaInitialValues: CartaFormInitialValues | undefined = generalCarta
+    ? {
+        titulo: generalCarta.titulo,
+        descripcion: generalCarta.descripcion,
+        puntuacion: generalCarta.puntuacion,
+        imagen: generalCarta.imagen,
+        respVisible: generalCarta.respVisible,
+        comentariosRespVisible: generalCarta.comentariosRespVisible,
+        posicion: generalCarta.posicion,
+        version: generalCarta.version,
+        preguntas: generalCarta.preguntas ?? [],
+      }
+    : undefined;
+
   const marcarImagenInitialValues: MarcarImagenFormInitialValues | undefined = marcarImagen
     ? {
         titulo: marcarImagen.titulo,
@@ -336,6 +383,16 @@ export default function EditarActividad() {
           mode="edit"
           tableroId={tableroInitialValues ? tablero.id : undefined}
           initialValues={tableroInitialValues}
+        />
+      );
+    }
+
+    if (kind === 'carta' && generalCarta) {
+      return (
+        <CartaForm
+          mode="edit"
+          generalId={actividadIdNum}
+          initialValues={cartaInitialValues}
         />
       );
     }
