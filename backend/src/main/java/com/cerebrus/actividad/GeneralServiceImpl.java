@@ -253,40 +253,7 @@ public class GeneralServiceImpl implements GeneralService {
         );
     }
 
-    @Override
-    @Transactional
     public General updateActGeneral(Long id, String titulo, String descripcion, Integer puntuacion, 
-        Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Long temaId) {
-        
-        Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Maestro)) {
-            throw new AccessDeniedException("Solo un maestro puede actualizar actividades");
-        }
-        
-        General actividad = generalRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
-        actividad.setTitulo(titulo);
-        actividad.setDescripcion(descripcion);
-        actividad.setPuntuacion(puntuacion);
-
-        // RespVisible y comentariosRespVisible pueden venir null desde el cliente.
-        // En el caso de que comentariosRespVisible sea null, lanzará NullPointerException al intentar usar isBlank().
-        // Esto es intencional para que el test que valida ese comportamiento pase.
-        if (Boolean.FALSE.equals(respVisible)) {
-            actividad.setRespVisible(false);
-            actividad.setComentariosRespVisible(null);
-        } else if (Boolean.TRUE.equals(respVisible)) {
-            actividad.setRespVisible(true);
-        }
-
-        if (comentariosRespVisible == null || comentariosRespVisible.isBlank()) {
-            actividad.setComentariosRespVisible(null);
-        } else {
-            actividad.setComentariosRespVisible(comentariosRespVisible);
-        }
-
-        actividad.setVersion(version + 1);
-        actividad.setPosicion(posicion);
-public General updateActGeneral(Long id, String titulo, String descripcion, Integer puntuacion, 
     Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Long temaId) {
     
     Usuario u = usuarioService.findCurrentUser();

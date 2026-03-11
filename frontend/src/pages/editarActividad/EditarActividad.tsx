@@ -95,57 +95,72 @@ export default function EditarActividad() {
   const [tablero, setTablero] = useState<TableroDTO | null>(null);
   const [clasificacion, setClasificacion] = useState<ClasificacionMaestroDTO | null>(null);
 
-useEffect(() => {
+ useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     if (!actividadId) return;
 
-    const cargarActividad = async () => {
-        setLoading(true);
-        setError(null);
+    // Envolvemos todo en una función para evitar el warning de React
+    const cargarActividad = () => {
+      setLoading(true);
+      setError(null);
 
-    // 1. Intentar test
-    apiFetch(`${apiBase}/api/generales/test/${actividadId}/maestro`)
-      .then((r) => r.json())
-      .then((data: GeneralTestMaestroDTO) => {
-        setGeneralTest(data);
-        setKind('test');
-        setLoading(false);
-      })
-      .catch(() => {
-        // 2. Intentar ordenación
-        apiFetch(`${apiBase}/api/ordenaciones/${actividadId}/maestro`)
-          .then((r) => r.json())
-          .then((data: OrdenacionDTO) => {
-            setOrdenacion(data);
-            setKind('ordenacion');
-            setLoading(false);
-          })
-          .catch(() => {
-            // 3. Intentar tablero
-            apiFetch(`${apiBase}/api/tableros/${actividadId}`)
-              .then((r) => r.json())
-              .then((data: TableroDTO) => {
-                setTablero(data);
-                setKind('tablero');
-                setLoading(false);
-              })
-              .catch(() => {
-                // 4. Intentar teoría
-                apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`)
-                  .then((r) => r.json())
-                  .then((data: TeoriaDTO) => {
-                    setTeoria(data);
-                    setKind('teoria');
-                    setLoading(false);
-                  })
-                  .catch((e) => {
-                    const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
-                    setError(msg);
-                    setLoading(false);
-                  });
-              });
-          });
-      });
+      // 1. Intentar test
+      apiFetch(`${apiBase}/api/generales/test/${actividadId}/maestro`)
+        .then((r) => r.json())
+        .then((data: GeneralTestMaestroDTO) => {
+          setGeneralTest(data);
+          setKind('test');
+          setLoading(false);
+        })
+        .catch(() => {
+          // 2. Intentar ordenación
+          apiFetch(`${apiBase}/api/ordenaciones/${actividadId}/maestro`)
+            .then((r) => r.json())
+            .then((data: OrdenacionDTO) => {
+              setOrdenacion(data);
+              setKind('ordenacion');
+              setLoading(false);
+            })
+            .catch(() => {
+              // 3. Intentar tablero
+              apiFetch(`${apiBase}/api/tableros/${actividadId}`)
+                .then((r) => r.json())
+                .then((data: TableroDTO) => {
+                  setTablero(data);
+                  setKind('tablero');
+                  setLoading(false);
+                })
+                .catch(() => {
+                  // 4. Intentar clasificación
+                  apiFetch(`${apiBase}/api/generales/clasificacion/${actividadId}/maestro`)
+                    .then((r) => r.json())
+                    .then((data: ClasificacionMaestroDTO) => {
+                      setClasificacion(data);
+                      setKind('clasificacion');
+                      setLoading(false);
+                    })
+                    .catch(() => {
+                      // 5. Intentar teoría
+                      apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`)
+                        .then((r) => r.json())
+                        .then((data: TeoriaDTO) => {
+                          setTeoria(data);
+                          setKind('teoria');
+                          setLoading(false);
+                        })
+                        .catch((e) => {
+                          const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
+                          setError(msg);
+                          setLoading(false);
+                        });
+                    });
+                });
+            });
+        });
+    };
+
+    // Llamamos a la función
+    cargarActividad();
   }, [actividadId]);
 
   const tableroInitialValues: TableroFormInitialValues | undefined = tablero

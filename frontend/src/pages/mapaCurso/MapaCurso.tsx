@@ -103,28 +103,36 @@ export default function MapaCurso() {
     return () => win.removeEventListener('resize', compute);
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     if (!cursoId) return;
-    setError('');
-    console.log('[MapaCurso] Cargando temas/actividades', { cursoId });
-    apiFetch(`${apiBase}/api/temas/curso/${cursoId}/alumno`)
-      .then(async (r) => {
-        const data = await r.json();
-        console.log('[MapaCurso] Temas recibidos', data);
-        return data;
-      })
-      .then((data: TemaDTO[]) => {
-        setTemas(Array.isArray(data) ? data : []);
-        setSelectedIndex(0);
-      })
-      .catch((e) => {
-        console.error('[MapaCurso] Error cargando temas/actividades', e);
-        setTemas([]);
-        setSelectedIndex(0);
-        setError(e instanceof Error ? e.message : String(e));
-      })
-      .finally(() => setLoading(false));
+
+    // Envolvemos el fetch y las actualizaciones de estado en una función
+    const cargarTemas = () => {
+      setError('');
+      console.log('[MapaCurso] Cargando temas/actividades', { cursoId });
+      
+      apiFetch(`${apiBase}/api/temas/curso/${cursoId}/alumno`)
+        .then(async (r) => {
+          const data = await r.json();
+          console.log('[MapaCurso] Temas recibidos', data);
+          return data;
+        })
+        .then((data: TemaDTO[]) => {
+          setTemas(Array.isArray(data) ? data : []);
+          setSelectedIndex(0);
+        })
+        .catch((e) => {
+          console.error('[MapaCurso] Error cargando temas/actividades', e);
+          setTemas([]);
+          setSelectedIndex(0);
+          setError(e instanceof Error ? e.message : String(e));
+        })
+        .finally(() => setLoading(false));
+    };
+
+    // Ejecutamos la función
+    cargarTemas();
   }, [cursoId]);
 
   useEffect(() => {
@@ -303,7 +311,7 @@ export default function MapaCurso() {
                             const locked = !isUnlocked;
 
                             const tipo = (act.tipo ?? '').toUpperCase();
-                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA'].includes(tipo);
+                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'CLASIFICACION'].includes(tipo);
 
                             const iconSrc = getActivityIconSrc(tipo, act.posicion);
                             const nodeBg = getNodeBgColor(linearIndex);
