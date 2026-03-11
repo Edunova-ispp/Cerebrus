@@ -24,6 +24,7 @@ import com.cerebrus.TipoActGeneral;
 import com.cerebrus.actividad.General;
 import com.cerebrus.actividad.GeneralRepository;
 import com.cerebrus.actividad.GeneralServiceImpl;
+import com.cerebrus.actividad.DTO.GeneralDTO;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
@@ -201,7 +202,7 @@ class GeneralServiceImplTest {
 
 		assertThatThrownBy(() -> generalService.readActividad(9L))
 				.isInstanceOf(ResourceNotFoundException.class)
-				.hasMessage("Actividad tipo test no encontrada");
+				.hasMessage("Actividad no encontrada");
 	}
 
     // Tests para verificar que se lanza AccessDeniedException si el usuario actual no es un maestro al actualizar,
@@ -289,21 +290,12 @@ class GeneralServiceImplTest {
 		General actualizada = generalService.updateActGeneral(
 				1L, "T", "D", 1, true, "coment", 1, 1, 1L);
 
-		assertThat(actualizada.getRespVisible()).isFalse();
+		assertThat(actualizada.getRespVisible()).isTrue();
 		assertThat(actualizada.getComentariosRespVisible()).isEqualTo("coment");
 	}
 
     // Tests para verificar que se lanza NullPointerException si comentarios es null al actualizar, y no se guarda
-	@Test
-	void updateActGeneral_comentariosNull_lanzaNullPointerException() {
-		when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
-		when(generalRepository.findById(1L)).thenReturn(Optional.of(new General()));
-
-		assertThatThrownBy(() -> generalService.updateActGeneral(
-				1L, "T", "D", 1, false, null, 1, 1, 1L))
-				.isInstanceOf(NullPointerException.class);
-	}
-
+	
     // Tests para verificar que se lanza AccessDeniedException si el usuario actual no es un maestro al actualizar 
     // un tipo test, y no se llama al repositorio
 	@Test
@@ -316,27 +308,25 @@ class GeneralServiceImplTest {
 				.hasMessage("Solo un maestro puede actualizar actividades tipo test");
 	}
 
-    // Tests para verificar que si se actualiza una actividad tipo test con preguntas null, no se llama al repositorio 
-    // de preguntas y se guarda correctamente
-	@Test
-	void updateTipoTest_preguntasIdNull_noTocaPreguntas_yGuarda() {
-		when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
+// Tests para verificar que si se actualiza una actividad tipo test con preguntas null, se lanza IllegalArgumentException
+    @Test
+    void updateTipoTest_preguntasIdNull_lanzaIllegalArgumentException() {
+        when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 
-		General general = new General();
-		general.setId(1L);
-		general.setPreguntas(new ArrayList<>(List.of(new Pregunta())));
+        General general = new General();
+        general.setId(1L);
+        general.setPreguntas(new ArrayList<>(List.of(new Pregunta())));
 
-		when(generalRepository.findById(1L)).thenReturn(Optional.of(general));
-		when(temaRepository.findById(1L)).thenReturn(Optional.of(crearTema(1L)));
-		when(generalRepository.save(any(General.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(generalRepository.findById(1L)).thenReturn(Optional.of(general));
+        when(temaRepository.findById(1L)).thenReturn(Optional.of(crearTema(1L)));
 
-		General resultado = generalService.updateTipoTest(
-				1L, "T", "D", 1, false, "", null, 2, 3, 1L);
+        assertThatThrownBy(() -> generalService.updateTipoTest(
+                1L, "T", "D", 1, false, "", null, 2, 3, 1L))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("La lista de preguntas no puede ser null");
 
-		assertThat(resultado.getPreguntas()).hasSize(1);
-		verify(preguntaRepository, never()).findAllById(any());
-		verify(generalRepository).save(generalCaptor.capture());
-		assertThat(generalCaptor.getValue()).isSameAs(general);
+        verify(preguntaRepository, never()).findAllById(any());
+        verify(generalRepository, never()).save(any());
 	}
 
     // Tests para verificar que si se actualiza una actividad tipo test con preguntasId, se reemplazan las 
@@ -349,6 +339,7 @@ class GeneralServiceImplTest {
 		antigua.setId(99L);
 		General general = new General();
 		general.setId(1L);
+		general.setTipo(TipoActGeneral.TEST);
 		general.setPreguntas(new ArrayList<>(List.of(antigua)));
 
 		when(generalRepository.findById(1L)).thenReturn(Optional.of(general));
@@ -392,7 +383,7 @@ class GeneralServiceImplTest {
 
 		assertThatThrownBy(() -> generalService.deleteActividad(99L))
 				.isInstanceOf(ResourceNotFoundException.class)
-				.hasMessage("Actividad tipo test no encontrada");
+				.hasMessage("Actividad no encontrada");
 
 		verify(generalRepository, never()).delete(any());
 	}

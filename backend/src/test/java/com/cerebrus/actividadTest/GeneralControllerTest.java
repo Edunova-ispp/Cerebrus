@@ -24,7 +24,9 @@ import org.springframework.http.ResponseEntity;
 import com.cerebrus.actividad.General;
 import com.cerebrus.actividad.GeneralController;
 import com.cerebrus.actividad.GeneralService;
+import com.cerebrus.actividad.DTO.GeneralTestDTO;
 import com.cerebrus.pregunta.Pregunta;
+import com.cerebrus.pregunta.PreguntaDTO;
 import com.cerebrus.tema.Tema;
 
 @ExtendWith(MockitoExtension.class)
@@ -226,7 +228,7 @@ class GeneralControllerTest {
     // Tests para verificar que se crea una actividad general con un request válido, y que se llama al servicio con 
     // los campos correctos
 	@Test
-	void updateActGeneral_requestValido_devuelve200() {
+	void updateActGeneral_requestValido() {
 		Tema tema = new Tema();
 		tema.setId(5L);
 
@@ -240,16 +242,9 @@ class GeneralControllerTest {
 		request.setVersion(4);
 		request.setTema(tema);
 
-		General actualizado = new General();
-		actualizado.setId(12L);
+		ResponseEntity<Void> response = generalController.updateActGeneral(12L, request);
 
-		when(generalService.updateActGeneral(12L, "Nuevo", "Desc", 10, false, "c", 3, 4, 5L))
-				.thenReturn(actualizado);
-
-		ResponseEntity<General> response = generalController.updateActGeneral(12L, request);
-
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(response.getBody()).isSameAs(actualizado);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 		verify(generalService).updateActGeneral(12L, "Nuevo", "Desc", 10, false, "c", 3, 4, 5L);
 	}
 
@@ -274,20 +269,22 @@ class GeneralControllerTest {
 		request.setVersion(4);
 		request.setTema(tema);
 
-		General actualizado = new General();
-		actualizado.setId(12L);
+		GeneralTestDTO esperado = new GeneralTestDTO(
+				12L, "Nuevo", "Desc", 10, null, true, "c", 3, 4, 5L, List.of());
 
 		when(generalService.updateTipoTest(eq(12L), eq("Nuevo"), eq("Desc"), eq(10), eq(true), eq("c"), any(), eq(3), eq(4), eq(5L)))
-				.thenReturn(actualizado);
+				.thenReturn(new General());
+		when(generalService.readTipoTest(12L)).thenReturn(esperado);
 
-		ResponseEntity<General> response = generalController.updateTipoTest(12L, request);
+		ResponseEntity<GeneralTestDTO> response = generalController.updateTipoTest(12L, request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(response.getBody()).isSameAs(actualizado);
+		assertThat(response.getBody()).isSameAs(esperado);
 
 		verify(generalService).updateTipoTest(eq(12L), eq("Nuevo"), eq("Desc"), eq(10), eq(true), eq("c"),
 				preguntasIdCaptor.capture(), eq(3), eq(4), eq(5L));
 		assertThat(preguntasIdCaptor.getValue()).containsExactly(1L);
+		verify(generalService).readTipoTest(12L);
 	}
 
     // Tests para verificar que al borrar una actividad tipo test, se devuelve 204 y se llama al servicio con el id 

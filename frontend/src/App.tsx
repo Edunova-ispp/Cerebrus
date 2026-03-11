@@ -20,6 +20,8 @@ import MisCursos from "./pages/misCursos/MisCursos";
 import OrdenacionAlumno from "./pages/ordenacionAlumno/OrdenacionAlumno";
 import ListaTemasCursoProfesor from "./pages/temasDelCurso/ListaTemasCursoProfesor";
 import TeoriaAlumno from "./pages/TeoriaAlumno/TeoriaAlumno";
+import Perfil from "./pages/perfil/Perfil";
+import TableroAlumno from "./pages/tableroAlumno/TableroAlumno";
 import TestAlumno from "./pages/testAlumno/TestAlumno";
 
 function App() {
@@ -48,8 +50,10 @@ function App() {
       <Route path="/actividades/teoria/:actividadId" element={<TeoriaAlumno />} />
 
       <Route path="/generales/test/:testId/alumno" element={<TestAlumno />} />
+      <Route path="/tableros/:tableroId/alumno" element={<TableroAlumno />} />
       <Route path="/estadisticas/:id" element={<EstadisticasCurso />} />
       <Route path="/medias/:id" element={<MediasCurso />} />
+      <Route path="/perfil" element={<Perfil />} />
     </Routes>
   );
 }
