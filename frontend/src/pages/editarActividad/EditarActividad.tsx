@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
+import { ClasificacionForm, type ClasificacionFormInitialPregunta, type ClasificacionFormInitialValues } from '../crearActividad/ClasificacionForm';
+import '../crearActividad/crearActividad.css';
 import { OrdenacionForm, type OrdenacionFormInitialValues } from '../crearActividad/OrdenacionForm';
+import { MarcarImagenForm, type MarcarImagenFormInitialValues } from '../crearActividad/MarcarImagenForm';
 import { TeoriaForm } from '../crearActividad/TeoriaForm';
 import { TestForm, type TestFormInitialValues } from '../crearActividad/TestForm';
 import { CartaForm, type CartaFormInitialValues } from '../crearActividad/CartaForm';
 import { TableroForm, type TableroFormInitialValues } from '../crearActividad/TableroForm';
-import '../crearActividad/crearActividad.css';
 
 type OrdenacionDTO = {
   id: number;
@@ -46,6 +48,26 @@ type GeneralTestMaestroDTO = {
   }[];
 };
 
+type MarcarImagenPuntoDTO = {
+  id: number;
+  respuesta: string;
+  pixelX: number;
+  pixelY: number;
+};
+
+type MarcarImagenDTO = {
+  id: number;
+  titulo: string;
+  descripcion: string | null;
+  puntuacion: number;
+  imagenActividad: string | null;
+  respVisible: boolean;
+  comentariosRespVisible: string | null;
+  temaId: number;
+  imagenAMarcar: string;
+  puntosImagen: MarcarImagenPuntoDTO[];
+};
+
 type TableroDTO = {
   id: number;
   titulo: string;
@@ -62,6 +84,20 @@ type TableroDTO = {
   }[];
 };
 
+type ClasificacionMaestroDTO = {
+  id: number;
+  titulo: string;
+  descripcion: string | null;
+  puntuacion: number;
+  imagen: string | null;
+  respVisible: boolean;
+  comentariosRespVisible: string | null;
+  posicion: number;
+  version: number;
+  temaId: number;
+  preguntas: ClasificacionFormInitialPregunta[];
+};
+
 type GeneralCartaMaestroDTO = {
   id: number;
   titulo: string;
@@ -76,11 +112,12 @@ type GeneralCartaMaestroDTO = {
   preguntas: {
     id: number;
     pregunta: string;
+    imagen: string | null;
     respuestas: { id: number; respuesta: string; correcta: boolean }[];
   }[];
 };
 
-type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'carta' | null;
+type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'marcarImagen' | 'clasificacion' | 'carta' | null;
 
 export default function EditarActividad() {
   const { id: cursoId, actividadId } = useParams<{
@@ -96,69 +133,118 @@ export default function EditarActividad() {
   const [ordenacion, setOrdenacion] = useState<OrdenacionDTO | null>(null);
   const [teoria, setTeoria] = useState<TeoriaDTO | null>(null);
   const [generalTest, setGeneralTest] = useState<GeneralTestMaestroDTO | null>(null);
+  const [marcarImagen, setMarcarImagen] = useState<MarcarImagenDTO | null>(null);
   const [tablero, setTablero] = useState<TableroDTO | null>(null);
   const [generalCarta, setGeneralCarta] = useState<GeneralCartaMaestroDTO | null>(null);
+  const [clasificacion, setClasificacion] = useState<ClasificacionMaestroDTO | null>(null);
 
   useEffect(() => {
-    const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+    const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
     if (!actividadId) return;
 
-    setLoading(true);
-    setError(null);
+    let cancelled = false;
 
-    // 1. Intentar test
-    apiFetch(`${apiBase}/api/generales/test/${actividadId}/maestro`)
-      .then((r) => r.json())
-      .then((data: GeneralTestMaestroDTO) => {
-        setGeneralTest(data);
-        setKind('test');
-        setLoading(false);
-      })
-      .catch(() => {
-        // 2. Intentar ordenación
-        apiFetch(`${apiBase}/api/ordenaciones/${actividadId}/maestro`)
-          .then((r) => r.json())
-          .then((data: OrdenacionDTO) => {
-            setOrdenacion(data);
-            setKind('ordenacion');
-            setLoading(false);
-          })
-          .catch(() => {
-            // 3. Intentar carta
-            apiFetch(`${apiBase}/api/generales/cartas/${actividadId}/maestro`)
-              .then((r) => r.json())
-              .then((data: GeneralCartaMaestroDTO) => {
-                setGeneralCarta(data);
-                setKind('carta');
-                setLoading(false);
-              })
-              .catch(() => {
-                // 4. Intentar tablero
-                apiFetch(`${apiBase}/api/tableros/${actividadId}`)
-                  .then((r) => r.json())
-                  .then((data: TableroDTO) => {
-                    setTablero(data);
-                    setKind('tablero');
-                    setLoading(false);
-                  })
-                  .catch(() => {
-                    // 5. Intentar teoría
-                    apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`)
-                      .then((r) => r.json())
-                      .then((data: TeoriaDTO) => {
-                        setTeoria(data);
-                        setKind('teoria');
-                        setLoading(false);
-                      })
-                      .catch((e) => {
-                        const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
-                        setError(msg);
-                        setLoading(false);
-                      });
-                  });
-              });
-          });
-      });
+    const run = async () => {
+      setLoading(true);
+      setError(null);
+      setKind(null);
+      setOrdenacion(null);
+      setTeoria(null);
+      setGeneralTest(null);
+      setMarcarImagen(null);
+      setTablero(null);
+      setGeneralCarta(null);
+      setClasificacion(null);
+
+      try {
+        try {
+          const r = await apiFetch(`${apiBase}/api/generales/test/${actividadId}/maestro`);
+          const data = (await r.json()) as GeneralTestMaestroDTO;
+          if (cancelled) return;
+          setGeneralTest(data);
+          setKind('test');
+          return;
+        } catch {
+          // try next kind
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/ordenaciones/${actividadId}/maestro`);
+          const data = (await r.json()) as OrdenacionDTO;
+          if (cancelled) return;
+          setOrdenacion(data);
+          setKind('ordenacion');
+          return;
+        } catch {
+          // try next kind
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/generales/cartas/${actividadId}/maestro`);
+          const data = (await r.json()) as GeneralCartaMaestroDTO;
+          if (cancelled) return;
+          setGeneralCarta(data);
+          setKind('carta');
+          return;
+        } catch {
+          // try next kind
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/marcar-imagenes/${actividadId}`);
+          const data = (await r.json()) as MarcarImagenDTO;
+          if (cancelled) return;
+          setMarcarImagen(data);
+          setKind('marcarImagen');
+          return;
+        } catch {
+          // try next kind
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/tableros/${actividadId}`);
+          const data = (await r.json()) as TableroDTO;
+          if (cancelled) return;
+          setTablero(data);
+          setKind('tablero');
+          return;
+        } catch {
+          // try next kind
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/generales/clasificacion/${actividadId}/maestro`);
+          const data = (await r.json()) as ClasificacionMaestroDTO;
+          if (cancelled) return;
+          setClasificacion(data);
+          setKind('clasificacion');
+          return;
+        } catch {
+          // try next kind
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`);
+          const data = (await r.json()) as TeoriaDTO;
+          if (cancelled) return;
+          setTeoria(data);
+          setKind('teoria');
+          return;
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : 'No se pudo cargar la actividad';
+          if (cancelled) return;
+          setError(msg);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+    };
   }, [actividadId]);
 
   const tableroInitialValues: TableroFormInitialValues | undefined = tablero
@@ -217,7 +303,37 @@ export default function EditarActividad() {
       }
     : undefined;
 
+  const marcarImagenInitialValues: MarcarImagenFormInitialValues | undefined = marcarImagen
+    ? {
+        titulo: marcarImagen.titulo,
+        descripcion: marcarImagen.descripcion,
+        puntuacion: marcarImagen.puntuacion,
+        respVisible: marcarImagen.respVisible,
+        comentariosRespVisible: marcarImagen.comentariosRespVisible,
+        imagenAMarcar: marcarImagen.imagenAMarcar,
+        puntosImagen: (marcarImagen.puntosImagen ?? []).map((p) => ({
+          id: p.id,
+          respuesta: p.respuesta,
+          pixelX: p.pixelX,
+          pixelY: p.pixelY,
+        })),
+      }
+    : undefined;
+  
   const actividadIdNum = actividadId ? Number.parseInt(actividadId, 10) : NaN;
+
+  const clasificacionInitialValues: ClasificacionFormInitialValues | undefined = clasificacion
+    ? {
+        titulo: clasificacion.titulo,
+        descripcion: clasificacion.descripcion,
+        puntuacion: clasificacion.puntuacion,
+        respVisible: clasificacion.respVisible,
+        comentariosRespVisible: clasificacion.comentariosRespVisible,
+        posicion: clasificacion.posicion,
+        version: clasificacion.version,
+        preguntas: clasificacion.preguntas ?? [],
+      }
+    : undefined;
 
   const renderForm = () => {
     if (kind === 'test' && generalTest) {
@@ -251,6 +367,16 @@ export default function EditarActividad() {
       );
     }
 
+    if (kind === 'marcarImagen' && marcarImagen) {
+      return (
+        <MarcarImagenForm
+          mode="edit"
+          marcarImagenId={actividadIdNum}
+          initialValues={marcarImagenInitialValues}
+        />
+      );
+    }
+        
     if (kind === 'tablero' && tablero) {
       return (
         <TableroForm
@@ -267,6 +393,16 @@ export default function EditarActividad() {
           mode="edit"
           generalId={actividadIdNum}
           initialValues={cartaInitialValues}
+        />
+      );
+    }
+
+    if (kind === 'clasificacion' && clasificacion) {
+      return (
+        <ClasificacionForm
+          mode="edit"
+          clasificacionId={actividadIdNum}
+          initialValues={clasificacionInitialValues}
         />
       );
     }

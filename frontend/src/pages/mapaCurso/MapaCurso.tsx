@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
+import { getCurrentUserInfo } from '../../types/curso';
 import { apiFetch } from '../../utils/api';
-import { getCurrentUserInfo } from '../../types/curso'; // Asegúrate de importar esto
 import './MapaCurso.css';
 
 import inicialMapIcon from '../../assets/props/mapa/act_mapa_inicial.svg';
@@ -26,7 +26,6 @@ type ActividadDTO = {
   readonly tipo: string;
 };
 
-// 1. Definimos bien el tipo de la información de progreso
 type CompletionInfo = {
   done: boolean;
   terminada: boolean;
@@ -62,8 +61,9 @@ function getNodeBgColor(index: number): string {
 function getCurrentUserIdFromJwt(): number | null {
   const info = getCurrentUserInfo();
   if (!info) return null;
-  const raw = (info as any)?.id ?? (info as any)?.userId ?? (info as any)?.sub;
-  return typeof raw === 'string' ? Number(raw) : raw;
+  const infoObj = info as { id?: string | number; userId?: string | number; sub?: string | number };
+  const raw = infoObj?.id ?? infoObj?.userId ?? infoObj?.sub;
+  return typeof raw === 'string' ? Number(raw) : (typeof raw === 'number' ? raw : null);
 }
 
 export default function MapaCurso() {
@@ -76,7 +76,6 @@ export default function MapaCurso() {
   const mapContainerRef = useRef<HTMLOListElement | null>(null);
   const [mapRowSize, setMapRowSize] = useState(6);
 
-  // 2. CORRECCIÓN: El Map ahora guarda objetos de tipo CompletionInfo
   const [completionMap, setCompletionMap] = useState<Map<number, CompletionInfo>>(new Map());
 
   useEffect(() => {
@@ -104,29 +103,36 @@ export default function MapaCurso() {
     return () => win.removeEventListener('resize', compute);
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     if (!cursoId) return;
-    setError('');
-    setLoading(true);
-    console.log('[MapaCurso] Cargando temas/actividades', { cursoId });
-    apiFetch(`${apiBase}/api/temas/curso/${cursoId}/alumno`)
-      .then(async (r) => {
-        const data = await r.json();
-        console.log('[MapaCurso] Temas recibidos', data);
-        return data;
-      })
-      .then((data: TemaDTO[]) => {
-        setTemas(Array.isArray(data) ? data : []);
-        setSelectedIndex(0);
-      })
-      .catch((e) => {
-        console.error('[MapaCurso] Error cargando temas/actividades', e);
-        setTemas([]);
-        setSelectedIndex(0);
-        setError(e instanceof Error ? e.message : String(e));
-      })
-      .finally(() => setLoading(false));
+
+    // Envolvemos el fetch y las actualizaciones de estado en una función
+    const cargarTemas = () => {
+      setError('');
+      console.log('[MapaCurso] Cargando temas/actividades', { cursoId });
+      
+      apiFetch(`${apiBase}/api/temas/curso/${cursoId}/alumno`)
+        .then(async (r) => {
+          const data = await r.json();
+          console.log('[MapaCurso] Temas recibidos', data);
+          return data;
+        })
+        .then((data: TemaDTO[]) => {
+          setTemas(Array.isArray(data) ? data : []);
+          setSelectedIndex(0);
+        })
+        .catch((e) => {
+          console.error('[MapaCurso] Error cargando temas/actividades', e);
+          setTemas([]);
+          setSelectedIndex(0);
+          setError(e instanceof Error ? e.message : String(e));
+        })
+        .finally(() => setLoading(false));
+    };
+
+    // Ejecutamos la función
+    cargarTemas();
   }, [cursoId]);
 
   useEffect(() => {
@@ -164,7 +170,7 @@ export default function MapaCurso() {
         return next;
       });
     });
-  }, [temas, selectedIndex]);
+  }, [temas, selectedIndex, completionMap]);
 
   const handleActivityClick = (act: ActividadDTO) => {
     const tipoReal = act.tipo ? act.tipo.toUpperCase() : '';
@@ -172,8 +178,9 @@ export default function MapaCurso() {
     else if (tipoReal === 'TEST' || tipoReal === 'GENERAL') navigate(`/generales/test/${act.id}/alumno`);
     else if (tipoReal === 'ORDENACION') navigate(`/ordenaciones/${act.id}/alumno`);
     else if (tipoReal === 'TABLERO') navigate(`/tableros/${act.id}/alumno`);
-    else if (tipoReal === 'IMAGEN') navigate(`/marcar-imagenes/${act.id}/alumno`);
     else if (tipoReal === 'CARTA') navigate(`/generales/carta/${act.id}/alumno`);
+    else if (tipoReal === 'MARCARIMAGEN') navigate(`/marcar-imagenes/${act.id}/alumno`);
+    else if (tipoReal === 'CLASIFICACION') navigate(`/clasificaciones/${act.id}/alumno`);
   };
 
   const selectedTema = temas[selectedIndex] ?? null;
@@ -305,7 +312,7 @@ export default function MapaCurso() {
                             const locked = !isUnlocked;
 
                             const tipo = (act.tipo ?? '').toUpperCase();
-                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'TABLERO', 'IMAGEN', 'CARTA'].includes(tipo);
+                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'CLASIFICACION', 'MARCARIMAGEN', 'TABLERO', 'CARTA'].includes(tipo);
 
                             const iconSrc = getActivityIconSrc(tipo, act.posicion);
                             const nodeBg = getNodeBgColor(linearIndex);
