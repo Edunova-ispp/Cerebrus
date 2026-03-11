@@ -20,6 +20,7 @@ import MisCursos from "./pages/misCursos/MisCursos";
 import OrdenacionAlumno from "./pages/ordenacionAlumno/OrdenacionAlumno";
 import ListaTemasCursoProfesor from "./pages/temasDelCurso/ListaTemasCursoProfesor";
 import TeoriaAlumno from "./pages/TeoriaAlumno/TeoriaAlumno";
+import MarcarImagenAlumno from "./pages/marcarImagenAlumno/MarcarImagenAlumno";
 import Perfil from "./pages/perfil/Perfil";
 import TableroAlumno from "./pages/tableroAlumno/TableroAlumno";
 import TestAlumno from "./pages/testAlumno/TestAlumno";
@@ -46,6 +47,7 @@ function App() {
       <Route path="/auth/logout"    element={<LogoutPage />} />
       <Route path="/cursos/:id/temas/:temaId/actividades/crear" element={<CrearActividad />} />
       <Route path="/ordenaciones/:ordenacionId/alumno" element={<OrdenacionAlumno />} />
+      <Route path="/marcar-imagenes/:marcarImagenId/alumno" element={<MarcarImagenAlumno />} />
       <Route path="/clasificaciones/:clasificacionId/alumno" element={<ClasificacionAlumno />} />
       <Route path="/actividades/teoria/:actividadId" element={<TeoriaAlumno />} />
 
