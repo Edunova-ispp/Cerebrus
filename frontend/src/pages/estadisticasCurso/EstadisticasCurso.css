@@ -46,10 +46,11 @@
   border-radius: 30px;
   width: 90%;
   max-width: 800px;
-  min-height: 300px;
   padding: 40px;
   box-shadow: inset -4px -4px 0px rgba(0,0,0,0.1);
   margin-bottom: 20px;
+  max-height: 420px;
+  overflow-y: auto;
 }
 
 .pixel-table {

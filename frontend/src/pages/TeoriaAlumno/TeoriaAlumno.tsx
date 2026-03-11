@@ -5,6 +5,7 @@ import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 import maguitoImg from '../../assets/props/maguito.png';
 import mapaIcon from '../../assets/icons/mapa.svg';
+import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
 import './TeoriaAlumno.css';
 
 type TeoriaDTO = {
@@ -63,6 +64,9 @@ export default function TeoriaAlumno() {
     run();
   }, [actividadId, apiBase]);
 
+  const [finished, setFinished] = useState(false);
+
+  // Función para finalizar la teoría y sumar el punto/completado
   const handleFinalizar = async () => {
     if (actividadAlumnoId) {
       try {
@@ -74,7 +78,7 @@ export default function TeoriaAlumno() {
         console.error("No se pudo marcar como finalizada");
       }
     }
-    navigate(-1);
+    setFinished(true);
   };
 
   if (loading) {
@@ -138,7 +142,6 @@ export default function TeoriaAlumno() {
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
 
@@ -152,6 +155,8 @@ export default function TeoriaAlumno() {
         )}
 
         {!teoria && !error && <p className="ca-text">No se encontró la lección.</p>}
+
+        {finished && <CompletionPopup title="¡LECCIÓN COMPLETADA!" onContinue={() => navigate(-1)} />}
       </main>
     </div>
   );
