@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
+import { ClasificacionForm } from './ClasificacionForm';
+import './crearActividad.css';
 import { OrdenacionForm } from './OrdenacionForm';
 import { TeoriaForm } from './TeoriaForm';
 import { TestForm } from './TestForm';
 import { TableroForm } from './TableroForm';
-import './crearActividad.css';
 
-const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden', 'Tablero'];
+const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden', 'Tablero', 'Clasificación'];
 
 export default function CrearActividad() {
   const { id: cursoId } = useParams<{ id: string; temaId: string }>();
@@ -19,6 +20,7 @@ export default function CrearActividad() {
     tipoSeleccionado === 'Tipo test' ? <TestForm mode="create" /> :
     tipoSeleccionado === 'Teoría' ? <TeoriaForm mode="create" /> :
     tipoSeleccionado === 'Tablero' ? <TableroForm mode="create" /> :
+    tipoSeleccionado === 'Clasificación' ? <ClasificacionForm mode="create" /> :
     <p className="ca-proximamente">Selecciona un tipo de actividad</p>;
 
   return (
