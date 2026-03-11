@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
+import { getCurrentUserInfo } from '../../types/curso';
 import { apiFetch } from '../../utils/api';
-import { getCurrentUserInfo } from '../../types/curso'; // Asegúrate de importar esto
 import './MapaCurso.css';
 
 type ActividadDTO = {
@@ -14,7 +14,6 @@ type ActividadDTO = {
   readonly tipo: string;
 };
 
-// 1. Definimos bien el tipo de la información de progreso
 type CompletionInfo = {
   done: boolean;
   terminada: boolean;
@@ -27,12 +26,12 @@ type TemaDTO = {
   readonly actividades: ActividadDTO[];
 };
 
-// Helper para el ID del alumno
 function getCurrentUserIdFromJwt(): number | null {
   const info = getCurrentUserInfo();
   if (!info) return null;
-  const raw = (info as any)?.id ?? (info as any)?.userId ?? (info as any)?.sub;
-  return typeof raw === 'string' ? Number(raw) : raw;
+  const infoObj = info as { id?: string | number; userId?: string | number; sub?: string | number };
+  const raw = infoObj?.id ?? infoObj?.userId ?? infoObj?.sub;
+  return typeof raw === 'string' ? Number(raw) : (typeof raw === 'number' ? raw : null);
 }
 
 export default function MapaCurso() {
@@ -46,13 +45,11 @@ export default function MapaCurso() {
   void loading;
   void error;
 
-  // 2. CORRECCIÓN: El Map ahora guarda objetos de tipo CompletionInfo
   const [completionMap, setCompletionMap] = useState<Map<number, CompletionInfo>>(new Map());
 
   useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     if (!cursoId) return;
-    setLoading(true);
     apiFetch(`${apiBase}/api/temas/curso/${cursoId}/alumno`)
       .then((r) => r.json())
       .then((data: TemaDTO[]) => {
@@ -98,13 +95,14 @@ export default function MapaCurso() {
         return next;
       });
     });
-  }, [temas, selectedIndex]);
+  }, [temas, selectedIndex, completionMap]);
 
   const handleActivityClick = (act: ActividadDTO) => {
     const tipoReal = act.tipo ? act.tipo.toUpperCase() : '';
     if (tipoReal === 'TEORIA') navigate(`/actividades/teoria/${act.id}`);
     else if (tipoReal === 'TEST' || tipoReal === 'GENERAL') navigate(`/generales/test/${act.id}/alumno`);
     else if (tipoReal === 'ORDENACION') navigate(`/ordenaciones/${act.id}/alumno`);
+    else if (tipoReal === 'CLASIFICACION') navigate(`/clasificaciones/${act.id}/alumno`);
   };
 
   const selectedTema = temas[selectedIndex] ?? null;
@@ -136,14 +134,13 @@ export default function MapaCurso() {
                   {[...selectedTema.actividades]
                     .sort((a, b) => a.posicion - b.posicion)
                     .map((act) => {
-                      // 3. Ahora 'info' sí tendrá las propiedades
                       const info = completionMap.get(act.id);
                       const done = info?.done ?? false;
                       const terminada = info?.terminada ?? false;
                       const puntosObtenidos = info?.puntuacionObtenida ?? 0;
                       
                       const tipo = act.tipo.toUpperCase();
-                      const navigable = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA'].includes(tipo);
+                      const navigable = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'CLASIFICACION'].includes(tipo);
 
                       return (
                         <button
