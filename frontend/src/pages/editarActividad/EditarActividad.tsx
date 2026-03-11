@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { OrdenacionForm, type OrdenacionFormInitialValues } from '../crearActividad/OrdenacionForm';
-import { TeoriaForm } from '../crearActividad/TeoriaForm';
+import { TeoriaForm, type TeoriaFormInitialValues } from '../crearActividad/TeoriaForm';
 import { TestForm, type TestFormInitialValues } from '../crearActividad/TestForm';
 import { TableroForm, type TableroFormInitialValues } from '../crearActividad/TableroForm';
 import '../crearActividad/crearActividad.css';
@@ -24,7 +24,8 @@ type OrdenacionDTO = {
 type TeoriaDTO = {
   id: number;
   titulo: string;
-  descripcion: string | null;
+  descripcion: string;
+  imagen: string;
 };
 
 type GeneralTestMaestroDTO = {
@@ -173,6 +174,14 @@ export default function EditarActividad() {
       }
     : undefined;
 
+  const teoriaInitialValues: TeoriaFormInitialValues | undefined = teoria
+    ? {
+        titulo: teoria.titulo,
+        descripcion: teoria.descripcion,
+        imagen: teoria.imagen,
+      }
+    : undefined;
+
   const actividadIdNum = actividadId ? Number.parseInt(actividadId, 10) : NaN;
 
   const renderForm = () => {
@@ -201,8 +210,7 @@ export default function EditarActividad() {
         <TeoriaForm
           mode="edit"
           actividadId={actividadIdNum}
-          initialTitulo={teoria.titulo}
-          initialDescripcion={teoria.descripcion ?? ''}
+          initialValues={teoriaInitialValues}
         />
       );
     }
