@@ -178,7 +178,7 @@ useEffect(() => {
     else if (tipoReal === 'TEST' || tipoReal === 'GENERAL') navigate(`/generales/test/${act.id}/alumno`);
     else if (tipoReal === 'ORDENACION') navigate(`/ordenaciones/${act.id}/alumno`);
     else if (tipoReal === 'TABLERO') navigate(`/tableros/${act.id}/alumno`);
-    else if (tipoReal === 'IMAGEN') navigate(`/marcar-imagenes/${act.id}/alumno`);
+    else if (tipoReal === 'MARCARIMAGEN') navigate(`/marcar-imagenes/${act.id}/alumno`);
     else if (tipoReal === 'CLASIFICACION') navigate(`/clasificaciones/${act.id}/alumno`);
   };
 
@@ -311,7 +311,7 @@ useEffect(() => {
                             const locked = !isUnlocked;
 
                             const tipo = (act.tipo ?? '').toUpperCase();
-                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'CLASIFICACION'].includes(tipo);
+                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'CLASIFICACION', 'MARCARIMAGEN', 'TABLERO'].includes(tipo);
 
                             const iconSrc = getActivityIconSrc(tipo, act.posicion);
                             const nodeBg = getNodeBgColor(linearIndex);
