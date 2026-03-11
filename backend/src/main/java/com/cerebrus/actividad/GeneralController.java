@@ -122,8 +122,8 @@ public class GeneralController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<General> updateActGeneral(@PathVariable Long id, @RequestBody @Valid General general){
-        General actualizado = generalService.updateActGeneral(
+    public ResponseEntity<Void> updateActGeneral(@PathVariable Long id, @RequestBody @Valid General general){
+        generalService.updateActGeneral(
             id,
             general.getTitulo(),
             general.getDescripcion(),
@@ -134,7 +134,7 @@ public class GeneralController {
             general.getVersion(),
             general.getTema().getId()
         );
-        return ResponseEntity.ok(actualizado);
+        return ResponseEntity.noContent().build();
     }
     
     @PutMapping("/test/update/{id}")

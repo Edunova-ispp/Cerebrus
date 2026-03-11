@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
+import './OrdenacionForm.css';
 
 export type OrdenacionFormMode = 'create' | 'edit';
 
@@ -27,11 +29,17 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
   const [puntuacion, setPuntuacion] = useState('');
   const [respVisible, setRespVisible] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
-  const [posicion, setPosicion] = useState('');
   const [ordenItems, setOrdenItems] = useState<string[]>(['']);
   const [ordenItemsKind, setOrdenItemsKind] = useState<'words' | 'images'>('words');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [iaModalOpen, setIaModalOpen] = useState(false);
+
+  const posicionOriginal = useMemo(() => {
+    if (mode !== 'edit') return null;
+    const raw = initialValues?.posicion;
+    return typeof raw === 'number' && Number.isFinite(raw) ? raw : null;
+  }, [initialValues?.posicion, mode]);
 
   const navigate = useNavigate();
   const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
@@ -44,7 +52,6 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
     setPuntuacion(String(initialValues.puntuacion ?? ''));
     setRespVisible(Boolean(initialValues.respVisible));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
-    setPosicion(String(initialValues.posicion ?? ''));
     setOrdenItems(initialValues.valores?.length ? [...initialValues.valores] : ['']);
   }, [initialValues]);
 
@@ -88,14 +95,8 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
       return;
     }
 
-    if (!posicion.trim()) {
-      setError('La posición es requerida');
-      return;
-    }
-
-    const posicionNum = Number.parseInt(posicion.trim(), 10);
-    if (Number.isNaN(posicionNum)) {
-      setError('La posición debe ser un número válido');
+    if (mode === 'edit' && posicionOriginal === null) {
+      setError('No se pudo conservar la posición original para la edición');
       return;
     }
 
@@ -125,7 +126,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
           tema: { id: temaIdNum },
           respVisible,
           comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
-          posicion: posicionNum,
+          ...(mode === 'edit' ? { posicion: posicionOriginal } : {}),
           valores,
         }),
       });
@@ -139,131 +140,109 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
     }
   };
 
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="ca-ordenacion-form"
-      style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
-    >
-      {error && (
-        <p className="ca-text" style={{ marginTop: 0 }}>
-          {error}
-        </p>
-      )}
+  const handleIAResult = (data: Record<string, unknown>) => {
+    if (data.titulo) setTitulo(data.titulo as string);
+    if (data.descripcion) setDescripcion(data.descripcion as string);
 
-      <div className="ca-contenedor-blanco" style={{ gap: 24, maxWidth: '100%' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: '1 1 320px', minWidth: 0 }}>
+    const valores = data.valores as { texto: string; orden: number }[] | undefined;
+    if (valores && Array.isArray(valores)) {
+      const sorted = [...valores].sort((a, b) => a.orden - b.orden);
+      setOrdenItems(sorted.map((v) => v.texto));
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="of-form">
+      {error && <p className="of-error">{error}</p>}
+
+      <GenerarIAModal
+        tipoActividad="ORDEN"
+        open={iaModalOpen}
+        onClose={() => setIaModalOpen(false)}
+        onResult={handleIAResult}
+      />
+
+      {/* ── Metadata ── */
+      <div className="of-meta-section">
+        <div className="of-col">
           <div>
-            <label className="ca-text" htmlFor="titulo">
-              Título
-            </label>
+            <label className="of-label" htmlFor="of-titulo">Título *</label>
             <input
               type="text"
-              id="titulo"
+              id="of-titulo"
+              className="of-input"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
-              style={{ width: '100%' }}
+              placeholder="Título de la actividad"
             />
           </div>
-
           <div>
-            <label className="ca-text" htmlFor="descripcion">
-              Descripción
-            </label>
+            <label className="of-label" htmlFor="of-descripcion">Descripción</label>
             <textarea
-              id="descripcion"
+              id="of-descripcion"
+              className="of-textarea"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               rows={3}
-              style={{ width: '100%' }}
+              placeholder="Descripción opcional"
             />
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: '1 1 320px', minWidth: 0 }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <label className="ca-text" htmlFor="puntuacion" style={{ whiteSpace: 'nowrap' }}>
-                Puntuación
-              </label>
-              <input
-                type="number"
-                id="puntuacion"
-                value={puntuacion}
-                onChange={(e) => setPuntuacion(e.target.value)}
-                style={{ width: 90 }}
-              />
-            </div>
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <label className="ca-text" htmlFor="posicion" style={{ whiteSpace: 'nowrap' }}>
-                Posición
-              </label>
-              <input
-                type="number"
-                id="posicion"
-                value={posicion}
-                onChange={(e) => setPosicion(e.target.value)}
-                style={{ width: 90 }}
-              />
-            </div>
+        <div className="of-col">
+          <div className="of-row">
+            <label className="of-label" htmlFor="of-puntuacion">Puntuación *</label>
+            <input
+              type="number"
+              id="of-puntuacion"
+              className="of-input of-input-sm"
+              value={puntuacion}
+              onChange={(e) => setPuntuacion(e.target.value)}
+            />
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
               type="checkbox"
-              id="respVisible"
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            <label className="ca-text" htmlFor="respVisible">
-              Correcciones visibles
-            </label>
-          </div>
-
+            Correcciones visibles
           {respVisible && (
             <div>
-              <label className="ca-text" htmlFor="comentariosRespVisible">
-                Comentarios
-              </label>
+              <label className="of-label" htmlFor="of-comentarios">Comentarios</label>
               <input
                 type="text"
-                id="comentariosRespVisible"
+                id="of-comentarios"
+                className="of-input"
                 value={comentariosRespVisible}
                 onChange={(e) => setComentariosRespVisible(e.target.value)}
-                style={{ width: '100%' }}
               />
             </div>
           )}
-
-          {/*<button className="ca-text" type="button" disabled>
-            Generar con IA
-          </button>*/}
         </div>
       </div>
+      </div>
 
-      <div
-        className="ca-contenedor-blanco"
-        style={{ gap: 16, marginTop: 16, flexDirection: 'column', alignItems: 'stretch' }}
-      >
-        <p className="ca-ordenacion-help" style={{ marginTop: 0, marginBottom: 0 }}>
-          Actividad de ordenación. El alumno debe organizar los valores siguiendo un criterio determinado. Introduzca los valores en el orden correcto y Cerebrus reorganizará los valores aleatoriamente para sus alumnos.
+    }
+      <div className="of-items-section">
+        <p className="of-help">
+          Actividad de ordenación. El alumno debe organizar los valores siguiendo un criterio
+          determinado. Introduzca los valores en el orden correcto y Cerebrus reorganizará los
+          valores aleatoriamente para sus alumnos.
         </p>
 
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div className="of-kind-btns">
           <button
-            className="ca-text"
+            className="of-kind-btn"
             type="button"
             disabled={ordenItemsKind === 'words'}
             onClick={() => setOrdenItemsKind('words')}
           >
             Palabras
           </button>
-
           <button
-            className="ca-text"
+            className="of-kind-btn"
             type="button"
             disabled={ordenItemsKind === 'images'}
             onClick={() => setOrdenItemsKind('images')}
@@ -272,18 +251,19 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
           </button>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, width: '100%' }}>
+        <div className="of-items-grid">
           {ordenItems.map((v, i) => (
-            <div key={i} style={{ border: '1px solid black', padding: 8 }}>
+            <div key={i} className="of-item">
               {ordenItemsKind === 'images' && v.trim() && (
                 <img
                   src={v.trim()}
                   alt={`Elemento ${i + 1}`}
-                  style={{ width: 56, height: 56, objectFit: 'cover', display: 'block', marginBottom: 8 }}
+                  className="of-item-img"
                 />
               )}
               <input
                 type={ordenItemsKind === 'images' ? 'url' : 'text'}
+                className="of-input"
                 placeholder={ordenItemsKind === 'images' ? `URL imagen ${i + 1}` : `Elemento ${i + 1}`}
                 value={v}
                 onChange={(e) => {
@@ -299,20 +279,20 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
               />
             </div>
           ))}
-
           <button
-            className="ca-text"
+            className="of-btn-add"
             type="button"
-            onClick={() => {
-              setOrdenItems([...ordenItems, '']);
-            }}
+            onClick={() => setOrdenItems([...ordenItems, ''])}
           >
             +
           </button>
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+      <div className="ca-form-footer">
+        <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+          Generar con IA
+        </button>
         <button className="ca-btn-guardar" type="submit" disabled={loading}>
           {loading ? 'Guardando...' : 'Guardar'}
         </button>

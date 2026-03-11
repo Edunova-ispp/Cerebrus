@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import './TestForm.css';
 
 export type TestFormMode = 'create' | 'edit';
@@ -63,6 +64,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
   const [questions, setQuestions] = useState<Question[]>([makeEmptyQuestion()]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [iaModalOpen, setIaModalOpen] = useState(false);
 
   // Tracks original server-loaded preguntas for deletion detection in edit mode
   const originalQuestionsRef = useRef<TestFormInitialPregunta[]>([]);
@@ -334,118 +336,129 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
+  const handleIAResult = (data: Record<string, unknown>) => {
+    if (data.titulo) setTitulo(data.titulo as string);
+    if (data.descripcion) setDescripcion(data.descripcion as string);
+
+    const preguntas = data.preguntas as { enunciado: string; opciones: { texto: string; correcta: boolean }[] }[] | undefined;
+    if (preguntas && Array.isArray(preguntas)) {
+      setQuestions(
+        preguntas.map((p) => ({
+          text: p.enunciado,
+          options: (p.opciones ?? []).map((o) => ({
+            text: o.texto,
+            correcta: Boolean(o.correcta),
+          })),
+        })),
+      );
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="tf-form">
       {error && <p className="ca-text tf-error">{error}</p>}
 
-      {/* ── TOP: Metadata ── */}
-      <div className="ca-contenedor-blanco tf-header">
+      <GenerarIAModal
+        tipoActividad="TEST"
+        open={iaModalOpen}
+        onClose={() => setIaModalOpen(false)}
+        onResult={handleIAResult}
+      />
+
+      {/* ── TOP: Metadata ── */
+      <div className="tf-header">
         <div className="tf-col">
           <div>
-            <label className="ca-text" htmlFor="tf-titulo">
-              Título
-            </label>
+            <label className="tf-label" htmlFor="tf-titulo">Título *</label>
             <input
               type="text"
               id="tf-titulo"
+              className="tf-input"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
-              style={{ width: '100%' }}
+              placeholder="Título del test"
             />
           </div>
 
           <div>
-            <label className="ca-text" htmlFor="tf-descripcion">
-              Descripción
-            </label>
+            <label className="tf-label" htmlFor="tf-descripcion">Descripción</label>
             <textarea
               id="tf-descripcion"
+              className="tf-input"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               rows={3}
-              style={{ width: '100%' }}
+              placeholder="Descripción opcional"
             />
           </div>
 
           <div>
-            <label className="ca-text" htmlFor="tf-imagen">
-              URL de imagen (opcional)
-            </label>
+            <label className="tf-label" htmlFor="tf-imagen">URL de imagen (opcional)</label>
             <input
               type="url"
               id="tf-imagen"
+              className="tf-input"
               value={imagen}
               onChange={(e) => setImagen(e.target.value)}
               placeholder="https://..."
-              style={{ width: '100%' }}
             />
             {imagen.trim() && (
               <img
                 src={imagen.trim()}
                 alt="Preview"
                 className="tf-img-preview"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-                onLoad={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'block';
-                }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                onLoad={(e) => { (e.target as HTMLImageElement).style.display = 'block'; }}
               />
             )}
           </div>
         </div>
 
         <div className="tf-col">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label className="ca-text" htmlFor="tf-puntuacion" style={{ whiteSpace: 'nowrap' }}>
-              Puntuación
-            </label>
-            <input
-              type="number"
-              id="tf-puntuacion"
-              value={puntuacion}
-              onChange={(e) => setPuntuacion(e.target.value)}
-              style={{ width: 90 }}
-            />
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 80 }}>
+            <div>
+              <label className="tf-label" htmlFor="tf-puntuacion">Puntuación *</label>
+              <input
+                type="number"
+                id="tf-puntuacion"
+                className="tf-input tf-input-sm"
+                value={puntuacion}
+                onChange={(e) => setPuntuacion(e.target.value)}
+              />
+            </div>
+            <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+              Generar con IA
+            </button>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <label className="tf-check-label">
             <input
               type="checkbox"
-              id="tf-respVisible"
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            <label className="ca-text" htmlFor="tf-respVisible">
-              Correcciones visibles
-            </label>
-          </div>
+            Mostrar correcciones al alumno
+          </label>
 
           {respVisible && (
             <div>
-              <label className="ca-text" htmlFor="tf-comentarios">
-                Comentarios
-              </label>
+              <label className="tf-label" htmlFor="tf-comentarios">Comentarios</label>
               <input
                 type="text"
                 id="tf-comentarios"
+                className="tf-input"
                 value={comentariosRespVisible}
                 onChange={(e) => setComentariosRespVisible(e.target.value)}
-                style={{ width: '100%' }}
               />
             </div>
           )}
         </div>
       </div>
 
-      {/* ── BOTTOM: Questions ── */}
-      <div
-        className="ca-contenedor-blanco tf-questions"
-        style={{ marginTop: 16, flexDirection: 'column', alignItems: 'stretch' }}
-      >
-          <p className="ca-ordenacion-help" style={{ marginTop: 0, marginBottom: 12 }}>
-            Añade las preguntas y opciones. Marca cuál es la correcta con{' '}
-            <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
+    }
+      <div className="tf-questions">
+          <p className="tf-help">
+            Añade las preguntas y opciones. Marca cuál es la correcta con <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
           </p>
 
           {questions.map((q, qi) => (
@@ -519,7 +532,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
           </button>
         </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+      <div className="ca-form-footer">
         <button className="ca-btn-guardar" type="submit" disabled={loading}>
           {loading ? 'Guardando...' : 'Guardar'}
         </button>

@@ -1,30 +1,61 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
+import './OrdenacionForm.css';
 
-interface Props {
-  mode?: 'create' | 'edit';
-  actividadId?: number;
-  initialTitulo?: string;
-  initialDescripcion?: string;
+export type TeoriaFormMode = 'create' | 'edit';
+
+export interface TeoriaFormInitialValues {
+  readonly titulo: string;
+  readonly descripcion: string;
+  readonly imagen: string;
+  readonly posicion: number;
 }
 
-export function TeoriaForm({ mode = 'create', actividadId, initialTitulo = '', initialDescripcion = '' }: Props) {
-  const [titulo, setTitulo] = useState(initialTitulo);
-  const [descripcion, setDescripcion] = useState(initialDescripcion);
+interface Props {
+  readonly mode?: 'create' | 'edit';
+  readonly actividadId?: number;
+  readonly initialValues?: TeoriaFormInitialValues;
+}
+
+export function TeoriaForm({ mode = 'create', actividadId, initialValues }: Props) {
+  const [titulo, setTitulo] = useState('');
+  const [descripcion, setDescripcion] = useState('');
+  const [imagen, setImagen] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [iaModalOpen, setIaModalOpen] = useState(false);
+
 
   const navigate = useNavigate();
   const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
 
   useEffect(() => {
-    setTitulo(initialTitulo);
-    setDescripcion(initialDescripcion);
-  }, [initialTitulo, initialDescripcion]);
+    console.log("Intial values", initialValues);
+    if (!initialValues) return;
+    setTitulo(initialValues.titulo ?? '');
+    setDescripcion(initialValues.descripcion ?? '');
+    setImagen(initialValues.imagen ?? '');
+  }, [initialValues]);
+
+  const validate = (): string | null => {
+    if (!titulo.trim()) return 'El título es requerido';
+
+    if (!temaId) return 'Falta el id del tema en la URL';
+    if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
+    if (!cursoId) return 'Falta el id del curso en la URL';
+    return null;
+  };
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const validationError = validate();
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
     setError('');
     setLoading(true);
 
@@ -38,6 +69,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialTitulo = '', i
           body: JSON.stringify({
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
+            imagen: imagen.trim(),
           }),
         });
       } else {
@@ -65,50 +97,71 @@ export function TeoriaForm({ mode = 'create', actividadId, initialTitulo = '', i
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="ca-ordenacion-form">
-      {error && (
-        <p className="ca-text" style={{ color: '#ff4444', marginBottom: '15px' }}>
-          {error}
-        </p>
-      )}
+  const handleIAResult = (data: Record<string, unknown>) => {
+    if (data.titulo) setTitulo(data.titulo as string);
+    if (data.descripcion) setDescripcion(data.descripcion as string);
+  };
 
-      <div
-        className="ca-contenedor-blanco"
-        style={{ flexDirection: 'column', alignItems: 'stretch', gap: '16px' }}
-      >
+  return (
+    <form onSubmit={handleSubmit} className="of-form">
+      {error && <p className="of-error">{error}</p>}
+
+      <GenerarIAModal
+        tipoActividad="TEORIA"
+        open={iaModalOpen}
+        onClose={() => setIaModalOpen(false)}
+        onResult={handleIAResult}
+      />
+
+      <div className="of-meta-section" style={{ flexDirection: 'column' }}>
         <div>
-          <label className="ca-text" htmlFor="titulo">
-            Título de la Lección
-          </label>
+          <label className="of-label" htmlFor="teoria-titulo">Título de la Lección</label>
           <input
             type="text"
-            id="titulo"
+            id="teoria-titulo"
+            className="of-input"
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
-            style={{ width: '100%' }}
             placeholder="Ej: Introducción a la materia"
           />
         </div>
-
         <div>
-          <label className="ca-text" htmlFor="descripcion">
-            Contenido Teórico
-          </label>
+          <label className="of-label" htmlFor="teoria-descripcion">Contenido Teórico</label>
           <textarea
-            id="descripcion"
+            id="teoria-descripcion"
+            className="of-textarea"
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
             rows={10}
-            style={{ width: '100%', resize: 'none' }}
             placeholder="Escribe aquí el contenido..."
           />
         </div>
+        <div>
+            <label className="cf-label" htmlFor="cf-imagen">URL de imagen (opcional)</label>
+            <input
+              type="url"
+              id="cf-imagen"
+              className="cf-input"
+              value={imagen}
+              onChange={(e) => setImagen(e.target.value)}
+              placeholder="https://..."
+            />
+            {imagen.trim() && (
+              <img
+                src={imagen.trim()}
+                alt="Preview"
+                className="cf-img-preview"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                onLoad={(e) => { (e.target as HTMLImageElement).style.display = 'block'; }}
+              />
+            )}
+          </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-        <button className="ca-btn-guardar" type="submit" disabled={loading}>
-          {loading ? 'Guardando...' : 'Guardar Teoría'}
+      <div className="ca-form-footer">        <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+          Generar con IA
+        </button>        <button className="ca-btn-guardar" type="submit" disabled={loading}>
+          {loading ? 'Guardando...' : 'Guardar'}
         </button>
       </div>
     </form>

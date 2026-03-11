@@ -209,17 +209,19 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
                 corregirActividadAlumnoAutomaticamenteGeneral(actividadAlumno, respuestasIds, actividad);
             } else if (((General) actividad).getTipo() == TipoActGeneral.CARTA){
                 corregirActividadAlumnoAutomaticamenteCartaGeneral(actividadAlumno, respuestasIds, actividad);
+            } else if (((General) actividad).getTipo() == TipoActGeneral.TEORIA){
+              // CASO PARA TEORÍA: Simplemente marcamos como terminada y damos la puntuación base
+               actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 1);
+               actividadAlumno.setNota(10); // Nota máxima por leer
+               actividadAlumno.setAcabada(LocalDateTime.now());
             }
         } else if(actividad instanceof Ordenacion) {
             corregirActividadAlumnoAutomaticamenteOrdenacion(actividadAlumno, respuestasIds, actividad);
         } else if(actividad instanceof MarcarImagen){
             corregirActividadAlumnoAutomaticamenteMarcarImagen(actividadAlumno, respuestasIds, actividad);
         } else {    
-        // CASO PARA TEORÍA: Simplemente marcamos como terminada y damos la puntuación base
-        actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 1);
-        actividadAlumno.setNota(10); // Nota máxima por leer
-        actividadAlumno.setAcabada(LocalDateTime.now());
-        } 
+        // CASO PARA TEORÍA: se ha movido dentro de instancia de GENERAL porque la actividad de teoria es una actividad general
+        }
         return actividadAlumnoRepository.save(actividadAlumno);
     }
 
@@ -275,6 +277,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
             return;
         }
 
+        // Validate responses
         if (respuestasIds == null || respuestasIds.size() != totalPreguntas) {
             throw new IllegalArgumentException("El número de respuestas no coincide con el número de preguntas");
         }
@@ -285,7 +288,6 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         }
 
         Set<Long> preguntasRespondidas = new HashSet<>();
-        int aciertos = 0;
 
         for (Long respuestaAlumnoId : respuestasIds) {
             RespAlumnoGeneral respAlumno = respAlumnoGeneralService.readRespAlumnoGeneral(respuestaAlumnoId);
@@ -303,21 +305,40 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
                 throw new IllegalArgumentException("Hay varias respuestas para la misma pregunta");
             }
 
-            boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(respuestaAlumnoId);
-            if (esCorrecta) {
-                aciertos++;
-            }
+            respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(respuestaAlumnoId);
         }
-    
-    int puntuacionMaxima = actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 0;
-    double proporcion = (double) aciertos / totalPreguntas;
 
-    int puntuacionFinal = (int) Math.round(proporcion * puntuacionMaxima);
-    int notaFinal = (int) Math.round(proporcion * 10);
+        // Time-based scoring: faster completion = more points
+        int puntuacionMaxima = actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 0;
+        Integer tiempoSegundos = actividadAlumno.getTiempo();
 
-    actividadAlumno.setPuntuacion(puntuacionFinal);
-    actividadAlumno.setNota(notaFinal);
-    actividadAlumno.setAcabada(LocalDateTime.now());
+        if (tiempoSegundos == null || tiempoSegundos <= 0) {
+            // Fallback: full points if time not measured
+            actividadAlumno.setPuntuacion(puntuacionMaxima);
+            actividadAlumno.setNota(10);
+        } else {
+            // Ideal time: 5s per pair, max time: 30s per pair (beyond that = minimum score)
+            int idealSeconds = totalPreguntas * 5;
+            int maxSeconds = totalPreguntas * 30;
+
+            double proporcion;
+            if (tiempoSegundos <= idealSeconds) {
+                proporcion = 1.0; // perfect score
+            } else if (tiempoSegundos >= maxSeconds) {
+                proporcion = 0.1; // minimum 10%
+            } else {
+                // Linear interpolation between ideal and max
+                proporcion = 1.0 - 0.9 * ((double)(tiempoSegundos - idealSeconds) / (maxSeconds - idealSeconds));
+            }
+
+            int puntuacionFinal = (int) Math.round(proporcion * puntuacionMaxima);
+            int notaFinal = (int) Math.round(proporcion * 10);
+
+            actividadAlumno.setPuntuacion(Math.max(puntuacionFinal, 1));
+            actividadAlumno.setNota(Math.max(notaFinal, 1));
+        }
+
+        actividadAlumno.setAcabada(LocalDateTime.now());
     }
 
     @Override

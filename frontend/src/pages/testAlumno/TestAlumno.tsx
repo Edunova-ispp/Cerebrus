@@ -3,10 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
+import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
+import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
 import './TestAlumno.css';
 import dragonImg from '../../assets/props/dragon.png';
 import caballeroImg from '../../assets/props/caballero.png';
-import espadaImg from '../../assets/props/espada.png';
 
 
 // ── Types ─────────────────────────────────────────────────────────────────
@@ -332,16 +333,7 @@ export default function TestAlumno() {
         {test && currentPregunta && (
           <>
             {/* ── Header ── */}
-            <div className="ta-top">
-              {/* Botón salir con espada */}
-                            <button className="ord-exit-btn" type="button" onClick={() => navigate(-1)}>
-                    <img src={espadaImg} alt="" className="ord-exit-icon" />
-                    Salir
-                  </button>
-              <div className="ta-title-banner">
-                <h1 className="ta-title">{test.titulo}</h1>
-              </div>
-            </div>
+            <ActivityHeader title={test.titulo} />
 
             {/* ── Score banner after submit ── */}
             {submitted && score && (
@@ -484,6 +476,8 @@ export default function TestAlumno() {
         )}
 
         {!test && !error && <p className="ca-text">No se encontró el test.</p>}
+
+        {submitted && <CompletionPopup title="¡TEST COMPLETADO!" onContinue={() => navigate(-1)} />}
       </main>
     </div>
   );
