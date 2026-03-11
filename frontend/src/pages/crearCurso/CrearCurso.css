@@ -128,7 +128,7 @@
 /* BOTÓN CREAR */
 .pixel-btn-submit-main {
   width: 100%;
-  background-color: #FCEF91;
+  background-color: var(--color-accent);
   border: 4px solid #000;
   border-radius: 18px;
   padding: 18px;
@@ -141,7 +141,7 @@
 }
 
 .pixel-btn-submit-main:hover {
-  background-color: #ffd988;
+  background-color: var(--color-accent-dark);
 }
 
 .pixel-btn-submit-main:active {

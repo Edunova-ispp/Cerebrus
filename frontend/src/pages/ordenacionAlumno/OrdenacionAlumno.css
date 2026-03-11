@@ -21,59 +21,6 @@
   box-sizing: border-box;
 }
 
-.ord-top {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 18px;
-}
-
-.ord-map-btn {
-  background: #b49aff;
-  border: 3px solid #000;
-  border-radius: 12px;
-  padding: 6px 14px;
-  font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.55rem;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 3px 3px 0 #000;
-  color: #000;
-  transition: color 0.15s;
-}
-.ord-map-btn:hover {
-  color: var(--color-accent, #FFF294);
-}
-.ord-map-icon {
-  width: 42px;
-  height: 42px;
-  transition: filter 0.15s;
-}
-.ord-map-btn:hover .ord-map-icon {
-  filter: brightness(0) saturate(100%) invert(88%) sepia(60%) saturate(400%) hue-rotate(350deg) brightness(105%);
-}
-
-.ord-title-banner {
-  background-color: #7C4DFF;
-  color: #fff;
-  border: 4px solid #000;
-  border-radius: 20px;
-  box-shadow: 5px 5px 0px #000;
-  padding: 14px 22px;
-  text-align: center;
-}
-
-.ord-title {
-  margin: 0;
-  font-family: 'Pixelify Sans', sans-serif;
-  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
-  line-height: 1.15;
-}
-
 .ord-description {
   margin: 0 0 18px;
   font-family: 'Pixelify Sans', sans-serif;
@@ -247,12 +194,4 @@
   image-rendering: pixelated;
   margin-right: 6px;
   vertical-align: middle;
-}
-
-/* Subtítulo en banner */
-.ord-subtitle {
-  margin: 4px 0 0;
-  font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1rem;
-  color: #ffffffcc;
 }

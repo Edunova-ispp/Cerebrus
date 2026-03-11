@@ -4,30 +4,58 @@ import { apiFetch } from '../../utils/api';
 import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import './OrdenacionForm.css';
 
-interface Props {
-  mode?: 'create' | 'edit';
-  actividadId?: number;
-  initialTitulo?: string;
-  initialDescripcion?: string;
+export type TeoriaFormMode = 'create' | 'edit';
+
+export interface TeoriaFormInitialValues {
+  readonly titulo: string;
+  readonly descripcion: string;
+  readonly imagen: string;
+  readonly posicion: number;
 }
 
-export function TeoriaForm({ mode = 'create', actividadId, initialTitulo = '', initialDescripcion = '' }: Props) {
-  const [titulo, setTitulo] = useState(initialTitulo);
-  const [descripcion, setDescripcion] = useState(initialDescripcion);
+interface Props {
+  readonly mode?: 'create' | 'edit';
+  readonly actividadId?: number;
+  readonly initialValues?: TeoriaFormInitialValues;
+}
+
+export function TeoriaForm({ mode = 'create', actividadId, initialValues }: Props) {
+  const [titulo, setTitulo] = useState('');
+  const [descripcion, setDescripcion] = useState('');
+  const [imagen, setImagen] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [iaModalOpen, setIaModalOpen] = useState(false);
+
 
   const navigate = useNavigate();
   const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
 
   useEffect(() => {
-    setTitulo(initialTitulo);
-    setDescripcion(initialDescripcion);
-  }, [initialTitulo, initialDescripcion]);
+    console.log("Intial values", initialValues);
+    if (!initialValues) return;
+    setTitulo(initialValues.titulo ?? '');
+    setDescripcion(initialValues.descripcion ?? '');
+    setImagen(initialValues.imagen ?? '');
+  }, [initialValues]);
+
+  const validate = (): string | null => {
+    if (!titulo.trim()) return 'El título es requerido';
+
+    if (!temaId) return 'Falta el id del tema en la URL';
+    if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
+    if (!cursoId) return 'Falta el id del curso en la URL';
+    return null;
+  };
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const validationError = validate();
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
     setError('');
     setLoading(true);
 
@@ -41,6 +69,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialTitulo = '', i
           body: JSON.stringify({
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
+            imagen: imagen.trim(),
           }),
         });
       } else {
@@ -107,6 +136,26 @@ export function TeoriaForm({ mode = 'create', actividadId, initialTitulo = '', i
             placeholder="Escribe aquí el contenido..."
           />
         </div>
+        <div>
+            <label className="cf-label" htmlFor="cf-imagen">URL de imagen (opcional)</label>
+            <input
+              type="url"
+              id="cf-imagen"
+              className="cf-input"
+              value={imagen}
+              onChange={(e) => setImagen(e.target.value)}
+              placeholder="https://..."
+            />
+            {imagen.trim() && (
+              <img
+                src={imagen.trim()}
+                alt="Preview"
+                className="cf-img-preview"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                onLoad={(e) => { (e.target as HTMLImageElement).style.display = 'block'; }}
+              />
+            )}
+          </div>
       </div>
 
       <div className="ca-form-footer">        <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>

@@ -29,12 +29,17 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
   const [puntuacion, setPuntuacion] = useState('');
   const [respVisible, setRespVisible] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
-  const [posicion, setPosicion] = useState('');
   const [ordenItems, setOrdenItems] = useState<string[]>(['']);
   const [ordenItemsKind, setOrdenItemsKind] = useState<'words' | 'images'>('words');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [iaModalOpen, setIaModalOpen] = useState(false);
+
+  const posicionOriginal = useMemo(() => {
+    if (mode !== 'edit') return null;
+    const raw = initialValues?.posicion;
+    return typeof raw === 'number' && Number.isFinite(raw) ? raw : null;
+  }, [initialValues?.posicion, mode]);
 
   const navigate = useNavigate();
   const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
@@ -47,7 +52,6 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
     setPuntuacion(String(initialValues.puntuacion ?? ''));
     setRespVisible(Boolean(initialValues.respVisible));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
-    setPosicion(String(initialValues.posicion ?? ''));
     setOrdenItems(initialValues.valores?.length ? [...initialValues.valores] : ['']);
   }, [initialValues]);
 
@@ -91,14 +95,8 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
       return;
     }
 
-    if (!posicion.trim()) {
-      setError('La posición es requerida');
-      return;
-    }
-
-    const posicionNum = Number.parseInt(posicion.trim(), 10);
-    if (Number.isNaN(posicionNum)) {
-      setError('La posición debe ser un número válido');
+    if (mode === 'edit' && posicionOriginal === null) {
+      setError('No se pudo conservar la posición original para la edición');
       return;
     }
 
@@ -128,7 +126,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
           tema: { id: temaIdNum },
           respVisible,
           comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
-          posicion: posicionNum,
+          ...(mode === 'edit' ? { posicion: posicionOriginal } : {}),
           valores,
         }),
       });
@@ -202,24 +200,14 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
               onChange={(e) => setPuntuacion(e.target.value)}
             />
           </div>
-          <div className="of-row">
-            <label className="of-label" htmlFor="of-posicion">Posición</label>
-            <input
-              type="number"
-              id="of-posicion"
-              className="of-input of-input-sm"
-              value={posicion}
-              onChange={(e) => setPosicion(e.target.value)}
-            />
-          </div>
-          <label className="of-check-label">
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
               type="checkbox"
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
             Correcciones visibles
-          </label>
           {respVisible && (
             <div>
               <label className="of-label" htmlFor="of-comentarios">Comentarios</label>
@@ -233,6 +221,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
             </div>
           )}
         </div>
+      </div>
       </div>
 
     }

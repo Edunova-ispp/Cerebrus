@@ -1,0 +1,243 @@
+.marcar-imagen-alumno-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  min-height: 100vh;
+  box-sizing: border-box;
+  background-color: #FAF6ED;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  z-index: 10;
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+.marcar-imagen-alumno-main {
+  flex: 1;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 24px 60px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mia-top {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.mia-exit-btn {
+  background-color: rgba(124, 77, 255, 0.5);
+  color: #000;
+  border: 4px solid #000;
+  border-radius: 16px;
+  padding: 10px 16px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 5px 5px 0px #000;
+  transition: transform 0.1s;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mia-exit-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0px #000;
+}
+
+.mia-exit-icon {
+  width: 26px;
+  height: 26px;
+  image-rendering: pixelated;
+}
+
+.mia-title-banner {
+  background-color: #7C4DFF;
+  color: #fff;
+  border: 4px solid #000;
+  border-radius: 20px;
+  box-shadow: 5px 5px 0px #000;
+  padding: 14px 22px;
+  text-align: center;
+}
+
+.mia-title-text {
+  margin: 0;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  line-height: 1.15;
+}
+
+.mia-description {
+  margin: 0 0 12px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.15rem;
+  color: #000;
+}
+
+.mia-image-section {
+  width: 100%;
+}
+
+.mia-instruction {
+  margin: 0 0 10px;
+  text-align: center;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #000;
+}
+
+.mia-image-frame {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.mia-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  border: 3px solid #000;
+  background: #fff;
+}
+
+.mia-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mia-point {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid #000;
+  box-shadow: 2px 2px 0px #000;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.mia-point--unanswered {
+  background: #7C4DFF;
+}
+
+.mia-point--selected {
+  background: #FFF294;
+}
+
+.mia-point--answered {
+  background: #E0AE00;
+}
+
+.mia-float-card {
+  position: absolute;
+  transform: translate(-50%, 0);
+  width: 280px;
+  max-width: min(280px, calc(100% - 16px));
+  background: #fff;
+  border: 4px solid #000;
+  border-radius: 16px;
+  box-shadow: 5px 5px 0px #000;
+  padding: 12px;
+  z-index: 3;
+}
+
+.mia-float-title {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #000;
+}
+
+.mia-float-input {
+  width: 100%;
+  height: 40px;
+  border-radius: 12px;
+  border: 2px solid #000;
+  padding: 8px 10px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.05rem;
+  box-sizing: border-box;
+}
+
+.mia-bottom {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.mia-bottom-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.mia-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+.mia-alert-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1000;
+}
+
+.mia-alert {
+  background: #D10057;
+  color: #fff;
+  border: 4px solid #000;
+  border-radius: 24px;
+  box-shadow: 8px 8px 0px #000;
+  padding: 28px 30px;
+  max-width: 520px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.mia-alert-title {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  color: #fff;
+}
+
+.mia-alert-comment {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  color: #fff;
+  opacity: 0.95;
+}
