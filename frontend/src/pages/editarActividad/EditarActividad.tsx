@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
+import { ClasificacionForm, type ClasificacionFormInitialPregunta, type ClasificacionFormInitialValues } from '../crearActividad/ClasificacionForm';
+import '../crearActividad/crearActividad.css';
 import { OrdenacionForm, type OrdenacionFormInitialValues } from '../crearActividad/OrdenacionForm';
 import { MarcarImagenForm, type MarcarImagenFormInitialValues } from '../crearActividad/MarcarImagenForm';
 import { TeoriaForm } from '../crearActividad/TeoriaForm';
 import { TestForm, type TestFormInitialValues } from '../crearActividad/TestForm';
 import { TableroForm, type TableroFormInitialValues } from '../crearActividad/TableroForm';
-import '../crearActividad/crearActividad.css';
 
 type OrdenacionDTO = {
   id: number;
@@ -82,7 +83,21 @@ type TableroDTO = {
   }[];
 };
 
-type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'marcarImagen' | null;
+type ClasificacionMaestroDTO = {
+  id: number;
+  titulo: string;
+  descripcion: string | null;
+  puntuacion: number;
+  imagen: string | null;
+  respVisible: boolean;
+  comentariosRespVisible: string | null;
+  posicion: number;
+  version: number;
+  temaId: number;
+  preguntas: ClasificacionFormInitialPregunta[];
+};
+
+type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'marcarImagen' | 'clasificacion' | null;
 
 export default function EditarActividad() {
   const { id: cursoId, actividadId } = useParams<{
@@ -100,6 +115,7 @@ export default function EditarActividad() {
   const [generalTest, setGeneralTest] = useState<GeneralTestMaestroDTO | null>(null);
   const [marcarImagen, setMarcarImagen] = useState<MarcarImagenDTO | null>(null);
   const [tablero, setTablero] = useState<TableroDTO | null>(null);
+  const [clasificacion, setClasificacion] = useState<ClasificacionMaestroDTO | null>(null);
 
   useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
@@ -116,6 +132,7 @@ export default function EditarActividad() {
       setGeneralTest(null);
       setMarcarImagen(null);
       setTablero(null);
+      setClasificacion(null);
 
       try {
         try {
@@ -157,6 +174,17 @@ export default function EditarActividad() {
           if (cancelled) return;
           setTablero(data);
           setKind('tablero');
+          return;
+        } catch {
+          // try next kind
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/generales/clasificacion/${actividadId}/maestro`);
+          const data = (await r.json()) as ClasificacionMaestroDTO;
+          if (cancelled) return;
+          setClasificacion(data);
+          setKind('clasificacion');
           return;
         } catch {
           // try next kind
@@ -247,6 +275,19 @@ export default function EditarActividad() {
   
   const actividadIdNum = actividadId ? Number.parseInt(actividadId, 10) : NaN;
 
+  const clasificacionInitialValues: ClasificacionFormInitialValues | undefined = clasificacion
+    ? {
+        titulo: clasificacion.titulo,
+        descripcion: clasificacion.descripcion,
+        puntuacion: clasificacion.puntuacion,
+        respVisible: clasificacion.respVisible,
+        comentariosRespVisible: clasificacion.comentariosRespVisible,
+        posicion: clasificacion.posicion,
+        version: clasificacion.version,
+        preguntas: clasificacion.preguntas ?? [],
+      }
+    : undefined;
+
   const renderForm = () => {
     if (kind === 'test' && generalTest) {
       return (
@@ -295,6 +336,16 @@ export default function EditarActividad() {
           mode="edit"
           tableroId={tableroInitialValues ? tablero.id : undefined}
           initialValues={tableroInitialValues}
+        />
+      );
+    }
+
+    if (kind === 'clasificacion' && clasificacion) {
+      return (
+        <ClasificacionForm
+          mode="edit"
+          clasificacionId={actividadIdNum}
+          initialValues={clasificacionInitialValues}
         />
       );
     }
