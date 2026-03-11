@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import './OrdenacionForm.css';
 
 export type OrdenacionFormMode = 'create' | 'edit';
@@ -32,6 +33,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
   const [ordenItemsKind, setOrdenItemsKind] = useState<'words' | 'images'>('words');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [iaModalOpen, setIaModalOpen] = useState(false);
 
   const posicionOriginal = useMemo(() => {
     if (mode !== 'edit') return null;
@@ -138,11 +140,29 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
     }
   };
 
+  const handleIAResult = (data: Record<string, unknown>) => {
+    if (data.titulo) setTitulo(data.titulo as string);
+    if (data.descripcion) setDescripcion(data.descripcion as string);
+
+    const valores = data.valores as { texto: string; orden: number }[] | undefined;
+    if (valores && Array.isArray(valores)) {
+      const sorted = [...valores].sort((a, b) => a.orden - b.orden);
+      setOrdenItems(sorted.map((v) => v.texto));
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="of-form">
       {error && <p className="of-error">{error}</p>}
 
-      {/* ── Metadata ── */}
+      <GenerarIAModal
+        tipoActividad="ORDEN"
+        open={iaModalOpen}
+        onClose={() => setIaModalOpen(false)}
+        onResult={handleIAResult}
+      />
+
+      {/* ── Metadata ── */
       <div className="of-meta-section">
         <div className="of-col">
           <div>
@@ -204,7 +224,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
       </div>
       </div>
 
-      {/* ── Items section ── */}
+    }
       <div className="of-items-section">
         <p className="of-help">
           Actividad de ordenación. El alumno debe organizar los valores siguiendo un criterio
@@ -270,6 +290,9 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
       </div>
 
       <div className="ca-form-footer">
+        <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+          Generar con IA
+        </button>
         <button className="ca-btn-guardar" type="submit" disabled={loading}>
           {loading ? 'Guardando...' : 'Guardar'}
         </button>
