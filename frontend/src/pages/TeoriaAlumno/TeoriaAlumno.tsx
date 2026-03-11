@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
-import { getCurrentUserInfo } from '../../types/curso'; // Asegúrate de importar esto
+import { getCurrentUserInfo } from '../../types/curso';
 import maguitoImg from '../../assets/props/maguito.png';
-import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
+import mapaIcon from '../../assets/icons/mapa.svg';
 import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
 import './TeoriaAlumno.css';
 
@@ -12,7 +12,6 @@ type TeoriaDTO = {
   readonly id: number;
   readonly titulo: string;
   readonly descripcion: string | null;
-  readonly puntuacion: number;
   readonly imagen: string | null;
   readonly posicion: number;
   readonly temaId: number | null;
@@ -26,7 +25,10 @@ export default function TeoriaAlumno() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [actividadAlumnoId, setActividadAlumnoId] = useState<number | null>(null);
+  const [isFlipped, setIsFlipped] = useState(false); 
+
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+
   useEffect(() => {
     if (!actividadId) return;
     const id = Number.parseInt(actividadId, 10);
@@ -36,9 +38,9 @@ export default function TeoriaAlumno() {
         setLoading(true);
         // 1. Cargar datos de la teoría
         const res = await apiFetch(`${apiBase}/api/actividades/${id}/alumno`);
-        if (!res.ok) throw new Error(); 
-    const data = await res.json();
-    setTeoria(data);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setTeoria(data);
 
         // 2. Registrar el inicio de la actividad
         const user = getCurrentUserInfo() as any;
@@ -60,7 +62,7 @@ export default function TeoriaAlumno() {
     };
 
     run();
-  }, [actividadId]);
+  }, [actividadId, apiBase]);
 
   const [finished, setFinished] = useState(false);
 
@@ -68,10 +70,9 @@ export default function TeoriaAlumno() {
   const handleFinalizar = async () => {
     if (actividadAlumnoId) {
       try {
-        // Marcamos como acabada en el servidor
         await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
           method: 'PUT',
-          body: JSON.stringify([]), // Lista vacía porque no hay respuestas que corregir
+          body: JSON.stringify([]),
         });
       } catch (e) {
         console.error("No se pudo marcar como finalizada");
@@ -100,28 +101,51 @@ export default function TeoriaAlumno() {
 
         {teoria && (
           <>
-            <ActivityHeader
-              title={teoria.titulo}
-              subtitle={teoria.descripcion ? teoria.descripcion.split('\n')[0] : undefined}
-            />
+            <div className="ta-top">
+              <button className="ta-map-btn" type="button" onClick={() => navigate(-1)}>
+                <img src={mapaIcon} alt="Mapa" className="ta-map-icon" />
+                <span>Mapa</span>
+              </button>
+            </div>
 
-            <div className="ta-content-box">
-              <div className="ta-text-area">
-                {teoria.descripcion
-                  ? teoria.descripcion.split('\n').map((line, i) => (
-                      <p key={i} className="ta-paragraph">
-                        {line}
-                      </p>
-                    ))
-                  : <p className="ta-paragraph">Sin contenido.</p>
-                }
-              </div>
+            <div 
+              className={`ta-flashcard ${isFlipped ? 'flipped' : ''}`} 
+              onClick={() => setIsFlipped(!isFlipped)}
+            >
+              <div className="ta-card-inner">
+                
+                {/* PARTE DELANTERA: Título e Imagen */}
+                <div className="ta-card-front">
+                  <div className="ta-card-content">
+                    <h1 className="ta-title">{teoria.titulo}</h1>
+                    {teoria.imagen ? (
+                      <img src={teoria.imagen} alt="Ilustración" className="ta-main-img" />
+                    ) : (
+                      <img src={maguitoImg} alt="Maguito" className="ta-maguito-placeholder" />
+                    )}
+                    <p className="ta-hint">PULSA PARA LEER LA LECCIÓN</p>
+                  </div>
+                </div>
 
-              <div className="ta-maguito-wrapper">
-                <img src={maguitoImg} alt="Maguito" className="ta-maguito-img" />
+                {/* PARTE TRASERA: Descripción */}
+                <div className="ta-card-back">
+                  <div className="ta-card-content">
+                    <h2 className="ta-back-title">{teoria.titulo}</h2>
+                    <div className="ta-scroll-area">
+                      {teoria.descripcion ? (
+                        teoria.descripcion.split('\n').map((line, i) => (
+                          <p key={i} className="ta-paragraph">{line}</p>
+                        ))
+                      ) : (
+                        <p className="ta-paragraph">Sin contenido disponible.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
+            {/* Botón de finalizar */}
             <div className="ta-bottom">
               <button className="ca-btn-guardar" type="button" onClick={handleFinalizar}>
                 He terminado de leer

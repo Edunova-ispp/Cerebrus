@@ -54,7 +54,7 @@ class ActividadServiceImplTest {
         when(temaService.obtenerTemaPorId(99L))
                 .thenThrow(new IllegalArgumentException("Tema no encontrado con ID: 99"));
 
-        assertThatThrownBy(() -> actividadService.crearActividadTeoria("T", "D", 10, "img", 99L))
+        assertThatThrownBy(() -> actividadService.crearActividadTeoria("Titulo", "Desc", null, 99L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Tema no encontrado");
 
@@ -65,7 +65,7 @@ class ActividadServiceImplTest {
     void crearActividadTeoria_usuarioNoEsMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(new com.cerebrus.usuario.Usuario() {});
 
-        assertThatThrownBy(() -> actividadService.crearActividadTeoria("T", "D", 10, "img", 1L))
+        assertThatThrownBy(() -> actividadService.crearActividadTeoria("T", "D", null, 1L))
                 .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
 
         verify(actividadRepository, never()).save(any());
@@ -82,7 +82,7 @@ class ActividadServiceImplTest {
         when(actividadRepository.findMaxPosicionByTemaId(55L)).thenReturn(null);
         when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Actividad resultado = actividadService.crearActividadTeoria("Título", "Desc", 20, null, 55L);
+        Actividad resultado = actividadService.crearActividadTeoria("Título", "Desc", null, 55L);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado).isInstanceOf(General.class);
@@ -114,7 +114,7 @@ class ActividadServiceImplTest {
         when(actividadRepository.findMaxPosicionByTemaId(56L)).thenReturn(0);
         when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        actividadService.crearActividadTeoria("T", "D", 1, "img", 56L);
+        actividadService.crearActividadTeoria("T", "D", null, 56L);
 
         verify(actividadRepository).save(actividadCaptor.capture());
         assertThat(actividadCaptor.getValue().getPosicion()).isEqualTo(1);
@@ -131,7 +131,7 @@ class ActividadServiceImplTest {
         when(actividadRepository.findMaxPosicionByTemaId(57L)).thenReturn(12);
         when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        actividadService.crearActividadTeoria("T", "D", 1, "img", 57L);
+        actividadService.crearActividadTeoria("T", "D", null, 57L);
 
         verify(actividadRepository).save(actividadCaptor.capture());
         assertThat(actividadCaptor.getValue().getPosicion()).isEqualTo(13);

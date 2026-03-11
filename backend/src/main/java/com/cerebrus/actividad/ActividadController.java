@@ -63,7 +63,6 @@ public class ActividadController {
             Actividad actividad = actividadService.crearActividadTeoria(
                 request.getTitulo(),
                 request.getDescripcion(),
-                request.getPuntuacion(),
                 request.getImagen(),
                 request.getTemaId()
             );
@@ -81,7 +80,8 @@ public class ActividadController {
             Actividad actividad = actividadService.updateActividadTeoria(
                 id,
                 request.getTitulo(),
-                request.getDescripcion()
+                request.getDescripcion(),
+                request.getImagen()
             );
             return ResponseEntity.ok(toTeoriaDto(actividad));
         } catch (IllegalArgumentException e) {
@@ -94,7 +94,6 @@ public class ActividadController {
             actividad.getId(),
             actividad.getTitulo(),
             actividad.getDescripcion(),
-            actividad.getPuntuacion(),
             actividad.getImagen(),
             actividad.getPosicion(),
             actividad.getTema() == null ? null : actividad.getTema().getId()

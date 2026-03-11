@@ -5,8 +5,8 @@ import { apiFetch } from '../../utils/api';
 import { ClasificacionForm, type ClasificacionFormInitialPregunta, type ClasificacionFormInitialValues } from '../crearActividad/ClasificacionForm';
 import '../crearActividad/crearActividad.css';
 import { OrdenacionForm, type OrdenacionFormInitialValues } from '../crearActividad/OrdenacionForm';
+import { TeoriaForm, type TeoriaFormInitialValues } from '../crearActividad/TeoriaForm';
 import { MarcarImagenForm, type MarcarImagenFormInitialValues } from '../crearActividad/MarcarImagenForm';
-import { TeoriaForm } from '../crearActividad/TeoriaForm';
 import { TestForm, type TestFormInitialValues } from '../crearActividad/TestForm';
 import { CartaForm, type CartaFormInitialValues } from '../crearActividad/CartaForm';
 import { TableroForm, type TableroFormInitialValues } from '../crearActividad/TableroForm';
@@ -27,7 +27,9 @@ type OrdenacionDTO = {
 type TeoriaDTO = {
   id: number;
   titulo: string;
-  descripcion: string | null;
+  descripcion: string;
+  imagen: string;
+  posicion: number;
 };
 
 type GeneralTestMaestroDTO = {
@@ -289,6 +291,15 @@ export default function EditarActividad() {
       }
     : undefined;
 
+  const teoriaInitialValues: TeoriaFormInitialValues | undefined = teoria
+    ? {
+        titulo: teoria.titulo,
+        descripcion: teoria.descripcion,
+        imagen: teoria.imagen,
+        posicion: teoria.posicion,
+      }
+    : undefined;
+
   const cartaInitialValues: CartaFormInitialValues | undefined = generalCarta
     ? {
         titulo: generalCarta.titulo,
@@ -319,7 +330,7 @@ export default function EditarActividad() {
         })),
       }
     : undefined;
-  
+
   const actividadIdNum = actividadId ? Number.parseInt(actividadId, 10) : NaN;
 
   const clasificacionInitialValues: ClasificacionFormInitialValues | undefined = clasificacion
@@ -361,8 +372,7 @@ export default function EditarActividad() {
         <TeoriaForm
           mode="edit"
           actividadId={actividadIdNum}
-          initialTitulo={teoria.titulo}
-          initialDescripcion={teoria.descripcion ?? ''}
+          initialValues={teoriaInitialValues}
         />
       );
     }
