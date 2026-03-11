@@ -73,7 +73,7 @@
 }
 
 .pixel-btn-submit-main {
-  background-color: hsl(35, 100%, 80%);
+  background-color: var(--color-accent);
   border: 4px solid #000;
   border-radius: 12px;
   padding: 12px 30px;

@@ -65,14 +65,7 @@ function LandingPage() {
             Mis Cursos
           </button>
         )}
-        {isLoggedIn ? (
-          <button
-            className="landing-login-btn landing-logout-btn"
-            onClick={handleLogout}
-          >
-            Cerrar sesión
-          </button>
-        ) : (
+        {!isLoggedIn && (
           <button className="landing-login-btn" onClick={() => navigate("/auth/login")}>
             Login
             <ProfileIcon className="landing-login-icon" aria-hidden />
