@@ -2,11 +2,15 @@ package com.cerebrus.actividad;
 
 import java.util.List;
 
+import com.cerebrus.actividad.DTO.CrucigramaDTO;
+import com.cerebrus.actividad.DTO.CrucigramaRequest;
 import com.cerebrus.actividad.DTO.GeneralCartaDTO;
 import com.cerebrus.actividad.DTO.GeneralCartaMaestroDTO;
 import com.cerebrus.actividad.DTO.GeneralDTO;
 import com.cerebrus.actividad.DTO.GeneralTestDTO;
 import com.cerebrus.actividad.DTO.GeneralTestMaestroDTO;
+
+import jakarta.validation.Valid;
 
 public interface GeneralService {
 	General crearActGeneral(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible);
@@ -27,4 +31,7 @@ public interface GeneralService {
 	GeneralClasificacionDTO readTipoClasificacion(Long id);
 	GeneralClasificacionMaestroDTO updateTipoClasificacion(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
         String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId) ;
+    CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama);
+    CrucigramaDTO readTipoCrucigrama(Long id);
+    CrucigramaDTO updateTipoCrucigrama(Long id, CrucigramaRequest crucigrama);
 }
