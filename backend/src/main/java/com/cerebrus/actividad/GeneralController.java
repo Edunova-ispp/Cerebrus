@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,11 +17,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cerebrus.actividad.DTO.CrucigramaDTO;
+import com.cerebrus.actividad.DTO.CrucigramaRequest;
 import com.cerebrus.actividad.DTO.GeneralCartaDTO;
 import com.cerebrus.actividad.DTO.GeneralCartaMaestroDTO;
 import com.cerebrus.actividad.DTO.GeneralDTO;
 import com.cerebrus.actividad.DTO.GeneralTestDTO;
 import com.cerebrus.actividad.DTO.GeneralTestMaestroDTO;
+import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 
 import jakarta.validation.Valid;
@@ -225,4 +229,49 @@ public class GeneralController {
         );
         return ResponseEntity.ok(actualizado);
     }
+
+    @PostMapping("/crucigrama")
+    public ResponseEntity<CrucigramaDTO> crearTipoCrucigrama(@RequestBody @Valid CrucigramaRequest crucigrama) {
+        try {
+            // Se ha decidido limitar el crucigrama a un maximo de 5 preguntas
+        if(crucigrama.getPreguntasYRespuestas().size() > 5) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        CrucigramaDTO generalCreada = generalService.crearTipoCrucigrama(crucigrama);
+        return ResponseEntity.ok(generalCreada);
+        }
+        catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/crucigrama/{id}")
+    public ResponseEntity<CrucigramaDTO> readTipoCrucigrama(@PathVariable Long id) {
+        try {
+            CrucigramaDTO crucigrama = generalService.readTipoCrucigrama(id);
+            return ResponseEntity.ok(crucigrama);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PutMapping("/crucigrama/{id}")
+    public ResponseEntity<CrucigramaDTO> updateTipoCrucigrama(@PathVariable Long id, @RequestBody CrucigramaRequest crucigrama) {
+        try {
+            CrucigramaDTO updated = generalService.updateTipoCrucigrama(id, crucigrama);
+            return ResponseEntity.ok(updated);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

@@ -1,5 +1,8 @@
 package com.cerebrus.respuestaalumno;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+
 public interface RespAlumnoGeneralService {
     RespAlumnoGeneralCreateResponse crearRespAlumnoGeneral(Long actAlumnoId, Long respuestaId, Long preguntaId);
     RespAlumnoGeneral readRespAlumnoGeneral(Long id);
@@ -7,4 +10,5 @@ public interface RespAlumnoGeneralService {
     void deleteRespAlumnoGeneral(Long id);
     Boolean corregirRespuestaAlumnoGeneral(Long id);
     boolean corregirRespuestaAlumnoGeneralTest(Long id);
+    HashMap<Long, String> corregirCrucigrama(LinkedHashMap<Long,String> respuestas, Long crucigramaId);
 }

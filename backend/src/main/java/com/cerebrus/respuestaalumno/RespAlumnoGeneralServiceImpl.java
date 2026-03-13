@@ -1,15 +1,21 @@
 package com.cerebrus.respuestaalumno;
 
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividadalumno.ActividadAlumno;
 import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadalumno.ActividadAlumnoService;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
@@ -31,17 +37,19 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     private final RespuestaRepository respuestaRepository;
     private final RespuestaService respuestaService;
     private final UsuarioService usuarioService;
+    private final ActividadRepository actividadRepository;
 
     @Autowired
     public RespAlumnoGeneralServiceImpl(RespAlumnoGeneralRepository respAlumnoGeneralRepository, 
         ActividadAlumnoRepository actividadAlumnoRepository, PreguntaRepository preguntaRepository, 
-        RespuestaRepository respuestaRepository, RespuestaService respuestaService, UsuarioService usuarioService) {
+        RespuestaRepository respuestaRepository, RespuestaService respuestaService, UsuarioService usuarioService, ActividadRepository actividadRepository) {
         this.respAlumnoGeneralRepository = respAlumnoGeneralRepository;
         this.actividadAlumnoRepository = actividadAlumnoRepository;
         this.preguntaRepository = preguntaRepository;
         this.respuestaRepository = respuestaRepository;
         this.respuestaService = respuestaService;
         this.usuarioService = usuarioService;
+        this.actividadRepository = actividadRepository;
     }
 
     @Override
@@ -137,4 +145,63 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
 
         return esCorrecta;
     }
+
+    @Override
+    @Transactional
+    public HashMap<Long, String> corregirCrucigrama(LinkedHashMap<Long, String> respuestas, Long crucigramaId) {
+        Usuario u = usuarioService.findCurrentUser();
+        if (!(u instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede responder crucigramas");
+        }
+
+        Alumno alumno = (Alumno) u;
+        Integer nota = 0;
+        Integer puntuacion = 0;
+        Integer puntuacionASumar = actividadRepository.findById(crucigramaId).orElseThrow(() -> new RuntimeException("El crucigrama no existe")).getPuntuacion() / respuestas.size();
+        List<RespAlumnoGeneral> respuestasAlumno = new java.util.ArrayList<>();
+        ActividadAlumno  actividadAlumno = actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumno.getId(), crucigramaId)
+            .orElse(actividadAlumnoRepository.save(new ActividadAlumno(0,0,LocalDateTime.now(),null,0,0,alumno,actividadRepository.findByID(crucigramaId))));
+        HashMap<Long, String> resultado = new HashMap<>();
+
+        for(Entry<Long, String> entry : respuestas.entrySet()) {
+            Long preguntaId = entry.getKey();
+            String respuestaDada = entry.getValue().strip().toLowerCase();
+
+            Pregunta pregunta = preguntaRepository.findById(preguntaId).orElseThrow(() -> new RuntimeException("La pregunta no existe"));
+            if (!pregunta.getActividad().getId().equals(crucigramaId)) {
+                throw new IllegalArgumentException("La pregunta con id " + preguntaId + " no pertenece al crucigrama con id " + crucigramaId);
+            }
+
+            Respuesta respuestaCorrecta = respuestaService.encontrarRespuestasPorPreguntaId(preguntaId).stream()
+                .filter(Respuesta::getCorrecta)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No se encontró una respuesta correcta para la pregunta con id " + preguntaId));
+
+            Boolean esCorrecta = respuestaDada.equals(respuestaCorrecta.getRespuesta().strip().toLowerCase());
+
+            if (esCorrecta) {
+                nota += 10/respuestas.size();
+                puntuacion += puntuacionASumar;
+            }
+
+            if(pregunta.getActividad().getRespVisible()) {
+                resultado.put(preguntaId, esCorrecta ? " Respuesta Correcta" : "Incorrecta la respuesta correcta era: " + respuestaCorrecta.getRespuesta());
+            } else {
+                resultado.put(preguntaId, esCorrecta ? "Respuesta Correcta" : " Respuesta Incorrecta");
+            }
+
+            RespAlumnoGeneral respAlumnoGeneral = new RespAlumnoGeneral(esCorrecta, null, respuestaDada, pregunta);
+            respAlumnoGeneral.setActividadAlumno(actividadAlumno);
+            respAlumnoGeneral = respAlumnoGeneralRepository.save(respAlumnoGeneral);
+            respuestasAlumno.add(respAlumnoGeneral);
+        }
+
+        actividadAlumno.setNota(nota);
+        actividadAlumno.setPuntuacion(puntuacion);
+        actividadAlumno.setAcabada(LocalDateTime.now());
+        actividadAlumnoRepository.save(actividadAlumno);
+        resultado.put(-1L, "Nota final: " + nota + " - Puntuación final: " + puntuacion);
+        return resultado;
+    
+}
 }

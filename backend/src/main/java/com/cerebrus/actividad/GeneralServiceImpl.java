@@ -1,8 +1,9 @@
  package com.cerebrus.actividad;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -10,11 +11,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.TipoActGeneral;
+import com.cerebrus.actividad.DTO.CrucigramaDTO;
+import com.cerebrus.actividad.DTO.CrucigramaRequest;
 import com.cerebrus.actividad.DTO.GeneralCartaDTO;
 import com.cerebrus.actividad.DTO.GeneralCartaMaestroDTO;
 import com.cerebrus.actividad.DTO.GeneralDTO;
 import com.cerebrus.actividad.DTO.GeneralTestDTO;
 import com.cerebrus.actividad.DTO.GeneralTestMaestroDTO;
+import com.cerebrus.actividadalumno.ActividadAlumno;
+import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadalumno.ActividadAlumnoService;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaDTO;
@@ -22,6 +28,9 @@ import com.cerebrus.pregunta.PreguntaMaestroDTO;
 import com.cerebrus.respuesta.Respuesta;
 import com.cerebrus.respuesta.RespuestaDTO;
 import com.cerebrus.respuesta.RespuestaMaestroDTO;
+import com.cerebrus.respuesta.RespuestaRepository;
+import com.cerebrus.respuestaalumno.RespAlumnoGeneral;
+import com.cerebrus.respuestaalumno.RespAlumnoGeneralRepository;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Alumno;
@@ -39,14 +48,26 @@ public class GeneralServiceImpl implements GeneralService {
     private final TemaRepository temaRepository;
     private final PreguntaRepository preguntaRepository;
     private final UsuarioService usuarioService;
+    private final RespuestaRepository respuestaRepository;
+    private final ActividadAlumnoService actividadAlumnoService;
+    private final RespAlumnoGeneralRepository respuestaAlumnoRepository;
+    private final ActividadAlumnoRepository actividadAlumnoRepository;
+    private final ActividadRepository actividadRepository;
 
     @Autowired
     public GeneralServiceImpl(GeneralRepository generalRepository, TemaRepository temaRepository, 
-        PreguntaRepository preguntaRepository, UsuarioService usuarioService) {
+        PreguntaRepository preguntaRepository, UsuarioService usuarioService, RespuestaRepository respuestaRepository, 
+        ActividadAlumnoService actividadAlumnoService, RespAlumnoGeneralRepository respuestaAlumnoRepository, ActividadAlumnoRepository actividadAlumnoRepository, ActividadRepository actividadRepository) {
         this.generalRepository = generalRepository;
         this.temaRepository = temaRepository;
         this.preguntaRepository = preguntaRepository;
         this.usuarioService = usuarioService;
+        this.respuestaRepository = respuestaRepository;
+        this.actividadAlumnoService = actividadAlumnoService;
+        this.respuestaAlumnoRepository = respuestaAlumnoRepository;
+        this.actividadAlumnoRepository = actividadAlumnoRepository;
+        this.actividadRepository = actividadRepository;
+
     }
 
     @Override
@@ -509,5 +530,106 @@ public GeneralClasificacionDTO readTipoClasificacion(Long id) {
         return readTipoClasificacionMaestro(actualizado.getId());
     }
 
-   
+@Override
+@Transactional
+public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
+    Usuario u = usuarioService.findCurrentUser();
+    if (!(u instanceof Maestro)) {
+        throw new AccessDeniedException("Solo un maestro puede crear actividades tipo crucigrama");
+    }
+    Tema tema = temaRepository.findById(crucigrama.getTemaId()).orElseThrow(() -> new ResourceNotFoundException("Tema no encontrado"));
+        Maestro maestro = (Maestro) u;
+        if (!tema.getCurso().getMaestro().getId().equals(maestro.getId())) {
+            throw new AccessDeniedException("No tienes permiso para crear un tablero en este tema");
+        }
+
+    General tipoCrucigrama = crearActGeneral(crucigrama.getTitulo(), crucigrama.getDescripcion(), crucigrama.getPuntuacion(),
+        crucigrama.getTemaId(), crucigrama.getRespVisible(), "");
+    
+    tipoCrucigrama.setTipo(TipoActGeneral.CRUCIGRAMA);
+    tipoCrucigrama.setPosicion(actividadRepository.findMaxPosicionByTemaId(crucigrama.getTemaId()) + 1);
+    tipoCrucigrama = generalRepository.save(tipoCrucigrama);
+
+    for (Map.Entry<String, String> preguntaRespuesta : crucigrama.getPreguntasYRespuestas().entrySet()) {
+            Pregunta pregunta = new Pregunta(preguntaRespuesta.getKey(), null, tipoCrucigrama);
+            pregunta = preguntaRepository.save(pregunta);
+            Respuesta respuesta = new Respuesta(preguntaRespuesta.getValue(), null, true, pregunta);
+            respuesta = respuestaRepository.save(respuesta);
+            pregunta.getRespuestas().add(respuesta);
+            pregunta = preguntaRepository.save(pregunta);
+            tipoCrucigrama.getPreguntas().add(pregunta);
+            tipoCrucigrama = generalRepository.save(tipoCrucigrama);
+        }
+    return CrucigramaDTO.fromEntity(tipoCrucigrama);
+    
+}
+
+@Override
+@Transactional(readOnly = true)
+public CrucigramaDTO readTipoCrucigrama(Long id) {
+    General crucigrama = generalRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Crucigrama no encontrado"));
+        Usuario u = usuarioService.findCurrentUser();
+        if (u instanceof Maestro) {
+            Maestro maestro = (Maestro) u;
+            if (!crucigrama.getTema().getCurso().getMaestro().getId().equals(maestro.getId())) {
+                throw new AccessDeniedException("No tienes permiso para acceder a este crucigrama");
+            }
+        }
+        else if (u instanceof Alumno) {
+            Alumno alumno = (Alumno) u;
+            if (!crucigrama.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
+                throw new AccessDeniedException("No tienes permiso para acceder a este crucigrama");
+            }
+        }
+
+        
+        return CrucigramaDTO.fromEntity(crucigrama);
+    
+}
+
+@Override
+@Transactional
+public CrucigramaDTO updateTipoCrucigrama(Long id, CrucigramaRequest crucigrama) {
+    Usuario u = usuarioService.findCurrentUser();
+    if (!(u instanceof Maestro)) {
+        throw new AccessDeniedException("Solo un maestro puede actualizar actividades tipo crucigrama");
+    }
+    General tipoCrucigrama = generalRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Crucigrama no encontrado"));
+    Maestro maestro = (Maestro) u;
+    if (!tipoCrucigrama.getTema().getCurso().getMaestro().getId().equals(maestro.getId())) {
+        throw new AccessDeniedException("No tienes permiso para actualizar este crucigrama");
+    }
+
+    tipoCrucigrama.setTitulo(crucigrama.getTitulo());
+    tipoCrucigrama.setDescripcion(crucigrama.getDescripcion());
+    tipoCrucigrama.setPuntuacion(crucigrama.getPuntuacion());
+    tipoCrucigrama.setRespVisible(crucigrama.getRespVisible());
+    tipoCrucigrama.setVersion(tipoCrucigrama.getVersion() + 1);
+    tipoCrucigrama.setTema(temaRepository.findById(crucigrama.getTemaId()).orElseThrow(() -> new ResourceNotFoundException("Tema no encontrado")));
+    tipoCrucigrama.setPosicion(actividadRepository.findMaxPosicionByTemaId(crucigrama.getTemaId()) + 1);
+
+
+    for (Pregunta p : tipoCrucigrama.getPreguntas()) {
+        respuestaRepository.deleteAll(p.getRespuestas());
+    }
+    preguntaRepository.deleteAll(tipoCrucigrama.getPreguntas());
+    tipoCrucigrama.getPreguntas().clear();
+
+    for (Map.Entry<String, String> preguntaRespuesta : crucigrama.getPreguntasYRespuestas().entrySet()) {
+        Pregunta pregunta = new Pregunta(preguntaRespuesta.getKey(), null, tipoCrucigrama);
+        pregunta = preguntaRepository.save(pregunta);
+        Respuesta respuesta = new Respuesta(preguntaRespuesta.getValue(), null, true, pregunta);
+        respuesta = respuestaRepository.save(respuesta);
+        pregunta.getRespuestas().add(respuesta);
+        pregunta = preguntaRepository.save(pregunta);
+        tipoCrucigrama.getPreguntas().add(pregunta);
+    }
+
+    tipoCrucigrama = generalRepository.save(tipoCrucigrama);
+    return CrucigramaDTO.fromEntity(tipoCrucigrama);
+    
+
+}
+
+
 }
