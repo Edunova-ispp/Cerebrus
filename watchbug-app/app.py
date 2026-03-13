@@ -30,4 +30,5 @@ if os.getenv('WATCHBUG_ADMIN', 'false').lower() == 'true':
     app.add_url_rule('/watchbug/dashboard/api/stats', 'watchbug_api_stats', api_stats, methods=['GET'])
 
 if __name__ == '__main__':
-    app.run(host=os.getenv('HOST', '127.0.0.1'), port=int(os.getenv('PORT', '5000')))
+    # In containerized environments, binding to 0.0.0.0 is required for port publishing.
+    app.run(host=os.getenv('HOST', '0.0.0.0'), port=int(os.getenv('PORT', '5000')))

@@ -36,6 +36,9 @@ services:
   frontend:
     build: ./frontend
     container_name: cerebrus-frontend
+    environment:
+      VITE_LOGROCKET_ID: "${LOGROCKET_ID}"
+      VITE_LOGROCKET_MANUAL_RECORDING: "${LOGROCKET_MANUAL_RECORDING:-true}"
     depends_on:
       - backend
     ports:

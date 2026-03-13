@@ -19,7 +19,9 @@
               logrocket: true,
               supabase: true
           },
-          apiEndpoint: "http://localhost:5000/watchbug/report"
+          apiEndpoint: "http://localhost:5000/watchbug/report",
+          logrocketId: "%VITE_LOGROCKET_ID%",
+          logrocketManual: "%VITE_LOGROCKET_MANUAL_RECORDING%" === "true"
       };
     </script>
     <script src="/watchbug-widget.js"></script>
