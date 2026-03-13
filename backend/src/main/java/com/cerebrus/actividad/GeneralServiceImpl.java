@@ -253,45 +253,39 @@ public class GeneralServiceImpl implements GeneralService {
         );
     }
 
-    @Override
-    @Transactional
     public General updateActGeneral(Long id, String titulo, String descripcion, Integer puntuacion, 
-        Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Long temaId) {
-        
-        Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Maestro)) {
-            throw new AccessDeniedException("Solo un maestro puede actualizar actividades");
-        }
-        
-        General actividad = generalRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
-        actividad.setTitulo(titulo);
-        actividad.setDescripcion(descripcion);
-        actividad.setPuntuacion(puntuacion);
-
-        // RespVisible y comentariosRespVisible pueden venir null desde el cliente.
-        // En el caso de que comentariosRespVisible sea null, lanzará NullPointerException al intentar usar isBlank().
-        // Esto es intencional para que el test que valida ese comportamiento pase.
-        if (Boolean.FALSE.equals(respVisible)) {
-            actividad.setRespVisible(false);
-            actividad.setComentariosRespVisible(null);
-        } else if (Boolean.TRUE.equals(respVisible)) {
-            actividad.setRespVisible(true);
-        }
-
-        if (comentariosRespVisible == null || comentariosRespVisible.isBlank()) {
-            actividad.setComentariosRespVisible(null);
-        } else {
-            actividad.setComentariosRespVisible(comentariosRespVisible);
-        }
-
-        actividad.setVersion(version + 1);
-        actividad.setPosicion(posicion);
-
-        Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
-        actividad.setTema(tema);
-        
-        return actividad;
+    Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Long temaId) {
+    
+    Usuario u = usuarioService.findCurrentUser();
+    if (!(u instanceof Maestro)) {
+        throw new AccessDeniedException("Solo un maestro puede actualizar actividades");
     }
+    
+    General actividad = generalRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
+    
+    actividad.setTitulo(titulo);
+    actividad.setDescripcion(descripcion);
+    actividad.setPuntuacion(puntuacion);
+    
+    boolean visible = (respVisible != null && respVisible);
+    actividad.setRespVisible(visible);
+    
+    if (!visible || comentariosRespVisible == null || comentariosRespVisible.trim().isEmpty()) {
+        actividad.setComentariosRespVisible(null);
+    } else {
+        actividad.setComentariosRespVisible(comentariosRespVisible.trim());
+    }
+
+    actividad.setVersion(version + 1);
+    actividad.setPosicion(posicion);
+
+    Tema tema = temaRepository.findById(temaId)
+        .orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
+    actividad.setTema(tema);
+    
+    return actividad;
+}
 
     @Override
     @Transactional
@@ -436,70 +430,41 @@ public class GeneralServiceImpl implements GeneralService {
 @Transactional
 public GeneralClasificacionDTO readTipoClasificacion(Long id) {
     Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Alumno)) {
-            throw new AccessDeniedException("Solo un alumno puede leer actividades tipo clasificación para realizarlas");
-        }
-      
-
-        General general = generalRepository.findByIdWithPreguntas(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Actividad tipo clasificación no encontrada"));
-        System.out.println("Actividad encontrada: " + general.getTitulo());
-        if (general.getTipo() != TipoActGeneral.CLASIFICACION) {
-            throw new ResourceNotFoundException("La actividad no es de tipo clasificación");
-        }
-        
-         general.getPreguntas().forEach(p -> p.getRespuestas().size());
-         List<Respuesta> respuestas = new ArrayList<>();
-        for (Pregunta p : general.getPreguntas()) {
-            respuestas.addAll(p.getRespuestas());
-         }
-         boolean bienBarajadas = false;
-         List<PreguntaDTO> preguntasDTO = new ArrayList<>();
-         while(!bienBarajadas){
-         List<RespuestaDTO> respuestasBarajadas = CerebrusUtils.shuffleCollection(respuestas).stream()
-                .map(r -> new RespuestaDTO(r.getId(), r.getRespuesta()))
-                .toList();;
-        
-       
-        
-        Integer i=0;
-        for(Pregunta p : general.getPreguntas()){
-            List<RespuestaDTO> Seleccionadas=new ArrayList<>();
-     
-           Integer total=respuestasBarajadas.size()/general.getPreguntas().size();
-           
-              while(Seleccionadas.size()<total){
-                RespuestaDTO r = respuestasBarajadas.get(i);
-                
-             
-                    Seleccionadas.add(r);
-               
-                i++;
-                
-              }
-                preguntasDTO.add(new PreguntaDTO(p.getId(), p.getPregunta(), p.getImagen(), Seleccionadas));
-
-
-        }
-        for(PreguntaDTO pd : preguntasDTO){
-           
-            for(RespuestaDTO rd : pd.getRespuestas()){
-                for (Pregunta p : general.getPreguntas()){
-                    for(Respuesta r : p.getRespuestas()){
-                        if(r.getId().equals(rd.getId())){
-                            bienBarajadas = true;
-                            break;
-
-                        
-                        } else {
-                            bienBarajadas = false;
-                        }
-                    }
-                }
-            }
-        }
+    if (!(u instanceof Alumno)) {
+        throw new AccessDeniedException("Solo un alumno puede leer actividades tipo clasificación");
     }
-  
+
+    General general = generalRepository.findByIdWithPreguntas(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Actividad tipo clasificación no encontrada"));
+    
+    if (general.getTipo() != TipoActGeneral.CLASIFICACION) {
+        throw new ResourceNotFoundException("La actividad no es de tipo clasificación");
+    }
+
+    general.getPreguntas().forEach(p -> p.getRespuestas().size());
+    List<Respuesta> todasLasRespuestas = new ArrayList<>();
+    for (Pregunta p : general.getPreguntas()) {
+        todasLasRespuestas.addAll(p.getRespuestas());
+    }
+    List<RespuestaDTO> respuestasBarajadas = CerebrusUtils.shuffleCollection(todasLasRespuestas).stream()
+        .map(r -> new RespuestaDTO(r.getId(), r.getRespuesta()))
+        .toList();
+
+    List<PreguntaDTO> preguntasDTO = new ArrayList<>();
+    int numPreguntas = general.getPreguntas().size();
+    int numRespuestas = respuestasBarajadas.size();
+    int index = 0;
+
+    for (int i = 0; i < numPreguntas; i++) {
+        Pregunta p = general.getPreguntas().get(i);
+        List<RespuestaDTO> asignadas = new ArrayList<>();
+        
+        int toAssign = numRespuestas / numPreguntas + (i < numRespuestas % numPreguntas ? 1 : 0);
+        for (int j = 0; j < toAssign && index < numRespuestas; j++) {
+            asignadas.add(respuestasBarajadas.get(index++));
+        }
+        preguntasDTO.add(new PreguntaDTO(p.getId(), p.getPregunta(), p.getImagen(), asignadas));
+    }
 
     return new GeneralClasificacionDTO(
         general.getId(), general.getTitulo(), general.getDescripcion(),

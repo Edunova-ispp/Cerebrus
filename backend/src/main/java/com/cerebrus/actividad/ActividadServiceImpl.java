@@ -9,9 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cerebrus.TipoActGeneral;
 import com.cerebrus.tema.Tema;
 import org.springframework.security.access.AccessDeniedException;
-import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.inscripcion.Inscripcion;
-import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.tema.TemaService;
 import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Maestro;
@@ -92,8 +90,7 @@ public class ActividadServiceImpl implements ActividadService {
     }
 
     @Override
-    public Actividad crearActividadTeoria(String titulo, String descripcion, 
-        Integer puntuacion, String imagen, Long temaId) {
+    public Actividad crearActividadTeoria(String titulo, String descripcion, String imagen, Long temaId) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -112,7 +109,7 @@ public class ActividadServiceImpl implements ActividadService {
     }
 
     @Override
-    public Actividad updateActividadTeoria(Long id, String titulo, String descripcion) {
+    public Actividad updateActividadTeoria(Long id, String titulo, String descripcion,String imagen ) {
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede editar actividades de teoría");
@@ -123,9 +120,10 @@ public class ActividadServiceImpl implements ActividadService {
             if (!actividad.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
                 throw new AccessDeniedException("No puedes editar actividades de cursos que no son tuyos");
             }
-        actividad.setTitulo(titulo);
-        actividad.setDescripcion(descripcion);
-        return actividadRepository.save(actividad);
+            actividad.setTitulo(titulo);
+            actividad.setDescripcion(descripcion);
+            actividad.setImagen(imagen);
+            return actividadRepository.save(actividad);
         }
     }
 

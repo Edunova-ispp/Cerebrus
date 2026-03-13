@@ -25,69 +25,6 @@
   position: relative;
 }
 
-/* ── Map button ────────────────────────────────────────── */
-
-.ta-wrapper > .ta-map-btn {
-  position: absolute;
-  left: -170px;
-  top: 0;
-  z-index: 1;
-}
-
-.ta-map-btn {
-  background: #b49aff;
-  border: 3px solid #000;
-  border-radius: 12px;
-  padding: 6px 14px;
-  font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.55rem;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 3px 3px 0 #000;
-  color: #000;
-  transition: color 0.15s;
-}
-
-.ta-map-btn:hover {
-  color: var(--color-accent, #FFF294);
-}
-
-.ta-map-icon {
-  width: 42px;
-  height: 42px;
-  transition: filter 0.15s;
-}
-
-.ta-map-btn:hover .ta-map-icon {
-  filter: brightness(0) saturate(100%) invert(88%) sepia(60%)
-    saturate(400%) hue-rotate(350deg) brightness(105%);
-}
-
-/* ── Header bar ────────────────────────────────────────── */
-
-.ta-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  background: var(--color-secondary, #7C4DFF);
-  border: 3px solid #000;
-  border-radius: 12px;
-  padding: 0 16px;
-  box-shadow: 4px 4px 0 #000;
-  box-sizing: border-box;
-}
-
-.ta-title {
-  font-size: 3rem;
-  font-weight: bold;
-  color: var(--color-accent, #FFF294);
-  -webkit-text-stroke: 1px #000;
-}
-
 /* ── Progress ──────────────────────────────────────────── */
 
 .ta-progress {
@@ -309,60 +246,6 @@
   cursor: default;
   box-shadow: none;
   transform: none;
-}
-
-/* ── Done popup ────────────────────────────────────────── */
-
-.ta-done-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 200;
-}
-
-.ta-done-popup {
-  background: var(--color-primary, #D10057);
-  border: 3px solid #000;
-  border-radius: 18px;
-  padding: 28px 32px 24px;
-  width: min(480px, 90vw);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 6px 6px 0 #000;
-}
-
-.ta-done-title {
-  font-size: 3.2rem;
-  font-weight: bold;
-  color: var(--color-accent, #FFF294);
-  margin: 0;
-  text-shadow: 3px 3px 0 #000;
-  text-align: center;
-  -webkit-text-stroke: 1px #000;
-}
-
-.ta-done-imgs {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  margin: 8px 0;
-}
-
-.ta-done-caballero {
-  width: 280px;
-  height: auto;
-  image-rendering: pixelated;
-}
-
-.ta-done-monstruo {
-  width: 220px;
-  height: auto;
-  image-rendering: pixelated;
 }
 
 /* ── Question modal ────────────────────────────────────── */

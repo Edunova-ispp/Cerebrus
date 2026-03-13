@@ -3,26 +3,29 @@ import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/auth/login/LoginPage";
 import LogoutPage from "./pages/auth/logout/LogoutPage";
 import RegisterPage from "./pages/auth/register/RegisterPage";
+import ClasificacionAlumno from "./pages/clasificacionAlumno/ClasificacionAlumno";
+import CrearActividad from "./pages/crearActividad/crearActividad.tsx";
 import CrearCurso from "./pages/crearCurso/CrearCurso";
+import CrearTema from "./pages/crearTema/CrearTema";
 import DeployTesting from "./pages/deployTesting/DeployTesting";
 import DetalleCurso from "./pages/detalleCurso/DetalleCurso";
+import EditarActividad from "./pages/editarActividad/EditarActividad";
 import EditarCurso from "./pages/editarCurso/EditarCurso";
+import EditarTema from "./pages/editarTema/EditarTema";
 import EstadisticasCurso from "./pages/estadisticasCurso/EstadisticasCurso";
+import MediasCurso from "./pages/estadisticasCurso/MediasCurso";
 import InfoPage from "./pages/infoPage/InfoPage";
 import LandingPage from "./pages/landingPage/LandingPage";
-import CrearActividad from "./pages/crearActividad/crearActividad.tsx";
-import MisCursos from "./pages/misCursos/MisCursos";
-import ListaTemasCursoProfesor from "./pages/temasDelCurso/ListaTemasCursoProfesor";
-import CrearTema from "./pages/crearTema/CrearTema";
-import EditarTema from "./pages/editarTema/EditarTema";
-import EditarActividad from "./pages/editarActividad/EditarActividad";
-import OrdenacionAlumno from "./pages/ordenacionAlumno/OrdenacionAlumno";
-import TestAlumno from "./pages/testAlumno/TestAlumno";
 import MapaCurso from "./pages/mapaCurso/MapaCurso";
-import MediasCurso from "./pages/estadisticasCurso/MediasCurso";
+import MisCursos from "./pages/misCursos/MisCursos";
+import OrdenacionAlumno from "./pages/ordenacionAlumno/OrdenacionAlumno";
+import ListaTemasCursoProfesor from "./pages/temasDelCurso/ListaTemasCursoProfesor";
 import TeoriaAlumno from "./pages/TeoriaAlumno/TeoriaAlumno";
+import MarcarImagenAlumno from "./pages/marcarImagenAlumno/MarcarImagenAlumno";
 import Perfil from "./pages/perfil/Perfil";
 import TableroAlumno from "./pages/tableroAlumno/TableroAlumno";
+import CartaAlumno from "./pages/cartaAlumno/CartaAlumno";
+import TestAlumno from "./pages/testAlumno/TestAlumno";
 
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
 class WatchbugErrorBoundary extends Component<
@@ -93,10 +96,13 @@ function App() {
       <Route path="/auth/logout"    element={<LogoutPage />} />
       <Route path="/cursos/:id/temas/:temaId/actividades/crear" element={<CrearActividad />} />
       <Route path="/ordenaciones/:ordenacionId/alumno" element={<OrdenacionAlumno />} />
+      <Route path="/marcar-imagenes/:marcarImagenId/alumno" element={<MarcarImagenAlumno />} />
+      <Route path="/clasificaciones/:clasificacionId/alumno" element={<ClasificacionAlumno />} />
       <Route path="/actividades/teoria/:actividadId" element={<TeoriaAlumno />} />
 
       <Route path="/generales/test/:testId/alumno" element={<TestAlumno />} />
       <Route path="/tableros/:tableroId/alumno" element={<TableroAlumno />} />
+      <Route path="/generales/carta/:cartaId/alumno" element={<CartaAlumno />} />
       <Route path="/estadisticas/:id" element={<EstadisticasCurso />} />
       <Route path="/medias/:id" element={<MediasCurso />} />
       <Route path="/perfil" element={<Perfil />} />

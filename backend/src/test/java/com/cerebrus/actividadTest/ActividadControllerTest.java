@@ -34,21 +34,20 @@ class ActividadControllerTest {
         ActividadController.CrearActividadTeoriaRequest request = new ActividadController.CrearActividadTeoriaRequest();
         request.setTitulo("Titulo");
         request.setDescripcion("Desc");
-        request.setPuntuacion(10);
         request.setImagen("img.png");
         request.setTemaId(5L);
 
         Actividad actividad = new Actividad() {};
         actividad.setId(99L);
 
-        when(actividadService.crearActividadTeoria("Titulo", "Desc", 10, "img.png", 5L))
+        when(actividadService.crearActividadTeoria("Titulo", "Desc", "img.png", 5L))
                 .thenReturn(actividad);
 
         ResponseEntity<TeoriaDTO> response = actividadController.crearActividadTeoria(request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
-        verify(actividadService).crearActividadTeoria("Titulo", "Desc", 10, "img.png", 5L);
+        verify(actividadService).crearActividadTeoria("Titulo", "Desc", "img.png", 5L);
     }
 
     @Test
@@ -56,12 +55,11 @@ class ActividadControllerTest {
         ActividadController.CrearActividadTeoriaRequest request = new ActividadController.CrearActividadTeoriaRequest();
         request.setTitulo("Titulo");
         request.setDescripcion("Desc");
-        request.setPuntuacion(10);
         request.setImagen(null);
         request.setTemaId(5L);
 
         Actividad actividad = new Actividad() {};
-        when(actividadService.crearActividadTeoria("Titulo", "Desc", 10, null, 5L))
+        when(actividadService.crearActividadTeoria("Titulo", "Desc", null, 5L))
                 .thenReturn(actividad);
 
         ResponseEntity<TeoriaDTO> response = actividadController.crearActividadTeoria(request);
@@ -74,11 +72,10 @@ class ActividadControllerTest {
         ActividadController.CrearActividadTeoriaRequest request = new ActividadController.CrearActividadTeoriaRequest();
         request.setTitulo("T");
         request.setDescripcion("D");
-        request.setPuntuacion(1);
         request.setImagen("img");
         request.setTemaId(10L);
 
-        when(actividadService.crearActividadTeoria(any(), any(), any(), any(), any()))
+        when(actividadService.crearActividadTeoria(any(), any(), any(), any()))
                 .thenThrow(new IllegalArgumentException("Tema no encontrado"));
 
         ResponseEntity<TeoriaDTO> response = actividadController.crearActividadTeoria(request);

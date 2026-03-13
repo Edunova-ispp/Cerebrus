@@ -147,7 +147,7 @@
 }
 
 .login-register-text span:hover {
-  color: #7a0030;
+  color: var(--color-accent);
 }
 
 /* Password toggle button */
