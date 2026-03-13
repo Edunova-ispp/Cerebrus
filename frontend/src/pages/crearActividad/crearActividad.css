@@ -179,5 +179,7 @@
 .ca-form-footer {
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 16px;
   margin-top: 20px;
 }

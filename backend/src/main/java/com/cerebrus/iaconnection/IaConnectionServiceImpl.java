@@ -218,9 +218,16 @@ public class IaConnectionServiceImpl implements IaConnectionService {
            
             String tipo = (String) jsonResponse.get("tipo");
           
-            if (!tipo.equals(tipoActividad.name())) {
-            throw new IllegalArgumentException("400 Bad Request tipo equivocado: "+jsonResponse);
+            // El prompt pide alias distintos al nombre del enum para algunos tipos
+            Map<String, String> aliasToEnum = Map.of(
+                "TIPO_TEST", "TEST",
+                "ORDENACION", "ORDEN",
+                "TEORICA", "TEORIA"
+            );
+            String tipoNormalizado = aliasToEnum.getOrDefault(tipo, tipo);
 
+            if (!tipoNormalizado.equals(tipoActividad.name())) {
+                throw new IllegalArgumentException("400 Bad Request tipo equivocado: " + jsonResponse);
             }
             
             

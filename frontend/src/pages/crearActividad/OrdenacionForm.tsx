@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import './OrdenacionForm.css';
 
 export type OrdenacionFormMode = 'create' | 'edit';
@@ -28,11 +29,17 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
   const [puntuacion, setPuntuacion] = useState('');
   const [respVisible, setRespVisible] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
-  const [posicion, setPosicion] = useState('');
   const [ordenItems, setOrdenItems] = useState<string[]>(['']);
   const [ordenItemsKind, setOrdenItemsKind] = useState<'words' | 'images'>('words');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [iaModalOpen, setIaModalOpen] = useState(false);
+
+  const posicionOriginal = useMemo(() => {
+    if (mode !== 'edit') return null;
+    const raw = initialValues?.posicion;
+    return typeof raw === 'number' && Number.isFinite(raw) ? raw : null;
+  }, [initialValues?.posicion, mode]);
 
   const navigate = useNavigate();
   const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
@@ -45,7 +52,6 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
     setPuntuacion(String(initialValues.puntuacion ?? ''));
     setRespVisible(Boolean(initialValues.respVisible));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
-    setPosicion(String(initialValues.posicion ?? ''));
     setOrdenItems(initialValues.valores?.length ? [...initialValues.valores] : ['']);
   }, [initialValues]);
 
@@ -89,14 +95,8 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
       return;
     }
 
-    if (!posicion.trim()) {
-      setError('La posición es requerida');
-      return;
-    }
-
-    const posicionNum = Number.parseInt(posicion.trim(), 10);
-    if (Number.isNaN(posicionNum)) {
-      setError('La posición debe ser un número válido');
+    if (mode === 'edit' && posicionOriginal === null) {
+      setError('No se pudo conservar la posición original para la edición');
       return;
     }
 
@@ -126,7 +126,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
           tema: { id: temaIdNum },
           respVisible,
           comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
-          posicion: posicionNum,
+          ...(mode === 'edit' ? { posicion: posicionOriginal } : {}),
           valores,
         }),
       });
@@ -140,11 +140,29 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
     }
   };
 
+  const handleIAResult = (data: Record<string, unknown>) => {
+    if (data.titulo) setTitulo(data.titulo as string);
+    if (data.descripcion) setDescripcion(data.descripcion as string);
+
+    const valores = data.valores as { texto: string; orden: number }[] | undefined;
+    if (valores && Array.isArray(valores)) {
+      const sorted = [...valores].sort((a, b) => a.orden - b.orden);
+      setOrdenItems(sorted.map((v) => v.texto));
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="of-form">
       {error && <p className="of-error">{error}</p>}
 
-      {/* ── Metadata ── */}
+      <GenerarIAModal
+        tipoActividad="ORDEN"
+        open={iaModalOpen}
+        onClose={() => setIaModalOpen(false)}
+        onResult={handleIAResult}
+      />
+
+      {/* ── Metadata ── */
       <div className="of-meta-section">
         <div className="of-col">
           <div>
@@ -182,24 +200,14 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
               onChange={(e) => setPuntuacion(e.target.value)}
             />
           </div>
-          <div className="of-row">
-            <label className="of-label" htmlFor="of-posicion">Posición</label>
-            <input
-              type="number"
-              id="of-posicion"
-              className="of-input of-input-sm"
-              value={posicion}
-              onChange={(e) => setPosicion(e.target.value)}
-            />
-          </div>
-          <label className="of-check-label">
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
               type="checkbox"
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
             Correcciones visibles
-          </label>
           {respVisible && (
             <div>
               <label className="of-label" htmlFor="of-comentarios">Comentarios</label>
@@ -214,8 +222,9 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
           )}
         </div>
       </div>
+      </div>
 
-      {/* ── Items section ── */}
+    }
       <div className="of-items-section">
         <p className="of-help">
           Actividad de ordenación. El alumno debe organizar los valores siguiendo un criterio
@@ -281,6 +290,9 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
       </div>
 
       <div className="ca-form-footer">
+        <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+          Generar con IA
+        </button>
         <button className="ca-btn-guardar" type="submit" disabled={loading}>
           {loading ? 'Guardando...' : 'Guardar'}
         </button>

@@ -3,8 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
+import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
+import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
 import './TestAlumno.css';
-import mapaIcon from '../../assets/icons/mapa.svg';
 import dragonImg from '../../assets/props/dragon.png';
 import caballeroImg from '../../assets/props/caballero.png';
 
@@ -332,15 +333,7 @@ export default function TestAlumno() {
         {test && currentPregunta && (
           <>
             {/* ── Header ── */}
-            <div className="ta-top">
-              <button className="ta-map-btn" type="button" onClick={() => navigate(-1)}>
-                <img src={mapaIcon} alt="Mapa" className="ta-map-icon" />
-                <span>Mapa</span>
-              </button>
-              <div className="ta-title-banner">
-                <h1 className="ta-title">{test.titulo}</h1>
-              </div>
-            </div>
+            <ActivityHeader title={test.titulo} />
 
             {/* ── Score banner after submit ── */}
             {submitted && score && (
@@ -483,6 +476,8 @@ export default function TestAlumno() {
         )}
 
         {!test && !error && <p className="ca-text">No se encontró el test.</p>}
+
+        {submitted && <CompletionPopup title="¡TEST COMPLETADO!" onContinue={() => navigate(-1)} />}
       </main>
     </div>
   );

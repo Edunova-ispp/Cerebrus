@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import './TestForm.css';
 
 export type TestFormMode = 'create' | 'edit';
@@ -63,6 +64,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
   const [questions, setQuestions] = useState<Question[]>([makeEmptyQuestion()]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [iaModalOpen, setIaModalOpen] = useState(false);
 
   // Tracks original server-loaded preguntas for deletion detection in edit mode
   const originalQuestionsRef = useRef<TestFormInitialPregunta[]>([]);
@@ -334,11 +336,36 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
+  const handleIAResult = (data: Record<string, unknown>) => {
+    if (data.titulo) setTitulo(data.titulo as string);
+    if (data.descripcion) setDescripcion(data.descripcion as string);
+
+    const preguntas = data.preguntas as { enunciado: string; opciones: { texto: string; correcta: boolean }[] }[] | undefined;
+    if (preguntas && Array.isArray(preguntas)) {
+      setQuestions(
+        preguntas.map((p) => ({
+          text: p.enunciado,
+          options: (p.opciones ?? []).map((o) => ({
+            text: o.texto,
+            correcta: Boolean(o.correcta),
+          })),
+        })),
+      );
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="tf-form">
       {error && <p className="ca-text tf-error">{error}</p>}
 
-      {/* ── TOP: Metadata ── */}
+      <GenerarIAModal
+        tipoActividad="TEST"
+        open={iaModalOpen}
+        onClose={() => setIaModalOpen(false)}
+        onResult={handleIAResult}
+      />
+
+      {/* ── TOP: Metadata ── */
       <div className="tf-header">
         <div className="tf-col">
           <div>
@@ -388,15 +415,20 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
         </div>
 
         <div className="tf-col">
-          <div>
-            <label className="tf-label" htmlFor="tf-puntuacion">Puntuación *</label>
-            <input
-              type="number"
-              id="tf-puntuacion"
-              className="tf-input tf-input-sm"
-              value={puntuacion}
-              onChange={(e) => setPuntuacion(e.target.value)}
-            />
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 80 }}>
+            <div>
+              <label className="tf-label" htmlFor="tf-puntuacion">Puntuación *</label>
+              <input
+                type="number"
+                id="tf-puntuacion"
+                className="tf-input tf-input-sm"
+                value={puntuacion}
+                onChange={(e) => setPuntuacion(e.target.value)}
+              />
+            </div>
+            <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+              Generar con IA
+            </button>
           </div>
 
           <label className="tf-check-label">
@@ -423,7 +455,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
         </div>
       </div>
 
-      {/* ── BOTTOM: Questions ── */}
+    }
       <div className="tf-questions">
           <p className="tf-help">
             Añade las preguntas y opciones. Marca cuál es la correcta con <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.

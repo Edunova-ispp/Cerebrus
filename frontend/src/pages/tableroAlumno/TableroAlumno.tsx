@@ -1,11 +1,10 @@
 import { useEffect, useState, useCallback, type ReactElement } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
+import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
+import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import { apiFetch } from '../../utils/api';
 import perritoImg from '../../assets/props/perritoCerberito.png';
-import mapaIcon from '../../assets/icons/mapa.svg';
-import caballeroImg from '../../assets/props/caballeroGanador.png';
-import mounstruoImg from '../../assets/props/mounstroMuerto.png';
 import hombreMisteriosoImg from '../../assets/props/hombreMisterioso.png';
 import './TableroAlumno.css';
 
@@ -52,21 +51,6 @@ function StatusMessage({ error }: { error?: string }) {
           {error ?? 'Cargando tablero...'}
         </p>
       </main>
-    </div>
-  );
-}
-
-function CompletionPopup({ onContinue }: { onContinue: () => void }) {
-  return (
-    <div className="ta-done-overlay">
-      <div className="ta-done-popup">
-        <h2 className="ta-done-title">¡HAS COMPLETADO EL TABLERO!</h2>
-        <div className="ta-done-imgs">
-          <img src={caballeroImg} alt="Caballero ganador" className="ta-done-caballero" />
-          <img src={mounstruoImg} alt="Monstruo derrotado" className="ta-done-monstruo" />
-        </div>
-        <button className="ta-accent-btn" onClick={onContinue}>Continuar</button>
-      </div>
     </div>
   );
 }
@@ -281,14 +265,7 @@ export default function TableroAlumno() {
       <NavbarMisCursos />
       <main className="ta-main">
         <div className="ta-wrapper">
-          <button className="ta-map-btn" onClick={() => navigate(-1)}>
-            <img src={mapaIcon} alt="Mapa" className="ta-map-icon" />
-            <span>Mapa</span>
-          </button>
-
-          <div className="ta-header">
-            <span className="ta-title">{tablero.titulo}</span>
-          </div>
+          <ActivityHeader title={tablero.titulo} />
 
           <div className="ta-progress">
             <img src={hombreMisteriosoImg} alt="Hombre misterioso" className="ta-progress-avatar" />
@@ -314,7 +291,7 @@ export default function TableroAlumno() {
             <p className="ta-hint">Pulsa una casilla <strong>?</strong> adyacente a Cerbero para responder</p>
           )}
 
-          {isComplete && <CompletionPopup onContinue={() => navigate(-1)} />}
+          {isComplete && <CompletionPopup title="¡HAS COMPLETADO EL TABLERO!" onContinue={() => navigate(-1)} />}
         </div>
       </main>
 
