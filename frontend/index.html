@@ -8,6 +8,22 @@
   </head>
   <body>
     <div id="root"></div>
+    
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      globalThis.__WATCHBUG_CONFIG__ = {
+          enabled: true,
+          admin: true,
+          services: {
+              sentry: true, 
+              logrocket: true,
+              supabase: true
+          },
+          apiEndpoint: "http://localhost:5000/watchbug/report",
+          logrocketId: "%VITE_LOGROCKET_ID%",
+          logrocketManual: "%VITE_LOGROCKET_MANUAL_RECORDING%" === "true"
+      };
+    </script>
+    <script src="/watchbug-widget.js"></script>
   </body>
 </html>

@@ -36,15 +36,29 @@ services:
   frontend:
     build: ./frontend
     container_name: cerebrus-frontend
+    environment:
+      VITE_LOGROCKET_ID: "${LOGROCKET_ID}"
+      VITE_LOGROCKET_MANUAL_RECORDING: "${LOGROCKET_MANUAL_RECORDING:-true}"
     depends_on:
       - backend
     ports:
       - "3000:80"
-  
-  mi-app-spring:
-    image: mi-usuario/mi-app:latest
+
+  watchbug-service:
+    build: 
+      context: ./watchbug-app
+    container_name: watchbug
     ports:
-      - "8080:8080"
+      - "5000:5000"
+    environment:
+      - WATCHBUG_ENABLED=True
+      - WATCHBUG_ADMIN=true
+      - SENTRY_DSN=${SENTRY_DSN}
+      - LOGROCKET_ID=${LOGROCKET_ID}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - SUPABASE_BUCKET_NAME=watchbug-screenshots
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
 
 volumes:
   dbdata:
