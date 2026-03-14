@@ -1,11 +1,16 @@
 package com.cerebrus.tema;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import com.cerebrus.TipoAct;
+import com.cerebrus.comun.enumerados.*;
+import com.cerebrus.actividad.Actividad;
+import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.curso.Curso;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,6 +19,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -27,9 +33,19 @@ public class Tema {
     @Column(nullable = false)
     private String titulo;
 
+    // Atributo derivado para obtener los tipos de actividades asociados al tema en orden. No modificable
+    public List<TipoAct> getTipoActividades() {
+        List<TipoAct> actividades = new ArrayList<>(Arrays.asList(TipoAct.values()));
+        return actividades;
+    }
+
+    //Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "curso_id", nullable = false)
     private Curso curso;
+
+    @OneToMany(mappedBy = "tema", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Actividad> actividades = new ArrayList<>();
 
     // Constructores
     public Tema() {
@@ -65,13 +81,13 @@ public class Tema {
         this.curso = curso;
     }
 
-    // Atributo derivado para obtener los tipos de actividades asociados al tema en orden
-    public List<TipoAct> getActividades() {
-        //TODO: Implementar lógica para obtener los tipos de actividades asociados al tema en orden
-        List<TipoAct> actividades = new ArrayList<>();
+    public List<Actividad> getActividades() {
         return actividades;
     }
 
+    public void setActividades(List<Actividad> actividades){
+        this.actividades = actividades;
+    }
 
     @Override
     public String toString() {

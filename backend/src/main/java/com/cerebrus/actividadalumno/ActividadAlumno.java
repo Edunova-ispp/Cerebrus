@@ -1,6 +1,7 @@
 package com.cerebrus.actividadalumno;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,8 +20,9 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 import com.cerebrus.actividad.Actividad;
-import com.cerebrus.usuario.Alumno;
-import com.cerebrus.respuestaalumno.RespuestaAlumno;
+import com.cerebrus.comun.enumerados.EstadoActividad;
+import com.cerebrus.respuestaAlumno.RespuestaAlumno;
+import com.cerebrus.usuario.alumno.Alumno;
 
 @Entity
 @Table(name = "actividad_alumno")
@@ -31,16 +33,13 @@ public class ActividadAlumno {
     private Long id;
 
     @Column(nullable = false)
-    private Integer tiempo;
-
-    @Column(nullable = false)
     private Integer puntuacion;
 
     @Column
-    private LocalDateTime inicio = LocalDateTime.of(1970, 1, 1, 0, 0);
+    private LocalDateTime fechaInicio = LocalDateTime.of(1970, 1, 1, 0, 0);
 
     @Column
-    private LocalDateTime acabada = LocalDateTime.of(1970, 1, 1, 0, 0);
+    private LocalDateTime fechaFin = LocalDateTime.of(1970, 1, 1, 0, 0);
 
     @Column(nullable = false)
     private Integer numAbandonos = 0;
@@ -50,6 +49,16 @@ public class ActividadAlumno {
     @Max(10)
     private Integer nota;
 
+    //Atributo derivado que calcula el tiempo tardado por el alumno en realizar una actividad concreta
+    public Integer getTiempo() {
+        if (fechaInicio == null || fechaFin == null) {
+            return 0; 
+        }
+        long minutos = ChronoUnit.MINUTES.between(fechaInicio, fechaFin);
+        return (int) minutos; 
+    }
+    
+    //Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "alumno_id", nullable = false)
     private Alumno alumno;
@@ -67,10 +76,9 @@ public class ActividadAlumno {
 
     public ActividadAlumno(Integer tiempo, Integer puntuacion, LocalDateTime inicio, 
         LocalDateTime acabada, Integer nota, Integer numAbandonos, Alumno alumno, Actividad actividad) {
-        this.tiempo = tiempo;
         this.puntuacion = puntuacion;
-        this.inicio = inicio;
-        this.acabada = acabada;
+        this.fechaInicio = inicio;
+        this.fechaFin = acabada;
         this.nota = nota;
         this.numAbandonos = numAbandonos;
         this.alumno = alumno;
@@ -84,14 +92,6 @@ public class ActividadAlumno {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Integer getTiempo() {
-        return tiempo;
-    }
-
-    public void setTiempo(Integer tiempo) {
-        this.tiempo = tiempo;
     }
 
     public Integer getPuntuacion() {
@@ -111,19 +111,19 @@ public class ActividadAlumno {
     }
 
     public LocalDateTime getInicio(){
-        return inicio;
+        return fechaInicio;
     }
 
     public void setInicio(LocalDateTime inicio){
-        this.inicio=inicio;
+        this.fechaInicio=inicio;
     }
 
     public LocalDateTime getAcabada(){
-        return acabada;
+        return fechaFin;
     }
 
     public void setAcabada(LocalDateTime acabada){
-        this.acabada=acabada;
+        this.fechaFin=acabada;
     }
 
     public Integer getNumAbandonos(){
@@ -152,7 +152,7 @@ public class ActividadAlumno {
         EstadoActividad result;
         if(getNumRepeticiones() > 0 && respuestasAlumno.get(respuestasAlumno.size()-1).getCorrecta().equals(Boolean.TRUE)){
             result = EstadoActividad.TERMINADA;
-        } else if (inicio != null && !(inicio.equals(LocalDateTime.of(1970, 1, 1, 0, 0)))){
+        } else if (fechaInicio != null && !(fechaInicio.equals(LocalDateTime.of(1970, 1, 1, 0, 0)))){
             result = EstadoActividad.EMPEZADA;
         } else {
             result = EstadoActividad.SIN_EMPEZAR;
@@ -188,10 +188,10 @@ public class ActividadAlumno {
     public String toString() {
         return "ActividadAlumno{" +
                 "id=" + id +
-                ", tiempo=" + tiempo +
+                ", tiempo=" + getTiempo() +
                 ", puntuacion=" + puntuacion +
-                ", fecha_inicio=" + inicio + 
-                ", fecha_fin=" + acabada +
+                ", fecha_inicio=" + fechaInicio + 
+                ", fecha_fin=" + fechaFin +
                 ", nota=" + nota +
                 ", num_abandonos=" + numAbandonos +
                 ", num_repeticiones=" + getNumRepeticiones() +

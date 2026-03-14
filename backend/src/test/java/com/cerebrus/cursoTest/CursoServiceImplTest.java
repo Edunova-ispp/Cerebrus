@@ -33,12 +33,12 @@ import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.ProgresoDTO;
 import com.cerebrus.estadisticas.EstadisticasMaestroServiceImpl;
 import com.cerebrus.inscripcion.Inscripcion;
-import com.cerebrus.respuestaalumno.RespuestaAlumno;
+import com.cerebrus.respuestaAlumno.RespuestaAlumno;
 import com.cerebrus.tema.Tema;
-import com.cerebrus.usuario.Alumno;
-import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
 class CursoServiceImplTest {

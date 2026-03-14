@@ -19,22 +19,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.exceptions.ResourceNotFoundException;
-import com.cerebrus.organizacion.Organizacion;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
-import com.cerebrus.respuesta.Respuesta;
-import com.cerebrus.respuesta.RespuestaRepository;
-import com.cerebrus.respuesta.RespuestaServiceImpl;
-import com.cerebrus.usuario.Alumno;
-import com.cerebrus.usuario.Maestro;
+import com.cerebrus.respuestaMaestro.RespuestaMaestro;
+import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
+import com.cerebrus.respuestaMaestro.RespuestaMaestroServiceImpl;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.organizacion.Organizacion;
 
 @ExtendWith(MockitoExtension.class)
 class RespuestaServiceImplTest {
 
 	@Mock
-	private RespuestaRepository respuestaRepository;
+	private RespuestaMaestroRepository respuestaRepository;
 
 	@Mock
 	private PreguntaRepository preguntaRepository;
@@ -43,11 +43,11 @@ class RespuestaServiceImplTest {
 	private UsuarioService usuarioService;
 
 	@InjectMocks
-	private RespuestaServiceImpl respuestaService;
+	private RespuestaMaestroServiceImpl respuestaService;
 
 	// Para capturar el objeto Respuesta que se guarda en el repositorio
 	@Captor
-	private ArgumentCaptor<Respuesta> respuestaCaptor;
+	private ArgumentCaptor<RespuestaMaestro> respuestaCaptor;
 
 	// Test para el método crearRespuesta que verifica que se guarda correctamente una respuesta cuando el usuario 
 	// es un maestro y la pregunta existe
@@ -58,15 +58,15 @@ class RespuestaServiceImplTest {
 		Pregunta pregunta = new Pregunta();
 		pregunta.setId(7L);
 		when(preguntaRepository.findById(7L)).thenReturn(Optional.of(pregunta));
-		when(respuestaRepository.save(any(Respuesta.class))).thenAnswer(inv -> inv.getArgument(0));
+		when(respuestaRepository.save(any(RespuestaMaestro.class))).thenAnswer(inv -> inv.getArgument(0));
 
-		Respuesta created = respuestaService.crearRespuesta("R1", "img.png", true, 7L);
+		RespuestaMaestro created = respuestaService.crearRespuesta("R1", "img.png", true, 7L);
 
 		assertThat(created).isNotNull();
 		verify(usuarioService).findCurrentUser();
 		verify(preguntaRepository).findById(7L);
 		verify(respuestaRepository).save(respuestaCaptor.capture());
-		Respuesta saved = respuestaCaptor.getValue();
+		RespuestaMaestro saved = respuestaCaptor.getValue();
 		assertThat(saved.getRespuesta()).isEqualTo("R1");
 		assertThat(saved.getImagen()).isEqualTo("img.png");
 		assertThat(saved.getCorrecta()).isTrue();
@@ -114,9 +114,9 @@ class RespuestaServiceImplTest {
 		Pregunta pregunta = new Pregunta();
 		pregunta.setId(7L);
 		when(preguntaRepository.findById(7L)).thenReturn(Optional.of(pregunta));
-		when(respuestaRepository.save(any(Respuesta.class))).thenAnswer(inv -> inv.getArgument(0));
+		when(respuestaRepository.save(any(RespuestaMaestro.class))).thenAnswer(inv -> inv.getArgument(0));
 
-		Respuesta created = respuestaService.crearRespuesta("R1", null, null, 7L);
+		RespuestaMaestro created = respuestaService.crearRespuesta("R1", null, null, 7L);
 
 		assertThat(created).isNotNull();
 		verify(respuestaRepository).save(respuestaCaptor.capture());
@@ -126,11 +126,11 @@ class RespuestaServiceImplTest {
 	// Test para el método readRespuesta que verifica que se devuelve la respuesta correcta cuando existe
 	@Test
 	void readRespuesta_devuelveRespuesta_cuandoExiste() {
-		Respuesta expected = new Respuesta();
+		RespuestaMaestro expected = new RespuestaMaestro();
 		expected.setId(1L);
 		when(respuestaRepository.findById(1L)).thenReturn(Optional.of(expected));
 
-		Respuesta found = respuestaService.readRespuesta(1L);
+		RespuestaMaestro found = respuestaService.readRespuesta(1L);
 
 		assertThat(found).isSameAs(expected);
 		verify(respuestaRepository).findById(1L);
@@ -156,15 +156,15 @@ class RespuestaServiceImplTest {
 	void updateRespuesta_actualizaYGuarda_cuandoUsuarioEsMaestro_yRespuestaExiste() {
 		Maestro maestro = crearMaestro("maestro1", "m1@cerebrus.com");
 		when(usuarioService.findCurrentUser()).thenReturn(maestro);
-		Respuesta existing = new Respuesta();
+		RespuestaMaestro existing = new RespuestaMaestro();
 		existing.setId(5L);
 		existing.setRespuesta("old");
 		existing.setImagen("old.png");
 		existing.setCorrecta(false);
 		when(respuestaRepository.findById(5L)).thenReturn(Optional.of(existing));
-		when(respuestaRepository.save(any(Respuesta.class))).thenAnswer(inv -> inv.getArgument(0));
+		when(respuestaRepository.save(any(RespuestaMaestro.class))).thenAnswer(inv -> inv.getArgument(0));
 
-		Respuesta updated = respuestaService.updateRespuesta(5L, "new", null, true);
+		RespuestaMaestro updated = respuestaService.updateRespuesta(5L, "new", null, true);
 
 		assertThat(updated).isSameAs(existing);
 		assertThat(updated.getRespuesta()).isEqualTo("new");
@@ -214,7 +214,7 @@ class RespuestaServiceImplTest {
 	void deleteRespuesta_elimina_cuandoUsuarioEsMaestro_yRespuestaExiste() {
 		Maestro maestro = crearMaestro("maestro1", "m1@cerebrus.com");
 		when(usuarioService.findCurrentUser()).thenReturn(maestro);
-		Respuesta existing = new Respuesta();
+		RespuestaMaestro existing = new RespuestaMaestro();
 		existing.setId(9L);
 		when(respuestaRepository.findById(9L)).thenReturn(Optional.of(existing));
 

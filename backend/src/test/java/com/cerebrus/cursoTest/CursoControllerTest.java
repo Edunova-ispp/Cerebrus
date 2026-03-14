@@ -27,8 +27,8 @@ import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.ProgresoDTO;
 import com.cerebrus.estadisticas.EstadisticasMaestroController;
 import com.cerebrus.estadisticas.EstadisticasMaestroServiceImpl;
-import com.cerebrus.usuario.Alumno;
-import com.cerebrus.usuario.Maestro;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
 class CursoControllerTest {

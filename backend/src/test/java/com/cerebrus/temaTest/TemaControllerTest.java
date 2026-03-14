@@ -24,7 +24,7 @@ import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaController;
 import com.cerebrus.tema.TemaDTO;
 import com.cerebrus.tema.TemaService;
-import com.cerebrus.usuario.Maestro;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
 class TemaControllerTest {

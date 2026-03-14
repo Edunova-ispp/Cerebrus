@@ -27,10 +27,10 @@ import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.tema.TemaServiceImpl;
-import com.cerebrus.usuario.Maestro;
-import com.cerebrus.usuario.MaestroRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.maestro.MaestroRepository;
 
 @ExtendWith(MockitoExtension.class)
 class TemaServiceImplTest {

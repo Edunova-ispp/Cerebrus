@@ -13,26 +13,27 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cerebrus.TipoActGeneral;
+import com.cerebrus.comun.enumerados.*;
 import com.cerebrus.actividad.Actividad;
-import com.cerebrus.usuario.Alumno;
 import com.cerebrus.actividad.ActividadRepository;
-import com.cerebrus.actividad.General;
-import com.cerebrus.actividad.MarcarImagen;
-import com.cerebrus.actividad.MarcarImagenService;
-import com.cerebrus.actividad.Ordenacion;
-import com.cerebrus.actividad.OrdenacionService;
+import com.cerebrus.actividad.general.General;
+import com.cerebrus.actividad.marcarImagen.MarcarImagen;
+import com.cerebrus.actividad.marcarImagen.MarcarImagenService;
+import com.cerebrus.actividad.ordenacion.Ordenacion;
+import com.cerebrus.actividad.ordenacion.OrdenacionService;
+import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.exceptions.ResourceNotFoundException;
-import com.cerebrus.respuestaalumno.RespAlumnoGeneral;
-import com.cerebrus.respuestaalumno.RespAlumnoGeneralService;
-import com.cerebrus.respuestaalumno.RespAlumnoOrdenacionService;
-import com.cerebrus.respuestaalumno.RespAlumnoPuntoImagen;
-import com.cerebrus.respuestaalumno.RespAlumnoPuntoImagenService;
-import com.cerebrus.respuestaalumno.RespuestaAlumno;
-import com.cerebrus.respuestaalumno.RespuestaAlumnoService;
-import com.cerebrus.usuario.AlumnoRepository;
+import com.cerebrus.respuestaAlumno.RespuestaAlumno;
+import com.cerebrus.respuestaAlumno.RespuestaAlumnoService;
+import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneral;
+import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneralService;
+import com.cerebrus.respuestaAlumno.respAlumOrdenacion.RespAlumnoOrdenacionService;
+import com.cerebrus.respuestaAlumno.respAlumPuntoImagen.RespAlumnoPuntoImagen;
+import com.cerebrus.respuestaAlumno.respAlumPuntoImagen.RespAlumnoPuntoImagenService;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.alumno.AlumnoRepository;
 
 @Service
 @Transactional

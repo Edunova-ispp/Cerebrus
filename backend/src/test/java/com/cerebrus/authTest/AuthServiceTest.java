@@ -19,11 +19,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.cerebrus.auth.AuthService;
 import com.cerebrus.auth.payload.request.SignupRequest;
-import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Director;
-import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioRepository;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {

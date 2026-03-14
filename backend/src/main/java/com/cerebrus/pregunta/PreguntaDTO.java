@@ -1,7 +1,8 @@
 package com.cerebrus.pregunta;
 
-import com.cerebrus.respuesta.RespuestaDTO;
 import java.util.List;
+
+import com.cerebrus.respuestaMaestro.RespuestaDTO;
 
 public class PreguntaDTO {
 

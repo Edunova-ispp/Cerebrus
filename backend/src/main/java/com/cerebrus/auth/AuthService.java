@@ -1,12 +1,13 @@
 package com.cerebrus.auth;
 
 import com.cerebrus.auth.payload.request.SignupRequest;
-import com.cerebrus.organizacion.Organizacion;
-import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Director;
-import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioRepository;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.organizacion.Organizacion;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

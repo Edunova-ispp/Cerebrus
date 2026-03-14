@@ -1,4 +1,4 @@
-package com.cerebrus.respuestaalumno;
+package com.cerebrus.respuestaAlumno;
 
 public interface RespuestaAlumnoService {
 

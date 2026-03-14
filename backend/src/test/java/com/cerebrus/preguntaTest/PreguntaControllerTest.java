@@ -26,7 +26,7 @@ import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaController;
 import com.cerebrus.pregunta.PreguntaRequest;
 import com.cerebrus.pregunta.PreguntaService;
-import com.cerebrus.respuesta.Respuesta;
+import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 
 @ExtendWith(MockitoExtension.class)
 class PreguntaControllerTest {
@@ -110,8 +110,8 @@ class PreguntaControllerTest {
     // Test para verificar que readPregunta retorna 200 OK con la pregunta y sus respuestas
     @Test
     void readPregunta_existente_retorna200ConPregunta() {
-        Respuesta r1 = new Respuesta("4", null, true, preguntaGuardada);
-        Respuesta r2 = new Respuesta("5", null, false, preguntaGuardada);
+        RespuestaMaestro r1 = new RespuestaMaestro("4", null, true, preguntaGuardada);
+        RespuestaMaestro r2 = new RespuestaMaestro("5", null, false, preguntaGuardada);
         preguntaGuardada.setRespuestas(new ArrayList<>(List.of(r1, r2)));
         when(preguntaService.readPregunta(10L)).thenReturn(preguntaGuardada);
 

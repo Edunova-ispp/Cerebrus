@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cerebrus.utils.CerebrusUtils;
+import com.cerebrus.comun.utils.CerebrusUtils;
 
 @ExtendWith(MockitoExtension.class)
 class CerebrusUtilsTest {

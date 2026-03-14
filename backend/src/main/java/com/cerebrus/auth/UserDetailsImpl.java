@@ -4,10 +4,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Director;
-import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

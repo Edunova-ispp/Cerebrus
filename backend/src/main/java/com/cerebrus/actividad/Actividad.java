@@ -52,6 +52,7 @@ public abstract class Actividad {
     @Column(nullable = false)
     private Integer version;
 
+    //Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tema_id", nullable = false)
     private Tema tema;

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.curso.CursoService;
-import com.cerebrus.usuario.Alumno;
+import com.cerebrus.usuario.alumno.Alumno;
 
 @RestController
 @RequestMapping("/api/estadisticas")

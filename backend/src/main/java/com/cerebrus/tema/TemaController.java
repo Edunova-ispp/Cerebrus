@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadService;
-import com.cerebrus.actividad.DTO.ActividadDTO;
+import com.cerebrus.actividad.dto.ActividadDTO;
 
 @RestController
 @RequestMapping("/api/temas")

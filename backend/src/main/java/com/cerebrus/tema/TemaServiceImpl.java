@@ -11,10 +11,10 @@ import com.cerebrus.actividad.Actividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.CursoRepository;
-import com.cerebrus.usuario.Maestro;
-import com.cerebrus.usuario.MaestroRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.maestro.MaestroRepository;
 import com.cerebrus.actividad.ActividadRepository;;
 
 @Service

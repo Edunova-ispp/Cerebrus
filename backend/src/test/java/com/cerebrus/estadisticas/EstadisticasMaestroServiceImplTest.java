@@ -26,10 +26,10 @@ import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
-import com.cerebrus.usuario.Alumno;
-import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
 class EstadisticasMaestroServiceImplTest {
@@ -159,7 +159,7 @@ class EstadisticasMaestroServiceImplTest {
         aa.setInicio(LocalDateTime.now());
         aa.setAcabada(LocalDateTime.now());
         aa.setNumAbandonos(0);
-        aa.setRespuestasAlumno(new ArrayList<>(List.of(new com.cerebrus.respuestaalumno.RespuestaAlumno() {{
+        aa.setRespuestasAlumno(new ArrayList<>(List.of(new com.cerebrus.respuestaAlumno.RespuestaAlumno() {{
             setCorrecta(true);
         }})));
         return aa;

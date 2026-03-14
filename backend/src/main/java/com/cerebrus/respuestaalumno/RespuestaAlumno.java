@@ -1,4 +1,4 @@
-package com.cerebrus.respuestaalumno;
+package com.cerebrus.respuestaAlumno;
 
 import com.cerebrus.actividadalumno.ActividadAlumno;
 
@@ -26,6 +26,7 @@ public abstract class RespuestaAlumno {
     @Column(nullable = false)
     private Boolean correcta;
 
+    //Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actividad_alumno_id", nullable = false)
     private ActividadAlumno actividadAlumno;

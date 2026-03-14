@@ -1,4 +1,4 @@
-package com.cerebrus.respuestaalumno;
+package com.cerebrus.respuestaAlumno;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

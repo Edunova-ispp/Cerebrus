@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
 
 import com.cerebrus.auth.UserDetailsImpl;
-import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Director;
-import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
 
 class UserDetailsImplTest {
 

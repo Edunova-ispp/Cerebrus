@@ -21,18 +21,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.TipoActGeneral;
-import com.cerebrus.actividad.General;
-import com.cerebrus.actividad.GeneralRepository;
-import com.cerebrus.actividad.GeneralServiceImpl;
-import com.cerebrus.actividad.DTO.GeneralDTO;
+import com.cerebrus.actividad.general.General;
+import com.cerebrus.actividad.general.GeneralRepository;
+import com.cerebrus.actividad.general.GeneralServiceImpl;
+import com.cerebrus.actividad.general.dto.GeneralDTO;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
-import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
 class GeneralServiceImplTest {
