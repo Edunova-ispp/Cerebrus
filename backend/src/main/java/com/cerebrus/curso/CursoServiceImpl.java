@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.ActividadRepository;
-import com.cerebrus.actividadalumno.ActividadAlumno;
-import com.cerebrus.actividadalumno.ActividadAlumnoProgreso;
-import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadAlumno.ActividadAlumno;
+import com.cerebrus.actividadAlumno.ActividadAlumnoProgreso;
+import com.cerebrus.actividadAlumno.ActividadAlumnoRepository;
 import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.usuario.Usuario;

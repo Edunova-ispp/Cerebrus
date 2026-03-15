@@ -3,7 +3,7 @@ package com.cerebrus.actividad;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cerebrus.actividadalumno.ActividadAlumno;
+import com.cerebrus.actividadAlumno.ActividadAlumno;
 import com.cerebrus.tema.Tema;
 
 import jakarta.persistence.CascadeType;

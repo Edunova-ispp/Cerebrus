@@ -9,17 +9,13 @@ public class RespAlumnoPuntoImagenDTO {
 
     private Long id;
     private String respuesta;
-    private Integer pixelX;
-    private Integer pixelY;
-    private Long marcarImagenId;
+    private Long puntoImagenId;
     private Long actividadAlumnoId;
 
-    public RespAlumnoPuntoImagenDTO(Long id, String respuesta, Integer pixelX, Integer pixelY, Long marcarImagenId, Long actividadAlumnoId) {
+    public RespAlumnoPuntoImagenDTO(Long id, String respuesta, Long puntoImagenId, Long actividadAlumnoId) {
         this.id = id;
         this.respuesta = respuesta;
-        this.pixelX = pixelX;
-        this.pixelY = pixelY;
-        this.marcarImagenId = marcarImagenId;
+        this.puntoImagenId = puntoImagenId;
         this.actividadAlumnoId = actividadAlumnoId;
     }
 

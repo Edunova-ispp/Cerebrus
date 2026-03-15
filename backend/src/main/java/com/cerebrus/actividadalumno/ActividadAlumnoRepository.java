@@ -1,4 +1,4 @@
-package com.cerebrus.actividadalumno;
+package com.cerebrus.actividadAlumno;
 
 import java.util.List;
 import java.util.Optional;

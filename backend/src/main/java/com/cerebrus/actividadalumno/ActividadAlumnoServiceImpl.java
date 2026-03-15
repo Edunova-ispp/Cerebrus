@@ -1,4 +1,4 @@
-package com.cerebrus.actividadalumno;
+package com.cerebrus.actividadAlumno;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -67,8 +67,8 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
     @Override
     @Transactional
-    public ActividadAlumno crearActividadAlumno(Integer tiempo, Integer puntuacion, LocalDateTime inicio,
-        LocalDateTime acabada, Integer nota, Integer numAbandonos, Long alumnoId, Long actId) {
+    public ActividadAlumno crearActividadAlumno(Integer puntuacion, LocalDateTime fechaInicio,
+        LocalDateTime fechaFin, Integer nota, Integer numAbandonos, Long alumnoId, Long actId) {
 
         // Idempotente: si ya existe la pareja (alumno, actividad), devolvemos la existente.
         Optional<ActividadAlumno> existing = actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumnoId, actId);
@@ -79,8 +79,8 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         Actividad actividad = actividadRepository.findById(actId).orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
         Alumno alumno = alumnoRepository.findById(alumnoId).orElseThrow(() -> new ResourceNotFoundException("El alumno no existe"));
 
-        ActividadAlumno actividadAlumno = new ActividadAlumno(tiempo, puntuacion, 
-            inicio, acabada, nota, numAbandonos, alumno, actividad);
+        ActividadAlumno actividadAlumno = new ActividadAlumno(puntuacion, 
+            fechaInicio, fechaFin, nota, numAbandonos, alumno, actividad);
 
         return actividadAlumnoRepository.save(actividadAlumno);
     }

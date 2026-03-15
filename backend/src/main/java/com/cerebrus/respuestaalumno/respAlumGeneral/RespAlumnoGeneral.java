@@ -1,6 +1,6 @@
 package com.cerebrus.respuestaAlumno.respAlumGeneral;
 
-import com.cerebrus.actividadalumno.ActividadAlumno;
+import com.cerebrus.actividadAlumno.ActividadAlumno;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.respuestaAlumno.RespuestaAlumno;
 

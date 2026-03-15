@@ -32,9 +32,7 @@ public class RespAlumnoPuntoImagenController {
     public ResponseEntity<RespAlumnoPuntoImagenDTO> crearRespAlumnoPuntoImagen(@RequestBody @Valid RespAlumnoPuntoImagenDTO respAlumnoPuntoImagenDTO) {
         RespAlumnoPuntoImagen respAlumnoPuntoImagen = respAlumnoPuntoImagenService.crearRespuestaAlumnoPuntoImagen(
             respAlumnoPuntoImagenDTO.getRespuesta(),
-            respAlumnoPuntoImagenDTO.getPixelX(),
-            respAlumnoPuntoImagenDTO.getPixelY(),
-            respAlumnoPuntoImagenDTO.getMarcarImagenId(),
+            respAlumnoPuntoImagenDTO.getPuntoImagenId(),
             respAlumnoPuntoImagenDTO.getActividadAlumnoId()
         );
         return new ResponseEntity<>(toDto(respAlumnoPuntoImagen), HttpStatus.CREATED);
@@ -44,9 +42,7 @@ public class RespAlumnoPuntoImagenController {
         return new RespAlumnoPuntoImagenDTO(
             respAlumnoPuntoImagen.getId(),
             respAlumnoPuntoImagen.getRespuesta(),
-            respAlumnoPuntoImagen.getPixelX(),
-            respAlumnoPuntoImagen.getPixelY(),
-            respAlumnoPuntoImagen.getMarcarImagen().getId(),
+            respAlumnoPuntoImagen.getPuntoImagen().getId(),
             respAlumnoPuntoImagen.getActividadAlumno().getId()
         );
     }

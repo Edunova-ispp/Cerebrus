@@ -1,4 +1,4 @@
-package com.cerebrus.actividadalumno;
+package com.cerebrus.actividadAlumno;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -65,11 +65,11 @@ public class ActividadAlumno {
     public ActividadAlumno() {
     }
 
-    public ActividadAlumno(Integer tiempo, Integer puntuacion, LocalDateTime inicio, 
-        LocalDateTime acabada, Integer nota, Integer numAbandonos, Alumno alumno, Actividad actividad) {
+    public ActividadAlumno(Integer puntuacion, LocalDateTime fechaInicio, 
+        LocalDateTime fechaFin, Integer nota, Integer numAbandonos, Alumno alumno, Actividad actividad) {
         this.puntuacion = puntuacion;
-        this.fechaInicio = inicio;
-        this.fechaFin = acabada;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
         this.nota = nota;
         this.numAbandonos = numAbandonos;
         this.alumno = alumno;

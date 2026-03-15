@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cerebrus.actividad.ordenacion.Ordenacion;
-import com.cerebrus.actividadalumno.ActividadAlumno;
+import com.cerebrus.actividadAlumno.ActividadAlumno;
 import com.cerebrus.respuestaAlumno.RespuestaAlumno;
 
 import jakarta.persistence.CollectionTable;

@@ -1,4 +1,4 @@
-package com.cerebrus.actividadalumno;
+package com.cerebrus.actividadAlumno;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cerebrus.actividadalumno.dto.ActividadAlumnoDTO;
-import com.cerebrus.actividadalumno.dto.CorreccionManualDTO;
+import com.cerebrus.actividadAlumno.dto.ActividadAlumnoDTO;
+import com.cerebrus.actividadAlumno.dto.CorreccionManualDTO;
 
 import jakarta.validation.Valid;
 
@@ -39,7 +39,6 @@ public class ActividadAlumnoController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<ActividadAlumnoDTO> crearActividadAlumno(@RequestBody @Valid ActividadAlumnoDTO actividadAlumno) {
         ActividadAlumno actividadAlumnoCreada = actividadAlumnoService.crearActividadAlumno(
-            actividadAlumno.getTiempo() == null ? 0 : actividadAlumno.getTiempo(),
             actividadAlumno.getPuntuacion() == null ? 0 : actividadAlumno.getPuntuacion(),
             actividadAlumno.getFechaInicio() == null ? LocalDateTime.now() : actividadAlumno.getFechaInicio(),
             actividadAlumno.getFechaFin() == null ? LocalDateTime.of(1970, 1, 1, 0, 0) : actividadAlumno.getFechaFin(),
@@ -104,6 +103,37 @@ public class ActividadAlumnoController {
         return new ResponseEntity<>(toDto(updated), HttpStatus.OK);
     }
 
+    
+    @PutMapping("/corregir-manualmente/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoManual(@PathVariable Long id, @RequestBody CorreccionManualDTO correccionManualDTO) {
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoManual(id, correccionManualDTO.getNuevaNota(), correccionManualDTO.getNuevasCorreccionesRespuestasIds());
+        return new ResponseEntity<>(toDto(actividadAlumnoActualizada), HttpStatus.OK);
+    }
+    
+    @PutMapping("/corregir-automaticamente/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoAutomaticamente(
+        @PathVariable Long id,
+        @RequestBody(required = false) List<Long> respuestasIds
+    ) {
+        // cuando la petición no envía cuerpo el parámetro llega como null, el
+        // servicio se encarga de recopilar los ids a partir de las respuestas
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamente(id, respuestasIds);
+        return new ResponseEntity<>(toDto(actividadAlumnoActualizada), HttpStatus.OK);
+    }
+    
+    @PutMapping("/corregir-automaticamente-general-clasificacion/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoAutomaticamenteGeneralClasificacion(
+        @PathVariable Long id,
+        @RequestBody(required = false) List<Long> respuestasIds
+    ) {
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(id, respuestasIds);
+        ActividadAlumnoDTO actividadAlumnoDTO = toDto(actividadAlumnoActualizada);
+        return new ResponseEntity<>(actividadAlumnoDTO, HttpStatus.OK);
+    }
+
     private static ActividadAlumnoDTO toDto(ActividadAlumno aa) {
         return new ActividadAlumnoDTO(
             aa.getId(),
@@ -116,48 +146,5 @@ public class ActividadAlumnoController {
             aa.getAlumno() == null ? null : aa.getAlumno().getId(),
             aa.getActividad() == null ? null : aa.getActividad().getId()
         );
-    }
-  
-    @PutMapping("/corregir-manualmente/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoManual(@PathVariable Long id, @RequestBody CorreccionManualDTO correccionManualDTO) {
-        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoManual(id, correccionManualDTO.getNuevaNota(), correccionManualDTO.getNuevasCorreccionesRespuestasIds());
-        return new ResponseEntity<>(toDto(actividadAlumnoActualizada), HttpStatus.OK);
-    }
-
-    @PutMapping("/corregir-automaticamente/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoAutomaticamente(
-        @PathVariable Long id,
-        @RequestBody(required = false) List<Long> respuestasIds
-    ) {
-        // cuando la petición no envía cuerpo el parámetro llega como null, el
-        // servicio se encarga de recopilar los ids a partir de las respuestas
-        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamente(id, respuestasIds);
-        return new ResponseEntity<>(toDto(actividadAlumnoActualizada), HttpStatus.OK);
-    }
-
-        @PutMapping("/corregir-automaticamente-general-clasificacion/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoAutomaticamenteGeneralClasificacion(
-        @PathVariable Long id,
-        @RequestBody(required = false) List<Long> respuestasIds
-    ) {
-
-       
-        
-        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(id, respuestasIds);
-        ActividadAlumnoDTO actividadAlumnoDTO = new ActividadAlumnoDTO(
-            actividadAlumnoActualizada.getId(),
-            actividadAlumnoActualizada.getTiempoMinutos(),
-            actividadAlumnoActualizada.getPuntuacion(),
-            actividadAlumnoActualizada.getFechaInicio(),
-            actividadAlumnoActualizada.getFechaFin(),
-            actividadAlumnoActualizada.getNota(),
-            actividadAlumnoActualizada.getNumAbandonos(),
-            actividadAlumnoActualizada.getAlumno().getId(),
-            actividadAlumnoActualizada.getActividad().getId()
-        );
-        return new ResponseEntity<>(actividadAlumnoDTO, HttpStatus.OK);
     }
 }

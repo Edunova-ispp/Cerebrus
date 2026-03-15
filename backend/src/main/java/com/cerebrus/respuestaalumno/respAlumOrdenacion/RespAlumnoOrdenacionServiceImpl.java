@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.ordenacion.Ordenacion;
 import com.cerebrus.actividad.ordenacion.OrdenacionRepository;
-import com.cerebrus.actividadalumno.ActividadAlumno;
-import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadAlumno.ActividadAlumno;
+import com.cerebrus.actividadAlumno.ActividadAlumnoRepository;
 import com.cerebrus.respuestaAlumno.respAlumOrdenacion.dto.RespAlumnoOrdenacionDTO;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;

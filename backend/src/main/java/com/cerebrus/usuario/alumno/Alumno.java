@@ -3,7 +3,7 @@ package com.cerebrus.usuario.alumno;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cerebrus.actividadalumno.ActividadAlumno;
+import com.cerebrus.actividadAlumno.ActividadAlumno;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.organizacion.Organizacion;

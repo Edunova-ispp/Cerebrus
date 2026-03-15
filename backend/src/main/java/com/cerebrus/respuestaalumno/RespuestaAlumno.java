@@ -1,6 +1,6 @@
 package com.cerebrus.respuestaAlumno;
 
-import com.cerebrus.actividadalumno.ActividadAlumno;
+import com.cerebrus.actividadAlumno.ActividadAlumno;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.ActividadRepository;
-import com.cerebrus.actividadalumno.ActividadAlumno;
-import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadAlumno.ActividadAlumno;
+import com.cerebrus.actividadAlumno.ActividadAlumnoRepository;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
@@ -159,7 +159,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         Integer puntuacionASumar = actividadRepository.findById(crucigramaId).orElseThrow(() -> new RuntimeException("El crucigrama no existe")).getPuntuacion() / respuestas.size();
         List<RespAlumnoGeneral> respuestasAlumno = new java.util.ArrayList<>();
         ActividadAlumno  actividadAlumno = actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumno.getId(), crucigramaId)
-            .orElse(actividadAlumnoRepository.save(new ActividadAlumno(0,0,LocalDateTime.now(),null,0,0,alumno,actividadRepository.findByID(crucigramaId))));
+            .orElse(actividadAlumnoRepository.save(new ActividadAlumno(0,LocalDateTime.now(),null,0,0,alumno,actividadRepository.findByID(crucigramaId))));
         HashMap<Long, String> resultado = new HashMap<>();
 
         for(Entry<Long, String> entry : respuestas.entrySet()) {

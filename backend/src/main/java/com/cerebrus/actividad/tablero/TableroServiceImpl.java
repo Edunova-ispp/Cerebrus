@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cerebrus.comun.enumerados.TamanoTablero;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.tablero.dto.TableroDTO;
-import com.cerebrus.actividadalumno.ActividadAlumno;
-import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
-import com.cerebrus.actividadalumno.ActividadAlumnoService;
+import com.cerebrus.actividadAlumno.ActividadAlumno;
+import com.cerebrus.actividadAlumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadAlumno.ActividadAlumnoService;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
@@ -189,7 +189,7 @@ public class TableroServiceImpl implements TableroService {
                 cleanedRespuesta = cleanedRespuesta.substring(1, cleanedRespuesta.length() - 1);
             }
             Boolean correcta = pregunta.getRespuestasAlumnoGeneral().get(0).getRespuesta().toLowerCase().strip().equals(cleanedRespuesta.toLowerCase().strip());
-            ActividadAlumno actividadAlumno = actividadAlumnoService.crearActividadAlumno(0, 0, LocalDateTime.now(), null, 0, 0, alumno.getId(), tablero.getId());
+            ActividadAlumno actividadAlumno = actividadAlumnoService.crearActividadAlumno(0, LocalDateTime.now(), null, 0, 0, alumno.getId(), tablero.getId());
             RespAlumnoGeneral respuestaAlumno = new RespAlumnoGeneral(correcta, actividadAlumno, respuesta, pregunta);
             respuestaAlumno =  respuestaAlumnoRepository.save(respuestaAlumno);
             actividadAlumno.getRespuestasAlumno().add(respuestaAlumno);

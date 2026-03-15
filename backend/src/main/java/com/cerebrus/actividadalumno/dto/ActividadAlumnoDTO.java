@@ -1,4 +1,4 @@
-package com.cerebrus.actividadalumno.dto;
+package com.cerebrus.actividadAlumno.dto;
 
 import java.time.LocalDateTime;
 

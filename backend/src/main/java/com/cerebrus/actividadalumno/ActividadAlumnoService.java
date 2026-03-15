@@ -1,4 +1,4 @@
-package com.cerebrus.actividadalumno;
+package com.cerebrus.actividadAlumno;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -7,8 +7,8 @@ import java.util.List;
 import com.cerebrus.actividad.Actividad;
 
 public interface ActividadAlumnoService {
-    ActividadAlumno crearActividadAlumno(Integer tiempo, Integer puntuacion, LocalDateTime inicio,
-        LocalDateTime acabada,Integer nota, Integer numAbandonos, Long alumnoId, Long actId);
+    ActividadAlumno crearActividadAlumno(Integer puntuacion, LocalDateTime fechaInicio,
+        LocalDateTime fechaFin,Integer nota, Integer numAbandonos, Long alumnoId, Long actId);
     ActividadAlumno readActividadAlumno(Long id);
     Optional<ActividadAlumno> readActividadAlumnoByAlumnoIdAndActividadId(Long alumnoId, Long actividadId);
     Integer ensureActividadAlumno(Long actividadId);
