@@ -11,13 +11,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RespuestaMaestroRepository extends JpaRepository<RespuestaMaestro, Long> {
 
-    @Query("select r from Respuesta r where r.respuesta = :respuesta")
+    @Query("select r from RespuestaMaestro r where r.respuesta = :respuesta")
     Optional<RespuestaMaestro> findByRespuesta(@Param("respuesta") String respuesta);
 
-    @Query("select r from Respuesta r where r.respuesta = :respuesta and r.pregunta.id = :preguntaId")
+    @Query("select r from RespuestaMaestro r where r.respuesta = :respuesta and r.pregunta.id = :preguntaId")
     Optional<RespuestaMaestro> findByRespuestaAndPreguntaId(@Param("respuesta") String respuesta, @Param("preguntaId") Long preguntaId);
 
-    @Query("select r from Respuesta r where r.pregunta.id = :preguntaId")
+    @Query("select r from RespuestaMaestro r where r.pregunta.id = :preguntaId")
     List<RespuestaMaestro> findRespuestaByPreguntaId(@Param("preguntaId") Long preguntaId);
 
 }

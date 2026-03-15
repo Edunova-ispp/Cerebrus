@@ -18,7 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cerebrus.TipoActGeneral;
+import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.ActividadServiceImpl;

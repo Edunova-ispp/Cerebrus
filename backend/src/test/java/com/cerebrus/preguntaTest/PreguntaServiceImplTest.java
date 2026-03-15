@@ -128,35 +128,35 @@ class PreguntaServiceImplTest {
         RespuestaMaestro r1 = new RespuestaMaestro("4", null, true, pregunta);
         RespuestaMaestro r2 = new RespuestaMaestro("5", null, false, pregunta);
         RespuestaMaestro r3 = new RespuestaMaestro("3", null, false, pregunta);
-        pregunta.setRespuestas(new ArrayList<>(List.of(r1, r2, r3)));
+        pregunta.setRespuestasMaestro(new ArrayList<>(List.of(r1, r2, r3)));
         when(preguntaRepository.findById(10L)).thenReturn(Optional.of(pregunta));
 
         Pregunta resultado = preguntaService.readPregunta(10L);
 
         assertThat(resultado).isNotNull();
-        assertThat(resultado.getRespuestas()).hasSize(3);
-        assertThat(resultado.getRespuestas()).containsExactlyInAnyOrder(r1, r2, r3);
+        assertThat(resultado.getRespuestasMaestro()).hasSize(3);
+        assertThat(resultado.getRespuestasMaestro()).containsExactlyInAnyOrder(r1, r2, r3);
     }
 
     @Test
     void readPregunta_sinRespuestas_retornaPreguntaConListaVacia() {
-        pregunta.setRespuestas(new ArrayList<>());
+        pregunta.setRespuestasMaestro(new ArrayList<>());
         when(preguntaRepository.findById(10L)).thenReturn(Optional.of(pregunta));
 
         Pregunta resultado = preguntaService.readPregunta(10L);
 
-        assertThat(resultado.getRespuestas()).isEmpty();
+        assertThat(resultado.getRespuestasMaestro()).isEmpty();
     }
 
     @Test
     void readPregunta_unaRespuesta_retornaMismaRespuesta() {
         RespuestaMaestro r1 = new RespuestaMaestro("4", null, true, pregunta);
-        pregunta.setRespuestas(new ArrayList<>(List.of(r1)));
+        pregunta.setRespuestasMaestro(new ArrayList<>(List.of(r1)));
         when(preguntaRepository.findById(10L)).thenReturn(Optional.of(pregunta));
 
         Pregunta resultado = preguntaService.readPregunta(10L);
 
-        assertThat(resultado.getRespuestas()).containsExactly(r1);
+        assertThat(resultado.getRespuestasMaestro()).containsExactly(r1);
     }
 
     @Test

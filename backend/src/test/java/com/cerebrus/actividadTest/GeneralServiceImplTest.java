@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.cerebrus.TipoActGeneral;
+import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.actividad.general.General;
 import com.cerebrus.actividad.general.GeneralRepository;
 import com.cerebrus.actividad.general.GeneralServiceImpl;

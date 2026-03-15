@@ -112,7 +112,7 @@ class PreguntaControllerTest {
     void readPregunta_existente_retorna200ConPregunta() {
         RespuestaMaestro r1 = new RespuestaMaestro("4", null, true, preguntaGuardada);
         RespuestaMaestro r2 = new RespuestaMaestro("5", null, false, preguntaGuardada);
-        preguntaGuardada.setRespuestas(new ArrayList<>(List.of(r1, r2)));
+        preguntaGuardada.setRespuestasMaestro(new ArrayList<>(List.of(r1, r2)));
         when(preguntaService.readPregunta(10L)).thenReturn(preguntaGuardada);
 
         ResponseEntity<Pregunta> respuesta = preguntaController.readPregunta(10L);
@@ -120,19 +120,19 @@ class PreguntaControllerTest {
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).isNotNull();
         assertThat(respuesta.getBody().getId()).isEqualTo(10L);
-        assertThat(respuesta.getBody().getRespuestas()).hasSize(2);
+        assertThat(respuesta.getBody().getRespuestasMaestro()).hasSize(2);
     }
 
     // Test para verificar que readPregunta retorna 200 OK con lista de respuestas vacía cuando la pregunta no tiene respuestas
     @Test
     void readPregunta_sinRespuestas_retorna200ConListaVacia() {
-        preguntaGuardada.setRespuestas(new ArrayList<>());
+        preguntaGuardada.setRespuestasMaestro(new ArrayList<>());
         when(preguntaService.readPregunta(10L)).thenReturn(preguntaGuardada);
 
         ResponseEntity<Pregunta> respuesta = preguntaController.readPregunta(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(respuesta.getBody().getRespuestas()).isEmpty();
+        assertThat(respuesta.getBody().getRespuestasMaestro()).isEmpty();
     }
 
     // Test para verificar que readPregunta propaga ResourceNotFoundException cuando la pregunta no existe
