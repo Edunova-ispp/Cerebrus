@@ -7,11 +7,8 @@ import com.cerebrus.actividad.general.dto.GeneralCartaDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralClasificacionDTO;
 import com.cerebrus.actividad.general.dto.GeneralClasificacionMaestroDTO;
-import com.cerebrus.actividad.general.dto.GeneralDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestMaestroDTO;
-
-import jakarta.validation.Valid;
 
 public interface GeneralService {
 	General crearActGeneral(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible);

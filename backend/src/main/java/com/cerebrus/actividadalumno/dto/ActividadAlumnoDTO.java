@@ -1,6 +1,5 @@
 package com.cerebrus.actividadalumno.dto;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import lombok.Getter;
@@ -18,9 +17,9 @@ public class ActividadAlumnoDTO {
 
     private Integer puntuacion;
 
-    private LocalDateTime inicio;
+    private LocalDateTime fechaInicio;
 
-    private LocalDateTime acabada;
+    private LocalDateTime fechaFin;
 
     private Integer nota;
 
@@ -31,12 +30,24 @@ public class ActividadAlumnoDTO {
     private Long actividadId;
 
     public ActividadAlumnoDTO(Long id, Integer tiempo, Integer puntuacion, 
-        LocalDateTime inicio, LocalDateTime acabada, Integer nota, Integer numAbandonos, Long alumnoId, Long actividadId) {
+        LocalDateTime fechaInicio, LocalDateTime fechaFin, Integer nota, Integer numAbandonos, Long alumnoId, Long actividadId) {
         this.id = id;
         this.tiempo = tiempo;
         this.puntuacion = puntuacion;
-        this.inicio = inicio;
-        this.acabada = acabada;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
+        this.nota = nota;
+        this.numAbandonos = numAbandonos;
+        this.alumnoId = alumnoId;
+        this.actividadId = actividadId;
+    }
+
+    public ActividadAlumnoDTO(Long id, Integer puntuacion, 
+        LocalDateTime fechaInicio, LocalDateTime fechaFin, Integer nota, Integer numAbandonos, Long alumnoId, Long actividadId) {
+        this.id = id;
+        this.puntuacion = puntuacion;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
         this.nota = nota;
         this.numAbandonos = numAbandonos;
         this.alumnoId = alumnoId;

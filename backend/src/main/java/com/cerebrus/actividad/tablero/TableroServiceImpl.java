@@ -37,7 +37,7 @@ public class TableroServiceImpl implements TableroService {
     private final ActividadRepository actividadRepository;
     private final TemaRepository temaRepository;
     private final PreguntaRepository preguntaRepository;
-    private final RespuestaMaestroRepository respuestaRepository;
+    private final RespuestaMaestroRepository respuestaMaestroRepository;
     private final UsuarioService usuarioService;
     private final ActividadAlumnoService actividadAlumnoService;
     private final RespAlumnoGeneralRepository respuestaAlumnoRepository;
@@ -49,7 +49,7 @@ public class TableroServiceImpl implements TableroService {
         this.tableroRepository = tableroRepository;
         this.temaRepository = temaRepository;
         this.preguntaRepository = preguntaRepository;
-        this.respuestaRepository = respuestaRepository;
+        this.respuestaMaestroRepository = respuestaRepository;
         this.usuarioService = usuarioService;
         this.actividadAlumnoService = actividadAlumnoService;
         this.respuestaAlumnoRepository = respuestaAlumnoRepository;
@@ -86,8 +86,8 @@ public class TableroServiceImpl implements TableroService {
             Pregunta pregunta = new Pregunta(preguntaRespuesta.getKey(), null, tableroCreado);
             pregunta = preguntaRepository.save(pregunta);
             RespuestaMaestro respuesta = new RespuestaMaestro(preguntaRespuesta.getValue(), null, true, pregunta);
-            respuesta = respuestaRepository.save(respuesta);
-            pregunta.getRespuestas().add(respuesta);
+            respuesta = respuestaMaestroRepository.save(respuesta);
+            pregunta.getRespuestasMaestro().add(respuesta);
             pregunta = preguntaRepository.save(pregunta);
             tableroCreado.getPreguntas().add(pregunta);
             tableroCreado = tableroRepository.save(tableroCreado);
@@ -149,7 +149,7 @@ public class TableroServiceImpl implements TableroService {
         tableroExistente.setVersion(tableroExistente.getVersion()+1);
 
         for (Pregunta pregunta : tableroExistente.getPreguntas()) {
-            respuestaRepository.deleteAll(pregunta.getRespuestas());
+            respuestaMaestroRepository.deleteAll(pregunta.getRespuestasMaestro());
             preguntaRepository.delete(pregunta);
         }
         tableroExistente.getPreguntas().clear();
@@ -158,8 +158,8 @@ public class TableroServiceImpl implements TableroService {
             Pregunta pregunta = new Pregunta(preguntaRespuesta.getKey(), null, tableroExistente);
             pregunta = preguntaRepository.save(pregunta);
             RespuestaMaestro respuesta = new RespuestaMaestro(preguntaRespuesta.getValue(), null, true, pregunta);
-            respuesta = respuestaRepository.save(respuesta);
-            pregunta.getRespuestas().add(respuesta);
+            respuesta = respuestaMaestroRepository.save(respuesta);
+            pregunta.getRespuestasMaestro().add(respuesta);
             pregunta = preguntaRepository.save(pregunta);
             tableroExistente.getPreguntas().add(pregunta);
         }
@@ -188,20 +188,20 @@ public class TableroServiceImpl implements TableroService {
             if (cleanedRespuesta.startsWith("\"") && cleanedRespuesta.endsWith("\"")) {
                 cleanedRespuesta = cleanedRespuesta.substring(1, cleanedRespuesta.length() - 1);
             }
-            Boolean correcta = pregunta.getRespuestas().get(0).getRespuesta().toLowerCase().strip().equals(cleanedRespuesta.toLowerCase().strip());
+            Boolean correcta = pregunta.getRespuestasAlumnoGeneral().get(0).getRespuesta().toLowerCase().strip().equals(cleanedRespuesta.toLowerCase().strip());
             ActividadAlumno actividadAlumno = actividadAlumnoService.crearActividadAlumno(0, 0, LocalDateTime.now(), null, 0, 0, alumno.getId(), tablero.getId());
             RespAlumnoGeneral respuestaAlumno = new RespAlumnoGeneral(correcta, actividadAlumno, respuesta, pregunta);
             respuestaAlumno =  respuestaAlumnoRepository.save(respuestaAlumno);
             actividadAlumno.getRespuestasAlumno().add(respuestaAlumno);
             actividadAlumno = actividadAlumnoRepository.save(actividadAlumno);
             if(correcta  && tablero.getPreguntas().get(tablero.getPreguntas().size()-1).getId().equals(pregunta.getId())) {
-                actividadAlumno.setAcabada(LocalDateTime.now());
+                actividadAlumno.setFechaFin(LocalDateTime.now());
                 actividadAlumno.setNota(10);
                 actividadAlumno.setPuntuacion(tablero.getPuntuacion());
                 actividadAlumnoRepository.save(actividadAlumno);
             }
             if(pregunta.getActividad().getRespVisible()) {
-                return correcta ? "Respuesta correcta" : "Respuesta incorrecta. La respuesta correcta es: " + pregunta.getRespuestas().get(0).getRespuesta();
+                return correcta ? "Respuesta correcta" : "Respuesta incorrecta. La respuesta correcta es: " + pregunta.getRespuestasMaestro().get(0).getRespuesta();
             } else {
                 return correcta ? "Respuesta correcta" : "Respuesta incorrecta";
             }

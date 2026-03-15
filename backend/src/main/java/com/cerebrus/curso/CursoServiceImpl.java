@@ -13,6 +13,7 @@ import com.cerebrus.actividadalumno.ActividadAlumno;
 import com.cerebrus.actividadalumno.ActividadAlumnoProgreso;
 import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
 import com.cerebrus.comun.utils.CerebrusUtils;
+import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;

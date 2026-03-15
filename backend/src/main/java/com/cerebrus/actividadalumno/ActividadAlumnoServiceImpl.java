@@ -1,7 +1,5 @@
 package com.cerebrus.actividadalumno;
 
-import java.sql.Time;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
@@ -21,7 +19,6 @@ import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 import com.cerebrus.actividad.marcarImagen.MarcarImagenService;
 import com.cerebrus.actividad.ordenacion.Ordenacion;
 import com.cerebrus.actividad.ordenacion.OrdenacionService;
-import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.respuestaAlumno.RespuestaAlumno;
 import com.cerebrus.respuestaAlumno.RespuestaAlumnoService;
@@ -119,13 +116,12 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
     @Override
     @Transactional
-    public ActividadAlumno updateActividadAlumno(Long id, Integer tiempo, Integer puntuacion,
-         LocalDateTime inicio, LocalDateTime acabada, Integer nota, Integer numAbandonos) {
+    public ActividadAlumno updateActividadAlumno(Long id, Integer puntuacion,
+         LocalDateTime fechaInicio, LocalDateTime fechaFin, Integer nota, Integer numAbandonos) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
-        actividadAlumno.setTiempo(tiempo);
         actividadAlumno.setPuntuacion(puntuacion);
-        actividadAlumno.setInicio(inicio);
-        actividadAlumno.setAcabada(acabada);
+        actividadAlumno.setFechaInicio(fechaInicio);
+        actividadAlumno.setFechaFin(fechaFin);
         actividadAlumno.setNota(nota);
         actividadAlumno.setNumAbandonos(numAbandonos);
         return actividadAlumnoRepository.save(actividadAlumno);
@@ -201,10 +197,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         Actividad actividad = actividadAlumno.getActividad();
         LocalDateTime finalActividad = LocalDateTime.now();
-        LocalDateTime inicioActividad = actividadAlumno.getInicio() != null? actividadAlumno.getInicio() : finalActividad;
-        actividadAlumno.setAcabada(finalActividad);
-        Integer tiempoSegundos = (int) Duration.between(inicioActividad, finalActividad).getSeconds();
-        actividadAlumno.setTiempo(tiempoSegundos);
+        actividadAlumno.setFechaFin(finalActividad);
         if(actividad instanceof General){
             if (((General) actividad).getTipo() == TipoActGeneral.TEST) {
                 corregirActividadAlumnoAutomaticamenteGeneral(actividadAlumno, respuestasIds, actividad);
@@ -214,7 +207,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
               // CASO PARA TEORÍA: Simplemente marcamos como terminada y damos la puntuación base
                actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 1);
                actividadAlumno.setNota(10); // Nota máxima por leer
-               actividadAlumno.setAcabada(LocalDateTime.now());
+               actividadAlumno.setFechaFin(LocalDateTime.now());
             }
         } else if(actividad instanceof Ordenacion) {
             corregirActividadAlumnoAutomaticamenteOrdenacion(actividadAlumno, respuestasIds, actividad);
@@ -263,7 +256,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     // 3. Guardar y redondear
     actividadAlumno.setPuntuacion((int) Math.round(puntuacionAcumulada));
     actividadAlumno.setNota((int) Math.round(notaAcumulada));
-    actividadAlumno.setAcabada(LocalDateTime.now());
+    actividadAlumno.setFechaFin(LocalDateTime.now());
     }
 
     @Override
@@ -274,7 +267,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         if (totalPreguntas == 0) {
             actividadAlumno.setPuntuacion(0);
             actividadAlumno.setNota(0);
-            actividadAlumno.setAcabada(LocalDateTime.now());
+            actividadAlumno.setFechaFin(LocalDateTime.now());
             return;
         }
 
@@ -311,7 +304,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
         // Time-based scoring: faster completion = more points
         int puntuacionMaxima = actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 0;
-        Integer tiempoSegundos = actividadAlumno.getTiempo();
+        Integer tiempoSegundos = actividadAlumno.getTiempoMinutos() * 60;
 
         if (tiempoSegundos == null || tiempoSegundos <= 0) {
             // Fallback: full points if time not measured
@@ -339,7 +332,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
             actividadAlumno.setNota(Math.max(notaFinal, 1));
         }
 
-        actividadAlumno.setAcabada(LocalDateTime.now());
+        actividadAlumno.setFechaFin(LocalDateTime.now());
     }
 
     @Override
@@ -416,7 +409,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         double notaMaxima = 10.0;
 
         int numRespuestasTotales = actividadGeneral.getPreguntas().stream()
-            .mapToInt(p -> p.getRespuestas().size())
+            .mapToInt(p -> p.getRespuestasMaestro().size())
             .sum();
         if (numRespuestasTotales == 0) {
             actividadAlumno.setPuntuacion(0);
@@ -446,7 +439,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         
         actividadAlumno.setPuntuacion((int) Math.round(puntuacionAcumulada));
         actividadAlumno.setNota((int) Math.round(notaAcumulada));
-        actividadAlumno.setAcabada(LocalDateTime.now());
+        actividadAlumno.setFechaFin(LocalDateTime.now());
 
         return actividadAlumnoRepository.save(actividadAlumno);
     }

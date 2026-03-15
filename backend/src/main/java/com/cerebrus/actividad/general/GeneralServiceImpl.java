@@ -1,6 +1,5 @@
  package com.cerebrus.actividad.general;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,24 +9,18 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cerebrus.TipoActGeneral;
+import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.general.dto.CrucigramaDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralClasificacionDTO;
 import com.cerebrus.actividad.general.dto.GeneralClasificacionMaestroDTO;
-import com.cerebrus.actividad.general.dto.GeneralDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestMaestroDTO;
-import com.cerebrus.actividadalumno.ActividadAlumno;
-import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
-import com.cerebrus.actividadalumno.ActividadAlumnoService;
 import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
-import com.cerebrus.pregunta.PreguntaDTO;
-import com.cerebrus.pregunta.PreguntaMaestroDTO;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Usuario;
@@ -35,12 +28,12 @@ import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
 import com.cerebrus.pregunta.PreguntaRepository;
-import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneral;
-import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneralRepository;
+import com.cerebrus.pregunta.dto.PreguntaDTO;
+import com.cerebrus.pregunta.dto.PreguntaMaestroDTO;
 import com.cerebrus.respuestaMaestro.RespuestaMaestro;
-import com.cerebrus.respuestaMaestro.RespuestaDTO;
-import com.cerebrus.respuestaMaestro.RespuestaMaestroDTO;
 import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
+import com.cerebrus.respuestaMaestro.dto.RespuestaDTO;
+import com.cerebrus.respuestaMaestro.dto.RespuestaMaestroDTO;
 
 @Service
 @Transactional
@@ -50,24 +43,18 @@ public class GeneralServiceImpl implements GeneralService {
     private final TemaRepository temaRepository;
     private final PreguntaRepository preguntaRepository;
     private final UsuarioService usuarioService;
-    private final RespuestaMaestroRepository respuestaRepository;
-    private final ActividadAlumnoService actividadAlumnoService;
-    private final RespAlumnoGeneralRepository respuestaAlumnoRepository;
-    private final ActividadAlumnoRepository actividadAlumnoRepository;
+    private final RespuestaMaestroRepository respuestaMaestroRepository;
     private final ActividadRepository actividadRepository;
 
     @Autowired
     public GeneralServiceImpl(GeneralRepository generalRepository, TemaRepository temaRepository, 
         PreguntaRepository preguntaRepository, UsuarioService usuarioService, RespuestaMaestroRepository respuestaRepository, 
-        ActividadAlumnoService actividadAlumnoService, RespAlumnoGeneralRepository respuestaAlumnoRepository, ActividadAlumnoRepository actividadAlumnoRepository, ActividadRepository actividadRepository) {
+        ActividadRepository actividadRepository) {
         this.generalRepository = generalRepository;
         this.temaRepository = temaRepository;
         this.preguntaRepository = preguntaRepository;
         this.usuarioService = usuarioService;
-        this.respuestaRepository = respuestaRepository;
-        this.actividadAlumnoService = actividadAlumnoService;
-        this.respuestaAlumnoRepository = respuestaAlumnoRepository;
-        this.actividadAlumnoRepository = actividadAlumnoRepository;
+        this.respuestaMaestroRepository = respuestaRepository;
         this.actividadRepository = actividadRepository;
 
     }
@@ -134,7 +121,7 @@ public class GeneralServiceImpl implements GeneralService {
                 }
                 Integer num = 1;
                 for(Pregunta pregunta : preguntas){
-                    if (pregunta.getRespuestas().size() != 1){
+                    if (pregunta.getRespuestasMaestro().size() != 1){
                         throw new IllegalArgumentException("La pregunta " + num + " no tiene exactamente una respuesta");
                     }
                     num++;
@@ -165,7 +152,7 @@ public class GeneralServiceImpl implements GeneralService {
         }
 
         List<PreguntaDTO> preguntasDTO = general.getPreguntas().stream().map(pregunta -> {
-            List<RespuestaDTO> respuestasDTO = CerebrusUtils.shuffleCollection(pregunta.getRespuestas())
+            List<RespuestaDTO> respuestasDTO = CerebrusUtils.shuffleCollection(pregunta.getRespuestasMaestro())
                 .stream()
                 .map(r -> new RespuestaDTO(r.getId(), r.getRespuesta()))
                 .toList();
@@ -192,7 +179,7 @@ public class GeneralServiceImpl implements GeneralService {
         }
 
         List<PreguntaDTO> preguntasDTO = general.getPreguntas().stream().map(pregunta -> {
-            List<RespuestaDTO> respuestasDTO = CerebrusUtils.shuffleCollection(pregunta.getRespuestas())
+            List<RespuestaDTO> respuestasDTO = CerebrusUtils.shuffleCollection(pregunta.getRespuestasMaestro())
                 .stream()
                 .map(r -> new RespuestaDTO(r.getId(), r.getRespuesta()))
                 .toList();
@@ -223,11 +210,10 @@ public class GeneralServiceImpl implements GeneralService {
             throw new ResourceNotFoundException("La actividad no es de tipo test");
         }
 
-        // Force lazy load of respuestas within the open transaction
-        general.getPreguntas().forEach(p -> p.getRespuestas().size());
+        general.getPreguntas().forEach(p -> p.getRespuestasMaestro().size());
 
         List<PreguntaMaestroDTO> preguntasDTO = general.getPreguntas().stream().map(pregunta -> {
-            List<RespuestaMaestroDTO> respuestasDTO = pregunta.getRespuestas().stream()
+            List<RespuestaMaestroDTO> respuestasDTO = pregunta.getRespuestasMaestro().stream()
                 .map(r -> new RespuestaMaestroDTO(r.getId(), r.getRespuesta(), r.getCorrecta()))
                 .toList();
             return new PreguntaMaestroDTO(pregunta.getId(), pregunta.getPregunta(), pregunta.getImagen(), respuestasDTO);
@@ -257,11 +243,10 @@ public class GeneralServiceImpl implements GeneralService {
             throw new ResourceNotFoundException("La actividad no es de tipo carta");
         }
 
-        // Force lazy load of respuestas within the open transaction
-        general.getPreguntas().forEach(p -> p.getRespuestas().size());
+        general.getPreguntas().forEach(p -> p.getRespuestasMaestro().size());
 
         List<PreguntaMaestroDTO> preguntasDTO = general.getPreguntas().stream().map(pregunta -> {
-            List<RespuestaMaestroDTO> respuestasDTO = pregunta.getRespuestas().stream()
+            List<RespuestaMaestroDTO> respuestasDTO = pregunta.getRespuestasMaestro().stream()
                 .map(r -> new RespuestaMaestroDTO(r.getId(), r.getRespuesta(), r.getCorrecta()))
                 .toList();
             return new PreguntaMaestroDTO(pregunta.getId(), pregunta.getPregunta(), pregunta.getImagen(), respuestasDTO);
@@ -361,7 +346,7 @@ public class GeneralServiceImpl implements GeneralService {
             tipoCarta.getPreguntas().addAll(preguntas);
             Integer num = 1;
             for(Pregunta pregunta : preguntas){
-                if (pregunta.getRespuestas().size() != 1){
+                if (pregunta.getRespuestasMaestro().size() != 1){
                     throw new IllegalArgumentException("La pregunta " + num + " no tiene exactamente una respuesta");
                 }
                num++;
@@ -427,10 +412,10 @@ public class GeneralServiceImpl implements GeneralService {
             throw new ResourceNotFoundException("La actividad no es de tipo clasificación");
         }
         
-         general.getPreguntas().forEach(p -> p.getRespuestas().size());
+         general.getPreguntas().forEach(p -> p.getRespuestasMaestro().size());
         
         List<PreguntaMaestroDTO> preguntasDTO = general.getPreguntas().stream().map(pregunta -> {
-            List<RespuestaMaestroDTO> respuestasDTO = pregunta.getRespuestas().stream()
+            List<RespuestaMaestroDTO> respuestasDTO = pregunta.getRespuestasMaestro().stream()
                 .map(r -> new RespuestaMaestroDTO(r.getId(), r.getRespuesta(), r.getCorrecta()))
                 .toList();
             return new PreguntaMaestroDTO(pregunta.getId(), pregunta.getPregunta(), pregunta.getImagen(), respuestasDTO);
@@ -464,10 +449,10 @@ public GeneralClasificacionDTO readTipoClasificacion(Long id) {
         throw new ResourceNotFoundException("La actividad no es de tipo clasificación");
     }
 
-    general.getPreguntas().forEach(p -> p.getRespuestas().size());
+    general.getPreguntas().forEach(p -> p.getRespuestasMaestro().size());
     List<RespuestaMaestro> todasLasRespuestas = new ArrayList<>();
     for (Pregunta p : general.getPreguntas()) {
-        todasLasRespuestas.addAll(p.getRespuestas());
+        todasLasRespuestas.addAll(p.getRespuestasMaestro());
     }
     List<RespuestaDTO> respuestasBarajadas = CerebrusUtils.shuffleCollection(todasLasRespuestas).stream()
         .map(r -> new RespuestaDTO(r.getId(), r.getRespuesta()))
@@ -515,7 +500,7 @@ public GeneralClasificacionDTO readTipoClasificacion(Long id) {
         if(preguntasId != null){
             List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
                 for(Pregunta p : preguntas){
-                    List<RespuestaMaestro> respuestas = p.getRespuestas();
+                    List<RespuestaMaestro> respuestas = p.getRespuestasMaestro();
                     for(RespuestaMaestro r : respuestas){
                         if(!r.getCorrecta()){
                             throw new IllegalArgumentException("Las preguntas de una actividad de clasificación no pueden tener respuestas incorrectas");
@@ -556,8 +541,8 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
             Pregunta pregunta = new Pregunta(preguntaRespuesta.getKey(), null, tipoCrucigrama);
             pregunta = preguntaRepository.save(pregunta);
             RespuestaMaestro respuesta = new RespuestaMaestro(preguntaRespuesta.getValue(), null, true, pregunta);
-            respuesta = respuestaRepository.save(respuesta);
-            pregunta.getRespuestas().add(respuesta);
+            respuesta = respuestaMaestroRepository.save(respuesta);
+            pregunta.getRespuestasMaestro().add(respuesta);
             pregunta = preguntaRepository.save(pregunta);
             tipoCrucigrama.getPreguntas().add(pregunta);
             tipoCrucigrama = generalRepository.save(tipoCrucigrama);
@@ -612,7 +597,7 @@ public CrucigramaDTO updateTipoCrucigrama(Long id, CrucigramaRequest crucigrama)
 
 
     for (Pregunta p : tipoCrucigrama.getPreguntas()) {
-        respuestaRepository.deleteAll(p.getRespuestas());
+        respuestaMaestroRepository.deleteAll(p.getRespuestasMaestro());
     }
     preguntaRepository.deleteAll(tipoCrucigrama.getPreguntas());
     tipoCrucigrama.getPreguntas().clear();
@@ -621,8 +606,8 @@ public CrucigramaDTO updateTipoCrucigrama(Long id, CrucigramaRequest crucigrama)
         Pregunta pregunta = new Pregunta(preguntaRespuesta.getKey(), null, tipoCrucigrama);
         pregunta = preguntaRepository.save(pregunta);
         RespuestaMaestro respuesta = new RespuestaMaestro(preguntaRespuesta.getValue(), null, true, pregunta);
-        respuesta = respuestaRepository.save(respuesta);
-        pregunta.getRespuestas().add(respuesta);
+        respuesta = respuestaMaestroRepository.save(respuesta);
+        pregunta.getRespuestasMaestro().add(respuesta);
         pregunta = preguntaRepository.save(pregunta);
         tipoCrucigrama.getPreguntas().add(pregunta);
     }

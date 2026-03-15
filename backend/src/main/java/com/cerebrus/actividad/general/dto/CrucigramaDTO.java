@@ -2,7 +2,7 @@ package com.cerebrus.actividad.general.dto;
 import java.util.List;
 
 import com.cerebrus.actividad.general.General;
-import com.cerebrus.pregunta.PreguntaDTO;
+import com.cerebrus.pregunta.dto.PreguntaDTO;
 
 import lombok.Getter;
 

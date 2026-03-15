@@ -24,7 +24,7 @@ import org.springframework.security.access.AccessDeniedException;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoController;
 import com.cerebrus.curso.CursoServiceImpl;
-import com.cerebrus.curso.ProgresoDTO;
+import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.estadisticas.EstadisticasMaestroController;
 import com.cerebrus.estadisticas.EstadisticasMaestroServiceImpl;
 import com.cerebrus.usuario.alumno.Alumno;

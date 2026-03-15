@@ -48,15 +48,6 @@ public class ActividadAlumno {
     @Min(0)
     @Max(10)
     private Integer nota;
-
-    //Atributo derivado que calcula el tiempo tardado por el alumno en realizar una actividad concreta
-    public Integer getTiempo() {
-        if (fechaInicio == null || fechaFin == null) {
-            return 0; 
-        }
-        long minutos = ChronoUnit.MINUTES.between(fechaInicio, fechaFin);
-        return (int) minutos; 
-    }
     
     //Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
@@ -102,27 +93,19 @@ public class ActividadAlumno {
         this.puntuacion = puntuacion;
     }
 
-    public Integer getNota(){
-        return nota;
-    }
-
-    public void setNota(Integer nota){
-        this.nota = nota;
-    }
-
-    public LocalDateTime getInicio(){
+    public LocalDateTime getFechaInicio(){
         return fechaInicio;
     }
 
-    public void setInicio(LocalDateTime inicio){
+    public void setFechaInicio(LocalDateTime inicio){
         this.fechaInicio=inicio;
     }
 
-    public LocalDateTime getAcabada(){
+    public LocalDateTime getFechaFin(){
         return fechaFin;
     }
 
-    public void setAcabada(LocalDateTime acabada){
+    public void setFechaFin(LocalDateTime acabada){
         this.fechaFin=acabada;
     }
 
@@ -132,6 +115,23 @@ public class ActividadAlumno {
 
     public void setNumAbandonos(Integer numAbandonos){
         this.numAbandonos = numAbandonos;
+    }
+
+    public Integer getNota(){
+        return nota;
+    }
+
+    public void setNota(Integer nota){
+        this.nota = nota;
+    }
+
+    //Atributo derivado que calcula el tiempo tardado por el alumno en realizar una actividad concreta
+    public Integer getTiempoMinutos() {
+        if (fechaInicio == null || fechaFin == null) {
+            return 0; 
+        }
+        long minutos = ChronoUnit.MINUTES.between(fechaInicio, fechaFin);
+        return (int) minutos; 
     }
 
     public Integer getNumRepeticiones(){
@@ -188,7 +188,7 @@ public class ActividadAlumno {
     public String toString() {
         return "ActividadAlumno{" +
                 "id=" + id +
-                ", tiempo=" + getTiempo() +
+                ", tiempo=" + getTiempoMinutos() +
                 ", puntuacion=" + puntuacion +
                 ", fecha_inicio=" + fechaInicio + 
                 ", fecha_fin=" + fechaFin +

@@ -1,7 +1,6 @@
 package com.cerebrus.actividad.general.dto;
 
-import com.cerebrus.pregunta.PreguntaDTO;
-import com.cerebrus.pregunta.PreguntaMaestroDTO;
+import com.cerebrus.pregunta.dto.PreguntaDTO;
 
 import java.util.List;
 

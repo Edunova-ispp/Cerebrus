@@ -1,4 +1,4 @@
-package com.cerebrus.respuestaMaestro;
+package com.cerebrus.respuestaMaestro.dto;
 
 public class RespuestaMaestroDTO {
 

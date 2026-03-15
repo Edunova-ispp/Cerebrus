@@ -1,11 +1,7 @@
 package com.cerebrus.actividad.tablero;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 
-import com.cerebrus.pregunta.PreguntaDTO;
-import com.cerebrus.pregunta.PreguntaRequest;
+import java.util.LinkedHashMap;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

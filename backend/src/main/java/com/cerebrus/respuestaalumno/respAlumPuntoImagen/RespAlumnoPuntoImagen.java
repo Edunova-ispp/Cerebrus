@@ -1,6 +1,5 @@
 package com.cerebrus.respuestaAlumno.respAlumPuntoImagen;
 
-import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 import com.cerebrus.actividadalumno.ActividadAlumno;
 import com.cerebrus.puntoimagen.PuntoImagen;
 import com.cerebrus.respuestaAlumno.RespuestaAlumno;

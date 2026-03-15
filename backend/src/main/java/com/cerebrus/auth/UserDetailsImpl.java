@@ -4,10 +4,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import com.cerebrus.usuario.Director;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.organizacion.Organizacion;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -44,8 +44,8 @@ public class UserDetailsImpl implements UserDetails {
             nombreRol = "ALUMNO";
         } else if (user instanceof Maestro) {
             nombreRol = "MAESTRO";
-        } else if (user instanceof Director) {
-            nombreRol = "DIRECTOR";
+        } else if (user instanceof Organizacion) {
+            nombreRol = "ORGANIZACION";
         }
 
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(nombreRol));

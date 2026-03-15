@@ -1,7 +1,8 @@
 package com.cerebrus.actividad.general.dto;
 
-import com.cerebrus.pregunta.PreguntaDTO;
 import java.util.List;
+
+import com.cerebrus.pregunta.dto.PreguntaDTO;
 
 public class GeneralCartaDTO {
 

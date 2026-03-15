@@ -13,8 +13,6 @@ import com.cerebrus.actividad.ordenacion.OrdenacionRepository;
 import com.cerebrus.actividadalumno.ActividadAlumno;
 import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
 import com.cerebrus.respuestaAlumno.respAlumOrdenacion.dto.RespAlumnoOrdenacionDTO;
-import com.cerebrus.respuestaMaestro.RespuestaMaestro;
-import com.cerebrus.respuestaMaestro.RespuestaMaestroService;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
@@ -28,16 +26,14 @@ public class RespAlumnoOrdenacionServiceImpl implements RespAlumnoOrdenacionServ
     private final UsuarioService usuarioService;
     private final ActividadAlumnoRepository actividadAlumnoRepository;
     private final OrdenacionRepository ordenacionRepository;
-    private final RespuestaMaestroService respuestaService;
 
     @Autowired
-    public RespAlumnoOrdenacionServiceImpl(RespAlumnoOrdenacionRepository respAlumnoOrdenacionRepository, RespuestaMaestroService respuestaService, UsuarioService usuarioService,
+    public RespAlumnoOrdenacionServiceImpl(RespAlumnoOrdenacionRepository respAlumnoOrdenacionRepository, UsuarioService usuarioService,
          ActividadAlumnoRepository actividadAlumnoRepository, OrdenacionRepository ordenacionRepository) {
         this.respAlumnoOrdenacionRepository = respAlumnoOrdenacionRepository;
         this.usuarioService = usuarioService;
         this.actividadAlumnoRepository = actividadAlumnoRepository;
         this.ordenacionRepository = ordenacionRepository;
-        this.respuestaService = respuestaService;
     }
 
     @Override
@@ -71,7 +67,7 @@ public class RespAlumnoOrdenacionServiceImpl implements RespAlumnoOrdenacionServ
 
         // Si la respuesta es correcta, cerramos la ActividadAlumno y calculamos nota/puntuación.
         if (Boolean.TRUE.equals(correcta)) {
-            actividadAlumno.setAcabada(LocalDateTime.now());
+            actividadAlumno.setFechaFin(LocalDateTime.now());
             actividadAlumno.setPuntuacion(ordenacion.getPuntuacion());
 
             int notaCalculada = 10 - (numFallosAntes == null ? 0 : numFallosAntes.intValue());

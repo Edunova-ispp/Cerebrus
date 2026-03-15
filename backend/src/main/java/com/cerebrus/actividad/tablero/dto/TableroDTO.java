@@ -3,8 +3,8 @@ package com.cerebrus.actividad.tablero.dto;
 import java.util.List;
 
 import com.cerebrus.comun.enumerados.TamanoTablero;
+import com.cerebrus.pregunta.dto.PreguntaDTO;
 import com.cerebrus.actividad.tablero.Tablero;
-import com.cerebrus.pregunta.PreguntaDTO;
 
 import lombok.Getter;
 

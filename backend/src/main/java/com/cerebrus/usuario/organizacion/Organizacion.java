@@ -30,15 +30,6 @@ public class Organizacion extends Usuario {
     @Column(nullable = false)
     private String nombreCentro;
 
-    // Atributo derivado que se obtiene a partir de la fecha de fin de la última suscripción activa
-    public Boolean getActivo() {
-        if (suscripciones == null || suscripciones.isEmpty()) {
-            return false;
-        }
-        Suscripcion ultimaSuscripcion = suscripciones.get(suscripciones.size() - 1);
-        return ultimaSuscripcion.getFechaFin() == null || ultimaSuscripcion.getFechaFin().isAfter(LocalDate.now());
-    }
-
     // Relaciones
 
     @OneToMany(mappedBy = "organizacion", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
@@ -67,11 +58,11 @@ public class Organizacion extends Usuario {
         this.id = id;
     }
 
-    public String getNombre() {
+    public String getNombreCentro() {
         return nombreCentro;
     }
 
-    public void setNombre(String nombre) {
+    public void setNombreCentro(String nombre) {
         this.nombreCentro = nombre;
     }
 
@@ -97,6 +88,15 @@ public class Organizacion extends Usuario {
 
     public void setSuscripciones(List<Suscripcion> suscripciones) {
         this.suscripciones = suscripciones;
+    }
+
+    // Atributo derivado que se obtiene a partir de la fecha de fin de la última suscripción activa
+    public Boolean getActivo() {
+        if (suscripciones == null || suscripciones.isEmpty()) {
+            return false;
+        }
+        Suscripcion ultimaSuscripcion = suscripciones.get(suscripciones.size() - 1);
+        return ultimaSuscripcion.getFechaFin() == null || ultimaSuscripcion.getFechaFin().isAfter(LocalDate.now());
     }
 
     @Override

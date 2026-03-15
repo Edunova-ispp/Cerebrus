@@ -6,9 +6,7 @@ import java.util.List;
 
 import com.cerebrus.comun.enumerados.*;
 import com.cerebrus.actividad.Actividad;
-import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.curso.Curso;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -32,12 +30,6 @@ public class Tema {
 
     @Column(nullable = false)
     private String titulo;
-
-    // Atributo derivado para obtener los tipos de actividades asociados al tema en orden. No modificable
-    public List<TipoAct> getTipoActividades() {
-        List<TipoAct> actividades = new ArrayList<>(Arrays.asList(TipoAct.values()));
-        return actividades;
-    }
 
     //Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
@@ -87,6 +79,12 @@ public class Tema {
 
     public void setActividades(List<Actividad> actividades){
         this.actividades = actividades;
+    }
+
+    // Atributo derivado para obtener los tipos de actividades asociados al tema en orden. No modificable
+    public List<TipoAct> getTipoActividades() {
+        List<TipoAct> actividades = new ArrayList<>(Arrays.asList(TipoAct.values()));
+        return actividades;
     }
 
     @Override

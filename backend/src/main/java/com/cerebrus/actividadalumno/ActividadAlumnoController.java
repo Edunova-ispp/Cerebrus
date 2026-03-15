@@ -41,8 +41,8 @@ public class ActividadAlumnoController {
         ActividadAlumno actividadAlumnoCreada = actividadAlumnoService.crearActividadAlumno(
             actividadAlumno.getTiempo() == null ? 0 : actividadAlumno.getTiempo(),
             actividadAlumno.getPuntuacion() == null ? 0 : actividadAlumno.getPuntuacion(),
-            actividadAlumno.getInicio() == null ? LocalDateTime.now() : actividadAlumno.getInicio(),
-            actividadAlumno.getAcabada() == null ? LocalDateTime.of(1970, 1, 1, 0, 0) : actividadAlumno.getAcabada(),
+            actividadAlumno.getFechaInicio() == null ? LocalDateTime.now() : actividadAlumno.getFechaInicio(),
+            actividadAlumno.getFechaFin() == null ? LocalDateTime.of(1970, 1, 1, 0, 0) : actividadAlumno.getFechaFin(),
             actividadAlumno.getNota() == null ? 0 : actividadAlumno.getNota(),
             actividadAlumno.getNumAbandonos() == null ? 0 : actividadAlumno.getNumAbandonos(),
             actividadAlumno.getAlumnoId(),
@@ -63,10 +63,9 @@ public class ActividadAlumnoController {
     public ResponseEntity<ActividadAlumnoDTO> updateActividadAlumno(@PathVariable Long id, @RequestBody @Valid ActividadAlumnoDTO actividadAlumno) {
         ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.updateActividadAlumno(
             id,
-            actividadAlumno.getTiempo(),
             actividadAlumno.getPuntuacion(),
-            actividadAlumno.getInicio(),
-            actividadAlumno.getAcabada(),
+            actividadAlumno.getFechaInicio(),
+            actividadAlumno.getFechaFin(),
             actividadAlumno.getNota(),
             actividadAlumno.getNumAbandonos()
         );
@@ -108,10 +107,10 @@ public class ActividadAlumnoController {
     private static ActividadAlumnoDTO toDto(ActividadAlumno aa) {
         return new ActividadAlumnoDTO(
             aa.getId(),
-            aa.getTiempo(),
+            aa.getTiempoMinutos(),
             aa.getPuntuacion(),
-            aa.getInicio(),
-            aa.getAcabada(),
+            aa.getFechaInicio(),
+            aa.getFechaFin(),
             aa.getNota(),
             aa.getNumAbandonos(),
             aa.getAlumno() == null ? null : aa.getAlumno().getId(),
@@ -150,10 +149,10 @@ public class ActividadAlumnoController {
         ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(id, respuestasIds);
         ActividadAlumnoDTO actividadAlumnoDTO = new ActividadAlumnoDTO(
             actividadAlumnoActualizada.getId(),
-            actividadAlumnoActualizada.getTiempo(),
+            actividadAlumnoActualizada.getTiempoMinutos(),
             actividadAlumnoActualizada.getPuntuacion(),
-            actividadAlumnoActualizada.getInicio(),
-            actividadAlumnoActualizada.getAcabada(),
+            actividadAlumnoActualizada.getFechaInicio(),
+            actividadAlumnoActualizada.getFechaFin(),
             actividadAlumnoActualizada.getNota(),
             actividadAlumnoActualizada.getNumAbandonos(),
             actividadAlumnoActualizada.getAlumno().getId(),

@@ -13,7 +13,7 @@ public interface ActividadAlumnoService {
     Optional<ActividadAlumno> readActividadAlumnoByAlumnoIdAndActividadId(Long alumnoId, Long actividadId);
     Integer ensureActividadAlumno(Long actividadId);
         ActividadAlumno abandonarActividadAlumno(Long actividadAlumnoId);
-    ActividadAlumno updateActividadAlumno(Long id, Integer tiempo, Integer puntuacion,
+    ActividadAlumno updateActividadAlumno(Long id, Integer puntuacion,
          LocalDateTime inicio, LocalDateTime acabada, Integer nota, Integer numAbandonos);
     void deleteActividadAlumno(Long id);
     ActividadAlumno corregirActividadAlumnoManual(Long id, Integer nuevaNota, List<Long> nuevasCorreccionesRespuestasIds);

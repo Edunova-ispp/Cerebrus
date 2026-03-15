@@ -30,7 +30,7 @@ import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.curso.CursoServiceImpl;
-import com.cerebrus.curso.ProgresoDTO;
+import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.estadisticas.EstadisticasMaestroServiceImpl;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.respuestaAlumno.RespuestaAlumno;

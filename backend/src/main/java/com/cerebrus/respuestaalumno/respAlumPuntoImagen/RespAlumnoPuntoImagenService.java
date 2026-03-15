@@ -4,6 +4,6 @@ public interface RespAlumnoPuntoImagenService {
 
     RespAlumnoPuntoImagen encontrarRespuestaAlumnoPuntoImagenPorId(Long id);
     Boolean corregirRespuestaAlumnoPuntoImagen(Long id);
-    RespAlumnoPuntoImagen crearRespuestaAlumnoPuntoImagen(String respuesta, Integer pixelX, Integer pixelY, Long marcarImagenId, Long actividadAlumnoId);
+    RespAlumnoPuntoImagen crearRespuestaAlumnoPuntoImagen(String respuesta, Long puntoImagenId, Long actividadAlumnoId);
 
 }

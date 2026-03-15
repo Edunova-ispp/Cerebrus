@@ -1,4 +1,4 @@
-package com.cerebrus.curso;
+package com.cerebrus.curso.dto;
 
 public class ProgresoDTO {
 

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.actividad.marcarImagen.dto.MarcarImagenDTO;
-import com.cerebrus.puntoimagen.PuntoImagenDTO;
+import com.cerebrus.puntoimagen.dto.PuntoImagenDTO;
 
 import jakarta.validation.Valid;
 

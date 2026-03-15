@@ -1,4 +1,4 @@
-package com.cerebrus.respuestaAlumno.respAlumPuntoImagen;
+package com.cerebrus.respuestaAlumno.respAlumPuntoImagen.dto;
 
 import lombok.Getter;
 import lombok.Setter;

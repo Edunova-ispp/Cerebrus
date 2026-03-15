@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cerebrus.actividad.Actividad;
+import com.cerebrus.actividad.general.General;
+import com.cerebrus.actividad.tablero.Tablero;
 import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneral;
 import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 
@@ -38,6 +40,10 @@ public class Pregunta {
 
     @OneToMany(mappedBy = "pregunta", fetch = FetchType.LAZY)
     private List<RespAlumnoGeneral> respuestasAlumGeneral = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "actividad_id", nullable = false)
+    private Actividad actividad;
 
     // Constructores
     public Pregunta() {
@@ -80,6 +86,23 @@ public class Pregunta {
     public void setRespuestasMaestro(List<RespuestaMaestro> respuestas) {
         this.respuestasMaestro = respuestas;
     }
+
+    public List<RespAlumnoGeneral> getRespuestasAlumnoGeneral() {
+        return respuestasAlumGeneral;
+    }
+
+    public void setRespuestasAlumnoGeneral(List<RespAlumnoGeneral> respuestasAlumno) {
+        this.respuestasAlumGeneral = respuestasAlumno;
+    }
+
+    public Actividad getActividad(){
+        return actividad;
+    }
+
+    public void setActividad(Actividad actividad){
+        this.actividad = actividad;
+    }
+
 
     @Override
     public String toString() {

@@ -1,6 +1,6 @@
 package com.cerebrus.iaconnection;
 
-import com.cerebrus.TipoAct;
+import com.cerebrus.comun.enumerados.TipoAct;
 
 public interface IaConnectionService {
     

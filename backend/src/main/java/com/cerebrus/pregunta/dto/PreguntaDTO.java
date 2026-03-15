@@ -1,8 +1,9 @@
-package com.cerebrus.pregunta;
+package com.cerebrus.pregunta.dto;
 
 import java.util.List;
 
-import com.cerebrus.respuestaMaestro.RespuestaDTO;
+import com.cerebrus.pregunta.Pregunta;
+import com.cerebrus.respuestaMaestro.dto.RespuestaDTO;
 
 public class PreguntaDTO {
 
@@ -35,7 +36,7 @@ public class PreguntaDTO {
     }
 
     public static PreguntaDTO fromEntity(Pregunta pregunta) {
-        List<RespuestaDTO> respuestasDTO = pregunta.getRespuestas().stream()
+        List<RespuestaDTO> respuestasDTO = pregunta.getRespuestasMaestro().stream()
             .map(RespuestaDTO::fromEntity)
             .toList();
 

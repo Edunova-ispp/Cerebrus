@@ -1,4 +1,6 @@
-package com.cerebrus.respuestaMaestro;
+package com.cerebrus.respuestaMaestro.dto;
+
+import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 
 public class RespuestaDTO {
 

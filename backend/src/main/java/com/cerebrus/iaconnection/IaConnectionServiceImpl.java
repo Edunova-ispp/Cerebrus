@@ -1,6 +1,6 @@
 package com.cerebrus.iaconnection;
 
-import com.cerebrus.TipoAct;
+import com.cerebrus.comun.enumerados.TipoAct;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.maestro.Maestro;

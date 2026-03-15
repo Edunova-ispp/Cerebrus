@@ -2,8 +2,6 @@ package com.cerebrus.actividad.tablero;
 
 import com.cerebrus.actividad.tablero.dto.TableroDTO;
 
-import jakarta.validation.Valid;
-
 public interface TableroService {
 
     TableroDTO crearActividadTablero(TableroRequest actividad);

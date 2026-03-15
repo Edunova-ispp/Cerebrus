@@ -53,9 +53,9 @@ public class PreguntaServiceImpl implements PreguntaService {
     @Override
     public Pregunta readPregunta(Long id) {
         Pregunta preguntaObj = preguntaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La pregunta no existe"));
-        List<RespuestaMaestro> respuestas = preguntaObj.getRespuestas();
+        List<RespuestaMaestro> respuestas = preguntaObj.getRespuestasMaestro();
         List<RespuestaMaestro> respuestasDesordenadas = CerebrusUtils.shuffleCollection(respuestas).stream().toList();
-        preguntaObj.setRespuestas(respuestasDesordenadas);
+        preguntaObj.setRespuestasMaestro(respuestasDesordenadas);
         return preguntaObj;
     }
 

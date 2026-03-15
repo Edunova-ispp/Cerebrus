@@ -2,7 +2,7 @@ package com.cerebrus.actividad.marcarImagen.dto;
 
 import java.util.List;
 
-import com.cerebrus.puntoimagen.PuntoImagenDTO;
+import com.cerebrus.puntoimagen.dto.PuntoImagenDTO;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividadalumno.ActividadAlumno;
 import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
-import com.cerebrus.actividadalumno.ActividadAlumnoService;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
@@ -198,7 +197,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
 
         actividadAlumno.setNota(nota);
         actividadAlumno.setPuntuacion(puntuacion);
-        actividadAlumno.setAcabada(LocalDateTime.now());
+        actividadAlumno.setFechaFin(LocalDateTime.now());
         actividadAlumnoRepository.save(actividadAlumno);
         resultado.put(-1L, "Nota final: " + nota + " - Puntuación final: " + puntuacion);
         return resultado;

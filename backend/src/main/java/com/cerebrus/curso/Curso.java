@@ -6,7 +6,6 @@ import java.util.List;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.usuario.maestro.Maestro;
-import com.cerebrus.usuario.organizacion.Organizacion;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
