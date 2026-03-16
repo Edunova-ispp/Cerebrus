@@ -97,6 +97,7 @@ class TemaServiceImplTest {
 
     @Test
     void crearTema_cursoNoExiste_lanzaIllegalArgumentException() {
+        when(maestroRepository.findById(1L)).thenReturn(Optional.of(maestro));
         when(cursoRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> temaService.crearTema("Fracciones", 999L, 1L))
@@ -108,7 +109,6 @@ class TemaServiceImplTest {
 
     @Test
     void crearTema_maestroNoExiste_lanzaIllegalArgumentException() {
-        when(cursoRepository.findById(10L)).thenReturn(Optional.of(curso));
         when(maestroRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> temaService.crearTema("Fracciones", 10L, 99L))
