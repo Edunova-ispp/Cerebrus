@@ -46,7 +46,9 @@ public class AuthService {
                 nuevoUsuario = new Maestro();
                 break;
             case "ORGANIZACION":
-                nuevoUsuario = new Organizacion();
+                Organizacion org = new Organizacion();
+                org.setNombreCentro(request.getNombreCentro()); 
+                nuevoUsuario = org;
                 break;
             default:
                 throw new IllegalArgumentException("Tipo de usuario inválido. Use: ALUMNO, MAESTRO o ORGANIZACION");

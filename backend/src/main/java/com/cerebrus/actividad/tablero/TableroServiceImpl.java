@@ -63,11 +63,15 @@ public class TableroServiceImpl implements TableroService {
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede crear actividades de tablero");
         }
-        Tema tema = temaRepository.findById(actividad.getTemaId()).orElseThrow(() -> new ResourceNotFoundException("Tema no encontrado"));
+        
+        Tema tema = temaRepository.findById(actividad.getTemaId())
+                .orElseThrow(() -> new ResourceNotFoundException("Tema no encontrado"));
+                
         Maestro maestro = (Maestro) u;
         if (!tema.getCurso().getMaestro().getId().equals(maestro.getId())) {
             throw new AccessDeniedException("No tienes permiso para crear un tablero en este tema");
         }
+        
         Tablero tablero = new Tablero(
             actividad.getTitulo(),
             actividad.getDescripcion(),
@@ -80,18 +84,23 @@ public class TableroServiceImpl implements TableroService {
             actividad.getTamano() ? TamanoTablero.TRES_X_TRES : TamanoTablero.CUATRO_X_CUATRO
         );
 
-        Tablero tableroCreado = tableroRepository.save(tablero);
-
         for (Map.Entry<String, String> preguntaRespuesta : actividad.getPreguntasYRespuestas().entrySet()) {
-            Pregunta pregunta = new Pregunta(preguntaRespuesta.getKey(), null, tableroCreado);
-            pregunta = preguntaRepository.save(pregunta);
-            RespuestaMaestro respuesta = new RespuestaMaestro(preguntaRespuesta.getValue(), null, true, pregunta);
-            respuesta = respuestaMaestroRepository.save(respuesta);
+            
+            Pregunta pregunta = new Pregunta();
+            pregunta.setPregunta(preguntaRespuesta.getKey());
+            pregunta.setActividad(tablero); 
+
+            RespuestaMaestro respuesta = new RespuestaMaestro();
+            respuesta.setRespuesta(preguntaRespuesta.getValue());
+            respuesta.setCorrecta(true);
+            respuesta.setPregunta(pregunta); 
+
+          
             pregunta.getRespuestasMaestro().add(respuesta);
-            pregunta = preguntaRepository.save(pregunta);
-            tableroCreado.getPreguntas().add(pregunta);
-            tableroCreado = tableroRepository.save(tableroCreado);
+            tablero.getPreguntas().add(pregunta);
         }
+
+        Tablero tableroCreado = tableroRepository.save(tablero);
 
         return TableroDTO.fromEntity(tableroCreado);
     }
@@ -155,12 +164,16 @@ public class TableroServiceImpl implements TableroService {
         tableroExistente.getPreguntas().clear();
 
         for (Map.Entry<String, String> preguntaRespuesta : tablero.getPreguntasYRespuestas().entrySet()) {
-            Pregunta pregunta = new Pregunta(preguntaRespuesta.getKey(), null, tableroExistente);
-            pregunta = preguntaRepository.save(pregunta);
-            RespuestaMaestro respuesta = new RespuestaMaestro(preguntaRespuesta.getValue(), null, true, pregunta);
-            respuesta = respuestaMaestroRepository.save(respuesta);
+            Pregunta pregunta = new Pregunta();
+            pregunta.setPregunta(preguntaRespuesta.getKey());
+            pregunta.setActividad(tableroExistente); 
+
+            RespuestaMaestro respuesta = new RespuestaMaestro();
+            respuesta.setRespuesta(preguntaRespuesta.getValue());
+            respuesta.setCorrecta(true);
+            respuesta.setPregunta(pregunta); 
+
             pregunta.getRespuestasMaestro().add(respuesta);
-            pregunta = preguntaRepository.save(pregunta);
             tableroExistente.getPreguntas().add(pregunta);
         }
 
@@ -188,18 +201,22 @@ public class TableroServiceImpl implements TableroService {
             if (cleanedRespuesta.startsWith("\"") && cleanedRespuesta.endsWith("\"")) {
                 cleanedRespuesta = cleanedRespuesta.substring(1, cleanedRespuesta.length() - 1);
             }
-            Boolean correcta = pregunta.getRespuestasAlumnoGeneral().get(0).getRespuesta().toLowerCase().strip().equals(cleanedRespuesta.toLowerCase().strip());
+            
+            Boolean correcta = pregunta.getRespuestasMaestro().get(0).getRespuesta().toLowerCase().strip().equals(cleanedRespuesta.toLowerCase().strip());
+            
             ActividadAlumno actividadAlumno = actividadAlumnoService.crearActividadAlumno(0, LocalDateTime.now(), null, 0, 0, alumno.getId(), tablero.getId());
+            
             RespAlumnoGeneral respuestaAlumno = new RespAlumnoGeneral(correcta, actividadAlumno, respuesta, pregunta);
-            respuestaAlumno =  respuestaAlumnoRepository.save(respuestaAlumno);
             actividadAlumno.getRespuestasAlumno().add(respuestaAlumno);
-            actividadAlumno = actividadAlumnoRepository.save(actividadAlumno);
+            
             if(correcta  && tablero.getPreguntas().get(tablero.getPreguntas().size()-1).getId().equals(pregunta.getId())) {
                 actividadAlumno.setFechaFin(LocalDateTime.now());
                 actividadAlumno.setNota(10);
                 actividadAlumno.setPuntuacion(tablero.getPuntuacion());
-                actividadAlumnoRepository.save(actividadAlumno);
             }
+            
+            actividadAlumnoRepository.save(actividadAlumno);
+            
             if(pregunta.getActividad().getRespVisible()) {
                 return correcta ? "Respuesta correcta" : "Respuesta incorrecta. La respuesta correcta es: " + pregunta.getRespuestasMaestro().get(0).getRespuesta();
             } else {
@@ -209,6 +226,5 @@ public class TableroServiceImpl implements TableroService {
         } else {
             throw new AccessDeniedException("Solo un alumno puede responder a actividades de tablero");
         }
-        
     }
 }

@@ -55,7 +55,7 @@ ALTER TABLE curso DROP FOREIGN KEY curso_ibfk_1;
 ALTER TABLE curso DROP COLUMN organizacion_id;
 
 -- Configurar la herencia de la tabla organizacion
-ALTER TABLE organizacion RENAME COLUMN nombre TO nombreCentro;
+ALTER TABLE organizacion RENAME COLUMN nombre TO nombre_centro;
 ALTER TABLE organizacion ADD CONSTRAINT fk_organizacion_usuario FOREIGN KEY (id) REFERENCES usuario(id) ON DELETE CASCADE;
 
 -- Eliminar tabla director que ya no se usa
@@ -82,6 +82,9 @@ ALTER TABLE actividad_alumno
 ALTER COLUMN fecha_inicio SET DEFAULT '1970-01-01 00:00:00',
 ALTER COLUMN fecha_fin SET DEFAULT '1970-01-01 00:00:00',
 ALTER COLUMN num_abandonos SET DEFAULT 0;
+
+-- Permitir que el segundo apellido sea nulo en la base de datos
+ALTER TABLE usuario MODIFY COLUMN segundo_apellido VARCHAR(255) NULL;
 
 -- ------------------------------------------------------------------------------------
 -- FASE 5: REFACTORIZACIÓN DE RESP_ALUMNO_PUNTO_IMAGEN
