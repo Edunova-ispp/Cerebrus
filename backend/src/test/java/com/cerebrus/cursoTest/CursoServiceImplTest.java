@@ -8,11 +8,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,21 +22,19 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadRepository;
-import com.cerebrus.actividadalumno.ActividadAlumno;
-import com.cerebrus.actividadalumno.ActividadAlumnoProgreso;
-import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadAlumno.ActividadAlumno;
+import com.cerebrus.actividadAlumno.ActividadAlumnoProgreso;
+import com.cerebrus.actividadAlumno.ActividadAlumnoRepository;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.curso.CursoServiceImpl;
-import com.cerebrus.curso.ProgresoDTO;
+import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.estadisticas.EstadisticasMaestroServiceImpl;
-import com.cerebrus.inscripcion.Inscripcion;
-import com.cerebrus.respuestaalumno.RespuestaAlumno;
-import com.cerebrus.tema.Tema;
-import com.cerebrus.usuario.Alumno;
-import com.cerebrus.usuario.Maestro;
+import com.cerebrus.respuestaAlumno.RespuestaAlumno;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
 class CursoServiceImplTest {
@@ -542,11 +538,10 @@ class CursoServiceImplTest {
 
         ActividadAlumno aa = new ActividadAlumno();
         aa.setAlumno(alumno);
-        aa.setTiempo(0);
         aa.setPuntuacion(0);
         aa.setNota(10);
-        aa.setInicio(LocalDateTime.now());
-        aa.setAcabada(LocalDateTime.now());
+        aa.setFechaInicio(LocalDateTime.now());
+        aa.setFechaFin(LocalDateTime.now());
         aa.setNumAbandonos(0);
         aa.setRespuestasAlumno(new ArrayList<>(List.of(respuestaCorrecta)));
         return aa;

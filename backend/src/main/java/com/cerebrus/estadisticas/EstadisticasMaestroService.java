@@ -3,7 +3,7 @@ package com.cerebrus.estadisticas;
 import java.util.Map;
 
 import com.cerebrus.curso.Curso;
-import com.cerebrus.usuario.Alumno;
+import com.cerebrus.usuario.alumno.Alumno;
 
 public interface EstadisticasMaestroService {
     Map<String, Long> numActividadesRealizadasPorAlumno(Curso curso);

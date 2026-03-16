@@ -8,10 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
 
 import com.cerebrus.auth.UserDetailsImpl;
-import com.cerebrus.usuario.Alumno;
-import com.cerebrus.usuario.Director;
-import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
 
 class UserDetailsImplTest {
 
@@ -49,25 +48,8 @@ class UserDetailsImplTest {
         assertThat(roles(userDetails)).containsExactly("MAESTRO");
     }
 
-    // Test para verificar que el método build asigna correctamente el rol de Director cuando el usuario 
-    // es una instancia de Director
-    @Test
-    void build_cuandoUsuarioEsDirector_asignaRolDirector() {
-        Director director = new Director();
-        director.setId(3L);
-        director.setNombreUsuario("director1");
-        director.setContrasena("pass");
-
-        UserDetailsImpl userDetails = UserDetailsImpl.build(director);
-
-        assertThat(userDetails.getId()).isEqualTo(3L);
-        assertThat(userDetails.getUsername()).isEqualTo("director1");
-        assertThat(userDetails.getPassword()).isEqualTo("pass");
-        assertThat(roles(userDetails)).containsExactly("DIRECTOR");
-    }
-
     // Test para verificar que el método build asigna un rol genérico de "USUARIO" si el usuario no es 
-    // una instancia de Alumno, Maestro o Director
+    // una instancia de Alumno o Maestro
     @Test
     void build_cuandoUsuarioNoEsSubtipoConocido_asignaRolUsuario() {
         Usuario usuario = new Usuario() {

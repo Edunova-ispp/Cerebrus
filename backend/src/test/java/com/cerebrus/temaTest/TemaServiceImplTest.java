@@ -27,10 +27,10 @@ import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.tema.TemaServiceImpl;
-import com.cerebrus.usuario.Maestro;
-import com.cerebrus.usuario.MaestroRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.maestro.MaestroRepository;
 
 @ExtendWith(MockitoExtension.class)
 class TemaServiceImplTest {
@@ -97,6 +97,7 @@ class TemaServiceImplTest {
 
     @Test
     void crearTema_cursoNoExiste_lanzaIllegalArgumentException() {
+        when(maestroRepository.findById(1L)).thenReturn(Optional.of(maestro));
         when(cursoRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> temaService.crearTema("Fracciones", 999L, 1L))
@@ -108,7 +109,6 @@ class TemaServiceImplTest {
 
     @Test
     void crearTema_maestroNoExiste_lanzaIllegalArgumentException() {
-        when(cursoRepository.findById(10L)).thenReturn(Optional.of(curso));
         when(maestroRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> temaService.crearTema("Fracciones", 10L, 99L))

@@ -1,9 +1,9 @@
 package com.cerebrus.iaconnection;
 
-import com.cerebrus.TipoAct;
-import com.cerebrus.usuario.Maestro;
+import com.cerebrus.comun.enumerados.TipoAct;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.maestro.Maestro;
 
 import java.util.List;
 import java.util.Map;

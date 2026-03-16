@@ -1,6 +1,6 @@
 package com.cerebrus.iaconnection;
 
-import com.cerebrus.TipoAct;
+import com.cerebrus.comun.enumerados.TipoAct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

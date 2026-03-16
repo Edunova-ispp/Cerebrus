@@ -24,14 +24,6 @@ public class UsuarioService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Transactional
-    public Usuario saveUser(Usuario user) throws DataAccessException {
-        if (user.getContrasena() != null && !user.getContrasena().trim().isEmpty()) {
-            user.setContrasena(passwordEncoder.encode(user.getContrasena()));
-        }
-        return userRepository.save(user);
-    }
-
     @Transactional(readOnly = true)
     public Usuario findByUsername(String username, String email) {
         return userRepository.findByNombreUsuarioOrCorreoElectronico(username, email)
@@ -60,6 +52,14 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public Iterable<Usuario> findAll() {
         return userRepository.findAll();
+    }
+
+    @Transactional
+    public Usuario saveUser(Usuario user) throws DataAccessException {
+        if (user.getContrasena() != null && !user.getContrasena().trim().isEmpty()) {
+            user.setContrasena(passwordEncoder.encode(user.getContrasena()));
+        }
+        return userRepository.save(user);
     }
 
     @Transactional

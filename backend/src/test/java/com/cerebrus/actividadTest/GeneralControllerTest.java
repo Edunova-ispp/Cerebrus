@@ -21,12 +21,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.cerebrus.actividad.General;
-import com.cerebrus.actividad.GeneralController;
-import com.cerebrus.actividad.GeneralService;
-import com.cerebrus.actividad.DTO.GeneralTestDTO;
+import com.cerebrus.actividad.general.General;
+import com.cerebrus.actividad.general.GeneralController;
+import com.cerebrus.actividad.general.GeneralService;
+import com.cerebrus.actividad.general.dto.GeneralTestDTO;
 import com.cerebrus.pregunta.Pregunta;
-import com.cerebrus.pregunta.PreguntaDTO;
+import com.cerebrus.pregunta.dto.PreguntaDTO;
 import com.cerebrus.tema.Tema;
 
 @ExtendWith(MockitoExtension.class)

@@ -1,4 +1,4 @@
-package com.cerebrus.respuestaalumno;
+package com.cerebrus.respuestaAlumno;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

@@ -11,10 +11,10 @@ import com.cerebrus.actividad.Actividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.CursoRepository;
-import com.cerebrus.usuario.Maestro;
-import com.cerebrus.usuario.MaestroRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.maestro.MaestroRepository;
 import com.cerebrus.actividad.ActividadRepository;;
 
 @Service
@@ -29,23 +29,24 @@ public class TemaServiceImpl implements TemaService {
     private final ActividadRepository actividadRepository;
 
     @Autowired
-    public TemaServiceImpl(TemaRepository temaRepository, CursoRepository cursoRepository, MaestroRepository maestroRepository, CursoServiceImpl cursoService, UsuarioService usuarioService, ActividadRepository actividadRepository) {
+    public TemaServiceImpl(TemaRepository temaRepository, CursoRepository cursoRepository, CursoServiceImpl cursoService, MaestroRepository maestroRepository, UsuarioService usuarioService, ActividadRepository actividadRepository) {
         this.temaRepository = temaRepository;
         this.cursoRepository = cursoRepository;
-        this.maestroRepository = maestroRepository;
         this.cursoService = cursoService;
+        this.maestroRepository = maestroRepository;
         this.usuarioService = usuarioService;
         this.actividadRepository = actividadRepository;
     }
 
     @Override
     public Tema crearTema(String titulo, Long cursoId, Long maestroId) {
+        // Verificar que el maestro existe
+        Maestro maestro = maestroRepository.findById(maestroId)
+                .orElseThrow(() -> new IllegalArgumentException("Maestro no encontrado"));
+
         // Verificar que el curso existe y pertenece al maestro
         Curso curso = cursoRepository.findById(cursoId)
                 .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
-
-        Maestro maestro = maestroRepository.findById(maestroId)
-                .orElseThrow(() -> new IllegalArgumentException("Maestro no encontrado"));
 
         if (!curso.getMaestro().getId().equals(maestroId)) {
             throw new IllegalArgumentException("El maestro no es propietario del curso");

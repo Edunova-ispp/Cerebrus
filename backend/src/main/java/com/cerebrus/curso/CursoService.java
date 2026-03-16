@@ -2,6 +2,8 @@ package com.cerebrus.curso;
 
 import java.util.List;
 
+import com.cerebrus.curso.dto.ProgresoDTO;
+
 public interface CursoService {
     List<String> obtenerDetallesCurso(Long id);
     List<Curso> ObtenerCursosUsuarioLogueado();

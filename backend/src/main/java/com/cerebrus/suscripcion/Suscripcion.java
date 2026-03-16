@@ -2,7 +2,7 @@ package com.cerebrus.suscripcion;
 
 import java.time.LocalDate;
 
-import com.cerebrus.organizacion.Organizacion;
+import com.cerebrus.usuario.organizacion.Organizacion;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,6 +37,7 @@ public class Suscripcion {
     @Column(nullable = false)
     private LocalDate fechaFin;
 
+    //Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organizacion_id", nullable = false)
     private Organizacion organizacion;

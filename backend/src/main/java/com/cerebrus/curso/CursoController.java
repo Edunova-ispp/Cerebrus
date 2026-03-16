@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cerebrus.curso.dto.ProgresoDTO;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 @RestController

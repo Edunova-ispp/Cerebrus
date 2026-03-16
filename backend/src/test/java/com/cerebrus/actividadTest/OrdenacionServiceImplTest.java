@@ -20,15 +20,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.cerebrus.actividad.Ordenacion;
-import com.cerebrus.actividad.OrdenacionRepository;
-import com.cerebrus.actividad.OrdenacionServiceImpl;
+import com.cerebrus.actividad.ordenacion.Ordenacion;
+import com.cerebrus.actividad.ordenacion.OrdenacionRepository;
+import com.cerebrus.actividad.ordenacion.OrdenacionServiceImpl;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
-import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
 class OrdenacionServiceImplTest {

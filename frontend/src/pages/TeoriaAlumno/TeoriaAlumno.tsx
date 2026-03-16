@@ -68,17 +68,27 @@ export default function TeoriaAlumno() {
 
   // Función para finalizar la teoría y sumar el punto/completado
   const handleFinalizar = async () => {
-    if (actividadAlumnoId) {
-      try {
-        await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
-          method: 'PUT',
-          body: JSON.stringify([]),
-        });
-      } catch (e) {
-        console.error("No se pudo marcar como finalizada");
-      }
+    if (!actividadAlumnoId) {
+      console.warn("Aún no se ha cargado el ID de la actividad del alumno.");
+      return; 
     }
-    setFinished(true);
+
+    try {
+      const res = await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
+        method: 'PUT',
+        body: JSON.stringify([]), 
+      });
+
+      if (!res.ok) {
+        throw new Error(`Error en la respuesta del servidor: ${res.status}`);
+      }
+
+      setFinished(true); 
+
+    } catch (e) {
+      console.error("No se pudo marcar como finalizada", e);
+   
+    }
   };
 
   if (loading) {

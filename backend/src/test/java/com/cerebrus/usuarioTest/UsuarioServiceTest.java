@@ -24,11 +24,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.cerebrus.exceptions.ResourceNotFoundException;
-import com.cerebrus.organizacion.Organizacion;
-import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioRepository;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.organizacion.Organizacion;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioServiceTest {

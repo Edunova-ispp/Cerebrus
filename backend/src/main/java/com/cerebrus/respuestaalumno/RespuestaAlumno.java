@@ -1,6 +1,6 @@
-package com.cerebrus.respuestaalumno;
+package com.cerebrus.respuestaAlumno;
 
-import com.cerebrus.actividadalumno.ActividadAlumno;
+import com.cerebrus.actividadAlumno.ActividadAlumno;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,6 +26,7 @@ public abstract class RespuestaAlumno {
     @Column(nullable = false)
     private Boolean correcta;
 
+    //Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actividad_alumno_id", nullable = false)
     private ActividadAlumno actividadAlumno;

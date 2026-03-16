@@ -19,8 +19,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.cerebrus.auth.UserDetailsImpl;
 import com.cerebrus.auth.UserDetailsServiceImpl;
-import com.cerebrus.usuario.Alumno;
 import com.cerebrus.usuario.UsuarioRepository;
+import com.cerebrus.usuario.alumno.Alumno;
 
 @ExtendWith(MockitoExtension.class)
 class UserDetailsServiceImplTest {

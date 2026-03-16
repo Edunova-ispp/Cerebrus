@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,15 +20,14 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadRepository;
-import com.cerebrus.actividadalumno.ActividadAlumno;
+import com.cerebrus.actividadAlumno.ActividadAlumno;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
-import com.cerebrus.usuario.Alumno;
-import com.cerebrus.usuario.Maestro;
-import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
 class EstadisticasMaestroServiceImplTest {
@@ -153,13 +151,12 @@ class EstadisticasMaestroServiceImplTest {
     private static ActividadAlumno crearActividadAlumnoTerminada(Alumno alumno) {
         ActividadAlumno aa = new ActividadAlumno();
         aa.setAlumno(alumno);
-        aa.setTiempo(0);
         aa.setPuntuacion(0);
         aa.setNota(10);
-        aa.setInicio(LocalDateTime.now());
-        aa.setAcabada(LocalDateTime.now());
+        aa.setFechaInicio(LocalDateTime.now());
+        aa.setFechaFin(LocalDateTime.now());
         aa.setNumAbandonos(0);
-        aa.setRespuestasAlumno(new ArrayList<>(List.of(new com.cerebrus.respuestaalumno.RespuestaAlumno() {{
+        aa.setRespuestasAlumno(new ArrayList<>(List.of(new com.cerebrus.respuestaAlumno.RespuestaAlumno() {{
             setCorrecta(true);
         }})));
         return aa;

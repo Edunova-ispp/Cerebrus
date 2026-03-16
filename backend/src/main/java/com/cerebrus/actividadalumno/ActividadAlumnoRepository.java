@@ -1,4 +1,4 @@
-package com.cerebrus.actividadalumno;
+package com.cerebrus.actividadAlumno;
 
 import java.util.List;
 import java.util.Optional;
@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.cerebrus.usuario.Alumno;
+import com.cerebrus.usuario.alumno.Alumno;
 
 @Repository
 public interface ActividadAlumnoRepository extends JpaRepository<ActividadAlumno, Long> {
@@ -16,7 +16,7 @@ public interface ActividadAlumnoRepository extends JpaRepository<ActividadAlumno
     @Query("SELECT aa FROM ActividadAlumno aa WHERE aa.alumno.id = :alumnoId AND aa.actividad.id = :actividadId")
     Optional<ActividadAlumno> findByAlumnoIdAndActividadId(Long alumnoId, Long actividadId);
 
-    @Query("SELECT aa.inicio AS inicio, aa.acabada AS acabada FROM ActividadAlumno aa WHERE aa.alumno = :alumno AND aa.actividad.tema.curso.id = :cursoId")
+    @Query("SELECT aa.fechaInicio AS inicio, aa.fechaFin AS acabada FROM ActividadAlumno aa WHERE aa.alumno = :alumno AND aa.actividad.tema.curso.id = :cursoId")
     List<ActividadAlumnoProgreso> findProgresoByAlumnoAndCursoId(@Param("alumno") Alumno alumno, @Param("cursoId") Long cursoId);
 
     @Query("SELECT aa.actividad FROM ActividadAlumno aa WHERE aa.id = :actividadId")

@@ -21,19 +21,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.actividad.Actividad;
-import com.cerebrus.actividadalumno.ActividadAlumno;
-import com.cerebrus.actividadalumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadAlumno.ActividadAlumno;
+import com.cerebrus.actividadAlumno.ActividadAlumnoRepository;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
-import com.cerebrus.respuesta.Respuesta;
-import com.cerebrus.respuesta.RespuestaRepository;
-import com.cerebrus.respuestaalumno.RespAlumnoGeneral;
-import com.cerebrus.respuestaalumno.RespAlumnoGeneralCreateResponse;
-import com.cerebrus.respuestaalumno.RespAlumnoGeneralRepository;
-import com.cerebrus.respuestaalumno.RespAlumnoGeneralServiceImpl;
-import com.cerebrus.usuario.Alumno;
-import com.cerebrus.usuario.Maestro;
+import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneral;
+import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneralCreateResponse;
+import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneralRepository;
+import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneralServiceImpl;
+import com.cerebrus.respuestaMaestro.RespuestaMaestro;
+import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
 class RespAlumnoGeneralServiceImplTest {
@@ -48,7 +48,7 @@ class RespAlumnoGeneralServiceImplTest {
     private PreguntaRepository preguntaRepository;
 
     @Mock
-    private RespuestaRepository respuestaRepository;
+    private RespuestaMaestroRepository respuestaRepository;
 
     @Mock
     private UsuarioService usuarioService;
@@ -106,7 +106,7 @@ class RespAlumnoGeneralServiceImplTest {
         pregunta.setActividad(actividad);
         when(preguntaRepository.findById(20L)).thenReturn(Optional.of(pregunta));
 
-        Respuesta respuestaObj = new Respuesta();
+        RespuestaMaestro respuestaObj = new RespuestaMaestro();
         respuestaObj.setId(30L);
         respuestaObj.setRespuesta("RESP");
         respuestaObj.setCorrecta(true);
@@ -144,7 +144,7 @@ class RespAlumnoGeneralServiceImplTest {
         pregunta.setActividad(actividad);
         when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
 
-        Respuesta respuestaObj = new Respuesta();
+        RespuestaMaestro respuestaObj = new RespuestaMaestro();
         respuestaObj.setRespuesta("X");
         respuestaObj.setCorrecta(false);
         when(respuestaRepository.findById(50L)).thenReturn(Optional.of(respuestaObj));
@@ -174,7 +174,7 @@ class RespAlumnoGeneralServiceImplTest {
         pregunta.setActividad(actividad);
         when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
 
-        Respuesta respuestaObj = new Respuesta();
+        RespuestaMaestro respuestaObj = new RespuestaMaestro();
         respuestaObj.setRespuesta("X");
         respuestaObj.setCorrecta(true);
         when(respuestaRepository.findById(50L)).thenReturn(Optional.of(respuestaObj));
@@ -200,7 +200,7 @@ class RespAlumnoGeneralServiceImplTest {
         pregunta.setActividad(actividad);
         when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
 
-        Respuesta respuestaObj = new Respuesta();
+        RespuestaMaestro respuestaObj = new RespuestaMaestro();
         respuestaObj.setRespuesta("X");
         respuestaObj.setCorrecta(true);
         when(respuestaRepository.findById(50L)).thenReturn(Optional.of(respuestaObj));
@@ -268,7 +268,7 @@ class RespAlumnoGeneralServiceImplTest {
         pregunta.setActividad(actividad);
         when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
 
-        Respuesta respuestaObj = new Respuesta();
+        RespuestaMaestro respuestaObj = new RespuestaMaestro();
         respuestaObj.setRespuesta("X");
         respuestaObj.setCorrecta(null);
         when(respuestaRepository.findById(50L)).thenReturn(Optional.of(respuestaObj));

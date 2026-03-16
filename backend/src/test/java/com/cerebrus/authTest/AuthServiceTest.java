@@ -19,11 +19,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.cerebrus.auth.AuthService;
 import com.cerebrus.auth.payload.request.SignupRequest;
-import com.cerebrus.usuario.Alumno;
-import com.cerebrus.usuario.Director;
-import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioRepository;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -92,22 +91,6 @@ class AuthServiceTest {
 		verify(usuarioRepository).save(usuarioCaptor.capture());
 		Usuario saved = usuarioCaptor.getValue();
 		assertThat(saved).isInstanceOf(Maestro.class);
-		comprobarCamposComunesUsuario(saved, request);
-		assertThat(saved.getContrasena()).isEqualTo("encoded-pass");
-	}
-
-    // Test para verificar que el método registrarUsuario guarda correctamente un usuario de tipo Director, 
-    // codifica la contraseña y no guarda si el tipo de usuario no es válido
-	@Test
-	void registrarUsuarioDirectorTest() {
-		SignupRequest request = crearSignupRequest("DIRECTOR");
-		when(passwordEncoder.encode(eq(request.getPassword()))).thenReturn("encoded-pass");
-
-		authService.registrarUsuario(request);
-
-		verify(usuarioRepository).save(usuarioCaptor.capture());
-		Usuario saved = usuarioCaptor.getValue();
-		assertThat(saved).isInstanceOf(Director.class);
 		comprobarCamposComunesUsuario(saved, request);
 		assertThat(saved.getContrasena()).isEqualTo("encoded-pass");
 	}

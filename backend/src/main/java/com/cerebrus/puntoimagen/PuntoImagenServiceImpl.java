@@ -1,16 +1,17 @@
-package com.cerebrus.puntoimagen;
+package com.cerebrus.puntoImagen;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cerebrus.actividad.MarcarImagen;
+import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 import com.cerebrus.exceptions.ResourceNotFoundException;
-import com.cerebrus.usuario.Alumno;
-import com.cerebrus.usuario.Maestro;
+import com.cerebrus.puntoImagen.dto.PuntoImagenDTO;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @Service
 @Transactional

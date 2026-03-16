@@ -1,6 +1,7 @@
-package com.cerebrus.puntoimagen;
+package com.cerebrus.puntoImagen;
 
-import com.cerebrus.actividad.MarcarImagen;
+import com.cerebrus.actividad.marcarImagen.MarcarImagen;
+import com.cerebrus.puntoImagen.dto.PuntoImagenDTO;
 
 public interface PuntoImagenService {
 
