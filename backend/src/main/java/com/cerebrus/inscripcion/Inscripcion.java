@@ -3,7 +3,7 @@ package com.cerebrus.inscripcion;
 import java.time.LocalDate;
 
 import com.cerebrus.curso.Curso;
-import com.cerebrus.usuario.Alumno;
+import com.cerebrus.usuario.alumno.Alumno;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,6 +29,7 @@ public class Inscripcion {
     @Column(nullable = false)
     private LocalDate fechaInscripcion;
 
+    //Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "alumno_id", nullable = false)
     private Alumno alumno;

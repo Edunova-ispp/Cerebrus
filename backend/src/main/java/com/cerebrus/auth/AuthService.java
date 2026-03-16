@@ -1,12 +1,12 @@
 package com.cerebrus.auth;
 
 import com.cerebrus.auth.payload.request.SignupRequest;
-import com.cerebrus.organizacion.Organizacion;
-import com.cerebrus.usuario.Alumno;
-import com.cerebrus.usuario.Director;
-import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioRepository;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.organizacion.Organizacion;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -45,11 +45,13 @@ public class AuthService {
             case "MAESTRO":
                 nuevoUsuario = new Maestro();
                 break;
-            case "DIRECTOR":
-                nuevoUsuario = new Director();
+            case "ORGANIZACION":
+                Organizacion org = new Organizacion();
+                org.setNombreCentro(request.getNombreCentro()); 
+                nuevoUsuario = org;
                 break;
             default:
-                throw new IllegalArgumentException("Tipo de usuario inválido. Use: ALUMNO, MAESTRO o DIRECTOR");
+                throw new IllegalArgumentException("Tipo de usuario inválido. Use: ALUMNO, MAESTRO o ORGANIZACION");
         }
 
         nuevoUsuario.setNombre(request.getNombre());
@@ -57,7 +59,6 @@ public class AuthService {
         nuevoUsuario.setSegundoApellido(request.getSegundoApellido());
         nuevoUsuario.setNombreUsuario(request.getUsername());
         nuevoUsuario.setCorreoElectronico(request.getEmail());
-        nuevoUsuario.setOrganizacion(new Organizacion(request.getOrganizacion()));
         nuevoUsuario.setContrasena(passwordEncoder.encode(request.getPassword()));
 
         usuarioRepository.save(nuevoUsuario);

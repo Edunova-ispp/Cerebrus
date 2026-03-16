@@ -21,10 +21,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.cerebrus.actividad.Ordenacion;
-import com.cerebrus.actividad.OrdenacionController;
-import com.cerebrus.actividad.OrdenacionService;
-import com.cerebrus.actividad.DTO.OrdenacionDTO;
+import com.cerebrus.actividad.ordenacion.Ordenacion;
+import com.cerebrus.actividad.ordenacion.OrdenacionController;
+import com.cerebrus.actividad.ordenacion.OrdenacionService;
+import com.cerebrus.actividad.ordenacion.dto.OrdenacionDTO;
 import com.cerebrus.tema.Tema;
 
 @ExtendWith(MockitoExtension.class)

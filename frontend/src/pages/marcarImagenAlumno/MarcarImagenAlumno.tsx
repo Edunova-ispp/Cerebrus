@@ -270,23 +270,21 @@ export default function MarcarImagenAlumno() {
 
     setSubmitting(true);
     try {
-      const respIds = await Promise.all(
-        puntos.map(async (p) => {
-          const res = await apiFetch(`${apiBase}/api/respuestas-alumno-punto-imagen`, {
-            method: 'POST',
-            body: JSON.stringify({
-              respuesta: (respuestas[p.id] ?? '').trim(),
-              pixelX: p.pixelX,
-              pixelY: p.pixelY,
-              marcarImagenId: actividad.id,
-              actividadAlumnoId,
-            }),
-          });
-          const data = (await res.json()) as RespAlumnoPuntoImagenDTO;
-          if (!data?.id) throw new Error('Respuesta inválida al guardar una respuesta');
-          return data.id;
-        })
-      );
+    const respIds = await Promise.all(
+      puntos.map(async (p) => {
+        const res = await apiFetch(`${apiBase}/api/respuestas-alumno-punto-imagen`, {
+          method: 'POST',
+          body: JSON.stringify({
+            respuesta: (respuestas[p.id] ?? '').trim(),
+            puntoImagenId: p.id,        
+            actividadAlumnoId: actividadAlumnoId 
+          }),
+        });
+        const data = (await res.json()) as RespAlumnoPuntoImagenDTO;
+        if (!data?.id) throw new Error('Respuesta inválida al guardar una respuesta');
+        return data.id;
+      })
+    );
 
       const corregirRes = await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
         method: 'PUT',

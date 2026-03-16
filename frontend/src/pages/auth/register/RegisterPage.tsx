@@ -34,17 +34,22 @@ const RegisterPage = () => {
     const payload: any = { 
       nombre, 
       primerApellido, 
-      segundoApellido,
+      segundoApellido: segundoApellido === '' ? null : segundoApellido,
       email, 
       username,
       password,
-      organizacion,
       tipoUsuario 
     };
 
     if (tipoUsuario === "ALUMNO") {
-      const valorPuntos = puntos === '' ? 0 : parseInt(puntos, 10);
-      payload.puntos = valorPuntos;
+      payload.puntos = puntos === '' ? 0 : parseInt(puntos, 10);
+      payload.organizacion = organizacion;
+    } 
+    else if (tipoUsuario === "MAESTRO") {
+      payload.organizacion = organizacion;
+    } 
+    else if (tipoUsuario === "ORGANIZACION") {
+      payload.nombreCentro = organizacion; 
     }
 
     try {
@@ -70,7 +75,7 @@ const RegisterPage = () => {
         setTimeout(() => {
           if (tipoUsuario === 'ALUMNO') navigate('/miscursos');
           else if (tipoUsuario === 'MAESTRO') navigate('/miscursos');
-          else if (tipoUsuario === 'DIRECTOR') navigate('/infoDueños');
+          else if (tipoUsuario === 'ORGANIZACION') navigate('/infoDueños');
           else navigate('/');
         }, 2000);
       } else {
@@ -101,7 +106,7 @@ const RegisterPage = () => {
               >
                 <option value="ALUMNO">Alumno</option>
                 <option value="MAESTRO">Maestro</option>
-                <option value="DIRECTOR">Director</option>
+                <option value="ORGANIZACION">Organización</option>
               </select>
             </div>
             {tipoUsuario === "ALUMNO" && (
@@ -120,19 +125,25 @@ const RegisterPage = () => {
 
           <div className="register-fields-row">
             <div className="register-field-group">
-              <label className="register-label">Nombre:</label>
+              <label className="register-label">
+                {tipoUsuario === 'ORGANIZACION' ? 'Nombre del creador:' : 'Nombre:'}
+              </label>
               <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required className="register-input" />
             </div>
             <div className="register-field-group">
-              <label className="register-label">Primer Apellido:</label>
+              <label className="register-label">
+                {tipoUsuario === 'ORGANIZACION' ? 'Primer apellido del creador:' : 'Primer apellido:'}
+              </label>
               <input type="text" value={primerApellido} onChange={(e) => setPrimerApellido(e.target.value)} required className="register-input" />
             </div>
           </div>
 
           <div className="register-fields-row">
             <div className="register-field-group">
-              <label className="register-label">Segundo Apellido:</label>
-              <input type="text" value={segundoApellido} onChange={(e) => setSegundoApellido(e.target.value)} required className="register-input" />
+              <label className="register-label">
+                {tipoUsuario === 'ORGANIZACION' ? 'Segundo apellido del creador:' : 'Segundo apellido:'}
+              </label>
+              <input type="text" value={segundoApellido} onChange={(e) => setSegundoApellido(e.target.value)} className="register-input" />
             </div>
             <div className="register-field-group">
               <label className="register-label">Correo electrónico:</label>
@@ -146,7 +157,9 @@ const RegisterPage = () => {
               <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required className="register-input" />
             </div>
             <div className="register-field-group">
-              <label className="register-label">Organización:</label>
+              <label className="register-label">
+                {tipoUsuario === 'ORGANIZACION' ? 'Nombre del Centro:' : 'Organización:'}
+              </label>
               <input type="text" value={organizacion} onChange={(e) => setOrganizacion(e.target.value)} required className="register-input" />
             </div>
           </div>

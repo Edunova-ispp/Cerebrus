@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadController;
 import com.cerebrus.actividad.ActividadService;
-import com.cerebrus.actividad.DTO.TeoriaDTO;
+import com.cerebrus.actividad.general.dto.TeoriaDTO;
 
 @ExtendWith(MockitoExtension.class)
 class ActividadControllerTest {

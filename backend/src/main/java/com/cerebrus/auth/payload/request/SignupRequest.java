@@ -9,30 +9,30 @@ import lombok.Setter;
 @Setter
 public class SignupRequest {
 
-	@NotBlank
-	private String nombre;
-
-	@NotBlank
-	private String primerApellido;
-
-	@NotBlank
-	private String segundoApellido;
+    @NotBlank
+    private String nombre;
 
     @NotBlank
-	private String username;
+    private String primerApellido;
+
+    private String segundoApellido;
+
+    @NotBlank
+    private String username;
 
     @NotBlank
     @Email
-	private String email;
+    private String email;
 
     @NotBlank
-	private String password;
+    private String password;
 
     @NotBlank 
     private String tipoUsuario;
-	
-	@NotBlank
+    
     private String organizacion;
-	
+    
+    private String nombreCentro;
+    
     private Integer puntos;
 }

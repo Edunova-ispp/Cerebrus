@@ -8,13 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.ActividadRepository;
+import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.exceptions.ResourceNotFoundException;
-import com.cerebrus.respuesta.Respuesta;
-import com.cerebrus.usuario.Maestro;
+import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.maestro.Maestro;
 import com.cerebrus.actividad.Actividad;
-import com.cerebrus.utils.CerebrusUtils;
 
 @Service
 @Transactional
@@ -53,9 +53,9 @@ public class PreguntaServiceImpl implements PreguntaService {
     @Override
     public Pregunta readPregunta(Long id) {
         Pregunta preguntaObj = preguntaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La pregunta no existe"));
-        List<Respuesta> respuestas = preguntaObj.getRespuestas();
-        List<Respuesta> respuestasDesordenadas = CerebrusUtils.shuffleCollection(respuestas).stream().toList();
-        preguntaObj.setRespuestas(respuestasDesordenadas);
+        List<RespuestaMaestro> respuestas = preguntaObj.getRespuestasMaestro();
+        List<RespuestaMaestro> respuestasDesordenadas = CerebrusUtils.shuffleCollection(respuestas).stream().toList();
+        preguntaObj.setRespuestasMaestro(respuestasDesordenadas);
         return preguntaObj;
     }
 

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cerebrus.actividad.DTO.TeoriaDTO;
+import com.cerebrus.actividad.general.dto.TeoriaDTO;
 
 @RestController
 @RequestMapping("/api/actividades")

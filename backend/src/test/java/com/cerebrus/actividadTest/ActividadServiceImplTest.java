@@ -18,17 +18,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cerebrus.TipoActGeneral;
+import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.ActividadServiceImpl;
-import com.cerebrus.actividad.General;
+import com.cerebrus.actividad.general.General;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.tema.TemaService;
-import com.cerebrus.usuario.Maestro;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
 class ActividadServiceImplTest {

@@ -21,18 +21,18 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
-import com.cerebrus.respuesta.Respuesta;
-import com.cerebrus.respuesta.RespuestaController;
-import com.cerebrus.respuesta.RespuestaService;
+import com.cerebrus.respuestaMaestro.RespuestaMaestro;
+import com.cerebrus.respuestaMaestro.RespuestaMaestroController;
+import com.cerebrus.respuestaMaestro.RespuestaMaestroService;
 
 @ExtendWith(MockitoExtension.class)
 public class RespuestaControllerTest {
 
 	@Mock
-	private RespuestaService respuestaService;
+	private RespuestaMaestroService respuestaService;
 
 	@InjectMocks
-	private RespuestaController controller;
+	private RespuestaMaestroController controller;
 
     // Test para verificar que el método crearRespuesta devuelve CREATED y delega correctamente al servicio
 	@Test
@@ -40,13 +40,13 @@ public class RespuestaControllerTest {
 		Pregunta pregunta = new Pregunta();
 		pregunta.setId(10L);
 
-		Respuesta request = new Respuesta();
+		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Opción A");
 		request.setImagen("img.png");
 		request.setCorrecta(true);
 		request.setPregunta(pregunta);
 
-		Respuesta created = new Respuesta();
+		RespuestaMaestro created = new RespuestaMaestro();
 		created.setId(99L);
 		created.setRespuesta("Opción A");
 		created.setImagen("img.png");
@@ -77,13 +77,13 @@ public class RespuestaControllerTest {
 		Pregunta pregunta = new Pregunta();
 		pregunta.setId(7L);
 
-		Respuesta request = new Respuesta();
+		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Texto");
 		request.setImagen(null);
 		request.setCorrecta(false);
 		request.setPregunta(pregunta);
 
-		Respuesta created = new Respuesta();
+		RespuestaMaestro created = new RespuestaMaestro();
 		created.setId(1L);
 
 		when(respuestaService.crearRespuesta(eq("Texto"), eq(null), eq(false), eq(7L))).thenReturn(created);
@@ -101,13 +101,13 @@ public class RespuestaControllerTest {
 		Pregunta pregunta = new Pregunta();
 		pregunta.setId(8L);
 
-		Respuesta request = new Respuesta();
+		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Texto");
 		request.setImagen("img");
 		request.setCorrecta(null);
 		request.setPregunta(pregunta);
 
-		Respuesta created = new Respuesta();
+		RespuestaMaestro created = new RespuestaMaestro();
 		created.setId(2L);
 
 		when(respuestaService.crearRespuesta(eq("Texto"), eq("img"), isNull(), eq(8L))).thenReturn(created);
@@ -123,7 +123,7 @@ public class RespuestaControllerTest {
     // cuando se le pasa una pregunta nula
 	@Test
 	void crearRespuesta_cuandoPreguntaEsNull_lanzaNullPointer() {
-		Respuesta request = new Respuesta();
+		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Texto");
 		request.setImagen(null);
 		request.setCorrecta(true);
@@ -140,7 +140,7 @@ public class RespuestaControllerTest {
 		Pregunta pregunta = new Pregunta();
 		pregunta.setId(123L);
 
-		Respuesta request = new Respuesta();
+		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Texto");
 		request.setImagen("x");
 		request.setCorrecta(true);
@@ -160,7 +160,7 @@ public class RespuestaControllerTest {
 		Pregunta pregunta = new Pregunta();
 		pregunta.setId(123L);
 
-		Respuesta request = new Respuesta();
+		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Texto");
 		request.setImagen("x");
 		request.setCorrecta(true);
@@ -177,12 +177,12 @@ public class RespuestaControllerTest {
     // Test para verificar que el método readRespuesta devuelve OK y delega correctamente al servicio
 	@Test
 	void readRespuesta_devuelveOk() {
-		Respuesta respuesta = new Respuesta();
+		RespuestaMaestro respuesta = new RespuestaMaestro();
 		respuesta.setId(5L);
 
 		when(respuestaService.readRespuesta(5L)).thenReturn(respuesta);
 
-		ResponseEntity<Respuesta> response = controller.readRespuesta(5L);
+		ResponseEntity<RespuestaMaestro> response = controller.readRespuesta(5L);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).isSameAs(respuesta);
@@ -202,7 +202,7 @@ public class RespuestaControllerTest {
     // Test para verificar que el método updateRespuesta devuelve NO_CONTENT y delega correctamente al servicio
 	@Test
 	void updateRespuesta_devuelveOk() {
-		Respuesta request = new Respuesta();
+		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Nueva");
 		request.setImagen("img2.png");
 		request.setCorrecta(false);
@@ -218,7 +218,7 @@ public class RespuestaControllerTest {
     // id diferente, y delega correctamente al servicio
 	@Test
 	void updateRespuesta_usaPathId_inclusoSiBodyTieneDiferenteId() {
-		Respuesta request = new Respuesta();
+		RespuestaMaestro request = new RespuestaMaestro();
 		request.setId(1234L);
 		request.setRespuesta("Nueva");
 		request.setImagen("img2.png");
@@ -244,7 +244,7 @@ public class RespuestaControllerTest {
     // delega correctamente al servicio
 	@Test
 	void updateRespuesta_permiteImagenNull() {
-		Respuesta request = new Respuesta();
+		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Nueva");
 		request.setImagen(null);
 		request.setCorrecta(true);
@@ -258,7 +258,7 @@ public class RespuestaControllerTest {
 
     // Test para verificar que el método updateRespuesta propaga AccessDeniedException lanzada por el servicio
 	void updateRespuesta_propagaAccessDeniedFromService() {
-		Respuesta request = new Respuesta();
+		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Nueva");
 		request.setImagen(null);
 		request.setCorrecta(true);
@@ -274,7 +274,7 @@ public class RespuestaControllerTest {
     // Test para verificar que el método updateRespuesta propaga ResourceNotFoundException lanzada por el servicio
 	@Test
 	void updateRespuesta_propagaNotFoundFromService() {
-		Respuesta request = new Respuesta();
+		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Nueva");
 		request.setImagen("img2.png");
 		request.setCorrecta(false);

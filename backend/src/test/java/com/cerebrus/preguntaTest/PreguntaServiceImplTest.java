@@ -26,10 +26,10 @@ import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
 import com.cerebrus.pregunta.PreguntaServiceImpl;
-import com.cerebrus.respuesta.Respuesta;
-import com.cerebrus.usuario.Maestro;
+import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
 class PreguntaServiceImplTest {
@@ -125,38 +125,38 @@ class PreguntaServiceImplTest {
 
     @Test
     void readPregunta_existente_retornaPreguntaConRespuestas() {
-        Respuesta r1 = new Respuesta("4", null, true, pregunta);
-        Respuesta r2 = new Respuesta("5", null, false, pregunta);
-        Respuesta r3 = new Respuesta("3", null, false, pregunta);
-        pregunta.setRespuestas(new ArrayList<>(List.of(r1, r2, r3)));
+        RespuestaMaestro r1 = new RespuestaMaestro("4", null, true, pregunta);
+        RespuestaMaestro r2 = new RespuestaMaestro("5", null, false, pregunta);
+        RespuestaMaestro r3 = new RespuestaMaestro("3", null, false, pregunta);
+        pregunta.setRespuestasMaestro(new ArrayList<>(List.of(r1, r2, r3)));
         when(preguntaRepository.findById(10L)).thenReturn(Optional.of(pregunta));
 
         Pregunta resultado = preguntaService.readPregunta(10L);
 
         assertThat(resultado).isNotNull();
-        assertThat(resultado.getRespuestas()).hasSize(3);
-        assertThat(resultado.getRespuestas()).containsExactlyInAnyOrder(r1, r2, r3);
+        assertThat(resultado.getRespuestasMaestro()).hasSize(3);
+        assertThat(resultado.getRespuestasMaestro()).containsExactlyInAnyOrder(r1, r2, r3);
     }
 
     @Test
     void readPregunta_sinRespuestas_retornaPreguntaConListaVacia() {
-        pregunta.setRespuestas(new ArrayList<>());
+        pregunta.setRespuestasMaestro(new ArrayList<>());
         when(preguntaRepository.findById(10L)).thenReturn(Optional.of(pregunta));
 
         Pregunta resultado = preguntaService.readPregunta(10L);
 
-        assertThat(resultado.getRespuestas()).isEmpty();
+        assertThat(resultado.getRespuestasMaestro()).isEmpty();
     }
 
     @Test
     void readPregunta_unaRespuesta_retornaMismaRespuesta() {
-        Respuesta r1 = new Respuesta("4", null, true, pregunta);
-        pregunta.setRespuestas(new ArrayList<>(List.of(r1)));
+        RespuestaMaestro r1 = new RespuestaMaestro("4", null, true, pregunta);
+        pregunta.setRespuestasMaestro(new ArrayList<>(List.of(r1)));
         when(preguntaRepository.findById(10L)).thenReturn(Optional.of(pregunta));
 
         Pregunta resultado = preguntaService.readPregunta(10L);
 
-        assertThat(resultado.getRespuestas()).containsExactly(r1);
+        assertThat(resultado.getRespuestasMaestro()).containsExactly(r1);
     }
 
     @Test

@@ -1,6 +1,6 @@
-package com.cerebrus.puntoimagen;
+package com.cerebrus.puntoImagen;
 
-import com.cerebrus.actividad.MarcarImagen;
+import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,6 +29,7 @@ public class PuntoImagen {
     @Column(nullable = false)
     private Integer pixelY;
 
+    //Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "marcar_imagen_id", nullable = false)
     private MarcarImagen marcarImagen;

@@ -1,11 +1,11 @@
 package com.cerebrus.actividad.DTO;
 
-import com.cerebrus.TipoActGeneral;
+import com.cerebrus.comun.enumerados.*;
 import com.cerebrus.actividad.Actividad;
-import com.cerebrus.actividad.General;
-import com.cerebrus.actividad.MarcarImagen;
-import com.cerebrus.actividad.Ordenacion;
-import com.cerebrus.actividad.Tablero;
+import com.cerebrus.actividad.general.General;
+import com.cerebrus.actividad.marcarImagen.MarcarImagen;
+import com.cerebrus.actividad.ordenacion.Ordenacion;
+import com.cerebrus.actividad.tablero.Tablero;
 
 import lombok.Getter;
 

@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
-import com.cerebrus.curso.CursoService;
-import com.cerebrus.usuario.Alumno;
 
 @RestController
 @RequestMapping("/api/estadisticas")
@@ -23,12 +21,10 @@ public class EstadisticasMaestroController {
 
     private final EstadisticasMaestroServiceImpl estadisticasMaestroService;
     private final CursoRepository cursoRepository;
-    private final CursoService cursoService;
 
-    public EstadisticasMaestroController(EstadisticasMaestroServiceImpl estadisticasMaestroService, CursoRepository cursoRepository, CursoService cursoService) {
+    public EstadisticasMaestroController(EstadisticasMaestroServiceImpl estadisticasMaestroService, CursoRepository cursoRepository) {
         this.estadisticasMaestroService = estadisticasMaestroService;
         this.cursoRepository = cursoRepository;
-        this.cursoService = cursoService;
     }
 
     @GetMapping("/cursos/{cursoId}/actividades-completadas")

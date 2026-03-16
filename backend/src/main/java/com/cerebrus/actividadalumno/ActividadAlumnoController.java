@@ -1,4 +1,4 @@
-package com.cerebrus.actividadalumno;
+package com.cerebrus.actividadAlumno;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.cerebrus.actividadAlumno.dto.ActividadAlumnoDTO;
+import com.cerebrus.actividadAlumno.dto.CorreccionManualDTO;
 
 import jakarta.validation.Valid;
 
@@ -36,10 +39,9 @@ public class ActividadAlumnoController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<ActividadAlumnoDTO> crearActividadAlumno(@RequestBody @Valid ActividadAlumnoDTO actividadAlumno) {
         ActividadAlumno actividadAlumnoCreada = actividadAlumnoService.crearActividadAlumno(
-            actividadAlumno.getTiempo() == null ? 0 : actividadAlumno.getTiempo(),
             actividadAlumno.getPuntuacion() == null ? 0 : actividadAlumno.getPuntuacion(),
-            actividadAlumno.getInicio() == null ? LocalDateTime.now() : actividadAlumno.getInicio(),
-            actividadAlumno.getAcabada() == null ? LocalDateTime.of(1970, 1, 1, 0, 0) : actividadAlumno.getAcabada(),
+            actividadAlumno.getFechaInicio() == null ? LocalDateTime.now() : actividadAlumno.getFechaInicio(),
+            actividadAlumno.getFechaFin() == null ? LocalDateTime.of(1970, 1, 1, 0, 0) : actividadAlumno.getFechaFin(),
             actividadAlumno.getNota() == null ? 0 : actividadAlumno.getNota(),
             actividadAlumno.getNumAbandonos() == null ? 0 : actividadAlumno.getNumAbandonos(),
             actividadAlumno.getAlumnoId(),
@@ -60,10 +62,9 @@ public class ActividadAlumnoController {
     public ResponseEntity<ActividadAlumnoDTO> updateActividadAlumno(@PathVariable Long id, @RequestBody @Valid ActividadAlumnoDTO actividadAlumno) {
         ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.updateActividadAlumno(
             id,
-            actividadAlumno.getTiempo(),
             actividadAlumno.getPuntuacion(),
-            actividadAlumno.getInicio(),
-            actividadAlumno.getAcabada(),
+            actividadAlumno.getFechaInicio(),
+            actividadAlumno.getFechaFin(),
             actividadAlumno.getNota(),
             actividadAlumno.getNumAbandonos()
         );
@@ -102,27 +103,14 @@ public class ActividadAlumnoController {
         return new ResponseEntity<>(toDto(updated), HttpStatus.OK);
     }
 
-    private static ActividadAlumnoDTO toDto(ActividadAlumno aa) {
-        return new ActividadAlumnoDTO(
-            aa.getId(),
-            aa.getTiempo(),
-            aa.getPuntuacion(),
-            aa.getInicio(),
-            aa.getAcabada(),
-            aa.getNota(),
-            aa.getNumAbandonos(),
-            aa.getAlumno() == null ? null : aa.getAlumno().getId(),
-            aa.getActividad() == null ? null : aa.getActividad().getId()
-        );
-    }
-  
+    
     @PutMapping("/corregir-manualmente/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoManual(@PathVariable Long id, @RequestBody CorreccionManualDTO correccionManualDTO) {
         ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoManual(id, correccionManualDTO.getNuevaNota(), correccionManualDTO.getNuevasCorreccionesRespuestasIds());
         return new ResponseEntity<>(toDto(actividadAlumnoActualizada), HttpStatus.OK);
     }
-
+    
     @PutMapping("/corregir-automaticamente/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoAutomaticamente(
@@ -134,28 +122,29 @@ public class ActividadAlumnoController {
         ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamente(id, respuestasIds);
         return new ResponseEntity<>(toDto(actividadAlumnoActualizada), HttpStatus.OK);
     }
-
-        @PutMapping("/corregir-automaticamente-general-clasificacion/{id}")
+    
+    @PutMapping("/corregir-automaticamente-general-clasificacion/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoAutomaticamenteGeneralClasificacion(
         @PathVariable Long id,
         @RequestBody(required = false) List<Long> respuestasIds
     ) {
-
-       
-        
         ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(id, respuestasIds);
-        ActividadAlumnoDTO actividadAlumnoDTO = new ActividadAlumnoDTO(
-            actividadAlumnoActualizada.getId(),
-            actividadAlumnoActualizada.getTiempo(),
-            actividadAlumnoActualizada.getPuntuacion(),
-            actividadAlumnoActualizada.getInicio(),
-            actividadAlumnoActualizada.getAcabada(),
-            actividadAlumnoActualizada.getNota(),
-            actividadAlumnoActualizada.getNumAbandonos(),
-            actividadAlumnoActualizada.getAlumno().getId(),
-            actividadAlumnoActualizada.getActividad().getId()
-        );
+        ActividadAlumnoDTO actividadAlumnoDTO = toDto(actividadAlumnoActualizada);
         return new ResponseEntity<>(actividadAlumnoDTO, HttpStatus.OK);
+    }
+
+    private static ActividadAlumnoDTO toDto(ActividadAlumno aa) {
+        return new ActividadAlumnoDTO(
+            aa.getId(),
+            aa.getTiempoMinutos(),
+            aa.getPuntuacion(),
+            aa.getFechaInicio(),
+            aa.getFechaFin(),
+            aa.getNota(),
+            aa.getNumAbandonos(),
+            aa.getAlumno() == null ? null : aa.getAlumno().getId(),
+            aa.getActividad() == null ? null : aa.getActividad().getId()
+        );
     }
 }

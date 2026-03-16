@@ -147,7 +147,7 @@ useEffect(() => {
     if (!alumnoId) return;
 
     Promise.all(
-      unchecked.map((act) =>
+      tema.actividades.map((act) =>
         apiFetch(`${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${act.id}`)
           .then(async (r) => {
             if (r.status === 404) return { id: act.id, info: { done: false, terminada: false } };
@@ -156,7 +156,7 @@ useEffect(() => {
               id: act.id,
               info: {
                 done: true,
-                terminada: !!data.acabada && data.acabada !== "1970-01-01T00:00:00",
+                terminada: !!data.fechaFin && data.fechaFin !== "1970-01-01T00:00:00",
                 puntuacionObtenida: data.puntuacion
               }
             };
@@ -170,7 +170,15 @@ useEffect(() => {
         return next;
       });
     });
-  }, [temas, selectedIndex, completionMap]);
+  }, [temas, selectedIndex]);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      setCompletionMap(new Map());
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
 
   const handleActivityClick = (act: ActividadDTO) => {
     const tipoReal = act.tipo ? act.tipo.toUpperCase() : '';

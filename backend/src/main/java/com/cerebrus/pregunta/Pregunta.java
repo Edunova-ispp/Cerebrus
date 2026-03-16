@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cerebrus.actividad.Actividad;
-import com.cerebrus.respuesta.Respuesta;
+import com.cerebrus.actividad.general.General;
+import com.cerebrus.actividad.tablero.Tablero;
+import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneral;
+import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -31,12 +34,16 @@ public class Pregunta {
 
     private String imagen;
 
+    //Relaciones
+    @OneToMany(mappedBy = "pregunta", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<RespuestaMaestro> respuestasMaestro = new ArrayList<>();
+
+    @OneToMany(mappedBy = "pregunta", fetch = FetchType.LAZY)
+    private List<RespAlumnoGeneral> respuestasAlumGeneral = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actividad_id", nullable = false)
     private Actividad actividad;
-
-    @OneToMany(mappedBy = "pregunta", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<Respuesta> respuestas = new ArrayList<>();
 
     // Constructores
     public Pregunta() {
@@ -45,7 +52,6 @@ public class Pregunta {
     public Pregunta(String pregunta, String imagen, Actividad actividad) {
         this.pregunta = pregunta;
         this.imagen = imagen;
-        this.actividad = actividad;
     }
 
     // Getters y Setters
@@ -73,21 +79,30 @@ public class Pregunta {
         this.imagen = imagen;
     }
 
-    public Actividad getActividad() {
+    public List<RespuestaMaestro> getRespuestasMaestro() {
+        return respuestasMaestro;
+    }
+
+    public void setRespuestasMaestro(List<RespuestaMaestro> respuestas) {
+        this.respuestasMaestro = respuestas;
+    }
+
+    public List<RespAlumnoGeneral> getRespuestasAlumnoGeneral() {
+        return respuestasAlumGeneral;
+    }
+
+    public void setRespuestasAlumnoGeneral(List<RespAlumnoGeneral> respuestasAlumno) {
+        this.respuestasAlumGeneral = respuestasAlumno;
+    }
+
+    public Actividad getActividad(){
         return actividad;
     }
 
-    public void setActividad(Actividad actividad) {
+    public void setActividad(Actividad actividad){
         this.actividad = actividad;
     }
 
-    public List<Respuesta> getRespuestas() {
-        return respuestas;
-    }
-
-    public void setRespuestas(List<Respuesta> respuestas) {
-        this.respuestas = respuestas;
-    }
 
     @Override
     public String toString() {
