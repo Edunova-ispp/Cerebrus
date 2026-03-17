@@ -155,7 +155,8 @@ public class IaConnectionServiceImpl implements IaConnectionService {
             +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"CLASIFICACION\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\", \"preguntas\": [{\"enunciado\": \"Enunciado de la pregunta\", \"opciones\": [{\"texto\": \"Texto de la opción\", \"correcta\": true}]}]}"
             + "Genera al menos 2 preguntas. Cada pregunta solo puede tener opciones correctas";
             case TABLERO -> "Genera una actividad de tablero sobre el siguiente tema: " + prompt
-            +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"TABLERO\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\" , \"tamaño\": \"tamaño de la actividad\"}";
+            +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"TABLERO\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\" , \"tamaño\": \"3x3/4x4\", \"preguntas\": [{\"enunciado\": \"Enunciado de la pregunta\", \"respuesta\": {\"texto\": \"Texto de la opción\", \"correcta\": true}}]}"
+            +"Genera 8 preguntas para tablero 3x3 o 15 para tablero 4x4. Cada pregunta solo puede tener una respuesta, que debe ser correcta.";
             case IMAGEN -> "Genera una actividad con imágenes sobre el siguiente tema: " + prompt
             +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"IMAGEN\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\", \"imagen\": \"url\"}";
             default -> throw new IllegalArgumentException("400 Bad Request");
