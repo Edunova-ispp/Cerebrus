@@ -140,18 +140,14 @@ public class IaConnectionServiceImpl implements IaConnectionService {
             case TEORIA -> "Genera una actividad teórica sobre el siguiente tema: " + prompt
             +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"TEORIA\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\"}";
             case TEST -> "Genera una actividad de tipo test con preguntas de opción múltiple sobre el siguiente tema: " + prompt
-            +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"TIPO_TEST\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\", \"preguntas\": [{\"enunciado\": \"Enunciado de la pregunta\", \"opciones\": [{\"texto\": \"Texto de la opción\", \"correcta\": true/false}]}]}"
+            +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"TEST\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\", \"preguntas\": [{\"enunciado\": \"Enunciado de la pregunta\", \"opciones\": [{\"texto\": \"Texto de la opción\", \"correcta\": true/false}]}]}"
             + "Genera al menos 2 preguntas. Cada pregunta solo puede tener una opcion correcta";
             case ORDEN -> "Genera una actividad de ordenación con los siguientes elementos: " + prompt+
-            "Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"ORDENACION\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\", \"valores\": [{\"texto\": \"Texto del elemento\", \"orden\": número que indica el orden correcto}]}"
+            "Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"ORDEN\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\", \"valores\": [{\"texto\": \"Texto del elemento\", \"orden\": número que indica el orden correcto}]}"
             + "Genera al menos 4 elementos a ordenar. Cada valor puedeser solo una direccion a una imagen o una sola palabra";
             case CARTA -> "Genera una actividad de tipo carta sobre el siguiente tema: " + prompt
             +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"CARTA\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\", \"preguntas\": [{\"enunciado\": \"Enunciado de la pregunta\", \"respuesta\": {\"texto\": \"Texto de la opción\", \"correcta\": true}}]}"
             +"Genera al menos dos preguntas. Cada pregunta solo puede tener una respuesta, que debe ser correcta.";
-            case CRUCIGRAMA -> "Genera una actividad de crucigrama sobre el siguiente tema: " + prompt
-            +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"CRUCIGRAMA\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\"}";
-            case ABIERTA -> "Genera una actividad de pregunta abierta sobre el siguiente tema: " + prompt
-            +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"ABIERTA\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\"}";
            case CLASIFICACION -> "Genera una actividad de clasificación sobre el siguiente tema: " + prompt
             +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"CLASIFICACION\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\", \"preguntas\": [{\"enunciado\": \"Enunciado de la pregunta\", \"opciones\": [{\"texto\": \"Texto de la opción\", \"correcta\": true}]}]}"
             + "Genera al menos 2 preguntas. Cada pregunta solo puede tener opciones correctas";
