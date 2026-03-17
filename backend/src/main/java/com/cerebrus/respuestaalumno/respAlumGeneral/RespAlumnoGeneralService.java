@@ -9,6 +9,6 @@ public interface RespAlumnoGeneralService {
     RespAlumnoGeneral updateRespAlumnoGeneral(Long id, Boolean correcta, Long actAlumnoId, String respuesta, Long preguntaId);
     void deleteRespAlumnoGeneral(Long id);
     Boolean corregirRespuestaAlumnoGeneral(Long id);
-    boolean corregirRespuestaAlumnoGeneralTest(Long id);
+    boolean corregirRespuestaAlumnoGeneralClasificacion(Long id);
     HashMap<Long, String> corregirCrucigrama(LinkedHashMap<Long,String> respuestas, Long crucigramaId);
 }
