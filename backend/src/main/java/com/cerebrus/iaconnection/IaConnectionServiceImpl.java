@@ -151,8 +151,9 @@ public class IaConnectionServiceImpl implements IaConnectionService {
             +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"CRUCIGRAMA\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\"}";
             case ABIERTA -> "Genera una actividad de pregunta abierta sobre el siguiente tema: " + prompt
             +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"ABIERTA\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\"}";
-            case CLASIFICACION -> "Genera una actividad de clasificación sobre el siguiente tema: " + prompt
-            +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"CLASIFICACION\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\"}";
+           case CLASIFICACION -> "Genera una actividad de clasificación sobre el siguiente tema: " + prompt
+            +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"CLASIFICACION\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\", \"preguntas\": [{\"enunciado\": \"Enunciado de la pregunta\", \"opciones\": [{\"texto\": \"Texto de la opción\", \"correcta\": true}]}]}"
+            + "Genera al menos 2 preguntas. Cada pregunta solo puede tener opciones correctas";
             case TABLERO -> "Genera una actividad de tablero sobre el siguiente tema: " + prompt
             +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"TABLERO\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\" , \"tamaño\": \"tamaño de la actividad\"}";
             case IMAGEN -> "Genera una actividad con imágenes sobre el siguiente tema: " + prompt
