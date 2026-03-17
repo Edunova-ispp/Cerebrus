@@ -146,7 +146,8 @@ public class IaConnectionServiceImpl implements IaConnectionService {
             "Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"ORDENACION\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\", \"valores\": [{\"texto\": \"Texto del elemento\", \"orden\": número que indica el orden correcto}]}"
             + "Genera al menos 4 elementos a ordenar. Cada valor puedeser solo una direccion a una imagen o una sola palabra";
             case CARTA -> "Genera una actividad de tipo carta sobre el siguiente tema: " + prompt
-            +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"CARTA\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\"}";
+            +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"CARTA\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\", \"preguntas\": [{\"enunciado\": \"Enunciado de la pregunta\", \"respuesta\": {\"texto\": \"Texto de la opción\", \"correcta\": true}}]}"
+            +"Genera al menos dos preguntas. Cada pregunta solo puede tener una respuesta, que debe ser correcta.";
             case CRUCIGRAMA -> "Genera una actividad de crucigrama sobre el siguiente tema: " + prompt
             +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"CRUCIGRAMA\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\"}";
             case ABIERTA -> "Genera una actividad de pregunta abierta sobre el siguiente tema: " + prompt
@@ -155,11 +156,10 @@ public class IaConnectionServiceImpl implements IaConnectionService {
             +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"CLASIFICACION\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\", \"preguntas\": [{\"enunciado\": \"Enunciado de la pregunta\", \"opciones\": [{\"texto\": \"Texto de la opción\", \"correcta\": true}]}]}"
             + "Genera al menos 2 preguntas. Cada pregunta solo puede tener opciones correctas";
             case TABLERO -> "Genera una actividad de tablero sobre el siguiente tema: " + prompt
-            +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"TABLERO\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\" , \"tamaño\": \"3x3/4x4\", \"preguntas\": [{\"enunciado\": \"Enunciado de la pregunta\", \"respuesta\": {\"texto\": \"Texto de la opción\", \"correcta\": true}}]}"
-            +"Genera 8 preguntas para tablero 3x3 o 15 para tablero 4x4. Cada pregunta solo puede tener una respuesta, que debe ser correcta.";
-            case IMAGEN -> "Genera una actividad con imágenes sobre el siguiente tema: " + prompt
-            +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"IMAGEN\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\", \"imagen\": \"url\"}";
-            default -> throw new IllegalArgumentException("400 Bad Request");
+            +"Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"TABLERO\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\" , \"tamaño\": \"TRES_X_TRES/CUATRO_X_CUATRO\", \"preguntas\": [{\"enunciado\": \"Enunciado de la pregunta\", \"respuesta\": {\"texto\": \"Texto de la opción\", \"correcta\": true}}]}"
+            +"Genera 8 preguntas para tablero TRES_X_TRES o 15 para tablero CUATRO_X_CUATRO. Cada pregunta solo puede tener una respuesta, que debe ser correcta.";
+           
+            default -> throw new IllegalArgumentException("400 Bad Request: Tipo de actividad no soportado: " + tipoActividad);
         };
     }
     
@@ -168,7 +168,7 @@ public class IaConnectionServiceImpl implements IaConnectionService {
        System.out.println("APIkey " + apiKey);
         Usuario usuario = usuarioService.findCurrentUser();
         if(!(usuario instanceof Maestro)){
-            throw new IllegalArgumentException("403 Forbidden");
+            throw new IllegalArgumentException("403 Forbidden: El usuario no es un maestro");
         }
        String promptDepurado = crearPromt(tipoActividad, prompt);
         HttpHeaders headers = new HttpHeaders();
@@ -199,7 +199,7 @@ public class IaConnectionServiceImpl implements IaConnectionService {
             }
             return respuesta;
         } catch (Exception e) {
-            throw new IllegalArgumentException("500 API Server Error: " + e.getMessage());
+            throw new IllegalArgumentException("500 Internal Server Error: "+" Error interno de la api de geminis: " + e.getMessage());
         }
          
     }
@@ -242,46 +242,42 @@ public class IaConnectionServiceImpl implements IaConnectionService {
                     break;
                 case TEST:
                     if (!jsonResponse.containsKey("titulo") || !jsonResponse.containsKey("descripcion") || !jsonResponse.containsKey("preguntas")) {
-                        throw new IllegalArgumentException("400 Bad Request");
+                        throw new IllegalArgumentException("400 Bad Request mal formato de actividad test: "+jsonResponse);
                     }
                     break;
                 case ORDEN:
                     if (!jsonResponse.containsKey("titulo") || !jsonResponse.containsKey("descripcion") || !jsonResponse.containsKey("valores")) {
-                        throw new IllegalArgumentException("400 Bad Request");
+                        throw new IllegalArgumentException("400 Bad Request mal formato de actividad orden: "+jsonResponse);
                     }
                     break;
                 case CARTA:
-                    if (!jsonResponse.containsKey("titulo") || !jsonResponse.containsKey("descripcion")) {
-                        throw new IllegalArgumentException("400 Bad Request");
+                    if (!jsonResponse.containsKey("titulo") || !jsonResponse.containsKey("descripcion") || !jsonResponse.containsKey("preguntas")) {
+                        throw new IllegalArgumentException("400 Bad Request mal formato de actividad carta: "+jsonResponse);
                     }
                     break;
                 case CRUCIGRAMA:
                     if (!jsonResponse.containsKey("titulo") || !jsonResponse.containsKey("descripcion")) {
-                        throw new IllegalArgumentException("400 Bad Request");
+                        throw new IllegalArgumentException("400 Bad Request mal formato de actividad crucigrama: "+jsonResponse);
                     }
                     break;
                 case ABIERTA:
                     if (!jsonResponse.containsKey("titulo") || !jsonResponse.containsKey("descripcion")) {
-                        throw new IllegalArgumentException("400 Bad Request");
+                        throw new IllegalArgumentException("400 Bad Request mal formato de actividad abierta: "+jsonResponse);
                     }
                     break;
                 case CLASIFICACION:
-                    if (!jsonResponse.containsKey("titulo") || !jsonResponse.containsKey("descripcion")) {
-                        throw new IllegalArgumentException("400 Bad Request");
+                    if (!jsonResponse.containsKey("titulo") || !jsonResponse.containsKey("descripcion") || !jsonResponse.containsKey("preguntas")) {
+                        throw new IllegalArgumentException("400 Bad Request mal formato de actividad clasificacion: "+jsonResponse);
                     }
                     break;
                 case TABLERO:
-                    if (!jsonResponse.containsKey("titulo") || !jsonResponse.containsKey("descripcion") || !jsonResponse.containsKey("tamaño")) {
-                        throw new IllegalArgumentException("400 Bad Request");
+                    if (!jsonResponse.containsKey("titulo") || !jsonResponse.containsKey("descripcion") || !jsonResponse.containsKey("tamaño") || !jsonResponse.containsKey("preguntas")) {
+                        throw new IllegalArgumentException("400 Bad Request mal formato de actividad tablero: "+jsonResponse);
                     }
                     break;
-                case IMAGEN:
-                    if (!jsonResponse.containsKey("titulo") || !jsonResponse.containsKey("descripcion") || !jsonResponse.containsKey("imagen")) {
-                        throw new IllegalArgumentException("400 Bad Request");
-                    }
-                    break;
+                
                 default:
-                    throw new IllegalArgumentException("400 Bad Request");
+                    throw new IllegalArgumentException("400 Bad Request mal tipo de actividad: "+tipoActividad);
             }
             
             return true;
