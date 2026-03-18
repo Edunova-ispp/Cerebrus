@@ -218,11 +218,11 @@ public class TableroServiceImpl implements TableroService {
                         numErrores++;
                     }
                 }
-                Integer notaFinal = Math.round(10 - (numErrores * (10 / tablero.getPreguntas().size()/6)));
+                Integer notaFinal = Math.round(10 - (numErrores * (10 / tablero.getPreguntas().size()/4)));
                 if (notaFinal <= 0) {
                     notaFinal = 1;
                 }
-                Integer puntuacionFinal = Math.round(tablero.getPuntuacion() - (numErrores * (tablero.getPuntuacion() / tablero.getPreguntas().size()/6)));
+                Integer puntuacionFinal = Math.round(tablero.getPuntuacion() - (numErrores * (tablero.getPuntuacion() / tablero.getPreguntas().size()/4)));
                 if (puntuacionFinal <= 0) {
                     puntuacionFinal = 1;
                 }

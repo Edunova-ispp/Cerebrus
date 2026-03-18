@@ -158,8 +158,20 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         Integer puntuacion = 0;
         Integer puntuacionASumar = actividadRepository.findById(crucigramaId).orElseThrow(() -> new RuntimeException("El crucigrama no existe")).getPuntuacion() / respuestas.size();
         List<RespAlumnoGeneral> respuestasAlumno = new java.util.ArrayList<>();
-        ActividadAlumno  actividadAlumno = actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumno.getId(), crucigramaId)
-            .orElse(actividadAlumnoRepository.save(new ActividadAlumno(0,LocalDateTime.now(),null,0,0,alumno,actividadRepository.findByID(crucigramaId))));
+        
+        // Buscar si ya existe ActividadAlumno para este alumno y actividad
+        // Si NO existe, crear UNA NUEVA
+        // Si existe, reutilizar la misma y actualizar datos
+        ActividadAlumno actividadAlumno;
+        var existente = actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumno.getId(), crucigramaId);
+        if (existente.isPresent()) {
+            // Ya existe: usar la misma
+            actividadAlumno = existente.get();
+        } else {
+            // NO existe: crear una nueva
+            actividadAlumno = actividadAlumnoRepository.save(new ActividadAlumno(0, LocalDateTime.now(), null, 0, 0, alumno, actividadRepository.findByID(crucigramaId)));
+        }
+        
         HashMap<Long, String> resultado = new HashMap<>();
 
         for(Entry<Long, String> entry : respuestas.entrySet()) {
@@ -183,8 +195,8 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
                 puntuacion += puntuacionASumar;
             }
             else {
-                nota -= 10/(respuestas.size()*4);
-                puntuacion -= puntuacionASumar/4;
+                nota -= 10/(respuestas.size()*2);
+                puntuacion -= puntuacionASumar/2;
             }
 
             if(pregunta.getActividad().getRespVisible()) {

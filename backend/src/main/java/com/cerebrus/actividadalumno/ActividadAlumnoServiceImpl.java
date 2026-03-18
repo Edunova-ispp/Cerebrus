@@ -251,8 +251,8 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
                     notaAcumulada += valorNotaPorPregunta;
                 }
                 else {
-                    puntuacionAcumulada -= valorPuntoPorPregunta / 4;
-                    notaAcumulada -= valorNotaPorPregunta / 4;
+                    puntuacionAcumulada -= valorPuntoPorPregunta / 2;
+                    notaAcumulada -= valorNotaPorPregunta / 2;
                     
                 }
             }
@@ -371,8 +371,8 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         puntuacionFinal = puntuacionPorRespuesta * numPosicionesCorrectas;
         notaFinal = notaPorRespuesta * numPosicionesCorrectas;
         Integer numErrores = numValores - numPosicionesCorrectas;
-        puntuacionFinal -= (puntuacionPorRespuesta / 6) * numErrores;
-        notaFinal -= (notaPorRespuesta / 6) * numErrores;
+        puntuacionFinal -= (puntuacionPorRespuesta / 3) * numErrores;
+        notaFinal -= (notaPorRespuesta / 3) * numErrores;
         if (puntuacionFinal < 0) {
             puntuacionFinal = 0;
         }
@@ -408,8 +408,8 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
                 notaFinal += notaPorRespuesta;
             }
                 else {
-                    puntuacionFinal -= puntuacionPorRespuesta / 4;
-                    notaFinal -= notaPorRespuesta / 4;
+                    puntuacionFinal -= puntuacionPorRespuesta / 2;
+                    notaFinal -= notaPorRespuesta / 2;
                 }
         }
         if (puntuacionFinal <0) {
@@ -463,8 +463,8 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
                     notaAcumulada += valorNotaPorPregunta;
                 }
                 else {
-                    puntuacionAcumulada -= valorPuntoPorPregunta / 4;
-                    notaAcumulada -= valorNotaPorPregunta / 4;
+                    puntuacionAcumulada -= valorPuntoPorPregunta / 2;
+                    notaAcumulada -= valorNotaPorPregunta / 2;
                 }
             }
         }
