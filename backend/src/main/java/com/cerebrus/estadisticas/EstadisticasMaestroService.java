@@ -3,14 +3,9 @@ package com.cerebrus.estadisticas;
 import java.util.Map;
 
 import com.cerebrus.curso.Curso;
-import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
-import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
-import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
+import com.cerebrus.usuario.alumno.Alumno;
 
 public interface EstadisticasMaestroService {
     Map<String, Long> numActividadesRealizadasPorAlumno(Curso curso);
-    Map<String, Integer> calcularTotalPuntosCursoPorAlumno(Long cursoId);
-    Map<Long, EstadisticasActividadDTO> obtenerEstadisticasCursoActividad(Long cursoId, Long temaId);
-    Map<Long, EstadisticasTemaDTO> obtenerEstadisticasCursoTema(Long cursoId);
-    EstadisticasCursoDTO obtenerEstadisticasCurso(Long cursoId);
+    Map<Alumno, Integer> calcularTotalPuntosCursoPorAlumno(Curso curso);
 }

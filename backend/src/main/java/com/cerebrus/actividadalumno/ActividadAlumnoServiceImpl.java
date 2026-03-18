@@ -426,7 +426,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         if (respuestasIds != null) {
             for (Long respuestaId : respuestasIds) {
                 
-                boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneralTest(respuestaId);
+                boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneralClasificacion(respuestaId);
                 System.out.println("Respuesta ID " + respuestaId + " es correcta? " + esCorrecta);
                 if (esCorrecta) {
                     puntuacionAcumulada += valorPuntoPorPregunta;

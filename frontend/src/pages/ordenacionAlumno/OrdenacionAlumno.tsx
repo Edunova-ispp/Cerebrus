@@ -87,7 +87,7 @@ export default function OrdenacionAlumno() {
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
   
   const ordenacionIdNum = useMemo(() => {
-    if (!ordenacionId) return NaN;
+    if (!ordenacionId) return Number.NaN;
     return Number.parseInt(ordenacionId, 10);
   }, [ordenacionId]);
 

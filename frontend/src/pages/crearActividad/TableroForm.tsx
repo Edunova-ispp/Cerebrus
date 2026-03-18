@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserRoles } from '../../types/curso';
+import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import './TableroForm.css';
 
 export type TableroFormMode = 'create' | 'edit';
@@ -45,6 +46,7 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [showIAModal, setShowIAModal] = useState(false);
 
   const navigate = useNavigate();
   const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
@@ -153,8 +155,54 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
 
   const numPreguntas = tamano === null ? 0 : tamano ? PREGUNTAS_3X3 : PREGUNTAS_4X4;
 
+  const handleIAResult = (data: any) => {
+    console.log("Datos crudos de la IA (Tablero):", data);
+
+    if (data.titulo) setTitulo(String(data.titulo));
+    if (data.descripcion) setDescripcion(String(data.descripcion));
+    if (data.puntuacion) setPuntuacion(String(data.puntuacion));
+
+    const arrayPreguntas = data.preguntas || data.casillas || data.items || data.tablero || [];
+
+    if (Array.isArray(arrayPreguntas) && arrayPreguntas.length > 0) {
+      const esTresPorTres = arrayPreguntas.length <= 8;
+      setTamano(esTresPorTres);
+      
+      const expectedCount = esTresPorTres ? PREGUNTAS_3X3 : PREGUNTAS_4X4;
+      const mappedPreguntas = makeQuestions(expectedCount);
+
+for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
+        const q = arrayPreguntas[i];
+        const textoPregunta = q.pregunta || q.enunciado || q.texto || '';
+        let textoRespuesta = '';
+        if (q.respuesta) {
+          if (typeof q.respuesta === 'string') {
+            textoRespuesta = q.respuesta;
+          } else if (typeof q.respuesta === 'object') {
+            textoRespuesta = q.respuesta.texto || q.respuesta.respuesta || q.respuesta.text || '';
+          }
+        } else {
+          textoRespuesta = q.solucion || q.correcta || '';
+        }
+
+        mappedPreguntas[i] = {
+          pregunta: String(textoPregunta),
+          respuesta: String(textoRespuesta)
+        };
+      }
+      
+      setPreguntas(mappedPreguntas);
+    }
+  };
+
   return (
     <form className="tbl-form" onSubmit={handleSubmit}>
+       <GenerarIAModal
+              tipoActividad="TABLERO"
+              open={showIAModal}
+              onClose={() => setShowIAModal(false)}
+              onResult={handleIAResult}
+            />
       {/* ── Datos básicos ─────────────────────────────────────── */}
       <div className="tbl-header">
         <div className="tbl-col">
@@ -192,7 +240,13 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
             />
             Mostrar respuesta correcta al alumno
           </label>
+          <div>
+            <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+              Generar con IA
+            </button>
+          </div>
         </div>
+        
       </div>
 
       {/* ── Selector de tamaño ────────────────────────────────── */}
