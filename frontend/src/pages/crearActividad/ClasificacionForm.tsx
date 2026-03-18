@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import './TestForm.css';
 
 export type ClasificacionFormMode = 'create' | 'edit';
@@ -59,6 +60,7 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
   const [preguntas, setPreguntas] = useState<Pregunta[]>([makeEmptyPregunta()]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+const [showIAModal, setShowIAModal] = useState(false);
 
   const originalPreguntasRef = useRef<ClasificacionFormInitialPregunta[]>([]);
   const navigate = useNavigate();
@@ -244,10 +246,51 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
     }
   };
 
+const handleIAResult = (data: any) => {
+    // 1. Imprimimos el JSON exacto en la consola por si necesitamos investigarlo
+    console.log("Datos crudos de la IA:", data);
+
+    if (data.titulo) setTitulo(data.titulo);
+    if (data.descripcion) setDescripcion(data.descripcion);
+    if (data.puntuacion) setPuntuacion(String(data.puntuacion));
+
+    // 2. Buscamos el array principal (la IA a veces lo llama 'categorias' en vez de 'preguntas')
+    const arrayPrincipal = data.preguntas || data.categorias || data.categories;
+
+    if (Array.isArray(arrayPrincipal) && arrayPrincipal.length > 0) {
+      const mappedPreguntas: Pregunta[] = arrayPrincipal.map((p: any) => {
+        const categoriaText = p.pregunta || p.categoria || p.nombre || p.titulo || p.name || p.enunciado || 'Categoría sin nombre';
+        const arrayElementos = p.respuestas || p.elementos || p.items || p.opciones || [];
+        let elementosMapeados: RespuestaOption[] = [{ text: '' }];
+        if (Array.isArray(arrayElementos) && arrayElementos.length > 0) {
+          elementosMapeados = arrayElementos.map((r: any) => {
+            if (typeof r === 'string') {
+              return { text: r };
+            }
+            const textoRespuesta = r.respuesta || r.texto || r.text || r.nombre || r.elemento || '';
+            return { text: String(textoRespuesta) };
+          });
+        }
+        return {
+          text: categoriaText,
+          respuestas: elementosMapeados
+        };
+      });
+      
+      setPreguntas(mappedPreguntas);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="tf-form">
       {error && <p className="ca-text tf-error">{error}</p>}
-      
+      <GenerarIAModal
+        tipoActividad="CLASIFICACION"
+        open={showIAModal}
+        onClose={() => setShowIAModal(false)}
+        onResult={handleIAResult}
+      />
+    
       <div className="ca-contenedor-blanco tf-header">
         <div className="tf-col">
           <div>
@@ -261,10 +304,16 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
         </div>
 
         <div className="tf-col">
+            <div>
+            <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+              Generar con IA
+            </button>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <label className="ca-text">Puntuación</label>
             <input type="number" value={puntuacion} onChange={(e) => setPuntuacion(e.target.value)} style={{ width: 90 }} />
           </div>
+          
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
             <input type="checkbox" id="respVisible" checked={respVisible} onChange={(e) => setRespVisible(e.target.checked)} />
             <label className="ca-text" htmlFor="respVisible">Corregir automáticamente</label>
@@ -274,6 +323,7 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
               <label className="ca-text">Comentarios de corrección</label>
               <input type="text" value={comentariosRespVisible} onChange={(e) => setComentariosRespVisible(e.target.value)} style={{ width: '100%' }} />
             </div>
+            
           )}
         </div>
       </div>
