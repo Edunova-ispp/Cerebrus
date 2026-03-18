@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 
 @RestController
@@ -84,14 +85,10 @@ public class EstadisticasMaestroController {
         return estadisticasMaestroService.obtenerEstadisticasCursoTema(cursoId);
     }   
 
-    @GetMapping("/cursos/{cursoId}/nota-maxima-curso")
-    public Integer obtenerNotaMaximaCurso(@PathVariable Long cursoId) {
-        return estadisticasMaestroService.obtenerNotaMaximaCurso(cursoId);
+    @GetMapping("/cursos/{cursoId}/estadisiticas-curso")
+    public EstadisticasCursoDTO obtenerEstadisticasCurso(@PathVariable Long cursoId) {
+        return estadisticasMaestroService.obtenerEstadisticasCurso(cursoId);
     }
-
-    @GetMapping("/cursos/{cursoId}/nota-minima-curso")
-    public Integer obtenerNotaMinimaCurso(@PathVariable Long cursoId) {
-        return estadisticasMaestroService.obtenerNotaMinimaCurso(cursoId);
-    }
+   
 
 }

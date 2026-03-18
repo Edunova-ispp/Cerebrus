@@ -18,6 +18,7 @@ import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
@@ -391,23 +392,39 @@ public class EstadisticasMaestroServiceImpl {
         return resultado;
     }
 
-    @Transactional(readOnly = true)
-    public Integer obtenerNotaMaximaCurso(Long cursoId) {
-        Usuario usuario = usuarioService.findCurrentUser();
+    private List<Actividad> obtenerActividadesCurso(Curso curso) {
+        return curso.getTemas().stream()
+                .flatMap(tema -> actividadRepository.findByTemaId(tema.getId()).stream())
+                .toList();
+    }
+
+    private Boolean cursoCompletadoPorTodos(Long cursoId) {
         Curso curso = cursoRepository.findById(cursoId)
                 .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
 
-        if (!(usuario instanceof Maestro)) {
-            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
-        }
+        List<Actividad> actividadesCurso = obtenerActividadesCurso(curso);
+        return temaCompletadoPorTodos(cursoId, actividadesCurso);
+    }
 
-        if (!curso.getMaestro().getId().equals(usuario.getId())) {
-            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
-        }
+    private Double notaMediaCurso(Long cursoId) {
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
 
-        List<Actividad> actividadesCurso = curso.getTemas().stream()
-                .flatMap(tema -> actividadRepository.findByTemaId(tema.getId()).stream())
-                .toList();
+        List<Actividad> actividadesCurso = obtenerActividadesCurso(curso);
+        return notaMediaTema(cursoId, actividadesCurso);
+    }
+
+    private Double tiempoMedioCurso(Long cursoId) {
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+
+        List<Actividad> actividadesCurso = obtenerActividadesCurso(curso);
+        return tiempoMedioTema(cursoId, actividadesCurso);
+    }
+
+    private Integer obtenerNotaMaximaCurso(Curso curso) {
+
+        List<Actividad> actividadesCurso = obtenerActividadesCurso(curso);
 
         Map<Long, Integer> sumaNotasPorAlumno = sumaNotasPorAlumnoTema(actividadesCurso);
         if (sumaNotasPorAlumno.isEmpty()) {
@@ -420,23 +437,8 @@ public class EstadisticasMaestroServiceImpl {
                 .orElse(0);
     }
 
-    @Transactional(readOnly = true)
-    public Integer obtenerNotaMinimaCurso(Long cursoId) {
-        Usuario usuario = usuarioService.findCurrentUser();
-        Curso curso = cursoRepository.findById(cursoId)
-                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
-
-        if (!(usuario instanceof Maestro)) {
-            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
-        }
-
-        if (!curso.getMaestro().getId().equals(usuario.getId())) {
-            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
-        }
-
-        List<Actividad> actividadesCurso = curso.getTemas().stream()
-                .flatMap(tema -> actividadRepository.findByTemaId(tema.getId()).stream())
-                .toList();
+    private Integer obtenerNotaMinimaCurso(Curso curso) {
+        List<Actividad> actividadesCurso = obtenerActividadesCurso(curso);
 
         Map<Long, Integer> sumaNotasPorAlumno = sumaNotasPorAlumnoTema(actividadesCurso);
         if (sumaNotasPorAlumno.isEmpty()) {
@@ -447,6 +449,27 @@ public class EstadisticasMaestroServiceImpl {
                 .mapToInt(Integer::intValue)
                 .min()
                 .orElse(0);
+    }
+
+    @Transactional(readOnly = true)
+    public EstadisticasCursoDTO obtenerEstadisticasCurso(Long cursoId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        if (!(usuario instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
+        }
+
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
+        }
+
+        return new EstadisticasCursoDTO(
+                    cursoCompletadoPorTodos(cursoId),
+                    notaMediaCurso(cursoId),
+                    tiempoMedioCurso(cursoId),
+                    obtenerNotaMaximaCurso(curso),
+                    obtenerNotaMinimaCurso(curso));
     }
 
 }
