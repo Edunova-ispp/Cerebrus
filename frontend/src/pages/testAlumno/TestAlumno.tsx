@@ -89,7 +89,7 @@ export default function TestAlumno() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const testIdNum = useMemo(() => {
-    if (!testId) return NaN;
+    if (!testId) return Number.NaN;
     return Number.parseInt(testId, 10);
   }, [testId]);
 
