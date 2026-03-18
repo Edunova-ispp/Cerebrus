@@ -4,27 +4,32 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
+import com.cerebrus.curso.CursoServiceImpl;
+import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 
 @RestController
 @RequestMapping("/api/estadisticas")
 public class EstadisticasMaestroController {
 
-    private final EstadisticasMaestroServiceImpl estadisticasMaestroService;
+    private final EstadisticasMaestroService estadisticasMaestroService;
     private final CursoRepository cursoRepository;
 
-    public EstadisticasMaestroController(EstadisticasMaestroServiceImpl estadisticasMaestroService, CursoRepository cursoRepository) {
+    @Autowired
+    public EstadisticasMaestroController(EstadisticasMaestroService estadisticasMaestroService, CursoRepository cursoRepository) {
         this.estadisticasMaestroService = estadisticasMaestroService;
         this.cursoRepository = cursoRepository;
     }
@@ -94,4 +99,170 @@ public class EstadisticasMaestroController {
         return estadisticasMaestroService.obtenerNotaMinimaCurso(cursoId);
     }
 
+    @GetMapping("/")
+    public String getMethodName(@RequestParam String param) {
+        return new String();
+    }
+
+    // ==================== CONSULTAR TIEMPO DE ALUMNO ====================
+
+    @GetMapping("/actividades/{actividadId}/alumno/{alumnoId}/tiempo")
+    public ResponseEntity<?> obtenerTiempoAlumnoEnActividad(@PathVariable Long actividadId, @PathVariable Long alumnoId) {
+        try {
+            Integer tiempo = estadisticasMaestroService.obtenerTiempoAlumnoEnActividad(alumnoId, actividadId);
+            return ResponseEntity.ok(Map.of("tiempoMinutos", tiempo));
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Ocurrió un error inesperado."));
+        }
+    }
+
+    @GetMapping("/temas/{temaId}/alumno/{alumnoId}/tiempo")
+    public ResponseEntity<?> obtenerTiempoAlumnoEnTema(@PathVariable Long temaId, @PathVariable Long alumnoId) {
+        try {
+            Integer tiempo = estadisticasMaestroService.obtenerTiempoAlumnoEnTema(alumnoId, temaId);
+            return ResponseEntity.ok(Map.of("tiempoMinutos", tiempo));
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Ocurrió un error inesperado."));
+        }
+    }
+
+    @GetMapping("/cursos/{cursoId}/alumno/{alumnoId}/tiempo")
+    public ResponseEntity<?> obtenerTiempoAlumnoEnCurso(@PathVariable Long cursoId, @PathVariable Long alumnoId) {
+        try {
+            Integer tiempo = estadisticasMaestroService.obtenerTiempoAlumnoEnCurso(alumnoId, cursoId);
+            return ResponseEntity.ok(Map.of("tiempoMinutos", tiempo));
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Ocurrió un error inesperado."));
+        }
+    }
+
+    // ==================== CONSULTAR TIEMPO PROMEDIO ====================
+
+    @GetMapping("/actividades/{actividadId}/tiempo-promedio")
+    public ResponseEntity<?> obtenerTiempoMedioActividad(@PathVariable Long actividadId) {
+        try {
+            Double tiempoPromedio = estadisticasMaestroService.obtenerTiempoMedioActividad(actividadId);
+            return ResponseEntity.ok(Map.of("tiempoPromedioMinutos", tiempoPromedio));
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Ocurrió un error inesperado."));
+        }
+    }
+
+    @GetMapping("/temas/{temaId}/tiempo-promedio")
+    public ResponseEntity<?> obtenerTiempoMedioTema(@PathVariable Long temaId) {
+        try {
+            Double tiempoPromedio = estadisticasMaestroService.obtenerTiempoMedioTema(temaId);
+            return ResponseEntity.ok(Map.of("tiempoPromedioMinutos", tiempoPromedio));
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Ocurrió un error inesperado."));
+        }
+    }
+
+    @GetMapping("/cursos/{cursoId}/tiempo-promedio")
+    public ResponseEntity<?> obtenerTiempoMedioCurso(@PathVariable Long cursoId) {
+        try {
+            Double tiempoPromedio = estadisticasMaestroService.obtenerTiempoMedioCurso(cursoId);
+            return ResponseEntity.ok(Map.of("tiempoPromedioMinutos", tiempoPromedio));
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Ocurrió un error inesperado."));
+        }
+    }
+
+    // ==================== CONSULTAR ALUMNOS MÁS RÁPIDOS Y LENTOS ====================
+
+    @GetMapping("/actividades/{actividadId}/alumnos-rapidos-lentos")
+    public ResponseEntity<?> obtenerAlumnosMasRapidosLentosActividad(@PathVariable Long actividadId, 
+            @RequestParam(defaultValue = "3") Integer limite) {
+        try {
+            AlumnosMasRapidosLentosDTO resultado = estadisticasMaestroService.obtenerAlumnosMasRapidosLentosActividad(actividadId, limite);
+            return ResponseEntity.ok(resultado);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Ocurrió un error inesperado."));
+        }
+    }
+
+    @GetMapping("/temas/{temaId}/alumnos-rapidos-lentos")
+    public ResponseEntity<?> obtenerAlumnosMasRapidosLentosTema(@PathVariable Long temaId, 
+            @RequestParam(defaultValue = "3") Integer limite) {
+        try {
+            AlumnosMasRapidosLentosDTO resultado = estadisticasMaestroService.obtenerAlumnosMasRapidosLentosTema(temaId, limite);
+            return ResponseEntity.ok(resultado);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Ocurrió un error inesperado."));
+        }
+    }
+
+    @GetMapping("/cursos/{cursoId}/alumnos-rapidos-lentos")
+    public ResponseEntity<?> obtenerAlumnosMasRapidosLentosCurso(@PathVariable Long cursoId, 
+            @RequestParam(defaultValue = "3") Integer limite) {
+        try {
+            AlumnosMasRapidosLentosDTO resultado = estadisticasMaestroService.obtenerAlumnosMasRapidosLentosCurso(cursoId, limite);
+            return ResponseEntity.ok(resultado);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Ocurrió un error inesperado."));
+        }
+    }
 }

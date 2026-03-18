@@ -95,7 +95,7 @@ export default function ClasificacionAlumno() {
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
   const clasificacionIdNum = useMemo(() => {
-    if (!clasificacionId) return NaN;
+    if (!clasificacionId) return Number.NaN;
     return Number.parseInt(clasificacionId, 10);
   }, [clasificacionId]);
 
@@ -208,7 +208,7 @@ export default function ClasificacionAlumno() {
     const respuestaIdStr = e.dataTransfer.getData('text/plain');
     if (!respuestaIdStr) return;
     
-    const respuestaId = parseInt(respuestaIdStr, 10);
+    const respuestaId = Number.parseInt(respuestaIdStr, 10);
 
     setRespuestasAsociadas((prev) => {
       const newMap = new Map(prev);
@@ -227,7 +227,7 @@ export default function ClasificacionAlumno() {
     const respuestaIdStr = e.dataTransfer.getData('text/plain');
     if (!respuestaIdStr) return;
     
-    const respuestaId = parseInt(respuestaIdStr, 10);
+    const respuestaId = Number.parseInt(respuestaIdStr, 10);
 
     setRespuestasAsociadas((prev) => {
       const newMap = new Map(prev);

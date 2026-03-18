@@ -331,7 +331,7 @@ export default function EditarActividad() {
       }
     : undefined;
 
-  const actividadIdNum = actividadId ? Number.parseInt(actividadId, 10) : NaN;
+  const actividadIdNum = actividadId ? Number.parseInt(actividadId, 10) : Number.NaN;
 
   const clasificacionInitialValues: ClasificacionFormInitialValues | undefined = clasificacion
     ? {
