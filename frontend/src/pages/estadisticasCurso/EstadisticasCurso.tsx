@@ -87,8 +87,8 @@ export default function EstadisticasCurso() {
             </tr>
           </thead>
           <tbody>
-            {estadisticas.map((stat, index) => (
-              <tr key={index}>
+            {estadisticas.map((stat) => (
+              <tr key={stat.nombre}>
                 <td>{stat.nombre}</td>
                 <td className="text-center">{stat.puntos}</td>
                 <td className="text-center">{stat.actividadesRealizadas}</td>
