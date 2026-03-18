@@ -159,7 +159,7 @@ export default function MarcarImagenAlumno() {
         }
 
         const alumnoId = getCurrentUserIdFromJwt();
-        if (!alumnoId) throw new Error('No se pudo identificar al alumno conectado. Inicia sesión de nuevo.');
+        if (!alumnoId) throw new TypeError('No se pudo identificar al alumno conectado. Inicia sesión de nuevo.');
 
         const ensureRes = await apiFetch(`${apiBase}/api/actividades-alumno/ensure/${actData.id}`);
         const ensureValue = (await ensureRes.json()) as unknown;
@@ -171,7 +171,7 @@ export default function MarcarImagenAlumno() {
           if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
             setActividadAlumnoId(aaData.id);
           } else {
-            throw new Error('Respuesta inválida al obtener ActividadAlumno');
+            throw new TypeError('Respuesta inválida al obtener ActividadAlumno');
           }
         } else {
           const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
@@ -182,7 +182,7 @@ export default function MarcarImagenAlumno() {
           if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
             setActividadAlumnoId(aaData.id);
           } else {
-            throw new Error('Respuesta inválida al crear ActividadAlumno');
+            throw new TypeError('Respuesta inválida al crear ActividadAlumno');
           }
         }
       } catch (e) {
@@ -281,7 +281,7 @@ export default function MarcarImagenAlumno() {
           }),
         });
         const data = (await res.json()) as RespAlumnoPuntoImagenDTO;
-        if (!data?.id) throw new Error('Respuesta inválida al guardar una respuesta');
+        if (!data?.id) throw new TypeError('Respuesta inválida al guardar una respuesta');
         return data.id;
       })
     );
@@ -348,7 +348,7 @@ export default function MarcarImagenAlumno() {
             <div className="mia-top">
               <button className="mia-exit-btn" type="button" onClick={() => navigate(-1)}>
                 <img src={espadaImg} alt="" className="mia-exit-icon" />
-                Salir
+                <span>Salir</span>
               </button>
 
               <div className="mia-title-banner">
