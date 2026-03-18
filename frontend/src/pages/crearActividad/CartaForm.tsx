@@ -30,11 +30,16 @@ export interface CartaFormInitialValues {
 }
 
 interface Card {
+  localKey: string;
   id?: number;
   pregunta: string;
   respuesta: string;
   imagen: string;
   respuestaId?: number;
+}
+
+function makeLocalCardKey(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 interface Props {
@@ -44,7 +49,7 @@ interface Props {
 }
 
 function makeEmptyCard(): Card {
-  return { pregunta: '', respuesta: '', imagen: '' };
+  return { localKey: makeLocalCardKey(), pregunta: '', respuesta: '', imagen: '' };
 }
 
 export function CartaForm({ mode = 'create', generalId, initialValues }: Props) {
@@ -78,6 +83,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
       originalCardsRef.current = [...initialValues.preguntas];
       setCards(
         initialValues.preguntas.map((p) => ({
+          localKey: makeLocalCardKey(),
           id: p.id,
           pregunta: p.pregunta,
           respuesta: p.respuestas[0]?.respuesta ?? '',
@@ -127,6 +133,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
         }
 
         return {
+          localKey: makeLocalCardKey(),
           pregunta: String(preguntaText),
           respuesta: String(respuestaText),
           imagen: ''
@@ -407,7 +414,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
           </p>
 
           {cards.map((card, ci) => (
-            <div key={ci} className="cf-card-block">
+            <div key={card.localKey} className="cf-card-block">
               <div className="cf-card-header">
                 <span className="cf-card-label">Carta {ci + 1}</span>
                 {cards.length > 1 && (

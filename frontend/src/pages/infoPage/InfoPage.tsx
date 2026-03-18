@@ -11,14 +11,14 @@ interface InfoPageProps {
 }
 
 const TITLE = [
-  { char: "C", cls: "primary" },
-  { char: "e", cls: "secondary" },
-  { char: "r", cls: "primary" },
-  { char: "e", cls: "secondary" },
-  { char: "b", cls: "primary" },
-  { char: "r", cls: "secondary" },
-  { char: "u", cls: "accent" },
-  { char: "s", cls: "accent" },
+  { key: "c-1", char: "C", cls: "primary" },
+  { key: "e-1", char: "e", cls: "secondary" },
+  { key: "r-1", char: "r", cls: "primary" },
+  { key: "e-2", char: "e", cls: "secondary" },
+  { key: "b-1", char: "b", cls: "primary" },
+  { key: "r-2", char: "r", cls: "secondary" },
+  { key: "u-1", char: "u", cls: "accent" },
+  { key: "s-1", char: "s", cls: "accent" },
 ];
 
 // Video camera icon as inline SVG
@@ -84,8 +84,8 @@ function InfoPage({ userType }: InfoPageProps) {
 
       <div className="info-header">
         <h1 className="info-title">
-          {TITLE.map((t, i) => (
-            <span key={i} className={`title-char ${t.cls}`}>
+          {TITLE.map((t) => (
+            <span key={t.key} className={`title-char ${t.cls}`}>
               {t.char}
             </span>
           ))}
