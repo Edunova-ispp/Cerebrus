@@ -250,10 +250,21 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
                     puntuacionAcumulada += valorPuntoPorPregunta;
                     notaAcumulada += valorNotaPorPregunta;
                 }
+                else {
+                    puntuacionAcumulada -= valorPuntoPorPregunta / 2;
+                    notaAcumulada -= valorNotaPorPregunta / 2;
+                    
+                }
             }
         }
 
     // 3. Guardar y redondear
+    if(puntuacionAcumulada < 0) {
+        puntuacionAcumulada = 0;
+    }
+    if(notaAcumulada < 0) {
+        notaAcumulada = 0;
+    }
     actividadAlumno.setPuntuacion((int) Math.round(puntuacionAcumulada));
     actividadAlumno.setNota((int) Math.round(notaAcumulada));
     actividadAlumno.setFechaFin(LocalDateTime.now());
@@ -359,6 +370,15 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         Integer numPosicionesCorrectas = respAlumnoOrdenacionService.obtenerNumPosicionesCorrectas(respuestasIds.get(0));
         puntuacionFinal = puntuacionPorRespuesta * numPosicionesCorrectas;
         notaFinal = notaPorRespuesta * numPosicionesCorrectas;
+        Integer numErrores = numValores - numPosicionesCorrectas;
+        puntuacionFinal -= (puntuacionPorRespuesta / 3) * numErrores;
+        notaFinal -= (notaPorRespuesta / 3) * numErrores;
+        if (puntuacionFinal < 0) {
+            puntuacionFinal = 0;
+        }
+        if (notaFinal < 0) {
+            notaFinal = 0;
+        }
         actividadAlumno.setPuntuacion(puntuacionFinal);
         actividadAlumno.setNota(notaFinal);
     }
@@ -387,6 +407,16 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
                 puntuacionFinal += puntuacionPorRespuesta;
                 notaFinal += notaPorRespuesta;
             }
+                else {
+                    puntuacionFinal -= puntuacionPorRespuesta / 2;
+                    notaFinal -= notaPorRespuesta / 2;
+                }
+        }
+        if (puntuacionFinal <0) {
+            puntuacionFinal = 0;
+        }
+        if (notaFinal <0) {
+            notaFinal = 0;
         }
         actividadAlumno.setPuntuacion(puntuacionFinal);
         actividadAlumno.setNota(notaFinal);
@@ -432,11 +462,20 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
                     puntuacionAcumulada += valorPuntoPorPregunta;
                     notaAcumulada += valorNotaPorPregunta;
                 }
+                else {
+                    puntuacionAcumulada -= valorPuntoPorPregunta / 2;
+                    notaAcumulada -= valorNotaPorPregunta / 2;
+                }
             }
         }
         
 
-        
+        if (puntuacionAcumulada <0) {
+            puntuacionAcumulada = 0;
+        }
+        if (notaAcumulada <0) {
+            notaAcumulada = 0;
+        }
         actividadAlumno.setPuntuacion((int) Math.round(puntuacionAcumulada));
         actividadAlumno.setNota((int) Math.round(notaAcumulada));
         actividadAlumno.setFechaFin(LocalDateTime.now());

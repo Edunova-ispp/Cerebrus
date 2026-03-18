@@ -143,9 +143,18 @@ export default function TeoriaAlumno() {
                     <h2 className="ta-back-title">{teoria.titulo}</h2>
                     <div className="ta-scroll-area">
                       {teoria.descripcion ? (
-                        teoria.descripcion.split('\n').map((line, i) => (
-                          <p key={i} className="ta-paragraph">{line}</p>
-                        ))
+                        (() => {
+                          const lineOccurrences = new Map<string, number>();
+                          return teoria.descripcion.split('\n').map((line) => {
+                            const currentCount = (lineOccurrences.get(line) ?? 0) + 1;
+                            lineOccurrences.set(line, currentCount);
+                            return (
+                              <p key={`${line || 'empty-line'}-${currentCount}`} className="ta-paragraph">
+                                {line}
+                              </p>
+                            );
+                          });
+                        })()
                       ) : (
                         <p className="ta-paragraph">Sin contenido disponible.</p>
                       )}

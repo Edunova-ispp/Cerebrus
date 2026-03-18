@@ -27,10 +27,14 @@ interface Props {
 const PREGUNTAS_3X3 = 8;
 const PREGUNTAS_4X4 = 15;
 
-type QPair = { pregunta: string; respuesta: string };
+type QPair = { localKey: string; pregunta: string; respuesta: string };
+
+function makeLocalKey(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
 
 function makeQuestions(count: number): QPair[] {
-  return Array.from({ length: count }, () => ({ pregunta: '', respuesta: '' }));
+  return Array.from({ length: count }, () => ({ localKey: makeLocalKey(), pregunta: '', respuesta: '' }));
 }
 
 const isCellDark = (row: number, col: number) => (row + col) % 2 === 1;
@@ -63,7 +67,7 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
     setTamano(initialValues.tamano);
     setTemaIdState(initialValues.temaId);
     setPreguntas(
-      initialValues.preguntas.map((p) => ({ pregunta: p.pregunta, respuesta: p.respuesta })),
+      initialValues.preguntas.map((p) => ({ localKey: makeLocalKey(), pregunta: p.pregunta, respuesta: p.respuesta })),
     );
   }, [initialValues]);
 
@@ -186,6 +190,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
         }
 
         mappedPreguntas[i] = {
+          ...mappedPreguntas[i],
           pregunta: String(textoPregunta),
           respuesta: String(textoRespuesta)
         };
@@ -238,7 +243,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            Mostrar respuesta correcta al alumno
+            <span>Mostrar respuesta correcta al alumno</span>
           </label>
           <div>
             <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
@@ -273,7 +278,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
                     const col = idx % dim;
                     return (
                       <div
-                        key={idx}
+                        key={`cell-${dim}-${row}-${col}`}
                         className={`tbl-board-cell${isCellDark(row, col) ? ' tbl-board-cell--dark' : ''}`}
                       />
                     );
@@ -296,18 +301,18 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
             <span className="tbl-q-col-label">Enunciado de la pregunta</span>
             <span className="tbl-q-col-label">Respuesta correcta</span>
           </div>
-          {Array.from({ length: numPreguntas }).map((_, i) => (
-            <div key={i} className="tbl-q-row">
+          {preguntas.slice(0, numPreguntas).map((q, i) => (
+            <div key={q.localKey} className="tbl-q-row">
               <span className="tbl-q-number">{i + 1}</span>
               <input
                 className="tbl-input"
-                value={preguntas[i]?.pregunta ?? ''}
+                value={q.pregunta ?? ''}
                 onChange={(e) => updatePregunta(i, e.target.value)}
                 placeholder={`Pregunta ${i + 1}`}
               />
               <input
                 className="tbl-input tbl-respuesta-input"
-                value={preguntas[i]?.respuesta ?? ''}
+                value={q.respuesta ?? ''}
                 onChange={(e) => updateRespuesta(i, e.target.value)}
                 placeholder="Respuesta"
               />

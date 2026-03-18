@@ -1,9 +1,10 @@
-import { useEffect, useState, useCallback, type ReactElement } from 'react';
+import { useEffect, useState, useCallback, useRef, type ReactElement } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
 import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import { apiFetch } from '../../utils/api';
+import { getCurrentUserInfo } from '../../types/curso';
 import perritoImg from '../../assets/props/perritoCerberito.png';
 import hombreMisteriosoImg from '../../assets/props/hombreMisterioso.png';
 import './TableroAlumno.css';
@@ -21,6 +22,17 @@ type TableroAlumnoDTO = {
 };
 
 // ── Helpers ───────────────────────────────────────────────
+
+function getCurrentUserIdFromJwt(): number | null {
+  const info = getCurrentUserInfo();
+  if (!info) return null;
+  const raw =
+    (info as Record<string, unknown>)?.id ??
+    (info as Record<string, unknown>)?.userId ??
+    (info as Record<string, unknown>)?.sub;
+  const userId = typeof raw === 'string' ? Number(raw) : raw;
+  return typeof userId === 'number' && Number.isFinite(userId) ? userId : null;
+}
 
 function cellToQIndex(r: number, c: number, size: number): number | null {
   if (r === 0 && c === 0) return null;
@@ -177,7 +189,14 @@ export default function TableroAlumno() {
   const { tableroId } = useParams<{ tableroId: string }>();
   const navigate = useNavigate();
 
+  // ── Refs para controlar el tiempo y estado ──
+  const initInFlightRef = useRef(false);
+  const completedRef = useRef(false);
+  const abandonReportedRef = useRef(false);
+  const actividadAlumnoIdRef = useRef<number | null>(null);
+
   const [tablero, setTablero] = useState<TableroAlumnoDTO | null>(null);
+  const [actividadAlumnoId, setActividadAlumnoId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -189,13 +208,60 @@ export default function TableroAlumno() {
   const [feedback, setFeedback] = useState<{ correct: boolean; msg: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Sincronizar el ID para el cleanup del abandono
   useEffect(() => {
-    if (!tableroId) return;
-    apiFetch(`${API_BASE}/api/tableros/${tableroId}`)
-      .then((r) => r.json())
-      .then((data: TableroAlumnoDTO) => setTablero(data))
-      .catch((e) => setError(e instanceof Error ? e.message : 'Error al cargar el tablero'))
-      .finally(() => setLoading(false));
+    actividadAlumnoIdRef.current = actividadAlumnoId;
+  }, [actividadAlumnoId]);
+
+  // Si se va sin terminar, registrar abandono
+  useEffect(() => {
+    return () => {
+      const id = actividadAlumnoIdRef.current;
+      if (!id || completedRef.current || abandonReportedRef.current) return;
+      abandonReportedRef.current = true;
+      apiFetch(`${API_BASE}/api/actividades-alumno/${id}/abandon`, { method: 'POST' }).catch(() => {});
+    };
+  }, []);
+
+  // Carga inicial y registro del inicio del cronómetro
+  useEffect(() => {
+    const run = async () => {
+      if (initInFlightRef.current) return;
+      initInFlightRef.current = true;
+      if (!tableroId) return;
+
+      try {
+        const res = await apiFetch(`${API_BASE}/api/tableros/${tableroId}`);
+        const data = await res.json();
+        setTablero(data);
+
+        // Registro de la actividad del alumno (¡Empieza el tiempo!)
+        const alumnoId = getCurrentUserIdFromJwt();
+        if (alumnoId) {
+          const ensureRes = await apiFetch(`${API_BASE}/api/actividades-alumno/ensure/${data.id}`);
+          const exists = (await ensureRes.json()) == 1;
+
+          if (exists) {
+            const getAA = await apiFetch(`${API_BASE}/api/actividades-alumno/alumno/${alumnoId}/actividad/${data.id}`);
+            const aaData = await getAA.json();
+            setActividadAlumnoId(aaData.id);
+          } else {
+            const createAA = await apiFetch(`${API_BASE}/api/actividades-alumno`, {
+              method: 'POST',
+              body: JSON.stringify({ alumnoId, actividadId: data.id }),
+            });
+            const aaData = await createAA.json();
+            setActividadAlumnoId(aaData.id);
+          }
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Error al cargar el tablero');
+      } finally {
+        setLoading(false);
+        initInFlightRef.current = false;
+      }
+    };
+    run();
   }, [tableroId]);
 
   const closeModal = useCallback(() => {
@@ -205,12 +271,25 @@ export default function TableroAlumno() {
     setInputAnswer('');
   }, [submitting]);
 
+  // Variables de finalización
+  const size = tablero?.tamano ? 3 : 4;
+  const completionTarget = tablero?.tamano ? 6 : 10;
+  const isComplete = answeredSet.size >= completionTarget;
+
+  // Registrar el final de la actividad (¡Termina el tiempo!)
+  useEffect(() => {
+    if (isComplete && !completedRef.current && actividadAlumnoId) {
+      completedRef.current = true;
+      apiFetch(`${API_BASE}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
+        method: 'PUT',
+        body: JSON.stringify([]) // Tablero no usa Ids aquí, pero llama al endpoint para sellar la fechaFin
+      }).catch(() => {});
+    }
+  }, [isComplete, actividadAlumnoId]);
+
+
   if (loading) return <StatusMessage />;
   if (error || !tablero) return <StatusMessage error={error || 'No se encontró el tablero'} />;
-
-  const size = tablero.tamano ? 3 : 4;
-  const completionTarget = tablero.tamano ? 6 : 10;
-  const isComplete = answeredSet.size >= completionTarget;
 
   // ── Handlers ──────────────────────────────────────────
 
