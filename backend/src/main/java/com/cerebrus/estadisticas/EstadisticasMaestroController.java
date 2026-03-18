@@ -18,7 +18,6 @@ import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
-import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 
 @RestController
