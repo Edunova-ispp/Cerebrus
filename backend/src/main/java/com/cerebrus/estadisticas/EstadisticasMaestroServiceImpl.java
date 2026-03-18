@@ -272,6 +272,31 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
     }
 
     @Transactional(readOnly = true)
+    public Double obtenerTiempoMedioActividad(Long actividadId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Actividad actividad = actividadRepository.findById(actividadId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: La actividad con ID " + actividadId + " no existe."));
+
+        validarPropietarioTema(maestro, actividad.getTema());
+
+        List<Integer> tiempos = actividad.getActividadesAlumno().stream()
+                .filter(aa -> aa.getEstadoActividad() == EstadoActividad.TERMINADA)
+                .map(ActividadAlumno::getTiempoMinutos)
+                .collect(Collectors.toList());
+
+        if (tiempos.isEmpty()) {
+            return 0.0;
+        }
+
+        return tiempos.stream()
+                .mapToInt(Integer::intValue)
+                .average()
+                .orElse(0.0);
+    }
+
+    @Transactional(readOnly = true)
     public Double obtenerTiempoMedioTema(Long temaId) {
         Usuario usuario = usuarioService.findCurrentUser();
         Maestro maestro = validarMaestro(usuario);
@@ -321,6 +346,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                 .orElse(0.0);
     }
 
+    @Transactional(readOnly = true)
     public Double obtenerTiempoMedioCurso(Long cursoId) {
         Usuario usuario = usuarioService.findCurrentUser();
         Maestro maestro = validarMaestro(usuario);
