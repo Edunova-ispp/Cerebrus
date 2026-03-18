@@ -79,10 +79,19 @@ public class EstadisticasMaestroController {
         return estadisticasMaestroService.obtenerEstadisticasCursoActividad(cursoId, temaId);
     }
 
-    @GetMapping("/cursos/{cursoId}/temas/{temaId}/estadisticas-tema")
-    public EstadisticasTemaDTO obtenerEstadisticasCursoTema(@PathVariable Long cursoId, @PathVariable Long temaId) {
-        return estadisticasMaestroService.obtenerEstadisticasCursoTema(cursoId, temaId);
+    @GetMapping("/cursos/{cursoId}/estadisticas-temas")
+    public Map<Long, EstadisticasTemaDTO> obtenerEstadisticasCursoTema(@PathVariable Long cursoId) {
+        return estadisticasMaestroService.obtenerEstadisticasCursoTema(cursoId);
+    }   
+
+    @GetMapping("/cursos/{cursoId}/nota-maxima-curso")
+    public Integer obtenerNotaMaximaCurso(@PathVariable Long cursoId) {
+        return estadisticasMaestroService.obtenerNotaMaximaCurso(cursoId);
     }
 
-   
+    @GetMapping("/cursos/{cursoId}/nota-minima-curso")
+    public Integer obtenerNotaMinimaCurso(@PathVariable Long cursoId) {
+        return estadisticasMaestroService.obtenerNotaMinimaCurso(cursoId);
+    }
+
 }
