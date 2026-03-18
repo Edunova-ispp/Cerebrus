@@ -18,6 +18,7 @@ import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.usuario.Usuario;
@@ -286,6 +287,105 @@ public class EstadisticasMaestroServiceImpl {
         }
 
         return resultado;
+    }
+
+    private Boolean temaCompletadoPorTodos(Long cursoId, List<Actividad> actividades) {
+        if (actividades.isEmpty()) {
+            return false;
+        }
+
+        return actividades.stream()
+                .allMatch(actividad -> actividadCompletadaPorTodos(cursoId, actividad.getId()));
+    }
+
+    private Double notaMediaTema(Long cursoId, List<Actividad> actividades) {
+        if (actividades.isEmpty()) {
+            return 0.0;
+        }
+
+        return actividades.stream()
+                .mapToDouble(actividad -> notaMediaActividad(cursoId, actividad.getId()))
+                .average()
+                .orElse(0.0);
+    }
+
+    private Double tiempoMedioTema(Long cursoId, List<Actividad> actividades) {
+        if (actividades.isEmpty()) {
+            return 0.0;
+        }
+
+        return actividades.stream()
+                .mapToDouble(actividad -> tiempoMedioActividad(cursoId, actividad.getId()))
+                .average()
+                .orElse(0.0);
+    }
+
+    private Map<Long, Integer> sumaNotasPorAlumnoTema(List<Actividad> actividades) {
+        Map<Long, Integer> sumaNotasPorAlumno = new HashMap<>();
+
+        for (Actividad actividad : actividades) {
+            actividad.getActividadesAlumno().stream()
+                    .filter(actAlumno -> actAlumno.getEstadoActividad() == EstadoActividad.TERMINADA)
+                    .filter(actAlumno -> actAlumno.getNota() != null)
+                    .forEach(actAlumno -> sumaNotasPorAlumno.merge(
+                            actAlumno.getAlumno().getId(),
+                            actAlumno.getNota(),
+                            Integer::sum));
+        }
+
+        return sumaNotasPorAlumno;
+    }
+
+    private Integer notaMaximaTema(List<Actividad> actividades) {
+        Map<Long, Integer> sumaNotasPorAlumno = sumaNotasPorAlumnoTema(actividades);
+        if (sumaNotasPorAlumno.isEmpty()) {
+            return 0;
+        }
+
+        return sumaNotasPorAlumno.values().stream()
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
+    }
+
+    private Integer notaMinimaTema(List<Actividad> actividades) {
+        Map<Long, Integer> sumaNotasPorAlumno = sumaNotasPorAlumnoTema(actividades);
+        if (sumaNotasPorAlumno.isEmpty()) {
+            return 0;
+        }
+
+        return sumaNotasPorAlumno.values().stream()
+                .mapToInt(Integer::intValue)
+                .min()
+                .orElse(0);
+    }
+
+    @Transactional(readOnly = true)
+    public EstadisticasTemaDTO obtenerEstadisticasCursoTema(Long cursoId, Long temaId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        if (!(usuario instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
+        }
+
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
+        }
+
+        Tema tema = curso.getTemas().stream()
+                .filter(t -> t.getId().equals(temaId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El tema con ID " + temaId + " no existe en el curso con ID " + cursoId + "."));
+
+        List<Actividad> actividades = actividadRepository.findByTemaId(tema.getId());
+
+        return new EstadisticasTemaDTO(
+                temaCompletadoPorTodos(cursoId, actividades),
+                notaMediaTema(cursoId, actividades),
+                tiempoMedioTema(cursoId, actividades),
+                notaMaximaTema(actividades),
+                notaMinimaTema(actividades));
     }
 
 }
