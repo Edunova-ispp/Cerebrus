@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
+import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
 
 @RestController
 @RequestMapping("/api/estadisticas")
@@ -71,4 +72,11 @@ public class EstadisticasMaestroController {
         }
 
     }
+
+    @GetMapping("/cursos/{cursoId}/temas/{temaId}/estadisticas-actividades")
+    public Map<Long, EstadisticasActividadDTO> obtenerEstadisticasCursoActividad(@PathVariable Long cursoId, @PathVariable Long temaId) {
+        return estadisticasMaestroService.obtenerEstadisticasCursoActividad(cursoId, temaId);
+    }
+
+   
 }
