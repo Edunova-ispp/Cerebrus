@@ -410,14 +410,18 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <input
-              type="checkbox"
-              id="tf-respVisible"
-              checked={respVisible}
-              onChange={(e) => setRespVisible(e.target.checked)}
-            />
-            <label className="ca-text" htmlFor="tf-respVisible">
-              Correcciones visibles
+            <label
+              className="ca-text"
+              htmlFor="tf-respVisible"
+              style={{ display: 'flex', alignItems: 'center', gap: 8, margin: 0 }}
+            >
+              <input
+                type="checkbox"
+                id="tf-respVisible"
+                checked={respVisible}
+                onChange={(e) => setRespVisible(e.target.checked)}
+              />
+              <span>Correcciones visibles</span>
             </label>
           </div>
 

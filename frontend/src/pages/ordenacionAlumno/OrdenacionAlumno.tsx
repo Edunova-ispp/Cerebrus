@@ -128,7 +128,7 @@ export default function OrdenacionAlumno() {
         setItems(Array.isArray(ordData.valores) ? [...ordData.valores] : []);
 
         const alumnoId = getCurrentUserIdFromJwt();
-        if (!alumnoId) throw new Error('No se pudo identificar al alumno conectado. Inicia sesión de nuevo.');
+        if (!alumnoId) throw new TypeError('No se pudo identificar al alumno conectado. Inicia sesión de nuevo.');
 
         const ensureRes = await apiFetch(`${apiBase}/api/actividades-alumno/ensure/${ordData.id}`);
         const ensureValue = (await ensureRes.json()) as unknown;
@@ -140,7 +140,7 @@ export default function OrdenacionAlumno() {
           if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
             setActividadAlumnoId(aaData.id);
           } else {
-            throw new Error('Respuesta inválida al obtener ActividadAlumno');
+            throw new TypeError('Respuesta inválida al obtener ActividadAlumno');
           }
         } else {
           const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
@@ -151,7 +151,7 @@ export default function OrdenacionAlumno() {
           if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
             setActividadAlumnoId(aaData.id);
           } else {
-            throw new Error('Respuesta inválida al crear ActividadAlumno');
+            throw new TypeError('Respuesta inválida al crear ActividadAlumno');
           }
         }
       } catch (e) {
@@ -217,7 +217,7 @@ if (!res.ok) throw new Error('Error al guardar la respuesta');
         comentario: ordenacion.respVisible ? comentario : undefined,
       });
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Error enviando la respuesta';
+      const msg = e instanceof TypeError ? e.message : 'Error enviando la respuesta';
       setError(msg);
     } finally {
       setSubmitting(false);

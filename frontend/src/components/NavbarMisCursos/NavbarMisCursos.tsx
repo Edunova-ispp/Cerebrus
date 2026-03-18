@@ -60,15 +60,15 @@ export default function NavbarMisCursos() {
           <img src={logo} alt="Cerebrus" className="navbar-logo" />
         </button>
         <div className="navbar-links">
-          <button className="navbar-link" onClick={() => navigate("/misCursos")}>
-            Mis Cursos
+          <button type="button" className="navbar-link" onClick={() => navigate("/misCursos")}>
+            <span>Mis Cursos</span>
           </button>
           <div className="navbar-link navbar-link--perfil">
             <span className="profile-icon"><PixelAvatar /></span>
             <span className="navbar-username">{username}</span>
           </div>
-          <button className="navbar-link navbar-link--logout" onClick={handleLogout}>
-            Cerrar sesión
+          <button type="button" className="navbar-link navbar-link--logout" onClick={handleLogout}>
+            <span>Cerrar sesión</span>
           </button>
         </div>
       </div>
