@@ -1,5 +1,7 @@
 package com.cerebrus.estadisticas;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +19,9 @@ import com.cerebrus.actividadAlumno.ActividadAlumno;
 import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
+import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 import com.cerebrus.estadisticas.dto.TiempoAlumnoDTO;
 import com.cerebrus.inscripcion.Inscripcion;
@@ -112,6 +117,94 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         return puntosPorAlumno;
         }
 
+    
+
+    @Transactional(readOnly = true)
+    public Map<Long, EstadisticasActividadDTO> obtenerEstadisticasCursoActividad(Long cursoId, Long temaId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        if (!(usuario instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
+        }
+
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
+        }
+
+        Tema tema = curso.getTemas().stream()
+                .filter(t -> t.getId().equals(temaId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El tema con ID " + temaId + " no existe en el curso con ID " + cursoId + "."));
+
+        List<Actividad> actividades = tema.getActividades();
+        Map<Long, EstadisticasActividadDTO> resultado = new HashMap<>();
+
+        for (Actividad actividad : actividades) {
+            EstadisticasActividadDTO stats = new EstadisticasActividadDTO(
+                    actividadCompletadaPorTodos(curso, actividad),
+                    tiempoMedioActividad(actividad),
+                    notaMediaActividad(actividad),
+                    notaMaximaActividad(actividad),
+                    notaMinimaActividad(actividad));
+
+            resultado.put(actividad.getId(), stats);
+        }
+
+        return resultado;
+    }
+
+    public Map<Long, EstadisticasTemaDTO> obtenerEstadisticasCursoTema(Long cursoId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        if (!(usuario instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
+        }
+
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
+        }
+
+        List<Tema> temas = curso.getTemas();
+        Map<Long, EstadisticasTemaDTO> resultado = new HashMap<>();
+
+        for(Tema tema:temas){
+            List<Actividad> actividades = tema.getActividades();
+            EstadisticasTemaDTO stats = new EstadisticasTemaDTO(
+                    temaCompletadoPorTodos(curso, actividades),
+                    notaMediaTema(actividades),
+                    tiempoMedioTema(actividades),
+                    notaMaximaTema(actividades),
+                    notaMinimaTema(actividades));
+
+            resultado.put(tema.getId(), stats);
+        }
+
+        return resultado;
+    }
+
+    @Transactional(readOnly = true)
+    public EstadisticasCursoDTO obtenerEstadisticasCurso(Long cursoId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        if (!(usuario instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
+        }
+
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
+        }
+
+        return new EstadisticasCursoDTO(
+                    cursoCompletadoPorTodos(curso),
+                    notaMediaCurso(curso),
+                    tiempoMedioCurso(curso),
+                    obtenerNotaMaximaCurso(curso),
+                    obtenerNotaMinimaCurso(curso));
+    }
+
     // ==================== MÉTODOS DE CONSULTA DE TIEMPOS ====================
 
     @Transactional(readOnly = true)
@@ -124,7 +217,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
 
         validarPropietarioTema(maestro, actividad.getTema());
 
-        ActividadAlumno actividadAlumno = actividad.getActividadesAlumno().stream()
+        ActividadAlumno actividadAlumno = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
                 .filter(aa -> aa.getAlumno().getId().equals(alumnoId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("404 Not Found: El alumno no tiene registro en esta actividad."));
@@ -146,7 +239,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         
         Integer tiempoTotal = 0;
         for (Actividad actividad : actividades) {
-            ActividadAlumno actividadAlumno = actividad.getActividadesAlumno().stream()
+            ActividadAlumno actividadAlumno = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
                     .filter(aa -> aa.getAlumno().getId().equals(alumnoId) && 
                             aa.getEstadoActividad() == EstadoActividad.TERMINADA)
                     .findFirst()
@@ -177,8 +270,6 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
 
         return tiempoTotal;
     }
-
-    // ==================== MÉTODOS DE TIEMPO PROMEDIO ====================
 
     @Transactional(readOnly = true)
     public Double obtenerTiempoMedioActividad(Long actividadId) {
@@ -222,7 +313,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         // Obtener todos los alumnos únicos que tienen actividades completadas
         List<Alumno> alumnosCon = new ArrayList<>();
         for (Actividad actividad : actividades) {
-            for (ActividadAlumno aa : actividad.getActividadesAlumno()) {
+            for (ActividadAlumno aa : obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno())) {
                 if (aa.getEstadoActividad() == EstadoActividad.TERMINADA && !alumnosCon.contains(aa.getAlumno())) {
                     alumnosCon.add(aa.getAlumno());
                 }
@@ -233,7 +324,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         for (Alumno alumno : alumnosCon) {
             int tiempoTotal = 0;
             for (Actividad actividad : actividades) {
-                ActividadAlumno aa = actividad.getActividadesAlumno().stream()
+                ActividadAlumno aa = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
                         .filter(a -> a.getAlumno().getId().equals(alumno.getId()) && 
                                 a.getEstadoActividad() == EstadoActividad.TERMINADA)
                         .findFirst()
@@ -299,7 +390,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
 
         validarPropietarioTema(maestro, actividad.getTema());
 
-        List<TiempoAlumnoDTO> tiempos = actividad.getActividadesAlumno().stream()
+        List<TiempoAlumnoDTO> tiempos = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
                 .filter(aa -> aa.getEstadoActividad() == EstadoActividad.TERMINADA)
                 .map(aa -> new TiempoAlumnoDTO(aa.getAlumno().getNombre(), aa.getAlumno().getId(), aa.getTiempoMinutos()))
                 .collect(Collectors.toList());
@@ -345,7 +436,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         Map<Long, TiempoAlumnoDTO> tiemposPorAlumno = new HashMap<>();
 
         for (Actividad actividad : actividades) {
-            for (ActividadAlumno aa : actividad.getActividadesAlumno()) {
+            for (ActividadAlumno aa : obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno())) {
                 if (aa.getEstadoActividad() == EstadoActividad.TERMINADA) {
                     Long alumnoId = aa.getAlumno().getId();
                     tiemposPorAlumno.putIfAbsent(alumnoId, 
@@ -401,7 +492,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                 List<Actividad> actividades = actividadRepository.findByTemaId(tema.getId());
                 
                 for (Actividad actividad : actividades) {
-                    ActividadAlumno aa = actividad.getActividadesAlumno().stream()
+                    ActividadAlumno aa = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
                             .filter(a -> a.getAlumno().getId().equals(alumno.getId()) && 
                                     a.getEstadoActividad() == EstadoActividad.TERMINADA)
                             .findFirst()
@@ -463,4 +554,237 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
             throw new AccessDeniedException("Acceso denegado: Solo el maestro propietario del curso puede acceder a esta información.");
         }
     }
+
+    private List<ActividadAlumno> obtenerUltimasInstanciasPorAlumno(List<ActividadAlumno> actividadesAlumno) {
+        Map<Long, ActividadAlumno> ultimaActividadPorAlumno = new HashMap<>();
+
+        for (ActividadAlumno actividadAlumno : actividadesAlumno) {
+            Long alumnoId = actividadAlumno.getAlumno().getId();
+            ActividadAlumno actual = ultimaActividadPorAlumno.get(alumnoId);
+            if (actual == null || esMasReciente(actividadAlumno, actual)) {
+                ultimaActividadPorAlumno.put(alumnoId, actividadAlumno);
+            }
+        }
+
+        return new ArrayList<>(ultimaActividadPorAlumno.values());
+    }
+
+    private boolean esMasReciente(ActividadAlumno candidata, ActividadAlumno actual) {
+        LocalDateTime fechaCandidata = candidata.getFechaFin() != null ? candidata.getFechaFin() : candidata.getFechaInicio();
+        LocalDateTime fechaActual = actual.getFechaFin() != null ? actual.getFechaFin() : actual.getFechaInicio();
+
+        if (fechaCandidata == null && fechaActual == null) {
+            return candidata.getId() != null && actual.getId() != null && candidata.getId() > actual.getId();
+        }
+        if (fechaCandidata == null) {
+            return false;
+        }
+        if (fechaActual == null) {
+            return true;
+        }
+
+        return fechaCandidata.isAfter(fechaActual);
+    }
+
+    private Boolean actividadCompletadaPorTodos(Curso curso, Actividad actividad) {
+        List<ActividadAlumno> actividadesAlumno = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno());
+        if (actividadesAlumno.isEmpty()) {
+            return false;
+        }
+
+        if(actividadesAlumno.size() < curso.getInscripciones().size()) {
+            return false;
+        }
+
+        return actividadesAlumno.stream()
+                .allMatch(actAlumno -> actAlumno.getEstadoActividad() == EstadoActividad.TERMINADA);    
+        }
+
+    private Double notaMediaActividad(Actividad actividad) {
+        
+        List<ActividadAlumno> actividadesAlumno = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
+                .filter(actAlumno -> actAlumno.getEstadoActividad() == EstadoActividad.TERMINADA)
+                .filter(actAlumno -> actAlumno.getNota() != null)
+                .toList();
+
+        if (actividadesAlumno.isEmpty()) {
+            return 0.0;
+        }
+
+        return actividadesAlumno.stream()
+                .mapToInt(ActividadAlumno::getNota)
+                .average()
+                .orElse(0.0);
+    }
+
+    private Double tiempoMedioActividad(Actividad actividad){
+        List<ActividadAlumno> actividadesAlumno = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
+                .filter(actAlumno -> actAlumno.getEstadoActividad() == EstadoActividad.TERMINADA)
+                .filter(actAlumno -> actAlumno.getFechaInicio() != null && actAlumno.getFechaFin() != null)
+                .toList();
+
+        if (actividadesAlumno.isEmpty()) {
+            return 0.0;
+        }
+
+        return actividadesAlumno.stream()
+                .mapToLong(actAlumno -> Duration.between(actAlumno.getFechaFin(), actAlumno.getFechaInicio()).toMinutes())
+                .average()
+                .orElse(0.0);
+    }
+
+    private Integer notaMaximaActividad(Actividad actividad){
+        List<ActividadAlumno> actividadesAlumno = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
+                .filter(actAlumno -> actAlumno.getEstadoActividad() == EstadoActividad.TERMINADA)
+                .filter(actAlumno -> actAlumno.getNota() != null)
+                .toList();
+
+        if (actividadesAlumno.isEmpty()) {
+            return 0;
+        }
+
+        return actividadesAlumno.stream()
+                .mapToInt(ActividadAlumno::getNota)
+                .max()
+                .orElse(0);
+    }
+
+    private Integer notaMinimaActividad(Actividad actividad){
+        List<ActividadAlumno> actividadesAlumno = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
+                .filter(actAlumno -> actAlumno.getEstadoActividad() == EstadoActividad.TERMINADA)
+                .filter(actAlumno -> actAlumno.getNota() != null)
+                .toList();
+
+        if (actividadesAlumno.isEmpty()) {
+            return 0;
+        }
+
+        return actividadesAlumno.stream()
+                .mapToInt(ActividadAlumno::getNota)
+                .min()
+                .orElse(0);
+    }
+
+    private Boolean temaCompletadoPorTodos(Curso curso, List<Actividad> actividades) {
+        if (actividades.isEmpty()) {
+            return false;
+        }
+
+        return actividades.stream()
+                .allMatch(actividad -> actividadCompletadaPorTodos(curso, actividad));
+    }
+
+    private Double notaMediaTema(List<Actividad> actividades) {
+        if (actividades.isEmpty()) {
+            return 0.0;
+        }
+
+        return actividades.stream()
+                .mapToDouble(actividad -> notaMediaActividad(actividad))
+                .average()
+                .orElse(0.0);
+    }
+
+    private Double tiempoMedioTema(List<Actividad> actividades) {
+        if (actividades.isEmpty()) {
+            return 0.0;
+        }
+
+        return actividades.stream()
+                .mapToDouble(actividad -> tiempoMedioActividad(actividad))
+                .average()
+                .orElse(0.0);
+    }
+
+    private Map<Long, Integer> sumaNotasPorAlumnoTema(List<Actividad> actividades) {
+        Map<Long, Integer> sumaNotasPorAlumno = new HashMap<>();
+
+        for (Actividad actividad : actividades) {
+            obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
+                    .filter(actAlumno -> actAlumno.getEstadoActividad() == EstadoActividad.TERMINADA)
+                    .filter(actAlumno -> actAlumno.getNota() != null)
+                    .forEach(actAlumno -> sumaNotasPorAlumno.merge(
+                            actAlumno.getAlumno().getId(),
+                            actAlumno.getNota(),
+                            Integer::sum));
+        }
+
+        return sumaNotasPorAlumno;
+    }
+
+    private Integer notaMaximaTema(List<Actividad> actividades) {
+        Map<Long, Integer> sumaNotasPorAlumno = sumaNotasPorAlumnoTema(actividades);
+        if (sumaNotasPorAlumno.isEmpty()) {
+            return 0;
+        }
+
+        return sumaNotasPorAlumno.values().stream()
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
+    }
+
+    private Integer notaMinimaTema(List<Actividad> actividades) {
+        Map<Long, Integer> sumaNotasPorAlumno = sumaNotasPorAlumnoTema(actividades);
+        if (sumaNotasPorAlumno.isEmpty()) {
+            return 0;
+        }
+
+        return sumaNotasPorAlumno.values().stream()
+                .mapToInt(Integer::intValue)
+                .min()
+                .orElse(0);
+    }
+
+    private List<Actividad> obtenerActividadesCurso(Curso curso) {
+        return curso.getTemas().stream()
+                .flatMap(tema -> actividadRepository.findByTemaId(tema.getId()).stream())
+                .toList();
+    }
+
+    private Boolean cursoCompletadoPorTodos(Curso curso) {
+
+        List<Actividad> actividadesCurso = obtenerActividadesCurso(curso);
+        return temaCompletadoPorTodos(curso, actividadesCurso);
+    }
+
+    private Double notaMediaCurso(Curso curso) {
+        List<Actividad> actividadesCurso = obtenerActividadesCurso(curso);
+        return notaMediaTema(actividadesCurso);
+    }
+
+    private Double tiempoMedioCurso(Curso curso) {
+        List<Actividad> actividadesCurso = obtenerActividadesCurso(curso);
+        return tiempoMedioTema(actividadesCurso);
+    }
+
+    private Integer obtenerNotaMaximaCurso(Curso curso) {
+
+        List<Actividad> actividadesCurso = obtenerActividadesCurso(curso);
+
+        Map<Long, Integer> sumaNotasPorAlumno = sumaNotasPorAlumnoTema(actividadesCurso);
+        if (sumaNotasPorAlumno.isEmpty()) {
+            return 0;
+        }
+
+        return sumaNotasPorAlumno.values().stream()
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
+    }
+
+    private Integer obtenerNotaMinimaCurso(Curso curso) {
+        List<Actividad> actividadesCurso = obtenerActividadesCurso(curso);
+
+        Map<Long, Integer> sumaNotasPorAlumno = sumaNotasPorAlumnoTema(actividadesCurso);
+        if (sumaNotasPorAlumno.isEmpty()) {
+            return 0;
+        }
+
+        return sumaNotasPorAlumno.values().stream()
+                .mapToInt(Integer::intValue)
+                .min()
+                .orElse(0);
+    }
+
 }

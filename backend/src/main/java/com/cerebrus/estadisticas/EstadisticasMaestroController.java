@@ -16,9 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
-import com.cerebrus.curso.CursoServiceImpl;
+import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
-
 
 @RestController
 @RequestMapping("/api/estadisticas")
@@ -77,6 +78,22 @@ public class EstadisticasMaestroController {
         }
 
     }
+
+    @GetMapping("/cursos/{cursoId}/temas/{temaId}/estadisticas-actividades")
+    public Map<Long, EstadisticasActividadDTO> obtenerEstadisticasCursoActividad(@PathVariable Long cursoId, @PathVariable Long temaId) {
+        return estadisticasMaestroService.obtenerEstadisticasCursoActividad(cursoId, temaId);
+    }
+
+    @GetMapping("/cursos/{cursoId}/estadisticas-temas")
+    public Map<Long, EstadisticasTemaDTO> obtenerEstadisticasCursoTema(@PathVariable Long cursoId) {
+        return estadisticasMaestroService.obtenerEstadisticasCursoTema(cursoId);
+    }   
+
+    @GetMapping("/cursos/{cursoId}/estadisiticas-curso")
+    public EstadisticasCursoDTO obtenerEstadisticasCurso(@PathVariable Long cursoId) {
+        return estadisticasMaestroService.obtenerEstadisticasCurso(cursoId);
+    }
+   
 
     @GetMapping("/")
     public String getMethodName(@RequestParam String param) {
@@ -244,5 +261,4 @@ public class EstadisticasMaestroController {
                     .body(Map.of("error", "Ocurrió un error inesperado."));
         }
     }
-    
 }
