@@ -182,6 +182,10 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
                 nota += 10/respuestas.size();
                 puntuacion += puntuacionASumar;
             }
+            else {
+                nota -= 10/(respuestas.size()*4);
+                puntuacion -= puntuacionASumar/4;
+            }
 
             if(pregunta.getActividad().getRespVisible()) {
                 resultado.put(preguntaId, esCorrecta ? " Respuesta Correcta" : "Incorrecta la respuesta correcta era: " + respuestaCorrecta.getRespuesta());
@@ -194,7 +198,12 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
             respAlumnoGeneral = respAlumnoGeneralRepository.save(respAlumnoGeneral);
             respuestasAlumno.add(respAlumnoGeneral);
         }
-
+        if(puntuacion < 0) {
+            puntuacion = 0;
+        }
+        if(nota < 0) {
+            nota = 0;
+        }
         actividadAlumno.setNota(nota);
         actividadAlumno.setPuntuacion(puntuacion);
         actividadAlumno.setFechaFin(LocalDateTime.now());
