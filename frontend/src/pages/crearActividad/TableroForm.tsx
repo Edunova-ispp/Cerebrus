@@ -243,7 +243,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            Mostrar respuesta correcta al alumno
+            <span>Mostrar respuesta correcta al alumno</span>
           </label>
           <div>
             <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>

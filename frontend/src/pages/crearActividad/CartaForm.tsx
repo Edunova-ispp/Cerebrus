@@ -388,7 +388,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
                 checked={respVisible}
                 onChange={(e) => setRespVisible(e.target.checked)}
               />
-              Mostrar correcciones al alumno
+              <span>Mostrar correcciones al alumno</span>
             </label>
 
             {respVisible && (
