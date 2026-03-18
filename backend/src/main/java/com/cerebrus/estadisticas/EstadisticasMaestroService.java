@@ -1,11 +1,21 @@
 package com.cerebrus.estadisticas;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.cerebrus.curso.Curso;
-import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 
 public interface EstadisticasMaestroService {
     Map<String, Long> numActividadesRealizadasPorAlumno(Curso curso);
-    Map<Alumno, Integer> calcularTotalPuntosCursoPorAlumno(Curso curso);
+    HashMap<String, Integer> calcularTotalPuntosCursoPorAlumno(Long cursoId);
+    Integer obtenerTiempoAlumnoEnActividad(Long alumnoId, Long actividadId);
+    Integer obtenerTiempoAlumnoEnTema(Long alumnoId, Long temaId);
+    Integer obtenerTiempoAlumnoEnCurso(Long alumnoId, Long cursoId);
+    Double obtenerTiempoMedioActividad(Long actividadId);
+    Double obtenerTiempoMedioTema(Long temaId);
+    Double obtenerTiempoMedioCurso(Long cursoId);
+    AlumnosMasRapidosLentosDTO obtenerAlumnosMasRapidosLentosActividad(Long actividadId, Integer limite);
+    AlumnosMasRapidosLentosDTO obtenerAlumnosMasRapidosLentosTema(Long temaId, Integer limite);
+    AlumnosMasRapidosLentosDTO obtenerAlumnosMasRapidosLentosCurso(Long cursoId, Integer limite);
 }

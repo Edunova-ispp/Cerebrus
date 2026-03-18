@@ -126,7 +126,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         return esCorrecta;
     }
 
-    public boolean corregirRespuestaAlumnoGeneralTest(Long id) {
+    public boolean corregirRespuestaAlumnoGeneralClasificacion(Long id) {
         RespAlumnoGeneral respuestaAlumno = respAlumnoGeneralRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("RespuestaAlumnoGeneral", "id", id));
         List<RespuestaMaestro> respuestas = respuestaService.encontrarRespuestasPorPreguntaId(respuestaAlumno.getPregunta().getId());
