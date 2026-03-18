@@ -26,6 +26,9 @@ import Perfil from "./pages/perfil/Perfil";
 import TableroAlumno from "./pages/tableroAlumno/TableroAlumno";
 import CartaAlumno from "./pages/cartaAlumno/CartaAlumno";
 import TestAlumno from "./pages/testAlumno/TestAlumno";
+import EstadisticasAlumno from "./pages/estadisticasCurso/EstadisticasAlumno.tsx";
+import EstadisticasActividad from "./pages/estadisticasCurso/EstadisticasActividad.tsx";
+import EstadisticasTema from "./pages/estadisticasCurso/EstadisticasTema.tsx";
 
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
 class WatchbugErrorBoundary extends Component<
@@ -106,6 +109,9 @@ function App() {
       <Route path="/estadisticas/:id" element={<EstadisticasCurso />} />
       <Route path="/medias/:id" element={<MediasCurso />} />
       <Route path="/perfil" element={<Perfil />} />
+      <Route path="/estadisticas/cursos/:cursoId/alumno/:alumnoNombre" element={<EstadisticasAlumno />} />
+      <Route path="/estadisticas/temas/:id" element={<EstadisticasTema />} />
+      <Route path="/estadisticas/actividades/:id" element={<EstadisticasActividad />} />
     </Routes>
     </WatchbugErrorBoundary>
   );

@@ -18,6 +18,39 @@
   gap: 28px;
 }
 
+.estadisticas-header-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; 
+  align-items: center;
+  width: 100%;
+  max-width: 1000px;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.estadisticas-titulo-curso {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 2.5rem;
+  color: #000;
+  margin: 0;
+  text-align: center;
+  white-space: nowrap;
+  min-width: 0; 
+}
+
+.estadisticas-titulo-curso {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 2.8rem;
+  color: #000000;
+  margin: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.btn-volver-pixel, .btn-medias-pixel {
+  margin: 0 !important;
+}
+
 .btn-volver-pixel {
   align-self: flex-start;
   background: var(--color-accent);
