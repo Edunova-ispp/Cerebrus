@@ -82,7 +82,7 @@ export default function MarcarImagenAlumno() {
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
   const marcarImagenIdNum = useMemo(() => {
-    if (!marcarImagenId) return NaN;
+    if (!marcarImagenId) return Number.NaN;
     return Number.parseInt(marcarImagenId, 10);
   }, [marcarImagenId]);
 

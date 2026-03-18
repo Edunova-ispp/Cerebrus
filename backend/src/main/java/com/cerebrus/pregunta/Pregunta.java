@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cerebrus.actividad.Actividad;
-import com.cerebrus.actividad.general.General;
-import com.cerebrus.actividad.tablero.Tablero;
 import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneral;
 import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 
@@ -52,6 +50,7 @@ public class Pregunta {
     public Pregunta(String pregunta, String imagen, Actividad actividad) {
         this.pregunta = pregunta;
         this.imagen = imagen;
+        this.actividad = actividad;
     }
 
     // Getters y Setters

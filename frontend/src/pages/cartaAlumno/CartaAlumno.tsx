@@ -101,7 +101,7 @@ export default function CartaAlumno() {
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
   const cartaIdNum = useMemo(() => {
-    if (!cartaId) return NaN;
+    if (!cartaId) return Number.NaN;
     return Number.parseInt(cartaId, 10);
   }, [cartaId]);
 

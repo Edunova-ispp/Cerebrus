@@ -27,14 +27,20 @@ export interface ClasificacionFormInitialValues {
 }
 
 interface RespuestaOption {
+  localKey: string;
   id?: number;
   text: string;
 }
 
 interface Pregunta {
+  localKey: string;
   id?: number;
   text: string;
   respuestas: RespuestaOption[];
+}
+
+function makeLocalKey(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 interface Props {
@@ -44,11 +50,11 @@ interface Props {
 }
 
 function makeEmptyRespuesta(): RespuestaOption {
-  return { text: '' };
+  return { localKey: makeLocalKey(), text: '' };
 }
 
 function makeEmptyPregunta(): Pregunta {
-  return { text: '', respuestas: [makeEmptyRespuesta()] };
+  return { localKey: makeLocalKey(), text: '', respuestas: [makeEmptyRespuesta()] };
 }
 
 export function ClasificacionForm({ mode = 'create', clasificacionId, initialValues }: Props) {
@@ -78,9 +84,11 @@ const [showIAModal, setShowIAModal] = useState(false);
       originalPreguntasRef.current = JSON.parse(JSON.stringify(initialValues.preguntas));
       setPreguntas(
         initialValues.preguntas.map((p) => ({
+          localKey: makeLocalKey(),
           id: p.id,
           text: p.pregunta,
           respuestas: p.respuestas.map((r) => ({
+            localKey: makeLocalKey(),
             id: r.id,
             text: r.respuesta,
           })),
@@ -261,17 +269,18 @@ const handleIAResult = (data: any) => {
       const mappedPreguntas: Pregunta[] = arrayPrincipal.map((p: any) => {
         const categoriaText = p.pregunta || p.categoria || p.nombre || p.titulo || p.name || p.enunciado || 'Categoría sin nombre';
         const arrayElementos = p.respuestas || p.elementos || p.items || p.opciones || [];
-        let elementosMapeados: RespuestaOption[] = [{ text: '' }];
+        let elementosMapeados: RespuestaOption[] = [makeEmptyRespuesta()];
         if (Array.isArray(arrayElementos) && arrayElementos.length > 0) {
           elementosMapeados = arrayElementos.map((r: any) => {
             if (typeof r === 'string') {
-              return { text: r };
+              return { localKey: makeLocalKey(), text: r };
             }
             const textoRespuesta = r.respuesta || r.texto || r.text || r.nombre || r.elemento || '';
-            return { text: String(textoRespuesta) };
+            return { localKey: makeLocalKey(), text: String(textoRespuesta) };
           });
         }
         return {
+          localKey: makeLocalKey(),
           text: categoriaText,
           respuestas: elementosMapeados
         };
@@ -331,7 +340,7 @@ const handleIAResult = (data: any) => {
       <div className="ca-contenedor-blanco" style={{ marginTop: 16, flexDirection: 'column', alignItems: 'stretch' }}>
         <h3 className="ca-text">Configuración de Categorías</h3>
         {preguntas.map((p, pIdx) => (
-          <div key={pIdx} className="tf-question-block" style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px', marginBottom: '15px' }}>
+          <div key={p.localKey} className="tf-question-block" style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px', marginBottom: '15px' }}>
             <div className="tf-question-header">
               <span className="tf-question-label">Categoría {pIdx + 1}</span>
               <button type="button" className="tf-btn-remove-question" onClick={() => removePregunta(pIdx)}>✕</button>
@@ -345,7 +354,7 @@ const handleIAResult = (data: any) => {
             />
             <div className="tf-options" style={{ marginLeft: '20px' }}>
               {p.respuestas.map((r, rIdx) => (
-                <div key={rIdx} className="tf-option" style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                <div key={r.localKey} className="tf-option" style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                   <input 
                     type="text" 
                     className="tf-option-input"
