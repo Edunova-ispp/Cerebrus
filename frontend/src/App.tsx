@@ -26,6 +26,7 @@ import Perfil from "./pages/perfil/Perfil";
 import TableroAlumno from "./pages/tableroAlumno/TableroAlumno";
 import CartaAlumno from "./pages/cartaAlumno/CartaAlumno";
 import TestAlumno from "./pages/testAlumno/TestAlumno";
+import CrucigramaAlumno from "./pages/crucigramaAlumno/CrucigramaAlumno";
 
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
 class WatchbugErrorBoundary extends Component<
@@ -98,6 +99,7 @@ function App() {
       <Route path="/ordenaciones/:ordenacionId/alumno" element={<OrdenacionAlumno />} />
       <Route path="/marcar-imagenes/:marcarImagenId/alumno" element={<MarcarImagenAlumno />} />
       <Route path="/clasificaciones/:clasificacionId/alumno" element={<ClasificacionAlumno />} />
+      <Route path="/crucigrama/:crucigramaId/alumno" element={<CrucigramaAlumno />} />
       <Route path="/actividades/teoria/:actividadId" element={<TeoriaAlumno />} />
 
       <Route path="/generales/test/:testId/alumno" element={<TestAlumno />} />
