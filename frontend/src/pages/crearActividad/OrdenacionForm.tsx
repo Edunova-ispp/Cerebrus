@@ -23,6 +23,10 @@ interface Props {
   readonly initialValues?: OrdenacionFormInitialValues;
 }
 
+function makeLocalKey(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -30,6 +34,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
   const [respVisible, setRespVisible] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
   const [ordenItems, setOrdenItems] = useState<string[]>(['']);
+  const [ordenItemKeys, setOrdenItemKeys] = useState<string[]>([makeLocalKey()]);
   const [ordenItemsKind, setOrdenItemsKind] = useState<'words' | 'images'>('words');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -52,7 +57,9 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
     setPuntuacion(String(initialValues.puntuacion ?? ''));
     setRespVisible(Boolean(initialValues.respVisible));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
-    setOrdenItems(initialValues.valores?.length ? [...initialValues.valores] : ['']);
+    const initialItems = initialValues.valores?.length ? [...initialValues.valores] : [''];
+    setOrdenItems(initialItems);
+    setOrdenItemKeys(initialItems.map(() => makeLocalKey()));
   }, [initialValues]);
 
   const valores = useMemo(() => {
@@ -253,7 +260,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
 
         <div className="of-items-grid">
           {ordenItems.map((v, i) => (
-            <div key={i} className="of-item">
+            <div key={ordenItemKeys[i] ?? `fallback-${i}`} className="of-item">
               {ordenItemsKind === 'images' && v.trim() && (
                 <img
                   src={v.trim()}
@@ -274,6 +281,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
                 onKeyDown={(e) => {
                   if (e.key === 'Backspace' && v === '' && ordenItems.length > 1) {
                     setOrdenItems(ordenItems.filter((_, idx) => idx !== i));
+                    setOrdenItemKeys(ordenItemKeys.filter((_, idx) => idx !== i));
                   }
                 }}
               />
@@ -282,7 +290,10 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
           <button
             className="of-btn-add"
             type="button"
-            onClick={() => setOrdenItems([...ordenItems, ''])}
+            onClick={() => {
+              setOrdenItems([...ordenItems, '']);
+              setOrdenItemKeys([...ordenItemKeys, makeLocalKey()]);
+            }}
           >
             +
           </button>

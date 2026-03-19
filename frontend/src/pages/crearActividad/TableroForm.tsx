@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserRoles } from '../../types/curso';
+import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import './TableroForm.css';
 
 export type TableroFormMode = 'create' | 'edit';
@@ -26,10 +27,14 @@ interface Props {
 const PREGUNTAS_3X3 = 8;
 const PREGUNTAS_4X4 = 15;
 
-type QPair = { pregunta: string; respuesta: string };
+type QPair = { localKey: string; pregunta: string; respuesta: string };
+
+function makeLocalKey(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
 
 function makeQuestions(count: number): QPair[] {
-  return Array.from({ length: count }, () => ({ pregunta: '', respuesta: '' }));
+  return Array.from({ length: count }, () => ({ localKey: makeLocalKey(), pregunta: '', respuesta: '' }));
 }
 
 const isCellDark = (row: number, col: number) => (row + col) % 2 === 1;
@@ -45,6 +50,7 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [showIAModal, setShowIAModal] = useState(false);
 
   const navigate = useNavigate();
   const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
@@ -61,7 +67,7 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
     setTamano(initialValues.tamano);
     setTemaIdState(initialValues.temaId);
     setPreguntas(
-      initialValues.preguntas.map((p) => ({ pregunta: p.pregunta, respuesta: p.respuesta })),
+      initialValues.preguntas.map((p) => ({ localKey: makeLocalKey(), pregunta: p.pregunta, respuesta: p.respuesta })),
     );
   }, [initialValues]);
 
@@ -153,8 +159,55 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
 
   const numPreguntas = tamano === null ? 0 : tamano ? PREGUNTAS_3X3 : PREGUNTAS_4X4;
 
+  const handleIAResult = (data: any) => {
+    console.log("Datos crudos de la IA (Tablero):", data);
+
+    if (data.titulo) setTitulo(String(data.titulo));
+    if (data.descripcion) setDescripcion(String(data.descripcion));
+    if (data.puntuacion) setPuntuacion(String(data.puntuacion));
+
+    const arrayPreguntas = data.preguntas || data.casillas || data.items || data.tablero || [];
+
+    if (Array.isArray(arrayPreguntas) && arrayPreguntas.length > 0) {
+      const esTresPorTres = arrayPreguntas.length <= 8;
+      setTamano(esTresPorTres);
+      
+      const expectedCount = esTresPorTres ? PREGUNTAS_3X3 : PREGUNTAS_4X4;
+      const mappedPreguntas = makeQuestions(expectedCount);
+
+for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
+        const q = arrayPreguntas[i];
+        const textoPregunta = q.pregunta || q.enunciado || q.texto || '';
+        let textoRespuesta = '';
+        if (q.respuesta) {
+          if (typeof q.respuesta === 'string') {
+            textoRespuesta = q.respuesta;
+          } else if (typeof q.respuesta === 'object') {
+            textoRespuesta = q.respuesta.texto || q.respuesta.respuesta || q.respuesta.text || '';
+          }
+        } else {
+          textoRespuesta = q.solucion || q.correcta || '';
+        }
+
+        mappedPreguntas[i] = {
+          ...mappedPreguntas[i],
+          pregunta: String(textoPregunta),
+          respuesta: String(textoRespuesta)
+        };
+      }
+      
+      setPreguntas(mappedPreguntas);
+    }
+  };
+
   return (
     <form className="tbl-form" onSubmit={handleSubmit}>
+       <GenerarIAModal
+              tipoActividad="TABLERO"
+              open={showIAModal}
+              onClose={() => setShowIAModal(false)}
+              onResult={handleIAResult}
+            />
       {/* ── Datos básicos ─────────────────────────────────────── */}
       <div className="tbl-header">
         <div className="tbl-col">
@@ -190,9 +243,15 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            Mostrar respuesta correcta al alumno
+            <span>Mostrar respuesta correcta al alumno</span>
           </label>
+          <div>
+            <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+              Generar con IA
+            </button>
+          </div>
         </div>
+        
       </div>
 
       {/* ── Selector de tamaño ────────────────────────────────── */}
@@ -219,7 +278,7 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
                     const col = idx % dim;
                     return (
                       <div
-                        key={idx}
+                        key={`cell-${dim}-${row}-${col}`}
                         className={`tbl-board-cell${isCellDark(row, col) ? ' tbl-board-cell--dark' : ''}`}
                       />
                     );
@@ -242,18 +301,18 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
             <span className="tbl-q-col-label">Enunciado de la pregunta</span>
             <span className="tbl-q-col-label">Respuesta correcta</span>
           </div>
-          {Array.from({ length: numPreguntas }).map((_, i) => (
-            <div key={i} className="tbl-q-row">
+          {preguntas.slice(0, numPreguntas).map((q, i) => (
+            <div key={q.localKey} className="tbl-q-row">
               <span className="tbl-q-number">{i + 1}</span>
               <input
                 className="tbl-input"
-                value={preguntas[i]?.pregunta ?? ''}
+                value={q.pregunta ?? ''}
                 onChange={(e) => updatePregunta(i, e.target.value)}
                 placeholder={`Pregunta ${i + 1}`}
               />
               <input
                 className="tbl-input tbl-respuesta-input"
-                value={preguntas[i]?.respuesta ?? ''}
+                value={q.respuesta ?? ''}
                 onChange={(e) => updateRespuesta(i, e.target.value)}
                 placeholder="Respuesta"
               />

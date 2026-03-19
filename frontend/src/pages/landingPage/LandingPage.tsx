@@ -10,14 +10,14 @@ import ProfileIcon from "../../assets/icons/profile.svg?react";
 
 // Alternating primary/secondary, except 'u' which uses accent
 const TITLE = [
-  { char: "C", cls: "primary" },
-  { char: "e", cls: "secondary" },
-  { char: "r", cls: "primary" },
-  { char: "e", cls: "secondary" },
-  { char: "b", cls: "primary" },
-  { char: "r", cls: "secondary" },
-  { char: "u", cls: "accent" },
-  { char: "s", cls: "accent" },
+  { key: "c-1", char: "C", cls: "primary" },
+  { key: "e-1", char: "e", cls: "secondary" },
+  { key: "r-1", char: "r", cls: "primary" },
+  { key: "e-2", char: "e", cls: "secondary" },
+  { key: "b-1", char: "b", cls: "primary" },
+  { key: "r-2", char: "r", cls: "secondary" },
+  { key: "u-1", char: "u", cls: "accent" },
+  { key: "s-1", char: "s", cls: "accent" },
 ];
 
 const cards = [
@@ -76,8 +76,8 @@ function LandingPage() {
       {/* Header row */}
       <div className="landing-header">
         <h1 className="landing-title">
-          {TITLE.map((t, i) => (
-            <span key={i} className={`title-char ${t.cls}`}>
+          {TITLE.map((t) => (
+            <span key={t.key} className={`title-char ${t.cls}`}>
               {t.char}
             </span>
           ))}
@@ -87,9 +87,9 @@ function LandingPage() {
 
       {/* Cards row */}
       <div className="landing-cards">
-        {cards.map((card, i) => (
+        {cards.map((card) => (
           <div
-            key={i}
+            key={card.route}
             className="landing-card-wrapper"
             onClick={() => navigate(card.route)}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(card.route); }}
@@ -98,8 +98,8 @@ function LandingPage() {
             style={{ cursor: "pointer" }}
           >
             <div className="landing-card-images">
-              {card.images.map((src, j) => (
-                <img key={j} src={src} alt="" />
+              {card.images.map((src) => (
+                <img key={src} src={src} alt="" />
               ))}
             </div>
             <div className={`landing-card ${card.cardCls}`}>

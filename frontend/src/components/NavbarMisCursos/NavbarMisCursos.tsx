@@ -36,13 +36,13 @@ export default function NavbarMisCursos() {
           </span>
         </button>
         <div className="navbar-links">
-          <button className="navbar-link" onClick={() => navigate("/misCursos")}>
+          <button type="button" className="navbar-link" onClick={() => navigate("/misCursos")}>
             <img src={misCursosIcon} alt="" className="navbar-icon" />
-            Mis Cursos
+            <span>Mis Cursos</span>
           </button>
-          <button className="navbar-link" onClick={() => navigate("/perfil")}>
+          <button type="button" className="navbar-link" onClick={() => navigate("/perfil")}>
             <img src={perfilIcon} alt="" className="navbar-icon" />
-            Perfil
+            <span>Perfil</span>
           </button>
         </div>
       </div>

@@ -89,7 +89,7 @@ export default function TestAlumno() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const testIdNum = useMemo(() => {
-    if (!testId) return NaN;
+    if (!testId) return Number.NaN;
     return Number.parseInt(testId, 10);
   }, [testId]);
 
@@ -133,7 +133,7 @@ export default function TestAlumno() {
         // 2. Resolve ActividadAlumno
         const alumnoId = getCurrentUserIdFromJwt();
         if (!alumnoId) {
-          throw new Error('No se pudo identificar al alumno. Inicia sesión de nuevo.');
+          throw new TypeError('No se pudo identificar al alumno. Inicia sesión de nuevo.');
         }
 
         const ensureRes = await apiFetch(`${apiBase}/api/actividades-alumno/ensure/${testData.id}`);
@@ -148,7 +148,7 @@ export default function TestAlumno() {
           if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
             setActividadAlumnoId(aaData.id);
           } else {
-            throw new Error('Respuesta inválida al obtener ActividadAlumno');
+            throw new TypeError('Respuesta inválida al obtener ActividadAlumno');
           }
         } else {
           const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
@@ -159,7 +159,7 @@ export default function TestAlumno() {
           if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
             setActividadAlumnoId(aaData.id);
           } else {
-            throw new Error('Respuesta inválida al crear ActividadAlumno');
+            throw new TypeError('Respuesta inválida al crear ActividadAlumno');
           }
         }
       } catch (e) {

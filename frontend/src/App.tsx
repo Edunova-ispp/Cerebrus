@@ -13,7 +13,10 @@ import EditarActividad from "./pages/editarActividad/EditarActividad";
 import EditarCurso from "./pages/editarCurso/EditarCurso";
 import EditarTema from "./pages/editarTema/EditarTema";
 import EstadisticasCurso from "./pages/estadisticasCurso/EstadisticasCurso";
-import MediasCurso from "./pages/estadisticasCurso/MediasCurso";
+import EstadisticasActividades from "./pages/estadisticasCurso/EstadisticasActividades.tsx";
+import EstadisticasTemas from "./pages/estadisticasCurso/EstadisticasTemas";
+import GraficasActividades from "./pages/estadisticasCurso/GraficasActividades";
+import GraficasTemas from "./pages/estadisticasCurso/GraficasTemas";
 import InfoPage from "./pages/infoPage/InfoPage";
 import LandingPage from "./pages/landingPage/LandingPage";
 import MapaCurso from "./pages/mapaCurso/MapaCurso";
@@ -27,6 +30,9 @@ import TableroAlumno from "./pages/tableroAlumno/TableroAlumno";
 import CartaAlumno from "./pages/cartaAlumno/CartaAlumno";
 import TestAlumno from "./pages/testAlumno/TestAlumno";
 import CrucigramaAlumno from "./pages/crucigramaAlumno/CrucigramaAlumno";
+import EstadisticasAlumno from "./pages/estadisticasCurso/EstadisticasAlumno.tsx";
+import EstadisticasActividad from "./pages/estadisticasCurso/EstadisticasActividad.tsx";
+import EstadisticasTema from "./pages/estadisticasCurso/EstadisticasTema.tsx";
 
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
 class WatchbugErrorBoundary extends Component<
@@ -106,8 +112,14 @@ function App() {
       <Route path="/tableros/:tableroId/alumno" element={<TableroAlumno />} />
       <Route path="/generales/carta/:cartaId/alumno" element={<CartaAlumno />} />
       <Route path="/estadisticas/:id" element={<EstadisticasCurso />} />
-      <Route path="/medias/:id" element={<MediasCurso />} />
+      <Route path="/estadisticas/:id/actividades" element={<EstadisticasActividades />} />
+      <Route path="/estadisticas/:cursoId/actividades/graficas" element={<GraficasActividades />} />
+      <Route path="/estadisticas/:id/temas" element={<EstadisticasTemas />} />
+      <Route path="/estadisticas/:cursoId/temas/graficas" element={<GraficasTemas />} />
       <Route path="/perfil" element={<Perfil />} />
+      <Route path="/estadisticas/cursos/:cursoId/alumno/:alumnoNombre" element={<EstadisticasAlumno />} />
+      <Route path="/estadisticas/temas/:id" element={<EstadisticasTema />} />
+      <Route path="/estadisticas/actividades/:id" element={<EstadisticasActividad />} />
     </Routes>
     </WatchbugErrorBoundary>
   );

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import './TestForm.css';
 
 export type ClasificacionFormMode = 'create' | 'edit';
@@ -26,14 +27,20 @@ export interface ClasificacionFormInitialValues {
 }
 
 interface RespuestaOption {
+  localKey: string;
   id?: number;
   text: string;
 }
 
 interface Pregunta {
+  localKey: string;
   id?: number;
   text: string;
   respuestas: RespuestaOption[];
+}
+
+function makeLocalKey(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 interface Props {
@@ -43,11 +50,11 @@ interface Props {
 }
 
 function makeEmptyRespuesta(): RespuestaOption {
-  return { text: '' };
+  return { localKey: makeLocalKey(), text: '' };
 }
 
 function makeEmptyPregunta(): Pregunta {
-  return { text: '', respuestas: [makeEmptyRespuesta()] };
+  return { localKey: makeLocalKey(), text: '', respuestas: [makeEmptyRespuesta()] };
 }
 
 export function ClasificacionForm({ mode = 'create', clasificacionId, initialValues }: Props) {
@@ -59,6 +66,7 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
   const [preguntas, setPreguntas] = useState<Pregunta[]>([makeEmptyPregunta()]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+const [showIAModal, setShowIAModal] = useState(false);
 
   const originalPreguntasRef = useRef<ClasificacionFormInitialPregunta[]>([]);
   const navigate = useNavigate();
@@ -76,9 +84,11 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
       originalPreguntasRef.current = JSON.parse(JSON.stringify(initialValues.preguntas));
       setPreguntas(
         initialValues.preguntas.map((p) => ({
+          localKey: makeLocalKey(),
           id: p.id,
           text: p.pregunta,
           respuestas: p.respuestas.map((r) => ({
+            localKey: makeLocalKey(),
             id: r.id,
             text: r.respuesta,
           })),
@@ -244,10 +254,52 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
     }
   };
 
+const handleIAResult = (data: any) => {
+    // 1. Imprimimos el JSON exacto en la consola por si necesitamos investigarlo
+    console.log("Datos crudos de la IA:", data);
+
+    if (data.titulo) setTitulo(data.titulo);
+    if (data.descripcion) setDescripcion(data.descripcion);
+    if (data.puntuacion) setPuntuacion(String(data.puntuacion));
+
+    // 2. Buscamos el array principal (la IA a veces lo llama 'categorias' en vez de 'preguntas')
+    const arrayPrincipal = data.preguntas || data.categorias || data.categories;
+
+    if (Array.isArray(arrayPrincipal) && arrayPrincipal.length > 0) {
+      const mappedPreguntas: Pregunta[] = arrayPrincipal.map((p: any) => {
+        const categoriaText = p.pregunta || p.categoria || p.nombre || p.titulo || p.name || p.enunciado || 'Categoría sin nombre';
+        const arrayElementos = p.respuestas || p.elementos || p.items || p.opciones || [];
+        let elementosMapeados: RespuestaOption[] = [makeEmptyRespuesta()];
+        if (Array.isArray(arrayElementos) && arrayElementos.length > 0) {
+          elementosMapeados = arrayElementos.map((r: any) => {
+            if (typeof r === 'string') {
+              return { localKey: makeLocalKey(), text: r };
+            }
+            const textoRespuesta = r.respuesta || r.texto || r.text || r.nombre || r.elemento || '';
+            return { localKey: makeLocalKey(), text: String(textoRespuesta) };
+          });
+        }
+        return {
+          localKey: makeLocalKey(),
+          text: categoriaText,
+          respuestas: elementosMapeados
+        };
+      });
+      
+      setPreguntas(mappedPreguntas);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="tf-form">
       {error && <p className="ca-text tf-error">{error}</p>}
-      
+      <GenerarIAModal
+        tipoActividad="CLASIFICACION"
+        open={showIAModal}
+        onClose={() => setShowIAModal(false)}
+        onResult={handleIAResult}
+      />
+    
       <div className="ca-contenedor-blanco tf-header">
         <div className="tf-col">
           <div>
@@ -261,10 +313,16 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
         </div>
 
         <div className="tf-col">
+            <div>
+            <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+              Generar con IA
+            </button>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <label className="ca-text">Puntuación</label>
             <input type="number" value={puntuacion} onChange={(e) => setPuntuacion(e.target.value)} style={{ width: 90 }} />
           </div>
+          
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
             <input type="checkbox" id="respVisible" checked={respVisible} onChange={(e) => setRespVisible(e.target.checked)} />
             <label className="ca-text" htmlFor="respVisible">Corregir automáticamente</label>
@@ -274,6 +332,7 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
               <label className="ca-text">Comentarios de corrección</label>
               <input type="text" value={comentariosRespVisible} onChange={(e) => setComentariosRespVisible(e.target.value)} style={{ width: '100%' }} />
             </div>
+            
           )}
         </div>
       </div>
@@ -281,7 +340,7 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
       <div className="ca-contenedor-blanco" style={{ marginTop: 16, flexDirection: 'column', alignItems: 'stretch' }}>
         <h3 className="ca-text">Configuración de Categorías</h3>
         {preguntas.map((p, pIdx) => (
-          <div key={pIdx} className="tf-question-block" style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px', marginBottom: '15px' }}>
+          <div key={p.localKey} className="tf-question-block" style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px', marginBottom: '15px' }}>
             <div className="tf-question-header">
               <span className="tf-question-label">Categoría {pIdx + 1}</span>
               <button type="button" className="tf-btn-remove-question" onClick={() => removePregunta(pIdx)}>✕</button>
@@ -295,7 +354,7 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
             />
             <div className="tf-options" style={{ marginLeft: '20px' }}>
               {p.respuestas.map((r, rIdx) => (
-                <div key={rIdx} className="tf-option" style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                <div key={r.localKey} className="tf-option" style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                   <input 
                     type="text" 
                     className="tf-option-input"

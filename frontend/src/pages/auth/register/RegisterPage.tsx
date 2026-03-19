@@ -42,7 +42,7 @@ const RegisterPage = () => {
     };
 
     if (tipoUsuario === "ALUMNO") {
-      payload.puntos = puntos === '' ? 0 : parseInt(puntos, 10);
+      payload.puntos = puntos === '' ? 0 : Number.parseInt(puntos, 10);
       payload.organizacion = organizacion;
     } 
     else if (tipoUsuario === "MAESTRO") {

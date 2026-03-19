@@ -17,6 +17,7 @@ import com.cerebrus.actividadAlumno.ActividadAlumnoService;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
+import com.cerebrus.respuestaAlumno.RespuestaAlumno;
 import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneral;
 import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneralRepository;
 import com.cerebrus.respuestaMaestro.RespuestaMaestro;
@@ -211,8 +212,22 @@ public class TableroServiceImpl implements TableroService {
             
             if(correcta  && tablero.getPreguntas().get(tablero.getPreguntas().size()-1).getId().equals(pregunta.getId())) {
                 actividadAlumno.setFechaFin(LocalDateTime.now());
-                actividadAlumno.setNota(10);
-                actividadAlumno.setPuntuacion(tablero.getPuntuacion());
+                int numErrores = 0;
+                for(RespuestaAlumno resp : actividadAlumno.getRespuestasAlumno()) {
+                    if(!resp.getCorrecta()) {
+                        numErrores++;
+                    }
+                }
+                Integer notaFinal = Math.round(10 - (numErrores * (10 / tablero.getPreguntas().size()/4)));
+                if (notaFinal <= 0) {
+                    notaFinal = 1;
+                }
+                Integer puntuacionFinal = Math.round(tablero.getPuntuacion() - (numErrores * (tablero.getPuntuacion() / tablero.getPreguntas().size()/4)));
+                if (puntuacionFinal <= 0) {
+                    puntuacionFinal = 1;
+                }
+                actividadAlumno.setNota(notaFinal);
+                actividadAlumno.setPuntuacion(puntuacionFinal);
             }
             
             actividadAlumnoRepository.save(actividadAlumno);

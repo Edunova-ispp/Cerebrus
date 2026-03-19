@@ -73,7 +73,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues }: Prop
           }),
         });
       } else {
-        const temaIdNum = temaId ? parseInt(temaId, 10) : null;
+        const temaIdNum = temaId ? Number.parseInt(temaId, 10) : null;
         if (!temaIdNum) throw new Error('ID de tema no encontrado');
         if (!cursoId) throw new Error('ID de curso no encontrado');
 

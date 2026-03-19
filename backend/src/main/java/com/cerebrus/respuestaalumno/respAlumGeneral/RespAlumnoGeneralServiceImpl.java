@@ -126,7 +126,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         return esCorrecta;
     }
 
-    public boolean corregirRespuestaAlumnoGeneralTest(Long id) {
+    public boolean corregirRespuestaAlumnoGeneralClasificacion(Long id) {
         RespAlumnoGeneral respuestaAlumno = respAlumnoGeneralRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("RespuestaAlumnoGeneral", "id", id));
         List<RespuestaMaestro> respuestas = respuestaService.encontrarRespuestasPorPreguntaId(respuestaAlumno.getPregunta().getId());
@@ -158,8 +158,20 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         Integer puntuacion = 0;
         Integer puntuacionASumar = actividadRepository.findById(crucigramaId).orElseThrow(() -> new RuntimeException("El crucigrama no existe")).getPuntuacion() / respuestas.size();
         List<RespAlumnoGeneral> respuestasAlumno = new java.util.ArrayList<>();
-        ActividadAlumno  actividadAlumno = actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumno.getId(), crucigramaId)
-            .orElse(actividadAlumnoRepository.save(new ActividadAlumno(0,LocalDateTime.now(),null,0,0,alumno,actividadRepository.findByID(crucigramaId))));
+        
+        // Buscar si ya existe ActividadAlumno para este alumno y actividad
+        // Si NO existe, crear UNA NUEVA
+        // Si existe, reutilizar la misma y actualizar datos
+        ActividadAlumno actividadAlumno;
+        var existente = actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumno.getId(), crucigramaId);
+        if (existente.isPresent()) {
+            // Ya existe: usar la misma
+            actividadAlumno = existente.get();
+        } else {
+            // NO existe: crear una nueva
+            actividadAlumno = actividadAlumnoRepository.save(new ActividadAlumno(0, LocalDateTime.now(), null, 0, 0, alumno, actividadRepository.findByID(crucigramaId)));
+        }
+        
         HashMap<Long, String> resultado = new HashMap<>();
 
         for(Entry<Long, String> entry : respuestas.entrySet()) {
@@ -182,6 +194,10 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
                 nota += 10/respuestas.size();
                 puntuacion += puntuacionASumar;
             }
+            else {
+                nota -= 10/(respuestas.size()*2);
+                puntuacion -= puntuacionASumar/2;
+            }
 
             if(pregunta.getActividad().getRespVisible()) {
                 resultado.put(preguntaId, esCorrecta ? " Respuesta Correcta" : "Incorrecta la respuesta correcta era: " + respuestaCorrecta.getRespuesta());
@@ -194,7 +210,12 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
             respAlumnoGeneral = respAlumnoGeneralRepository.save(respAlumnoGeneral);
             respuestasAlumno.add(respAlumnoGeneral);
         }
-
+        if(puntuacion < 0) {
+            puntuacion = 0;
+        }
+        if(nota < 0) {
+            nota = 0;
+        }
         actividadAlumno.setNota(nota);
         actividadAlumno.setPuntuacion(puntuacion);
         actividadAlumno.setFechaFin(LocalDateTime.now());

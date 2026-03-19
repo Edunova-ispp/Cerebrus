@@ -309,7 +309,7 @@ useEffect(() => {
 
                     const firstInRowLinearIndex = rowIndex * mapRowSize;
                     const renderedRow = (
-                      <li key={`row-${rowIndex}`} className="mapa-map-row-item">
+                      <li key={`row-${row[0]?.id ?? 'empty'}-${row[row.length - 1]?.id ?? 'empty'}`} className="mapa-map-row-item">
                         <div className={`mapa-map-row${reverse ? ' mapa-map-row--reverse' : ''}`}>
                           {rowActs.map((act, localIndex) => {
                             const linearIndex = firstInRowLinearIndex + (reverse ? row.length - 1 - localIndex : localIndex);

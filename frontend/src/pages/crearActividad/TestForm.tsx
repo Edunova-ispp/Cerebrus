@@ -29,15 +29,21 @@ export interface TestFormInitialValues {
 }
 
 interface QuestionOption {
+  localKey: string;
   id?: number;
   text: string;
   correcta: boolean;
 }
 
 interface Question {
+  localKey: string;
   id?: number;
   text: string;
   options: QuestionOption[];
+}
+
+function makeLocalKey(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 interface Props {
@@ -47,11 +53,11 @@ interface Props {
 }
 
 function makeEmptyOption(): QuestionOption {
-  return { text: '', correcta: false };
+  return { localKey: makeLocalKey(), text: '', correcta: false };
 }
 
 function makeEmptyQuestion(): Question {
-  return { text: '', options: [makeEmptyOption(), makeEmptyOption()] };
+  return { localKey: makeLocalKey(), text: '', options: [makeEmptyOption(), makeEmptyOption()] };
 }
 
 export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
@@ -85,9 +91,11 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
       originalQuestionsRef.current = [...initialValues.preguntas];
       setQuestions(
         initialValues.preguntas.map((p) => ({
+          localKey: makeLocalKey(),
           id: p.id,
           text: p.pregunta,
           options: p.respuestas.map((r) => ({
+            localKey: makeLocalKey(),
             id: r.id,
             text: r.respuesta,
             correcta: r.correcta,
@@ -344,8 +352,10 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
     if (preguntas && Array.isArray(preguntas)) {
       setQuestions(
         preguntas.map((p) => ({
+          localKey: makeLocalKey(),
           text: p.enunciado,
           options: (p.opciones ?? []).map((o) => ({
+            localKey: makeLocalKey(),
             text: o.texto,
             correcta: Boolean(o.correcta),
           })),
@@ -437,7 +447,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            Mostrar correcciones al alumno
+            <span>Mostrar correcciones al alumno</span>
           </label>
 
           {respVisible && (
@@ -462,7 +472,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
           </p>
 
           {questions.map((q, qi) => (
-            <div key={qi} className="tf-question-block">
+            <div key={q.localKey} className="tf-question-block">
               <div className="tf-question-header">
                 <span className="tf-question-label">Pregunta {qi + 1}</span>
                 {questions.length > 1 && (
@@ -488,7 +498,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
               <div className="tf-options">
                 {q.options.map((opt, oi) => (
                   <div
-                    key={oi}
+                    key={opt.localKey}
                     className={`tf-option${opt.correcta ? ' tf-option--correct' : ''}`}
                   >
                     <span className="tf-option-letter">{String.fromCharCode(65 + oi)}.</span>

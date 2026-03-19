@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import { apiFetch } from '../../utils/api';
 import './CartaForm.css';
 
@@ -29,11 +30,16 @@ export interface CartaFormInitialValues {
 }
 
 interface Card {
+  localKey: string;
   id?: number;
   pregunta: string;
   respuesta: string;
   imagen: string;
   respuestaId?: number;
+}
+
+function makeLocalCardKey(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 interface Props {
@@ -43,7 +49,7 @@ interface Props {
 }
 
 function makeEmptyCard(): Card {
-  return { pregunta: '', respuesta: '', imagen: '' };
+  return { localKey: makeLocalCardKey(), pregunta: '', respuesta: '', imagen: '' };
 }
 
 export function CartaForm({ mode = 'create', generalId, initialValues }: Props) {
@@ -56,6 +62,8 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
   const [cards, setCards] = useState<Card[]>([makeEmptyCard()]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const [showIAModal, setShowIAModal] = useState(false);
 
   const originalCardsRef = useRef<CartaFormInitialPregunta[]>([]);
 
@@ -75,6 +83,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
       originalCardsRef.current = [...initialValues.preguntas];
       setCards(
         initialValues.preguntas.map((p) => ({
+          localKey: makeLocalCardKey(),
           id: p.id,
           pregunta: p.pregunta,
           respuesta: p.respuestas[0]?.respuesta ?? '',
@@ -100,6 +109,40 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
 
   const updateCardImagen = (ci: number, imagen: string) =>
     setCards((prev) => prev.map((c, i) => (i === ci ? { ...c, imagen } : c)));
+  const handleIAResult = (data: any) => {
+    console.log("Datos crudos de la IA (Cartas):", data);
+
+    if (data.titulo) setTitulo(String(data.titulo));
+    if (data.descripcion) setDescripcion(String(data.descripcion));
+    if (data.puntuacion) setPuntuacion(String(data.puntuacion));
+    const arrayPreguntas = data.preguntas || data.cartas || data.items || [];
+
+    if (Array.isArray(arrayPreguntas) && arrayPreguntas.length > 0) {
+      const mappedCards: Card[] = arrayPreguntas.map((p: any) => {
+        const preguntaText = p.enunciado || p.pregunta || p.anverso || '';
+
+        let respuestaText = '';
+        if (p.respuesta) {
+          if (typeof p.respuesta === 'string') {
+            respuestaText = p.respuesta;
+          } else {
+            respuestaText = p.respuesta.texto || p.respuesta.text || p.respuesta.respuesta || '';
+          }
+        } else if (p.respuestas && Array.isArray(p.respuestas) && p.respuestas.length > 0) {
+          respuestaText = p.respuestas[0].texto || p.respuestas[0].respuesta || '';
+        }
+
+        return {
+          localKey: makeLocalCardKey(),
+          pregunta: String(preguntaText),
+          respuesta: String(respuestaText),
+          imagen: ''
+        };
+      });
+
+      setCards(mappedCards);
+    }
+  };
 
   // ── Validation ───────────────────────────────────────────────────────────
 
@@ -146,7 +189,6 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
       const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
       if (mode === 'create') {
-        // Step 1 – create the General (carta) shell with no questions
         const generalRes = await apiFetch(`${apiBase}/api/generales/cartas/maestro`, {
           method: 'POST',
           body: JSON.stringify({
@@ -162,7 +204,6 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
         });
         const gId = (await generalRes.json()) as number;
 
-        // Step 2 – create each card (pregunta + single respuesta)
         for (const card of cards) {
           const pregRes = await apiFetch(`${apiBase}/api/preguntas`, {
             method: 'POST',
@@ -174,7 +215,6 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
           });
           const pregId = (await pregRes.json()) as number;
 
-          // Step 3 – create the single answer for this card
           await apiFetch(`${apiBase}/api/respuestas`, {
             method: 'POST',
             body: JSON.stringify({
@@ -186,7 +226,6 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
           });
         }
       } else {
-        // Edit – update metadata
         await apiFetch(`${apiBase}/api/generales/update/${generalId}`, {
           method: 'PUT',
           body: JSON.stringify({
@@ -202,7 +241,6 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
           }),
         });
 
-        // Edit – cards: delete removed, update existing, create new
         const currentCardIds = new Set(cards.filter((c) => c.id).map((c) => c.id!));
         for (const orig of originalCardsRef.current) {
           if (!currentCardIds.has(orig.id)) {
@@ -212,13 +250,11 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
 
         for (const card of cards) {
           if (card.id) {
-            // Existing card – update pregunta text
             await apiFetch(`${apiBase}/api/preguntas/update/${card.id}`, {
               method: 'PUT',
               body: JSON.stringify({ pregunta: card.pregunta.trim(), imagen: card.imagen.trim() || null }),
             });
 
-            // Update the existing respuesta
             if (card.respuestaId) {
               await apiFetch(`${apiBase}/api/respuestas/update/${card.respuestaId}`, {
                 method: 'PUT',
@@ -229,7 +265,6 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
                 }),
               });
             } else {
-              // No existing respuesta – create one
               await apiFetch(`${apiBase}/api/respuestas`, {
                 method: 'POST',
                 body: JSON.stringify({
@@ -241,7 +276,6 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
               });
             }
           } else {
-            // New card – create pregunta + respuesta
             const pregRes = await apiFetch(`${apiBase}/api/preguntas`, {
               method: 'POST',
               body: JSON.stringify({
@@ -277,171 +311,186 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <form onSubmit={handleSubmit} className="cf-form">
-      {error && <p className="ca-text cf-error">{error}</p>}
+    <>
+      <form onSubmit={handleSubmit} className="cf-form">
+        {error && <p className="ca-text cf-error">{error}</p>}
 
-      {/* ── TOP: Metadata ── */}
-      <div className="cf-header">
-        <div className="cf-col">
-          <div>
-            <label className="cf-label" htmlFor="cf-titulo">Título *</label>
-            <input
-              type="text"
-              id="cf-titulo"
-              className="cf-input"
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
-              placeholder="Título de la actividad de cartas"
-            />
-          </div>
-
-          <div>
-            <label className="cf-label" htmlFor="cf-descripcion">Descripción</label>
-            <textarea
-              id="cf-descripcion"
-              className="cf-input"
-              value={descripcion}
-              onChange={(e) => setDescripcion(e.target.value)}
-              rows={3}
-              placeholder="Descripción opcional"
-            />
-          </div>
-
-          <div>
-            <label className="cf-label" htmlFor="cf-imagen">URL de imagen (opcional)</label>
-            <input
-              type="url"
-              id="cf-imagen"
-              className="cf-input"
-              value={imagen}
-              onChange={(e) => setImagen(e.target.value)}
-              placeholder="https://..."
-            />
-            {imagen.trim() && (
-              <img
-                src={imagen.trim()}
-                alt="Preview"
-                className="cf-img-preview"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                onLoad={(e) => { (e.target as HTMLImageElement).style.display = 'block'; }}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="cf-col">
-          <div>
-            <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
-            <input
-              type="number"
-              id="cf-puntuacion"
-              className="cf-input cf-input-sm"
-              value={puntuacion}
-              onChange={(e) => setPuntuacion(e.target.value)}
-            />
-          </div>
-
-          <label className="cf-check-label">
-            <input
-              type="checkbox"
-              checked={respVisible}
-              onChange={(e) => setRespVisible(e.target.checked)}
-            />
-            Mostrar correcciones al alumno
-          </label>
-
-          {respVisible && (
+        {/* ── TOP: Metadata ── */}
+        <div className="cf-header">
+          <div className="cf-col">
             <div>
-              <label className="cf-label" htmlFor="cf-comentarios">Comentarios</label>
+              <label className="cf-label" htmlFor="cf-titulo">Título *</label>
               <input
                 type="text"
-                id="cf-comentarios"
+                id="cf-titulo"
                 className="cf-input"
-                value={comentariosRespVisible}
-                onChange={(e) => setComentariosRespVisible(e.target.value)}
+                value={titulo}
+                onChange={(e) => setTitulo(e.target.value)}
+                placeholder="Título de la actividad de cartas"
               />
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* ── BOTTOM: Cards ── */}
-      <div className="cf-cards">
-        <p className="cf-help">
-          Añade las cartas. Cada carta tiene una <strong>pregunta</strong> (anverso) y una <strong>respuesta</strong> (reverso). El alumno deberá emparejar cada pregunta con su respuesta.
-        </p>
-
-        {cards.map((card, ci) => (
-          <div key={ci} className="cf-card-block">
-            <div className="cf-card-header">
-              <span className="cf-card-label">Carta {ci + 1}</span>
-              {cards.length > 1 && (
-                <button
-                  type="button"
-                  className="cf-btn-remove-card"
-                  onClick={() => removeCard(ci)}
-                  title="Eliminar carta"
-                >
-                  ✕
-                </button>
-              )}
+            <div>
+              <label className="cf-label" htmlFor="cf-descripcion">Descripción</label>
+              <textarea
+                id="cf-descripcion"
+                className="cf-input"
+                value={descripcion}
+                onChange={(e) => setDescripcion(e.target.value)}
+                rows={3}
+                placeholder="Descripción opcional"
+              />
             </div>
 
-            <div className="cf-card-fields">
-              <div className="cf-card-field">
-                <label className="cf-card-field-label">Pregunta</label>
-                <input
-                  type="text"
-                  className="cf-card-input"
-                  placeholder={`Pregunta de la carta ${ci + 1}...`}
-                  value={card.pregunta}
-                  onChange={(e) => updateCardPregunta(ci, e.target.value)}
-                />
-              </div>
-              <div className="cf-card-field">
-                <label className="cf-card-field-label">Respuesta</label>
-                <input
-                  type="text"
-                  className="cf-card-input"
-                  placeholder={`Respuesta de la carta ${ci + 1}...`}
-                  value={card.respuesta}
-                  onChange={(e) => updateCardRespuesta(ci, e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="cf-card-imagen">
-              <label className="cf-card-field-label">Imagen de la carta (opcional)</label>
+            <div>
+              <label className="cf-label" htmlFor="cf-imagen">URL de imagen (opcional)</label>
               <input
                 type="url"
-                className="cf-card-input"
+                id="cf-imagen"
+                className="cf-input"
+                value={imagen}
+                onChange={(e) => setImagen(e.target.value)}
                 placeholder="https://..."
-                value={card.imagen}
-                onChange={(e) => updateCardImagen(ci, e.target.value)}
               />
-              {card.imagen.trim() && (
+              {imagen.trim() && (
                 <img
-                  src={card.imagen.trim()}
-                  alt={`Imagen carta ${ci + 1}`}
-                  className="cf-card-img-preview"
+                  src={imagen.trim()}
+                  alt="Preview"
+                  className="cf-img-preview"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   onLoad={(e) => { (e.target as HTMLImageElement).style.display = 'block'; }}
                 />
               )}
             </div>
           </div>
-        ))}
+          
 
-        <button type="button" className="cf-btn-add-card" onClick={addCard}>
-          + Añadir carta
-        </button>
-      </div>
+          <div className="cf-col">
+                      <div>
+            <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+              Generar con IA
+            </button>
+          </div>
+            <div>
+              <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
+              <input
+                type="number"
+                id="cf-puntuacion"
+                className="cf-input cf-input-sm"
+                value={puntuacion}
+                onChange={(e) => setPuntuacion(e.target.value)}
+              />
+            </div>
 
-      <div className="ca-form-footer">
-        <button className="ca-btn-guardar" type="submit" disabled={loading}>
-          {loading ? 'Guardando...' : 'Guardar'}
-        </button>
-      </div>
-    </form>
+            <label className="cf-check-label">
+              <input
+                type="checkbox"
+                checked={respVisible}
+                onChange={(e) => setRespVisible(e.target.checked)}
+              />
+              <span>Mostrar correcciones al alumno</span>
+            </label>
+
+            {respVisible && (
+              <div>
+                <label className="cf-label" htmlFor="cf-comentarios">Comentarios</label>
+                <input
+                  type="text"
+                  id="cf-comentarios"
+                  className="cf-input"
+                  value={comentariosRespVisible}
+                  onChange={(e) => setComentariosRespVisible(e.target.value)}
+                />
+              </div>
+              
+            )}
+          </div>
+        </div>
+
+        {/* ── BOTTOM: Cards ── */}
+        <div className="cf-cards">
+          <p className="cf-help">
+            Añade las cartas. Cada carta tiene una <strong>pregunta</strong> (anverso) y una <strong>respuesta</strong> (reverso). El alumno deberá emparejar cada pregunta con su respuesta.
+          </p>
+
+          {cards.map((card, ci) => (
+            <div key={card.localKey} className="cf-card-block">
+              <div className="cf-card-header">
+                <span className="cf-card-label">Carta {ci + 1}</span>
+                {cards.length > 1 && (
+                  <button
+                    type="button"
+                    className="cf-btn-remove-card"
+                    onClick={() => removeCard(ci)}
+                    title="Eliminar carta"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              <div className="cf-card-fields">
+                <div className="cf-card-field">
+                  <label className="cf-card-field-label">Pregunta</label>
+                  <input
+                    type="text"
+                    className="cf-card-input"
+                    placeholder={`Pregunta de la carta ${ci + 1}...`}
+                    value={card.pregunta}
+                    onChange={(e) => updateCardPregunta(ci, e.target.value)}
+                  />
+                </div>
+                <div className="cf-card-field">
+                  <label className="cf-card-field-label">Respuesta</label>
+                  <input
+                    type="text"
+                    className="cf-card-input"
+                    placeholder={`Respuesta de la carta ${ci + 1}...`}
+                    value={card.respuesta}
+                    onChange={(e) => updateCardRespuesta(ci, e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="cf-card-imagen">
+                <label className="cf-card-field-label">Imagen de la carta (opcional)</label>
+                <input
+                  type="url"
+                  className="cf-card-input"
+                  placeholder="https://..."
+                  value={card.imagen}
+                  onChange={(e) => updateCardImagen(ci, e.target.value)}
+                />
+                {card.imagen.trim() && (
+                  <img
+                    src={card.imagen.trim()}
+                    alt={`Imagen carta ${ci + 1}`}
+                    className="cf-card-img-preview"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    onLoad={(e) => { (e.target as HTMLImageElement).style.display = 'block'; }}
+                  />
+                )}
+              </div>
+            </div>
+          ))}
+
+          <button type="button" className="cf-btn-add-card" onClick={addCard}>
+            + Añadir carta
+          </button>
+        </div>
+
+        <div className="ca-form-footer">
+          <button className="ca-btn-guardar" type="submit" disabled={loading}>
+            {loading ? 'Guardando...' : 'Guardar'}
+          </button>
+        </div>
+      </form>
+      <GenerarIAModal
+        tipoActividad="CARTA"
+        open={showIAModal}
+        onClose={() => setShowIAModal(false)}
+        onResult={handleIAResult}
+      />
+    </>
   );
 }

@@ -18,8 +18,6 @@ interface Props {
 
 export default function DetalleCursoAlumno({ curso, progreso }: Props) {
   const navigate = useNavigate();
-  const puntosConseguidos = progreso?.puntos ?? 0;
-  void puntosConseguidos;
   return (
     <div className="detalle-alumno-page">
       <NavbarMisCursos />
