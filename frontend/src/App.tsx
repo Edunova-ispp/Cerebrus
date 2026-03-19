@@ -19,7 +19,6 @@ import LandingPage from "./pages/landingPage/LandingPage";
 import MapaCurso from "./pages/mapaCurso/MapaCurso";
 import MisCursos from "./pages/misCursos/MisCursos";
 import OrdenacionAlumno from "./pages/ordenacionAlumno/OrdenacionAlumno";
-import ListaTemasCursoProfesor from "./pages/temasDelCurso/ListaTemasCursoProfesor";
 import TeoriaAlumno from "./pages/TeoriaAlumno/TeoriaAlumno";
 import MarcarImagenAlumno from "./pages/marcarImagenAlumno/MarcarImagenAlumno";
 import Perfil from "./pages/perfil/Perfil";
@@ -90,7 +89,6 @@ function App() {
       <Route path="/editarCurso/:id" element={<EditarCurso />} />
       <Route path="/mapa/:id"      element={<MapaCurso />} />
       <Route path="/cursos/:id"    element={<DetalleCurso />} />
-      <Route path="/cursos/:id/temas"    element={<ListaTemasCursoProfesor />} />
       <Route path="/cursos/:id/temas/crear" element={<CrearTema />} />
       <Route path="/cursos/:id/temas/:temaId/editar" element={<EditarTema />} />
       <Route path="/cursos/:id/temas/:temaId/actividades/:actividadId/editar" element={<EditarActividad />} />

@@ -22,8 +22,14 @@ function formatearTiempo(minutos: number): string {
   return `${Math.round(minutos)} mins`;
 }
 
-export default function EstadisticasActividad() {
-  const { id } = useParams<{ id: string }>();
+interface EstadisticasActividadProps {
+  readonly actividadIdProp?: string;
+  readonly embedded?: boolean;
+}
+
+export default function EstadisticasActividad({ actividadIdProp, embedded }: EstadisticasActividadProps = {}) {
+  const params = useParams<{ id: string }>();
+  const id = actividadIdProp ?? params.id;
   const navigate = useNavigate();
   const [datos, setDatos] = useState<RapidosLentosDTO | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,15 +73,18 @@ export default function EstadisticasActividad() {
   const elMasLento = alumnosCompletos.length > 0 ? alumnosCompletos[alumnosCompletos.length - 1] : null;
 
   return (
-    <div className="estadisticas-page">
-      <NavbarMisCursos />
+    <div className={embedded ? 'stats-sub-embedded' : 'estadisticas-page'}>
+      {!embedded && <NavbarMisCursos />}
       
       <main className="estadisticas-main">
-        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
-          ← Volver al curso
-        </button>
-        
-        <h1 className="estadisticas-titulo-curso">Estadísticas de la Actividad</h1>
+        {!embedded && (
+          <>
+            <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
+              ← Volver al curso
+            </button>
+            <h1 className="estadisticas-titulo-curso">Estadísticas de la Actividad</h1>
+          </>
+        )}
 
         <div className="estadisticas-yellow-card">
           {loading && <div className="stats-info-msg">Cargando tiempos...</div>}

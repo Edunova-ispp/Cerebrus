@@ -14,8 +14,14 @@ interface Tema {
   actividades: Actividad[];
 }
 
-export default function MediasCurso() {
-  const { id } = useParams<{ id: string }>();
+interface MediasCursoProps {
+  readonly cursoIdProp?: string;
+  readonly embedded?: boolean;
+}
+
+export default function MediasCurso({ cursoIdProp, embedded }: MediasCursoProps = {}) {
+  const params = useParams<{ id: string }>();
+  const id = cursoIdProp ?? params.id;
   const navigate = useNavigate();
   
   const [temas, setTemas] = useState<Tema[]>([]);
@@ -77,11 +83,15 @@ export default function MediasCurso() {
   };
 
   return (
-    <div className="estadisticas-page">
-      <NavbarMisCursos />
+    <div className={embedded ? 'medias-embedded' : 'estadisticas-page'}>
+      {!embedded && <NavbarMisCursos />}
       <main className="estadisticas-main">
-        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>←</button>
-        <h1 className="estadisticas-titulo-curso">Medias del Curso</h1>
+        {!embedded && (
+          <>
+            <button className="btn-volver-pixel" onClick={() => navigate(-1)}>←</button>
+            <h1 className="estadisticas-titulo-curso">Medias del Curso</h1>
+          </>
+        )}
 
         {loading && <p className="msg-placeholder">Cargando datos...</p>}
         {error && <p className="msg-placeholder" style={{ color: 'red' }}>{error}</p>}

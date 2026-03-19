@@ -121,12 +121,19 @@ type GeneralCartaMaestroDTO = {
 
 type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'marcarImagen' | 'clasificacion' | 'carta' | null;
 
-export default function EditarActividad() {
-  const { id: cursoId, actividadId } = useParams<{
+interface EditarActividadProps {
+  readonly actividadIdProp?: string;
+  readonly embedded?: boolean;
+  readonly onDone?: () => void;
+}
+
+export default function EditarActividad({ actividadIdProp, embedded, onDone }: EditarActividadProps = {}) {
+  const { id: cursoId, actividadId: actividadIdParam } = useParams<{
     id: string;
     temaId: string;
     actividadId: string;
   }>();
+  const actividadId = actividadIdProp ?? actividadIdParam;
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -421,18 +428,20 @@ export default function EditarActividad() {
   };
 
   return (
-    <div className="ca-page">
-      <NavbarMisCursos />
+    <div className={embedded ? 'ca-embedded' : 'ca-page'}>
+      {!embedded && <NavbarMisCursos />}
       <main className="ca-main">
-        <div className="ca-sidebar">
-          <button
-            className="ca-sidebar-btn"
-            type="button"
-            onClick={() => navigate(`/cursos/${cursoId}/temas`)}
-          >
-            Volver al Mapa
-          </button>
-        </div>
+        {!embedded && (
+          <div className="ca-sidebar">
+            <button
+              className="ca-sidebar-btn"
+              type="button"
+              onClick={() => navigate(`/cursos/${cursoId}/temas`)}
+            >
+              Volver al Mapa
+            </button>
+          </div>
+        )}
 
         <div className="ca-contenido">
           {loading && <p className="ca-text">Cargando actividad...</p>}

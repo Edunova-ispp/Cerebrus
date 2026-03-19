@@ -208,3 +208,162 @@
   justify-content: center;
   margin-top: 25px;
 }
+
+/* ===== STATS SUB-SIDEBAR LAYOUT ===== */
+.stats-layout {
+  display: flex;
+  gap: 24px;
+  width: 100%;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+.stats-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stats-sidebar-btn {
+  width: 100%;
+  background: #FCEF91;
+  color: #000;
+  border: 3px solid #000;
+  border-radius: 12px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 12px 14px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0px #000;
+  transition: transform 0.1s, background 0.15s;
+  text-align: left;
+}
+
+.stats-sidebar-btn:hover {
+  background: #f5d49a;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #000;
+}
+
+.stats-sidebar-btn--active {
+  background: #f5d49a;
+  box-shadow: inset 2px 2px 0px #000;
+  transform: translate(1px, 1px);
+}
+
+.stats-sidebar-btn--active:hover {
+  transform: translate(1px, 1px);
+  box-shadow: inset 2px 2px 0px #000;
+}
+
+.stats-sidebar-btn--refresh {
+  background: #FFF;
+}
+
+.stats-sidebar-btn--tema {
+  background: #4a90e2;
+  color: white;
+}
+
+.stats-sidebar-btn--tema:hover {
+  background: #3a7bd5;
+}
+
+.stats-sidebar-btn--actividad {
+  background: #e67e22;
+  color: white;
+}
+
+.stats-sidebar-btn--actividad:hover {
+  background: #cf6d17;
+}
+
+.stats-sidebar-back {
+  background: #eee;
+  font-size: 0.95rem;
+}
+
+.stats-sidebar-back:hover {
+  background: #ddd;
+}
+
+.stats-sidebar-title {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1.1rem;
+  margin: 4px 0 2px;
+  color: #333;
+}
+
+.stats-sidebar-loading {
+  font-family: 'Oxygen', sans-serif;
+  font-style: italic;
+  color: #666;
+  padding: 8px;
+}
+
+.stats-sidebar-divider {
+  width: 100%;
+  border: none;
+  border-top: 2px solid #ccc;
+  margin: 4px 0;
+}
+
+.stats-content-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.stats-placeholder {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1.2rem;
+  color: #666;
+  text-align: center;
+  padding: 60px 20px;
+  background: #FFF9C4;
+  border: 2px solid #000;
+  border-radius: 20px;
+}
+
+/* Embedded sub-component resets */
+.stats-sub-embedded {
+  width: 100%;
+}
+
+.stats-sub-embedded .estadisticas-main {
+  padding: 0;
+  max-width: none;
+}
+
+.medias-embedded {
+  width: 100%;
+}
+
+.medias-embedded .estadisticas-main {
+  padding: 0;
+  max-width: none;
+}
+
+/* Responsive stats sidebar */
+@media (max-width: 768px) {
+  .stats-layout {
+    flex-direction: column;
+  }
+
+  .stats-sidebar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .stats-sidebar-btn {
+    flex: 1;
+    min-width: 140px;
+    text-align: center;
+    padding: 10px 8px;
+    font-size: 0.9rem;
+  }
+}

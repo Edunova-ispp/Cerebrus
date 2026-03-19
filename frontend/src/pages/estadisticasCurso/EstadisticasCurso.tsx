@@ -1,6 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
+import MediasCurso from './MediasCurso';
+import EstadisticasTema from './EstadisticasTema';
+import EstadisticasActividad from './EstadisticasActividad';
 import './EstadisticasCurso.css';
 
 interface EstadisticaAlumno {
@@ -11,10 +14,16 @@ interface EstadisticaAlumno {
   tiempoTotal: number;
 }
 
-interface OpcionDesplegable {
+interface OpcionItem {
   id: number;
   nombre: string;
 }
+
+type StatsView =
+  | { mode: "resumen" }
+  | { mode: "medias" }
+  | { mode: "tiemposTema"; temaId?: number }
+  | { mode: "tiemposActividad"; actividadId?: number };
 
 function formatearTiempo(minutosTotales: number): string {
   if (!minutosTotales || minutosTotales === 0) return '0 mins';
@@ -22,17 +31,23 @@ function formatearTiempo(minutosTotales: number): string {
   return `${minutosTotales} mins`;
 }
 
-export default function EstadisticasCurso() {
-  const { id } = useParams<{ id: string }>();
+interface EstadisticasCursoProps {
+  readonly cursoId?: string;
+  readonly embedded?: boolean;
+}
+
+export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCursoProps = {}) {
+  const params = useParams<{ id: string }>();
+  const id = cursoId ?? params.id;
   const navigate = useNavigate();
   const [estadisticas, setEstadisticas] = useState<EstadisticaAlumno[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const [modalAbierto, setModalAbierto] = useState<'tema' | 'actividad' | null>(null);
-  const [opcionesDisponibles, setOpcionesDisponibles] = useState<OpcionDesplegable[]>([]);
-  const [opcionSeleccionada, setOpcionSeleccionada] = useState<string>('');
-  const [cargandoOpciones, setCargandoOpciones] = useState(false);
+  const [statsView, setStatsView] = useState<StatsView>({ mode: "resumen" });
+  const [temasList, setTemasList] = useState<OpcionItem[]>([]);
+  const [actividadesList, setActividadesList] = useState<OpcionItem[]>([]);
+  const [cargandoLista, setCargandoLista] = useState(false);
 
   useEffect(() => {
     cargarEstadisticas();
@@ -112,79 +127,67 @@ export default function EstadisticasCurso() {
     return { media: totalMinutos / alumnosConTiempo.length, masRapido, masLento };
   }, [estadisticas]);
 
-  // --- LÓGICA DEL MODAL DE SELECCIÓN CON EL ENDPOINT DEL MAESTRO ---
-  const abrirModal = async (tipo: 'tema' | 'actividad') => {
-    setModalAbierto(tipo);
-    setCargandoOpciones(true);
-    setOpcionSeleccionada('');
-    setOpcionesDisponibles([]);
-
+  const cargarListaTemas = useCallback(async () => {
+    setCargandoLista(true);
     try {
       const token = localStorage.getItem('token');
       const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
-      
       const res = await fetch(`${apiBase}/api/temas/curso/${id}/maestro`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
       if (!res.ok) throw new Error('No se pudo obtener la lista de temas');
-      const temasData = await res.json(); 
-
-let opcionesNuevas: OpcionDesplegable[] = [];
-
-      if (tipo === 'tema') {
-        opcionesNuevas = temasData.map((t: any) => {
-          // Magia aquí: si viene anidado usa t.tema, si viene plano usa t directamente
-          const temaObj = t.tema || t; 
-          return {
-            id: temaObj.id,
-            nombre: temaObj.titulo || temaObj.nombre || `Tema ${temaObj.id}`
-          };
-        });
-     } else {
-  const acts: OpcionDesplegable[] = [];
-  temasData.forEach((t: any) => {
-    const listaActs = t.actividades || t.actividadesDTO || [];
-    
-    listaActs.forEach((a: any) => {
-      const actObj = a.actividad || a;
-      const tipoAct = (actObj.tipo || "").toUpperCase();
-      const tituloAct = (actObj.titulo || actObj.nombre || "").toLowerCase();
-      
-      const esTeoria = tipoAct === 'TEORIA' || tituloAct.includes('teoría') || tituloAct.includes('teoria');
-
-      if (!esTeoria) {
-        acts.push({
-          id: actObj.id,
-          nombre: actObj.titulo || actObj.nombre || `Actividad ${actObj.id}`
-        });
-      }
-    });
-  });
-  opcionesNuevas = acts;
-}
-
-      setOpcionesDisponibles(opcionesNuevas);
-      if (opcionesNuevas.length > 0) {
-        setOpcionSeleccionada(opcionesNuevas[0].id.toString());
-      }
+      const temasData = await res.json();
+      const nuevos: OpcionItem[] = temasData.map((t: any) => {
+        const temaObj = t.tema || t;
+        return { id: temaObj.id, nombre: temaObj.titulo || temaObj.nombre || `Tema ${temaObj.id}` };
+      });
+      setTemasList(nuevos);
     } catch (err) {
       console.error(err);
-      alert("No se pudo cargar la lista. Revisa la consola y la URL del fetch.");
-      setModalAbierto(null);
     } finally {
-      setCargandoOpciones(false);
+      setCargandoLista(false);
     }
+  }, [id]);
+
+  const cargarListaActividades = useCallback(async () => {
+    setCargandoLista(true);
+    try {
+      const token = localStorage.getItem('token');
+      const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+      const res = await fetch(`${apiBase}/api/temas/curso/${id}/maestro`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('No se pudo obtener la lista');
+      const temasData = await res.json();
+      const acts: OpcionItem[] = [];
+      temasData.forEach((t: any) => {
+        const listaActs = t.actividades || t.actividadesDTO || [];
+        listaActs.forEach((a: any) => {
+          const actObj = a.actividad || a;
+          const tipoAct = (actObj.tipo || "").toUpperCase();
+          const tituloAct = (actObj.titulo || actObj.nombre || "").toLowerCase();
+          const esTeoria = tipoAct === 'TEORIA' || tituloAct.includes('teoría') || tituloAct.includes('teoria');
+          if (!esTeoria) {
+            acts.push({ id: actObj.id, nombre: actObj.titulo || actObj.nombre || `Actividad ${actObj.id}` });
+          }
+        });
+      });
+      setActividadesList(acts);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCargandoLista(false);
+    }
+  }, [id]);
+
+  const handleTiemposTema = async () => {
+    await cargarListaTemas();
+    setStatsView({ mode: "tiemposTema" });
   };
 
-  const confirmarNavegacion = () => {
-    if (!opcionSeleccionada) return;
-    if (modalAbierto === 'tema') {
-      navigate(`/estadisticas/temas/${opcionSeleccionada}`);
-    } else if (modalAbierto === 'actividad') {
-      navigate(`/estadisticas/actividades/${opcionSeleccionada}`);
-    }
-    setModalAbierto(null);
+  const handleTiemposActividad = async () => {
+    await cargarListaActividades();
+    setStatsView({ mode: "tiemposActividad" });
   };
 
   let estadisticasContent: React.ReactNode;
@@ -238,93 +241,127 @@ let opcionesNuevas: OpcionDesplegable[] = [];
     );
   }
 
-return (
-    <div className="estadisticas-page">
-      <NavbarMisCursos />
-      
-      <main className="estadisticas-main" style={{ maxWidth: '1200px' }}>
-        {/* Botón Volver arriba a la izquierda */}
-        <div style={{ width: '100%', display: 'flex', marginBottom: '10px' }}>
-          <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
+  const renderSidebar = () => {
+    if (statsView.mode === "tiemposTema") {
+      return (
+        <>
+          <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "resumen" })}>
             ← Volver
           </button>
-        </div>
-
-        <h1 className="estadisticas-titulo-curso">Estadísticas del Curso</h1>
-
-        {/* --- CONTENEDOR PRINCIPAL EN PARALELO --- */}
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'row', 
-          width: '100%', 
-          gap: '30px', 
-          alignItems: 'flex-start',
-          marginTop: '20px'
-        }}>
-          
-          {/* COLUMNA IZQUIERDA: Botones de navegación y Actualizar */}
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '20px', 
-            minWidth: '250px' 
-          }}>
-            <button 
-              className="btn-medias-pixel" 
-              onClick={cargarEstadisticas}
-              style={{ width: '100%', backgroundColor: '#FFF' }}
+          <h3 className="stats-sidebar-title">Temas</h3>
+          {cargandoLista ? (
+            <p className="stats-sidebar-loading">Cargando...</p>
+          ) : temasList.map(t => (
+            <button
+              key={t.id}
+              className={`stats-sidebar-btn${'temaId' in statsView && statsView.temaId === t.id ? ' stats-sidebar-btn--active' : ''}`}
+              onClick={() => setStatsView({ mode: "tiemposTema", temaId: t.id })}
             >
-              Actualizar ↻
+              {t.nombre}
             </button>
-            
-            <hr style={{ width: '100%', border: '1px solid #ccc' }} />
+          ))}
+        </>
+      );
+    }
 
-            <button className="btn-medias-pixel" onClick={() => navigate(`/medias/${id}`)} style={{ width: '100%' }}>
-              Puntuaciones medias
+    if (statsView.mode === "tiemposActividad") {
+      return (
+        <>
+          <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "resumen" })}>
+            ← Volver
+          </button>
+          <h3 className="stats-sidebar-title">Actividades</h3>
+          {cargandoLista ? (
+            <p className="stats-sidebar-loading">Cargando...</p>
+          ) : actividadesList.map(a => (
+            <button
+              key={a.id}
+              className={`stats-sidebar-btn${'actividadId' in statsView && statsView.actividadId === a.id ? ' stats-sidebar-btn--active' : ''}`}
+              onClick={() => setStatsView({ mode: "tiemposActividad", actividadId: a.id })}
+            >
+              {a.nombre}
             </button>
-            <button className="btn-medias-pixel" onClick={() => abrirModal('tema')} style={{ width: '100%', backgroundColor: '#4a90e2', color: 'white' }}>
-              Tiempos por Tema
-            </button>
-            <button className="btn-medias-pixel" onClick={() => abrirModal('actividad')} style={{ width: '100%', backgroundColor: '#e67e22', color: 'white' }}>
-              Tiempos por Actividad
-            </button>
-          </div>
-          <div className="estadisticas-yellow-card" style={{ flex: 1, margin: 0, width: 'auto' }}>
+          ))}
+        </>
+      );
+    }
+
+    return (
+      <>
+        <button className="stats-sidebar-btn stats-sidebar-btn--refresh" onClick={cargarEstadisticas}>
+          Actualizar ↻
+        </button>
+        <hr className="stats-sidebar-divider" />
+        <button
+          className={`stats-sidebar-btn${statsView.mode === 'resumen' ? ' stats-sidebar-btn--active' : ''}`}
+          onClick={() => setStatsView({ mode: "resumen" })}
+        >
+          Resumen general
+        </button>
+        <button
+          className={`stats-sidebar-btn${statsView.mode === 'medias' ? ' stats-sidebar-btn--active' : ''}`}
+          onClick={() => setStatsView({ mode: "medias" })}
+        >
+          Puntuaciones medias
+        </button>
+        <button className="stats-sidebar-btn stats-sidebar-btn--tema" onClick={handleTiemposTema}>
+          Tiempos por Tema →
+        </button>
+        <button className="stats-sidebar-btn stats-sidebar-btn--actividad" onClick={handleTiemposActividad}>
+          Tiempos por Actividad →
+        </button>
+      </>
+    );
+  };
+
+  const renderStatsContent = () => {
+    switch (statsView.mode) {
+      case "medias":
+        return <MediasCurso cursoIdProp={id} embedded />;
+      case "tiemposTema":
+        if ('temaId' in statsView && statsView.temaId) {
+          return <EstadisticasTema temaIdProp={String(statsView.temaId)} embedded />;
+        }
+        return <div className="stats-placeholder">Selecciona un tema de la lista</div>;
+      case "tiemposActividad":
+        if ('actividadId' in statsView && statsView.actividadId) {
+          return <EstadisticasActividad actividadIdProp={String(statsView.actividadId)} embedded />;
+        }
+        return <div className="stats-placeholder">Selecciona una actividad de la lista</div>;
+      default:
+        return (
+          <div className="estadisticas-yellow-card" style={{ margin: 0 }}>
             {estadisticasContent}
           </div>
+        );
+    }
+  };
 
-        </div>
-      </main>
-      {modalAbierto && (
-        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div className="modal-content" style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', border: '4px solid #333', minWidth: '300px' }}>
-            <h2 style={{ marginTop: 0 }}>
-              Selecciona {modalAbierto === 'tema' ? 'un Tema' : 'una Actividad'}
-            </h2>
-            
-            {cargandoOpciones ? (
-              <p>Cargando opciones...</p>
-            ) : opcionesDisponibles.length === 0 ? (
-              <p>No hay datos.</p>
-            ) : (
-              <select 
-                value={opcionSeleccionada} 
-                onChange={(e) => setOpcionSeleccionada(e.target.value)}
-                style={{ width: '100%', padding: '10px', fontSize: '16px', marginBottom: '20px' }}
-              >
-                {opcionesDisponibles.map(op => (
-                  <option key={op.id} value={op.id}>{op.nombre}</option>
-                ))}
-              </select>
-            )}
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button className="btn-medias-pixel" onClick={() => setModalAbierto(null)} style={{ backgroundColor: '#ccc' }}>Cancelar</button>
-              <button className="btn-medias-pixel" onClick={confirmarNavegacion} disabled={!opcionSeleccionada || cargandoOpciones}>Ver</button>
+return (
+    <div className={embedded ? 'estadisticas-embedded' : 'estadisticas-page'}>
+      {!embedded && <NavbarMisCursos />}
+      
+      <main className="estadisticas-main" style={{ maxWidth: '1200px' }}>
+        {!embedded && (
+          <>
+            <div style={{ width: '100%', display: 'flex', marginBottom: '10px' }}>
+              <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
+                ← Volver
+              </button>
             </div>
+            <h1 className="estadisticas-titulo-curso">Estadísticas del Curso</h1>
+          </>
+        )}
+
+        <div className="stats-layout">
+          <div className="stats-sidebar">
+            {renderSidebar()}
+          </div>
+          <div className="stats-content-area">
+            {renderStatsContent()}
           </div>
         </div>
-      )}
+      </main>
     </div>
   );
 }

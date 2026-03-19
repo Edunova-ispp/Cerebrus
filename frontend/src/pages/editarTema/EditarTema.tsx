@@ -5,9 +5,17 @@ import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 import './EditarTema.css';
 
-export default function EditarTema() {
-  // Sacamos id (del curso) y temaId (del tema) de la URL
-  const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+interface EditarTemaProps {
+  readonly cursoIdProp?: string;
+  readonly temaIdProp?: string;
+  readonly embedded?: boolean;
+  readonly onDone?: () => void;
+}
+
+export default function EditarTema({ cursoIdProp, temaIdProp, embedded, onDone }: EditarTemaProps = {}) {
+  const params = useParams<{ id: string; temaId: string }>();
+  const cursoId = cursoIdProp ?? params.id;
+  const temaId = temaIdProp ?? params.temaId;
   const [titulo, setTitulo] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -57,7 +65,7 @@ export default function EditarTema() {
         method: 'PUT',
         body: JSON.stringify({ nuevoTitulo: titulo.trim() }),
       });
-      navigate(`/cursos/${cursoId}/temas`); // Volvemos a la lista
+      if (onDone) { onDone(); } else { navigate(`/cursos/${cursoId}/temas`); }
     } catch (err) {
       setError('Error al guardar los cambios');
     } finally {
@@ -66,14 +74,16 @@ export default function EditarTema() {
   };
 
   return (
-    <div className="crear-tema-page">
-      <NavbarMisCursos />
+    <div className={embedded ? 'crear-tema-embedded' : 'crear-tema-page'}>
+      {!embedded && <NavbarMisCursos />}
       <main className="crear-tema-main">
-        <button className="detalle-volver" onClick={() => navigate(-1)}>
-          ←
-        </button>
+        {!embedded && (
+          <button className="detalle-volver" onClick={() => navigate(-1)}>
+            ←
+          </button>
+        )}
 
-        <h2 className="welcome-text">Bienvenido al editor de temas</h2>
+        <h2 className="welcome-text">Editar tema</h2>
 
         <div className="crear-tema-card">
           {loading ? (

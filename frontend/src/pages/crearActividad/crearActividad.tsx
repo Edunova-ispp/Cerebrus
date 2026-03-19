@@ -12,7 +12,12 @@ import { TableroForm } from './TableroForm';
 
 const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden', 'Marcar en imagen', 'Tablero', 'Clasificación', 'Carta'];
 
-export default function CrearActividad() {
+interface CrearActividadProps {
+  readonly embedded?: boolean;
+  readonly onDone?: () => void;
+}
+
+export default function CrearActividad({ embedded, onDone }: CrearActividadProps = {}) {
   const { id: cursoId } = useParams<{ id: string; temaId: string }>();
   const navigate = useNavigate();
   const [tipoSeleccionado, setTipoSeleccionado] = useState<string | null>(null);
@@ -28,13 +33,15 @@ export default function CrearActividad() {
     <p className="ca-proximamente">Selecciona un tipo de actividad</p>;
 
   return (
-    <div className="ca-page">
-      <NavbarMisCursos />
+    <div className={embedded ? 'ca-embedded' : 'ca-page'}>
+      {!embedded && <NavbarMisCursos />}
       <main className="ca-main">
         <div className="ca-sidebar">
-          <button className="ca-sidebar-btn" onClick={() => navigate(`/cursos/${cursoId}/temas`)}>
-            Volver al Mapa
-          </button>
+          {!embedded && (
+            <button className="ca-sidebar-btn" onClick={() => navigate(`/cursos/${cursoId}/temas`)}>
+              Volver al Mapa
+            </button>
+          )}
           {TIPOS.map((tipo) => (
             <button
               key={tipo}
