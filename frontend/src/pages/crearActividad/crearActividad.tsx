@@ -9,8 +9,9 @@ import { MarcarImagenForm } from './MarcarImagenForm';
 import { TestForm } from './TestForm';
 import { CartaForm } from './CartaForm';
 import { TableroForm } from './TableroForm';
+import { CrucigramaForm } from './CrucigramaForm';
 
-const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden', 'Marcar en imagen', 'Tablero', 'Clasificación', 'Carta'];
+const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden', 'Marcar en imagen', 'Tablero', 'Clasificación', 'Carta', 'Crucigrama'];
 
 export default function CrearActividad() {
   const { id: cursoId } = useParams<{ id: string; temaId: string }>();
@@ -25,6 +26,7 @@ export default function CrearActividad() {
     tipoSeleccionado === 'Tablero' ? <TableroForm mode="create" /> :
     tipoSeleccionado === 'Carta' ? <CartaForm mode="create" /> :
     tipoSeleccionado === 'Clasificación' ? <ClasificacionForm mode="create" /> :
+    tipoSeleccionado === 'Crucigrama' ? <CrucigramaForm mode="create" /> :
     <p className="ca-proximamente">Selecciona un tipo de actividad</p>;
 
   return (
