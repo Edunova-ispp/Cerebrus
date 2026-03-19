@@ -7,7 +7,7 @@
 
 .estadisticas-main {
   flex: 1;
-  max-width: 1200px;
+  max-width: 1600px;
   width: 100%;
   margin: 0 auto;
   padding: 16px 24px 60px;
@@ -153,11 +153,12 @@
 .layout-estadisticas {
   display: flex;
   gap: 20px;
-  width: 95%;
-  max-width: 1100px;
+  /* Ocupa prácticamente todo el ancho del bloque principal */
+  width: 100%;
+  max-width: 100%;
   flex: 1;
   min-height: 0;
-  margin: 20px auto;
+  margin: 20px 0;
 }
 
 .panel-temas, .panel-actividades {
@@ -166,6 +167,7 @@
   border-radius: 15px;
   padding: 20px;
   box-shadow: 6px 6px 0px rgba(0,0,0,0.1);
+  align-self: center;
 }
 
 .panel-temas {
@@ -253,4 +255,68 @@
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1rem;
+}
+
+.legend-item {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #000;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.legend-line {
+  width: 22px;
+  height: 0;
+  border-top-style: solid;
+  border-top-color: #000;
+}
+
+/* ==================== INDICADORES CURSO (DTO) ==================== */
+
+.curso-indicadores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.curso-indicador {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.curso-indicador-label {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.05rem;
+  color: #000;
+}
+
+.curso-indicador-value {
+  background-color: #D10057;
+  color: #fff;
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.25rem;
+  text-align: center;
+  box-shadow: 3px 3px 0px #000;
 }

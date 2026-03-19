@@ -98,7 +98,7 @@ export default function EstadisticasTemas() {
       <NavbarMisCursos />
       <main className="estadisticas-main">
         <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
-          ←
+          ← Volver
         </button>
         <h1 className="estadisticas-titulo-curso">Temas del Curso</h1>
 
