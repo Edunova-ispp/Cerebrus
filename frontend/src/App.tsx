@@ -29,6 +29,7 @@ import Perfil from "./pages/perfil/Perfil";
 import TableroAlumno from "./pages/tableroAlumno/TableroAlumno";
 import CartaAlumno from "./pages/cartaAlumno/CartaAlumno";
 import TestAlumno from "./pages/testAlumno/TestAlumno";
+import CrucigramaAlumno from "./pages/crucigramaAlumno/CrucigramaAlumno";
 import EstadisticasAlumno from "./pages/estadisticasCurso/EstadisticasAlumno.tsx";
 import EstadisticasActividad from "./pages/estadisticasCurso/EstadisticasActividad.tsx";
 import EstadisticasTema from "./pages/estadisticasCurso/EstadisticasTema.tsx";
@@ -104,6 +105,7 @@ function App() {
       <Route path="/ordenaciones/:ordenacionId/alumno" element={<OrdenacionAlumno />} />
       <Route path="/marcar-imagenes/:marcarImagenId/alumno" element={<MarcarImagenAlumno />} />
       <Route path="/clasificaciones/:clasificacionId/alumno" element={<ClasificacionAlumno />} />
+      <Route path="/crucigrama/:crucigramaId/alumno" element={<CrucigramaAlumno />} />
       <Route path="/actividades/teoria/:actividadId" element={<TeoriaAlumno />} />
 
       <Route path="/generales/test/:testId/alumno" element={<TestAlumno />} />

@@ -1,0 +1,237 @@
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&display=swap');
+
+/* ── Page wrapper ── */
+.cf-form {
+  max-width: 860px;
+  margin: 20px auto;
+  padding: 0 16px 40px;
+  font-family: 'Pixelify Sans', sans-serif;
+  box-sizing: border-box;
+}
+
+/* ── Error banner ── */
+.cf-error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 3px solid #f5c6cb;
+  border-radius: 12px;
+  box-shadow: 3px 3px 0 #000;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+/* ── White card ── */
+.cf-card {
+  background: #fff;
+  border: 3px solid #000;
+  border-radius: 16px;
+  box-shadow: 5px 5px 0 #000;
+  padding: 22px 24px;
+  margin-bottom: 16px;
+}
+
+/* ── Two-column grid inside card ── */
+.cf-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 600px) {
+  .cf-grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ── Label ── */
+.cf-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #555;
+  margin-bottom: 5px;
+  margin-top: 14px;
+  letter-spacing: 0.5px;
+}
+
+.cf-label:first-child { margin-top: 0; }
+
+/* ── Inputs ── */
+.cf-input,
+.cf-textarea {
+  width: 100%;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #000;
+  background: #FAF6ED;
+  border: 3px solid #000;
+  border-radius: 10px;
+  box-shadow: 3px 3px 0 #000;
+  padding: 9px 12px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.cf-input:focus,
+.cf-textarea:focus {
+  border-color: #a855f7;
+  background: #f5eeff;
+}
+
+.cf-textarea { resize: vertical; min-height: 80px; }
+
+.cf-input-upper { text-transform: uppercase; }
+
+/* Number input */
+.cf-input[type='number'] { max-width: 120px; }
+
+/* ── Checkbox row ── */
+.cf-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  cursor: pointer;
+}
+
+.cf-checkbox-row input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  accent-color: #a855f7;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cf-checkbox-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #444;
+  cursor: pointer;
+}
+
+/* ── Section title ── */
+.cf-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cf-section-title span {
+  background: #e0d4ff;
+  color: #7c3aed;
+  border: 2px solid #7c3aed;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+}
+
+/* ── Word row ── */
+.cf-word-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  align-items: flex-end;
+}
+
+.cf-word-col-clue  { flex: 2; }
+.cf-word-col-word  { flex: 1; }
+
+/* Remove button */
+.cf-btn-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #dc3545;
+  font-size: 1.3rem;
+  padding: 0 4px 4px;
+  line-height: 1;
+  transition: transform 0.1s;
+  flex-shrink: 0;
+}
+
+.cf-btn-remove:hover { transform: scale(1.2); }
+
+/* ── Add word button ── */
+.cf-btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  background: #f0e6ff;
+  color: #7c3aed;
+  border: 3px solid #7c3aed;
+  border-radius: 12px;
+  box-shadow: 3px 3px 0 #000;
+  padding: 8px 18px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.cf-btn-add:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 #000;
+}
+
+/* ── Submit button ── */
+.cf-btn-submit {
+  display: block;
+  margin: 28px auto 0;
+  min-width: 260px;
+  padding: 13px 24px;
+  background: #D10057;
+  color: #fff;
+  border: 3px solid #000;
+  border-radius: 14px;
+  box-shadow: 5px 5px 0 #000;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  animation: cf-pulse 1.8s ease-in-out infinite;
+}
+
+.cf-btn-submit:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 #000;
+}
+
+.cf-btn-submit:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.cf-btn-submit:disabled {
+  animation: none;
+  background: #e8a0b8;
+  opacity: 0.6;
+  cursor: default;
+  box-shadow: 2px 2px 0 #aaa;
+}
+
+@keyframes cf-pulse {
+  0%, 100% { box-shadow: 5px 5px 0 #000; }
+  50%       { box-shadow: 5px 5px 0 #000, 0 0 18px 4px rgba(209,0,87,0.35); }
+}
+
+/* ── Word count badge ── */
+.cf-word-count {
+  background: #fce8a6;
+  border: 2px solid #d4a017;
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #7a5800;
+  margin-left: 6px;
+}

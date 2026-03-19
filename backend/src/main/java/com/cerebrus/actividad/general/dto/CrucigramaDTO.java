@@ -1,9 +1,10 @@
 package com.cerebrus.actividad.general.dto;
-import java.util.List;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import com.cerebrus.actividad.general.General;
 import com.cerebrus.pregunta.dto.PreguntaDTO;
-
 import lombok.Getter;
 
 @Getter
@@ -16,7 +17,12 @@ public class CrucigramaDTO {
     private final Long temaId;
     private final Boolean respVisible;
     private final List<PreguntaDTO> preguntas;
-    public CrucigramaDTO(Long id, String titulo, String descripcion,  Integer posicion, Integer puntuacion, Boolean respVisible, Long temaId, List<PreguntaDTO> preguntas) {
+    // AGREGAMOS ESTO: El mapa que el Frontend sabe leer
+    private final Map<String, String> preguntasYRespuestas;
+
+    public CrucigramaDTO(Long id, String titulo, String descripcion, Integer posicion, 
+                        Integer puntuacion, Boolean respVisible, Long temaId, 
+                        List<PreguntaDTO> preguntas, Map<String, String> preguntasYRespuestas) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
@@ -25,11 +31,22 @@ public class CrucigramaDTO {
         this.temaId = temaId;
         this.respVisible = respVisible;
         this.preguntas = preguntas;
+        this.preguntasYRespuestas = preguntasYRespuestas;
     }
+
     public static CrucigramaDTO fromEntity(General creada) {
         List<PreguntaDTO> preguntasDTO = creada.getPreguntas().stream()
-            .map(PreguntaDTO::fromEntity)
-            .toList();
+                .map(PreguntaDTO::fromEntity)
+                .toList();
+
+        // Convertimos las entidades Pregunta -> RespuestaMaestro al Mapa que espera el Front
+        Map<String, String> mapa = creada.getPreguntas().stream()
+                .filter(p -> p.getRespuestasMaestro() != null && !p.getRespuestasMaestro().isEmpty())
+                .collect(Collectors.toMap(
+                    p -> p.getPregunta(), // La pista
+                    p -> p.getRespuestasMaestro().get(0).getRespuesta(), // La palabra (asumiendo que hay una)
+                    (existente, nuevo) -> existente // Evita errores si hay pistas duplicadas
+                ));
 
         return new CrucigramaDTO(
             creada.getId(),
@@ -39,11 +56,8 @@ public class CrucigramaDTO {
             creada.getPuntuacion(),
             creada.getRespVisible(),
             creada.getTema().getId(),
-            preguntasDTO
+            preguntasDTO,
+            mapa // <--- Pasamos el mapa aquí
         );
     }
-
-
-
-
 }
