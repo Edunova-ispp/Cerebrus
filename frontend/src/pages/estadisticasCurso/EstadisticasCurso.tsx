@@ -279,8 +279,11 @@ return (
             
             <hr style={{ width: '100%', border: '1px solid #ccc' }} />
 
-            <button className="btn-medias-pixel" onClick={() => navigate(`/medias/${id}`)} style={{ width: '100%' }}>
-              Puntuaciones medias
+            <button className="btn-medias-pixel" onClick={() => navigate(`/estadisticas/${id}/actividades`)} style={{ width: '100%' }}>
+              Actividades
+            </button>
+            <button className="btn-medias-pixel" onClick={() => navigate(`/estadisticas/${id}/temas`)} style={{ width: '100%' }}>
+              Temas
             </button>
             <button className="btn-medias-pixel" onClick={() => abrirModal('tema')} style={{ width: '100%', backgroundColor: '#4a90e2', color: 'white' }}>
               Tiempos por Tema

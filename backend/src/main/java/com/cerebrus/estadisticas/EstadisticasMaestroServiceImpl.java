@@ -154,6 +154,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         return resultado;
     }
 
+    @Transactional(readOnly = true)
     public Map<Long, EstadisticasTemaDTO> obtenerEstadisticasCursoTema(Long cursoId) {
         Usuario usuario = usuarioService.findCurrentUser();
         Curso curso = cursoRepository.findById(cursoId)

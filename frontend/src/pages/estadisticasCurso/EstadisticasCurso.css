@@ -7,15 +7,16 @@
 
 .estadisticas-main {
   flex: 1;
-  max-width: 900px;
+  max-width: 1200px;
   width: 100%;
   margin: 0 auto;
   padding: 16px 24px 60px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 28px;
+  min-height: 0;
 }
 
 .estadisticas-header-grid {
@@ -154,7 +155,8 @@
   gap: 20px;
   width: 95%;
   max-width: 1100px;
-  height: 480px;
+  flex: 1;
+  min-height: 0;
   margin: 20px auto;
 }
 
@@ -166,14 +168,34 @@
   box-shadow: 6px 6px 0px rgba(0,0,0,0.1);
 }
 
-.panel-temas { flex: 1; display: flex; flex-direction: column; }
-.panel-actividades { flex: 1.5; overflow-y: auto; }
+.panel-temas {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.panel-actividades {
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Flex/scroll solo cuando está dentro del layout de dos paneles */
+.layout-estadisticas > .panel-temas {
+  flex: 0 0 280px;
+}
+
+.layout-estadisticas > .panel-actividades {
+  flex: 1 1 auto;
+  overflow: auto;
+}
 
 .lista-temas-scroll {
   list-style: none;
   padding: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  flex: 1;
+  min-height: 0;
 }
 
 .item-tema-pixel, .item-actividad-pixel {
@@ -207,4 +229,28 @@
   gap: 30px;
   justify-content: center;
   margin-top: 25px;
+}
+
+/* ==================== GRÁFICAS (SVG) ==================== */
+
+.charts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.chart-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chart-title {
+  margin: 0;
+}
+
+.chart-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
