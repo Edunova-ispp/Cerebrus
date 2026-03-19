@@ -16,16 +16,36 @@ interface OpcionDesplegable {
   nombre: string;
 }
 
+interface EstadisticasCursoDTO {
+  cursoCompletadoPorTodos: boolean | null;
+  notaMediaCurso: number | null;
+  tiempoMedioCurso: number | null;
+  notaMaximaCurso: number | null;
+  notaMinimaCurso: number | null;
+}
+
 function formatearTiempo(minutosTotales: number): string {
   if (!minutosTotales || minutosTotales === 0) return '0 mins';
   if (minutosTotales === 1) return '1 min';
   return `${minutosTotales} mins`;
 }
 
+function formatearNumero2Dec(valor: number | null | undefined): string {
+  if (typeof valor !== 'number' || !Number.isFinite(valor)) return '0';
+  return String(Math.round(valor * 100) / 100);
+}
+
+function formatearTiempoCurso(minutos: number | null | undefined): string {
+  if (typeof minutos !== 'number' || !Number.isFinite(minutos) || minutos <= 0) return '0 mins';
+  const redondeado = Math.round(minutos);
+  return formatearTiempo(redondeado);
+}
+
 export default function EstadisticasCurso() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [estadisticas, setEstadisticas] = useState<EstadisticaAlumno[]>([]);
+  const [estadisticasCurso, setEstadisticasCurso] = useState<EstadisticasCursoDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -46,10 +66,11 @@ export default function EstadisticasCurso() {
       const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
       // Hacemos 3 llamadas: Puntos, Actividades y la lista completa de tiempos (con límite 1000 para que vengan todos)
-      const [puntosRes, actividadesRes, tiemposRes] = await Promise.all([
+      const [puntosRes, actividadesRes, tiemposRes, cursoRes] = await Promise.all([
         fetch(`${apiBase}/api/estadisticas/cursos/${id}/puntos`, { headers: { 'Authorization': `Bearer ${token}` } }),
         fetch(`${apiBase}/api/estadisticas/cursos/${id}/actividades-completadas`, { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch(`${apiBase}/api/estadisticas/cursos/${id}/alumnos-rapidos-lentos?limite=1000`, { headers: { 'Authorization': `Bearer ${token}` } })
+        fetch(`${apiBase}/api/estadisticas/cursos/${id}/alumnos-rapidos-lentos?limite=1000`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${apiBase}/api/estadisticas/cursos/${id}/estadisiticas-curso`, { headers: { 'Authorization': `Bearer ${token}` } }),
       ]);
 
       if (!puntosRes.ok || !actividadesRes.ok) throw new Error('Error al cargar datos principales');
@@ -57,6 +78,7 @@ export default function EstadisticasCurso() {
       const puntosData = await puntosRes.json();
       const actividadesData = await actividadesRes.json();
       const tiemposData = tiemposRes.ok ? await tiemposRes.json() : null;
+      const cursoData: EstadisticasCursoDTO | null = cursoRes.ok ? await cursoRes.json() : null;
 
       const alumnosMap = new Map<string, EstadisticaAlumno>();
 
@@ -86,9 +108,11 @@ export default function EstadisticasCurso() {
       }
 
       setEstadisticas(Array.from(alumnosMap.values()));
+      setEstadisticasCurso(cursoData);
 
     } catch (err) {
       setError((err as Error).message || 'Error cargando las estadísticas');
+      setEstadisticasCurso(null);
     } finally {
       setLoading(false);
     }
@@ -186,6 +210,27 @@ let opcionesNuevas: OpcionDesplegable[] = [];
     }
     setModalAbierto(null);
   };
+
+  const cursoIndicadoresContent = !loading && !error ? (
+    <div className="curso-indicadores" style={{ marginBottom: '16px' }}>
+      <div className="curso-indicador">
+        <div className="curso-indicador-label">Nota media</div>
+        <div className="curso-indicador-value">{formatearNumero2Dec(estadisticasCurso?.notaMediaCurso)}</div>
+      </div>
+      <div className="curso-indicador">
+        <div className="curso-indicador-label">Nota máx.</div>
+        <div className="curso-indicador-value">{estadisticasCurso?.notaMaximaCurso ?? 0}</div>
+      </div>
+      <div className="curso-indicador">
+        <div className="curso-indicador-label">Nota mín.</div>
+        <div className="curso-indicador-value">{estadisticasCurso?.notaMinimaCurso ?? 0}</div>
+      </div>
+      <div className="curso-indicador">
+        <div className="curso-indicador-label">Tiempo medio</div>
+        <div className="curso-indicador-value">{formatearTiempoCurso(estadisticasCurso?.tiempoMedioCurso)}</div>
+      </div>
+    </div>
+  ) : null;
 
   let estadisticasContent: React.ReactNode;
   if (loading) {
@@ -292,8 +337,11 @@ return (
               Tiempos por Actividad
             </button>
           </div>
-          <div className="estadisticas-yellow-card" style={{ flex: 1, margin: 0, width: 'auto' }}>
-            {estadisticasContent}
+          <div style={{ flex: 1, margin: 0, width: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {cursoIndicadoresContent}
+            <div className="estadisticas-yellow-card" style={{ flex: 1, margin: 0, width: 'auto' }}>
+              {estadisticasContent}
+            </div>
           </div>
 
         </div>

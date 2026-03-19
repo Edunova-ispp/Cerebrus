@@ -9,6 +9,7 @@ import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
+import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
 
 public interface EstadisticasMaestroService {
 
@@ -34,4 +35,7 @@ public interface EstadisticasMaestroService {
     Boolean temaCompletado(Long alumnoId, Long cursoId, Long temaId);
     Integer notaMediaAlumno(Long alumnoId, Long cursoId, Long temaId);
     Map<Long, EstadisticasAlumnoDTO> obtenerEstadisticasAlumno(Long alumnoId, Long cursoId, Long temaId);
+    RepeticionesActividadDTO obtenerRepeticionesActividad(Long actividadId);
+
+    Map<Long, RepeticionesActividadDTO> obtenerRepeticionesCursoActividad(Long cursoId, Long temaId);
 }

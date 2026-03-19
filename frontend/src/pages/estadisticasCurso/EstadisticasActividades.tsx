@@ -22,6 +22,12 @@ interface EstadisticasActividadDTO {
   actividadCompletadaPorTodos: boolean | null;
 }
 
+interface RepeticionesActividadDTO {
+  repeticionesMedia: number | null;
+  repeticionesMinima: number | null;
+  repeticionesMaxima: number | null;
+}
+
 export default function EstadisticasActividades() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -29,6 +35,7 @@ export default function EstadisticasActividades() {
   const [temas, setTemas] = useState<Tema[]>([]);
   const [temaSeleccionado, setTemaSeleccionado] = useState<Tema | null>(null);
   const [mapaEstadisticas, setMapaEstadisticas] = useState<Map<number, EstadisticasActividadDTO>>(new Map());
+  const [mapaRepeticiones, setMapaRepeticiones] = useState<Map<number, RepeticionesActividadDTO>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -40,18 +47,31 @@ export default function EstadisticasActividades() {
     const token = localStorage.getItem('token');
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
-    const res = await fetch(`${apiBase}/api/estadisticas/cursos/${id}/temas/${temaId}/estadisticas-actividades`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const [resStats, resReps] = await Promise.all([
+      fetch(`${apiBase}/api/estadisticas/cursos/${id}/temas/${temaId}/estadisticas-actividades`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }),
+      fetch(`${apiBase}/api/estadisticas/cursos/${id}/temas/${temaId}/repeticiones-actividades`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }),
+    ]);
 
-    if (!res.ok) throw new Error('Error al obtener estadísticas de actividades');
+    if (!resStats.ok) throw new Error('Error al obtener estadísticas de actividades');
+    if (!resReps.ok) throw new Error('Error al obtener repeticiones de actividades');
 
-    const data = await res.json();
+    const data = await resStats.json();
     const nuevoMapa = new Map<number, EstadisticasActividadDTO>();
     Object.entries(data as Record<string, EstadisticasActividadDTO>).forEach(([actividadId, stats]) => {
       nuevoMapa.set(Number(actividadId), stats);
     });
     setMapaEstadisticas(nuevoMapa);
+
+    const repsData = await resReps.json();
+    const nuevoMapaReps = new Map<number, RepeticionesActividadDTO>();
+    Object.entries(repsData as Record<string, RepeticionesActividadDTO>).forEach(([actividadId, reps]) => {
+      nuevoMapaReps.set(Number(actividadId), reps);
+    });
+    setMapaRepeticiones(nuevoMapaReps);
   };
 
   const seleccionarTema = async (tema: Tema) => {
@@ -66,6 +86,12 @@ export default function EstadisticasActividades() {
 
   const notaMediaMostrada = (stats: EstadisticasActividadDTO | undefined) => {
     const valor = stats?.notaMediaActividad;
+    if (typeof valor !== 'number' || !Number.isFinite(valor)) return 0;
+    return Math.round(valor * 100) / 100;
+  };
+
+  const repeticionesMediaMostrada = (reps: RepeticionesActividadDTO | undefined) => {
+    const valor = reps?.repeticionesMedia;
     if (typeof valor !== 'number' || !Number.isFinite(valor)) return 0;
     return Math.round(valor * 100) / 100;
   };
@@ -106,6 +132,7 @@ export default function EstadisticasActividades() {
       } else {
         setTemaSeleccionado(null);
         setMapaEstadisticas(new Map());
+        setMapaRepeticiones(new Map());
       }
 
     } catch (err) {
@@ -119,7 +146,7 @@ export default function EstadisticasActividades() {
     <div className="estadisticas-page">
       <NavbarMisCursos />
       <main className="estadisticas-main">
-        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>←</button>
+        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>← Volver</button>
         <h1 className="estadisticas-titulo-curso">Actividades del Curso</h1>
 
         {loading && <p className="msg-placeholder">Cargando datos...</p>}
@@ -164,6 +191,9 @@ export default function EstadisticasActividades() {
                         <th>Nota Máx.</th>
                         <th>Nota Mín.</th>
                         <th>Tiempo Medio</th>
+                        <th>Reps Media</th>
+                        <th>Reps Mín.</th>
+                        <th>Reps Máx.</th>
                         <th>Terminada por todos</th>
                       </tr>
                     </thead>
@@ -174,12 +204,16 @@ export default function EstadisticasActividades() {
                           <td>{act.titulo}</td>
                           {(() => {
                             const stats = mapaEstadisticas.get(act.id);
+                            const reps = mapaRepeticiones.get(act.id);
                             return (
                               <>
                                 <td className="text-center font-bold">{notaMediaMostrada(stats)}</td>
                                 <td className="text-center font-bold">{stats?.notaMaximaActividad ?? 0}</td>
                                 <td className="text-center font-bold">{stats?.notaMinimaActividad ?? 0}</td>
                                 <td className="text-center font-bold">{formatearTiempoMinutos(stats?.tiempoMedioActividad)}</td>
+                                <td className="text-center font-bold">{repeticionesMediaMostrada(reps)}</td>
+                                <td className="text-center font-bold">{reps?.repeticionesMinima ?? 0}</td>
+                                <td className="text-center font-bold">{reps?.repeticionesMaxima ?? 0}</td>
                                 <td className="text-center font-bold">{terminadaPorTodosMostrada(stats)}</td>
                               </>
                             );

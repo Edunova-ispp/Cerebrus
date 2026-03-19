@@ -29,20 +29,18 @@ type BarDatum = {
 
 const MAX_BARS = 12;
 
-function limitarLabel(texto: string, maxLen: number) {
-  const limpio = (texto ?? '').trim();
-  if (limpio.length <= maxLen) return limpio;
-  return `${limpio.slice(0, Math.max(0, maxLen - 1))}…`;
-}
-
 function BarChart({
   titulo,
   data,
   unidad,
+  barColor,
+  legendBarLabel,
 }: {
   titulo: string;
   data: BarDatum[];
   unidad?: string;
+  barColor: string;
+  legendBarLabel: string;
 }) {
   const height = 300;
   const margin = { top: 22, right: 18, bottom: 78, left: 18 };
@@ -54,6 +52,21 @@ function BarChart({
   const barWidth = 46;
   const gap = 14;
   const width = Math.max(640, margin.left + margin.right + data.length * barWidth + Math.max(0, data.length - 1) * gap);
+
+  const media = data.length === 0 ? 0 : data.reduce((acc, d) => acc + (Number.isFinite(d.value) ? d.value : 0), 0) / data.length;
+  const mediaClamped = Number.isFinite(media) ? Math.max(0, media) : 0;
+  const yMedia = margin.top + (chartHeight - (mediaClamped / safeMax) * chartHeight);
+
+  const progresoPoints = data
+    .map((d, idx) => {
+      const x = margin.left + idx * (barWidth + gap);
+      const v = Number.isFinite(d.value) ? Math.max(0, d.value) : 0;
+      const barH = (v / safeMax) * chartHeight;
+      const y = margin.top + (chartHeight - barH);
+      const xCenter = x + barWidth / 2;
+      return `${xCenter},${y}`;
+    })
+    .join(' ');
 
   return (
     <div className="chart-block">
@@ -75,7 +88,7 @@ function BarChart({
                   y={y}
                   width={barWidth}
                   height={barH}
-                  fill="#FCEF91"
+                  fill={barColor}
                   stroke="#000"
                   strokeWidth={2}
                   rx={6}
@@ -94,16 +107,35 @@ function BarChart({
                   x={labelX}
                   y={height - 14}
                   textAnchor="end"
-                  fontSize="12"
+                  fontSize="20"
                   fontFamily="'Pixelify Sans', sans-serif"
                   fill="#000"
-                  transform={`rotate(-35 ${labelX} ${height - 14})`}
                 >
                   {d.label}
                 </text>
               </g>
             );
           })}
+
+          {data.length > 1 && (
+            <polyline
+              points={progresoPoints}
+              fill="none"
+              stroke="#000"
+              strokeWidth={2}
+            />
+          )}
+
+          {data.length > 0 && (
+            <line
+              x1={margin.left - 6}
+              y1={yMedia}
+              x2={width - margin.right + 6}
+              y2={yMedia}
+              stroke="#FF0000"
+              strokeWidth={4}
+            />
+          )}
 
           <line
             x1={margin.left - 6}
@@ -115,6 +147,22 @@ function BarChart({
           />
         </svg>
       </div>
+
+      <div className="chart-legend" aria-label="Leyenda">
+        <span className="legend-item">
+          <span className="legend-swatch" style={{ backgroundColor: barColor }} />
+          {legendBarLabel}
+        </span>
+        <span className="legend-item">
+          <span className="legend-line" style={{ borderTopColor: '#000', borderTopWidth: 2 }} />
+          Línea negra: progreso (tope de cada barra)
+        </span>
+        <span className="legend-item">
+          <span className="legend-line" style={{ borderTopColor: '#FF0000', borderTopWidth: 4 }} />
+          Línea roja: media
+        </span>
+      </div>
+
       {data.length >= MAX_BARS && (
         <p className="stats-info-msg">Mostrando {MAX_BARS} elementos para que la gráfica no se desborde.</p>
       )}
@@ -209,7 +257,7 @@ export default function GraficasActividades() {
         const stats = mapaEstadisticas.get(a.id);
         const v = stats?.notaMediaActividad;
         return {
-          label: limitarLabel(`${idx + 1}. ${a.titulo}`, 18),
+          label: String(idx + 1),
           value: typeof v === 'number' && Number.isFinite(v) ? v : 0,
         };
       });
@@ -223,7 +271,7 @@ export default function GraficasActividades() {
         const stats = mapaEstadisticas.get(a.id);
         const v = stats?.tiempoMedioActividad;
         return {
-          label: limitarLabel(`${idx + 1}. ${a.titulo}`, 18),
+          label: String(idx + 1),
           value: typeof v === 'number' && Number.isFinite(v) ? v : 0,
         };
       });
@@ -234,7 +282,7 @@ export default function GraficasActividades() {
       <NavbarMisCursos />
       <main className="estadisticas-main">
         <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
-          ←
+          ← Volver
         </button>
         <h1 className="estadisticas-titulo-curso">Gráficas de Actividades</h1>
 
@@ -279,8 +327,19 @@ export default function GraficasActividades() {
                     <p className="msg-vacio">Este tema aun no tiene actividades</p>
                   ) : (
                     <>
-                      <BarChart titulo="Nota media por actividad" data={datosNotaMedia} />
-                      <BarChart titulo="Tiempo medio por actividad" data={datosTiempoMedio} unidad="mins" />
+                      <BarChart
+                        titulo="Nota media por actividad"
+                        data={datosNotaMedia}
+                        barColor="#D10057"
+                        legendBarLabel="Barras: nota media"
+                      />
+                      <BarChart
+                        titulo="Tiempo medio por actividad"
+                        data={datosTiempoMedio}
+                        unidad="mins"
+                        barColor="#7C4DFF"
+                        legendBarLabel="Barras: tiempo medio"
+                      />
                     </>
                   )}
                 </div>
