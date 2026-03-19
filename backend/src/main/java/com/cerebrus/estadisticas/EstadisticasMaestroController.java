@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
@@ -93,6 +94,24 @@ public class EstadisticasMaestroController {
     public EstadisticasCursoDTO obtenerEstadisticasCurso(@PathVariable Long cursoId) {
         return estadisticasMaestroService.obtenerEstadisticasCurso(cursoId);
     }
+
+    @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/estadisticas-alumno")
+    public Map<Long, EstadisticasAlumnoDTO> obtenerEstadisticasAlumno(@PathVariable Long alumnoId, @PathVariable Long cursoId, @PathVariable Long temaId) {
+        return estadisticasMaestroService.obtenerEstadisticasAlumno(alumnoId, cursoId, temaId);
+    }
+
+    @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/completado")
+    public Boolean temaCompletado(@PathVariable Long alumnoId, @PathVariable Long cursoId, @PathVariable Long temaId) {
+        return estadisticasMaestroService.temaCompletado(alumnoId, cursoId, temaId);
+    }
+
+    @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/nota-media")
+    public Integer notaMediaAlumno(@PathVariable Long alumnoId, @PathVariable Long cursoId, @PathVariable Long temaId) {
+        return estadisticasMaestroService.notaMediaAlumno(alumnoId, cursoId, temaId);
+    }
+
+
+    
    
 
     @GetMapping("/")
@@ -261,4 +280,7 @@ public class EstadisticasMaestroController {
                     .body(Map.of("error", "Ocurrió un error inesperado."));
         }
     }
+
+
+
 }

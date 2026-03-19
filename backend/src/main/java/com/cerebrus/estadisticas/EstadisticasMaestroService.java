@@ -6,6 +6,7 @@ import java.util.Map;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 
@@ -29,4 +30,8 @@ public interface EstadisticasMaestroService {
     AlumnosMasRapidosLentosDTO obtenerAlumnosMasRapidosLentosActividad(Long actividadId, Integer limite);
     AlumnosMasRapidosLentosDTO obtenerAlumnosMasRapidosLentosTema(Long temaId, Integer limite);
     AlumnosMasRapidosLentosDTO obtenerAlumnosMasRapidosLentosCurso(Long cursoId, Integer limite);
+
+    Boolean temaCompletado(Long alumnoId, Long cursoId, Long temaId);
+    Integer notaMediaAlumno(Long alumnoId, Long cursoId, Long temaId);
+    Map<Long, EstadisticasAlumnoDTO> obtenerEstadisticasAlumno(Long alumnoId, Long cursoId, Long temaId);
 }

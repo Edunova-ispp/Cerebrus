@@ -20,6 +20,7 @@ import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
@@ -535,6 +536,102 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         return new AlumnosMasRapidosLentosDTO(masRapidos, masLentos, promedio);
     }
 
+    @Transactional(readOnly = true)
+    public Boolean temaCompletado (Long alumnoId, Long cursoId, Long temaId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+
+        validarPropietarioCurso(maestro, curso);
+
+        List<Actividad> actividades = actividadRepository.findByTemaId(temaId);
+        return actividades.stream()
+            .allMatch(actividad -> actividad.getActividadesAlumno().stream()
+                        .filter(aa -> aa.getAlumno().getId().equals(alumnoId))
+                        .anyMatch(aa -> aa.getEstadoActividad() == EstadoActividad.TERMINADA));
+    }
+
+    @Transactional(readOnly = true)
+    public Integer notaMediaAlumno(Long alumnoId, Long cursoId, Long temaId){
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+
+        validarPropietarioCurso(maestro, curso);
+
+        List<Actividad> actividades = actividadRepository.findByTemaId(temaId);
+        int notaTotal = 0;
+        int contador = 0;
+
+        for (Actividad actividad : actividades) {
+            ActividadAlumno aa = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
+                    .filter(a -> a.getAlumno().getId().equals(alumnoId))
+                    .filter(a -> a.getEstadoActividad()==EstadoActividad.TERMINADA)
+                    .findFirst()
+                    .orElse(null);
+
+            if (aa != null && aa.getNota() != null) {
+                notaTotal += aa.getNota();
+                contador++;
+            }
+        }
+        return contador > 0 ? notaTotal / contador : 0;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, EstadisticasAlumnoDTO> obtenerEstadisticasAlumno(Long alumnoId, Long cursoId, Long temaId){
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+
+        validarPropietarioCurso(maestro, curso);
+
+        Map<Long, EstadisticasAlumnoDTO> resultado = new HashMap<>();
+        List<Actividad> todasLasActividades = actividadRepository.findByTemaId(temaId);
+
+        for (Actividad actividad : todasLasActividades) {
+            List<ActividadAlumno> instanciasAlumno = actividad.getActividadesAlumno().stream()
+                .filter(aa -> aa.getAlumno().getId().equals(alumnoId))
+                .toList();
+
+            ActividadAlumno ultimaInstanciaTerminada = instanciasAlumno.stream()
+                .filter(aa -> aa.getEstadoActividad() == EstadoActividad.TERMINADA)
+                .reduce((a, b) -> esMasReciente(a, b) ? a : b)
+                .orElse(null);
+
+            EstadisticasAlumnoDTO stats;
+            if (ultimaInstanciaTerminada != null) {
+                stats = new EstadisticasAlumnoDTO(
+                true,
+                ultimaInstanciaTerminada.getNota(),
+                obtenerNumRepetciones(ultimaInstanciaTerminada, alumnoId),
+                ultimaInstanciaTerminada.getNumFallos(),
+                ultimaInstanciaTerminada.getNumAbandonos(),
+                ultimaInstanciaTerminada.getFechaInicio(),
+                ultimaInstanciaTerminada.getFechaFin(),
+                ultimaInstanciaTerminada.getTiempoMinutos());
+            } else {
+                stats = new EstadisticasAlumnoDTO(
+                        false,
+                        0,
+                        0,
+                        0,
+                        0,
+                        null,
+                        null,
+                        0);
+            }
+            resultado.put(actividad.getId(), stats);
+        }
+        return resultado;
+    }
+
     // ==================== MÉTODOS AUXILIARES ====================
 
     private Maestro validarMaestro(Usuario usuario) {
@@ -786,6 +883,14 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                 .mapToInt(Integer::intValue)
                 .min()
                 .orElse(0);
+    }
+
+    private Integer obtenerNumRepetciones(ActividadAlumno actividadAlumno, Long alumnoId) {
+        Actividad actividad = actividadAlumno.getActividad();
+        List<ActividadAlumno> todasLasInstancias = actividad.getActividadesAlumno().stream()
+            .filter(aa -> aa.getAlumno().getId().equals(alumnoId))
+            .toList();
+        return todasLasInstancias.size();
     }
 
 }
