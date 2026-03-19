@@ -25,6 +25,7 @@ import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 import com.cerebrus.estadisticas.dto.TiempoAlumnoDTO;
+import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
@@ -155,6 +156,55 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         return resultado;
     }
 
+    @Transactional(readOnly = true)
+    public Map<Long, RepeticionesActividadDTO> obtenerRepeticionesCursoActividad(Long cursoId, Long temaId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        if (!(usuario instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
+        }
+
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
+        }
+
+        Tema tema = curso.getTemas().stream()
+                .filter(t -> t.getId().equals(temaId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El tema con ID " + temaId + " no existe en el curso con ID " + cursoId + "."));
+
+        List<Actividad> actividades = tema.getActividades();
+        Map<Long, RepeticionesActividadDTO> resultado = new HashMap<>();
+
+        for (Actividad actividad : actividades) {
+            Map<Long, Integer> repeticionesPorAlumno = new HashMap<>();
+            for (ActividadAlumno aa : actividad.getActividadesAlumno()) {
+                if (aa.getEstadoActividad() == EstadoActividad.TERMINADA && aa.getAlumno() != null) {
+                    Long alumnoId = aa.getAlumno().getId();
+                    if (alumnoId != null) {
+                        repeticionesPorAlumno.merge(alumnoId, 1, Integer::sum);
+                    }
+                }
+            }
+
+            if (repeticionesPorAlumno.isEmpty()) {
+                resultado.put(actividad.getId(), new RepeticionesActividadDTO(0.0, 0, 0));
+                continue;
+            }
+
+            List<Integer> repeticiones = new ArrayList<>(repeticionesPorAlumno.values());
+            Integer min = repeticiones.stream().min(Integer::compareTo).orElse(0);
+            Integer max = repeticiones.stream().max(Integer::compareTo).orElse(0);
+            Double media = repeticiones.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+
+            resultado.put(actividad.getId(), new RepeticionesActividadDTO(media, min, max));
+        }
+
+        return resultado;
+    }
+
+    @Transactional(readOnly = true)
     public Map<Long, EstadisticasTemaDTO> obtenerEstadisticasCursoTema(Long cursoId) {
         Usuario usuario = usuarioService.findCurrentUser();
         Curso curso = cursoRepository.findById(cursoId)
@@ -629,6 +679,39 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
             resultado.put(actividad.getId(), stats);
         }
         return resultado;
+    }
+
+    @Transactional(readOnly = true)
+    public RepeticionesActividadDTO obtenerRepeticionesActividad(Long actividadId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Actividad actividad = actividadRepository.findById(actividadId)
+                .orElseThrow(() -> new RuntimeException(
+                        "404 Not Found: La actividad con ID " + actividadId + " no existe."));
+
+        validarPropietarioTema(maestro, actividad.getTema());
+
+        Map<Long, Integer> repeticionesPorAlumno = new HashMap<>();
+        for (ActividadAlumno aa : actividad.getActividadesAlumno()) {
+            if (aa.getEstadoActividad() == EstadoActividad.TERMINADA && aa.getAlumno() != null) {
+                Long alumnoId = aa.getAlumno().getId();
+                if (alumnoId != null) {
+                    repeticionesPorAlumno.merge(alumnoId, 1, Integer::sum);
+                }
+            }
+        }
+
+        if (repeticionesPorAlumno.isEmpty()) {
+            return new RepeticionesActividadDTO(0.0, 0, 0);
+        }
+
+        List<Integer> repeticiones = new ArrayList<>(repeticionesPorAlumno.values());
+        Integer min = repeticiones.stream().min(Integer::compareTo).orElse(0);
+        Integer max = repeticiones.stream().max(Integer::compareTo).orElse(0);
+        Double media = repeticiones.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+
+        return new RepeticionesActividadDTO(media, min, max);
     }
 
     // ==================== MÉTODOS AUXILIARES ====================
