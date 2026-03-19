@@ -1,6 +1,6 @@
-﻿.tf-form,
+.tf-form,
 .tf-form * {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   text-align: left;
   box-sizing: border-box;
 }
@@ -12,7 +12,7 @@
   font-size: 0.95rem;
 }
 
-/* ── Header columns ──────────────────────────────────────────── */
+/* -- Header columns -------------------------------------------- */
 
 .tf-header {
   display: flex;
@@ -52,7 +52,7 @@
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 10px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
   color: #000;
   transition: background 0.15s;
@@ -79,7 +79,7 @@
   border-radius: 8px;
 }
 
-/* ── Help text ───────────────────────────────────────────────── */
+/* -- Help text ------------------------------------------------- */
 
 .tf-help {
   font-size: 0.92rem;
@@ -88,7 +88,7 @@
   color: #555;
 }
 
-/* ── Question blocks ─────────────────────────────────────────── */
+/* -- Question blocks ------------------------------------------- */
 
 .tf-questions {
   display: flex;
@@ -126,7 +126,7 @@
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 10px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
   color: #000;
   transition: background 0.15s;
@@ -138,7 +138,7 @@
   background: var(--color-accent-dark);
 }
 
-/* ── Options ─────────────────────────────────────────────────── */
+/* -- Options --------------------------------------------------- */
 
 .tf-options {
   display: flex;
@@ -174,7 +174,7 @@
   border: 2px solid #000;
   border-radius: 8px;
   padding: 6px 10px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
   color: #000;
   min-width: 0;
@@ -192,7 +192,7 @@
   background: var(--color-accent-dark);
 }
 
-/* ── Buttons ─────────────────────────────────────────────────── */
+/* -- Buttons --------------------------------------------------- */
 
 .tf-btn-correct {
   background: #eee;
@@ -257,7 +257,7 @@
   border: 2px solid #000;
   border-radius: 8px;
   padding: 4px 12px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 0.9rem;
   cursor: pointer;
   margin-left: 30px;
@@ -274,7 +274,7 @@
   border: 3px solid #000;
   border-radius: 12px;
   padding: 10px 24px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;

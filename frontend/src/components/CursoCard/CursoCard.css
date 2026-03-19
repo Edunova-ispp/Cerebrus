@@ -189,3 +189,12 @@
   background: #e74c3c;
   transform: scale(1.1);
 }
+
+/* === PROFESOR: Oxygen === */
+.maestro .curso-card__initials,
+.maestro .curso-card__titulo,
+.maestro .curso-card__maestro-label,
+.maestro .curso-card__maestro-value,
+.maestro .curso-card__delete-btn {
+  font-family: 'Oxygen', sans-serif;
+}

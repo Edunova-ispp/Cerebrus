@@ -1,6 +1,6 @@
 .of-form,
 .of-form * {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   text-align: left;
   box-sizing: border-box;
 }
@@ -58,7 +58,7 @@
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 10px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
   color: #000;
   transition: background 0.15s;
@@ -81,7 +81,7 @@
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 10px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
   color: #000;
   resize: vertical;
@@ -126,7 +126,7 @@
   border: 2px solid #000;
   border-radius: 8px;
   padding: 6px 16px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 0.95rem;
   cursor: pointer;
   transition: background 0.15s;
@@ -176,7 +176,7 @@
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 20px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.3rem;
   font-weight: bold;
   cursor: pointer;

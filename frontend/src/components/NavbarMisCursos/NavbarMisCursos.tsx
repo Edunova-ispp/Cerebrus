@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/icons/logoCebrerusTopbar.png";
 import misCursosIcon from "../../assets/icons/misCursos.svg";
 import perfilIcon from "../../assets/icons/perfil.svg";
+import { getCurrentUserRoles } from "../../types/curso";
 import "./NavbarMisCursos.css";
 
 export default function NavbarMisCursos() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+  const isMaestro = getCurrentUserRoles().some((r) => r.toUpperCase().includes("MAESTRO"));
 
   useEffect(() => {
     if (!token) {
@@ -16,7 +18,7 @@ export default function NavbarMisCursos() {
   }, [navigate, token]);
 
   return (
-    <nav className="navbar">
+    <nav className={`navbar${isMaestro ? ' navbar--maestro' : ''}`}>
       <div className="navbar-inner">
         <button
           type="button"

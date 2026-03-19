@@ -102,7 +102,7 @@ export default function MisCursos() {
   };
 
   return (
-    <div className="mis-cursos-page">
+    <div className={`mis-cursos-page${isMaestro ? ' maestro' : ''}`}>
       <NavbarMisCursos />
 
       <main className="mis-cursos-main">

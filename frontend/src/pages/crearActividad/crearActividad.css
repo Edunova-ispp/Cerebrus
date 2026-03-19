@@ -39,7 +39,7 @@
 .ca-sidebar-btn {
   background: transparent;
   border: none;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.1rem;
   cursor: pointer;
   text-align: left;
@@ -65,7 +65,7 @@
   min-height: 400px;
   overflow-y: auto;
   overflow-x: hidden;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   color: #000;
 }
 
@@ -92,7 +92,7 @@
 
 .ca-ordenacion-form,
 .ca-ordenacion-form * {
-  font-family: 'Pixelify Sans', sans-serif !important;
+  font-family: 'Oxygen', sans-serif !important;
   text-align: left;
 }
 
@@ -119,12 +119,12 @@
 }
 
 .ca-text {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   color: #000;
 }
 
 .ca-ordenacion-help {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 0.95rem;
   line-height: 1.35;
 }
@@ -155,7 +155,7 @@
 }
 
 .ca-proximamente {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.4rem;
   color: #aaa;
 }
@@ -165,7 +165,7 @@
   color: #000;
   border: 4px solid #000;
   border-radius: 16px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.3rem;
   font-weight: bold;
   padding: 12px 48px;

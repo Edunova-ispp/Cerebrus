@@ -22,7 +22,13 @@
     box-sizing: border-box;
   }
   
-  p, h1, h2, h3, span, div, button {
+  .clasificacion-alumno-page p,
+  .clasificacion-alumno-page h1,
+  .clasificacion-alumno-page h2,
+  .clasificacion-alumno-page h3,
+  .clasificacion-alumno-page span,
+  .clasificacion-alumno-page div,
+  .clasificacion-alumno-page button {
     font-family: 'Pixelify Sans', sans-serif;
   }
 

@@ -1,7 +1,7 @@
 .crear-curso-page {
   background-color: #FDF8E1;
   min-height: 100vh;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
 }
 
 .crear-curso-main {
@@ -17,7 +17,7 @@
   background: none;
   border: none;
   color: #000;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.2rem;
   cursor: pointer;
   padding: 0;
@@ -132,7 +132,7 @@
   border: 4px solid #000;
   border-radius: 18px;
   padding: 18px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.8rem;
   font-weight: bold;
   cursor: pointer;
