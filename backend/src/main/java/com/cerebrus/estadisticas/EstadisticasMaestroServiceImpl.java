@@ -681,7 +681,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         return resultado;
     }
 
-
+    @Transactional(readOnly = true)
     public RepeticionesActividadDTO obtenerRepeticionesActividad(Long actividadId) {
         Usuario usuario = usuarioService.findCurrentUser();
         Maestro maestro = validarMaestro(usuario);
