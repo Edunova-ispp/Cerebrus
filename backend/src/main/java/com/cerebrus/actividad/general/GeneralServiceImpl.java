@@ -551,6 +551,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
     
 }
 
+
 @Override
 @Transactional(readOnly = true)
 public CrucigramaDTO readTipoCrucigrama(Long id) {

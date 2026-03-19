@@ -52,6 +52,7 @@ public class Pregunta {
     public Pregunta(String pregunta, String imagen, Actividad actividad) {
         this.pregunta = pregunta;
         this.imagen = imagen;
+        this.actividad = actividad;
     }
 
     // Getters y Setters
