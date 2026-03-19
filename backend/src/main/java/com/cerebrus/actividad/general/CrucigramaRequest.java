@@ -1,6 +1,6 @@
 package com.cerebrus.actividad.general;
 
-import java.util.LinkedHashMap;
+import java.util.Map;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -25,7 +25,7 @@ public class CrucigramaRequest {
     private  Boolean respVisible;
 
     @NotNull
-    private  LinkedHashMap<String,String> preguntasYRespuestas;
+    private  Map<String,String> preguntasYRespuestas;
 
 
     public CrucigramaRequest() {}
