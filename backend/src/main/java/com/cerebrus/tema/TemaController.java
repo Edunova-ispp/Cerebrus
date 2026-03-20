@@ -35,20 +35,22 @@ public class TemaController {
     }
 
     @PostMapping
-    public ResponseEntity<Tema> crearTema(@RequestBody CrearTemaRequest request, @RequestParam Long maestroId) {
+    public ResponseEntity<TemaDTO> crearTema(@RequestBody CrearTemaRequest request, @RequestParam Long maestroId) {
         try {
             Tema tema = temaService.crearTema(request.getTitulo(), request.getCursoId(), maestroId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(tema);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new TemaDTO(tema, List.of()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
     @PutMapping("/{temaId}")
-    public ResponseEntity<Tema> renombrarTema(@PathVariable Long temaId, @RequestBody RenombrarTemaRequest request, @RequestParam Long maestroId) {
+    public ResponseEntity<TemaDTO> renombrarTema(@PathVariable Long temaId, @RequestBody RenombrarTemaRequest request, @RequestParam Long maestroId) {
         try {
             Tema tema = temaService.renombrarTema(temaId, request.getNuevoTitulo(), maestroId);
-            return ResponseEntity.ok(tema);
+            List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
+            List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
+            return ResponseEntity.ok(new TemaDTO(tema, actividadesDTO));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }

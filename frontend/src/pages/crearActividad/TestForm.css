@@ -61,7 +61,7 @@
 .tf-input:hover,
 .tf-input:focus {
   outline: none;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .tf-input-sm {
@@ -135,7 +135,7 @@
 .tf-question-input:hover,
 .tf-question-input:focus {
   outline: none;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 /* -- Options --------------------------------------------------- */
@@ -184,12 +184,12 @@
 .tf-option-input:hover,
 .tf-option-input:focus {
   outline: none;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .tf-option--correct .tf-option-input {
   border-color: #000;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 /* -- Buttons --------------------------------------------------- */
@@ -214,7 +214,7 @@
 }
 
 .tf-btn-correct--active {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
   color: #000;
   border-color: #000;
 }
@@ -265,7 +265,7 @@
 }
 
 .tf-btn-add-option:hover {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .tf-btn-add-question {
@@ -285,7 +285,7 @@
 }
 
 .tf-btn-add-question:hover {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
   transform: translate(-2px, -2px);
   box-shadow: 6px 6px 0px #000;
 }

@@ -116,7 +116,7 @@
   background: var(--color-accent);
 }
 .ltp-item--activo {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
   border: 2px solid #000;
   font-weight: bold;
 }
@@ -171,7 +171,7 @@
   box-shadow: 0 4px 0px #000;
   transition: background 0.15s;
 }
-.ltp-btn-añadir:hover { background: var(--color-accent-dark); }
+.ltp-btn-añadir:hover { background: var( --color-accent-light); }
 
 .detalle-profesor-main {
   flex: 1;

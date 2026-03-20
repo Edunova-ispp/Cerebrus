@@ -10,6 +10,7 @@ html, body {
   --color-secondary: #7C4DFF;
   --color-accent: #FFF294;
   --color-text: #000638;
+  --color-accent-light: #fff9ca;
   --color-accent-dark: #ffe62b;
   --color-error: #ff0040;
   --color-confirm: #5affcd;
@@ -34,7 +35,7 @@ a {
   text-decoration: inherit;
 }
 a:hover {
-  color: var(--color-accent-dark);
+  color: var( --color-accent-light);
 }
 
 body {
@@ -68,7 +69,7 @@ button {
     background-color: #F9F7F0;
   }
   a:hover {
-    color: var(--color-accent-dark);
+    color: var( --color-accent-light);
   }
   button {
     background-color: #f9f9f9;

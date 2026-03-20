@@ -147,7 +147,7 @@
 }
 
 .ca-btn-guardar {
-  background: #4ade80;
+  background: var(--color-accent);
   border: 4px solid #000;
   border-radius: 12px;
   padding: 10px 24px;

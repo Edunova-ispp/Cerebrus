@@ -21,7 +21,7 @@ interface OpcionItem {
 
 type StatsView =
   | { mode: "resumen" }
-  | { mode: "medias" }
+  | { mode: "medias"; temaId?: number }
   | { mode: "tiemposTema"; temaId?: number }
   | { mode: "tiemposActividad"; actividadId?: number };
 
@@ -180,6 +180,11 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
     }
   }, [id]);
 
+  const handleMedias = async () => {
+    await cargarListaTemas();
+    setStatsView({ mode: "medias" });
+  };
+
   const handleTiemposTema = async () => {
     await cargarListaTemas();
     setStatsView({ mode: "tiemposTema" });
@@ -199,18 +204,20 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
     estadisticasContent = (
       <>
         {metricasTiempo && (
-          <div className="estadisticas-tiempo-resumen" style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '20px', padding: '15px', backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '8px' }}>
-            <div className="text-center">
-              <strong>Tiempo medio</strong><br/>
-              {formatearTiempo(metricasTiempo.media)}
+          <div className="stat-cards-row">
+            <div className="stat-card stat-card--tiempo">
+              <span className="stat-card__label">Tiempo medio</span>
+              <span className="stat-card__value">{formatearTiempo(metricasTiempo.media)}</span>
             </div>
-            <div className="text-center">
-              <strong>Alumno más rápido</strong><br/>
-              {metricasTiempo.masRapido.nombre} ({formatearTiempo(metricasTiempo.masRapido.tiempoTotal)})
+            <div className="stat-card stat-card--rapido">
+              <span className="stat-card__label">Alumno más rápido</span>
+              <span className="stat-card__value">{formatearTiempo(metricasTiempo.masRapido.tiempoTotal)}</span>
+              <span className="stat-card__name">{metricasTiempo.masRapido.nombre}</span>
             </div>
-            <div className="text-center">
-              <strong>Alumno más lento</strong><br/>
-              {metricasTiempo.masLento.nombre} ({formatearTiempo(metricasTiempo.masLento.tiempoTotal)})
+            <div className="stat-card stat-card--lento">
+              <span className="stat-card__label">Alumno más lento</span>
+              <span className="stat-card__value">{formatearTiempo(metricasTiempo.masLento.tiempoTotal)}</span>
+              <span className="stat-card__name">{metricasTiempo.masLento.nombre}</span>
             </div>
           </div>
         )}
@@ -242,11 +249,33 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
   }
 
   const renderSidebar = () => {
-    if (statsView.mode === "tiemposTema") {
+    if (statsView.mode === "medias") {
       return (
         <>
           <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "resumen" })}>
             ← Volver
+          </button>
+          <h3 className="stats-sidebar-title">Temas</h3>
+          {cargandoLista ? (
+            <p className="stats-sidebar-loading">Cargando...</p>
+          ) : temasList.map(t => (
+            <button
+              key={t.id}
+              className={`stats-sidebar-btn${'temaId' in statsView && statsView.temaId === t.id ? ' stats-sidebar-btn--active' : ''}`}
+              onClick={() => setStatsView({ mode: "medias", temaId: t.id })}
+            >
+              {t.nombre}
+            </button>
+          ))}
+        </>
+      );
+    }
+
+    if (statsView.mode === "tiemposTema") {
+      return (
+        <>
+          <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "resumen" })}>
+             Volver
           </button>
           <h3 className="stats-sidebar-title">Temas</h3>
           {cargandoLista ? (
@@ -268,7 +297,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
       return (
         <>
           <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "resumen" })}>
-            ← Volver
+             Volver
           </button>
           <h3 className="stats-sidebar-title">Actividades</h3>
           {cargandoLista ? (
@@ -300,15 +329,15 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
         </button>
         <button
           className={`stats-sidebar-btn${statsView.mode === 'medias' ? ' stats-sidebar-btn--active' : ''}`}
-          onClick={() => setStatsView({ mode: "medias" })}
+          onClick={handleMedias}
         >
           Puntuaciones medias
         </button>
         <button className="stats-sidebar-btn stats-sidebar-btn--tema" onClick={handleTiemposTema}>
-          Tiempos por Tema →
+          Tiempos por Tema 
         </button>
         <button className="stats-sidebar-btn stats-sidebar-btn--actividad" onClick={handleTiemposActividad}>
-          Tiempos por Actividad →
+          Tiempos por Actividad 
         </button>
       </>
     );
@@ -317,7 +346,11 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
   const renderStatsContent = () => {
     switch (statsView.mode) {
       case "medias":
-        return <MediasCurso cursoIdProp={id} embedded />;
+        return <MediasCurso
+          cursoIdProp={id}
+          embedded
+          temaIdSeleccionado={'temaId' in statsView ? statsView.temaId : undefined}
+        />;
       case "tiemposTema":
         if ('temaId' in statsView && statsView.temaId) {
           return <EstadisticasTema temaIdProp={String(statsView.temaId)} embedded />;
@@ -330,7 +363,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
         return <div className="stats-placeholder">Selecciona una actividad de la lista</div>;
       default:
         return (
-          <div className="estadisticas-yellow-card" style={{ margin: 0 }}>
+          <div className="estadisticas-yellow-card">
             {estadisticasContent}
           </div>
         );
@@ -341,12 +374,12 @@ return (
     <div className={embedded ? 'estadisticas-embedded' : 'estadisticas-page'}>
       {!embedded && <NavbarMisCursos />}
       
-      <main className="estadisticas-main" style={{ maxWidth: '1200px' }}>
+      <main className="estadisticas-main">
         {!embedded && (
           <>
             <div style={{ width: '100%', display: 'flex', marginBottom: '10px' }}>
               <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
-                ← Volver
+                 Volver
               </button>
             </div>
             <h1 className="estadisticas-titulo-curso">Estadísticas del Curso</h1>

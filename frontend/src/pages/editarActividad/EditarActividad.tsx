@@ -123,17 +123,20 @@ type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'marcarImagen
 
 interface EditarActividadProps {
   readonly actividadIdProp?: string;
+  readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
   readonly embedded?: boolean;
   readonly onDone?: () => void;
 }
 
-export default function EditarActividad({ actividadIdProp, embedded, onDone }: EditarActividadProps = {}) {
-  const { id: cursoId, actividadId: actividadIdParam } = useParams<{
+export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdProp, embedded, onDone }: EditarActividadProps = {}) {
+  const params = useParams<{
     id: string;
     temaId: string;
     actividadId: string;
   }>();
-  const actividadId = actividadIdProp ?? actividadIdParam;
+  const cursoId = cursoIdProp ?? params.id;
+  const actividadId = actividadIdProp ?? params.actividadId;
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -360,6 +363,9 @@ export default function EditarActividad({ actividadIdProp, embedded, onDone }: E
           mode="edit"
           generalId={actividadIdNum}
           initialValues={testInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -370,6 +376,9 @@ export default function EditarActividad({ actividadIdProp, embedded, onDone }: E
           mode="edit"
           ordenacionId={actividadIdNum}
           initialValues={ordenacionInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -380,6 +389,9 @@ export default function EditarActividad({ actividadIdProp, embedded, onDone }: E
           mode="edit"
           actividadId={actividadIdNum}
           initialValues={teoriaInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -390,6 +402,9 @@ export default function EditarActividad({ actividadIdProp, embedded, onDone }: E
           mode="edit"
           marcarImagenId={actividadIdNum}
           initialValues={marcarImagenInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -400,6 +415,9 @@ export default function EditarActividad({ actividadIdProp, embedded, onDone }: E
           mode="edit"
           tableroId={tableroInitialValues ? tablero.id : undefined}
           initialValues={tableroInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -410,6 +428,9 @@ export default function EditarActividad({ actividadIdProp, embedded, onDone }: E
           mode="edit"
           generalId={actividadIdNum}
           initialValues={cartaInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -420,6 +441,9 @@ export default function EditarActividad({ actividadIdProp, embedded, onDone }: E
           mode="edit"
           clasificacionId={actividadIdNum}
           initialValues={clasificacionInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -436,7 +460,7 @@ export default function EditarActividad({ actividadIdProp, embedded, onDone }: E
             <button
               className="ca-sidebar-btn"
               type="button"
-              onClick={() => navigate(`/cursos/${cursoId}/temas`)}
+              onClick={() => navigate(`/cursos/${cursoId}`)}
             >
               Volver al Mapa
             </button>

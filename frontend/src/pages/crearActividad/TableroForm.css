@@ -48,12 +48,12 @@
 }
 
 .tbl-input:hover {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .tbl-input:focus {
   outline: none;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .tbl-textarea {
@@ -70,12 +70,12 @@
 }
 
 .tbl-textarea:hover {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .tbl-textarea:focus {
   outline: none;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 /* ── Secciones ─────────────────────────────────────────────── */
@@ -120,7 +120,7 @@
 }
 
 .tbl-tamano-btn--active {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
   transform: translate(-2px, -2px);
   box-shadow: 6px 6px 0 #000;
 }
@@ -201,11 +201,11 @@
 }
 
 .tbl-respuesta-input:hover {
-  background: var(--color-accent-dark) !important;
+  background: var( --color-accent-light) !important;
 }
 
 .tbl-respuesta-input:focus {
-  background: var(--color-accent-dark) !important;
+  background: var( --color-accent-light) !important;
   border-color: #000 !important;
 }
 

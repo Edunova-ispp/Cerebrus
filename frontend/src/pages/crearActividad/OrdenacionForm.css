@@ -67,7 +67,7 @@
 .of-input:hover,
 .of-input:focus {
   outline: none;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .of-input-sm {
@@ -91,7 +91,7 @@
 .of-textarea:hover,
 .of-textarea:focus {
   outline: none;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 /* ── Row helpers ───────────────────────────────────────────── */
@@ -133,7 +133,7 @@
 }
 
 .of-kind-btn:hover:not(:disabled) {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .of-kind-btn:disabled {
@@ -185,7 +185,7 @@
 }
 
 .of-btn-add:hover {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 /* ── Error / success ───────────────────────────────────────── */

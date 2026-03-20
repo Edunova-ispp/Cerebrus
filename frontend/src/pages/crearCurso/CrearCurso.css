@@ -1,5 +1,4 @@
 .crear-curso-page {
-  background-color: #FDF8E1;
   min-height: 100vh;
   font-family: 'Oxygen', sans-serif;
 }
@@ -68,7 +67,7 @@
 }
 
 .pixel-input {
-  background-color: #FFF9C4;
+  background-color: var(--color-accent-light);
   border: 3px solid #000;
   border-radius: 15px;
   padding: 12px 15px;
@@ -79,7 +78,7 @@
 
 /* Textarea más estilizado y menos ancho si lo deseas */
 .pixel-textarea {
-  background-color: #FFF9C4;
+  background-color: var(--color-accent-light);
   border: 4px solid #000;
   border-radius: 15px;
   padding: 12px 15px;
@@ -110,7 +109,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #ffe895; /* Amarillo sólido acorde a la estética */
+  background-color: var(--color-accent-light); /* Amarillo sólido acorde a la estética */
 }
 
 .pixel-fallback-initials {
@@ -141,7 +140,7 @@
 }
 
 .pixel-btn-submit-main:hover {
-  background-color: var(--color-accent-dark);
+  background-color: var( --color-accent-light);
 }
 
 .pixel-btn-submit-main:active {

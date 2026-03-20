@@ -48,9 +48,9 @@ export default function DetalleCursoProfesor({ curso }: Props) {
             case "editarTema":
               return <EditarTema cursoIdProp={String(curso.id)} temaIdProp={String(view.temaId)} embedded onDone={goToMapa} />;
             case "crearActividad":
-              return <CrearActividad embedded onDone={goToMapa} />;
+              return <CrearActividad temaIdProp={String(view.temaId)} cursoIdProp={String(curso.id)} embedded onDone={goToMapa} />;
             case "editarActividad":
-              return <EditarActividad actividadIdProp={String(view.actividadId)} embedded onDone={goToMapa} />;
+              return <EditarActividad actividadIdProp={String(view.actividadId)} temaIdProp={String(view.temaId)} cursoIdProp={String(curso.id)} embedded onDone={goToMapa} />;
           }
         }
         return (
@@ -79,16 +79,22 @@ export default function DetalleCursoProfesor({ curso }: Props) {
           </div>
 
           <nav className="detalle-sidebar-nav">
-            {TABS.map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                className={`detalle-sidebar-btn${view.tab === tab.key ? " detalle-sidebar-btn--active" : ""}`}
-                onClick={() => setView({ tab: tab.key })}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {TABS.map((tab) => {
+              const isInAction = "action" in view;
+              const isBack = tab.key === "mapa" && isInAction;
+              const isActive = view.tab === tab.key && !isBack;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  className={`detalle-sidebar-btn${isActive ? " detalle-sidebar-btn--active" : ""}${isBack ? " detalle-sidebar-btn--back" : ""}`}
+                  onClick={() => setView({ tab: tab.key })}
+                >
+                  {tab.label}
+                  {isBack && <span className="detalle-sidebar-btn__back-hint">Pulsa para volver</span>}
+                </button>
+              );
+            })}
           </nav>
         </aside>
 

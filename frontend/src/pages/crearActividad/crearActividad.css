@@ -48,7 +48,7 @@
   color: #000;
   transition: background 0.15s;
 }
-.ca-sidebar-btn:hover { background: var(--color-accent-dark); }
+.ca-sidebar-btn:hover { background: var( --color-accent-light); }
 .ca-sidebar-btn--activo { font-weight: bold; background: var(--color-accent); }
 
 .ca-contenido {
@@ -106,7 +106,7 @@
 }
 
 .ca-ordenacion-form button.ca-text:hover {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .ca-ordenacion-form button.ca-text:disabled {
@@ -173,7 +173,7 @@
   box-shadow: 5px 5px 0px #000;
   transition: transform 0.1s;
 }
-.ca-btn-guardar:hover { background: var(--color-accent-dark); transform: translate(-2px, -2px); box-shadow: 7px 7px 0px #000; }
+.ca-btn-guardar:hover { background: var( --color-accent-light); transform: translate(-2px, -2px); box-shadow: 7px 7px 0px #000; }
 .ca-btn-guardar:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 .ca-form-footer {

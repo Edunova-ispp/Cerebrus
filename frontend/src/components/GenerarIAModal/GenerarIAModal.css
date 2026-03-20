@@ -134,7 +134,7 @@
 }
 
 .iam-btn-generate:hover:not(:disabled) {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 /* ── Loading indicator ───────────────────────────────────── */

@@ -45,7 +45,7 @@ export default function CrearTema({ cursoIdProp, embedded, onDone }: CrearTemaPr
           cursoId: Number(cursoId),
         }),
       });
-      if (onDone) { onDone(); } else { navigate(`/cursos/${cursoId}/temas`); }
+      if (onDone) { onDone(); } else { navigate(`/cursos/${cursoId}`); }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear el tema');
     } finally {

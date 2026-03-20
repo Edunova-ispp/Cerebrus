@@ -65,7 +65,7 @@ export default function EditarTema({ cursoIdProp, temaIdProp, embedded, onDone }
         method: 'PUT',
         body: JSON.stringify({ nuevoTitulo: titulo.trim() }),
       });
-      if (onDone) { onDone(); } else { navigate(`/cursos/${cursoId}/temas`); }
+      if (onDone) { onDone(); } else { navigate(`/cursos/${cursoId}`); }
     } catch (err) {
       setError('Error al guardar los cambios');
     } finally {

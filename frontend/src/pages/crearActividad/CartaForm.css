@@ -61,7 +61,7 @@
 .cf-input:hover,
 .cf-input:focus {
   outline: none;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .cf-input-sm {
@@ -156,7 +156,7 @@
 .cf-card-input:hover,
 .cf-card-input:focus {
   outline: none;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 /* ── Card image ──────────────────────────────────────────────── */
@@ -209,7 +209,7 @@
 }
 
 .cf-btn-add-card:hover {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
   transform: translate(-2px, -2px);
   box-shadow: 6px 6px 0px #000;
 }

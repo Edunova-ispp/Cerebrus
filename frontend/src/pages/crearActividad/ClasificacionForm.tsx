@@ -47,6 +47,9 @@ interface Props {
   readonly mode?: ClasificacionFormMode;
   readonly clasificacionId?: number;
   readonly initialValues?: ClasificacionFormInitialValues;
+  readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
+  readonly onDone?: () => void;
 }
 
 function makeEmptyRespuesta(): RespuestaOption {
@@ -57,7 +60,7 @@ function makeEmptyPregunta(): Pregunta {
   return { localKey: makeLocalKey(), text: '', respuestas: [makeEmptyRespuesta()] };
 }
 
-export function ClasificacionForm({ mode = 'create', clasificacionId, initialValues }: Props) {
+export function ClasificacionForm({ mode = 'create', clasificacionId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -70,7 +73,9 @@ const [showIAModal, setShowIAModal] = useState(false);
 
   const originalPreguntasRef = useRef<ClasificacionFormInitialPregunta[]>([]);
   const navigate = useNavigate();
-  const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+  const params = useParams<{ id: string; temaId: string }>();
+  const cursoId = cursoIdProp ?? params.id;
+  const temaId = temaIdProp ?? params.temaId;
 
   useEffect(() => {
     if (!initialValues) return;
@@ -246,7 +251,7 @@ const [showIAModal, setShowIAModal] = useState(false);
           }
         }
       }
-      navigate(`/cursos/${cursoId}/temas`);
+      if (onDone) onDone(); else navigate(`/cursos/${cursoId}`);
     } catch (err) {
       setError('Error al guardar la actividad');
     } finally {

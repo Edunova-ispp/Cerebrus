@@ -87,21 +87,23 @@ export default function EstadisticasTema({ temaIdProp, embedded }: EstadisticasT
           
           {!loading && !error && datos && (
             <>
-              <div className="estadisticas-tiempo-resumen" style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '20px', padding: '15px', backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '8px' }}>
-                <div className="text-center">
-                  <strong>Tiempo medio</strong><br/>
-                  {formatearTiempo(promedioCalculado)}
+              <div className="stat-cards-row">
+                <div className="stat-card stat-card--tiempo">
+                  <span className="stat-card__label">Tiempo medio</span>
+                  <span className="stat-card__value">{formatearTiempo(promedioCalculado)}</span>
                 </div>
                 {elMasRapido && (
-                  <div className="text-center">
-                    <strong>Alumno más rápido</strong><br/>
-                    {elMasRapido.nombreAlumno} ({formatearTiempo(elMasRapido.tiempoMinutos)})
+                  <div className="stat-card stat-card--rapido">
+                    <span className="stat-card__label">Alumno más rápido</span>
+                    <span className="stat-card__value">{formatearTiempo(elMasRapido.tiempoMinutos)}</span>
+                    <span className="stat-card__name">{elMasRapido.nombreAlumno}</span>
                   </div>
                 )}
                 {elMasLento && (
-                  <div className="text-center">
-                    <strong>Alumno más lento</strong><br/>
-                    {elMasLento.nombreAlumno} ({formatearTiempo(elMasLento.tiempoMinutos)})
+                  <div className="stat-card stat-card--lento">
+                    <span className="stat-card__label">Alumno más lento</span>
+                    <span className="stat-card__value">{formatearTiempo(elMasLento.tiempoMinutos)}</span>
+                    <span className="stat-card__name">{elMasLento.nombreAlumno}</span>
                   </div>
                 )}
               </div>
@@ -118,7 +120,9 @@ export default function EstadisticasTema({ temaIdProp, embedded }: EstadisticasT
                   <tbody>
                     {alumnosCompletos.map((alumno, index) => (
                       <tr key={alumno.alumnoId}>
-                        <td className="text-center">{index + 1}</td>
+                        <td className="text-center">
+                          <span className={`rank-badge${index < 3 ? ` rank-badge--${index + 1}` : ''}`}>{index + 1}</span>
+                        </td>
                         <td>{alumno.nombreAlumno}</td>
                         <td className="text-center">{formatearTiempo(alumno.tiempoMinutos)}</td>
                       </tr>
