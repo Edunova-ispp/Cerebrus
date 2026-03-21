@@ -3,6 +3,7 @@ package com.cerebrus.estadisticas;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,10 +20,15 @@ import com.cerebrus.actividadAlumno.ActividadAlumno;
 import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
+import com.cerebrus.estadisticas.dto.ActividadEstadisticasAlumnoDTO;
+import com.cerebrus.estadisticas.dto.AlumnoBasicoDTO;
+import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
-import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
+import com.cerebrus.estadisticas.dto.IntentoActividadDTO;
+import com.cerebrus.estadisticas.dto.TemaEstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.TiempoAlumnoDTO;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
@@ -785,6 +791,133 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                 .mapToInt(Integer::intValue)
                 .min()
                 .orElse(0);
+    }
+
+    // ==================== ESTADÍSTICAS INDIVIDUALES DEL ALUMNO ====================
+
+    @Transactional(readOnly = true)
+    public List<AlumnoBasicoDTO> obtenerAlumnosDeCurso(Long cursoId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        validarPropietarioCurso(maestro, curso);
+
+        return curso.getInscripciones().stream()
+                .map(i -> new AlumnoBasicoDTO(i.getAlumno().getId(), buildNombreAlumno(i.getAlumno())))
+                .sorted(Comparator.comparing(AlumnoBasicoDTO::getNombre))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public EstadisticasAlumnoDTO obtenerEstadisticasAlumnoEnCurso(Long cursoId, Long alumnoId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        validarPropietarioCurso(maestro, curso);
+
+        Alumno alumno = curso.getInscripciones().stream()
+                .map(i -> i.getAlumno())
+                .filter(a -> a.getId().equals(alumnoId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El alumno no está inscrito en este curso."));
+
+        List<TemaEstadisticasAlumnoDTO> temasDTO = new ArrayList<>();
+        int totalCompletadas = 0;
+        int totalActividades = 0;
+        int tiempoTotal = 0;
+        List<Integer> notasCompletadas = new ArrayList<>();
+
+        for (Tema tema : curso.getTemas()) {
+            List<ActividadEstadisticasAlumnoDTO> actividadesDTO = new ArrayList<>();
+            boolean temaCompletado = !tema.getActividades().isEmpty();
+
+            for (Actividad actividad : tema.getActividades()) {
+                totalActividades++;
+                ActividadAlumno ultimoCompletado = getUltimoIntento(actividad, alumnoId);
+                boolean completada = ultimoCompletado != null;
+
+                if (!completada) {
+                    temaCompletado = false;
+                } else {
+                    totalCompletadas++;
+                    tiempoTotal += ultimoCompletado.getTiempoMinutos() != null ? ultimoCompletado.getTiempoMinutos() : 0;
+                    if (ultimoCompletado.getNota() != null) {
+                        notasCompletadas.add(ultimoCompletado.getNota());
+                    }
+                }
+
+                Integer notaAlumno = completada ? ultimoCompletado.getNota() : null;
+                Integer puntuacionAlumno = completada ? ultimoCompletado.getPuntuacion() : null;
+                Double notaMediaClase = notaMediaActividad(actividad);
+                Double desviacion = (notaAlumno != null) ? (double) notaAlumno - notaMediaClase : null;
+
+                actividadesDTO.add(new ActividadEstadisticasAlumnoDTO(
+                        actividad.getId(),
+                        actividad.getTitulo(),
+                        actividad.getClass().getSimpleName(),
+                        actividad.getPuntuacion(),
+                        completada,
+                        notaAlumno,
+                        puntuacionAlumno,
+                        notaMediaClase,
+                        desviacion,
+                        buildIntentosDTO(actividad, alumnoId)));
+            }
+
+            temasDTO.add(new TemaEstadisticasAlumnoDTO(tema.getId(), tema.getTitulo(), temaCompletado, actividadesDTO));
+        }
+
+        Double notaMedia = notasCompletadas.isEmpty() ? 0.0
+                : notasCompletadas.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+        Integer notaMin = notasCompletadas.isEmpty() ? null
+                : notasCompletadas.stream().mapToInt(Integer::intValue).min().orElse(0);
+        Integer notaMax = notasCompletadas.isEmpty() ? null
+                : notasCompletadas.stream().mapToInt(Integer::intValue).max().orElse(0);
+
+        return new EstadisticasAlumnoDTO(
+                alumnoId, buildNombreAlumno(alumno), notaMedia, notaMin, notaMax,
+                totalCompletadas, totalActividades, tiempoTotal, temasDTO);
+    }
+
+    private String buildNombreAlumno(Alumno alumno) {
+        String nombre = alumno.getNombre();
+        if (alumno.getPrimerApellido() != null && !alumno.getPrimerApellido().isBlank()) {
+            nombre = nombre + " " + alumno.getPrimerApellido();
+        }
+        return nombre;
+    }
+
+    private ActividadAlumno getUltimoIntento(Actividad actividad, Long alumnoId) {
+        return actividad.getActividadesAlumno().stream()
+                .filter(aa -> aa.getAlumno().getId().equals(alumnoId)
+                        && aa.getEstadoActividad() == EstadoActividad.TERMINADA)
+                .max(Comparator.comparing(aa -> {
+                    LocalDateTime fecha = aa.getFechaFin() != null ? aa.getFechaFin() : aa.getFechaInicio();
+                    return fecha != null ? fecha : LocalDateTime.MIN;
+                }))
+                .orElse(null);
+    }
+
+    private List<IntentoActividadDTO> buildIntentosDTO(Actividad actividad, Long alumnoId) {
+        return actividad.getActividadesAlumno().stream()
+                .filter(aa -> aa.getAlumno().getId().equals(alumnoId))
+                .sorted(Comparator.comparing(aa -> {
+                    LocalDateTime fecha = aa.getFechaFin() != null ? aa.getFechaFin() : aa.getFechaInicio();
+                    return fecha != null ? fecha : LocalDateTime.MIN;
+                }))
+                .map(aa -> new IntentoActividadDTO(
+                        aa.getId(),
+                        aa.getFechaInicio(),
+                        aa.getFechaFin(),
+                        aa.getPuntuacion(),
+                        aa.getNota(),
+                        aa.getTiempoMinutos(),
+                        aa.getNumAbandonos()))
+                .collect(Collectors.toList());
     }
 
 }

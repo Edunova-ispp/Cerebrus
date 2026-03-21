@@ -1,6 +1,7 @@
 package com.cerebrus.estadisticas;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -16,10 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
+import com.cerebrus.estadisticas.dto.AlumnoBasicoDTO;
+import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
-import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 
 @RestController
 @RequestMapping("/api/estadisticas")
@@ -250,6 +253,42 @@ public class EstadisticasMaestroController {
         try {
             AlumnosMasRapidosLentosDTO resultado = estadisticasMaestroService.obtenerAlumnosMasRapidosLentosCurso(cursoId, limite);
             return ResponseEntity.ok(resultado);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Ocurrió un error inesperado."));
+        }
+    }
+
+    // ==================== ESTADÍSTICAS INDIVIDUALES DEL ALUMNO ====================
+
+    @GetMapping("/cursos/{cursoId}/alumnos")
+    public ResponseEntity<?> obtenerAlumnosDeCurso(@PathVariable Long cursoId) {
+        try {
+            List<AlumnoBasicoDTO> alumnos = estadisticasMaestroService.obtenerAlumnosDeCurso(cursoId);
+            return ResponseEntity.ok(alumnos);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Ocurrió un error inesperado."));
+        }
+    }
+
+    @GetMapping("/cursos/{cursoId}/alumnos/{alumnoId}")
+    public ResponseEntity<?> obtenerEstadisticasAlumnoEnCurso(@PathVariable Long cursoId, @PathVariable Long alumnoId) {
+        try {
+            EstadisticasAlumnoDTO stats = estadisticasMaestroService.obtenerEstadisticasAlumnoEnCurso(cursoId, alumnoId);
+            return ResponseEntity.ok(stats);
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", e.getMessage()));
