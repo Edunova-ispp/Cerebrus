@@ -127,11 +127,12 @@ public class ActividadAlumno {
 
     //Atributo derivado que calcula el tiempo tardado por el alumno en realizar una actividad concreta
     public Integer getTiempoMinutos() {
-        if (fechaInicio == null || fechaFin == null) {
-            return 0; 
-        }
+        LocalDateTime epoch = LocalDateTime.of(1970, 1, 1, 0, 0);
+        if (fechaInicio == null || fechaFin == null) return 0;
+        if (fechaInicio.equals(epoch) || fechaFin.equals(epoch)) return 0;
+        if (fechaFin.isBefore(fechaInicio)) return 0;
         long minutos = ChronoUnit.MINUTES.between(fechaInicio, fechaFin);
-        return (int) minutos; 
+        return (int) minutos;
     }
 
     public Integer getNumRepeticiones(){
@@ -149,15 +150,19 @@ public class ActividadAlumno {
     }
 
     public EstadoActividad getEstadoActividad(){
-        EstadoActividad result;
-        if(getNumRepeticiones() > 0 && respuestasAlumno.get(respuestasAlumno.size()-1).getCorrecta().equals(Boolean.TRUE)){
-            result = EstadoActividad.TERMINADA;
-        } else if (fechaInicio != null && !(fechaInicio.equals(LocalDateTime.of(1970, 1, 1, 0, 0)))){
-            result = EstadoActividad.EMPEZADA;
-        } else {
-            result = EstadoActividad.SIN_EMPEZAR;
+        LocalDateTime epoch = LocalDateTime.of(1970, 1, 1, 0, 0);
+        // Actividad terminada si tiene fechaFin válida (no epoch) — cubre Teoría y cualquier
+        // actividad que selle fechaFin al completarse sin generar respuestasAlumno
+        if (fechaFin != null && !fechaFin.equals(epoch) && fechaFin.getYear() > 1970) {
+            return EstadoActividad.TERMINADA;
         }
-        return result;
+        if (getNumRepeticiones() > 0 && respuestasAlumno.get(respuestasAlumno.size()-1).getCorrecta().equals(Boolean.TRUE)) {
+            return EstadoActividad.TERMINADA;
+        }
+        if (fechaInicio != null && !fechaInicio.equals(epoch)) {
+            return EstadoActividad.EMPEZADA;
+        }
+        return EstadoActividad.SIN_EMPEZAR;
     }
 
     public Alumno getAlumno() {
