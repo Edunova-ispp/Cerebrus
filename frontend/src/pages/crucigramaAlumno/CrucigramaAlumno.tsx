@@ -504,7 +504,7 @@ export default function CrucigramaAlumno() {
 
             <div className="cr-progress-wrap">
               <span className="cr-timer">
-                {String(Math.floor(elapsed / 60)).padStart(2, '0')}:{String(elapsed % 60).padStart(2, '0')}
+                ⏱ {String(Math.floor(elapsed / 60)).padStart(2, '0')}:{String(elapsed % 60).padStart(2, '0')}
               </span>
               <span>Progreso:</span>
               <div className="cr-progress-bar">
@@ -654,17 +654,9 @@ export default function CrucigramaAlumno() {
         {submitted && score?.correct === score?.total && (
           <CompletionPopup
             title="¡CRUCIGRAMA COMPLETADO!"
+            subtitle={`⏱ ${String(Math.floor(elapsed / 60)).padStart(2, '0')}:${String(elapsed % 60).padStart(2, '0')}${earnedPoints != null ? `  •  ${earnedPoints} puntos` : ''}`}
             onContinue={() => navigate(-1)}
-          >
-            <p style={{ textAlign: 'center', fontFamily: "'Pixelify Sans', sans-serif", fontSize: 20 }}>
-              Tiempo: {String(Math.floor(elapsed / 60)).padStart(2, '0')}:{String(elapsed % 60).padStart(2, '0')}
-            </p>
-            {earnedPoints !== null && (
-              <p style={{ textAlign: 'center', fontFamily: "'Pixelify Sans', sans-serif", fontSize: 20 }}>
-                +{earnedPoints} puntos
-              </p>
-            )}
-          </CompletionPopup>
+          />
         )}
       </main>
     </div>

@@ -425,13 +425,15 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     }
 
     public void corregirActividadAlumnoAutomaticamenteCrucigrama(ActividadAlumno actividadAlumno, Actividad actividad) {
-        General actividadGeneral = (General) actividad;
+        // Fetch the General entity fresh to ensure preguntas collection is loaded
+        General actividadGeneral = (General) actividadRepository.findById(actividad.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
         int totalPalabras = actividadGeneral.getPreguntas().size();
-        int puntuacionMaxima = actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 0;
+        int puntuacionMaxima = actividadGeneral.getPuntuacion() != null ? actividadGeneral.getPuntuacion() : 0;
 
-        if (totalPalabras == 0) {
-            actividadAlumno.setPuntuacion(0);
-            actividadAlumno.setNota(0);
+        if (totalPalabras == 0 || puntuacionMaxima == 0) {
+            actividadAlumno.setPuntuacion(puntuacionMaxima);
+            actividadAlumno.setNota(10);
             return;
         }
 

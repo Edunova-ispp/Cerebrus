@@ -495,6 +495,9 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
           mode="edit"
           crucigramaId={actividadIdNum}
           initialValues={crucigramaInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
