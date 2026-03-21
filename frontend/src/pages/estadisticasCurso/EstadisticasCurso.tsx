@@ -20,23 +20,29 @@ interface OpcionItem {
   nombre: string;
 }
 
-type StatsView =
-  | { mode: "resumen" }
-  | { mode: "medias"; temaId?: number }
-  | { mode: "tiemposTema"; temaId?: number }
-  | { mode: "tiemposActividad"; actividadId?: number }
-  | { mode: "alumnos" }
-  | { mode: "alumnoDetalle"; alumnoId: number; alumnoNombre: string };
+interface EstadisticasCursoDTO {
+  cursoCompletadoPorTodos: boolean | null;
+  notaMediaCurso: number | null;
+  tiempoMedioCurso: number | null;
+  notaMaximaCurso: number | null;
+  notaMinimaCurso: number | null;
+}
 
 function formatearTiempo(minutosTotales: number): string {
   if (!minutosTotales || minutosTotales === 0) return '0 mins';
   if (minutosTotales === 1) return '1 min';
-  return `${minutosTotales.toFixed(2)} mins`;
+  return `${minutosTotales} mins`;
 }
 
-interface EstadisticasCursoProps {
-  readonly cursoId?: string;
-  readonly embedded?: boolean;
+function formatearNumero2Dec(valor: number | null | undefined): string {
+  if (typeof valor !== 'number' || !Number.isFinite(valor)) return '0';
+  return String(Math.round(valor * 100) / 100);
+}
+
+function formatearTiempoCurso(minutos: number | null | undefined): string {
+  if (typeof minutos !== 'number' || !Number.isFinite(minutos) || minutos <= 0) return '0 mins';
+  const redondeado = Math.round(minutos);
+  return formatearTiempo(redondeado);
 }
 
 export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCursoProps = {}) {
@@ -44,6 +50,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
   const id = cursoId ?? params.id;
   const navigate = useNavigate();
   const [estadisticas, setEstadisticas] = useState<EstadisticaAlumno[]>([]);
+  const [estadisticasCurso, setEstadisticasCurso] = useState<EstadisticasCursoDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -65,10 +72,11 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
       const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
       // Hacemos 3 llamadas: Puntos, Actividades y la lista completa de tiempos (con límite 1000 para que vengan todos)
-      const [puntosRes, actividadesRes, tiemposRes] = await Promise.all([
+      const [puntosRes, actividadesRes, tiemposRes, cursoRes] = await Promise.all([
         fetch(`${apiBase}/api/estadisticas/cursos/${id}/puntos`, { headers: { 'Authorization': `Bearer ${token}` } }),
         fetch(`${apiBase}/api/estadisticas/cursos/${id}/actividades-completadas`, { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch(`${apiBase}/api/estadisticas/cursos/${id}/alumnos-rapidos-lentos?limite=1000`, { headers: { 'Authorization': `Bearer ${token}` } })
+        fetch(`${apiBase}/api/estadisticas/cursos/${id}/alumnos-rapidos-lentos?limite=1000`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${apiBase}/api/estadisticas/cursos/${id}/estadisiticas-curso`, { headers: { 'Authorization': `Bearer ${token}` } }),
       ]);
 
       if (!puntosRes.ok || !actividadesRes.ok) throw new Error('Error al cargar datos principales');
@@ -76,6 +84,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
       const puntosData = await puntosRes.json();
       const actividadesData = await actividadesRes.json();
       const tiemposData = tiemposRes.ok ? await tiemposRes.json() : null;
+      const cursoData: EstadisticasCursoDTO | null = cursoRes.ok ? await cursoRes.json() : null;
 
       const alumnosMap = new Map<string, EstadisticaAlumno>();
 
@@ -105,9 +114,11 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
       }
 
       setEstadisticas(Array.from(alumnosMap.values()));
+      setEstadisticasCurso(cursoData);
 
     } catch (err) {
       setError((err as Error).message || 'Error cargando las estadísticas');
+      setEstadisticasCurso(null);
     } finally {
       setLoading(false);
     }
@@ -184,39 +195,36 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
     }
   }, [id]);
 
-  const handleMedias = async () => {
-    await cargarListaTemas();
-    setStatsView({ mode: "medias" });
-  };
-
-  const handleTiemposTema = async () => {
-    await cargarListaTemas();
-    setStatsView({ mode: "tiemposTema" });
-  };
-
-  const handleTiemposActividad = async () => {
-    await cargarListaActividades();
-    setStatsView({ mode: "tiemposActividad" });
-  };
-
-  const handleAlumnos = useCallback(async () => {
-    setCargandoLista(true);
-    try {
-      const token = localStorage.getItem('token');
-      const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
-      const res = await fetch(`${apiBase}/api/estadisticas/cursos/${id}/alumnos`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      setAlumnosList(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setCargandoLista(false);
+  const confirmarNavegacion = () => {
+    if (!opcionSeleccionada) return;
+    if (modalAbierto === 'tema') {
+      navigate(`/estadisticas/temas/${opcionSeleccionada}`);
+    } else if (modalAbierto === 'actividad') {
+      navigate(`/estadisticas/actividades/${opcionSeleccionada}`);
     }
-    setStatsView({ mode: "alumnos" });
-  }, [id]);
+    setModalAbierto(null);
+  };
+
+  const cursoIndicadoresContent = !loading && !error ? (
+    <div className="curso-indicadores" style={{ marginBottom: '16px' }}>
+      <div className="curso-indicador">
+        <div className="curso-indicador-label">Nota media</div>
+        <div className="curso-indicador-value">{formatearNumero2Dec(estadisticasCurso?.notaMediaCurso)}</div>
+      </div>
+      <div className="curso-indicador">
+        <div className="curso-indicador-label">Nota máx.</div>
+        <div className="curso-indicador-value">{estadisticasCurso?.notaMaximaCurso ?? 0}</div>
+      </div>
+      <div className="curso-indicador">
+        <div className="curso-indicador-label">Nota mín.</div>
+        <div className="curso-indicador-value">{estadisticasCurso?.notaMinimaCurso ?? 0}</div>
+      </div>
+      <div className="curso-indicador">
+        <div className="curso-indicador-label">Tiempo medio</div>
+        <div className="curso-indicador-value">{formatearTiempoCurso(estadisticasCurso?.tiempoMedioCurso)}</div>
+      </div>
+    </div>
+  ) : null;
 
   let estadisticasContent: React.ReactNode;
   if (loading) {
@@ -289,27 +297,14 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
             >
               {t.nombre}
             </button>
-          ))}
-        </>
-      );
-    }
+            
+            <hr style={{ width: '100%', border: '1px solid #ccc' }} />
 
-    if (statsView.mode === "tiemposTema") {
-      return (
-        <>
-          <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "resumen" })}>
-             Volver
-          </button>
-          <h3 className="stats-sidebar-title">Temas</h3>
-          {cargandoLista ? (
-            <p className="stats-sidebar-loading">Cargando...</p>
-          ) : temasList.map(t => (
-            <button
-              key={t.id}
-              className={`stats-sidebar-btn${'temaId' in statsView && statsView.temaId === t.id ? ' stats-sidebar-btn--active' : ''}`}
-              onClick={() => setStatsView({ mode: "tiemposTema", temaId: t.id })}
-            >
-              {t.nombre}
+            <button className="btn-medias-pixel" onClick={() => navigate(`/estadisticas/${id}/actividades`)} style={{ width: '100%' }}>
+              Actividades
+            </button>
+            <button className="btn-medias-pixel" onClick={() => navigate(`/estadisticas/${id}/temas`)} style={{ width: '100%' }}>
+              Temas
             </button>
           ))}
         </>
@@ -357,74 +352,12 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
             >
               {a.nombre}
             </button>
-          ))}
-        </>
-      );
-    }
-
-    return (
-      <>
-        <button className="stats-sidebar-btn stats-sidebar-btn--refresh" onClick={cargarEstadisticas}>
-          Actualizar ↻
-        </button>
-        <hr className="stats-sidebar-divider" />
-        <button
-          className={`stats-sidebar-btn${statsView.mode === 'resumen' ? ' stats-sidebar-btn--active' : ''}`}
-          onClick={() => setStatsView({ mode: "resumen" })}
-        >
-          Resumen general
-        </button>
-        <button
-          className={`stats-sidebar-btn${'temaId' in statsView ? ' stats-sidebar-btn--active' : ''}`}
-          onClick={handleMedias}
-        >
-          Puntuaciones medias
-        </button>
-        <button className="stats-sidebar-btn stats-sidebar-btn--tema" onClick={handleTiemposTema}>
-          Tiempos por Tema 
-        </button>
-        <button className="stats-sidebar-btn stats-sidebar-btn--actividad" onClick={handleTiemposActividad}>
-          Tiempos por Actividad 
-        </button>
-        <button className="stats-sidebar-btn stats-sidebar-btn--alumnos" onClick={handleAlumnos}>
-          Alumnos 
-        </button>
-      </>
-    );
-  };
-
-  const renderStatsContent = () => {
-    switch (statsView.mode) {
-      case "medias":
-        return <MediasCurso
-          cursoIdProp={id}
-          embedded
-          temaIdSeleccionado={'temaId' in statsView ? statsView.temaId : undefined}
-        />;
-      case "tiemposTema":
-        if ('temaId' in statsView && statsView.temaId) {
-          return <EstadisticasTema temaIdProp={String(statsView.temaId)} embedded />;
-        }
-        return <div className="stats-placeholder">Selecciona un tema de la lista</div>;
-      case "tiemposActividad":
-        if ('actividadId' in statsView && statsView.actividadId) {
-          return <EstadisticasActividad actividadIdProp={String(statsView.actividadId)} embedded />;
-        }
-        return <div className="stats-placeholder">Selecciona una actividad de la lista</div>;
-      case "alumnos":
-        return <div className="stats-placeholder">Selecciona un alumno de la lista</div>;
-      case "alumnoDetalle":
-        return (
-          <EstadisticasAlumno
-            cursoIdProp={id}
-            alumnoId={statsView.alumnoId}
-            embedded
-          />
-        );
-      default:
-        return (
-          <div className="estadisticas-yellow-card">
-            {estadisticasContent}
+          </div>
+          <div style={{ flex: 1, margin: 0, width: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {cursoIndicadoresContent}
+            <div className="estadisticas-yellow-card" style={{ flex: 1, margin: 0, width: 'auto' }}>
+              {estadisticasContent}
+            </div>
           </div>
         );
     }

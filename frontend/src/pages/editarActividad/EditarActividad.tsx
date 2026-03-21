@@ -10,6 +10,7 @@ import { MarcarImagenForm, type MarcarImagenFormInitialValues } from '../crearAc
 import { TestForm, type TestFormInitialValues } from '../crearActividad/TestForm';
 import { CartaForm, type CartaFormInitialValues } from '../crearActividad/CartaForm';
 import { TableroForm, type TableroFormInitialValues } from '../crearActividad/TableroForm';
+import { CrucigramaForm, type CrucigramaFormInitialValues } from '../crearActividad/CrucigramaForm';
 
 type OrdenacionDTO = {
   id: number;
@@ -119,7 +120,23 @@ type GeneralCartaMaestroDTO = {
   }[];
 };
 
-type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'marcarImagen' | 'clasificacion' | 'carta' | null;
+type CrucigramaMaestroDTO = {
+  id: number;
+  titulo: string;
+  descripcion: string;
+  puntuacion: number;
+  respVisible: boolean;
+  temaId: number;
+  preguntas: {
+    id: number;
+    pregunta: string;
+    respuestas: { id: number; respuesta: string; correcta: boolean }[];
+  }[];
+  preguntasYRespuestas?: Record<string, string>;
+};
+
+
+type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'marcarImagen' | 'clasificacion' | 'carta' | 'crucigrama' | null;
 
 interface EditarActividadProps {
   readonly actividadIdProp?: string;
@@ -149,6 +166,7 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
   const [tablero, setTablero] = useState<TableroDTO | null>(null);
   const [generalCarta, setGeneralCarta] = useState<GeneralCartaMaestroDTO | null>(null);
   const [clasificacion, setClasificacion] = useState<ClasificacionMaestroDTO | null>(null);
+  const [crucigrama, setCrucigrama ] = useState<CrucigramaMaestroDTO | null>(null);
 
   useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
@@ -167,6 +185,7 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
       setTablero(null);
       setGeneralCarta(null);
       setClasificacion(null);
+      setCrucigrama(null);
 
       try {
         try {
@@ -219,6 +238,17 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
           if (cancelled) return;
           setTablero(data);
           setKind('tablero');
+          return;
+        } catch {
+          // try next kind
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/generales/crucigrama/${actividadId}`);
+          const data = (await r.json()) as CrucigramaMaestroDTO;
+          if (cancelled) return;
+          setCrucigrama(data);
+          setKind('crucigrama');
           return;
         } catch {
           // try next kind
@@ -356,6 +386,17 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
       }
     : undefined;
 
+  const crucigramaInitialValues: CrucigramaFormInitialValues | undefined = crucigrama
+  ? {
+      titulo: crucigrama.titulo,
+      descripcion: crucigrama.descripcion || '',
+      puntuacion: crucigrama.puntuacion,
+      respVisible: crucigrama.respVisible,
+      temaId: crucigrama.temaId,
+      preguntasYRespuestas: crucigrama.preguntasYRespuestas,
+    }
+  : undefined;
+
   const renderForm = () => {
     if (kind === 'test' && generalTest) {
       return (
@@ -444,6 +485,16 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
           temaIdProp={temaIdProp}
           cursoIdProp={cursoIdProp}
           onDone={onDone}
+        />
+      );
+    }
+
+    if (kind === 'crucigrama' && crucigrama) {
+      return (
+        <CrucigramaForm
+          mode="edit"
+          crucigramaId={actividadIdNum}
+          initialValues={crucigramaInitialValues}
         />
       );
     }

@@ -23,6 +23,8 @@ import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
+import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
+import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
 
 @RestController
 @RequestMapping("/api/estadisticas")
@@ -87,6 +89,11 @@ public class EstadisticasMaestroController {
         return estadisticasMaestroService.obtenerEstadisticasCursoActividad(cursoId, temaId);
     }
 
+    @GetMapping("/cursos/{cursoId}/temas/{temaId}/repeticiones-actividades")
+    public Map<Long, RepeticionesActividadDTO> obtenerRepeticionesCursoActividad(@PathVariable Long cursoId, @PathVariable Long temaId) {
+        return estadisticasMaestroService.obtenerRepeticionesCursoActividad(cursoId, temaId);
+    }
+
     @GetMapping("/cursos/{cursoId}/estadisticas-temas")
     public Map<Long, EstadisticasTemaDTO> obtenerEstadisticasCursoTema(@PathVariable Long cursoId) {
         return estadisticasMaestroService.obtenerEstadisticasCursoTema(cursoId);
@@ -96,6 +103,24 @@ public class EstadisticasMaestroController {
     public EstadisticasCursoDTO obtenerEstadisticasCurso(@PathVariable Long cursoId) {
         return estadisticasMaestroService.obtenerEstadisticasCurso(cursoId);
     }
+
+    @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/estadisticas-alumno")
+    public Map<Long, EstadisticasAlumnoDTO> obtenerEstadisticasAlumno(@PathVariable Long alumnoId, @PathVariable Long cursoId, @PathVariable Long temaId) {
+        return estadisticasMaestroService.obtenerEstadisticasAlumno(alumnoId, cursoId, temaId);
+    }
+
+    @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/completado")
+    public Boolean temaCompletado(@PathVariable Long alumnoId, @PathVariable Long cursoId, @PathVariable Long temaId) {
+        return estadisticasMaestroService.temaCompletado(alumnoId, cursoId, temaId);
+    }
+
+    @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/nota-media")
+    public Integer notaMediaAlumno(@PathVariable Long alumnoId, @PathVariable Long cursoId, @PathVariable Long temaId) {
+        return estadisticasMaestroService.notaMediaAlumno(alumnoId, cursoId, temaId);
+    }
+
+
+    
    
 
     @GetMapping("/")
@@ -265,39 +290,6 @@ public class EstadisticasMaestroController {
         }
     }
 
-    // ==================== ESTADÍSTICAS INDIVIDUALES DEL ALUMNO ====================
 
-    @GetMapping("/cursos/{cursoId}/alumnos")
-    public ResponseEntity<?> obtenerAlumnosDeCurso(@PathVariable Long cursoId) {
-        try {
-            List<AlumnoBasicoDTO> alumnos = estadisticasMaestroService.obtenerAlumnosDeCurso(cursoId);
-            return ResponseEntity.ok(alumnos);
-        } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", e.getMessage()));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Ocurrió un error inesperado."));
-        }
-    }
 
-    @GetMapping("/cursos/{cursoId}/alumnos/{alumnoId}")
-    public ResponseEntity<?> obtenerEstadisticasAlumnoEnCurso(@PathVariable Long cursoId, @PathVariable Long alumnoId) {
-        try {
-            EstadisticasAlumnoDTO stats = estadisticasMaestroService.obtenerEstadisticasAlumnoEnCurso(cursoId, alumnoId);
-            return ResponseEntity.ok(stats);
-        } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", e.getMessage()));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Ocurrió un error inesperado."));
-        }
-    }
 }

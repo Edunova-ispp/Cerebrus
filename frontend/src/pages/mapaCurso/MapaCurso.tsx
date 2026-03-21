@@ -49,6 +49,7 @@ function getActivityIconSrc(tipo: string, posicion: number): string {
   if (tipoUpper.includes('IMAGEN')) return imagenMapIcon;
   if (tipoUpper.includes('CARTA')) return cartaMapIcon;
   if (tipoUpper.includes('ABIERTA')) return abiertaMapIcon;
+  if (tipoUpper.includes('CRUCIGRAMA')) return clasificacionMapIcon;
   if (posicion === 0) return inicialMapIcon;
   return abiertaMapIcon; // Icono por defecto si no se reconoce el tipo
 }
@@ -189,6 +190,7 @@ useEffect(() => {
     else if (tipoReal === 'CARTA') navigate(`/generales/carta/${act.id}/alumno`);
     else if (tipoReal === 'MARCARIMAGEN') navigate(`/marcar-imagenes/${act.id}/alumno`);
     else if (tipoReal === 'CLASIFICACION') navigate(`/clasificaciones/${act.id}/alumno`);
+    else if (tipoReal === 'CRUCIGRAMA') navigate(`/crucigrama/${act.id}/alumno`);
   };
 
   const selectedTema = temas[selectedIndex] ?? null;
@@ -320,7 +322,7 @@ useEffect(() => {
                             const locked = !isUnlocked;
 
                             const tipo = (act.tipo ?? '').toUpperCase();
-                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'CLASIFICACION', 'MARCARIMAGEN', 'TABLERO', 'CARTA'].includes(tipo);
+                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'CLASIFICACION', 'MARCARIMAGEN', 'TABLERO', 'CARTA', 'CRUCIGRAMA'].includes(tipo);
 
                             const iconSrc = getActivityIconSrc(tipo, act.posicion);
                             const nodeBg = getNodeBgColor(linearIndex);

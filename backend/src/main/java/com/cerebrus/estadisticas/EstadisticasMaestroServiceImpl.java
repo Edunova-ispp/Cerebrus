@@ -30,6 +30,7 @@ import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 import com.cerebrus.estadisticas.dto.IntentoActividadDTO;
 import com.cerebrus.estadisticas.dto.TemaEstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.TiempoAlumnoDTO;
+import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
@@ -160,6 +161,55 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         return resultado;
     }
 
+    @Transactional(readOnly = true)
+    public Map<Long, RepeticionesActividadDTO> obtenerRepeticionesCursoActividad(Long cursoId, Long temaId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        if (!(usuario instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
+        }
+
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
+        }
+
+        Tema tema = curso.getTemas().stream()
+                .filter(t -> t.getId().equals(temaId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El tema con ID " + temaId + " no existe en el curso con ID " + cursoId + "."));
+
+        List<Actividad> actividades = tema.getActividades();
+        Map<Long, RepeticionesActividadDTO> resultado = new HashMap<>();
+
+        for (Actividad actividad : actividades) {
+            Map<Long, Integer> repeticionesPorAlumno = new HashMap<>();
+            for (ActividadAlumno aa : actividad.getActividadesAlumno()) {
+                if (aa.getEstadoActividad() == EstadoActividad.TERMINADA && aa.getAlumno() != null) {
+                    Long alumnoId = aa.getAlumno().getId();
+                    if (alumnoId != null) {
+                        repeticionesPorAlumno.merge(alumnoId, 1, Integer::sum);
+                    }
+                }
+            }
+
+            if (repeticionesPorAlumno.isEmpty()) {
+                resultado.put(actividad.getId(), new RepeticionesActividadDTO(0.0, 0, 0));
+                continue;
+            }
+
+            List<Integer> repeticiones = new ArrayList<>(repeticionesPorAlumno.values());
+            Integer min = repeticiones.stream().min(Integer::compareTo).orElse(0);
+            Integer max = repeticiones.stream().max(Integer::compareTo).orElse(0);
+            Double media = repeticiones.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+
+            resultado.put(actividad.getId(), new RepeticionesActividadDTO(media, min, max));
+        }
+
+        return resultado;
+    }
+
+    @Transactional(readOnly = true)
     public Map<Long, EstadisticasTemaDTO> obtenerEstadisticasCursoTema(Long cursoId) {
         Usuario usuario = usuarioService.findCurrentUser();
         Curso curso = cursoRepository.findById(cursoId)
@@ -540,6 +590,135 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         return new AlumnosMasRapidosLentosDTO(masRapidos, masLentos, promedio);
     }
 
+    @Transactional(readOnly = true)
+    public Boolean temaCompletado (Long alumnoId, Long cursoId, Long temaId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+
+        validarPropietarioCurso(maestro, curso);
+
+        List<Actividad> actividades = actividadRepository.findByTemaId(temaId);
+        return actividades.stream()
+            .allMatch(actividad -> actividad.getActividadesAlumno().stream()
+                        .filter(aa -> aa.getAlumno().getId().equals(alumnoId))
+                        .anyMatch(aa -> aa.getEstadoActividad() == EstadoActividad.TERMINADA));
+    }
+
+    @Transactional(readOnly = true)
+    public Integer notaMediaAlumno(Long alumnoId, Long cursoId, Long temaId){
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+
+        validarPropietarioCurso(maestro, curso);
+
+        List<Actividad> actividades = actividadRepository.findByTemaId(temaId);
+        int notaTotal = 0;
+        int contador = 0;
+
+        for (Actividad actividad : actividades) {
+            ActividadAlumno aa = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
+                    .filter(a -> a.getAlumno().getId().equals(alumnoId))
+                    .filter(a -> a.getEstadoActividad()==EstadoActividad.TERMINADA)
+                    .findFirst()
+                    .orElse(null);
+
+            if (aa != null && aa.getNota() != null) {
+                notaTotal += aa.getNota();
+                contador++;
+            }
+        }
+        return contador > 0 ? notaTotal / contador : 0;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, EstadisticasAlumnoDTO> obtenerEstadisticasAlumno(Long alumnoId, Long cursoId, Long temaId){
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+
+        validarPropietarioCurso(maestro, curso);
+
+        Map<Long, EstadisticasAlumnoDTO> resultado = new HashMap<>();
+        List<Actividad> todasLasActividades = actividadRepository.findByTemaId(temaId);
+
+        for (Actividad actividad : todasLasActividades) {
+            List<ActividadAlumno> instanciasAlumno = actividad.getActividadesAlumno().stream()
+                .filter(aa -> aa.getAlumno().getId().equals(alumnoId))
+                .toList();
+
+            ActividadAlumno ultimaInstanciaTerminada = instanciasAlumno.stream()
+                .filter(aa -> aa.getEstadoActividad() == EstadoActividad.TERMINADA)
+                .reduce((a, b) -> esMasReciente(a, b) ? a : b)
+                .orElse(null);
+
+            EstadisticasAlumnoDTO stats;
+            if (ultimaInstanciaTerminada != null) {
+                stats = new EstadisticasAlumnoDTO(
+                true,
+                ultimaInstanciaTerminada.getNota(),
+                obtenerNumRepetciones(ultimaInstanciaTerminada, alumnoId),
+                ultimaInstanciaTerminada.getNumFallos(),
+                ultimaInstanciaTerminada.getNumAbandonos(),
+                ultimaInstanciaTerminada.getFechaInicio(),
+                ultimaInstanciaTerminada.getFechaFin(),
+                ultimaInstanciaTerminada.getTiempoMinutos());
+            } else {
+                stats = new EstadisticasAlumnoDTO(
+                        false,
+                        0,
+                        0,
+                        0,
+                        0,
+                        null,
+                        null,
+                        0);
+            }
+            resultado.put(actividad.getId(), stats);
+        }
+        return resultado;
+    }
+
+    @Transactional(readOnly = true)
+    public RepeticionesActividadDTO obtenerRepeticionesActividad(Long actividadId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Actividad actividad = actividadRepository.findById(actividadId)
+                .orElseThrow(() -> new RuntimeException(
+                        "404 Not Found: La actividad con ID " + actividadId + " no existe."));
+
+        validarPropietarioTema(maestro, actividad.getTema());
+
+        Map<Long, Integer> repeticionesPorAlumno = new HashMap<>();
+        for (ActividadAlumno aa : actividad.getActividadesAlumno()) {
+            if (aa.getEstadoActividad() == EstadoActividad.TERMINADA && aa.getAlumno() != null) {
+                Long alumnoId = aa.getAlumno().getId();
+                if (alumnoId != null) {
+                    repeticionesPorAlumno.merge(alumnoId, 1, Integer::sum);
+                }
+            }
+        }
+
+        if (repeticionesPorAlumno.isEmpty()) {
+            return new RepeticionesActividadDTO(0.0, 0, 0);
+        }
+
+        List<Integer> repeticiones = new ArrayList<>(repeticionesPorAlumno.values());
+        Integer min = repeticiones.stream().min(Integer::compareTo).orElse(0);
+        Integer max = repeticiones.stream().max(Integer::compareTo).orElse(0);
+        Double media = repeticiones.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+
+        return new RepeticionesActividadDTO(media, min, max);
+    }
+
     // ==================== MÉTODOS AUXILIARES ====================
 
     private Maestro validarMaestro(Usuario usuario) {
@@ -793,131 +972,12 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                 .orElse(0);
     }
 
-    // ==================== ESTADÍSTICAS INDIVIDUALES DEL ALUMNO ====================
-
-    @Transactional(readOnly = true)
-    public List<AlumnoBasicoDTO> obtenerAlumnosDeCurso(Long cursoId) {
-        Usuario usuario = usuarioService.findCurrentUser();
-        Maestro maestro = validarMaestro(usuario);
-
-        Curso curso = cursoRepository.findById(cursoId)
-                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
-        validarPropietarioCurso(maestro, curso);
-
-        return curso.getInscripciones().stream()
-                .map(i -> new AlumnoBasicoDTO(i.getAlumno().getId(), buildNombreAlumno(i.getAlumno())))
-                .sorted(Comparator.comparing(AlumnoBasicoDTO::getNombre))
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public EstadisticasAlumnoDTO obtenerEstadisticasAlumnoEnCurso(Long cursoId, Long alumnoId) {
-        Usuario usuario = usuarioService.findCurrentUser();
-        Maestro maestro = validarMaestro(usuario);
-
-        Curso curso = cursoRepository.findById(cursoId)
-                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
-        validarPropietarioCurso(maestro, curso);
-
-        Alumno alumno = curso.getInscripciones().stream()
-                .map(i -> i.getAlumno())
-                .filter(a -> a.getId().equals(alumnoId))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("404 Not Found: El alumno no está inscrito en este curso."));
-
-        List<TemaEstadisticasAlumnoDTO> temasDTO = new ArrayList<>();
-        int totalCompletadas = 0;
-        int totalActividades = 0;
-        int tiempoTotal = 0;
-        List<Integer> notasCompletadas = new ArrayList<>();
-
-        for (Tema tema : curso.getTemas()) {
-            List<ActividadEstadisticasAlumnoDTO> actividadesDTO = new ArrayList<>();
-            boolean temaCompletado = !tema.getActividades().isEmpty();
-
-            for (Actividad actividad : tema.getActividades()) {
-                totalActividades++;
-                ActividadAlumno ultimoCompletado = getUltimoIntento(actividad, alumnoId);
-                boolean completada = ultimoCompletado != null;
-
-                if (!completada) {
-                    temaCompletado = false;
-                } else {
-                    totalCompletadas++;
-                    tiempoTotal += ultimoCompletado.getTiempoMinutos() != null ? ultimoCompletado.getTiempoMinutos() : 0;
-                    if (ultimoCompletado.getNota() != null) {
-                        notasCompletadas.add(ultimoCompletado.getNota());
-                    }
-                }
-
-                Integer notaAlumno = completada ? ultimoCompletado.getNota() : null;
-                Integer puntuacionAlumno = completada ? ultimoCompletado.getPuntuacion() : null;
-                Double notaMediaClase = notaMediaActividad(actividad);
-                Double desviacion = (notaAlumno != null) ? (double) notaAlumno - notaMediaClase : null;
-
-                actividadesDTO.add(new ActividadEstadisticasAlumnoDTO(
-                        actividad.getId(),
-                        actividad.getTitulo(),
-                        actividad.getClass().getSimpleName(),
-                        actividad.getPuntuacion(),
-                        completada,
-                        notaAlumno,
-                        puntuacionAlumno,
-                        notaMediaClase,
-                        desviacion,
-                        buildIntentosDTO(actividad, alumnoId)));
-            }
-
-            temasDTO.add(new TemaEstadisticasAlumnoDTO(tema.getId(), tema.getTitulo(), temaCompletado, actividadesDTO));
-        }
-
-        Double notaMedia = notasCompletadas.isEmpty() ? 0.0
-                : notasCompletadas.stream().mapToInt(Integer::intValue).average().orElse(0.0);
-        Integer notaMin = notasCompletadas.isEmpty() ? null
-                : notasCompletadas.stream().mapToInt(Integer::intValue).min().orElse(0);
-        Integer notaMax = notasCompletadas.isEmpty() ? null
-                : notasCompletadas.stream().mapToInt(Integer::intValue).max().orElse(0);
-
-        return new EstadisticasAlumnoDTO(
-                alumnoId, buildNombreAlumno(alumno), notaMedia, notaMin, notaMax,
-                totalCompletadas, totalActividades, tiempoTotal, temasDTO);
-    }
-
-    private String buildNombreAlumno(Alumno alumno) {
-        String nombre = alumno.getNombre();
-        if (alumno.getPrimerApellido() != null && !alumno.getPrimerApellido().isBlank()) {
-            nombre = nombre + " " + alumno.getPrimerApellido();
-        }
-        return nombre;
-    }
-
-    private ActividadAlumno getUltimoIntento(Actividad actividad, Long alumnoId) {
-        return actividad.getActividadesAlumno().stream()
-                .filter(aa -> aa.getAlumno().getId().equals(alumnoId)
-                        && aa.getEstadoActividad() == EstadoActividad.TERMINADA)
-                .max(Comparator.comparing(aa -> {
-                    LocalDateTime fecha = aa.getFechaFin() != null ? aa.getFechaFin() : aa.getFechaInicio();
-                    return fecha != null ? fecha : LocalDateTime.MIN;
-                }))
-                .orElse(null);
-    }
-
-    private List<IntentoActividadDTO> buildIntentosDTO(Actividad actividad, Long alumnoId) {
-        return actividad.getActividadesAlumno().stream()
-                .filter(aa -> aa.getAlumno().getId().equals(alumnoId))
-                .sorted(Comparator.comparing(aa -> {
-                    LocalDateTime fecha = aa.getFechaFin() != null ? aa.getFechaFin() : aa.getFechaInicio();
-                    return fecha != null ? fecha : LocalDateTime.MIN;
-                }))
-                .map(aa -> new IntentoActividadDTO(
-                        aa.getId(),
-                        aa.getFechaInicio(),
-                        aa.getFechaFin(),
-                        aa.getPuntuacion(),
-                        aa.getNota(),
-                        aa.getTiempoMinutos(),
-                        aa.getNumAbandonos()))
-                .collect(Collectors.toList());
+    private Integer obtenerNumRepetciones(ActividadAlumno actividadAlumno, Long alumnoId) {
+        Actividad actividad = actividadAlumno.getActividad();
+        List<ActividadAlumno> todasLasInstancias = actividad.getActividadesAlumno().stream()
+            .filter(aa -> aa.getAlumno().getId().equals(alumnoId))
+            .toList();
+        return todasLasInstancias.size();
     }
 
 }
