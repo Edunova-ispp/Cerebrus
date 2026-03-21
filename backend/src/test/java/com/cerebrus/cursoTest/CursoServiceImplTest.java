@@ -551,6 +551,8 @@ class CursoServiceImplTest {
     private static ActividadAlumnoProgreso crearProgreso(LocalDateTime inicio, LocalDateTime acabada) {
         return new ActividadAlumnoProgreso() {
             @Override
+            public Long getActividadId() { return null; }
+            @Override
             public LocalDateTime getInicio() { return inicio; }
             @Override
             public LocalDateTime getAcabada() { return acabada; }

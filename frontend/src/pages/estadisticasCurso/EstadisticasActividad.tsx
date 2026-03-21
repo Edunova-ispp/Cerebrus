@@ -19,7 +19,7 @@ function formatearTiempo(minutos: number): string {
   if (minutos === 0) return '0 mins';
   if (!minutos || minutos < 0) return '< 1 min';
   if (minutos === 1) return '1 min';
-  return `${Math.round(minutos)} mins`;
+  return `${minutos.toFixed(2)} mins`;
 }
 
 interface EstadisticasActividadProps {

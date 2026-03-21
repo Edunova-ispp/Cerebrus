@@ -81,6 +81,7 @@
   
   .clf-title {
     margin: 0;
+    font-family: 'Pixelify Sans', sans-serif;
     font-size: clamp(1.6rem, 2.8vw, 2.2rem);
     line-height: 1.15;
     text-shadow: 3px 3px 0px #000;
@@ -102,6 +103,7 @@
   
   .clf-section-title {
     margin: 0 0 8px;
+    font-family: 'Pixelify Sans', sans-serif;
     font-size: 1.8rem;
     color: #000;
     text-transform: uppercase;

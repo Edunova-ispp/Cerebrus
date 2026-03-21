@@ -51,8 +51,8 @@
 
 /* ── LA FLASHCARD (TAMAÑO JUEGO 190x240) ── */
 .ta-flashcard {
-  width: 190px; 
-  height: 240px;
+  width: 570px !important;
+  height: 410px !important;
   perspective: 600px;
   cursor: pointer;
 }
@@ -88,8 +88,19 @@
 /* ── CARA BOCA ABAJO (ROSA FUCSIA) ── */
 .ta-card-front {
   background: #D10057 !important; 
+  justify-content: center;
+  padding: 0;
+}
+
+.ta-card-front .ta-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: space-between;
-  padding: 15px 10px;
+  width: 100%;
+  height: 100%;
+  padding: 15px 10px 30px;
+  box-sizing: border-box;
 }
 
 .ta-title {
@@ -101,29 +112,24 @@
   text-shadow: 2px 2px 0px #000;
 }
 
-.ta-main-img {
-  width: 100px;
-  height: 100px;
-  background-color: white;
-  border: 3px solid #000;
-  border-radius: 8px;
+.ta-main-img,
+.ta-maguito-placeholder {
+  width: 350px;
+  height: 320px;
   object-fit: contain;
-  padding: 5px;
+  padding: 1px;
 }
 
 /* TEXTO AMARILLO CORREGIDO */
 .ta-hint {
   font-family: 'Pixelify Sans', sans-serif !important;
-  font-size: 0.85rem !important; 
+  font-size: 1.85rem !important; 
   color: #fce8a6 !important; 
   text-align: center;
   text-transform: uppercase;
   font-weight: bold;
   text-shadow: 2px 2px 0px #000000 !important; 
-  margin: 0;
-  padding-bottom: 5px;
   display: block;
-  width: 100%;
 }
 /* ── CARA BOCA ARRIBA (SOLUCIÓN AMARILLA) ── */
 .ta-card-back {

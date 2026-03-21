@@ -160,7 +160,7 @@ export default function MediasCurso({ cursoIdProp, embedded, temaIdSeleccionado 
       <main className="estadisticas-main">
         {!embedded && (
           <>
-            <button className="btn-volver-pixel" onClick={() => navigate(-1)}>← Volver</button>
+            <button className="btn-volver-pixel" onClick={() => navigate(-1)}>Volver</button>
             <h1 className="estadisticas-titulo-curso">Puntuaciones Medias</h1>
           </>
         )}

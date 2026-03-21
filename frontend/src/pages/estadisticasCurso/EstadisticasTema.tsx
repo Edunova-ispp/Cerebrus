@@ -18,7 +18,7 @@ interface RapidosLentosDTO {
 function formatearTiempo(minutos: number): string {
   if (!minutos || minutos <= 0) return '0 mins';
   if (minutos === 1) return '1 min';
-  return `${Math.round(minutos)} mins`;
+  return `${minutos.toFixed(2)} mins`;
 }
 
 interface EstadisticasTemaProps {
@@ -76,7 +76,7 @@ export default function EstadisticasTema({ temaIdProp, embedded }: EstadisticasT
       <main className="estadisticas-main">
         {!embedded && (
           <>
-            <button className="btn-volver-pixel" onClick={() => navigate(-1)}>← Volver al curso</button>
+            <button className="btn-volver-pixel" onClick={() => navigate(-1)}>Volver al curso</button>
             <h1 className="estadisticas-titulo-curso">Estadísticas del Tema</h1>
           </>
         )}

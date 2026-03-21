@@ -31,7 +31,7 @@ type StatsView =
 function formatearTiempo(minutosTotales: number): string {
   if (!minutosTotales || minutosTotales === 0) return '0 mins';
   if (minutosTotales === 1) return '1 min';
-  return `${minutosTotales} mins`;
+  return `${minutosTotales.toFixed(2)} mins`;
 }
 
 interface EstadisticasCursoProps {
@@ -276,7 +276,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
       return (
         <>
           <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "resumen" })}>
-            ← Volver
+            Volver
           </button>
           <h3 className="stats-sidebar-title">Temas</h3>
           {cargandoLista ? (
@@ -342,7 +342,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
       return (
         <>
           <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "resumen" })}>
-            ← Volver
+            Volver
           </button>
           <h3 className="stats-sidebar-title">Alumnos</h3>
           {cargandoLista ? (
