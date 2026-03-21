@@ -6,7 +6,7 @@ RUN npm ci
 COPY frontend/ ./
 # Importante: Que el frontend sepa que la API está en el mismo dominio bajo /api
 ENV VITE_API_URL=/api
-RUN npm run build
+RUN npx vite build
 
 # Fase 2: Construir el Backend
 FROM maven:3.9.6-eclipse-temurin-21 AS backend-builder
