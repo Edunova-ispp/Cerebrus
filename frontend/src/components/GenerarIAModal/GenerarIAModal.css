@@ -124,7 +124,7 @@
 }
 
 .iam-btn-cancel {
-  background: #e0e0e0;
+  background: var(--color-error-light, #ff6e7a);
   color: #000;
 }
 
