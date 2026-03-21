@@ -27,14 +27,14 @@ export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDo
   const [tipoSeleccionado, setTipoSeleccionado] = useState<string | null>(null);
 
   const formContent =
-    tipoSeleccionado === 'Poner en orden' ? <OrdenacionForm /> :
-    tipoSeleccionado === 'Tipo test' ? <TestForm mode="create" /> :
-    tipoSeleccionado === 'Teoría' ? <TeoriaForm mode="create" /> :
-    tipoSeleccionado === 'Marcar en imagen' ? <MarcarImagenForm mode="create" /> :
-    tipoSeleccionado === 'Tablero' ? <TableroForm mode="create" /> :
-    tipoSeleccionado === 'Carta' ? <CartaForm mode="create" /> :
-    tipoSeleccionado === 'Clasificación' ? <ClasificacionForm mode="create" /> :
-    tipoSeleccionado === 'Crucigrama' ? <CrucigramaForm mode="create" /> :
+    tipoSeleccionado === 'Poner en orden' ? <OrdenacionForm temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Tipo test' ? <TestForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Teoría' ? <TeoriaForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Marcar en imagen' ? <MarcarImagenForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Tablero' ? <TableroForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Carta' ? <CartaForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Clasificación' ? <ClasificacionForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Crucigrama' ? <CrucigramaForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
     <p className="ca-proximamente">Selecciona un tipo de actividad</p>;
 
   const handleVolver = () => {

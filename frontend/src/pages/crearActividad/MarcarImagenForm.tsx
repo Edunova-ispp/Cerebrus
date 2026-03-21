@@ -307,6 +307,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                 overflow: 'hidden',
                 background: '#fff',
                 position: 'relative',
+                maxWidth: 600,
               }}
             >
               <img
@@ -317,7 +318,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                 onClick={handleImageClick}
                 style={{
                   width: '100%',
-                  maxHeight: 520,
+                  maxHeight: 450,
                   objectFit: 'contain',
                   display: 'block',
                   cursor: 'crosshair',

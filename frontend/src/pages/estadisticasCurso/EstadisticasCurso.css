@@ -192,13 +192,12 @@
   display: flex;
   gap: 14px;
   width: 100%;
-  flex-wrap: wrap;
   margin-bottom: 20px;
 }
 
 .stat-card {
   flex: 1;
-  min-width: 140px;
+  min-width: 0;
   background: #fff;
   display: flex;
   flex-direction: column;
