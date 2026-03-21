@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,8 @@ import com.cerebrus.usuario.maestro.Maestro;
 
 @Service
 public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroService {
+
+    private static final Logger log = LoggerFactory.getLogger(EstadisticasMaestroServiceImpl.class);
 
     private final EstadisticasMaestroRepository estadisticasRepository;
     private final UsuarioService usuarioService;
@@ -101,6 +105,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
 
         HashMap<String, Integer> puntosPorAlumno = new HashMap<>();
         List<Inscripcion> inscripciones = curso.getInscripciones();
+        log.info("[PUNTOS] cursoId={}, inscripciones.size={}", cursoId, inscripciones != null ? inscripciones.size() : "null");
         
         for (Inscripcion inscripcion : inscripciones) {
             Alumno alumno = inscripcion.getAlumno();
@@ -119,13 +124,15 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
 
                     if (actividadAlumno != null &&
                         actividadAlumno.getEstadoActividad().equals(EstadoActividad.TERMINADA)) {
-                        totalPuntos += actividad.getPuntuacion();
+                        totalPuntos += actividadAlumno.getPuntuacion();
                     }
                 }
             }
 
+            log.info("[PUNTOS] alumno='{}' totalPuntos={}", alumno.getNombre(), totalPuntos);
             puntosPorAlumno.put(alumno.getNombre(), totalPuntos);
         }
+        log.info("[PUNTOS] resultado final: {} alumnos", puntosPorAlumno.size());
         return puntosPorAlumno;
         }
 
@@ -544,12 +551,16 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         validarPropietarioCurso(maestro, curso);
 
         Map<Long, TiempoAlumnoDTO> tiemposPorAlumno = new HashMap<>();
+        List<Inscripcion> inscripcionesCurso = curso.getInscripciones();
+        List<Tema> temasCurso = curso.getTemas();
+        log.info("[ALUMNOS-TIEMPOS] cursoId={}, inscripciones={}, temas={}", cursoId, inscripcionesCurso != null ? inscripcionesCurso.size() : "null", temasCurso != null ? temasCurso.size() : "null");
 
-        for (Inscripcion inscripcion : curso.getInscripciones()) {
+        for (Inscripcion inscripcion : inscripcionesCurso) {
             Alumno alumno = inscripcion.getAlumno();
+            log.info("[ALUMNOS-TIEMPOS] procesando alumno='{}' id={}", alumno.getNombre(), alumno.getId());
             int tiempoTotal = 0;
 
-            for (Tema tema : curso.getTemas()) {
+            for (Tema tema : temasCurso) {
                 List<Actividad> actividades = actividadRepository.findByTemaId(tema.getId());
                 
                 for (Actividad actividad : actividades) {
@@ -565,10 +576,10 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                 }
             }
 
-            if (tiempoTotal > 0) {
-                tiemposPorAlumno.put(alumno.getId(), 
-                        new TiempoAlumnoDTO(alumno.getNombre(), alumno.getId(), tiempoTotal));
-            }
+            log.info("[ALUMNOS-TIEMPOS] alumno='{}' tiempoTotal={}", alumno.getNombre(), tiempoTotal);
+            // Incluir TODOS los alumnos inscritos, incluso con tiempo 0
+            tiemposPorAlumno.put(alumno.getId(), 
+                    new TiempoAlumnoDTO(alumno.getNombre(), alumno.getId(), tiempoTotal));
         }
 
         List<TiempoAlumnoDTO> tiempos = new ArrayList<>(tiemposPorAlumno.values());

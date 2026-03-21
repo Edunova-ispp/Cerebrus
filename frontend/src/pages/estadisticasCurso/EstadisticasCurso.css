@@ -142,6 +142,27 @@
   font-size: 0.9rem;
 }
 
+.stats-sidebar-search {
+  width: 100%;
+  background: #fff;
+  color: #000;
+  border: 2.5px solid #000;
+  border-radius: 10px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.93rem;
+  font-weight: 700;
+  padding: 11px 14px;
+  box-sizing: border-box;
+  box-shadow: 3px 3px 0px #000;
+  outline: none;
+  margin-bottom: 4px;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.1s;
+}
+.stats-sidebar-search:focus {
+  background: var(--color-accent-light);
+  box-shadow: 3px 3px 0px #000;
+}
+
 /* ===================== BUTTONS ===================== */
 
 .btn-volver-pixel,

@@ -287,164 +287,170 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
       <div
         className="ca-contenedor-blanco"
-        style={{ gap: 16, marginTop: 16, flexDirection: 'column', alignItems: 'stretch' }}
+        style={{ gap: 16, marginTop: 16, marginBottom: 24, flexDirection: 'column', alignItems: 'stretch' }}
       >
         <p className="ca-ordenacion-help" style={{ marginTop: 0, marginBottom: 0 }}>
-          Actividad de marcar en imagen (base). Define la imagen objetivo y añade puntos por coordenadas (px) con una
-          respuesta asociada.
+          Haz clic en la imagen para añadir puntos.
         </p>
 
         {imagenAMarcar.trim() && (
-          <div>
-            <p className="ca-text" style={{ marginTop: 0, marginBottom: 8 }}>
-              Haz clic en la imagen para añadir puntos.
-            </p>
-
-            <div
-              style={{
-                border: '2px solid #000',
-                borderRadius: 8,
-                overflow: 'hidden',
-                background: '#fff',
-                position: 'relative',
-                maxWidth: 600,
-              }}
-            >
-              <img
-                ref={imgRef}
-                src={imagenAMarcar.trim()}
-                alt="Vista previa"
-                onLoad={handleImageLoad}
-                onClick={handleImageClick}
+          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+            <div style={{ flex: '1 1 300px', maxWidth: 500, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div
                 style={{
-                  width: '100%',
-                  maxHeight: 450,
-                  objectFit: 'contain',
-                  display: 'block',
-                  cursor: 'crosshair',
-                  userSelect: 'none',
+                  border: '2px solid #000',
+                  borderRadius: 8,
+                  overflow: 'hidden',
+                  background: '#fff',
+                  position: 'relative',
                 }}
-              />
+              >
+                <img
+                  ref={imgRef}
+                  src={imagenAMarcar.trim()}
+                  alt="Vista previa"
+                  onLoad={handleImageLoad}
+                  onClick={handleImageClick}
+                  style={{
+                    width: '100%',
+                    maxHeight: 350,
+                    objectFit: 'contain',
+                    display: 'block',
+                    cursor: 'crosshair',
+                    userSelect: 'none',
+                  }}
+                />
 
-              {imageNaturalSize &&
-                puntos.map((p, idx) => {
-                  const left = `${(p.pixelX / imageNaturalSize.w) * 100}%`;
-                  const top = `${(p.pixelY / imageNaturalSize.h) * 100}%`;
-                  const isSelected = selectedPointIndex === idx;
+                {imageNaturalSize &&
+                  puntos.map((p, idx) => {
+                    const left = `${(p.pixelX / imageNaturalSize.w) * 100}%`;
+                    const top = `${(p.pixelY / imageNaturalSize.h) * 100}%`;
+                    const isSelected = selectedPointIndex === idx;
 
+                    return (
+                      <button
+                        key={`${p.pixelX}-${p.pixelY}-${idx}`}
+                        type="button"
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          setSelectedPointIndex(idx);
+                        }}
+                        aria-label={`Punto ${idx + 1}`}
+                        style={{
+                          position: 'absolute',
+                          left,
+                          top,
+                          transform: 'translate(-50%, -50%)',
+                          width: 14,
+                          height: 14,
+                          borderRadius: 9999,
+                          border: '2px solid #000',
+                          background: isSelected ? '#FFF394' : '#D10057',
+                          boxShadow: '2px 2px 0px #000',
+                          padding: 0,
+                          cursor: 'pointer',
+                        }}
+                      />
+                    );
+                  })}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <button className="ca-btn-guardar" type="submit" disabled={loading}>
+                  {loading ? 'Guardando...' : 'Guardar'}
+                </button>
+              </div>
+            </div>
+
+            {puntos.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: '1 1 200px', maxWidth: 300, maxHeight: 400, overflowY: 'auto' }}>
+                {puntos.map((p, i) => {
+                  const selected = selectedPointIndex === i;
                   return (
-                    <button
-                      key={`${p.pixelX}-${p.pixelY}-${idx}`}
-                      type="button"
-                      onClick={(ev) => {
-                        ev.stopPropagation();
-                        setSelectedPointIndex(idx);
-                      }}
-                      aria-label={`Punto ${idx + 1}`}
+                    <div
+                      key={`${p.pixelX}-${p.pixelY}-${i}`}
                       style={{
-                        position: 'absolute',
-                        left,
-                        top,
-                        transform: 'translate(-50%, -50%)',
-                        width: 14,
-                        height: 14,
-                        borderRadius: 9999,
-                        border: '2px solid #000',
-                        background: isSelected ? '#FFF394' : '#D10057',
-                        boxShadow: '2px 2px 0px #000',
-                        padding: 0,
-                        cursor: 'pointer',
+                        border: selected ? '3px solid black' : '1px solid black',
+                        borderRadius: 8,
+                        padding: 6,
+                        background: selected ? '#fff' : 'transparent',
+                        position: 'relative',
                       }}
-                    />
+                      onClick={() => setSelectedPointIndex(i)}
+                    >
+                      <button
+                        type="button"
+                        aria-label={`Eliminar punto ${i + 1}`}
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          setPuntos((prev) => {
+                            const next = prev.filter((_, idx) => idx !== i);
+                            const nextSelected = next.length === 0 ? null : Math.min(i, next.length - 1);
+                            setSelectedPointIndex(nextSelected);
+                            return next;
+                          });
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: 4,
+                          right: 4,
+                          width: 22,
+                          height: 22,
+                          display: 'grid',
+                          placeItems: 'center',
+                          border: '2px solid #000',
+                          borderRadius: 6,
+                          background: '#fff',
+                          padding: 0,
+                          cursor: 'pointer',
+                          lineHeight: 1,
+                          boxShadow: '2px 2px 0px #000',
+                        }}
+                      >
+                        🗑
+                      </button>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <label className="ca-text" style={{ marginBottom: 0, fontSize: '0.85rem' }}>
+                          Punto {i + 1}
+                        </label>
+
+                        <input
+                          type="text"
+                          placeholder="Respuesta"
+                          value={p.respuesta}
+                          onChange={(e) => {
+                            const next = [...puntos];
+                            next[i] = { ...next[i], respuesta: e.target.value };
+                            setPuntos(next);
+                          }}
+                        />
+
+                        <p className="ca-text" style={{ margin: 0, fontSize: '0.75rem', color: '#666' }}>
+                          X: {p.pixelX}px, Y: {p.pixelY}px
+                        </p>
+                      </div>
+                    </div>
                   );
                 })}
-            </div>
+              </div>
+            )}
           </div>
         )}
 
-        {puntos.length === 0 ? (
+        {puntos.length === 0 && imagenAMarcar.trim() && (
           <p className="ca-text" style={{ marginTop: 0, marginBottom: 0 }}>
             Sin puntos todavía. Añádelos haciendo clic en la imagen.
           </p>
-        ) : (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, width: '100%' }}>
-            {puntos.map((p, i) => {
-              const selected = selectedPointIndex === i;
-              return (
-                <div
-                  key={`${p.pixelX}-${p.pixelY}-${i}`}
-                  style={{
-                    border: selected ? '3px solid black' : '1px solid black',
-                    padding: 6,
-                    minWidth: 200,
-                    background: selected ? '#fff' : 'transparent',
-                    position: 'relative',
-                  }}
-                  onClick={() => setSelectedPointIndex(i)}
-                >
-                  <button
-                    type="button"
-                    aria-label={`Eliminar punto ${i + 1}`}
-                    onClick={(ev) => {
-                      ev.stopPropagation();
-                      setPuntos((prev) => {
-                        const next = prev.filter((_, idx) => idx !== i);
-                        const nextSelected = next.length === 0 ? null : Math.min(i, next.length - 1);
-                        setSelectedPointIndex(nextSelected);
-                        return next;
-                      });
-                    }}
-                    style={{
-                      position: 'absolute',
-                      top: 4,
-                      right: 4,
-                      width: 22,
-                      height: 22,
-                      display: 'grid',
-                      placeItems: 'center',
-                      border: '2px solid #000',
-                      borderRadius: 6,
-                      background: '#fff',
-                      padding: 0,
-                      cursor: 'pointer',
-                      lineHeight: 1,
-                      boxShadow: '2px 2px 0px #000',
-                    }}
-                  >
-                    🗑
-                  </button>
+        )}
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <label className="ca-text" style={{ marginBottom: 0 }}>
-                      Punto {i + 1}
-                    </label>
-
-                    <input
-                      type="text"
-                      placeholder="Respuesta"
-                      value={p.respuesta}
-                      onChange={(e) => {
-                        const next = [...puntos];
-                        next[i] = { ...next[i], respuesta: e.target.value };
-                        setPuntos(next);
-                      }}
-                    />
-
-                    <p className="ca-text" style={{ margin: 0 }}>
-                      X: {p.pixelX}px, Y: {p.pixelY}px
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+        {!imagenAMarcar.trim() && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 8 }}>
+            <button className="ca-btn-guardar" type="submit" disabled={loading}>
+              {loading ? 'Guardando...' : 'Guardar'}
+            </button>
           </div>
         )}
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
-        <button className="ca-btn-guardar" type="submit" disabled={loading}>
-          {loading ? 'Guardando...' : 'Guardar'}
-        </button>
       </div>
     </form>
   );

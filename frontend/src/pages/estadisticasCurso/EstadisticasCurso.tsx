@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import MediasCurso from './MediasCurso';
@@ -80,6 +80,8 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
   const [actividadesList, setActividadesList] = useState<OpcionItem[]>([]);
   const [alumnosList, setAlumnosList] = useState<{ id: number; nombre: string }[]>([]);
   const [cargandoLista, setCargandoLista] = useState(false);
+  const [alumnoSearch, setAlumnoSearch] = useState('');
+  const alumnoSearchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     cargarEstadisticas();
@@ -135,6 +137,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
       }
 
       setEstadisticas(Array.from(alumnosMap.values()));
+      console.log('[cargarEstadisticas] alumnosMap:', Array.from(alumnosMap.entries()));
       setEstadisticasCurso(cursoData);
 
     } catch (err) {
@@ -163,7 +166,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
     return { media: totalMinutos / alumnosConTiempo.length, masRapido, masLento };
   }, [estadisticas]);
 
-  const cargarListaTemas = useCallback(async () => {
+  const cargarListaTemas = useCallback(async (): Promise<OpcionItem[]> => {
     setCargandoLista(true);
     try {
       const token = localStorage.getItem('token');
@@ -178,14 +181,16 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
         return { id: temaObj.id, nombre: temaObj.titulo || temaObj.nombre || `Tema ${temaObj.id}` };
       });
       setTemasList(nuevos);
+      return nuevos;
     } catch (err) {
       console.error(err);
+      return [];
     } finally {
       setCargandoLista(false);
     }
   }, [id]);
 
-  const cargarListaActividades = useCallback(async () => {
+  const cargarListaActividades = useCallback(async (): Promise<OpcionItem[]> => {
     setCargandoLista(true);
     try {
       const token = localStorage.getItem('token');
@@ -209,31 +214,33 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
         });
       });
       setActividadesList(acts);
+      return acts;
     } catch (err) {
       console.error(err);
+      return [];
     } finally {
       setCargandoLista(false);
     }
   }, [id]);
 
   const handleMedias = async () => {
-    await cargarListaTemas();
-    setStatsView({ mode: "medias" });
+    const temas = await cargarListaTemas();
+    setStatsView({ mode: "medias", temaId: temas[0]?.id });
   };
 
   const handleDesgloseActividades = async () => {
-    await cargarListaTemas();
-    setStatsView({ mode: "desgloseActividades" });
+    const temas = await cargarListaTemas();
+    setStatsView({ mode: "desgloseActividades", temaId: temas[0]?.id });
   };
 
   const handleGraficasActividades = async () => {
-    await cargarListaTemas();
-    setStatsView({ mode: "graficasActividades" });
+    const temas = await cargarListaTemas();
+    setStatsView({ mode: "graficasActividades", temaId: temas[0]?.id });
   };
 
   const handleTiemposActividad = async () => {
-    await cargarListaActividades();
-    setStatsView({ mode: "tiemposActividad" });
+    const acts = await cargarListaActividades();
+    setStatsView({ mode: "tiemposActividad", actividadId: acts[0]?.id });
   };
 
   const handleAlumnos = useCallback(async () => {
@@ -246,6 +253,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
       });
       if (!res.ok) throw new Error();
       const data = await res.json();
+      console.log('[handleAlumnos] respuesta alumnos-rapidos-lentos:', JSON.stringify(data));
       const seen = new Set<number>();
       const alumnos: { id: number; nombre: string }[] = [];
       [...(data.masRapidos || []), ...(data.masLentos || [])].forEach((a: { alumnoId: number; nombreAlumno: string }) => {
@@ -255,12 +263,19 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
         }
       });
       setAlumnosList(alumnos);
+      console.log('[handleAlumnos] alumnos construidos:', alumnos.length, alumnos);
+      if (alumnos.length > 0) {
+        setStatsView({ mode: "alumnoDetalle", alumnoId: alumnos[0].id, alumnoNombre: alumnos[0].nombre });
+      } else {
+        setStatsView({ mode: "alumnos" });
+      }
+      setAlumnoSearch('');
+      setTimeout(() => alumnoSearchRef.current?.focus(), 100);
     } catch (err) {
       console.error(err);
     } finally {
       setCargandoLista(false);
     }
-    setStatsView({ mode: "alumnos" });
   }, [id]);
 
   const cursoIndicadoresContent = !loading && !error ? (
@@ -383,17 +398,28 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
     }
 
     if (statsView.mode === "alumnos" || statsView.mode === "alumnoDetalle") {
+      const filteredAlumnos = alumnoSearch.trim()
+        ? alumnosList.filter(a => a.nombre.toLowerCase().includes(alumnoSearch.trim().toLowerCase()))
+        : alumnosList;
       return (
         <>
           <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "resumen" })}>
             Volver
           </button>
           <h3 className="stats-sidebar-title">Alumnos</h3>
+          <input
+            ref={alumnoSearchRef}
+            type="text"
+            className="stats-sidebar-search"
+            placeholder="Buscar alumno..."
+            value={alumnoSearch}
+            onChange={e => setAlumnoSearch(e.target.value)}
+          />
           {cargandoLista ? (
             <p className="stats-sidebar-loading">Cargando...</p>
-          ) : alumnosList.length === 0 ? (
-            <p className="stats-sidebar-loading">Sin alumnos inscritos</p>
-          ) : alumnosList.map(a => (
+          ) : filteredAlumnos.length === 0 ? (
+            <p className="stats-sidebar-loading">{alumnoSearch.trim() ? 'Sin resultados' : 'Sin alumnos inscritos'}</p>
+          ) : filteredAlumnos.map(a => (
             <button
               key={a.id}
               className={`stats-sidebar-btn${statsView.mode === 'alumnoDetalle' && statsView.alumnoId === a.id ? ' stats-sidebar-btn--active' : ''}`}
