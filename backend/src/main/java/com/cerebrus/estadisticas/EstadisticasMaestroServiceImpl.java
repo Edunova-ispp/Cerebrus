@@ -962,7 +962,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         }
 
         return actividadesAlumno.stream()
-                .mapToLong(actAlumno -> Duration.between(actAlumno.getFechaFin(), actAlumno.getFechaInicio()).toMinutes())
+                .mapToLong(actAlumno -> Duration.between(actAlumno.getFechaInicio(), actAlumno.getFechaFin()).toMinutes())
                 .average()
                 .orElse(0.0);
     }

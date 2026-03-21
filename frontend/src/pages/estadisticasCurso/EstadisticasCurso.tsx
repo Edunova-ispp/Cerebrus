@@ -51,8 +51,10 @@ interface EstadisticasCursoProps {
 
 function formatearTiempo(minutosTotales: number): string {
   if (!minutosTotales || minutosTotales === 0) return '0 mins';
-  if (minutosTotales === 1) return '1 min';
-  return `${minutosTotales} mins`;
+  const redondeado = Math.round(minutosTotales);
+  if (redondeado === 0) return '< 1 min';
+  if (redondeado === 1) return '1 min';
+  return `${redondeado} mins`;
 }
 
 function formatearNumero2Dec(valor: number | null | undefined): string {
