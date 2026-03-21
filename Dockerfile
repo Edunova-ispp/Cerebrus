@@ -4,6 +4,15 @@ WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm ci
 COPY frontend/ ./
+
+# Permitir inyectar variables de entorno en el build
+ARG WATCHBUG_ADMIN
+ARG LOGROCKET_ID
+ARG LOGROCKET_MANUAL_RECORDING
+ENV WATCHBUG_ADMIN=$WATCHBUG_ADMIN
+ENV LOGROCKET_ID=$LOGROCKET_ID
+ENV LOGROCKET_MANUAL_RECORDING=$LOGROCKET_MANUAL_RECORDING
+
 # Importante: Que el frontend sepa que la API está en el mismo dominio bajo /api
 ENV VITE_API_URL=/api
 RUN npx vite build

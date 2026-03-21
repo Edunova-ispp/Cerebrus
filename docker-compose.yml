@@ -34,11 +34,17 @@ services:
       - "8080:8080"
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      args:
+        LOGROCKET_ID: "${LOGROCKET_ID}"
+        LOGROCKET_MANUAL_RECORDING: "${LOGROCKET_MANUAL_RECORDING:-true}"
+        WATCHBUG_ADMIN: "${WATCHBUG_ADMIN:-false}"
     container_name: cerebrus-frontend
     environment:
-      VITE_LOGROCKET_ID: "${LOGROCKET_ID}"
-      VITE_LOGROCKET_MANUAL_RECORDING: "${LOGROCKET_MANUAL_RECORDING:-true}"
+        LOGROCKET_ID: "${LOGROCKET_ID}"
+        LOGROCKET_MANUAL_RECORDING: "${LOGROCKET_MANUAL_RECORDING:-true}"
+        WATCHBUG_ADMIN: "${WATCHBUG_ADMIN:-false}"
     depends_on:
       - backend
     ports:
@@ -52,7 +58,7 @@ services:
       - "5000:5000"
     environment:
       - WATCHBUG_ENABLED=True
-      - WATCHBUG_ADMIN=true
+      - WATCHBUG_ADMIN=${WATCHBUG_ADMIN:-false}
       - SENTRY_DSN=${SENTRY_DSN}
       - LOGROCKET_ID=${LOGROCKET_ID}
       - SUPABASE_URL=${SUPABASE_URL}

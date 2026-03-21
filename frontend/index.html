@@ -11,17 +11,20 @@
     
     <script type="module" src="/src/main.tsx"></script>
     <script>
+      // Función para limpiar variables no reemplazadas por Vite
+      const env = (val, fallback) => (val && !val.startsWith('%')) ? val : fallback;
+      
       globalThis.__WATCHBUG_CONFIG__ = {
           enabled: true,
-          admin: true,
+          admin: env("%WATCHBUG_ADMIN%", "false") === "true",
           services: {
               sentry: true, 
               logrocket: true,
               supabase: true
           },
-          apiEndpoint: "http://localhost:5000/watchbug/report",
-          logrocketId: "%VITE_LOGROCKET_ID%",
-          logrocketManual: "%VITE_LOGROCKET_MANUAL_RECORDING%" === "true"
+          apiEndpoint: env("%WATCHBUG_API_URL%", "http://localhost:5000/watchbug/report"),
+          logrocketId: env("%LOGROCKET_ID%", null),
+          logrocketManual: env("%LOGROCKET_MANUAL_RECORDING%", "true") === "true"
       };
     </script>
     <script src="/watchbug-widget.js"></script>

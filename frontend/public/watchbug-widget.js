@@ -547,7 +547,8 @@
         
         // Click handler - abrir dashboard
         button.addEventListener('click', () => {
-            window.location.href = 'http://localhost:5000/watchbug/dashboard';
+            const apiBase = WATCHBUG_CONFIG.apiEndpoint.replace('/watchbug/report', '');
+            window.location.href = `${apiBase}/watchbug/dashboard`;
         });
         
         return button;

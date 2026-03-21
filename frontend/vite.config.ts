@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
+  envDir: "../",
+  envPrefix: ["VITE_", "WATCHBUG_ADMIN", "LOGROCKET_"],
   plugins: [react(), svgr()],
   test: {
     environment: "jsdom",
