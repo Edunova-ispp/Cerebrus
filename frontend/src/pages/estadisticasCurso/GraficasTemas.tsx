@@ -173,6 +173,7 @@ export default function GraficasTemas({ cursoIdProp, embedded }: { cursoIdProp?:
   const [mapaEstadisticas, setMapaEstadisticas] = useState<Map<number, EstadisticasTemaDTO>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [chartMode, setChartMode] = useState<'nota' | 'tiempo'>('nota');
 
   useEffect(() => {
     cargarTodo();
@@ -257,7 +258,9 @@ export default function GraficasTemas({ cursoIdProp, embedded }: { cursoIdProp?:
             ← Volver
           </button>
         )}
-        <h1 className="estadisticas-titulo-curso">Gráficas de Temas</h1>
+        <div className="chart-header">
+          <h2 className="chart-main-title">Gráficas de Temas</h2>
+        </div>
 
         {loading && <p className="msg-placeholder">Cargando datos...</p>}
         {error && (
@@ -272,19 +275,39 @@ export default function GraficasTemas({ cursoIdProp, embedded }: { cursoIdProp?:
               <p className="msg-vacio">Este curso aun no tiene temas</p>
             ) : (
               <div className="charts-grid">
-                <BarChart
-                  titulo="Nota media por tema"
-                  data={datosNotaMedia}
-                  barColor="#D10057"
-                  legendBarLabel="Barras: nota media"
-                />
-                <BarChart
-                  titulo="Tiempo medio por tema"
-                  data={datosTiempoMedio}
-                  unidad="mins"
-                  barColor="#7C4DFF"
-                  legendBarLabel="Barras: tiempo medio"
-                />
+                <div className="chart-header">
+                  <span></span>
+                  <div className="chart-toggle">
+                    <button
+                      className={`chart-toggle-btn${chartMode === 'nota' ? ' chart-toggle-btn--active' : ''}`}
+                      onClick={() => setChartMode('nota')}
+                    >
+                      Nota
+                    </button>
+                    <button
+                      className={`chart-toggle-btn${chartMode === 'tiempo' ? ' chart-toggle-btn--active' : ''}`}
+                      onClick={() => setChartMode('tiempo')}
+                    >
+                      Tiempo
+                    </button>
+                  </div>
+                </div>
+                {chartMode === 'nota' ? (
+                  <BarChart
+                    titulo="Nota media por tema"
+                    data={datosNotaMedia}
+                    barColor="#D10057"
+                    legendBarLabel="Barras: nota media"
+                  />
+                ) : (
+                  <BarChart
+                    titulo="Tiempo medio por tema"
+                    data={datosTiempoMedio}
+                    unidad="mins"
+                    barColor="#7C4DFF"
+                    legendBarLabel="Barras: tiempo medio"
+                  />
+                )}
               </div>
             )}
           </section>

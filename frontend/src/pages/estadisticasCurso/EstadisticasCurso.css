@@ -200,18 +200,11 @@
   flex: 1;
   min-width: 140px;
   background: #fff;
-  border: 2.5px solid #000;
-  border-radius: 14px;
-  padding: 16px 18px;
-  box-shadow: 4px 4px 0px #000;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.stat-card--tiempo { border-left: 5px solid #000; }
-.stat-card--rapido { border-left: 5px solid #000; }
-.stat-card--lento  { border-left: 5px solid #000; }
 
 .stat-card__label {
   font-family: 'Oxygen', sans-serif;
@@ -219,7 +212,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: #777;
+  color: #535353;
 }
 
 .stat-card__value {
@@ -499,6 +492,15 @@
   flex-direction: column;
   gap: 16px;
   width: 100%;
+  background: white;
+  border: 2.5px solid #000;
+  border-radius: 12px;
+  box-shadow: 4px 4px 0px #000;
+  padding: 24px 28px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  font-family: 'Oxygen', sans-serif;
 }
 
 .graficas-embedded .layout-estadisticas {
@@ -538,6 +540,65 @@
 .graficas-embedded .estadisticas-titulo-curso {
   font-size: 1.3rem;
   margin: 0;
+}
+
+/* ===================== CHART HEADER & TOGGLE ===================== */
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.chart-main-title {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+  color: #000;
+}
+
+.chart-subtitle {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.chart-toggle {
+  display: flex;
+  background: #fcfcfc;
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+  width: fit-content;
+}
+
+.chart-toggle-btn {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: transparent;
+  color: #555;
+  transition: all 0.2s;
+}
+
+.chart-toggle-btn:hover {
+  color: #000;
+}
+
+.chart-toggle-btn--active {
+  background: var(--color-accent-light);
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 
 /* ===================== CHARTS (SVG) ===================== */

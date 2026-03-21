@@ -180,6 +180,7 @@ export default function GraficasActividades({ cursoIdProp, embedded, temaIdSelec
   const [mapaEstadisticas, setMapaEstadisticas] = useState<Map<number, EstadisticasActividadDTO>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [chartMode, setChartMode] = useState<'nota' | 'tiempo'>('nota');
 
   useEffect(() => {
     cargarEstructuraYSeleccion();
@@ -296,7 +297,9 @@ export default function GraficasActividades({ cursoIdProp, embedded, temaIdSelec
             ← Volver
           </button>
         )}
-        <h1 className="estadisticas-titulo-curso">Gráficas de Actividades</h1>
+        <div className="chart-header">
+          <h2 className="chart-main-title">Gráficas de Actividades</h2>
+        </div>
 
         {loading && <p className="msg-placeholder">Cargando datos...</p>}
         {error && (
@@ -336,24 +339,45 @@ export default function GraficasActividades({ cursoIdProp, embedded, temaIdSelec
             <section className="panel-actividades">
               {temaSeleccionado ? (
                 <div className="charts-grid">
-                  <h3>{temaSeleccionado.titulo}</h3>
+                  <div className="chart-header">
+                    <h3 className="chart-subtitle">{temaSeleccionado.titulo}</h3>
+                    {temaSeleccionado.actividades.length > 0 && (
+                      <div className="chart-toggle">
+                        <button
+                          className={`chart-toggle-btn${chartMode === 'nota' ? ' chart-toggle-btn--active' : ''}`}
+                          onClick={() => setChartMode('nota')}
+                        >
+                          Nota
+                        </button>
+                        <button
+                          className={`chart-toggle-btn${chartMode === 'tiempo' ? ' chart-toggle-btn--active' : ''}`}
+                          onClick={() => setChartMode('tiempo')}
+                        >
+                          Tiempo
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   {temaSeleccionado.actividades.length === 0 ? (
                     <p className="msg-vacio">Este tema aun no tiene actividades</p>
                   ) : (
                     <>
-                      <BarChart
-                        titulo="Nota media por actividad"
-                        data={datosNotaMedia}
-                        barColor="#D10057"
-                        legendBarLabel="Barras: nota media"
-                      />
-                      <BarChart
-                        titulo="Tiempo medio por actividad"
-                        data={datosTiempoMedio}
-                        unidad="mins"
-                        barColor="#7C4DFF"
-                        legendBarLabel="Barras: tiempo medio"
-                      />
+                      {chartMode === 'nota' ? (
+                        <BarChart
+                          titulo="Nota media por actividad"
+                          data={datosNotaMedia}
+                          barColor="#D10057"
+                          legendBarLabel="Barras: nota media"
+                        />
+                      ) : (
+                        <BarChart
+                          titulo="Tiempo medio por actividad"
+                          data={datosTiempoMedio}
+                          unidad="mins"
+                          barColor="#7C4DFF"
+                          legendBarLabel="Barras: tiempo medio"
+                        />
+                      )}
                     </>
                   )}
                 </div>

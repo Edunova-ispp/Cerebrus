@@ -30,6 +30,7 @@ type StatsView =
   | { mode: "tiemposActividad"; actividadId?: number }
   | { mode: "alumnos" }
   | { mode: "alumnoDetalle"; alumnoId: number; alumnoNombre: string }
+  | { mode: "desgloseYGraficas" }
   | { mode: "desgloseActividades"; temaId?: number }
   | { mode: "desgloseTemas" }
   | { mode: "graficasActividades"; temaId?: number }
@@ -408,7 +409,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
     if (statsView.mode === "desgloseActividades") {
       return (
         <>
-          <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "desgloseTemas" })}>
+          <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "desgloseYGraficas" })}>
             Volver
           </button>
           <h3 className="stats-sidebar-title">Temas</h3>
@@ -430,7 +431,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
     if (statsView.mode === "graficasActividades") {
       return (
         <>
-          <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "desgloseTemas" })}>
+          <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "desgloseYGraficas" })}>
             Volver
           </button>
           <h3 className="stats-sidebar-title">Temas</h3>
@@ -449,7 +450,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
       );
     }
 
-    if (statsView.mode === "desgloseTemas"
+    if (statsView.mode === "desgloseYGraficas" || statsView.mode === "desgloseTemas"
         || statsView.mode === "graficasTemas") {
       return (
         <>
@@ -464,7 +465,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
             Actividades
           </button>
           <button
-            className={`stats-sidebar-btn${statsView.mode === 'desgloseTemas' ? ' stats-sidebar-btn--active' : ''}`}
+            className={`stats-sidebar-btn${statsView.mode === 'desgloseTemas' || statsView.mode === 'desgloseYGraficas' ? ' stats-sidebar-btn--active' : ''}`}
             onClick={() => setStatsView({ mode: "desgloseTemas" })}
           >
             Temas
@@ -512,20 +513,8 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
           Alumnos
         </button>
         <hr className="stats-sidebar-divider" />
-        <h3 className="stats-sidebar-title">Desglose</h3>
-        <button className="stats-sidebar-btn" onClick={handleDesgloseActividades}>
-          Actividades
-        </button>
-        <button className="stats-sidebar-btn" onClick={() => setStatsView({ mode: "desgloseTemas" })}>
-          Temas
-        </button>
-        <hr className="stats-sidebar-divider" />
-        <h3 className="stats-sidebar-title">Gráficas</h3>
-        <button className="stats-sidebar-btn" onClick={handleGraficasActividades}>
-          Gráficas Actividades
-        </button>
-        <button className="stats-sidebar-btn" onClick={() => setStatsView({ mode: "graficasTemas" })}>
-          Gráficas Temas
+        <button className="stats-sidebar-btn" onClick={() => setStatsView({ mode: "desgloseYGraficas" })}>
+          Desglose y Gráficas
         </button>
       </>
     );
@@ -559,6 +548,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
           return <EstadisticasActividades cursoIdProp={id} embedded temaIdSeleccionado={statsView.temaId} />;
         }
         return <div className="stats-placeholder">Selecciona un tema de la lista</div>;
+      case "desgloseYGraficas":
       case "desgloseTemas":
         return <EstadisticasTemas cursoIdProp={id} embedded />;
       case "graficasActividades":

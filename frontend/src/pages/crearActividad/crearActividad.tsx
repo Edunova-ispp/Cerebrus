@@ -47,9 +47,7 @@ export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDo
 
   const sidebar = (
     <div className="ca-sidebar">
-      <button className="ca-sidebar-btn" onClick={handleVolver}>
-        ← Volver al Mapa
-      </button>
+   
       {TIPOS.map((tipo) => (
         <button
           key={tipo}
