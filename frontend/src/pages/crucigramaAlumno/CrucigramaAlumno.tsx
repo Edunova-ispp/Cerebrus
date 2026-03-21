@@ -4,7 +4,18 @@ import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
 import { apiFetch } from '../../utils/api';
+import { getCurrentUserInfo } from '../../types/curso';
 import './CrucigramaAlumno.css';
+
+function getCurrentUserIdFromJwt(): number | null {
+  const info = getCurrentUserInfo();
+  if (!info) return null;
+  const raw = info?.id ?? info?.userId ?? info?.sub;
+  const userId = typeof raw === 'string' ? Number(raw) : raw;
+  return typeof userId === 'number' && Number.isFinite(userId) ? userId : null;
+}
+
+type ActividadAlumnoDTO = { readonly id: number; readonly puntuacion?: number };
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -169,7 +180,13 @@ export default function CrucigramaAlumno() {
   const { crucigramaId } = useParams<{ crucigramaId: string }>();
   const navigate = useNavigate();
 
+  const initInFlightRef = useRef(false);
+  const completedRef = useRef(false);
+  const abandonReportedRef = useRef(false);
+  const actividadAlumnoIdRef = useRef<number | null>(null);
+
   const [crucigrama, setCrucigrama] = useState<CrucigramaDTO | null>(null);
+  const [actividadAlumnoId, setActividadAlumnoId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -178,13 +195,31 @@ export default function CrucigramaAlumno() {
   const [answers, setAnswers] = useState<Map<string, string>>(new Map());
   const [selection, setSelection] = useState<Selection | null>(null);
   const [cellResults, setCellResults] = useState<Map<string, 'correct' | 'wrong'>>(new Map());
+  const [elapsed, setElapsed] = useState(0);
+  const [earnedPoints, setEarnedPoints] = useState<number | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
-  // ── Load ──────────────────────────────────────────────────────────────
+  // Keep ref in sync
   useEffect(() => {
-    if (!crucigramaId) return;
+    actividadAlumnoIdRef.current = actividadAlumnoId;
+  }, [actividadAlumnoId]);
+
+  // Abandon on unmount if not finished
+  useEffect(() => {
+    return () => {
+      const id = actividadAlumnoIdRef.current;
+      if (!id || completedRef.current || abandonReportedRef.current) return;
+      abandonReportedRef.current = true;
+      apiFetch(`${apiBase}/api/actividades-alumno/${id}/abandon`, { method: 'POST' }).catch(() => {});
+    };
+  }, [apiBase]);
+
+  // ── Load + ensure ActividadAlumno ─────────────────────────────────────
+  useEffect(() => {
+    if (!crucigramaId || initInFlightRef.current) return;
+    initInFlightRef.current = true;
     const run = async () => {
       setLoading(true);
       setError('');
@@ -192,14 +227,45 @@ export default function CrucigramaAlumno() {
         const res = await apiFetch(`${apiBase}/api/generales/crucigrama/${crucigramaId}`);
         const data = (await res.json()) as CrucigramaDTO;
         setCrucigrama(data);
+
+        // Resolve ActividadAlumno
+        const alumnoId = getCurrentUserIdFromJwt();
+        if (!alumnoId) throw new TypeError('No se pudo identificar al alumno.');
+
+        const ensureRes = await apiFetch(`${apiBase}/api/actividades-alumno/ensure/${data.id}`);
+        const ensureValue = (await ensureRes.json()) as unknown;
+        const exists = ensureValue === 1 || ensureValue === '1' || ensureValue === true;
+
+        if (exists) {
+          const getAA = await apiFetch(
+            `${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${data.id}`,
+          );
+          const aaData = (await getAA.json()) as ActividadAlumnoDTO;
+          if (typeof aaData?.id === 'number') setActividadAlumnoId(aaData.id);
+        } else {
+          const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
+            method: 'POST',
+            body: JSON.stringify({ alumnoId, actividadId: data.id }),
+          });
+          const aaData = (await createAA.json()) as ActividadAlumnoDTO;
+          if (typeof aaData?.id === 'number') setActividadAlumnoId(aaData.id);
+        }
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Error cargando el crucigrama');
       } finally {
         setLoading(false);
+        initInFlightRef.current = false;
       }
     };
     run();
-  }, [crucigramaId]);
+  }, [crucigramaId, apiBase]);
+
+  // ── Timer ──────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!actividadAlumnoId || submitted) return;
+    const id = setInterval(() => setElapsed((e) => e + 1), 1000);
+    return () => clearInterval(id);
+  }, [actividadAlumnoId, submitted]);
 
   // ── Layout ────────────────────────────────────────────────────────────
   const { words, cellMap } = useMemo(() => {
@@ -327,14 +393,30 @@ export default function CrucigramaAlumno() {
     }
   }, [selection, submitted, words, answers, cellMap]);
 
-  const handleCheck = () => {
+  const handleCheck = async () => {
     const results = new Map<string, 'correct' | 'wrong'>();
     cellMap.forEach((cell, key) => {
       results.set(key, (answers.get(key) ?? '') === cell.letter ? 'correct' : 'wrong');
     });
     setCellResults(results);
     setChecked(true);
-    if ([...results.values()].every(v => v === 'correct')) setSubmitted(true);
+    const allCorrect = [...results.values()].every(v => v === 'correct');
+    if (allCorrect) {
+      setSubmitted(true);
+      if (actividadAlumnoId) {
+        try {
+          const res = await apiFetch(
+            `${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`,
+            { method: 'PUT', body: JSON.stringify([]) },
+          );
+          const data = (await res.json()) as ActividadAlumnoDTO;
+          if (typeof data?.puntuacion === 'number') setEarnedPoints(data.puntuacion);
+          completedRef.current = true;
+        } catch {
+          completedRef.current = true;
+        }
+      }
+    }
   };
 
   const handleReveal = () => {
@@ -421,6 +503,9 @@ export default function CrucigramaAlumno() {
             )}
 
             <div className="cr-progress-wrap">
+              <span className="cr-timer">
+                {String(Math.floor(elapsed / 60)).padStart(2, '0')}:{String(elapsed % 60).padStart(2, '0')}
+              </span>
               <span>Progreso:</span>
               <div className="cr-progress-bar">
                 <div className="cr-progress-fill" style={{ width: `${progressPct}%` }} />
@@ -567,7 +652,19 @@ export default function CrucigramaAlumno() {
 
         {!crucigrama && !error && <p className="ca-text">No se encontró el crucigrama.</p>}
         {submitted && score?.correct === score?.total && (
-          <CompletionPopup title="¡CRUCIGRAMA COMPLETADO!" onContinue={() => navigate(-1)} />
+          <CompletionPopup
+            title="¡CRUCIGRAMA COMPLETADO!"
+            onContinue={() => navigate(-1)}
+          >
+            <p style={{ textAlign: 'center', fontFamily: "'Pixelify Sans', sans-serif", fontSize: 20 }}>
+              Tiempo: {String(Math.floor(elapsed / 60)).padStart(2, '0')}:{String(elapsed % 60).padStart(2, '0')}
+            </p>
+            {earnedPoints !== null && (
+              <p style={{ textAlign: 'center', fontFamily: "'Pixelify Sans', sans-serif", fontSize: 20 }}>
+                +{earnedPoints} puntos
+              </p>
+            )}
+          </CompletionPopup>
         )}
       </main>
     </div>

@@ -208,6 +208,8 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
                actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 1);
                actividadAlumno.setNota(10); // Nota máxima por leer
                actividadAlumno.setFechaFin(LocalDateTime.now());
+            } else if (((General) actividad).getTipo() == TipoActGeneral.CRUCIGRAMA){
+                corregirActividadAlumnoAutomaticamenteCrucigrama(actividadAlumno, actividad);
             }
         } else if(actividad instanceof Ordenacion) {
             corregirActividadAlumnoAutomaticamenteOrdenacion(actividadAlumno, respuestasIds, actividad);
@@ -420,6 +422,47 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         }
         actividadAlumno.setPuntuacion(puntuacionFinal);
         actividadAlumno.setNota(notaFinal);
+    }
+
+    public void corregirActividadAlumnoAutomaticamenteCrucigrama(ActividadAlumno actividadAlumno, Actividad actividad) {
+        General actividadGeneral = (General) actividad;
+        int totalPalabras = actividadGeneral.getPreguntas().size();
+        int puntuacionMaxima = actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 0;
+
+        if (totalPalabras == 0) {
+            actividadAlumno.setPuntuacion(0);
+            actividadAlumno.setNota(0);
+            return;
+        }
+
+        // Time-based scoring: ideal 30s per word, max 120s per word
+        long tiempoSegundos = 0;
+        if (actividadAlumno.getFechaInicio() != null && actividadAlumno.getFechaFin() != null) {
+            tiempoSegundos = java.time.Duration.between(actividadAlumno.getFechaInicio(), actividadAlumno.getFechaFin()).toSeconds();
+        }
+
+        if (tiempoSegundos <= 0) {
+            actividadAlumno.setPuntuacion(puntuacionMaxima);
+            actividadAlumno.setNota(10);
+        } else {
+            int idealSeconds = totalPalabras * 30;
+            int maxSeconds = totalPalabras * 120;
+
+            double proporcion;
+            if (tiempoSegundos <= idealSeconds) {
+                proporcion = 1.0;
+            } else if (tiempoSegundos >= maxSeconds) {
+                proporcion = 0.1;
+            } else {
+                proporcion = 1.0 - 0.9 * ((double)(tiempoSegundos - idealSeconds) / (maxSeconds - idealSeconds));
+            }
+
+            int puntuacionFinalCrucigrama = (int) Math.round(proporcion * puntuacionMaxima);
+            int notaFinalCrucigrama = (int) Math.round(proporcion * 10);
+
+            actividadAlumno.setPuntuacion(Math.max(puntuacionFinalCrucigrama, 1));
+            actividadAlumno.setNota(Math.max(notaFinalCrucigrama, 1));
+        }
     }
 
     @Override  
