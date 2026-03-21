@@ -170,8 +170,9 @@ function BarChart({
   );
 }
 
-export default function GraficasActividades() {
-  const { cursoId } = useParams<{ cursoId: string }>();
+export default function GraficasActividades({ cursoIdProp, embedded, temaIdSeleccionado }: { cursoIdProp?: string; embedded?: boolean; temaIdSeleccionado?: number } = {}) {
+  const params = useParams<{ cursoId: string }>();
+  const cursoId = cursoIdProp ?? params.cursoId;
   const navigate = useNavigate();
 
   const [temas, setTemas] = useState<Tema[]>([]);
@@ -184,6 +185,15 @@ export default function GraficasActividades() {
     cargarEstructuraYSeleccion();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cursoId]);
+
+  useEffect(() => {
+    if (temaIdSeleccionado != null && temas.length > 0) {
+      const tema = temas.find(t => t.id === temaIdSeleccionado);
+      if (tema && tema.id !== temaSeleccionado?.id) {
+        seleccionarTema(tema);
+      }
+    }
+  }, [temaIdSeleccionado, temas]);
 
   const cargarEstructuraYSeleccion = async () => {
     setLoading(true);
@@ -278,12 +288,14 @@ export default function GraficasActividades() {
   }, [temaSeleccionado, mapaEstadisticas]);
 
   return (
-    <div className="estadisticas-page">
-      <NavbarMisCursos />
-      <main className="estadisticas-main">
-        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
-          ← Volver
-        </button>
+    <div className={embedded ? 'graficas-embedded' : 'estadisticas-page'}>
+      {!embedded && <NavbarMisCursos />}
+      <main className={embedded ? 'graficas-embedded-main' : 'estadisticas-main'}>
+        {!embedded && (
+          <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
+            ← Volver
+          </button>
+        )}
         <h1 className="estadisticas-titulo-curso">Gráficas de Actividades</h1>
 
         {loading && <p className="msg-placeholder">Cargando datos...</p>}
@@ -295,29 +307,31 @@ export default function GraficasActividades() {
 
         {!loading && !error && (
           <div className="layout-estadisticas">
-            <aside className="panel-temas">
-              <h3>Temas</h3>
-              {temas.length === 0 ? (
-                <p className="msg-vacio">Este curso aun no tiene temas</p>
-              ) : (
-                <ul className="lista-temas-scroll">
-                  {temas.map((tema) => (
-                    <li
-                      key={tema.id}
-                      className={`btn-medias-pixel ${temaSeleccionado?.id === tema.id ? 'active' : ''}`}
-                      onClick={() => seleccionarTema(tema)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') seleccionarTema(tema);
-                      }}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      {tema.titulo}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </aside>
+            {temaIdSeleccionado == null && (
+              <aside className="panel-temas">
+                <h3>Temas</h3>
+                {temas.length === 0 ? (
+                  <p className="msg-vacio">Este curso aun no tiene temas</p>
+                ) : (
+                  <ul className="lista-temas-scroll">
+                    {temas.map((tema) => (
+                      <li
+                        key={tema.id}
+                        className={`btn-medias-pixel ${temaSeleccionado?.id === tema.id ? 'active' : ''}`}
+                        onClick={() => seleccionarTema(tema)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') seleccionarTema(tema);
+                        }}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        {tema.titulo}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </aside>
+            )}
 
             <section className="panel-actividades">
               {temaSeleccionado ? (

@@ -2,9 +2,12 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import MediasCurso from './MediasCurso';
-import EstadisticasTema from './EstadisticasTema';
 import EstadisticasActividad from './EstadisticasActividad';
 import EstadisticasAlumno from './EstadisticasAlumno';
+import EstadisticasActividades from './EstadisticasActividades';
+import EstadisticasTemas from './EstadisticasTemas';
+import GraficasActividades from './GraficasActividades';
+import GraficasTemas from './GraficasTemas';
 import './EstadisticasCurso.css';
 
 interface EstadisticaAlumno {
@@ -20,12 +23,29 @@ interface OpcionItem {
   nombre: string;
 }
 
+type StatsView =
+  | { mode: "resumen" }
+  | { mode: "medias"; temaId?: number }
+  | { mode: "tiemposTema"; temaId?: number }
+  | { mode: "tiemposActividad"; actividadId?: number }
+  | { mode: "alumnos" }
+  | { mode: "alumnoDetalle"; alumnoId: number; alumnoNombre: string }
+  | { mode: "desgloseActividades"; temaId?: number }
+  | { mode: "desgloseTemas" }
+  | { mode: "graficasActividades"; temaId?: number }
+  | { mode: "graficasTemas" };
+
 interface EstadisticasCursoDTO {
   cursoCompletadoPorTodos: boolean | null;
   notaMediaCurso: number | null;
   tiempoMedioCurso: number | null;
   notaMaximaCurso: number | null;
   notaMinimaCurso: number | null;
+}
+
+interface EstadisticasCursoProps {
+  readonly cursoId?: string;
+  readonly embedded?: boolean;
 }
 
 function formatearTiempo(minutosTotales: number): string {
@@ -195,15 +215,52 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
     }
   }, [id]);
 
-  const confirmarNavegacion = () => {
-    if (!opcionSeleccionada) return;
-    if (modalAbierto === 'tema') {
-      navigate(`/estadisticas/temas/${opcionSeleccionada}`);
-    } else if (modalAbierto === 'actividad') {
-      navigate(`/estadisticas/actividades/${opcionSeleccionada}`);
-    }
-    setModalAbierto(null);
+  const handleMedias = async () => {
+    await cargarListaTemas();
+    setStatsView({ mode: "medias" });
   };
+
+  const handleDesgloseActividades = async () => {
+    await cargarListaTemas();
+    setStatsView({ mode: "desgloseActividades" });
+  };
+
+  const handleGraficasActividades = async () => {
+    await cargarListaTemas();
+    setStatsView({ mode: "graficasActividades" });
+  };
+
+  const handleTiemposActividad = async () => {
+    await cargarListaActividades();
+    setStatsView({ mode: "tiemposActividad" });
+  };
+
+  const handleAlumnos = useCallback(async () => {
+    setCargandoLista(true);
+    try {
+      const token = localStorage.getItem('token');
+      const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
+      const res = await fetch(`${apiBase}/api/estadisticas/cursos/${id}/alumnos-rapidos-lentos?limite=1000`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const seen = new Set<number>();
+      const alumnos: { id: number; nombre: string }[] = [];
+      [...(data.masRapidos || []), ...(data.masLentos || [])].forEach((a: { alumnoId: number; nombreAlumno: string }) => {
+        if (!seen.has(a.alumnoId)) {
+          seen.add(a.alumnoId);
+          alumnos.push({ id: a.alumnoId, nombre: a.nombreAlumno });
+        }
+      });
+      setAlumnosList(alumnos);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCargandoLista(false);
+    }
+    setStatsView({ mode: "alumnos" });
+  }, [id]);
 
   const cursoIndicadoresContent = !loading && !error ? (
     <div className="curso-indicadores" style={{ marginBottom: '16px' }}>
@@ -297,15 +354,6 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
             >
               {t.nombre}
             </button>
-            
-            <hr style={{ width: '100%', border: '1px solid #ccc' }} />
-
-            <button className="btn-medias-pixel" onClick={() => navigate(`/estadisticas/${id}/actividades`)} style={{ width: '100%' }}>
-              Actividades
-            </button>
-            <button className="btn-medias-pixel" onClick={() => navigate(`/estadisticas/${id}/temas`)} style={{ width: '100%' }}>
-              Temas
-            </button>
           ))}
         </>
       );
@@ -352,13 +400,182 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
             >
               {a.nombre}
             </button>
-          </div>
-          <div style={{ flex: 1, margin: 0, width: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          ))}
+        </>
+      );
+    }
+
+    if (statsView.mode === "desgloseActividades") {
+      return (
+        <>
+          <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "desgloseTemas" })}>
+            Volver
+          </button>
+          <h3 className="stats-sidebar-title">Temas</h3>
+          {cargandoLista ? (
+            <p className="stats-sidebar-loading">Cargando...</p>
+          ) : temasList.map(t => (
+            <button
+              key={t.id}
+              className={`stats-sidebar-btn${'temaId' in statsView && statsView.temaId === t.id ? ' stats-sidebar-btn--active' : ''}`}
+              onClick={() => setStatsView({ mode: "desgloseActividades", temaId: t.id })}
+            >
+              {t.nombre}
+            </button>
+          ))}
+        </>
+      );
+    }
+
+    if (statsView.mode === "graficasActividades") {
+      return (
+        <>
+          <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "desgloseTemas" })}>
+            Volver
+          </button>
+          <h3 className="stats-sidebar-title">Temas</h3>
+          {cargandoLista ? (
+            <p className="stats-sidebar-loading">Cargando...</p>
+          ) : temasList.map(t => (
+            <button
+              key={t.id}
+              className={`stats-sidebar-btn${'temaId' in statsView && statsView.temaId === t.id ? ' stats-sidebar-btn--active' : ''}`}
+              onClick={() => setStatsView({ mode: "graficasActividades", temaId: t.id })}
+            >
+              {t.nombre}
+            </button>
+          ))}
+        </>
+      );
+    }
+
+    if (statsView.mode === "desgloseTemas"
+        || statsView.mode === "graficasTemas") {
+      return (
+        <>
+          <button className="stats-sidebar-btn stats-sidebar-back" onClick={() => setStatsView({ mode: "resumen" })}>
+            Volver
+          </button>
+          <h3 className="stats-sidebar-title">Desglose</h3>
+          <button
+            className="stats-sidebar-btn"
+            onClick={handleDesgloseActividades}
+          >
+            Actividades
+          </button>
+          <button
+            className={`stats-sidebar-btn${statsView.mode === 'desgloseTemas' ? ' stats-sidebar-btn--active' : ''}`}
+            onClick={() => setStatsView({ mode: "desgloseTemas" })}
+          >
+            Temas
+          </button>
+          <hr className="stats-sidebar-divider" />
+          <h3 className="stats-sidebar-title">Gráficas</h3>
+          <button
+            className="stats-sidebar-btn"
+            onClick={handleGraficasActividades}
+          >
+            Gráficas Actividades
+          </button>
+          <button
+            className={`stats-sidebar-btn${statsView.mode === 'graficasTemas' ? ' stats-sidebar-btn--active' : ''}`}
+            onClick={() => setStatsView({ mode: "graficasTemas" })}
+          >
+            Gráficas Temas
+          </button>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <button className="stats-sidebar-btn stats-sidebar-btn--refresh" onClick={cargarEstadisticas}>
+          Actualizar ↻
+        </button>
+        <hr className="stats-sidebar-divider" />
+        <button
+          className={`stats-sidebar-btn${statsView.mode === 'resumen' ? ' stats-sidebar-btn--active' : ''}`}
+          onClick={() => setStatsView({ mode: "resumen" })}
+        >
+          Resumen general
+        </button>
+        <button
+          className={`stats-sidebar-btn${'temaId' in statsView ? ' stats-sidebar-btn--active' : ''}`}
+          onClick={handleMedias}
+        >
+          Puntuaciones medias
+        </button>
+        <button className="stats-sidebar-btn stats-sidebar-btn--actividad" onClick={handleTiemposActividad}>
+          Tiempos por Actividad
+        </button>
+        <button className="stats-sidebar-btn stats-sidebar-btn--alumnos" onClick={handleAlumnos}>
+          Alumnos
+        </button>
+        <hr className="stats-sidebar-divider" />
+        <h3 className="stats-sidebar-title">Desglose</h3>
+        <button className="stats-sidebar-btn" onClick={handleDesgloseActividades}>
+          Actividades
+        </button>
+        <button className="stats-sidebar-btn" onClick={() => setStatsView({ mode: "desgloseTemas" })}>
+          Temas
+        </button>
+        <hr className="stats-sidebar-divider" />
+        <h3 className="stats-sidebar-title">Gráficas</h3>
+        <button className="stats-sidebar-btn" onClick={handleGraficasActividades}>
+          Gráficas Actividades
+        </button>
+        <button className="stats-sidebar-btn" onClick={() => setStatsView({ mode: "graficasTemas" })}>
+          Gráficas Temas
+        </button>
+      </>
+    );
+  };
+
+  const renderStatsContent = () => {
+    switch (statsView.mode) {
+      case "medias":
+        return <MediasCurso
+          cursoIdProp={id}
+          embedded
+          temaIdSeleccionado={'temaId' in statsView ? statsView.temaId : undefined}
+        />;
+      case "tiemposActividad":
+        if ('actividadId' in statsView && statsView.actividadId) {
+          return <EstadisticasActividad actividadIdProp={String(statsView.actividadId)} embedded />;
+        }
+        return <div className="stats-placeholder">Selecciona una actividad de la lista</div>;
+      case "alumnos":
+        return <div className="stats-placeholder">Selecciona un alumno de la lista</div>;
+      case "alumnoDetalle":
+        return (
+          <EstadisticasAlumno
+            cursoIdProp={id}
+            alumnoId={statsView.alumnoId}
+            embedded
+          />
+        );
+      case "desgloseActividades":
+        if ('temaId' in statsView && statsView.temaId) {
+          return <EstadisticasActividades cursoIdProp={id} embedded temaIdSeleccionado={statsView.temaId} />;
+        }
+        return <div className="stats-placeholder">Selecciona un tema de la lista</div>;
+      case "desgloseTemas":
+        return <EstadisticasTemas cursoIdProp={id} embedded />;
+      case "graficasActividades":
+        if ('temaId' in statsView && statsView.temaId) {
+          return <GraficasActividades cursoIdProp={id} embedded temaIdSeleccionado={statsView.temaId} />;
+        }
+        return <div className="stats-placeholder">Selecciona un tema de la lista</div>;
+      case "graficasTemas":
+        return <GraficasTemas cursoIdProp={id} embedded />;
+      default:
+        return (
+          <>
             {cursoIndicadoresContent}
-            <div className="estadisticas-yellow-card" style={{ flex: 1, margin: 0, width: 'auto' }}>
+            <div className="estadisticas-yellow-card">
               {estadisticasContent}
             </div>
-          </div>
+          </>
         );
     }
   };

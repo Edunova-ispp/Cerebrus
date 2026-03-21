@@ -164,8 +164,9 @@ function BarChart({
   );
 }
 
-export default function GraficasTemas() {
-  const { cursoId } = useParams<{ cursoId: string }>();
+export default function GraficasTemas({ cursoIdProp, embedded }: { cursoIdProp?: string; embedded?: boolean } = {}) {
+  const params = useParams<{ cursoId: string }>();
+  const cursoId = cursoIdProp ?? params.cursoId;
   const navigate = useNavigate();
 
   const [temas, setTemas] = useState<Tema[]>([]);
@@ -248,12 +249,14 @@ export default function GraficasTemas() {
   }, [temas, mapaEstadisticas]);
 
   return (
-    <div className="estadisticas-page">
-      <NavbarMisCursos />
-      <main className="estadisticas-main">
-        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
-          ← Volver
-        </button>
+    <div className={embedded ? 'graficas-embedded' : 'estadisticas-page'}>
+      {!embedded && <NavbarMisCursos />}
+      <main className={embedded ? 'graficas-embedded-main' : 'estadisticas-main'}>
+        {!embedded && (
+          <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
+            ← Volver
+          </button>
+        )}
         <h1 className="estadisticas-titulo-curso">Gráficas de Temas</h1>
 
         {loading && <p className="msg-placeholder">Cargando datos...</p>}

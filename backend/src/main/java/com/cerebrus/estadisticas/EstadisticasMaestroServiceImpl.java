@@ -16,6 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadRepository;
+import com.cerebrus.actividad.general.General;
+import com.cerebrus.actividad.marcarImagen.MarcarImagen;
+import com.cerebrus.actividad.ordenacion.Ordenacion;
+import com.cerebrus.actividad.tablero.Tablero;
 import com.cerebrus.actividadAlumno.ActividadAlumno;
 import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.curso.Curso;
@@ -25,6 +29,7 @@ import com.cerebrus.estadisticas.dto.AlumnoBasicoDTO;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasAlumnoResumenDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 import com.cerebrus.estadisticas.dto.IntentoActividadDTO;
@@ -719,6 +724,139 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         return new RepeticionesActividadDTO(media, min, max);
     }
 
+    // ==================== RESUMEN ESTADÍSTICAS ALUMNO ====================
+
+    @Transactional(readOnly = true)
+    public EstadisticasAlumnoResumenDTO obtenerResumenEstadisticasAlumno(Long cursoId, Long alumnoId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+
+        validarPropietarioCurso(maestro, curso);
+
+        // Find alumno name from inscriptions
+        Alumno alumno = curso.getInscripciones().stream()
+                .map(Inscripcion::getAlumno)
+                .filter(a -> a.getId().equals(alumnoId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El alumno con ID " + alumnoId + " no está inscrito en este curso."));
+
+        List<Tema> temas = curso.getTemas();
+        List<TemaEstadisticasAlumnoDTO> temasDTO = new ArrayList<>();
+        int totalActividades = 0;
+        int actividadesCompletadas = 0;
+        int tiempoTotal = 0;
+        List<Integer> notasAlumno = new ArrayList<>();
+
+        for (Tema tema : temas) {
+            List<Actividad> actividades = actividadRepository.findByTemaId(tema.getId());
+            List<ActividadEstadisticasAlumnoDTO> actividadesDTO = new ArrayList<>();
+
+            boolean temaCompletado = true;
+
+            for (Actividad actividad : actividades) {
+                totalActividades++;
+
+                // All instances of this student for this activity
+                List<ActividadAlumno> instanciasAlumno = actividad.getActividadesAlumno().stream()
+                        .filter(aa -> aa.getAlumno().getId().equals(alumnoId))
+                        .toList();
+
+                // Latest completed instance
+                ActividadAlumno ultimaTerminada = instanciasAlumno.stream()
+                        .filter(aa -> aa.getEstadoActividad() == EstadoActividad.TERMINADA)
+                        .reduce((a, b) -> esMasReciente(a, b) ? a : b)
+                        .orElse(null);
+
+                boolean completada = ultimaTerminada != null;
+                if (!completada) {
+                    temaCompletado = false;
+                }
+
+                Integer notaAlumnoVal = completada ? ultimaTerminada.getNota() : null;
+                Integer puntuacionAlumnoVal = completada ? ultimaTerminada.getPuntuacion() : null;
+                Double notaMediaClase = notaMediaActividad(actividad);
+
+                Double desviacion = null;
+                if (notaAlumnoVal != null && notaMediaClase != null) {
+                    desviacion = notaAlumnoVal - notaMediaClase;
+                }
+
+                if (completada) {
+                    actividadesCompletadas++;
+                    if (ultimaTerminada.getTiempoMinutos() != null) {
+                        tiempoTotal += ultimaTerminada.getTiempoMinutos();
+                    }
+                    if (notaAlumnoVal != null) {
+                        notasAlumno.add(notaAlumnoVal);
+                    }
+                }
+
+                // Build intentos list
+                List<IntentoActividadDTO> intentos = instanciasAlumno.stream()
+                        .filter(aa -> aa.getEstadoActividad() == EstadoActividad.TERMINADA)
+                        .sorted((a, b) -> {
+                            LocalDateTime fa = a.getFechaFin() != null ? a.getFechaFin() : a.getFechaInicio();
+                            LocalDateTime fb = b.getFechaFin() != null ? b.getFechaFin() : b.getFechaInicio();
+                            if (fa == null && fb == null) return 0;
+                            if (fa == null) return -1;
+                            if (fb == null) return 1;
+                            return fa.compareTo(fb);
+                        })
+                        .map(aa -> new IntentoActividadDTO(
+                                aa.getId(),
+                                aa.getFechaInicio(),
+                                aa.getFechaFin(),
+                                aa.getPuntuacion(),
+                                aa.getNota(),
+                                aa.getTiempoMinutos(),
+                                aa.getNumAbandonos()))
+                        .toList();
+
+                // Derive tipo string
+                String tipoStr = obtenerTipoActividad(actividad);
+
+                actividadesDTO.add(new ActividadEstadisticasAlumnoDTO(
+                        actividad.getId(),
+                        actividad.getTitulo(),
+                        tipoStr,
+                        actividad.getPuntuacion(),
+                        completada,
+                        notaAlumnoVal,
+                        puntuacionAlumnoVal,
+                        notaMediaClase,
+                        desviacion,
+                        intentos));
+            }
+
+            temasDTO.add(new TemaEstadisticasAlumnoDTO(
+                    tema.getId(),
+                    tema.getTitulo(),
+                    temaCompletado,
+                    actividadesDTO));
+        }
+
+        Double notaMedia = notasAlumno.isEmpty() ? 0.0
+                : notasAlumno.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+        Integer notaMin = notasAlumno.isEmpty() ? null
+                : notasAlumno.stream().mapToInt(Integer::intValue).min().orElse(0);
+        Integer notaMax = notasAlumno.isEmpty() ? null
+                : notasAlumno.stream().mapToInt(Integer::intValue).max().orElse(0);
+
+        return new EstadisticasAlumnoResumenDTO(
+                alumnoId,
+                alumno.getNombre(),
+                notaMedia,
+                notaMin,
+                notaMax,
+                actividadesCompletadas,
+                totalActividades,
+                tiempoTotal,
+                temasDTO);
+    }
+
     // ==================== MÉTODOS AUXILIARES ====================
 
     private Maestro validarMaestro(Usuario usuario) {
@@ -978,6 +1116,28 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
             .filter(aa -> aa.getAlumno().getId().equals(alumnoId))
             .toList();
         return todasLasInstancias.size();
+    }
+
+    private String obtenerTipoActividad(Actividad actividad) {
+        if (actividad instanceof General) {
+            General general = (General) actividad;
+            switch (general.getTipo()) {
+                case TEST: return "GeneralTest";
+                case CARTA: return "Carta";
+                case CRUCIGRAMA: return "Crucigrama";
+                case TEORIA: return "Teoria";
+                case CLASIFICACION: return "Clasificacion";
+                case ABIERTA: return "Abierta";
+                default: return general.getTipo().toString();
+            }
+        } else if (actividad instanceof Ordenacion) {
+            return "Ordenacion";
+        } else if (actividad instanceof Tablero) {
+            return "Tablero";
+        } else if (actividad instanceof MarcarImagen) {
+            return "MarcarImagen";
+        }
+        return "Otro";
     }
 
 }

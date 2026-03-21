@@ -13,8 +13,16 @@ import { CrucigramaForm } from './CrucigramaForm';
 
 const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden', 'Marcar en imagen', 'Tablero', 'Clasificación', 'Carta', 'Crucigrama'];
 
-export default function CrearActividad() {
-  const { id: cursoId } = useParams<{ id: string; temaId: string }>();
+interface CrearActividadProps {
+  readonly cursoIdProp?: string;
+  readonly temaIdProp?: string;
+  readonly embedded?: boolean;
+  readonly onDone?: () => void;
+}
+
+export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDone }: CrearActividadProps = {}) {
+  const params = useParams<{ id: string; temaId: string }>();
+  const cursoId = cursoIdProp ?? params.id;
   const navigate = useNavigate();
   const [tipoSeleccionado, setTipoSeleccionado] = useState<string | null>(null);
 
@@ -29,28 +37,48 @@ export default function CrearActividad() {
     tipoSeleccionado === 'Crucigrama' ? <CrucigramaForm mode="create" /> :
     <p className="ca-proximamente">Selecciona un tipo de actividad</p>;
 
-  return (
-    <div className={embedded ? 'ca-embedded' : 'ca-page'}>
-      {!embedded && <NavbarMisCursos />}
-      <main className="ca-main">
-        <div className="ca-sidebar">
-          {!embedded && (
-            <button className="ca-sidebar-btn" onClick={() => navigate(`/cursos/${cursoId}`)}>
-              Volver al Mapa
-            </button>
-          )}
-          {TIPOS.map((tipo) => (
-            <button
-              key={tipo}
-              className="ca-sidebar-btn"
-              type="button"
-              onClick={() => setTipoSeleccionado(tipo)}
-            >
-              {tipo}
-            </button>
-          ))}
-        </div>
+  const handleVolver = () => {
+    if (embedded && onDone) {
+      onDone();
+    } else {
+      navigate(`/cursos/${cursoId}`);
+    }
+  };
 
+  const sidebar = (
+    <div className="ca-sidebar">
+      <button className="ca-sidebar-btn" onClick={handleVolver}>
+        ← Volver al Mapa
+      </button>
+      {TIPOS.map((tipo) => (
+        <button
+          key={tipo}
+          className={`ca-sidebar-btn${tipoSeleccionado === tipo ? ' ca-sidebar-btn--activo' : ''}`}
+          type="button"
+          onClick={() => setTipoSeleccionado(tipo)}
+        >
+          {tipo}
+        </button>
+      ))}
+    </div>
+  );
+
+  if (embedded) {
+    return (
+      <div className="ca-embedded">
+        {sidebar}
+        <div className="ca-contenido">
+          {formContent}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="ca-page">
+      <NavbarMisCursos />
+      <main className="ca-main">
+        {sidebar}
         <div className="ca-contenido">
           {formContent}
         </div>

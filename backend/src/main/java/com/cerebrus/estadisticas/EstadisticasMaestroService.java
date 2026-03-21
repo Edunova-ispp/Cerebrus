@@ -10,6 +10,7 @@ import com.cerebrus.estadisticas.dto.AlumnoBasicoDTO;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasAlumnoResumenDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
@@ -41,4 +42,6 @@ public interface EstadisticasMaestroService {
     RepeticionesActividadDTO obtenerRepeticionesActividad(Long actividadId);
 
     Map<Long, RepeticionesActividadDTO> obtenerRepeticionesCursoActividad(Long cursoId, Long temaId);
+
+    EstadisticasAlumnoResumenDTO obtenerResumenEstadisticasAlumno(Long cursoId, Long alumnoId);
 }

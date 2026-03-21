@@ -57,6 +57,8 @@ const TIPO_LABELS: Record<string, string> = {
   Tablero: 'Tablero',
   Clasificacion: 'Clasificación',
   Carta: 'Carta',
+  Crucigrama: 'Crucigrama',
+  Abierta: 'Abierta',
 };
 
 function tipoLabel(tipo: string): string {

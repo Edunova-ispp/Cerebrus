@@ -12,6 +12,13 @@
   z-index: 10;
 }
 
+.ca-embedded {
+  display: flex;
+  gap: 24px;
+  width: 100%;
+  min-height: 400px;
+}
+
 .ca-main {
   flex: 1;
   display: flex;

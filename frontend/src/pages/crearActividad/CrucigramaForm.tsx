@@ -263,8 +263,8 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues }:
                 {loading
                     ? 'PROCESANDO...'
                     : mode === 'edit'
-                        ? 'ACTUALIZAR CRUCIGRAMA'
-                        : 'GUARDAR CRUCIGRAMA'}
+                        ? 'GUARDAR'
+                        : 'GUARDAR '}
             </button>
         </form>
     );
