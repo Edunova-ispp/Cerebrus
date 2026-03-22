@@ -218,7 +218,7 @@ public class IaConnectionServiceImpl implements IaConnectionService {
                     case 5 -> apikeyActual = apiKey5;
                     default -> throw new IllegalArgumentException("400 Bad Request: Error al seleccionar la clave de API");
                    }
-                   System.out.println("Usando la clave de API " + IndiceKey + ": " + apikeyActual);
+                   System.out.println("Usando la clave de API " + IndiceKey + ": ****" + apikeyActual.substring(apikeyActual.length()-4));
             String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apikeyActual;
 
             ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
@@ -235,7 +235,7 @@ public class IaConnectionServiceImpl implements IaConnectionService {
               throw new IllegalArgumentException("respuesta no válida: " + respuesta);
             }
             peticionesDiarias++;
-            System.out.println("Peticiones diarias realizadas con la clave actual (" + apikeyActual + "): " + peticionesDiarias);
+            System.out.println("Peticiones diarias realizadas con la clave actual (" + apikeyActual.substring(apikeyActual.length()-4) + "): " + peticionesDiarias);
             return respuesta;
         } catch (Exception e) {
             throw new IllegalArgumentException("500 Internal Server Error: "+" Error interno de la api de geminis: " + e.getMessage());
