@@ -4,6 +4,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,7 @@ import com.cerebrus.actividad.tablero.dto.TableroDTO;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RestController
 @RequestMapping("/api/tableros")
 @CrossOrigin(origins = "*")
+@Validated
 public class TableroController {
 
     private final TableroService tableroService;
@@ -41,12 +44,11 @@ public class TableroController {
     public ResponseEntity<TableroDTO> crearActividadTablero(@RequestBody @Valid TableroRequest actividad) {
         try {
         if ((actividad.getPreguntasYRespuestas().size() != 8 && actividad.getPreguntasYRespuestas().size() != 15) || (actividad.getTamano() && actividad.getPreguntasYRespuestas().size() != 8) || (!actividad.getTamano() && actividad.getPreguntasYRespuestas().size() != 15)) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        TableroDTO creada = tableroService.crearActividadTablero(actividad);
-        return new ResponseEntity<>(creada, HttpStatus.CREATED);
-    }     catch (ResourceNotFoundException e) {
+            throw new IllegalArgumentException("El numero de preguntas no coincide con el tamano del tablero");
+            }
+            TableroDTO creada = tableroService.crearActividadTablero(actividad);
+            return new ResponseEntity<>(creada, HttpStatus.CREATED);
+             }     catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         catch (AccessDeniedException e) {
@@ -57,7 +59,7 @@ public class TableroController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TableroDTO> getTablero(@PathVariable Long id) {
+    public ResponseEntity<TableroDTO> getTablero(@PathVariable @NotNull Long id) {
         try {
             TableroDTO tablero = tableroService.getTablero(id);
             return ResponseEntity.ok(tablero);
@@ -71,7 +73,7 @@ public class TableroController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarTablero(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminarTablero(@PathVariable @NotNull Long id) {
         try {
             tableroService.eliminarTablero(id);
             return ResponseEntity.noContent().build();
@@ -85,10 +87,10 @@ public class TableroController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TableroDTO> actualizarTablero(@PathVariable Long id, @RequestBody @Valid TableroRequest tablero) {
-        try {
-            if ((tablero.getPreguntasYRespuestas().size() != 8 && tablero.getPreguntasYRespuestas().size() != 15) || (tablero.getTamano() && tablero.getPreguntasYRespuestas().size() != 8) || (!tablero.getTamano() && tablero.getPreguntasYRespuestas().size() != 15)) {
-                return ResponseEntity.badRequest().build();
+    public ResponseEntity<TableroDTO> actualizarTablero(@PathVariable @NotNull Long id, @RequestBody @Valid TableroRequest tablero) {
+        try{    
+        if ((tablero.getPreguntasYRespuestas().size() != 8 && tablero.getPreguntasYRespuestas().size() != 15) || (tablero.getTamano() && tablero.getPreguntasYRespuestas().size() != 8) || (!tablero.getTamano() && tablero.getPreguntasYRespuestas().size() != 15)) {
+                throw new IllegalArgumentException("El numero de preguntas no coincide con el tamano del tablero");
             }
 
             TableroDTO actualizado = tableroService.actualizarTablero(id, tablero);
