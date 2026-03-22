@@ -49,7 +49,7 @@ COPY watchbug-app/requirements.txt ./
 RUN pip3 install --no-cache-dir -r requirements.txt
 COPY watchbug-app/watchbug/ ./watchbug/
 RUN pip3 install ./watchbug/
-COPY watchbug-app/app.py /app/watchbug.py
+COPY watchbug-app/app.py /app/server.py
 
 # Copiar el .jar del backend
 COPY --from=backend-builder /app/backend/target/*.jar /app/backend.jar
