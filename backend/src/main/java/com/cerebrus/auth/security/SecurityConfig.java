@@ -54,10 +54,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://localhost:5173",
-                "https://cerebrus-frontend.onrender.com", "https://cerebrus-frontend.onrender.com/"));
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:3000", 
+                "http://localhost:5173",
+                "https://cerebrus-frontend.onrender.com", 
+                "https://*.koyeb.app",
+                "http://*.koyeb.app",
+                "https://cerebrus.koyeb.app"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Origin", "Accept", "X-Requested-With"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
