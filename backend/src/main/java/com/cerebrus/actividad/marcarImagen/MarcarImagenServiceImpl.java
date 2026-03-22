@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.marcarImagen.dto.MarcarImagenDTO;
 import com.cerebrus.exceptions.ResourceNotFoundException;
-import com.cerebrus.puntoImagen.PuntoImagen;
-import com.cerebrus.puntoImagen.PuntoImagenService;
-import com.cerebrus.puntoImagen.dto.PuntoImagenDTO;
+import com.cerebrus.puntoImage.PuntoImagen;
+import com.cerebrus.puntoImage.PuntoImagenService;
+import com.cerebrus.puntoImage.dto.PuntoImagenDTO;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaService;
 import com.cerebrus.usuario.Usuario;

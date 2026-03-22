@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cerebrus.actividad.Actividad;
-import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneral;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneral;
 import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 
 import jakarta.persistence.CascadeType;
