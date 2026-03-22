@@ -66,29 +66,28 @@ export default function TeoriaAlumno() {
 
   const [finished, setFinished] = useState(false);
 
-  // Función para finalizar la teoría y sumar el punto/completado
-  const handleFinalizar = async () => {
-    if (!actividadAlumnoId) {
-      console.warn("Aún no se ha cargado el ID de la actividad del alumno.");
-      return; 
-    }
+  // Muestra el popup inmediatamente; el registro al backend ocurre al hacer clic en Continuar
+  const handleFinalizar = () => {
+    setFinished(true);
+  };
 
-    try {
-      const res = await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
-        method: 'PUT',
-        body: JSON.stringify([]), 
-      });
-
-      if (!res.ok) {
-        throw new Error(`Error en la respuesta del servidor: ${res.status}`);
+  const handleContinuar = async () => {
+    console.log('[TeoriaAlumno] handleContinuar — actividadAlumnoId:', actividadAlumnoId);
+    if (actividadAlumnoId) {
+      try {
+        const res = await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
+          method: 'PUT',
+          body: JSON.stringify([]),
+        });
+        const data = await res.json();
+        console.log('[TeoriaAlumno] corregir-automaticamente response:', data);
+      } catch (e) {
+        console.error('[TeoriaAlumno] error registrando completión:', e);
       }
-
-      setFinished(true); 
-
-    } catch (e) {
-      console.error("No se pudo marcar como finalizada", e);
-   
+    } else {
+      console.warn('[TeoriaAlumno] actividadAlumnoId es null — no se puede registrar la completión');
     }
+    navigate(-1);
   };
 
   if (loading) {
@@ -175,7 +174,7 @@ export default function TeoriaAlumno() {
 
         {!teoria && !error && <p className="ca-text">No se encontró la lección.</p>}
 
-        {finished && <CompletionPopup title="¡LECCIÓN COMPLETADA!" onContinue={() => navigate(-1)} />}
+        {finished && <CompletionPopup title="¡LECCIÓN COMPLETADA!" onContinue={handleContinuar} />}
       </main>
     </div>
   );

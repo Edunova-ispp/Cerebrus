@@ -72,6 +72,7 @@ class EstadisticasMaestroServiceImplTest {
     void calcularTotalPuntosCursoPorAlumno_actividadesTerminadas_sumaPuntosCorrectamente() {
         Actividad actividad = crearActividad(50);
         ActividadAlumno actividadAlumno = crearActividadAlumnoTerminada(alumno);
+        actividadAlumno.setPuntuacion(50);
         actividad.setActividadesAlumno(List.of(actividadAlumno));
 
         Tema tema = new Tema();

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import type { Curso } from "../../types/curso";
 import "./CursoCard.css";
@@ -18,14 +19,37 @@ interface CursoCardProps {
   readonly onEliminar?: (id: number) => void;
 }
 
-export default function CursoCard({ curso, isMaestro = false, onToggleVisibilidad, onCardClick, onEliminar }: CursoCardProps) {  return (
-    <motion.div
-      className="curso-card"
-      whileHover={{ scale: 1.05 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      onClick={onCardClick}
-      style={{ cursor: onCardClick ? "pointer" : undefined }}
-    >
+export default function CursoCard({ curso, isMaestro = false, onToggleVisibilidad, onCardClick, onEliminar }: CursoCardProps) {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(curso.codigo);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <>
+      {modalOpen && (
+        <div className="codigo-modal-overlay" onClick={() => setModalOpen(false)}>
+          <div className="codigo-modal" onClick={(e) => e.stopPropagation()}>
+            <p className="codigo-modal__label">Código del curso</p>
+            <p className="codigo-modal__value">{curso.codigo}</p>
+            <button className="codigo-modal__copy-btn" onClick={handleCopy}>
+              {copied ? '✓ Copiado' : '⎘ Copiar'}
+            </button>
+            <button className="codigo-modal__close-btn" onClick={() => setModalOpen(false)}>✕</button>
+          </div>
+        </div>
+      )}
+      <motion.div
+        className="curso-card"
+        whileHover={{ scale: 1.05 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        onClick={onCardClick}
+        style={{ cursor: onCardClick ? "pointer" : undefined }}
+      >
       {isMaestro && onEliminar && (
         <button
           className="curso-card__delete-btn"
@@ -59,7 +83,16 @@ export default function CursoCard({ curso, isMaestro = false, onToggleVisibilida
         <div className="curso-card__maestro-info">
           <div className="curso-card__maestro-row">
             <span className="curso-card__maestro-label">Código:</span>
-            <span className="curso-card__maestro-value curso-card__codigo">{curso.codigo}</span>
+            <div className="curso-card__codigo-group">
+              <span className="curso-card__maestro-value curso-card__codigo">{curso.codigo}</span>
+              <button
+                className="curso-card__expand-btn"
+                onClick={(e) => { e.stopPropagation(); setModalOpen(true); }}
+                aria-label="Ver código completo"
+              >
+                ⛶
+              </button>
+            </div>
           </div>
           <div className="curso-card__maestro-row">
             <span className="curso-card__maestro-label">Visible:</span>
@@ -79,6 +112,7 @@ export default function CursoCard({ curso, isMaestro = false, onToggleVisibilida
           </div>
         </div>
       )}
-    </motion.div>
+      </motion.div>
+    </>
   );
 }

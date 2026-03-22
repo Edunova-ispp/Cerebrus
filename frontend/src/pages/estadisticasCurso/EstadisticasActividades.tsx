@@ -28,8 +28,15 @@ interface RepeticionesActividadDTO {
   repeticionesMaxima: number | null;
 }
 
-export default function EstadisticasActividades() {
-  const { id } = useParams<{ id: string }>();
+interface EstadisticasActividadesProps {
+  readonly cursoIdProp?: string;
+  readonly embedded?: boolean;
+  readonly temaIdSeleccionado?: number;
+}
+
+export default function EstadisticasActividades({ cursoIdProp, embedded, temaIdSeleccionado }: EstadisticasActividadesProps = {}) {
+  const params = useParams<{ id: string }>();
+  const id = cursoIdProp ?? params.id;
   const navigate = useNavigate();
   
   const [temas, setTemas] = useState<Tema[]>([]);
@@ -42,6 +49,15 @@ export default function EstadisticasActividades() {
   useEffect(() => {
     cargarTodo();
   }, [id]);
+
+  useEffect(() => {
+    if (temaIdSeleccionado != null && temas.length > 0) {
+      const tema = temas.find(t => t.id === temaIdSeleccionado);
+      if (tema && tema.id !== temaSeleccionado?.id) {
+        seleccionarTema(tema);
+      }
+    }
+  }, [temaIdSeleccionado, temas]);
 
   const cargarEstadisticasTema = async (temaId: number) => {
     const token = localStorage.getItem('token');
@@ -143,38 +159,44 @@ export default function EstadisticasActividades() {
   };
 
   return (
-    <div className="estadisticas-page">
-      <NavbarMisCursos />
+    <div className={embedded ? 'estadisticas-embedded' : 'estadisticas-page'}>
+      {!embedded && <NavbarMisCursos />}
       <main className="estadisticas-main">
-        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>← Volver</button>
-        <h1 className="estadisticas-titulo-curso">Actividades del Curso</h1>
+        {!embedded && (
+          <>
+            <button className="btn-volver-pixel" onClick={() => navigate(-1)}>← Volver</button>
+            <h1 className="estadisticas-titulo-curso">Actividades del Curso</h1>
+          </>
+        )}
 
         {loading && <p className="msg-placeholder">Cargando datos...</p>}
         {error && <p className="msg-placeholder" style={{ color: 'red' }}>{error}</p>}
 
         <div className="layout-estadisticas">
-          {/* PANEL IZQUIERDO: TEMAS */}
-          <aside className="panel-temas">
-            <h3>Temas</h3>
-            {temas.length === 0 ? (
-              <p className="msg-vacio">Este curso aun no tiene temas</p>
-            ) : (
-              <ul className="lista-temas-scroll">
-                {temas.map((tema) => (
-                  <li
-                    key={tema.id}
-                    className={`btn-medias-pixel ${temaSeleccionado?.id === tema.id ? 'active' : ''}`}
-                    onClick={() => seleccionarTema(tema)}
-                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') seleccionarTema(tema); }}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    {tema.titulo}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </aside>
+          {/* PANEL IZQUIERDO: TEMAS (hidden when controlled externally) */}
+          {temaIdSeleccionado == null && (
+            <aside className="panel-temas">
+              <h3>Temas</h3>
+              {temas.length === 0 ? (
+                <p className="msg-vacio">Este curso aun no tiene temas</p>
+              ) : (
+                <ul className="lista-temas-scroll">
+                  {temas.map((tema) => (
+                    <li
+                      key={tema.id}
+                      className={`btn-medias-pixel ${temaSeleccionado?.id === tema.id ? 'active' : ''}`}
+                      onClick={() => seleccionarTema(tema)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') seleccionarTema(tema); }}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      {tema.titulo}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </aside>
+          )}
 
           {/* PANEL DERECHO: ACTIVIDADES */}
           <section className="panel-actividades">
@@ -230,15 +252,7 @@ export default function EstadisticasActividades() {
           </section>
         </div>
 
-        <div className="botones-footer">
-          <button className="btn-medias-pixel" onClick={cargarTodo}>Actualizar ↻</button>
-          <button
-            className="btn-medias-pixel"
-            onClick={() => navigate(`/estadisticas/${id}/actividades/graficas`)}
-          >
-            Gráficas
-          </button>
-        </div>
+      
       </main>
     </div>
   );

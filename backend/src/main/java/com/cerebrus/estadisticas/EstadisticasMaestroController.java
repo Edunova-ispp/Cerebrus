@@ -1,6 +1,7 @@
 package com.cerebrus.estadisticas;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -16,8 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
+import com.cerebrus.estadisticas.dto.AlumnoBasicoDTO;
+import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasAlumnoResumenDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
@@ -99,6 +103,24 @@ public class EstadisticasMaestroController {
     @GetMapping("/cursos/{cursoId}/estadisiticas-curso")
     public EstadisticasCursoDTO obtenerEstadisticasCurso(@PathVariable Long cursoId) {
         return estadisticasMaestroService.obtenerEstadisticasCurso(cursoId);
+    }
+
+    @GetMapping("/cursos/{cursoId}/alumnos/{alumnoId}")
+    public ResponseEntity<?> obtenerResumenEstadisticasAlumno(@PathVariable Long cursoId, @PathVariable Long alumnoId) {
+        try {
+            EstadisticasAlumnoResumenDTO resultado = estadisticasMaestroService.obtenerResumenEstadisticasAlumno(cursoId, alumnoId);
+            return ResponseEntity.ok(resultado);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().startsWith("404")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", e.getMessage()));
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Ocurrió un error inesperado."));
+        }
     }
 
     @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/estadisticas-alumno")
