@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,8 +19,11 @@ import com.cerebrus.curso.dto.ProgresoDTO;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 @RestController
 @RequestMapping("/api/cursos")
+@Validated
 public class CursoController {
 
     private final CursoServiceImpl cursoService;
@@ -50,7 +53,7 @@ public class CursoController {
 
     public static class CrearCursoRequest {
 
-        @NotBlank
+        @NotBlank(message = "El titulo no puede estar vacio")
         private String titulo;
 
         private String descripcion;
@@ -115,6 +118,7 @@ public class CursoController {
         private String titulo;
 
         private String descripcion;
+
         private String imagen;
 
         public String getTitulo() { return titulo; }
