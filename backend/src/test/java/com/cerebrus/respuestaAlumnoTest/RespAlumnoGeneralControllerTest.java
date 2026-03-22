@@ -19,13 +19,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.cerebrus.actividadAlumno.ActividadAlumno;
+import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.pregunta.Pregunta;
-import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneral;
-import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneralController;
-import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneralCreateResponse;
-import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneralRequest;
-import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneralService;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneral;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneralController;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneralCreateResponse;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneralRequest;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneralService;
 
 @ExtendWith(MockitoExtension.class)
 public class RespAlumnoGeneralControllerTest {
