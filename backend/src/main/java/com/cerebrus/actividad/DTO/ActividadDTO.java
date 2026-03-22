@@ -1,4 +1,4 @@
-package com.cerebrus.actividad.DTO;
+package com.cerebrus.actividad.dto;
 
 import com.cerebrus.comun.enumerados.*;
 import com.cerebrus.actividad.Actividad;

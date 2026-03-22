@@ -325,4 +325,94 @@ public class IaConnectionServiceImpl implements IaConnectionService {
         }
        
     }
+
+    @Override
+    public Map<String, Object> evaluarRespuestaAbierta(String pregunta, String respuestaAlumno, String respuestaModelo, Integer puntuacionMaxima) {
+        
+        String apikeyActual;
+        Integer PeticionesMaximasDiariasPorKey = 20;
+        
+        Usuario usuario = usuarioService.findCurrentUser();
+        
+        String prompt = String.format(
+            """
+            Evalúa la siguiente respuesta de un alumno comparándola con el modelo de respuesta proporcionado por el profesor.
+            
+            PREGUNTA: %s
+            
+            RESPUESTA DEL ALUMNO: %s
+            
+            MODELO DE RESPUESTA DEL PROFESOR: %s
+            
+            Proporciona una puntuación entre 0 y %d basada en:
+            1. Precisión y exactitud de la respuesta
+            2. Completitud de la respuesta
+            3. Consistencia con el modelo de respuesta
+            
+            Devuelve EXCLUSIVAMENTE un JSON con el siguiente formato:
+            {
+              "puntuacion": <número entre 0 y %d>,
+              "comentarios": "<explicación breve de la puntuación>"
+            }
+            """,
+            pregunta, respuestaAlumno, respuestaModelo, puntuacionMaxima, puntuacionMaxima
+        );
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        
+        Map<String, Object> textPart = Map.of("text", prompt);
+        Map<String, Object> contents = Map.of("parts", List.of(textPart));
+        Map<String, Object> body = Map.of("contents", List.of(contents));
+        
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+        
+        try {
+            if(peticionesDiarias >= PeticionesMaximasDiariasPorKey){
+                if(IndiceKey<5){
+                    IndiceKey++;
+                    peticionesDiarias=0;
+                }else{
+                    if(fechaUltimaPeticion == null || !fechaUltimaPeticion.isEqual(LocalDate.now())) {
+                        fechaUltimaPeticion = LocalDate.now();
+                        IndiceKey=1;
+                        peticionesDiarias=0;
+                    }else{
+                        throw new IllegalArgumentException("429 Too Many Requests: Se han alcanzado el límite de peticiones diarias");
+                    }
+                }
+            }
+            
+            switch (IndiceKey) {
+                case 1 -> apikeyActual = apiKey1;
+                case 2 -> apikeyActual = apiKey2;
+                case 3 -> apikeyActual = apiKey3;
+                case 4 -> apikeyActual = apiKey4;
+                case 5 -> apikeyActual = apiKey5;
+                default -> throw new IllegalArgumentException("Error al seleccionar la clave de API");
+            }
+            
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apikeyActual;
+            
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+            
+            List candidates = (List) response.getBody().get("candidates");
+            Map firstCandidate = (Map) candidates.get(0);
+            Map content = (Map) firstCandidate.get("content");
+            List parts = (List) content.get("parts");
+            Map firstPart = (Map) parts.get(0);
+            String respuesta = (String) firstPart.get("text");
+            
+            String cleanedResponse = cleanJsonResponse(respuesta);
+            Map<String, Object> evaluacion = new com.fasterxml.jackson.databind.ObjectMapper()
+                .readValue(cleanedResponse, Map.class);
+            
+            peticionesDiarias++;
+            
+            return evaluacion;
+            
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error al evaluar la respuesta: " + e.getMessage());
+        }
+    }
 }

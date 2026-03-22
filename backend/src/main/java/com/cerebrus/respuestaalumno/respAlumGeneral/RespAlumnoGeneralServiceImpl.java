@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.ActividadRepository;
+import com.cerebrus.actividad.general.General;
 import com.cerebrus.actividadAlumno.ActividadAlumno;
 import com.cerebrus.actividadAlumno.ActividadAlumnoRepository;
+import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.iaconnection.IaConnectionService;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
 import com.cerebrus.respuestaMaestro.RespuestaMaestro;
@@ -37,11 +41,13 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     private final RespuestaMaestroService respuestaService;
     private final UsuarioService usuarioService;
     private final ActividadRepository actividadRepository;
+    private final IaConnectionService iaConnectionService;
 
     @Autowired
     public RespAlumnoGeneralServiceImpl(RespAlumnoGeneralRepository respAlumnoGeneralRepository, 
         ActividadAlumnoRepository actividadAlumnoRepository, PreguntaRepository preguntaRepository, 
-        RespuestaMaestroRepository respuestaRepository, RespuestaMaestroService respuestaService, UsuarioService usuarioService, ActividadRepository actividadRepository) {
+        RespuestaMaestroRepository respuestaRepository, RespuestaMaestroService respuestaService, UsuarioService usuarioService, ActividadRepository actividadRepository,
+        IaConnectionService iaConnectionService) {
         this.respAlumnoGeneralRepository = respAlumnoGeneralRepository;
         this.actividadAlumnoRepository = actividadAlumnoRepository;
         this.preguntaRepository = preguntaRepository;
@@ -49,6 +55,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         this.respuestaService = respuestaService;
         this.usuarioService = usuarioService;
         this.actividadRepository = actividadRepository;
+        this.iaConnectionService = iaConnectionService;
     }
 
     @Override
@@ -222,6 +229,71 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         actividadAlumnoRepository.save(actividadAlumno);
         resultado.put(-1L, "Nota final: " + nota + " - Puntuación final: " + puntuacion);
         return resultado;
-    
-}
+    }
+
+    @Override
+    @Transactional
+    public RespAlumnoAbiertaResponse crearRespAlumnoAbierta(RespAlumnoAbiertaRequest request) {
+        
+        Usuario u = usuarioService.findCurrentUser();
+        if (!(u instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede crear respuestas de alumno");
+        }
+
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(request.getActividadAlumnoId())
+            .orElseThrow(() -> new RuntimeException("La actividad del alumno no existe"));
+        
+        Pregunta pregunta = preguntaRepository.findById(request.getPreguntaId())
+            .orElseThrow(() -> new RuntimeException("La pregunta no existe"));
+        
+        General actividad = (General) pregunta.getActividad();
+        if (actividad.getTipo() != TipoActGeneral.ABIERTA) {
+            throw new IllegalArgumentException("La pregunta no pertenece a una actividad de tipo abierta");
+        }
+        
+        List<RespuestaMaestro> respuestasMaestro = respuestaService.encontrarRespuestasPorPreguntaId(request.getPreguntaId());
+        if (respuestasMaestro.isEmpty()) {
+            throw new RuntimeException("No se encontró modelo de respuesta para la pregunta");
+        }
+        
+        RespuestaMaestro modeloRespuesta = respuestasMaestro.get(0);
+        
+        Map<String, Object> evaluacion = iaConnectionService.evaluarRespuestaAbierta(
+            pregunta.getPregunta(),
+            request.getRespuestaAlumno(),
+            modeloRespuesta.getRespuesta(),
+            actividad.getPuntuacion()
+        );
+        
+        Integer puntuacion = ((Number) evaluacion.get("puntuacion")).intValue();
+        String comentariosIA = (String) evaluacion.get("comentarios");
+        
+        RespAlumnoGeneral respAlumnoGeneralEntity = new RespAlumnoGeneral(
+            puntuacion > 0, 
+            actividadAlumno, 
+            request.getRespuestaAlumno(), 
+            pregunta
+        );
+        
+        RespAlumnoGeneral guardada = respAlumnoGeneralRepository.save(respAlumnoGeneralEntity);
+        
+        actividadAlumno.setPuntuacion(puntuacion);
+        actividadAlumno.setNota(puntuacion);
+        actividadAlumno.setFechaFin(LocalDateTime.now());
+        actividadAlumnoRepository.save(actividadAlumno);
+        
+        String comentariosRespVisible = "";
+        if (actividad.getRespVisible()) {
+            comentariosRespVisible = actividad.getComentariosRespVisible() != null ? 
+                actividad.getComentariosRespVisible() : "";
+        }
+        
+        return new RespAlumnoAbiertaResponse(
+            guardada.getId(),
+            puntuacion,
+            comentariosIA,
+            actividad.getRespVisible(),
+            comentariosRespVisible
+        );
+    }
 }

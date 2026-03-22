@@ -68,6 +68,23 @@ public class RespAlumnoGeneralController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
+
+    @PostMapping("/abierta")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<RespAlumnoAbiertaResponse> crearRespAlumnoAbierta(@RequestBody @Valid RespAlumnoAbiertaRequest request) {
+        try {
+            RespAlumnoAbiertaResponse respuesta = respAlumnoGeneralService.crearRespAlumnoAbierta(request);
+            return new ResponseEntity<>(respuesta, HttpStatus.CREATED);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
     
 
 // ESTOS MÉTODOS QUEDAN DEFINIDOS POR SI ES NECESARIO UTILIZARLOS, PERO PARA LA FEATURE 35 NO SON NECESARIOS
