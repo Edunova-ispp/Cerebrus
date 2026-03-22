@@ -30,6 +30,7 @@ import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.estadisticas.EstadisticasMaestroServiceImpl;
+import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.respuestaAlumno.RespuestaAlumno;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
@@ -111,8 +112,8 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(usuarioGenerico);
 
         assertThatThrownBy(() -> cursoService.ObtenerCursosUsuarioLogueado())
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("403 Forbidden");
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Solo alumnos o maestros pueden consultar cursos");
     }
 
     // -------------------------------------------------------
@@ -138,8 +139,8 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(otroMaestro);
 
         assertThatThrownBy(() -> cursoService.obtenerDetallesCurso(10L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("403 Forbidden");
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("No tienes permiso para ver los detalles de este curso");
     }
 
     // Test para verificar que obtenerDetallesCurso retorna titulo, descripcion e imagen para alumno inscrito en curso visible
@@ -164,8 +165,8 @@ class CursoServiceImplTest {
         when(cursoRepository.findByAlumnoId(2L)).thenReturn(List.of(curso));
 
         assertThatThrownBy(() -> cursoService.obtenerDetallesCurso(10L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("403 Forbidden");
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("No tienes permiso para ver los detalles de este curso");
     }
 
     // Test para verificar que obtenerDetallesCurso lanza RuntimeException 403 cuando el alumno no está inscrito en el curso
@@ -176,8 +177,8 @@ class CursoServiceImplTest {
         when(cursoRepository.findByAlumnoId(2L)).thenReturn(List.of());
 
         assertThatThrownBy(() -> cursoService.obtenerDetallesCurso(10L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("403 Forbidden");
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("No tienes permiso para ver los detalles de este curso");
     }
 
     // Test para verificar que obtenerDetallesCurso lanza RuntimeException 404 cuando el curso no existe
@@ -186,8 +187,8 @@ class CursoServiceImplTest {
         when(cursoRepository.findByID(99L)).thenReturn(null);
 
         assertThatThrownBy(() -> cursoService.obtenerDetallesCurso(99L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("404 Not Found");
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No se ha encontrado una entidad del tipo Curso con campo id: '99'");
     }
 
     // Test para verificar que obtenerDetallesCurso lanza RuntimeException 403 cuando el usuario no es ni Maestro ni Alumno
@@ -197,8 +198,8 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(usuarioGenerico);
 
         assertThatThrownBy(() -> cursoService.obtenerDetallesCurso(10L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("403 Forbidden");
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Solo alumnos o maestros pueden consultar detalles del curso");
     }
 
     // -------------------------------------------------------
@@ -238,8 +239,8 @@ class CursoServiceImplTest {
         when(cursoRepository.findByID(99L)).thenReturn(null);
 
         assertThatThrownBy(() -> cursoService.cambiarVisibilidad(99L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("404 Not Found");
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No se ha encontrado una entidad del tipo Curso con campo id: '99'");
 
         verify(cursoRepository, never()).save(any());
     }
@@ -251,8 +252,8 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
         assertThatThrownBy(() -> cursoService.cambiarVisibilidad(10L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("403 Forbidden");
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Solo un maestro puede cambiar la visibilidad");
 
         verify(cursoRepository, never()).save(any());
     }
@@ -265,8 +266,8 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(otroMaestro);
 
         assertThatThrownBy(() -> cursoService.cambiarVisibilidad(10L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("403 Forbidden");
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Solo el propietario del curso puede cambiar su visibilidad");
 
         verify(cursoRepository, never()).save(any());
     }
@@ -358,8 +359,8 @@ class CursoServiceImplTest {
         when(cursoRepository.findByID(99L)).thenReturn(null);
 
         assertThatThrownBy(() -> cursoService.actualizarCurso(99L, "T", "D", null))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("404 Not Found");
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No se ha encontrado una entidad del tipo Curso con campo id: '99'");
 
         verify(cursoRepository, never()).save(any());
     }
@@ -473,8 +474,8 @@ class CursoServiceImplTest {
         when(cursoRepository.findByID(99L)).thenReturn(null);
 
         assertThatThrownBy(() -> cursoService.getProgreso(99L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("404 Not Found");
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No se ha encontrado una entidad del tipo Curso con campo id: '99'");
     }
 
     // Test para verificar que getProgreso lanza RuntimeException 403 cuando el usuario no es Alumno
@@ -484,8 +485,8 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
 
         assertThatThrownBy(() -> cursoService.getProgreso(10L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("403 Forbidden");
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Solo un alumno puede consultar su progreso");
     }
 
     // -------------------------------------------------------
