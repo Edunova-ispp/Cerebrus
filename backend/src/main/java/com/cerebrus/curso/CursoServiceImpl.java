@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.ActividadRepository;
-import com.cerebrus.actividadAlumno.ActividadAlumno;
-import com.cerebrus.actividadAlumno.ActividadAlumnoProgreso;
-import com.cerebrus.actividadAlumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadAlumn.ActividadAlumno;
+import com.cerebrus.actividadAlumn.ActividadAlumnoProgreso;
+import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
 import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.exceptions.ResourceNotFoundException;

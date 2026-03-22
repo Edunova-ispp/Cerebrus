@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.cerebrus.actividadAlumno.ActividadAlumno;
+import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.curso.Curso;
 
 @Repository

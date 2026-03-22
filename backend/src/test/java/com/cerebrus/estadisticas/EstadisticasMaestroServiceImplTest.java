@@ -20,7 +20,7 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadRepository;
-import com.cerebrus.actividadAlumno.ActividadAlumno;
+import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.inscripcion.Inscripcion;
@@ -157,7 +157,7 @@ class EstadisticasMaestroServiceImplTest {
         aa.setFechaInicio(LocalDateTime.now());
         aa.setFechaFin(LocalDateTime.now());
         aa.setNumAbandonos(0);
-        aa.setRespuestasAlumno(new ArrayList<>(List.of(new com.cerebrus.respuestaAlumno.RespuestaAlumno() {{
+        aa.setRespuestasAlumno(new ArrayList<>(List.of(new com.cerebrus.respuestaAlumn.RespuestaAlumno() {{
             setCorrecta(true);
         }})));
         return aa;
