@@ -13,6 +13,7 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "respuesta_alumno")
@@ -24,11 +25,13 @@ public abstract class RespuestaAlumno {
     private Long id;
 
     @Column(nullable = false)
+    @NotNull(message = "El campo correcta es obligatorio")
     private Boolean correcta;
 
     //Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actividad_alumno_id", nullable = false)
+    @NotNull(message = "La actividad del alumno es obligatoria")
     private ActividadAlumno actividadAlumno;
 
     // Constructores

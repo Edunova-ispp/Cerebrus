@@ -39,7 +39,7 @@ public class RespAlumnoOrdenacionController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<RespAlumnoOrdenacionCreateResponse> crearRespAlumnoOrdenacion(@RequestBody @Valid RespAlumnoOrdenacion respAlumnoOrdenacion) {
-        
+
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Alumno)) {
             throw new AccessDeniedException("Solo un alumno puede crear respuestas de alumno");

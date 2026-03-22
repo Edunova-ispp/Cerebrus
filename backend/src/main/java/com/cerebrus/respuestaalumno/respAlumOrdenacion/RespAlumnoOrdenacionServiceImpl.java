@@ -12,6 +12,7 @@ import com.cerebrus.actividad.ordenacion.Ordenacion;
 import com.cerebrus.actividad.ordenacion.OrdenacionRepository;
 import com.cerebrus.actividadAlumno.ActividadAlumno;
 import com.cerebrus.actividadAlumno.ActividadAlumnoRepository;
+import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.respuestaAlumno.respAlumOrdenacion.dto.RespAlumnoOrdenacionDTO;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
@@ -39,17 +40,38 @@ public class RespAlumnoOrdenacionServiceImpl implements RespAlumnoOrdenacionServ
     @Override
     @Transactional
     public RespAlumnoOrdenacionCreateResponse crearRespAlumnoOrdenacion(Long actAlumnoId, List<String> valoresAlum, Long actOrdId) {
+        if (actAlumnoId == null) {
+            throw new IllegalArgumentException("La actividad del alumno es obligatoria");
+        }
+
+        if (actOrdId == null) {
+            throw new IllegalArgumentException("La actividad de ordenacion es obligatoria");
+        }
+
+        if (valoresAlum == null || valoresAlum.isEmpty()) {
+            throw new IllegalArgumentException("Debes enviar al menos un valor");
+        }
+
+        List<String> valoresNormalizados = valoresAlum.stream()
+                .map(valor -> valor == null ? "" : valor.trim())
+                .toList();
+
+        if (valoresNormalizados.stream().anyMatch(String::isEmpty)) {
+            throw new IllegalArgumentException("Los valores ordenados no pueden estar vacios");
+        }
         
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Alumno)) {
             throw new AccessDeniedException("Solo un alumno puede crear respuestas de alumno a actividades de ordenación");
         }
 
-        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actAlumnoId).orElseThrow(() -> new RuntimeException("La actividad del alumno no existe"));
-        Ordenacion ordenacion = ordenacionRepository.findById(actOrdId).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actAlumnoId)
+                .orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
+        Ordenacion ordenacion = ordenacionRepository.findById(actOrdId)
+                .orElseThrow(() -> new ResourceNotFoundException("La actividad de ordenacion no existe"));
 
         List<String> valoresCorrectos = ordenacion.getValores();
-        Boolean correcta = valoresAlum.equals(valoresCorrectos);
+        Boolean correcta = valoresNormalizados.equals(valoresCorrectos);
         Integer numFallosAntes = actividadAlumno.getNumFallos();
         String comentario = null;
         if (ordenacion.getRespVisible()) {
@@ -61,7 +83,7 @@ public class RespAlumnoOrdenacionServiceImpl implements RespAlumnoOrdenacionServ
         RespAlumnoOrdenacion respAlumnoOrdenacion = new RespAlumnoOrdenacion();
         respAlumnoOrdenacion.setActividadAlumno(actividadAlumno);
         respAlumnoOrdenacion.setOrdenacion(ordenacion);
-        respAlumnoOrdenacion.setValoresAlum(valoresAlum);
+        respAlumnoOrdenacion.setValoresAlum(valoresNormalizados);
         respAlumnoOrdenacion.setCorrecta(correcta);
         respAlumnoOrdenacionRepository.save(respAlumnoOrdenacion);
 
