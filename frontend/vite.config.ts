@@ -18,6 +18,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       "/api": "http://backend:8080",
+      "/watchbug/": "http://watchbug:5000",
     },
     watch: {
       usePolling: true,
