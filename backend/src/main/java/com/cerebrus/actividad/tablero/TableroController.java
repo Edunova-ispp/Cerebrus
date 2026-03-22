@@ -59,7 +59,7 @@ public class TableroController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TableroDTO> getTablero(@PathVariable @NotNull Long id) {
+    public ResponseEntity<TableroDTO> getTablero(@PathVariable Long id) {
         try {
             TableroDTO tablero = tableroService.getTablero(id);
             return ResponseEntity.ok(tablero);
@@ -73,7 +73,7 @@ public class TableroController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarTablero(@PathVariable @NotNull Long id) {
+    public ResponseEntity<Void> eliminarTablero(@PathVariable Long id) {
         try {
             tableroService.eliminarTablero(id);
             return ResponseEntity.noContent().build();
@@ -87,7 +87,7 @@ public class TableroController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TableroDTO> actualizarTablero(@PathVariable @NotNull Long id, @RequestBody @Valid TableroRequest tablero) {
+    public ResponseEntity<TableroDTO> actualizarTablero(@PathVariable Long id, @RequestBody @Valid TableroRequest tablero) {
         try{    
         if ((tablero.getPreguntasYRespuestas().size() != 8 && tablero.getPreguntasYRespuestas().size() != 15) || (tablero.getTamano() && tablero.getPreguntasYRespuestas().size() != 8) || (!tablero.getTamano() && tablero.getPreguntasYRespuestas().size() != 15)) {
                 throw new IllegalArgumentException("El numero de preguntas no coincide con el tamano del tablero");

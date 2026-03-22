@@ -83,22 +83,22 @@ public class GeneralController {
     }
 
     @GetMapping("/test/{id}")
-    public ResponseEntity<GeneralTestDTO> readTipoTest(@PathVariable @NotNull Long id) {
+    public ResponseEntity<GeneralTestDTO> readTipoTest(@PathVariable Long id) {
         return ResponseEntity.ok(generalService.readTipoTest(id));
     }
 
     @GetMapping("/test/{id}/maestro")
-    public ResponseEntity<GeneralTestMaestroDTO> readTipoTestMaestro(@PathVariable @NotNull Long id) {
+    public ResponseEntity<GeneralTestMaestroDTO> readTipoTestMaestro(@PathVariable Long id) {
         return ResponseEntity.ok(generalService.readTipoTestMaestro(id));
     }
 
       @GetMapping("/cartas/{id}")
-    public ResponseEntity<GeneralCartaDTO> readTipoCarta(@PathVariable @NotNull Long id) {
+    public ResponseEntity<GeneralCartaDTO> readTipoCarta(@PathVariable Long id) {
         return ResponseEntity.ok(generalService.readTipoCarta(id));
     }
 
     @GetMapping("/cartas/{id}/maestro")
-    public ResponseEntity<GeneralCartaMaestroDTO> readTipoCartaMaestro(@PathVariable @NotNull Long id) {
+    public ResponseEntity<GeneralCartaMaestroDTO> readTipoCartaMaestro(@PathVariable Long id) {
         return ResponseEntity.ok(generalService.readTipoCartaMaestro(id));
     }
 
@@ -124,12 +124,12 @@ public class GeneralController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<General> readActividad(@PathVariable @NotNull Long id){
+    public ResponseEntity<General> readActividad(@PathVariable Long id){
         return ResponseEntity.ok(generalService.readActividad(id));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Void> updateActGeneral(@PathVariable @NotNull Long id, @RequestBody @Valid General general){
+    public ResponseEntity<Void> updateActGeneral(@PathVariable Long id, @RequestBody @Valid General general){
         generalService.updateActGeneral(
             id,
             general.getTitulo(),
@@ -145,7 +145,7 @@ public class GeneralController {
     }
     
     @PutMapping("/test/update/{id}")
-    public ResponseEntity<GeneralTestDTO> updateTipoTest(@PathVariable @NotNull Long id, @RequestBody @Valid General general){
+    public ResponseEntity<GeneralTestDTO> updateTipoTest(@PathVariable Long id, @RequestBody @Valid General general){
         generalService.updateTipoTest(
             id,
             general.getTitulo(),
@@ -164,7 +164,7 @@ public class GeneralController {
     }
 
     @PutMapping("/cartas/update/{id}")
-    public ResponseEntity<GeneralCartaDTO> updateTipoCarta(@PathVariable @NotNull Long id, @RequestBody @Valid General general) {
+    public ResponseEntity<GeneralCartaDTO> updateTipoCarta(@PathVariable Long id, @RequestBody @Valid General general) {
 
         generalService.updateTipoCarta(
         id,
@@ -183,7 +183,7 @@ public class GeneralController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteActividad(@PathVariable @NotNull Long id) {
+    public ResponseEntity<Void> deleteActividad(@PathVariable Long id) {
         generalService.deleteActividad(id);
         return ResponseEntity.noContent().build();
     }
@@ -207,17 +207,17 @@ public class GeneralController {
     }
     
     @GetMapping("/clasificacion/{id}/maestro")
-    public ResponseEntity<GeneralClasificacionMaestroDTO> readTipoClasificacionMaestro(@PathVariable @NotNull Long id) {
+    public ResponseEntity<GeneralClasificacionMaestroDTO> readTipoClasificacionMaestro(@PathVariable Long id) {
         return ResponseEntity.ok(generalService.readTipoClasificacionMaestro(id));
     }
 
     @GetMapping("/clasificacion/{id}")
-    public ResponseEntity<GeneralClasificacionDTO> readTipoClasificacion(@PathVariable @NotNull Long id) {
+    public ResponseEntity<GeneralClasificacionDTO> readTipoClasificacion(@PathVariable Long id) {
         return ResponseEntity.ok(generalService.readTipoClasificacion(id));
     }
 
     @PutMapping("/clasificacion/update/{id}")
-    public ResponseEntity<GeneralClasificacionMaestroDTO> updateTipoClasificacion(@PathVariable @NotNull Long id, @RequestBody @Valid General general){
+    public ResponseEntity<GeneralClasificacionMaestroDTO> updateTipoClasificacion(@PathVariable Long id, @RequestBody @Valid General general){
         GeneralClasificacionMaestroDTO actualizado = generalService.updateTipoClasificacion(
             id,
             general.getTitulo(),

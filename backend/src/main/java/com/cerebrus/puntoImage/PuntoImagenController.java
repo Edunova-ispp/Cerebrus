@@ -14,9 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.puntoImage.dto.PuntoImagenDTO;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-
 @RestController
 @RequestMapping("/api/puntos-imagen")
 @CrossOrigin(origins = "*")
@@ -32,13 +29,13 @@ public class PuntoImagenController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<PuntoImagenDTO> obtenerPuntoImagenPorId(@PathVariable @NotNull Long id) {
+    public ResponseEntity<PuntoImagenDTO> obtenerPuntoImagenPorId(@PathVariable Long id) {
         return new ResponseEntity<>(toPuntoImagenDTO(puntoImagenService.obtenerPuntoImagenPorId(id)), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> eliminarPuntoImagen(@PathVariable @NotNull Long id) {
+    public ResponseEntity<Void> eliminarPuntoImagen(@PathVariable Long id) {
         puntoImagenService.eliminarPuntoImagen(id);
         return ResponseEntity.noContent().build();
     }

@@ -24,7 +24,6 @@ import com.cerebrus.actividad.dtoo.ActividadDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 
 @RestController
 @RequestMapping("/api/temas")
@@ -52,9 +51,9 @@ public class TemaController {
     }
 
     @PutMapping("/{temaId}")
-    public ResponseEntity<TemaDTO> renombrarTema(@PathVariable @NotNull Long temaId,
+    public ResponseEntity<TemaDTO> renombrarTema(@PathVariable Long temaId,
             @Valid @RequestBody RenombrarTemaRequest request,
-            @RequestParam @NotNull Long maestroId) {
+            @RequestParam Long maestroId) {
         try {
             Tema tema = temaService.renombrarTema(temaId, request.getNuevoTitulo(), maestroId);
         List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
@@ -115,7 +114,7 @@ public class TemaController {
     }
 
     @GetMapping("/curso/{cursoId}/alumno")
-    public ResponseEntity<List<TemaDTO>> ObtenerTemasPorCursoAlumno(@PathVariable @NotNull Long cursoId) {
+    public ResponseEntity<List<TemaDTO>> ObtenerTemasPorCursoAlumno(@PathVariable Long cursoId) {
         List<Tema> temas = temaService.ObtenerTemasPorCursoAlumno(cursoId);
         List<TemaDTO> temasDTO = temas.stream().map(tema -> {
             List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
@@ -126,7 +125,7 @@ public class TemaController {
     }
 
     @GetMapping("/curso/{cursoId}/maestro")
-    public ResponseEntity<List<TemaDTO>> ObtenerTemasPorCursoMaestro(@PathVariable @NotNull(message = "El cursoId no puede ser nulo") Long cursoId) {
+    public ResponseEntity<List<TemaDTO>> ObtenerTemasPorCursoMaestro(@PathVariable Long cursoId) {
         List<Tema> temas = temaService.ObtenerTemasPorCursoMaestro(cursoId);
         List<TemaDTO> temasDTO = temas.stream().map(tema -> {
             List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());

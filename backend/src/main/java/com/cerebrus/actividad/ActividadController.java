@@ -45,7 +45,7 @@ public class ActividadController {
     }
 
     @GetMapping("/{id}/alumno")
-    public ResponseEntity<TeoriaDTO> getActividadAlumno(@PathVariable @NotNull Long id) {
+    public ResponseEntity<TeoriaDTO> getActividadAlumno(@PathVariable Long id) {
         try {
             Actividad actividad = actividadService.encontrarActividadPorIdAlumno(id);
             return ResponseEntity.ok(toTeoriaDto(actividad));
@@ -55,7 +55,7 @@ public class ActividadController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> eliminarActividad(@PathVariable @NotNull Long id) {
+    public ResponseEntity<Void> eliminarActividad(@PathVariable Long id) {
         try {
             actividadService.deleteActividad(id);
             return ResponseEntity.noContent().build();
@@ -80,9 +80,7 @@ public class ActividadController {
     }
 
     @PutMapping("/teoria/{id}")
-    public ResponseEntity<TeoriaDTO> updateActividadTeoria(
-            @PathVariable @NotNull Long id,
-            @RequestBody @Valid CrearActividadTeoriaRequest request) {
+    public ResponseEntity<TeoriaDTO> updateActividadTeoria(@PathVariable Long id, @RequestBody @Valid CrearActividadTeoriaRequest request) {
         try {
             Actividad actividad = actividadService.updateActividadTeoria(
                 id,
