@@ -3,6 +3,7 @@ package com.cerebrus.exceptions;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -135,6 +136,24 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(body);
     }
+
+        /**
+         * Maneja excepciones de acceso denegado
+         * Retorna 403 Forbidden
+         */
+        @ExceptionHandler(AccessDeniedException.class)
+        public ResponseEntity<?> handleAccessDenied(
+                        AccessDeniedException ex,
+                        WebRequest request) {
+
+                Map<String, Object> body = new HashMap<>();
+                body.put("status", HttpStatus.FORBIDDEN.value());
+                body.put("mensaje", ex.getMessage() != null ? ex.getMessage() : "Acceso denegado");
+
+                return ResponseEntity
+                                .status(HttpStatus.FORBIDDEN)
+                                .body(body);
+        }
 
     /**
      * Maneja excepciones generales
