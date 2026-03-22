@@ -15,6 +15,7 @@ import com.cerebrus.puntoImage.PuntoImagen;
 import com.cerebrus.puntoImage.PuntoImagenService;
 import com.cerebrus.puntoImage.dto.PuntoImagenDTO;
 import com.cerebrus.tema.Tema;
+import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.tema.TemaService;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
@@ -30,13 +31,15 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
     private final TemaService temaService;
     private final PuntoImagenService puntoImagenService;
     private final UsuarioService usuarioService;
+    private final TemaRepository temaRepository;
 
     @Autowired
-    public MarcarImagenServiceImpl(MarcarImagenRepository marcarImagenRepository, TemaService temaService, PuntoImagenService puntoImagenService, UsuarioService usuarioService) {
+    public MarcarImagenServiceImpl(MarcarImagenRepository marcarImagenRepository, TemaService temaService, PuntoImagenService puntoImagenService, UsuarioService usuarioService, TemaRepository temaRepository) {
         this.marcarImagenRepository = marcarImagenRepository;
         this.temaService = temaService;
         this.puntoImagenService = puntoImagenService;
         this.usuarioService = usuarioService;
+        this.temaRepository = temaRepository;
     }
 
     @Override
@@ -50,6 +53,9 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
 
         MarcarImagen marcarImagen = new MarcarImagen();
         Tema tema = temaService.obtenerTemaPorId(marcarImagenDTO.getTemaId());
+        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede crear esta actividad");
+        }
         List<PuntoImagen> puntosImagen = new LinkedList<>();
 
         marcarImagen.setTitulo(marcarImagenDTO.getTitulo());
@@ -90,8 +96,12 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
             throw new AccessDeniedException("Solo un usuario logueado como alumno o maestro puede obtener una actividad de marcar imagen");
         }
 
-        return marcarImagenRepository.findById(id)
+        MarcarImagen marcarImagen = marcarImagenRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Marcar Imagen", "id", id));
+        if (!marcarImagen.getTema().getCurso().getMaestro().getId().equals(u.getId()) && !marcarImagen.getTema().getCurso().getInscripciones().stream().anyMatch(a -> a.getAlumno().getId().equals(u.getId()))) {
+            throw new AccessDeniedException("Solo alguien perteneciente al curso puede acceder a esta actividad");
+        }
+        return marcarImagen;
     }
 
     @Override
@@ -102,6 +112,12 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede actualizar actividades de marcar imagenes");
         }
+
+        Tema tema = temaRepository.findById(marcarImagenDTO.getTemaId()).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
+        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede actualizar esta actividad");
+        }
+
 
         MarcarImagen marcarImagenAActualizar = obtenerMarcarImagenPorId(id);
         List<PuntoImagen> puntosImagen = new ArrayList<>(marcarImagenDTO.getPuntosImagen().stream()
@@ -152,6 +168,9 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
         }
 
         MarcarImagen marcarImagen = obtenerMarcarImagenPorId(id);
+        if (!marcarImagen.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede eliminar esta actividad");
+        }
         marcarImagenRepository.delete(marcarImagen);
     }
 }

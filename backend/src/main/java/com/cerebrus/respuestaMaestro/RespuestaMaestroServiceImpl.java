@@ -41,6 +41,9 @@ public class RespuestaMaestroServiceImpl implements RespuestaMaestroService {
 
         Pregunta pregunta = preguntaRepository.findById(preguntaId).orElseThrow(() -> new ResourceNotFoundException("La pregunta de la respuesta no existe"));
         
+        if (!pregunta.getActividad().getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede crear esta respuesta");
+        }
         RespuestaMaestro respuestaObj = new RespuestaMaestro();
         respuestaObj.setRespuesta(respuesta);
         respuestaObj.setImagen(imagen);
@@ -79,6 +82,10 @@ public class RespuestaMaestroServiceImpl implements RespuestaMaestroService {
         }
 
         RespuestaMaestro respuestaObj = respuestaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La respuesta no existe"));
+        if (!respuestaObj.getPregunta().getActividad().getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede actualizar esta respuesta");
+        }
+
         respuestaObj.setRespuesta(respuestaNormalizada);
         respuestaObj.setImagen(imagenNormalizada);
         respuestaObj.setCorrecta(correcta);
@@ -95,6 +102,9 @@ public class RespuestaMaestroServiceImpl implements RespuestaMaestroService {
         }
 
         RespuestaMaestro respuestaObj = respuestaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La respuesta no existe"));
+        if (!respuestaObj.getPregunta().getActividad().getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede eliminar esta respuesta");
+        }
         respuestaRepository.delete(respuestaObj);
     }
 

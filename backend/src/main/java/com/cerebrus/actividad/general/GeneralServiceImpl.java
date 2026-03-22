@@ -69,6 +69,9 @@ public class GeneralServiceImpl implements GeneralService {
         }
 
         Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
+        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede crear actividades para ese curso");
+        }
         General actividad = new General();
         actividad.setTitulo(titulo);
         actividad.setDescripcion(descripcion);
@@ -93,6 +96,10 @@ public class GeneralServiceImpl implements GeneralService {
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede crear actividades");
         }
+        Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
+        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede crear actividades para ese curso");
+        }
 
         General tipoTest = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
 
@@ -107,13 +114,19 @@ public class GeneralServiceImpl implements GeneralService {
 
     @Override
     @Transactional
-    public General crearTipoCarta(String titulo, String descripcion, Integer puntuacion, Long temaId, 
+    public General crearTipoCarta(String titulo, String descripcion, Integer puntuacion, Long temaId,
         Boolean respVisible, String comentariosRespVisible,
             List<Long> preguntasId) {
                 Usuario usuario = usuarioService.findCurrentUser();
                 if(!(usuario instanceof Maestro)){
                     throw new AccessDeniedException("Solo un maestro puede crear actividades");
                 }
+
+                Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
+                if (!tema.getCurso().getMaestro().getId().equals(usuario.getId())) {
+                    throw new AccessDeniedException("Solo el maestro del curso puede crear actividades para ese curso");
+                }
+
                 General tipoCarta = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
                 List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
                 if(preguntas.size() != preguntasId.size()){
@@ -129,7 +142,7 @@ public class GeneralServiceImpl implements GeneralService {
                 tipoCarta.setPreguntas(preguntas);
                 tipoCarta.setTipo(TipoActGeneral.CARTA);
                 return generalRepository.save(tipoCarta);
-            } 
+            }
 
     @Override
     @Transactional(readOnly = true)
@@ -210,6 +223,10 @@ public class GeneralServiceImpl implements GeneralService {
             throw new ResourceNotFoundException("La actividad no es de tipo test");
         }
 
+        if(general.getTema() != null && !general.getTema().getCurso().getMaestro().getId().equals(u.getId())){
+            throw new AccessDeniedException("Solo el maestro del curso puede acceder a esta actividad");
+        }
+
         general.getPreguntas().forEach(p -> p.getRespuestasMaestro().size());
 
         List<PreguntaMaestroDTO> preguntasDTO = general.getPreguntas().stream().map(pregunta -> {
@@ -243,6 +260,10 @@ public class GeneralServiceImpl implements GeneralService {
             throw new ResourceNotFoundException("La actividad no es de tipo carta");
         }
 
+        if(general.getTema() != null && !general.getTema().getCurso().getMaestro().getId().equals(u.getId())){
+            throw new AccessDeniedException("Solo el maestro del curso puede acceder a esta actividad");
+        }
+
         general.getPreguntas().forEach(p -> p.getRespuestasMaestro().size());
 
         List<PreguntaMaestroDTO> preguntasDTO = general.getPreguntas().stream().map(pregunta -> {
@@ -268,9 +289,14 @@ public class GeneralServiceImpl implements GeneralService {
     if (!(u instanceof Maestro)) {
         throw new AccessDeniedException("Solo un maestro puede actualizar actividades");
     }
+
     
     General actividad = generalRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
+
+    if (!actividad.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+        throw new AccessDeniedException("Solo el maestro del curso puede actualizar esta actividad");
+    }
     
     actividad.setTitulo(titulo);
     actividad.setDescripcion(descripcion);
@@ -305,6 +331,7 @@ public class GeneralServiceImpl implements GeneralService {
             throw new AccessDeniedException("Solo un maestro puede actualizar actividades tipo test");
         }
 
+
         General tipoTest = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
             posicion, version, temaId);
         if(preguntasId != null){
@@ -334,7 +361,10 @@ public class GeneralServiceImpl implements GeneralService {
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede actualizar actividades tipo carta");
         }
-
+        Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
+        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede actualizar esta actividad");
+        }
         General tipoCarta = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
             posicion, version, temaId);
         if(preguntasId != null){
@@ -368,7 +398,11 @@ public class GeneralServiceImpl implements GeneralService {
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede eliminar actividades");
         }
+        
         General general = generalRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
+        if (!general.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede eliminar esta actividad");
+        }
         List<Pregunta> preguntas = general.getPreguntas();
         preguntaRepository.deleteAll(preguntas);
         generalRepository.delete(general);
@@ -383,6 +417,11 @@ public class GeneralServiceImpl implements GeneralService {
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede crear actividades");
         }
+        Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
+        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede crear esta actividad");
+        }
+
         General clasificacion = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
         clasificacion.setTipo(TipoActGeneral.CLASIFICACION);
        
@@ -406,7 +445,9 @@ public class GeneralServiceImpl implements GeneralService {
         General general = generalRepository.findByIdWithPreguntas(id)
             .orElseThrow(() -> new ResourceNotFoundException("Actividad tipo clasificación no encontrada"));
             
-           
+        if(general.getTema() != null && !general.getTema().getCurso().getMaestro().getId().equals(u.getId())){
+            throw new AccessDeniedException("Solo el maestro del curso puede acceder a esta actividad");
+        }
        
         if (general.getTipo() != TipoActGeneral.CLASIFICACION) {
             throw new ResourceNotFoundException("La actividad no es de tipo clasificación");
@@ -491,6 +532,10 @@ public GeneralClasificacionDTO readTipoClasificacion(Long id) {
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede actualizar actividades tipo clasificación");
+        }
+        Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
+        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede actualizar esta actividad");
         }
         System.out.println("Actualizando tipo clasificación: " + id);
 

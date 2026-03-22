@@ -46,6 +46,10 @@ public class OrdenacionServiceImpl implements OrdenacionService {
 
         Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
         
+        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede crear esta actividad");
+        }
+
         Ordenacion ordenacion = new Ordenacion();
         ordenacion.setTitulo(titulo);
         ordenacion.setDescripcion(descripcion);
@@ -84,9 +88,13 @@ public class OrdenacionServiceImpl implements OrdenacionService {
             throw new AccessDeniedException("Solo un maestro puede leer actividades de ordenación para edición");
         }
 
+
         Ordenacion ordenacion = ordenacionRepository.findWithValoresById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Ordenacion", "id", id));
 
+        if (!ordenacion.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede acceder a esta actividad");
+            }
         // Fuerza la inicialización dentro de la transacción (por si el provider ignora el EntityGraph)
         ordenacion.getValores().size();
         if (ordenacion.getTema() != null) {
@@ -110,6 +118,9 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
 
         Ordenacion ordenacion = ordenacionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Ordenacion", "id", id));
+        if (!ordenacion.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede actualizar esta actividad");
+        }
         ordenacion.setTitulo(titulo);
         ordenacion.setDescripcion(descripcion);
         ordenacion.setPuntuacion(puntuacion);
@@ -136,6 +147,11 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         if (!ordenacionRepository.existsById(id)) {
             throw new ResourceNotFoundException("Ordenacion", "id", id);
         }
+        Ordenacion ordenacion = ordenacionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Ordenacion", "id", id));
+        if (!ordenacion.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede eliminar esta actividad");
+        }
+
         ordenacionRepository.deleteById(id);
     }
 
