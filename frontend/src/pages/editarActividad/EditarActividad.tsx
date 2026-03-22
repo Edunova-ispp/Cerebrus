@@ -138,12 +138,22 @@ type CrucigramaMaestroDTO = {
 
 type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'marcarImagen' | 'clasificacion' | 'carta' | 'crucigrama' | null;
 
-export default function EditarActividad() {
-  const { id: cursoId, actividadId } = useParams<{
+interface EditarActividadProps {
+  readonly actividadIdProp?: string;
+  readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
+  readonly embedded?: boolean;
+  readonly onDone?: () => void;
+}
+
+export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdProp, embedded, onDone }: EditarActividadProps = {}) {
+  const params = useParams<{
     id: string;
     temaId: string;
     actividadId: string;
   }>();
+  const cursoId = cursoIdProp ?? params.id;
+  const actividadId = actividadIdProp ?? params.actividadId;
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -394,6 +404,9 @@ export default function EditarActividad() {
           mode="edit"
           generalId={actividadIdNum}
           initialValues={testInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -404,6 +417,9 @@ export default function EditarActividad() {
           mode="edit"
           ordenacionId={actividadIdNum}
           initialValues={ordenacionInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -414,6 +430,9 @@ export default function EditarActividad() {
           mode="edit"
           actividadId={actividadIdNum}
           initialValues={teoriaInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -424,6 +443,9 @@ export default function EditarActividad() {
           mode="edit"
           marcarImagenId={actividadIdNum}
           initialValues={marcarImagenInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -434,6 +456,9 @@ export default function EditarActividad() {
           mode="edit"
           tableroId={tableroInitialValues ? tablero.id : undefined}
           initialValues={tableroInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -444,6 +469,9 @@ export default function EditarActividad() {
           mode="edit"
           generalId={actividadIdNum}
           initialValues={cartaInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -454,6 +482,9 @@ export default function EditarActividad() {
           mode="edit"
           clasificacionId={actividadIdNum}
           initialValues={clasificacionInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -464,6 +495,9 @@ export default function EditarActividad() {
           mode="edit"
           crucigramaId={actividadIdNum}
           initialValues={crucigramaInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -472,18 +506,20 @@ export default function EditarActividad() {
   };
 
   return (
-    <div className="ca-page">
-      <NavbarMisCursos />
+    <div className={embedded ? 'ca-embedded' : 'ca-page'}>
+      {!embedded && <NavbarMisCursos />}
       <main className="ca-main">
-        <div className="ca-sidebar">
-          <button
-            className="ca-sidebar-btn"
-            type="button"
-            onClick={() => navigate(`/cursos/${cursoId}/temas`)}
-          >
-            Volver al Mapa
-          </button>
-        </div>
+        {!embedded && (
+          <div className="ca-sidebar">
+            <button
+              className="ca-sidebar-btn"
+              type="button"
+              onClick={() => navigate(`/cursos/${cursoId}`)}
+            >
+              Volver al Mapa
+            </button>
+          </div>
+        )}
 
         <div className="ca-contenido">
           {loading && <p className="ca-text">Cargando actividad...</p>}

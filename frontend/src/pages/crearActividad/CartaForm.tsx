@@ -46,13 +46,16 @@ interface Props {
   readonly mode?: CartaFormMode;
   readonly generalId?: number;
   readonly initialValues?: CartaFormInitialValues;
+  readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
+  readonly onDone?: () => void;
 }
 
 function makeEmptyCard(): Card {
   return { localKey: makeLocalCardKey(), pregunta: '', respuesta: '', imagen: '' };
 }
 
-export function CartaForm({ mode = 'create', generalId, initialValues }: Props) {
+export function CartaForm({ mode = 'create', generalId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -68,7 +71,9 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
   const originalCardsRef = useRef<CartaFormInitialPregunta[]>([]);
 
   const navigate = useNavigate();
-  const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+  const params = useParams<{ id: string; temaId: string }>();
+  const cursoId = cursoIdProp ?? params.id;
+  const temaId = temaIdProp ?? params.temaId;
 
   useEffect(() => {
     if (!initialValues) return;
@@ -299,7 +304,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
         }
       }
 
-      navigate(`/cursos/${cursoId}/temas`);
+      if (onDone) onDone(); else navigate(`/cursos/${cursoId}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error guardando la actividad de cartas';
       setError(msg);

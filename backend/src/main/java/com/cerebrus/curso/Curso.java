@@ -19,6 +19,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "curso")
@@ -29,6 +31,7 @@ public class Curso {
     private Long id;
 
     @Column(nullable = false)
+    @NotBlank(message = "El titulo no puede estar vacio")
     private String titulo;
 
     @Column(columnDefinition = "TEXT")
@@ -40,6 +43,7 @@ public class Curso {
     private String codigo;
 
     @Column(nullable = false)
+    @NotNull(message = "La visibilidad es obligatoria")
     private Boolean visibilidad;
 
     //Relaciones

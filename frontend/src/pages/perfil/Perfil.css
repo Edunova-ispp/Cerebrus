@@ -5,7 +5,7 @@
   justify-content: center;
   height: 70vh;
   gap: 32px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
 }
 
 .perfil-title {
@@ -16,7 +16,7 @@
 }
 
 .perfil-logout-btn {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 2rem;
   font-weight: bold;
   color: var(--color-text);

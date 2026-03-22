@@ -1,0 +1,337 @@
+/* ===== ROOT ===== */
+.ea-root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ===== ALUMNO HEADER ===== */
+.ea-alumno-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 12px;
+  border-bottom: 2.5px solid #000;
+}
+
+.ea-alumno-nombre {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.1;
+}
+
+.ea-alumno-subtitle {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.85rem;
+  color: #666;
+  letter-spacing: 0.03em;
+}
+
+/* ===== TEMA SECTION ===== */
+.ea-tema-section {
+  border: 2.5px solid #000;
+  border-radius: 10px;
+  box-shadow: 3px 3px 0px #000;
+}
+
+.ea-tema-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.ea-tema-header:hover {
+  background: var(--color-accent-light, #fdf3c8);
+}
+
+.ea-tema-header--done {
+  background: #f0fce8;
+}
+
+.ea-tema-header--done:hover {
+  background: #e2f8d4;
+}
+
+.ea-tema-arrow {
+  font-size: 1rem;
+  flex-shrink: 0;
+  width: 16px;
+}
+
+.ea-tema-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ea-tema-badge {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-family: 'Oxygen', sans-serif;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 2px solid #000;
+  white-space: nowrap;
+}
+
+.ea-tema-badge--done {
+  background: #c6f0ab;
+  color: #1a5c00;
+}
+
+.ea-tema-badge--pending {
+  background: #ffe8a3;
+  color: #7a5800;
+}
+
+/* ===== ACTIVIDADES LIST ===== */
+.ea-actividades-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 2.5px solid #000;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+}
+
+.ea-actividad-block {
+  border-bottom: 1.5px solid #ddd;
+}
+
+.ea-actividad-block:last-child {
+  border-bottom: none;
+}
+
+/* ===== ACTIVIDAD ROW ===== */
+.ea-actividad-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 10px 28px;
+  background: #fafafa;
+  border: none;
+  cursor: pointer;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.92rem;
+  color: #000;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.ea-actividad-row:hover {
+  background: #f5f0e8;
+}
+
+.ea-actividad-row--done {
+  background: #f9fdf7;
+}
+
+.ea-actividad-row--done:hover {
+  background: #edf8e5;
+}
+
+.ea-actividad-row--pending {
+  background: #fafafa;
+}
+
+.ea-act-tipo-badge {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-family: 'Oxygen', sans-serif;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1.5px solid #000;
+  background: #FCEF91;
+  color: #000;
+  white-space: nowrap;
+}
+
+.ea-act-titulo {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.ea-act-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Nota badge */
+.ea-nota-badge {
+  font-size: 0.82rem;
+  font-family: 'Oxygen', sans-serif;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1.5px solid #000;
+  white-space: nowrap;
+}
+
+.ea-nota-badge--above {
+  background: #b6f5b6;
+  color: #135000;
+}
+
+.ea-nota-badge--below {
+  background: #ffd4d4;
+  color: #7a0000;
+}
+
+.ea-nota-badge--avg {
+  background: #ffe8a3;
+  color: #7a5800;
+}
+
+.ea-nota-badge--none {
+  background: #eee;
+  color: #666;
+}
+
+.ea-act-media {
+  font-size: 0.75rem;
+  color: #666;
+  font-family: 'Oxygen', sans-serif;
+  white-space: nowrap;
+}
+
+.ea-act-desv {
+  font-size: 0.78rem;
+  font-family: 'Oxygen', sans-serif;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ea-act-desv--pos {
+  color: #1a7300;
+}
+
+.ea-act-desv--neg {
+  color: #c00000;
+}
+
+.ea-act-no-completada {
+  font-size: 0.75rem;
+  color: #999;
+  font-style: italic;
+}
+
+.ea-act-intentos-badge {
+  font-size: 0.7rem;
+  font-family: 'Oxygen', sans-serif;
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1.5px solid #bbb;
+  background: #f0f0f0;
+  color: #333;
+  white-space: nowrap;
+}
+
+.ea-act-expand-arrow {
+  font-size: 0.8rem;
+  color: #666;
+  flex-shrink: 0;
+}
+
+/* ===== INTENTOS LIST ===== */
+.ea-intentos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: #fff;
+  border-top: 1.5px solid #e0d5c3;
+}
+
+.ea-intento-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 16px 7px 40px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.82rem;
+  color: #333;
+  border-bottom: 1px solid #f0ebe0;
+}
+
+.ea-intento-row:last-child {
+  border-bottom: none;
+}
+
+.ea-intento-num {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: #888;
+  width: 28px;
+}
+
+.ea-intento-fecha {
+  flex: 1;
+  min-width: 0;
+  color: #555;
+}
+
+.ea-intento-nota {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: #000;
+  min-width: 44px;
+  text-align: right;
+}
+
+.ea-intento-puntos {
+  flex-shrink: 0;
+  color: #555;
+  min-width: 52px;
+  text-align: right;
+}
+
+.ea-intento-tiempo {
+  flex-shrink: 0;
+  color: #777;
+  min-width: 44px;
+  text-align: right;
+}
+
+.ea-intento-abandonos {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  color: #c54a00;
+  background: #fff3e0;
+  border: 1px solid #c54a00;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+/* ===== EMPTY / ERROR ===== */
+.ea-empty {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.85rem;
+  color: #999;
+  padding: 10px 16px 10px 28px;
+  margin: 0;
+  font-style: italic;
+}

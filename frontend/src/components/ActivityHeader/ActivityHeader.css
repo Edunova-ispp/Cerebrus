@@ -14,7 +14,7 @@
   border: 3px solid #000;
   border-radius: 12px;
   padding: 6px 14px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.55rem;
   font-weight: bold;
   cursor: pointer;
@@ -55,14 +55,14 @@
 
 .ah-title {
   margin: 0;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: clamp(1.8rem, 3.2vw, 2.6rem);
   line-height: 1.15;
 }
 
 .ah-subtitle {
   margin: 4px 0 0;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.1rem;
   color: #ffffffcc;
 }

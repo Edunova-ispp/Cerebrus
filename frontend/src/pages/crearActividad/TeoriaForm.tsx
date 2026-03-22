@@ -17,9 +17,12 @@ interface Props {
   readonly mode?: 'create' | 'edit';
   readonly actividadId?: number;
   readonly initialValues?: TeoriaFormInitialValues;
+  readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
+  readonly onDone?: () => void;
 }
 
-export function TeoriaForm({ mode = 'create', actividadId, initialValues }: Props) {
+export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [imagen, setImagen] = useState('');
@@ -29,7 +32,9 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues }: Prop
 
 
   const navigate = useNavigate();
-  const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+  const params = useParams<{ id: string; temaId: string }>();
+  const cursoId = cursoIdProp ?? params.id;
+  const temaId = temaIdProp ?? params.temaId;
 
   useEffect(() => {
     console.log("Intial values", initialValues);
@@ -88,7 +93,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues }: Prop
         });
       }
 
-      navigate(-1);
+      if (onDone) onDone(); else navigate(-1);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Error guardando la teoría';
       setError(msg);

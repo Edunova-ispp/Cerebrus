@@ -43,6 +43,19 @@
   font-weight: 700;
 }
 
+.cr-timer {
+  background: #b49aff;
+  color: #000;
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 6px 14px;
+  box-shadow: 3px 3px 0 #000;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .cr-progress-bar {
   flex: 1;
   height: 16px;

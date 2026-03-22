@@ -25,6 +25,9 @@ interface Props {
     readonly mode?: CrucigramaFormMode;
     readonly crucigramaId?: number;
     readonly initialValues?: CrucigramaFormInitialValues;
+    readonly temaIdProp?: string;
+    readonly cursoIdProp?: string;
+    readonly onDone?: () => void;
 }
 
 interface PreguntaLocal {
@@ -34,7 +37,7 @@ interface PreguntaLocal {
 
 const MAX_PALABRAS = 10;
 
-export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues }: Props) {
+export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
     const [titulo, setTitulo] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [puntuacion, setPuntuacion] = useState(10);
@@ -44,7 +47,9 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues }:
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
-    const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+    const params = useParams<{ id: string; temaId: string }>();
+    const cursoId = cursoIdProp ?? params.id;
+    const temaId = temaIdProp ?? params.temaId;
 
     // ── Load initial values ───────────────────────────────────────────────
     useEffect(() => {
@@ -133,7 +138,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues }:
                 throw new Error((errorData as any).message || 'Error del servidor al guardar');
             }
 
-            navigate(`/cursos/${cursoId}/temas`);
+            if (onDone) onDone(); else navigate(`/cursos/${cursoId}/temas`);
         } catch (err: any) {
             setError(err.message || 'No se pudo conectar con el servidor.');
         } finally {
@@ -263,8 +268,8 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues }:
                 {loading
                     ? 'PROCESANDO...'
                     : mode === 'edit'
-                        ? 'ACTUALIZAR CRUCIGRAMA'
-                        : 'GUARDAR CRUCIGRAMA'}
+                        ? 'GUARDAR'
+                        : 'GUARDAR '}
             </button>
         </form>
     );

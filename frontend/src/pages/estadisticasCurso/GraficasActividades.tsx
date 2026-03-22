@@ -170,8 +170,9 @@ function BarChart({
   );
 }
 
-export default function GraficasActividades() {
-  const { cursoId } = useParams<{ cursoId: string }>();
+export default function GraficasActividades({ cursoIdProp, embedded, temaIdSeleccionado }: { cursoIdProp?: string; embedded?: boolean; temaIdSeleccionado?: number } = {}) {
+  const params = useParams<{ cursoId: string }>();
+  const cursoId = cursoIdProp ?? params.cursoId;
   const navigate = useNavigate();
 
   const [temas, setTemas] = useState<Tema[]>([]);
@@ -179,11 +180,21 @@ export default function GraficasActividades() {
   const [mapaEstadisticas, setMapaEstadisticas] = useState<Map<number, EstadisticasActividadDTO>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [chartMode, setChartMode] = useState<'nota' | 'tiempo'>('nota');
 
   useEffect(() => {
     cargarEstructuraYSeleccion();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cursoId]);
+
+  useEffect(() => {
+    if (temaIdSeleccionado != null && temas.length > 0) {
+      const tema = temas.find(t => t.id === temaIdSeleccionado);
+      if (tema && tema.id !== temaSeleccionado?.id) {
+        seleccionarTema(tema);
+      }
+    }
+  }, [temaIdSeleccionado, temas]);
 
   const cargarEstructuraYSeleccion = async () => {
     setLoading(true);
@@ -278,13 +289,17 @@ export default function GraficasActividades() {
   }, [temaSeleccionado, mapaEstadisticas]);
 
   return (
-    <div className="estadisticas-page">
-      <NavbarMisCursos />
-      <main className="estadisticas-main">
-        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
-          ← Volver
-        </button>
-        <h1 className="estadisticas-titulo-curso">Gráficas de Actividades</h1>
+    <div className={embedded ? 'graficas-embedded' : 'estadisticas-page'}>
+      {!embedded && <NavbarMisCursos />}
+      <main className={embedded ? 'graficas-embedded-main' : 'estadisticas-main'}>
+        {!embedded && (
+          <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
+            ← Volver
+          </button>
+        )}
+        <div className="chart-header">
+          <h2 className="chart-main-title">Gráficas de Actividades</h2>
+        </div>
 
         {loading && <p className="msg-placeholder">Cargando datos...</p>}
         {error && (
@@ -295,51 +310,74 @@ export default function GraficasActividades() {
 
         {!loading && !error && (
           <div className="layout-estadisticas">
-            <aside className="panel-temas">
-              <h3>Temas</h3>
-              {temas.length === 0 ? (
-                <p className="msg-vacio">Este curso aun no tiene temas</p>
-              ) : (
-                <ul className="lista-temas-scroll">
-                  {temas.map((tema) => (
-                    <li
-                      key={tema.id}
-                      className={`btn-medias-pixel ${temaSeleccionado?.id === tema.id ? 'active' : ''}`}
-                      onClick={() => seleccionarTema(tema)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') seleccionarTema(tema);
-                      }}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      {tema.titulo}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </aside>
+            {temaIdSeleccionado == null && (
+              <aside className="panel-temas">
+                <h3>Temas</h3>
+                {temas.length === 0 ? (
+                  <p className="msg-vacio">Este curso aun no tiene temas</p>
+                ) : (
+                  <ul className="lista-temas-scroll">
+                    {temas.map((tema) => (
+                      <li
+                        key={tema.id}
+                        className={`btn-medias-pixel ${temaSeleccionado?.id === tema.id ? 'active' : ''}`}
+                        onClick={() => seleccionarTema(tema)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') seleccionarTema(tema);
+                        }}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        {tema.titulo}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </aside>
+            )}
 
             <section className="panel-actividades">
               {temaSeleccionado ? (
                 <div className="charts-grid">
-                  <h3>{temaSeleccionado.titulo}</h3>
+                  <div className="chart-header">
+                    <h3 className="chart-subtitle">{temaSeleccionado.titulo}</h3>
+                    {temaSeleccionado.actividades.length > 0 && (
+                      <div className="chart-toggle">
+                        <button
+                          className={`chart-toggle-btn${chartMode === 'nota' ? ' chart-toggle-btn--active' : ''}`}
+                          onClick={() => setChartMode('nota')}
+                        >
+                          Nota
+                        </button>
+                        <button
+                          className={`chart-toggle-btn${chartMode === 'tiempo' ? ' chart-toggle-btn--active' : ''}`}
+                          onClick={() => setChartMode('tiempo')}
+                        >
+                          Tiempo
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   {temaSeleccionado.actividades.length === 0 ? (
                     <p className="msg-vacio">Este tema aun no tiene actividades</p>
                   ) : (
                     <>
-                      <BarChart
-                        titulo="Nota media por actividad"
-                        data={datosNotaMedia}
-                        barColor="#D10057"
-                        legendBarLabel="Barras: nota media"
-                      />
-                      <BarChart
-                        titulo="Tiempo medio por actividad"
-                        data={datosTiempoMedio}
-                        unidad="mins"
-                        barColor="#7C4DFF"
-                        legendBarLabel="Barras: tiempo medio"
-                      />
+                      {chartMode === 'nota' ? (
+                        <BarChart
+                          titulo="Nota media por actividad"
+                          data={datosNotaMedia}
+                          barColor="#D10057"
+                          legendBarLabel="Barras: nota media"
+                        />
+                      ) : (
+                        <BarChart
+                          titulo="Tiempo medio por actividad"
+                          data={datosTiempoMedio}
+                          unidad="mins"
+                          barColor="#7C4DFF"
+                          legendBarLabel="Barras: tiempo medio"
+                        />
+                      )}
                     </>
                   )}
                 </div>

@@ -3,7 +3,7 @@ package com.cerebrus.actividad;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cerebrus.actividadAlumno.ActividadAlumno;
+import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.tema.Tema;
 
 import jakarta.persistence.CascadeType;
@@ -19,6 +19,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 @Entity
 @Table(name = "actividad")
@@ -30,26 +34,34 @@ public abstract class Actividad {
     private Long id;
 
     @Column(nullable = false)
+    @NotBlank(message = "El titulo no puede estar vacio")
     private String titulo;
 
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
     @Column(nullable = false)
+    @NotNull(message = "La puntuacion es obligatoria")
+    @PositiveOrZero(message = "La puntuacion no puede ser negativa")
     private Integer puntuacion;
 
     private String imagen;
 
     @Column(nullable = false)
+    @NotNull(message = "El campo respVisible es obligatorio")
     private Boolean respVisible = false;
 
     @Column
     private String comentariosRespVisible;
 
     @Column(nullable = false)
+    @NotNull(message = "La posicion es obligatoria")
+    @PositiveOrZero(message = "La posicion debe ser mayor o igual que 0")
     private Integer posicion;
 
     @Column(nullable = false)
+    @NotNull(message = "La version es obligatoria")
+    @Positive(message = "La version debe ser mayor que 0")
     private Integer version;
 
     //Relaciones

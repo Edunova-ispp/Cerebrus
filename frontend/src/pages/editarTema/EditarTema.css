@@ -4,7 +4,7 @@
 .crear-tema-page input, 
 .crear-tema-page button, 
 .crear-tema-page label {
-  font-family: 'Pixelify Sans', sans-serif !important;
+  font-family: 'Oxygen', sans-serif !important;
 }
 
 .crear-tema-page {
@@ -62,7 +62,7 @@
 }
 
 .pixel-input {
-  background-color: #FDF8E1;
+  background-color: var(--color-accent-light);
   border: 4px solid #000;
   border-radius: 12px;
   padding: 12px 15px;

@@ -112,3 +112,8 @@
   object-fit: contain;
   transition: filter 0.2s ease;
 }
+
+/* === PROFESOR: Oxygen (excepto título Cerebrus) === */
+.navbar--maestro .navbar-link {
+  font-family: 'Oxygen', sans-serif;
+}

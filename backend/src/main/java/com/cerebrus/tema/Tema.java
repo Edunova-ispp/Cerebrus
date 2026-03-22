@@ -19,6 +19,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "tema")
@@ -29,6 +30,7 @@ public class Tema {
     private Long id;
 
     @Column(nullable = false)
+    @NotBlank(message = "El titulo del tema no puede estar vacio")
     private String titulo;
 
     //Relaciones

@@ -37,6 +37,7 @@ public class OrdenacionServiceImpl implements OrdenacionService {
     public Ordenacion crearActOrdenacion(String titulo, String descripcion, 
         Integer puntuacion, String imagen, Long temaId, Boolean respVisible, 
         String comentariosRespVisible, Integer posicion, List<String> valores) {
+        validateValores(valores);
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -66,9 +67,8 @@ public class OrdenacionServiceImpl implements OrdenacionService {
 
     @Override
     @Transactional(readOnly = true)
-    public Ordenacion readOrdenacion(Long id) {
-        
-        Ordenacion ordenacion = ordenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
+    public Ordenacion readOrdenacion(Long id) {        
+        Ordenacion ordenacion = ordenacionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Ordenacion", "id", id));
         List<String> valores = ordenacion.getValores();
         List<String> valoresDesordenados = CerebrusUtils.shuffleCollection(valores).stream().toList();
         ordenacion.setValores(valoresDesordenados);
@@ -85,7 +85,7 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         }
 
         Ordenacion ordenacion = ordenacionRepository.findWithValoresById(id)
-            .orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
+            .orElseThrow(() -> new ResourceNotFoundException("Ordenacion", "id", id));
 
         // Fuerza la inicialización dentro de la transacción (por si el provider ignora el EntityGraph)
         ordenacion.getValores().size();
@@ -100,6 +100,7 @@ public class OrdenacionServiceImpl implements OrdenacionService {
     public Ordenacion updateActOrdenacion(Long id, String titulo, String descripcion, 
         Integer puntuacion, String imagen, Long temaId, Boolean respVisible, 
         String comentariosRespVisible, Integer posicion, List<String> valores) {
+        validateValores(valores);
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -108,7 +109,7 @@ public class OrdenacionServiceImpl implements OrdenacionService {
 
         Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
 
-        Ordenacion ordenacion = ordenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
+        Ordenacion ordenacion = ordenacionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Ordenacion", "id", id));
         ordenacion.setTitulo(titulo);
         ordenacion.setDescripcion(descripcion);
         ordenacion.setPuntuacion(puntuacion);
@@ -132,11 +133,26 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede eliminar actividades de ordenación");
         }
+        if (!ordenacionRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Ordenacion", "id", id);
+        }
         ordenacionRepository.deleteById(id);
     }
 
     @Override 
     public Ordenacion encontrarOrdenacionPorId(Long id) {
-        return ordenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
+        return ordenacionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Ordenacion", "id", id));
+    }
+
+
+
+    private void validateValores(List<String> valores) {
+        if (valores == null || valores.isEmpty()) {
+            throw new IllegalArgumentException("La ordenacion debe incluir al menos 1 valor");
+        }
+        boolean contieneVacios = valores.stream().anyMatch(v -> v == null || v.trim().isEmpty());
+        if (contieneVacios) {
+            throw new IllegalArgumentException("Los valores de ordenacion no pueden estar vacios");
+        }
     }
 }

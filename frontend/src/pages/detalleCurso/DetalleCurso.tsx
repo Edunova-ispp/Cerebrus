@@ -42,7 +42,20 @@ export default function DetalleCurso() {
         setCurso(cursoData);
 
         if (!isMaestro) {
-          const prog = await fetchProgresoAlumno(Number(id)).catch(() => null);
+          let prog: ProgresoAlumno | null = null;
+          try {
+            const apiBase2 = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+            const res = await fetch(`${apiBase2}/api/cursos/${id}/progreso`, {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
+              },
+            });
+            const raw = await res.json();
+            prog = raw as ProgresoAlumno;
+          } catch (e) {
+            console.error("[Progreso] Error al obtener progreso:", e);
+          }
           setProgreso(prog);
         }
       } catch {

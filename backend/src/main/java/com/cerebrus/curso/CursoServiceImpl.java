@@ -1,7 +1,10 @@
 package com.cerebrus.curso;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -9,11 +12,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.ActividadRepository;
-import com.cerebrus.actividadAlumno.ActividadAlumno;
-import com.cerebrus.actividadAlumno.ActividadAlumnoProgreso;
-import com.cerebrus.actividadAlumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadAlumn.ActividadAlumno;
+import com.cerebrus.actividadAlumn.ActividadAlumnoProgreso;
+import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
 import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.curso.dto.ProgresoDTO;
+import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
@@ -53,7 +57,7 @@ public class CursoServiceImpl implements CursoService {
         } else if (usuario instanceof Alumno) {
              return cursoRepository.findByAlumnoId(usuario.getId());
         }else{
-            throw new RuntimeException("403 Forbidden");
+              throw new AccessDeniedException("Solo alumnos o maestros pueden consultar cursos");
         }
 
        
@@ -68,13 +72,13 @@ public class CursoServiceImpl implements CursoService {
         //En el caso de los alumnos, solo pueden ver los detalles de los cursos a los que están inscritos y que además son visibles.
         Curso curso=cursoRepository.findByID(id);
         if(curso==null){
-            throw new RuntimeException("404 Not Found");
+            throw new ResourceNotFoundException("Curso", "id", id);
         }
        
         Usuario usuario = usuarioService.findCurrentUser(); 
         if(usuario instanceof Maestro){
             if(!curso.getMaestro().getId().equals(usuario.getId())){
-                throw new RuntimeException("403 Forbidden");
+                throw new AccessDeniedException("No tienes permiso para ver los detalles de este curso");
             }else {
                 return List.of(curso.getTitulo(), curso.getDescripcion(), curso.getImagen(), curso.getCodigo());
             }
@@ -84,12 +88,12 @@ public class CursoServiceImpl implements CursoService {
            List<Curso> cursosAlumno=cursoRepository.findByAlumnoId(usuario.getId());
            
             if(curso.getVisibilidad().equals(false)||!cursosAlumno.contains(curso)){
-                throw new RuntimeException("403 Forbidden");
+                throw new AccessDeniedException("No tienes permiso para ver los detalles de este curso");
                 }else{
                     return List.of(curso.getTitulo(), curso.getDescripcion(), curso.getImagen());
                 }
         }else{
-            throw new RuntimeException("403 Forbidden");
+            throw new AccessDeniedException("Solo alumnos o maestros pueden consultar detalles del curso");
 }
      }
 
@@ -98,14 +102,14 @@ public class CursoServiceImpl implements CursoService {
     public Curso cambiarVisibilidad(Long id) {
         Curso curso = cursoRepository.findByID(id);
         if (curso == null) {
-            throw new RuntimeException("404 Not Found");
+            throw new ResourceNotFoundException("Curso", "id", id);
         }
         Usuario usuario = usuarioService.findCurrentUser();
         if (!(usuario instanceof Maestro)) {
-            throw new RuntimeException("403 Forbidden");
+            throw new AccessDeniedException("Solo un maestro puede cambiar la visibilidad");
         }
         if (!curso.getMaestro().getId().equals(usuario.getId())) {
-            throw new RuntimeException("403 Forbidden");
+            throw new AccessDeniedException("Solo el propietario del curso puede cambiar su visibilidad");
         }
         curso.setVisibilidad(!curso.getVisibilidad());
         return cursoRepository.save(curso);
@@ -114,6 +118,10 @@ public class CursoServiceImpl implements CursoService {
     @Transactional
     @Override
     public Curso crearCurso(String titulo, String descripcion, String imagen){
+        String tituloNormalizado = normalizeAndValidateTitulo(titulo);
+        String descripcionNormalizada = normalizeDescripcion(descripcion);
+        String imagenNormalizada = normalizeImagen(imagen);
+
         Usuario usuarioActual = usuarioService.findCurrentUser();
         if (!(usuarioActual instanceof Maestro)){
             throw new AccessDeniedException("Solo un maestro puede crear cursos");
@@ -121,9 +129,9 @@ public class CursoServiceImpl implements CursoService {
 
 
         Curso curso = new Curso();
-        curso.setTitulo(titulo);
-        curso.setDescripcion(descripcion);
-        curso.setImagen(imagen);
+    curso.setTitulo(tituloNormalizado);
+    curso.setDescripcion(descripcionNormalizada);
+    curso.setImagen(imagenNormalizada);
         curso.setVisibilidad(false);
         Maestro maestro = (Maestro) usuarioActual;
         curso.setMaestro(maestro);
@@ -140,15 +148,23 @@ public class CursoServiceImpl implements CursoService {
 
     @Override
     public Curso getCursoById(Long id) {
-        return cursoRepository.findByID(id);
+        Curso curso = cursoRepository.findByID(id);
+        if (curso == null) {
+            throw new ResourceNotFoundException("Curso", "id", id);
+        }
+        return curso;
     }
 
     @Transactional
     @Override
     public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen) {
+        String tituloNormalizado = normalizeAndValidateTitulo(titulo);
+        String descripcionNormalizada = normalizeDescripcion(descripcion);
+        String imagenNormalizada = normalizeImagen(imagen);
+
         Curso curso = cursoRepository.findByID(id);
         if (curso == null) {
-            throw new RuntimeException("404 Not Found");
+            throw new ResourceNotFoundException("Curso", "id", id);
         }
         Usuario usuario = usuarioService.findCurrentUser();
         if (!(usuario instanceof Maestro)) {
@@ -157,21 +173,21 @@ public class CursoServiceImpl implements CursoService {
         if (!curso.getMaestro().getId().equals(usuario.getId())) {
             throw new AccessDeniedException("Solo el propietario del curso puede actualizarlo");
         }
-        curso.setTitulo(titulo);
-        curso.setDescripcion(descripcion);
-        curso.setImagen(imagen);
+        curso.setTitulo(tituloNormalizado);
+        curso.setDescripcion(descripcionNormalizada);
+        curso.setImagen(imagenNormalizada);
         return cursoRepository.save(curso);
     }
 
     public ProgresoDTO getProgreso(Long cursoId) {
     Curso curso = cursoRepository.findByID(cursoId);
     if (curso == null) {
-        throw new RuntimeException("404 Not Found");
+        throw new ResourceNotFoundException("Curso", "id", cursoId);
     }
 
     Usuario usuario = usuarioService.findCurrentUser();
     if (!(usuario instanceof Alumno alumno)) {
-        throw new RuntimeException("403 Forbidden");
+        throw new AccessDeniedException("Solo un alumno puede consultar su progreso");
     }
 
     long totalActividades = actividadRepository.countByCursoId(cursoId);
@@ -185,16 +201,28 @@ public class CursoServiceImpl implements CursoService {
         return new ProgresoDTO("SIN_EMPEZAR", 0);
     }
 
+    // Para cada actividad, quedarse solo con el intento más reciente (igual que las stats del maestro)
+    Map<Long, ActividadAlumnoProgreso> ultimoPorActividad = new HashMap<>();
+    for (ActividadAlumnoProgreso r : registros) {
+        Long actId = r.getActividadId();
+        ActividadAlumnoProgreso actual = ultimoPorActividad.get(actId);
+        if (actual == null || esProgresoMasReciente(r, actual)) {
+            ultimoPorActividad.put(actId, r);
+        }
+    }
+    List<ActividadAlumnoProgreso> ultimos = new ArrayList<>(ultimoPorActividad.values());
+
     // 1. CALCULAMOS LA SUMA TOTAL DE PUNTOS
     // Sumamos el campo 'puntuacion' de todas las actividades que tengan valor
-    int puntosTotales = registros.stream()
+    int puntosTotales = ultimos.stream()
             .filter(aa -> aa.getPuntuacion() != null)
             .mapToInt(aa -> aa.getPuntuacion())
             .sum();
 
     // 2. CALCULAMOS EL ESTADO
-    long acabadas = registros.stream()
-            .filter(aa -> aa.getAcabada() != null)
+    // Ignoramos fechas epoch (1970-01-01) que se almacenan como "sin finish" en algunas actividades
+    long acabadas = ultimos.stream()
+            .filter(aa -> aa.getAcabada() != null && aa.getAcabada().getYear() > 1970)
             .count();
 
     if (acabadas == totalActividades) {
@@ -202,7 +230,7 @@ public class CursoServiceImpl implements CursoService {
         return new ProgresoDTO("TERMINADA", puntosTotales);
     }
 
-    long conInicio = registros.stream()
+    long conInicio = ultimos.stream()
             .filter(aa -> aa.getInicio() != null)
             .count();
 
@@ -214,12 +242,21 @@ public class CursoServiceImpl implements CursoService {
     return new ProgresoDTO("SIN_EMPEZAR", puntosTotales);
 }
 
+private boolean esProgresoMasReciente(ActividadAlumnoProgreso candidata, ActividadAlumnoProgreso actual) {
+    LocalDateTime fechaCandidato = candidata.getAcabada() != null ? candidata.getAcabada() : candidata.getInicio();
+    LocalDateTime fechaActual    = actual.getAcabada()    != null ? actual.getAcabada()    : actual.getInicio();
+    if (fechaCandidato == null && fechaActual == null) return false;
+    if (fechaCandidato == null) return false;
+    if (fechaActual    == null) return true;
+    return fechaCandidato.isAfter(fechaActual);
+}
+
     @Transactional
 @Override
 public void eliminarCurso(Long id) {
     Curso curso = cursoRepository.findByID(id);
     if (curso == null) {
-        throw new RuntimeException("404 Not Found");
+        throw new ResourceNotFoundException("Curso", "id", id);
     }
     Usuario usuario = usuarioService.findCurrentUser();
     if (!(usuario instanceof Maestro)) {
@@ -235,12 +272,12 @@ public void eliminarCurso(Long id) {
     public List<Integer> getNotaMediaPorActividad(Long cursoId) {
         Curso curso = cursoRepository.findByID(cursoId);
         if (curso == null) {
-            throw new RuntimeException("404 Not Found");
+            throw new ResourceNotFoundException("Curso", "id", cursoId);
         }
 
         Usuario usuario = usuarioService.findCurrentUser();
         if (!(usuario instanceof Maestro)) {
-            throw new RuntimeException("403 Forbidden");
+            throw new AccessDeniedException("Solo un maestro puede consultar las notas medias");
         }
         
         List<ActividadAlumno> actividades = actividadAlumnoRepository.findByCursoID(cursoId);
@@ -269,6 +306,30 @@ public void eliminarCurso(Long id) {
         return notasMedias;
         
             }
+
+    private String normalizeAndValidateTitulo(String titulo) {
+        if (titulo == null) {
+            throw new IllegalArgumentException("El titulo es obligatorio");
+        }
+        String normalizado = titulo.trim();
+        return normalizado;
+    }
+
+    private String normalizeDescripcion(String descripcion) {
+        if (descripcion == null) {
+            return null;
+        }
+        String normalizada = descripcion.trim();
+        return normalizada.isEmpty() ? null : normalizada;
+    }
+
+    private String normalizeImagen(String imagen) {
+        if (imagen == null) {
+            return null;
+        }
+        String normalizada = imagen.trim();
+        return normalizada.isEmpty() ? null : normalizada;
+    }
 
 }
 
