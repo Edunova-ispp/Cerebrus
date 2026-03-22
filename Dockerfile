@@ -12,6 +12,7 @@ ARG LOGROCKET_MANUAL_RECORDING
 ENV WATCHBUG_ADMIN=$WATCHBUG_ADMIN
 ENV LOGROCKET_ID=$LOGROCKET_ID
 ENV LOGROCKET_MANUAL_RECORDING=$LOGROCKET_MANUAL_RECORDING
+ENV WATCHBUG_API_URL=/watchbug/report
 
 # Importante: Que el frontend sepa que la API está en el mismo dominio bajo ruta relativa
 ENV VITE_API_URL=
@@ -25,9 +26,30 @@ RUN mvn dependency:go-offline -B
 COPY backend/src ./src
 RUN mvn clean package -DskipTests
 
-# Fase 3: Imagen Final
+# Fase 3: Construir Watchbug App (Python)
+FROM python:3.11-slim AS watchbug-builder
+WORKDIR /app/watchbug
+COPY watchbug-app/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY watchbug-app/watchbug/ ./watchbug/
+RUN pip install ./watchbug/
+# Guardaremos los paquetes en una capa temporal, aunque al final instalaremos directo en la imagen final
+
+# Fase 4: Imagen Final
 FROM eclipse-temurin:21-jre-alpine
-RUN apk add --no-cache nginx supervisor
+RUN apk add --no-cache nginx supervisor python3 py3-pip python3-dev build-base libffi-dev
+
+# Crear entorno virtual de Python por seguridad en Alpine
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Instalar dependencias de Watchbug en la imagen final
+WORKDIR /app/watchbug-src
+COPY watchbug-app/requirements.txt ./
+RUN pip3 install --no-cache-dir -r requirements.txt
+COPY watchbug-app/watchbug/ ./watchbug/
+RUN pip3 install ./watchbug/
+COPY watchbug-app/app.py /app/watchbug.py
 
 # Copiar el .jar del backend
 COPY --from=backend-builder /app/backend/target/*.jar /app/backend.jar

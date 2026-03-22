@@ -18,9 +18,9 @@ html, body {
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: #F9F7F0;
-  background-color: #242424;
+  color-scheme: light;
+  color: #213547;
+  background-color: #F9F7F0;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -57,22 +57,9 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #f9f9f9;
   cursor: pointer;
   transition: border-color 0.25s;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #F9F7F0;
-  }
-  a:hover {
-    color: var(--color-accent-dark);
-  }
-  button {
-    background-color: #f9f9f9;
-  }
 }
 
 /* ── Global scrollbar ── */

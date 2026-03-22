@@ -22,7 +22,7 @@
               logrocket: true,
               supabase: true
           },
-          apiEndpoint: env("%WATCHBUG_API_URL%", "http://localhost:5000/watchbug/report"),
+          apiEndpoint: env("%WATCHBUG_API_URL%", "/watchbug/report"),
           logrocketId: env("%LOGROCKET_ID%", null),
           logrocketManual: env("%LOGROCKET_MANUAL_RECORDING%", "true") === "true"
       };
