@@ -26,7 +26,11 @@ services:
       DB_USER: cerebrus
       DB_PASSWORD: cerebrus
     
-      GOOGLE_API_KEY: ${GEMINI_API_KEY}
+      GOOGLE_API_KEY_1: ${GEMINI_API_KEY_1}
+      GOOGLE_API_KEY_2: ${GEMINI_API_KEY_2}
+      GOOGLE_API_KEY_3: ${GEMINI_API_KEY_3}
+      GOOGLE_API_KEY_4: ${GEMINI_API_KEY_4}
+      GOOGLE_API_KEY_5: ${GEMINI_API_KEY_5}
     depends_on:
       db:
         condition: service_healthy
