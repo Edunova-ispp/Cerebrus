@@ -147,8 +147,8 @@ public class OrdenacionServiceImpl implements OrdenacionService {
 
 
     private void validateValores(List<String> valores) {
-        if (valores == null || valores.size() < 2) {
-            throw new IllegalArgumentException("La ordenacion debe incluir al menos 2 valores");
+        if (valores == null || valores.isEmpty()) {
+            throw new IllegalArgumentException("La ordenacion debe incluir al menos 1 valor");
         }
         boolean contieneVacios = valores.stream().anyMatch(v -> v == null || v.trim().isEmpty());
         if (contieneVacios) {
