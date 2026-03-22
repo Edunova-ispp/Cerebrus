@@ -10,8 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.suscripcion.Suscripcion;
+import com.cerebrus.suscripcion.SuscripcionRepository;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.organizacion.Organizacion;
 
 @Service
 @Transactional
@@ -20,12 +23,15 @@ public class InscripcionServiceImpl implements InscripcionService {
     private final InscripcionRepository inscripcionRepository;
     private final UsuarioService usuarioService;
     private final CursoRepository cursoRepository;
+    private final SuscripcionRepository suscripcionRepository;
 
     @Autowired
-    public InscripcionServiceImpl(InscripcionRepository inscripcionRepository, UsuarioService usuarioService, CursoRepository cursoRepository) {
+    public InscripcionServiceImpl(InscripcionRepository inscripcionRepository, UsuarioService usuarioService,
+            CursoRepository cursoRepository, SuscripcionRepository suscripcionRepository) {
         this.inscripcionRepository = inscripcionRepository;
         this.usuarioService = usuarioService;
         this.cursoRepository = cursoRepository;
+        this.suscripcionRepository = suscripcionRepository;
     }
 
 
@@ -36,6 +42,8 @@ public class InscripcionServiceImpl implements InscripcionService {
         if (!(usuarioService.findCurrentUser() instanceof Alumno alumno)) {
             throw new AccessDeniedException("Solo un alumno puede inscribirse a un curso");
         }
+
+        validarSuscripcionActivaYCupo(alumno);
 
         Curso curso = cursoRepository.findByCodigo(codigoNormalizado);
         if (curso == null) {
@@ -57,6 +65,28 @@ public class InscripcionServiceImpl implements InscripcionService {
         inscripcion.setPuntos(0);
         inscripcion.setFechaInscripcion(LocalDate.now());
         return inscripcionRepository.save(inscripcion);
+    }
+
+    private void validarSuscripcionActivaYCupo(Alumno alumno) {
+        Organizacion organizacion = alumno.getOrganizacion();
+        if (organizacion == null || organizacion.getId() == null) {
+            throw new AccessDeniedException("El alumno no pertenece a una organizacion con suscripcion");
+        }
+
+        LocalDate hoy = LocalDate.now();
+        Suscripcion suscripcionActiva = suscripcionRepository
+                .findTopByOrganizacionIdAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqualOrderByFechaFinDesc(
+                        organizacion.getId(), hoy, hoy)
+                .orElseThrow(() -> new AccessDeniedException("La organizacion no tiene una suscripcion activa"));
+
+        boolean alumnoYaConsumeCupo = inscripcionRepository.existsByAlumnoId(alumno.getId());
+        if (!alumnoYaConsumeCupo) {
+            long alumnosInscritos = inscripcionRepository
+                    .countDistinctAlumnosInscritosByOrganizacionId(organizacion.getId());
+            if (alumnosInscritos >= suscripcionActiva.getNumAlumnos()) {
+                throw new AccessDeniedException("Se ha alcanzado el cupo de alumnos de la suscripcion activa");
+            }
+        }
     }
 
     private String normalizeCodigoCurso(String codigoCurso) {
