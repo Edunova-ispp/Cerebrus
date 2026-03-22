@@ -28,10 +28,20 @@ public class PuntoImagenServiceImpl implements PuntoImagenService {
 
     @Override
     public PuntoImagen crearPuntoImagen(PuntoImagenDTO puntoImagenDTO, MarcarImagen marcarImagen) {
+        if (puntoImagenDTO == null) {
+            throw new IllegalArgumentException("El punto de imagen es obligatorio");
+        }
+        if (marcarImagen == null) {
+            throw new IllegalArgumentException("La actividad marcar imagen es obligatoria");
+        }
+        String respuestaNormalizada = normalizeRespuesta(puntoImagenDTO.getRespuesta());
+        validateCoordenada(puntoImagenDTO.getPixelX(), "pixelX");
+        validateCoordenada(puntoImagenDTO.getPixelY(), "pixelY");
+
         PuntoImagen puntoImagen = new PuntoImagen();
         puntoImagen.setPixelX(puntoImagenDTO.getPixelX());
         puntoImagen.setPixelY(puntoImagenDTO.getPixelY());
-        puntoImagen.setRespuesta(puntoImagenDTO.getRespuesta());
+        puntoImagen.setRespuesta(respuestaNormalizada);
         puntoImagen.setMarcarImagen(marcarImagen);
         return puntoImagenRepository.save(puntoImagen);
     }
@@ -50,8 +60,13 @@ public class PuntoImagenServiceImpl implements PuntoImagenService {
 
     @Override
     public PuntoImagen actualizarPuntoImagen(PuntoImagenDTO puntoImagenDTO) {
+        if (puntoImagenDTO == null) {
+            throw new IllegalArgumentException("El punto de imagen es obligatorio");
+        }
+        String respuestaNormalizada = normalizeRespuesta(puntoImagenDTO.getRespuesta());
+
         PuntoImagen puntoImagen = obtenerPuntoImagenPorId(puntoImagenDTO.getId());
-        puntoImagen.setRespuesta(puntoImagenDTO.getRespuesta());
+        puntoImagen.setRespuesta(respuestaNormalizada);
         return puntoImagenRepository.save(puntoImagen);
     }
 
@@ -69,7 +84,26 @@ public class PuntoImagenServiceImpl implements PuntoImagenService {
 
     @Override
     public PuntoImagen encontrarPuntoImagenPorCoordenada(Long marcarImagenId, Integer pixelX, Integer pixelY) {
+        validateCoordenada(pixelX, "pixelX");
+        validateCoordenada(pixelY, "pixelY");
         return puntoImagenRepository.findByMarcarImagenIdAndPixelXAndPixelY(marcarImagenId, pixelX, pixelY)
                 .orElseThrow(() -> new ResourceNotFoundException("PuntoImagen", "marcarImagenId, pixelX, pixelY", marcarImagenId + ", " + pixelX + ", " + pixelY));
+    }
+
+    private void validateCoordenada(Integer value, String field) {
+        if (value == null || value < 0) {
+            throw new IllegalArgumentException("El " + field + " no puede ser negativo");
+        }
+    }
+
+    private String normalizeRespuesta(String respuesta) {
+        if (respuesta == null) {
+            throw new IllegalArgumentException("La respuesta es obligatoria");
+        }
+        String normalizada = respuesta.trim();
+        if (normalizada.isEmpty()) {
+            throw new IllegalArgumentException("La respuesta no puede estar vacia");
+        }
+        return normalizada;
     }
 }

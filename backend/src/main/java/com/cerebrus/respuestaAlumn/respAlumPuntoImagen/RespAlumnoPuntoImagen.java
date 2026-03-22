@@ -10,17 +10,21 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "resp_alumno_punto_imagen")
 public class RespAlumnoPuntoImagen extends RespuestaAlumno {
 
     @Column(nullable = false, columnDefinition = "TEXT")
+    @NotBlank(message = "La respuesta es obligatoria")
     private String respuesta;
 
     //Relaciones
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "punto_imagen_id", referencedColumnName = "id", nullable=false)
+    @NotNull(message = "El punto de imagen es obligatorio")
     private PuntoImagen puntoImagen;
 
     // Constructores

@@ -15,6 +15,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -181,9 +182,9 @@ public class IaConnectionServiceImpl implements IaConnectionService {
        Integer PeticionesMaximasDiariasPorKey = 20;
         Usuario usuario = usuarioService.findCurrentUser();
         if(!(usuario instanceof Maestro)){
-            throw new IllegalArgumentException("403 Forbidden: El usuario no es un maestro");
+            throw new AccessDeniedException("403 Forbidden: Solo un maestro puede generar actividades con IA");
         }
-       String promptDepurado = crearPromt(tipoActividad, prompt);
+        String promptDepurado = crearPromt(tipoActividad, prompt.trim());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -232,13 +233,13 @@ public class IaConnectionServiceImpl implements IaConnectionService {
             String respuesta = (String) firstPart.get("text");
           
            if (!validateActivityResponse(respuesta, tipoActividad)) {
-              throw new IllegalArgumentException("respuesta no válida: " + respuesta);
+              throw new IllegalArgumentException("400 Bad Request: respuesta no válida: " + respuesta);
             }
             peticionesDiarias++;
             System.out.println("Peticiones diarias realizadas con la clave actual (" + apikeyActual.substring(apikeyActual.length()-4) + "): " + peticionesDiarias);
             return respuesta;
         } catch (Exception e) {
-            throw new IllegalArgumentException("500 Internal Server Error: "+" Error interno de la api de geminis: " + e.getMessage());
+            throw new IllegalStateException("500 Internal Server Error: Error interno de la API de Gemini: " + e.getMessage());
         }
          
     }

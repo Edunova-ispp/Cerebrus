@@ -3,6 +3,7 @@ package com.cerebrus.actividad;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.actividad.general.dto.TeoriaDTO;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 @RestController
 @RequestMapping("/api/actividades")
 @CrossOrigin(origins = "*")
+@Validated
 public class ActividadController {
 
     private final ActividadService actividadService;
@@ -58,7 +65,7 @@ public class ActividadController {
     }
 
     @PostMapping("/teoria")
-    public ResponseEntity<TeoriaDTO> crearActividadTeoria(@RequestBody CrearActividadTeoriaRequest request) {
+    public ResponseEntity<TeoriaDTO> crearActividadTeoria(@RequestBody @Valid CrearActividadTeoriaRequest request) {
         try {
             Actividad actividad = actividadService.crearActividadTeoria(
                 request.getTitulo(),
@@ -73,9 +80,7 @@ public class ActividadController {
     }
 
     @PutMapping("/teoria/{id}")
-    public ResponseEntity<TeoriaDTO> updateActividadTeoria(
-            @PathVariable Long id,
-            @RequestBody CrearActividadTeoriaRequest request) {
+    public ResponseEntity<TeoriaDTO> updateActividadTeoria(@PathVariable Long id, @RequestBody @Valid CrearActividadTeoriaRequest request) {
         try {
             Actividad actividad = actividadService.updateActividadTeoria(
                 id,
@@ -101,10 +106,14 @@ public class ActividadController {
     }
 
     public static class CrearActividadTeoriaRequest {
+        @NotBlank(message = "El titulo es obligatorio")
         private String titulo;
         private String descripcion;
         private Integer puntuacion;
         private String imagen;
+
+        @NotNull(message = "El temaId es obligatorio")
+        @Positive(message = "El temaId debe ser mayor que 0")
         private Long temaId;
 
         public String getTitulo() { return titulo; }
