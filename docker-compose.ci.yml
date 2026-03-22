@@ -9,7 +9,11 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mariadb://db:3306/cerebrus
       SPRING_DATASOURCE_USERNAME: cerebrus
       SPRING_DATASOURCE_PASSWORD: cerebrus
-      GOOGLE_API_KEY: ${GEMINI_API_KEY}
+      GOOGLE_API_KEY_1: ${GEMINI_API_KEY_1}
+      GOOGLE_API_KEY_2: ${GEMINI_API_KEY_2}
+      GOOGLE_API_KEY_3: ${GEMINI_API_KEY_3}
+      GOOGLE_API_KEY_4: ${GEMINI_API_KEY_4}
+      GOOGLE_API_KEY_5: ${GEMINI_API_KEY_5}
       # si tu app usa estas vars en perfil docker, también las dejamos:
       DB_URL: jdbc:mariadb://db:3306/cerebrus
       DB_USER: cerebrus

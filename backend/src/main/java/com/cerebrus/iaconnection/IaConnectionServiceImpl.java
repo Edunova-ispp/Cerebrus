@@ -5,6 +5,7 @@ import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.maestro.Maestro;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -34,8 +35,21 @@ public class IaConnectionServiceImpl implements IaConnectionService {
        
     }
 
-    @Value("${GOOGLE_API_KEY}") 
-    private String apiKey;
+    @Value("${GOOGLE_API_KEY_1}") 
+    private String apiKey1;
+    @Value("${GOOGLE_API_KEY_2}") 
+    private String apiKey2;
+    @Value("${GOOGLE_API_KEY_3}") 
+    private String apiKey3;
+    @Value("${GOOGLE_API_KEY_4}")
+    private String apiKey4;
+    @Value("${GOOGLE_API_KEY_5}")
+    private String apiKey5;
+
+    private Integer peticionesDiarias=0;
+    private Integer IndiceKey=1;
+    private LocalDate fechaUltimaPeticion;
+    
     // Usamos gemini-1.5-flash por su velocidad y gratuidad
     
     private static final String JSON_TEORIA = """
@@ -161,7 +175,10 @@ public class IaConnectionServiceImpl implements IaConnectionService {
     
      @Override
     public String generarActividad(TipoAct tipoActividad, String prompt) {
-       System.out.println("APIkey " + apiKey);
+        String apikeyActual ;
+       
+       
+       Integer PeticionesMaximasDiariasPorKey = 20;
         Usuario usuario = usuarioService.findCurrentUser();
         if(!(usuario instanceof Maestro)){
             throw new IllegalArgumentException("403 Forbidden: El usuario no es un maestro");
@@ -178,7 +195,31 @@ public class IaConnectionServiceImpl implements IaConnectionService {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
        
         try {
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+            if(peticionesDiarias >= PeticionesMaximasDiariasPorKey){
+                
+                if(IndiceKey<5){
+                    IndiceKey++;
+                  
+                   peticionesDiarias=0;
+                   
+                }else{
+                    if(fechaUltimaPeticion == null || !fechaUltimaPeticion.isEqual(LocalDate.now())) {
+                        fechaUltimaPeticion = LocalDate.now();
+                        IndiceKey=1;
+                        peticionesDiarias=0;}
+                    throw new IllegalArgumentException("429 Too Many Requests: Se han alcanzado el límite de peticiones diarias para todas las claves de API disponibles. Por favor, inténtalo de nuevo mañana.");
+                }
+            }
+             switch (IndiceKey) {
+                    case 1 -> apikeyActual = apiKey1;
+                    case 2 -> apikeyActual = apiKey2;
+                    case 3 -> apikeyActual = apiKey3;
+                    case 4 -> apikeyActual = apiKey4;
+                    case 5 -> apikeyActual = apiKey5;
+                    default -> throw new IllegalArgumentException("400 Bad Request: Error al seleccionar la clave de API");
+                   }
+                   System.out.println("Usando la clave de API " + IndiceKey + ": ****" + apikeyActual.substring(apikeyActual.length()-4));
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apikeyActual;
 
             ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
             
@@ -193,6 +234,8 @@ public class IaConnectionServiceImpl implements IaConnectionService {
            if (!validateActivityResponse(respuesta, tipoActividad)) {
               throw new IllegalArgumentException("respuesta no válida: " + respuesta);
             }
+            peticionesDiarias++;
+            System.out.println("Peticiones diarias realizadas con la clave actual (" + apikeyActual.substring(apikeyActual.length()-4) + "): " + peticionesDiarias);
             return respuesta;
         } catch (Exception e) {
             throw new IllegalArgumentException("500 Internal Server Error: "+" Error interno de la api de geminis: " + e.getMessage());
