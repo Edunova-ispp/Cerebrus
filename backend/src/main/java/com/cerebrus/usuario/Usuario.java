@@ -10,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "usuario")
@@ -21,21 +23,27 @@ public abstract class Usuario {
     private Long id;
 
     @Column(nullable = false)
+    @NotBlank(message = "El nombre no puede estar vacío")
     private String nombre;
 
     @Column(nullable = false)
+    @NotBlank(message = "El primer apellido no puede estar vacío")
     private String primerApellido;
 
     @Column(nullable = true)
     private String segundoApellido;
 
     @Column(nullable = false, unique = true)
+    @NotBlank(message = "El nombre de usuario no puede estar vacío")
     private String nombreUsuario;
 
     @Column(nullable = false, unique = true)
+    @NotBlank(message = "El correo electrónico no puede estar vacío")
+    @Email(message = "El correo electrónico debe tener un formato válido")
     private String correoElectronico;
 
     @Column(nullable = false)
+    @NotBlank(message = "La contraseña no puede estar vacía")
     private String contrasena;
 
     // Constructores
