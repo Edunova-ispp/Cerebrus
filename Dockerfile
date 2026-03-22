@@ -13,8 +13,8 @@ ENV WATCHBUG_ADMIN=$WATCHBUG_ADMIN
 ENV LOGROCKET_ID=$LOGROCKET_ID
 ENV LOGROCKET_MANUAL_RECORDING=$LOGROCKET_MANUAL_RECORDING
 
-# Importante: Que el frontend sepa que la API está en el mismo dominio bajo /api
-ENV VITE_API_URL=/api
+# Importante: Que el frontend sepa que la API está en el mismo dominio bajo ruta relativa
+ENV VITE_API_URL=
 RUN npx vite build
 
 # Fase 2: Construir el Backend
