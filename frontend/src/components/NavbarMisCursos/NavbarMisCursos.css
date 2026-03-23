@@ -10,7 +10,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
+  /* Reemplazado color-mix para compatiblidad con html2canvas / watchbug */
+  background-color: rgba(255, 255, 255, 0.4); 
   border: 4px solid #000;
   border-radius: 20px;
   padding: 0px 70px;
@@ -110,9 +111,4 @@
   width: 32px;
   object-fit: contain;
   transition: filter 0.2s ease;
-}
-
-/* === PROFESOR: Oxygen (excepto título Cerebrus) === */
-.navbar--maestro .navbar-link {
-  font-family: 'Oxygen', sans-serif;
 }

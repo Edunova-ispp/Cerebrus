@@ -1,6 +1,7 @@
 package com.cerebrus.actividad.tablero;
 
 import com.cerebrus.actividad.tablero.dto.TableroDTO;
+import com.cerebrus.actividad.tablero.dto.TableroRequest;
 
 public interface TableroService {
 

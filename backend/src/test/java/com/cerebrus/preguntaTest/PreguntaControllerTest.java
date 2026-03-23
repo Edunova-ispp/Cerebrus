@@ -24,8 +24,8 @@ import com.cerebrus.actividad.Actividad;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaController;
-import com.cerebrus.pregunta.PreguntaRequest;
 import com.cerebrus.pregunta.PreguntaService;
+import com.cerebrus.pregunta.dto.PreguntaRequest;
 import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 
 @ExtendWith(MockitoExtension.class)

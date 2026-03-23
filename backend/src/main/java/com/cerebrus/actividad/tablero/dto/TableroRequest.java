@@ -1,6 +1,7 @@
-package com.cerebrus.actividad.general;
+package com.cerebrus.actividad.tablero.dto;
 
-import java.util.Map;
+
+import java.util.LinkedHashMap;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -8,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CrucigramaRequest {
+public class TableroRequest {
 
     @NotNull
     private  String titulo;
@@ -19,16 +20,19 @@ public class CrucigramaRequest {
     private  Integer puntuacion;
 
     @NotNull
+    private  Boolean tamano; // Verdadero para 3x3, falso para 4x4
+
+    @NotNull
     private  Long temaId;
 
     @NotNull
     private  Boolean respVisible;
 
     @NotNull
-    private  Map<String,String> preguntasYRespuestas;
+    private  LinkedHashMap<String,String> preguntasYRespuestas;
 
 
-    public CrucigramaRequest() {}
+    public TableroRequest() {}
 
 
 
