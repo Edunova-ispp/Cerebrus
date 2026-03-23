@@ -45,6 +45,10 @@ public class OrdenacionServiceImpl implements OrdenacionService {
 
         Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
         
+        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede crear actividades en ese tema");
+        }
+
         Ordenacion ordenacion = new Ordenacion();
         ordenacion.setTitulo(titulo);
         ordenacion.setDescripcion(descripcion);
@@ -87,6 +91,10 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         Ordenacion ordenacion = ordenacionRepository.findWithValoresById(id)
             .orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
 
+        if (ordenacion.getTema() != null && ordenacion.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("No puedes leer actividades de cursos que no son tuyos");
+        }
+
         // Fuerza la inicialización dentro de la transacción (por si el provider ignora el EntityGraph)
         ordenacion.getValores().size();
         if (ordenacion.getTema() != null) {
@@ -109,6 +117,9 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
 
         Ordenacion ordenacion = ordenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
+        if (!ordenacion.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede actualizar esta actividad");
+        }
         ordenacion.setTitulo(titulo);
         ordenacion.setDescripcion(descripcion);
         ordenacion.setPuntuacion(puntuacion);
@@ -132,6 +143,12 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede eliminar actividades de ordenación");
         }
+
+        Ordenacion ordenacion = ordenacionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Ordenacion", "id", id));
+        if (!ordenacion.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede eliminar esta actividad");
+        }
+        
         ordenacionRepository.deleteById(id);
     }
 

@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +23,6 @@ import com.cerebrus.actividad.general.dto.GeneralClasificacionDTO;
 import com.cerebrus.actividad.general.dto.GeneralClasificacionMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestMaestroDTO;
-import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 
 import jakarta.validation.Valid;
@@ -232,46 +230,28 @@ public class GeneralController {
 
     @PostMapping("/crucigrama")
     public ResponseEntity<CrucigramaDTO> crearTipoCrucigrama(@RequestBody @Valid CrucigramaRequest crucigrama) {
-        try {
-            // Se ha decidido limitar el crucigrama a un maximo de 5 preguntas
+        
+        // Se ha decidido limitar el crucigrama a un maximo de 5 preguntas
         if(crucigrama.getPreguntasYRespuestas().size() > 5) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
         CrucigramaDTO generalCreada = generalService.crearTipoCrucigrama(crucigrama);
         return ResponseEntity.ok(generalCreada);
-        }
-        catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        
+        
     }
 
     @GetMapping("/crucigrama/{id}")
     public ResponseEntity<CrucigramaDTO> readTipoCrucigrama(@PathVariable Long id) {
-        try {
             CrucigramaDTO crucigrama = generalService.readTipoCrucigrama(id);
             return ResponseEntity.ok(crucigrama);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
     }
 
     @PutMapping("/crucigrama/{id}")
     public ResponseEntity<CrucigramaDTO> updateTipoCrucigrama(@PathVariable Long id, @RequestBody CrucigramaRequest crucigrama) {
-        try {
-            CrucigramaDTO updated = generalService.updateTipoCrucigrama(id, crucigrama);
-            return ResponseEntity.ok(updated);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    
+        CrucigramaDTO updated = generalService.updateTipoCrucigrama(id, crucigrama);
+        return ResponseEntity.ok(updated);
     }
 
 }
