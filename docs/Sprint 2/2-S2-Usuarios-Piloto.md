@@ -23,7 +23,7 @@
 ---
 
 ## 1. Introducción
-Este documento contiene el listado oficial de los usuarios que han participado en las pruebas del segundo sprint (Sprint 2) de la aplicación CerebrUS. Por motivos de privacidad y protección de datos, los apellidos y direcciones de correo electrónico han sido parcialmente anonimizados.
+Este documento contiene el listado oficial de los usuarios que han participado en las pruebas del primer sprint (Sprint 1) y, una vez finalizado, participarán en las pruebas del segundo sprint (Sprint 2) de la aplicación CerebrUS. Por motivos de privacidad y protección de datos, los apellidos y direcciones de correo electrónico han sido parcialmente anonimizados.
 
 ## 2. Datos de Usuarios Piloto
 
