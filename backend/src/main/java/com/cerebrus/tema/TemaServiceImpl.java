@@ -119,7 +119,7 @@ public class TemaServiceImpl implements TemaService {
             actividades.forEach(actividad -> actividadRepository.delete(actividad));
             temaRepository.delete(tema);
         } else {
-            throw new IllegalArgumentException("El usuario no tiene permiso para eliminar este tema.");
+            throw new AccessDeniedException("El usuario no tiene permiso para eliminar este tema.");
         }
     }
 }

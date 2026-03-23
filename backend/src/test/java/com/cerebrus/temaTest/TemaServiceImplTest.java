@@ -252,12 +252,12 @@ class TemaServiceImplTest {
     }
 
     @Test
-    void eliminarTema_usuarioSinPermiso_lanzaIllegalArgumentException() {
+    void eliminarTema_usuarioSinPermiso_lanzaAccessDeniedException() {
         when(temaRepository.findById(100L)).thenReturn(Optional.of(tema));
         when(usuarioService.findCurrentUser()).thenReturn(otroMaestro);
 
         assertThatThrownBy(() -> temaService.eliminarTema(100L))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("El usuario no tiene permiso para eliminar este tema.");
 
         verify(temaRepository, never()).delete(any());

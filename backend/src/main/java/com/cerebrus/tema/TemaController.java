@@ -49,6 +49,7 @@ public class TemaController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
+        
     }
 
     @PutMapping("/{temaId}")
@@ -62,6 +63,7 @@ public class TemaController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
+        
     }
 
     public static class CrearTemaRequest {
@@ -102,14 +104,12 @@ public class TemaController {
 
     @GetMapping("/{temaId}")
     public ResponseEntity<TemaDTO> obtenerTemaPorId(@PathVariable Long temaId) {
-        try {
+        
             Tema tema = temaService.obtenerTemaPorId(temaId);
             List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
             List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
             return ResponseEntity.ok(new TemaDTO(tema, actividadesDTO));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        
     }
 
     @GetMapping("/curso/{cursoId}/alumno")
@@ -137,12 +137,10 @@ public class TemaController {
     @DeleteMapping("/{temaId}")
     @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> eliminarTema(@PathVariable Long temaId) {
-        try {
+        
             temaService.eliminarTema(temaId);
             return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        
     }
 }
 

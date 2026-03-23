@@ -34,39 +34,32 @@ public class ActividadController {
 
     @GetMapping("/{id}/maestro")
     public ResponseEntity<TeoriaDTO> getActividadMaestro(@PathVariable Long id) {
-        try {
-            Actividad actividad = actividadService.encontrarActividadPorIdMaestro(id);
-            return ResponseEntity.ok(toTeoriaDto(actividad));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+       
+        Actividad actividad = actividadService.encontrarActividadPorIdMaestro(id);
+        return ResponseEntity.ok(toTeoriaDto(actividad));
+       
     }
 
     @GetMapping("/{id}/alumno")
     public ResponseEntity<TeoriaDTO> getActividadAlumno(@PathVariable Long id) {
-        try {
-            Actividad actividad = actividadService.encontrarActividadPorIdAlumno(id);
-            return ResponseEntity.ok(toTeoriaDto(actividad));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        
+        Actividad actividad = actividadService.encontrarActividadPorIdAlumno(id);
+        return ResponseEntity.ok(toTeoriaDto(actividad));
+       
     }
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> eliminarActividad(@PathVariable Long id) {
-        try {
-            actividadService.deleteActividad(id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        
+        actividadService.deleteActividad(id);
+        return ResponseEntity.noContent().build();
+        
     }
 
     @PostMapping("/teoria")
     @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<TeoriaDTO> crearActividadTeoria(@RequestBody @Valid CrearActividadTeoriaRequest request) {
-        try {
             Actividad actividad = actividadService.crearActividadTeoria(
                 request.getTitulo(),
                 request.getDescripcion(),
@@ -74,9 +67,7 @@ public class ActividadController {
                 request.getTemaId()
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(toTeoriaDto(actividad));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        
     }
 
     @PutMapping("/teoria/{id}")
@@ -84,7 +75,6 @@ public class ActividadController {
     public ResponseEntity<TeoriaDTO> updateActividadTeoria(
             @PathVariable Long id,
             @RequestBody @Valid CrearActividadTeoriaRequest request) {
-        try {
             Actividad actividad = actividadService.updateActividadTeoria(
                 id,
                 request.getTitulo(),
@@ -92,9 +82,6 @@ public class ActividadController {
                 request.getImagen()
             );
             return ResponseEntity.ok(toTeoriaDto(actividad));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
     }
 
     private static TeoriaDTO toTeoriaDto(Actividad actividad) {
