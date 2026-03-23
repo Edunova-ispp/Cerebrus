@@ -11,5 +11,4 @@ public interface RespAlumnoGeneralService {
     Boolean corregirRespuestaAlumnoGeneral(Long id);
     boolean corregirRespuestaAlumnoGeneralClasificacion(Long id);
     HashMap<Long, String> corregirCrucigrama(LinkedHashMap<Long,String> respuestas, Long crucigramaId);
-    RespAlumnoAbiertaResponse crearRespAlumnoAbierta(RespAlumnoAbiertaRequest request);
-}
+    EvaluacionActividadAbiertaResponse corregirActividadAbierta(EvaluacionActividadAbiertaRequest request);}

@@ -71,9 +71,9 @@ public class RespAlumnoGeneralController {
 
     @PostMapping("/abierta")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<RespAlumnoAbiertaResponse> crearRespAlumnoAbierta(@RequestBody @Valid RespAlumnoAbiertaRequest request) {
+    public ResponseEntity<EvaluacionActividadAbiertaResponse> evaluarActividadAbierta(@RequestBody @Valid EvaluacionActividadAbiertaRequest request) {
         try {
-            RespAlumnoAbiertaResponse respuesta = respAlumnoGeneralService.crearRespAlumnoAbierta(request);
+            EvaluacionActividadAbiertaResponse respuesta = respAlumnoGeneralService.corregirActividadAbierta(request);
             return new ResponseEntity<>(respuesta, HttpStatus.CREATED);
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

@@ -626,7 +626,6 @@ public class GeneralServiceImpl implements GeneralService {
             throw new AccessDeniedException("Solo un maestro puede crear actividades");
         }
         
-        // Validación 1: Máximo 5 preguntas
         if (preguntasId == null || preguntasId.isEmpty()) {
             throw new IllegalArgumentException("Debe proporcionar al menos una pregunta");
         }
@@ -642,10 +641,8 @@ public class GeneralServiceImpl implements GeneralService {
             throw new ResourceNotFoundException("Alguna de las preguntas no existe");
         }
         
-        // Validación 2: Cada pregunta debe tener EXACTAMENTE una respuesta
         Integer num = 1;
         for(Pregunta pregunta : preguntas){
-            // Cargar respuestas de forma explícita desde BD
             List<RespuestaMaestro> respuestas = respuestaMaestroRepository.findRespuestaByPreguntaId(pregunta.getId());
             
             if (respuestas == null || respuestas.isEmpty()) {
@@ -674,7 +671,6 @@ public class GeneralServiceImpl implements GeneralService {
             throw new ResourceNotFoundException("La actividad no es de tipo abierta");
         }
 
-        // Para alumnos: devolver solo preguntas sin las respuestas del maestro
         List<PreguntaAlumnoDTO> preguntasDTO = general.getPreguntas().stream()
             .map(pregunta -> new PreguntaAlumnoDTO(pregunta.getId(), pregunta.getPregunta(), pregunta.getImagen()))
             .toList();
