@@ -87,7 +87,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
           body: JSON.stringify({
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
-            imagen: '',
+            imagen: imagen.trim(),
             temaId: temaIdNum,
           }),
         });
