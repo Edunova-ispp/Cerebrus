@@ -91,7 +91,7 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
     const pts = Number.parseInt(puntuacion.trim(), 10);
-    if (Number.isNaN(pts) || pts < 0) return 'La puntuación debe ser un número válido';
+    if (Number.isNaN(pts) || pts <= 0) return 'La puntuación debe ser un número mayor a 0';
     if (tamano === null) return 'Selecciona el tamaño del tablero';
     if (mode === 'create' && !temaId) return 'Falta el id del tema en la URL';
     if (mode === 'edit' && !tableroId) return 'Falta el id del tablero a editar';
@@ -222,6 +222,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
             placeholder="Título del tablero"
+            required
           />
           <label className="tbl-label">Descripción</label>
           <textarea
@@ -237,10 +238,11 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
           <input
             className="tbl-input"
             type="number"
-            min={0}
+            min={1}
             value={puntuacion}
             onChange={(e) => setPuntuacion(e.target.value)}
             placeholder="Ej. 100"
+            required
           />
           <label className="tbl-label tbl-label--check">
             <input
