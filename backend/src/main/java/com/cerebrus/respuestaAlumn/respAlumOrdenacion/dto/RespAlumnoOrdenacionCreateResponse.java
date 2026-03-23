@@ -1,6 +1,4 @@
-package com.cerebrus.respuestaAlumn.respAlumOrdenacion;
-
-import com.cerebrus.respuestaAlumn.respAlumOrdenacion.dto.RespAlumnoOrdenacionDTO;
+package com.cerebrus.respuestaAlumn.respAlumOrdenacion.dto;
 
 public class RespAlumnoOrdenacionCreateResponse {
 
