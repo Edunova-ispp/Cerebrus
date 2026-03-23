@@ -17,6 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiertaRequest;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiertaResponse;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralCreateResponse;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralRequest;
 
 import jakarta.validation.Valid;
 
@@ -62,7 +67,16 @@ public class RespAlumnoGeneralController {
         return new ResponseEntity<>(resultado, HttpStatus.OK);
         
     }
-    
+
+    @PostMapping("/abierta")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<EvaluacionActividadAbiertaResponse> evaluarActividadAbierta(@RequestBody @Valid EvaluacionActividadAbiertaRequest request) {
+        
+            EvaluacionActividadAbiertaResponse respuesta = respAlumnoGeneralService.corregirActividadAbierta(request);
+            return new ResponseEntity<>(respuesta, HttpStatus.CREATED);
+        
+    }
+
 
 // ESTOS MÉTODOS QUEDAN DEFINIDOS POR SI ES NECESARIO UTILIZARLOS, PERO PARA LA FEATURE 35 NO SON NECESARIOS
 

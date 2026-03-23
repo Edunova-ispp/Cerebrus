@@ -1,4 +1,4 @@
-package com.cerebrus.respuestaAlumn.respAlumGeneral;
+package com.cerebrus.respuestaAlumn.respAlumGeneral.dto;
 
 import jakarta.validation.constraints.NotNull;
 

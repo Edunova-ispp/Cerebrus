@@ -28,6 +28,11 @@ export default function TeoriaAlumno() {
   const [isFlipped, setIsFlipped] = useState(false); 
 
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+  const teoriaImageSrc = teoria?.imagen
+    ? (/^https?:\/\//i.test(teoria.imagen) || teoria.imagen.startsWith('data:')
+        ? teoria.imagen
+        : `${apiBase}${teoria.imagen.startsWith('/') ? '' : '/'}${teoria.imagen}`)
+    : null;
 
   useEffect(() => {
     if (!actividadId) return;
@@ -127,8 +132,8 @@ export default function TeoriaAlumno() {
                 <div className="ta-card-front">
                   <div className="ta-card-content">
                     <h1 className="ta-title">{teoria.titulo}</h1>
-                    {teoria.imagen ? (
-                      <img src={teoria.imagen} alt="Ilustración" className="ta-main-img" />
+                    {teoriaImageSrc ? (
+                      <img src={teoriaImageSrc} alt="Ilustración" className="ta-main-img" />
                     ) : (
                       <img src={maguitoImg} alt="Maguito" className="ta-maguito-placeholder" />
                     )}

@@ -1,4 +1,4 @@
-package com.cerebrus.respuestaAlumn.respAlumGeneral;
+package com.cerebrus.respuestaAlumn.respAlumGeneral.dto;
 
 /**
  * Flat DTO returned after creating a RespAlumnoGeneral.

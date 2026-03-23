@@ -11,6 +11,8 @@ import com.cerebrus.pregunta.PreguntaRepository;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.maestro.Maestro;
 import com.cerebrus.usuario.Usuario;
+import com.cerebrus.actividad.general.General;
+import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 
@@ -39,7 +41,20 @@ public class RespuestaMaestroServiceImpl implements RespuestaMaestroService {
             throw new AccessDeniedException("Solo un maestro puede crear respuestas");
         }
 
-        Pregunta pregunta = preguntaRepository.findById(preguntaId).orElseThrow(() -> new ResourceNotFoundException("La pregunta de la respuesta no existe"));
+        Pregunta pregunta = preguntaRepository.findById(preguntaId)
+            .orElseThrow(() -> new ResourceNotFoundException("La pregunta de la respuesta no existe"));
+        
+    
+        if (pregunta.getActividad() != null && pregunta.getActividad() instanceof General) {
+            General general = (General) pregunta.getActividad();
+            
+            if (TipoActGeneral.ABIERTA.equals(general.getTipo())) {
+                List<RespuestaMaestro> respuestasExistentes = respuestaRepository.findRespuestaByPreguntaId(preguntaId);
+                if (respuestasExistentes != null && !respuestasExistentes.isEmpty()) {
+                    throw new IllegalArgumentException("Esta pregunta ya tiene una respuesta. En actividades de tipo ABIERTA solo se permite una respuesta por pregunta");
+                }
+            }
+        }
         
         if (!pregunta.getActividad().getTema().getCurso().getMaestro().getId().equals(u.getId())) {
             throw new AccessDeniedException("Solo el maestro del curso puede crear respuestas para sus preguntas");

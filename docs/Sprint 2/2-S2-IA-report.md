@@ -1,5 +1,33 @@
-<h1>Reporte sobre el uso de la IA en Cerebrus <img src="../images/cerebrus.png" alt="Logo de Cerebrus" width="48" style="vertical-align: middle; margin-left: 8px;" /></h1>
+<div align="center">
 
+<img src="images/cerebrus.png" alt="Logo de CerebrUS" width="300">
+
+</div>
+
+# Reporte sobre el uso de la IA en Cerebrus
+
+## Control de Versiones
+
+| Versión | Fecha | Autor/es | Descripción de los Cambios |
+| :---: | :---: | :--- | :--- |
+| 1.0 | 21/03/2026 | David Valencia | Creación del documento base |
+| 1.1 | 23/03/2026 | David Valencia | Actualizaciones menores |
+
+---
+
+## Tabla de Contenido
+
+- [Reporte sobre el uso de la IA en Cerebrus](#reporte-sobre-el-uso-de-la-ia-en-cerebrus)
+  - [Control de Versiones](#control-de-versiones)
+  - [Tabla de Contenido](#tabla-de-contenido)
+  - [Introducción](#introducción)
+  - [Actividades en las que se ha utilizado IA](#actividades-en-las-que-se-ha-utilizado-ia)
+  - [Uso responsable y ético](#uso-responsable-y-ético)
+
+---
+
+
+## Introducción
 Durante los dos primeros sprints del proyecto, el equipo de Cerebrus ha utilizado **herramientas de IA generativa** como apoyo en actividades concretas de diseño, análisis y desarrollo.
 
 ## Actividades en las que se ha utilizado IA

@@ -34,6 +34,8 @@ public class InscripcionController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("El curso no existe");
             } else if (e.getMessage().equals("400 Bad Request")) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El alumno ya está inscrito en este curso");
+            } else if (e.getMessage().equals("403 Forbidden")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No puedes unirte a un curso no visible");
             } else if(e.getMessage().equals("401 Unauthorized")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No autorizado");
             } else {

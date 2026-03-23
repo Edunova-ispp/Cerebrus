@@ -10,7 +10,6 @@ html, body {
   --color-secondary: #7C4DFF;
   --color-accent: #FFF294;
   --color-text: #000638;
-  --color-accent-light: #fff9ca;
   --color-accent-dark: #ffe62b;
   --color-error: #ff0040;
   --color-confirm: #5affcd;
@@ -19,9 +18,9 @@ html, body {
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: #F9F7F0;
-  background-color: #242424;
+  color-scheme: light;
+  color: #213547;
+  background-color: #F9F7F0;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -35,7 +34,7 @@ a {
   text-decoration: inherit;
 }
 a:hover {
-  color: var( --color-accent-light);
+  color: var(--color-accent-dark);
 }
 
 body {
@@ -58,22 +57,9 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #f9f9f9;
   cursor: pointer;
   transition: border-color 0.25s;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #F9F7F0;
-  }
-  a:hover {
-    color: var( --color-accent-light);
-  }
-  button {
-    background-color: #f9f9f9;
-  }
 }
 
 /* ── Global scrollbar ── */
@@ -86,5 +72,3 @@ button {
   width: 10px;
   height: 10px;
 }
-
-
