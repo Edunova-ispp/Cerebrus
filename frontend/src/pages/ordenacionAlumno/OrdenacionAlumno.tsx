@@ -318,7 +318,7 @@ export default function OrdenacionAlumno() {
     <div className="ord-items">
       {items.map((value, index) => (
         <div key={`${value}-${index}`} className="ord-item">
-          <div className="ord-item-index">{index + 1}.</div>
+          <div className="ord-item-index">{index + 1}</div>
 
           <div className="ord-item-value">
             {isImageString(value) ? (
