@@ -141,9 +141,41 @@ const [showIAModal, setShowIAModal] = useState(false);
     setPreguntas(updated);
   };
 
+  const validate = (): string | null => {
+    if (!titulo.trim()) return 'El título es requerido';
+    if (!puntuacion.trim()) return 'La puntuación es requerida';
+
+    const pNum = Number.parseInt(puntuacion.trim(), 10);
+    if (isNaN(pNum) || pNum <= 0) return 'La puntuación debe ser un número mayor a 0';
+
+    if (preguntas.length < 2) return 'Debe haber al menos 2 categorías';
+
+    for (let i = 0; i < preguntas.length; i++) {
+      if (!preguntas[i].text.trim()) {
+        return `La categoría ${i + 1} debe tener un nombre`;
+      }
+      const elementosConTexto = preguntas[i].respuestas.filter(r => r.text.trim());
+      if (elementosConTexto.length === 0) {
+        return `La categoría ${i + 1} debe tener al menos 1 elemento`;
+      }
+    }
+
+    if (!temaId) return 'Falta el id del tema en la URL';
+    if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
+    if (!cursoId) return 'Falta el id del curso en la URL';
+
+    return null;
+  };
+
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     // Validar campos requeridos
     if (!titulo.trim()) {
@@ -332,7 +364,7 @@ const handleIAResult = (data: any) => {
 
   return (
     <form onSubmit={handleSubmit} className="tf-form">
-      {error && <p className="ca-text tf-error">{error}</p>}
+      {error && <p className="tf-error">{error}</p>}
       <GenerarIAModal
         tipoActividad="CLASIFICACION"
         open={showIAModal}

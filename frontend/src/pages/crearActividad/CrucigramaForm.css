@@ -8,7 +8,7 @@
 
 /* ── Error banner ── */
 .cf-error {
-  color: #c0392b;
+  color: #c0392b !important;
   margin-top: 0;
   margin-bottom: 12px;
   font-size: 0.95rem;
