@@ -135,15 +135,59 @@ type CrucigramaMaestroDTO = {
   preguntasYRespuestas?: Record<string, string>;
 };
 
+type TemaActividadMetaDTO = {
+  id: number;
+  tipo: string;
+};
+
+type TemaWithActividadesDTO = {
+  actividades?: TemaActividadMetaDTO[];
+};
+
+const isCrucigramaMaestroDTO = (value: unknown): value is CrucigramaMaestroDTO => {
+  if (typeof value !== 'object' || value === null) return false;
+  const data = value as Record<string, unknown>;
+  return (
+    typeof data.titulo === 'string' &&
+    typeof data.descripcion === 'string' &&
+    typeof data.puntuacion === 'number' &&
+    typeof data.temaId === 'number' &&
+    Array.isArray(data.preguntas)
+  );
+};
+
+const isTeoriaDTO = (value: unknown): value is TeoriaDTO => {
+  if (typeof value !== 'object' || value === null) return false;
+  const data = value as Record<string, unknown>;
+  return (
+    typeof data.titulo === 'string' &&
+    typeof data.descripcion === 'string' &&
+    typeof data.posicion === 'number' &&
+    !('puntuacion' in data) &&
+    !Array.isArray(data.preguntas)
+  );
+};
+
 
 type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'marcarImagen' | 'clasificacion' | 'carta' | 'crucigrama' | null;
 
-export default function EditarActividad() {
-  const { id: cursoId, actividadId } = useParams<{
+interface EditarActividadProps {
+  readonly actividadIdProp?: string;
+  readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
+  readonly embedded?: boolean;
+  readonly onDone?: () => void;
+}
+
+export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdProp, embedded, onDone }: EditarActividadProps = {}) {
+  const params = useParams<{
     id: string;
     temaId: string;
     actividadId: string;
   }>();
+  const cursoId = cursoIdProp ?? params.id;
+  const temaId = temaIdProp ?? params.temaId;
+  const actividadId = actividadIdProp ?? params.actividadId;
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -176,6 +220,21 @@ export default function EditarActividad() {
       setGeneralCarta(null);
       setClasificacion(null);
       setCrucigrama(null);
+
+      let activityTypeHint: string | null = null;
+      const temaIdNum = Number.parseInt(String(temaId), 10);
+      const actividadIdNum = Number.parseInt(String(actividadId), 10);
+
+      if (!Number.isNaN(temaIdNum) && !Number.isNaN(actividadIdNum)) {
+        try {
+          const temaResponse = await apiFetch(`${apiBase}/api/temas/${temaIdNum}`);
+          const temaData = (await temaResponse.json()) as TemaWithActividadesDTO;
+          const actividadMeta = temaData.actividades?.find((item) => item.id === actividadIdNum);
+          activityTypeHint = actividadMeta?.tipo ?? null;
+        } catch {
+          // optional hint; continue with endpoint probing
+        }
+      }
 
       try {
         try {
@@ -234,17 +293,6 @@ export default function EditarActividad() {
         }
 
         try {
-          const r = await apiFetch(`${apiBase}/api/generales/crucigrama/${actividadId}`);
-          const data = (await r.json()) as CrucigramaMaestroDTO;
-          if (cancelled) return;
-          setCrucigrama(data);
-          setKind('crucigrama');
-          return;
-        } catch {
-          // try next kind
-        }
-
-        try {
           const r = await apiFetch(`${apiBase}/api/generales/clasificacion/${actividadId}/maestro`);
           const data = (await r.json()) as ClasificacionMaestroDTO;
           if (cancelled) return;
@@ -255,9 +303,52 @@ export default function EditarActividad() {
           // try next kind
         }
 
+        if (activityTypeHint === 'teoria') {
+          const r = await apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`);
+          const raw = await r.json();
+          if (!isTeoriaDTO(raw)) {
+            throw new Error('No se pudo identificar la actividad de teoría');
+          }
+          if (cancelled) return;
+          setTeoria(raw);
+          setKind('teoria');
+          return;
+        }
+
+        if (activityTypeHint === 'crucigrama') {
+          const r = await apiFetch(`${apiBase}/api/generales/crucigrama/${actividadId}`);
+          const raw = await r.json();
+          if (!isCrucigramaMaestroDTO(raw)) {
+            throw new Error('No se pudo identificar la actividad de crucigrama');
+          }
+          if (cancelled) return;
+          setCrucigrama(raw);
+          setKind('crucigrama');
+          return;
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/generales/crucigrama/${actividadId}`);
+          const raw = await r.json();
+          if (!isCrucigramaMaestroDTO(raw)) {
+            throw new Error('No es un crucigrama');
+          }
+          const data = raw;
+          if (cancelled) return;
+          setCrucigrama(data);
+          setKind('crucigrama');
+          return;
+        } catch {
+          // try next kind
+        }
+
         try {
           const r = await apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`);
-          const data = (await r.json()) as TeoriaDTO;
+          const raw = await r.json();
+          if (!isTeoriaDTO(raw)) {
+            throw new Error('No es una teoría');
+          }
+          const data = raw;
           if (cancelled) return;
           setTeoria(data);
           setKind('teoria');
@@ -277,7 +368,7 @@ export default function EditarActividad() {
     return () => {
       cancelled = true;
     };
-  }, [actividadId]);
+  }, [actividadId, temaId]);
 
   const tableroInitialValues: TableroFormInitialValues | undefined = tablero
     ? {
@@ -394,6 +485,9 @@ export default function EditarActividad() {
           mode="edit"
           generalId={actividadIdNum}
           initialValues={testInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -404,6 +498,9 @@ export default function EditarActividad() {
           mode="edit"
           ordenacionId={actividadIdNum}
           initialValues={ordenacionInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -414,6 +511,9 @@ export default function EditarActividad() {
           mode="edit"
           actividadId={actividadIdNum}
           initialValues={teoriaInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -424,6 +524,9 @@ export default function EditarActividad() {
           mode="edit"
           marcarImagenId={actividadIdNum}
           initialValues={marcarImagenInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -434,6 +537,9 @@ export default function EditarActividad() {
           mode="edit"
           tableroId={tableroInitialValues ? tablero.id : undefined}
           initialValues={tableroInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -444,6 +550,9 @@ export default function EditarActividad() {
           mode="edit"
           generalId={actividadIdNum}
           initialValues={cartaInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -454,6 +563,9 @@ export default function EditarActividad() {
           mode="edit"
           clasificacionId={actividadIdNum}
           initialValues={clasificacionInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -464,6 +576,9 @@ export default function EditarActividad() {
           mode="edit"
           crucigramaId={actividadIdNum}
           initialValues={crucigramaInitialValues}
+          temaIdProp={temaIdProp}
+          cursoIdProp={cursoIdProp}
+          onDone={onDone}
         />
       );
     }
@@ -472,18 +587,20 @@ export default function EditarActividad() {
   };
 
   return (
-    <div className="ca-page">
-      <NavbarMisCursos />
+    <div className={embedded ? 'ca-embedded' : 'ca-page'}>
+      {!embedded && <NavbarMisCursos />}
       <main className="ca-main">
-        <div className="ca-sidebar">
-          <button
-            className="ca-sidebar-btn"
-            type="button"
-            onClick={() => navigate(`/cursos/${cursoId}/temas`)}
-          >
-            Volver al Mapa
-          </button>
-        </div>
+        {!embedded && (
+          <div className="ca-sidebar">
+            <button
+              className="ca-sidebar-btn"
+              type="button"
+              onClick={() => navigate(`/cursos/${cursoId}`)}
+            >
+              Volver al Mapa
+            </button>
+          </div>
+        )}
 
         <div className="ca-contenido">
           {loading && <p className="ca-text">Cargando actividad...</p>}

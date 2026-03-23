@@ -50,6 +50,9 @@ interface Props {
   readonly mode?: TestFormMode;
   readonly generalId?: number;
   readonly initialValues?: TestFormInitialValues;
+  readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
+  readonly onDone?: () => void;
 }
 
 function makeEmptyOption(): QuestionOption {
@@ -60,7 +63,7 @@ function makeEmptyQuestion(): Question {
   return { localKey: makeLocalKey(), text: '', options: [makeEmptyOption(), makeEmptyOption()] };
 }
 
-export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
+export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -76,7 +79,9 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
   const originalQuestionsRef = useRef<TestFormInitialPregunta[]>([]);
 
   const navigate = useNavigate();
-  const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+  const params = useParams<{ id: string; temaId: string }>();
+  const cursoId = cursoIdProp ?? params.id;
+  const temaId = temaIdProp ?? params.temaId;
 
   useEffect(() => {
     if (!initialValues) return;
@@ -155,6 +160,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
 
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
+    if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
 
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
@@ -333,7 +339,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
         }
       }
 
-      navigate(`/cursos/${cursoId}/temas`);
+      if (onDone) onDone(); else navigate(`/cursos/${cursoId}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error guardando el test';
       setError(msg);
@@ -387,6 +393,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Título del test"
+              required
             />
           </div>
 
@@ -434,6 +441,8 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
                 className="tf-input tf-input-sm"
                 value={puntuacion}
                 onChange={(e) => setPuntuacion(e.target.value)}
+                min="1"
+                required
               />
             </div>
             <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>

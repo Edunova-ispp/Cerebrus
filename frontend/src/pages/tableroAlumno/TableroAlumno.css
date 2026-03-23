@@ -275,7 +275,7 @@
 .ta-modal-title {
   font-size: 3.2rem;
   font-weight: bold;
-  color: #D1C1FF;
+  color: #D6C4FF;
   margin: 0;
   text-shadow: 4px 4px 0 #000;
   text-align: center;
@@ -284,7 +284,7 @@
 }
 
 .ta-modal-q {
-  background: #D1C1FF;
+  background: #D6C4FF;
   border: 2px solid #000;
   border-radius: 10px;
   padding: 10px 14px;

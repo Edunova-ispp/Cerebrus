@@ -92,3 +92,12 @@
 .mis-cursos-feedback--success {
   color: #4caf50;
 }
+
+/* === PROFESOR: Oxygen === */
+.mis-cursos-page.maestro .mis-cursos-title,
+.mis-cursos-page.maestro .join-label,
+.mis-cursos-page.maestro .join-input,
+.mis-cursos-page.maestro .join-btn,
+.mis-cursos-page.maestro .mis-cursos-feedback {
+  font-family: 'Oxygen', sans-serif;
+}

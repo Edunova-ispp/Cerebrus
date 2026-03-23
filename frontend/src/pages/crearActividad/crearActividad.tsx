@@ -13,42 +13,70 @@ import { CrucigramaForm } from './CrucigramaForm';
 
 const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden', 'Marcar en imagen', 'Tablero', 'Clasificación', 'Carta', 'Crucigrama'];
 
-export default function CrearActividad() {
-  const { id: cursoId } = useParams<{ id: string; temaId: string }>();
+interface CrearActividadProps {
+  readonly cursoIdProp?: string;
+  readonly temaIdProp?: string;
+  readonly embedded?: boolean;
+  readonly onDone?: () => void;
+}
+
+export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDone }: CrearActividadProps = {}) {
+  const params = useParams<{ id: string; temaId: string }>();
+  const cursoId = cursoIdProp ?? params.id;
   const navigate = useNavigate();
   const [tipoSeleccionado, setTipoSeleccionado] = useState<string | null>(null);
 
   const formContent =
-    tipoSeleccionado === 'Poner en orden' ? <OrdenacionForm /> :
-    tipoSeleccionado === 'Tipo test' ? <TestForm mode="create" /> :
-    tipoSeleccionado === 'Teoría' ? <TeoriaForm mode="create" /> :
-    tipoSeleccionado === 'Marcar en imagen' ? <MarcarImagenForm mode="create" /> :
-    tipoSeleccionado === 'Tablero' ? <TableroForm mode="create" /> :
-    tipoSeleccionado === 'Carta' ? <CartaForm mode="create" /> :
-    tipoSeleccionado === 'Clasificación' ? <ClasificacionForm mode="create" /> :
-    tipoSeleccionado === 'Crucigrama' ? <CrucigramaForm mode="create" /> :
+    tipoSeleccionado === 'Poner en orden' ? <OrdenacionForm temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Tipo test' ? <TestForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Teoría' ? <TeoriaForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Marcar en imagen' ? <MarcarImagenForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Tablero' ? <TableroForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Carta' ? <CartaForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Clasificación' ? <ClasificacionForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Crucigrama' ? <CrucigramaForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
     <p className="ca-proximamente">Selecciona un tipo de actividad</p>;
+
+  const handleVolver = () => {
+    if (embedded && onDone) {
+      onDone();
+    } else {
+      navigate(`/cursos/${cursoId}`);
+    }
+  };
+
+  const sidebar = (
+    <div className="ca-sidebar">
+   
+      {TIPOS.map((tipo) => (
+        <button
+          key={tipo}
+          className={`ca-sidebar-btn${tipoSeleccionado === tipo ? ' ca-sidebar-btn--activo' : ''}`}
+          type="button"
+          onClick={() => setTipoSeleccionado(tipo)}
+        >
+          {tipo}
+        </button>
+      ))}
+    </div>
+  );
+
+  if (embedded) {
+    return (
+      <div className="ca-embedded">
+        {sidebar}
+        <div className="ca-contenido">
+          {formContent}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="ca-page">
       <NavbarMisCursos />
       <main className="ca-main">
-        <div className="ca-sidebar">
-          <button className="ca-sidebar-btn" onClick={() => navigate(`/cursos/${cursoId}/temas`)}>
-            Volver al Mapa
-          </button>
-          {TIPOS.map((tipo) => (
-            <button
-              key={tipo}
-              className="ca-sidebar-btn"
-              type="button"
-              onClick={() => setTipoSeleccionado(tipo)}
-            >
-              {tipo}
-            </button>
-          ))}
-        </div>
-
+        {sidebar}
         <div className="ca-contenido">
           {formContent}
         </div>

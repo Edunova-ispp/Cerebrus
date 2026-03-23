@@ -17,9 +17,12 @@ interface Props {
   readonly mode?: 'create' | 'edit';
   readonly actividadId?: number;
   readonly initialValues?: TeoriaFormInitialValues;
+  readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
+  readonly onDone?: () => void;
 }
 
-export function TeoriaForm({ mode = 'create', actividadId, initialValues }: Props) {
+export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [imagen, setImagen] = useState('');
@@ -29,7 +32,9 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues }: Prop
 
 
   const navigate = useNavigate();
-  const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+  const params = useParams<{ id: string; temaId: string }>();
+  const cursoId = cursoIdProp ?? params.id;
+  const temaId = temaIdProp ?? params.temaId;
 
   useEffect(() => {
     console.log("Intial values", initialValues);
@@ -41,6 +46,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues }: Prop
 
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
+    if (!descripcion.trim()) return 'El contenido teórico es requerido';
 
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
@@ -82,13 +88,13 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues }: Prop
           body: JSON.stringify({
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
-            imagen: '',
+            imagen: imagen.trim(),
             temaId: temaIdNum,
           }),
         });
       }
 
-      navigate(-1);
+      if (onDone) onDone(); else navigate(-1);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Error guardando la teoría';
       setError(msg);
@@ -115,7 +121,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues }: Prop
 
       <div className="of-meta-section" style={{ flexDirection: 'column' }}>
         <div>
-          <label className="of-label" htmlFor="teoria-titulo">Título de la Lección</label>
+          <label className="of-label" htmlFor="teoria-titulo">Título de la Lección *</label>
           <input
             type="text"
             id="teoria-titulo"
@@ -123,10 +129,11 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues }: Prop
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
             placeholder="Ej: Introducción a la materia"
+            required
           />
         </div>
         <div>
-          <label className="of-label" htmlFor="teoria-descripcion">Contenido Teórico</label>
+          <label className="of-label" htmlFor="teoria-descripcion">Contenido Teórico *</label>
           <textarea
             id="teoria-descripcion"
             className="of-textarea"
@@ -134,6 +141,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues }: Prop
             onChange={(e) => setDescripcion(e.target.value)}
             rows={10}
             placeholder="Escribe aquí el contenido..."
+            required
           />
         </div>
         <div>

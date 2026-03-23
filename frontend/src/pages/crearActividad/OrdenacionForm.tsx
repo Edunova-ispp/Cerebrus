@@ -21,13 +21,16 @@ interface Props {
   readonly mode?: OrdenacionFormMode;
   readonly ordenacionId?: number;
   readonly initialValues?: OrdenacionFormInitialValues;
+  readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
+  readonly onDone?: () => void;
 }
 
 function makeLocalKey(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }: Props) {
+export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -47,7 +50,9 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
   }, [initialValues?.posicion, mode]);
 
   const navigate = useNavigate();
-  const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+  const params = useParams<{ id: string; temaId: string }>();
+  const cursoId = cursoIdProp ?? params.id;
+  const temaId = temaIdProp ?? params.temaId;
 
   useEffect(() => {
     if (!initialValues) return;
@@ -85,6 +90,10 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
       setError('La puntuación debe ser un número válido');
       return;
     }
+    if (puntuacionNum <= 0) {
+      setError('La puntuación debe ser un número mayor a 0');
+      return;
+    }
 
     if (!temaId) {
       setError('Falta el id del tema en la URL');
@@ -107,8 +116,8 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
       return;
     }
 
-    if (valores.length === 0) {
-      setError('Debes añadir al menos un valor');
+    if (valores.length < 2) {
+      setError('Debes añadir al menos dos valores');
       return;
     }
 
@@ -138,7 +147,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
         }),
       });
 
-      navigate(`/cursos/${cursoId}/temas`);
+      if (onDone) onDone(); else navigate(`/cursos/${cursoId}`);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Error creando la ordenación';
       setError(msg);
@@ -181,6 +190,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Título de la actividad"
+              required
             />
           </div>
           <div>
@@ -205,6 +215,8 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues }:
               className="of-input of-input-sm"
               value={puntuacion}
               onChange={(e) => setPuntuacion(e.target.value)}
+              min="1"
+              required
             />
           </div>
 

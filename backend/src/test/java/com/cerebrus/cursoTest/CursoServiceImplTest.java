@@ -22,15 +22,15 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadRepository;
-import com.cerebrus.actividadAlumno.ActividadAlumno;
-import com.cerebrus.actividadAlumno.ActividadAlumnoProgreso;
-import com.cerebrus.actividadAlumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadAlumn.ActividadAlumno;
+import com.cerebrus.actividadAlumn.ActividadAlumnoProgreso;
+import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.estadisticas.EstadisticasMaestroServiceImpl;
-import com.cerebrus.respuestaAlumno.RespuestaAlumno;
+import com.cerebrus.respuestaAlumn.RespuestaAlumno;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
@@ -550,6 +550,8 @@ class CursoServiceImplTest {
     // Crea un ActividadAlumnoProgreso (interfaz) con las fechas de inicio y fin proporcionadas usando clase anónima
     private static ActividadAlumnoProgreso crearProgreso(LocalDateTime inicio, LocalDateTime acabada) {
         return new ActividadAlumnoProgreso() {
+            @Override
+            public Long getActividadId() { return null; }
             @Override
             public LocalDateTime getInicio() { return inicio; }
             @Override

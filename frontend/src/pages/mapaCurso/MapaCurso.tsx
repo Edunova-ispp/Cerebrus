@@ -78,6 +78,8 @@ export default function MapaCurso() {
   const [mapRowSize, setMapRowSize] = useState(6);
 
   const [completionMap, setCompletionMap] = useState<Map<number, CompletionInfo>>(new Map());
+  const [loadingCompletion, setLoadingCompletion] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const el = mapContainerRef.current;
@@ -139,13 +141,24 @@ useEffect(() => {
   useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     const tema = temas[selectedIndex];
-    if (!tema || tema.actividades.length === 0) return;
+    if (!tema || tema.actividades.length === 0) {
+      setLoadingCompletion(false);
+      return;
+    }
 
-    const unchecked = tema.actividades.filter((act) => !completionMap.has(act.id));
-    if (unchecked.length === 0) return;
+    const unchecked = tema.actividades;
+    if (unchecked.length === 0) {
+      setLoadingCompletion(false);
+      return;
+    }
 
     const alumnoId = getCurrentUserIdFromJwt();
-    if (!alumnoId) return;
+    if (!alumnoId) {
+      setLoadingCompletion(false);
+      return;
+    }
+
+    setLoadingCompletion(true);
 
     Promise.all(
       tema.actividades.map((act) =>
@@ -170,12 +183,14 @@ useEffect(() => {
         results.forEach(({ id, info }) => next.set(id, info));
         return next;
       });
+      setLoadingCompletion(false);
     });
-  }, [temas, selectedIndex]);
+  }, [temas, selectedIndex, refreshKey]);
 
   useEffect(() => {
     const handleFocus = () => {
       setCompletionMap(new Map());
+      setRefreshKey((k) => k + 1);
     };
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
@@ -276,23 +291,23 @@ useEffect(() => {
           </aside>
 
           <section className="mapa-activities">
-            {loading && (
+            {(loading || loadingCompletion) && (
               <p className="mapa-feedback">Cargando actividades...</p>
             )}
 
-            {!loading && error && (
+            {!loading && !loadingCompletion && error && (
               <p className="mapa-feedback mapa-feedback--error">
                 No se pudieron cargar los temas/actividades ({error}).
               </p>
             )}
 
-            {!loading && !error && temas.length === 0 && (
+            {!loading && !loadingCompletion && !error && temas.length === 0 && (
               <p className="mapa-feedback">
                 Este curso todavía no tiene temas o no tienes acceso.
               </p>
             )}
 
-            {selectedTema && !loading && !error && (
+            {selectedTema && !loading && !loadingCompletion && !error && (
               <>
                 <h2 className="mapa-activities-title">{selectedTema.titulo}</h2>
 
