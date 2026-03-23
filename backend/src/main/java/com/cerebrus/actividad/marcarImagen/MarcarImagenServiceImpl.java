@@ -50,6 +50,12 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
 
         MarcarImagen marcarImagen = new MarcarImagen();
         Tema tema = temaService.obtenerTemaPorId(marcarImagenDTO.getTemaId());
+
+        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede crear actividades en ese tema");
+            
+        }
+
         List<PuntoImagen> puntosImagen = new LinkedList<>();
 
         marcarImagen.setTitulo(marcarImagenDTO.getTitulo());
@@ -89,9 +95,14 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
         if (!(u instanceof Maestro) && !(u instanceof Alumno)) {
             throw new AccessDeniedException("Solo un usuario logueado como alumno o maestro puede obtener una actividad de marcar imagen");
         }
-
-        return marcarImagenRepository.findById(id)
+        MarcarImagen marcarImagen = marcarImagenRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Marcar Imagen", "id", id));
+
+        if (!marcarImagen.getTema().getCurso().getMaestro().getId().equals(u.getId()) && !marcarImagen.getTema().getCurso().getInscripciones().stream().anyMatch(a -> a.getAlumno().getId().equals(u.getId()))) {
+            throw new AccessDeniedException("Solo alguien perteneciente al curso puede acceder a esta actividad");
+        }
+
+        return marcarImagen;
     }
 
     @Override
@@ -101,6 +112,11 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede actualizar actividades de marcar imagenes");
+        }
+
+        Tema tema = temaService.obtenerTemaPorId(marcarImagenDTO.getTemaId());
+        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede actualizar actividades en ese tema");
         }
 
         MarcarImagen marcarImagenAActualizar = obtenerMarcarImagenPorId(id);
@@ -150,8 +166,12 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede eliminar actividades de marcar imagenes");
         }
-
+        
         MarcarImagen marcarImagen = obtenerMarcarImagenPorId(id);
+
+        if (!marcarImagen.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede eliminar esta actividad");
+        }
         marcarImagenRepository.delete(marcarImagen);
     }
 }
