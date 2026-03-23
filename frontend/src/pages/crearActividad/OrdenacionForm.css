@@ -191,7 +191,7 @@
 /* ── Error / success ───────────────────────────────────────── */
 
 .of-error {
-  color: #c0392b;
+  color: #c0392b !important;
   font-size: 0.95rem;
   margin: 0 0 12px 0;
 }

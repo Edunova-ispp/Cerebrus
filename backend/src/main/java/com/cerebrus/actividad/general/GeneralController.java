@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.actividad.general.dto.CrucigramaDTO;
+import com.cerebrus.actividad.general.dto.CrucigramaRequest;
+import com.cerebrus.actividad.general.dto.GeneralAbiertaAlumnoDTO;
+import com.cerebrus.actividad.general.dto.GeneralAbiertaMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralClasificacionDTO;
@@ -272,6 +275,56 @@ public class GeneralController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @PostMapping("/abierta/maestro")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<Long> crearTipoAbierta(@RequestBody @Valid General general) {
+
+        List<Long> preguntasId = general.getPreguntas().stream()
+            .map(Pregunta::getId)
+            .toList();
+
+        General generalCreada = generalService.crearTipoAbierta(
+            general.getTitulo(),
+            general.getDescripcion(),
+            general.getPuntuacion(),
+            general.getTema().getId(),
+            general.getRespVisible(),
+            general.getComentariosRespVisible(),
+            preguntasId
+        );
+
+        return new ResponseEntity<>(generalCreada.getId(), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/abierta/{id}")
+    public ResponseEntity<GeneralAbiertaAlumnoDTO> readTipoAbierta(@PathVariable Long id) {
+        return ResponseEntity.ok(generalService.readTipoAbierta(id));
+    }
+
+    @GetMapping("/abierta/{id}/maestro")
+    public ResponseEntity<GeneralAbiertaMaestroDTO> readTipoAbiertaMaestro(@PathVariable Long id) {
+        return ResponseEntity.ok(generalService.readTipoAbiertaMaestro(id));
+    }
+
+    @PutMapping("/abierta/update/{id}")
+    public ResponseEntity<GeneralAbiertaAlumnoDTO> updateTipoAbierta(@PathVariable Long id, @RequestBody @Valid General general) {
+
+        generalService.updateTipoAbierta(
+        id,
+        general.getTitulo(),
+        general.getDescripcion(),
+        general.getPuntuacion(),
+        general.getRespVisible(),
+        general.getComentariosRespVisible(),
+        general.getPreguntas().stream().map(Pregunta::getId).toList(),
+        general.getPosicion(),
+        general.getVersion(),
+        general.getTema().getId()
+        );
+
+        return ResponseEntity.ok(generalService.readTipoAbierta(id));
     }
 
 }
