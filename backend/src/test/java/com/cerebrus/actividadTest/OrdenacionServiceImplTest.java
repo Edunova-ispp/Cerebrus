@@ -54,6 +54,7 @@ class OrdenacionServiceImplTest {
     @BeforeEach
     void setUp() {
         maestro = new Maestro();
+        maestro.setId(2L);
         usuarioNoMaestro = new Usuario() {};
 
         // Tema de prueba existente (necesario porque el servicio valida que temaId exista)
@@ -62,6 +63,7 @@ class OrdenacionServiceImplTest {
         curso.setTitulo("Curso test");
         curso.setCodigo("COD-TEST");
         curso.setVisibilidad(true);
+        curso.setMaestro(maestro);
 
         tema = new Tema();
         tema.setId(1L);
@@ -83,6 +85,7 @@ class OrdenacionServiceImplTest {
         ordenacion.setPosicion(1);
         ordenacion.setVersion(1);
         ordenacion.setValores(new ArrayList<>(valores));
+        ordenacion.setTema(tema);
     }
 
     // -------------------------------------------------------
@@ -311,6 +314,7 @@ class OrdenacionServiceImplTest {
     @Test
     void deleteActOrdenacion_maestro_eliminaCorrectamente() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
 
         ordenacionService.deleteActOrdenacion(10L);
 

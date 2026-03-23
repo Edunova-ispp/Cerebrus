@@ -78,10 +78,10 @@ class ActividadControllerTest {
         when(actividadService.crearActividadTeoria(any(), any(), any(), any()))
                 .thenThrow(new IllegalArgumentException("Tema no encontrado"));
 
-        ResponseEntity<TeoriaDTO> response = actividadController.crearActividadTeoria(request);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isNull();
+        assertThatThrownBy(() -> actividadController.crearActividadTeoria(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Tema no encontrado");
+        
     }
 
     @Test

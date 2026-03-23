@@ -1,8 +1,10 @@
 package com.cerebrus.cursoTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +28,7 @@ import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.estadisticas.EstadisticasMaestroController;
 import com.cerebrus.estadisticas.EstadisticasMaestroServiceImpl;
+import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
 
@@ -132,9 +135,9 @@ class CursoControllerTest {
         when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(10L))
                 .thenThrow(new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos"));
 
-        ResponseEntity<HashMap<String, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(10L);
-
-        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThatThrownBy(() -> estadisticasMaestroController.obtenerPuntosCurso(10L))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Solo un maestro puede visualizar los puntos de los alumnos");
     }
 
     // Test para verificar que obtenerPuntosCurso retorna 404 cuando el service lanza RuntimeException con mensaje 404
@@ -142,9 +145,9 @@ class CursoControllerTest {
     void obtenerPuntosCurso_cursoNoExiste_retorna404() {
         when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(99L)).thenThrow(new RuntimeException("404 Not Found"));
 
-        ResponseEntity<HashMap<String, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(99L);
-
-        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThatThrownBy(() -> estadisticasMaestroController.obtenerPuntosCurso(99L))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("404 Not Found");
     }
 
     // Test para verificar que obtenerPuntosCurso retorna 500 cuando el service lanza una RuntimeException inesperada
@@ -152,9 +155,9 @@ class CursoControllerTest {
     void obtenerPuntosCurso_errorInesperado_retorna500() {
         when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(10L)).thenThrow(new RuntimeException("Error interno"));
 
-        ResponseEntity<HashMap<String, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(10L);
-
-        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThatThrownBy(() -> estadisticasMaestroController.obtenerPuntosCurso(10L))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Error interno");
     }
 
     // -------------------------------------------------------
