@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,13 +28,11 @@ import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 
 
 @RestController
 @RequestMapping("/api/generales")
 @CrossOrigin(origins = "*")
-@Validated
 public class GeneralController {
 
     private final GeneralService generalService;
@@ -238,7 +235,7 @@ public class GeneralController {
         try {
             // Se ha decidido limitar el crucigrama a un maximo de 5 preguntas
         if(crucigrama.getPreguntasYRespuestas().size() > 5) {
-            throw new IllegalArgumentException("El crucigrama no puede tener mas de 5 preguntas");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
         CrucigramaDTO generalCreada = generalService.crearTipoCrucigrama(crucigrama);
         return ResponseEntity.ok(generalCreada);

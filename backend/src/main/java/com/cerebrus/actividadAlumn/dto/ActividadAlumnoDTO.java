@@ -2,7 +2,6 @@ package com.cerebrus.actividadAlumn.dto;
 
 import java.time.LocalDateTime;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,10 +25,8 @@ public class ActividadAlumnoDTO {
 
     private Integer numAbandonos;
 
-    @NotNull(message = "El alumno es obligatorio")
     private Long alumnoId;
 
-    @NotNull(message = "La actividad es obligatoria")
     private Long actividadId;
 
     public ActividadAlumnoDTO(Long id, Integer tiempo, Integer puntuacion, 

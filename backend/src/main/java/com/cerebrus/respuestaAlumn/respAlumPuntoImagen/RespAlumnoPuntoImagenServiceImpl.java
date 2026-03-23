@@ -32,19 +32,6 @@ public class RespAlumnoPuntoImagenServiceImpl implements RespAlumnoPuntoImagenSe
     @Override
     @Transactional
     public RespAlumnoPuntoImagen crearRespuestaAlumnoPuntoImagen(String respuesta, Long puntoImagenId, Long actividadAlumnoId) {
-        String respuestaNormalizada = respuesta == null ? "" : respuesta.trim();
-        if (respuestaNormalizada.isEmpty()) {
-            throw new IllegalArgumentException("La respuesta es obligatoria");
-        }
-
-        if (puntoImagenId == null) {
-            throw new IllegalArgumentException("El punto de imagen es obligatorio");
-        }
-
-        if (actividadAlumnoId == null) {
-            throw new IllegalArgumentException("La actividad del alumno es obligatoria");
-        }
-
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Alumno)) {
             throw new AccessDeniedException("Solo un alumno puede crear respuestas para puntos de imagen");
@@ -52,11 +39,8 @@ public class RespAlumnoPuntoImagenServiceImpl implements RespAlumnoPuntoImagenSe
 
         RespAlumnoPuntoImagen respAlumnoPuntoImagen = new RespAlumnoPuntoImagen();
         PuntoImagen puntoImagen = puntoImagenService.obtenerPuntoImagenPorId(puntoImagenId);
-        ActividadAlumno actividadAlumno = respAlumnoPuntoImagenRepository.encontrarActividadAlumnoPorId(actividadAlumnoId);
-        if (actividadAlumno == null) {
-            throw new ResourceNotFoundException("ActividadAlumno", "id", actividadAlumnoId);
-        }
-        respAlumnoPuntoImagen.setRespuesta(respuestaNormalizada);
+        ActividadAlumno actividadAlumno = respAlumnoPuntoImagenRepository.encontrarActividadAlumnoPorId(actividadAlumnoId); 
+        respAlumnoPuntoImagen.setRespuesta(respuesta);
         respAlumnoPuntoImagen.setPuntoImagen(puntoImagen);
         respAlumnoPuntoImagen.setActividadAlumno(actividadAlumno);
         respAlumnoPuntoImagen.setCorrecta(false);

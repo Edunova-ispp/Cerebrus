@@ -55,21 +55,14 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     @Transactional
     public RespAlumnoGeneralCreateResponse crearRespAlumnoGeneral(Long actAlumnoId, Long respuestaId, Long preguntaId) {
 
-        if (actAlumnoId == null || respuestaId == null || preguntaId == null) {
-            throw new IllegalArgumentException("Actividad, pregunta y respuesta son obligatorias");
-        }
-
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Alumno)) {
             throw new AccessDeniedException("Solo un alumno puede crear respuestas de alumno");
         }
 
-        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actAlumnoId)
-            .orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
-        Pregunta pregunta = preguntaRepository.findById(preguntaId)
-            .orElseThrow(() -> new ResourceNotFoundException("La pregunta no existe"));
-        RespuestaMaestro respuestaObj = respuestaRepository.findById(respuestaId)
-            .orElseThrow(() -> new ResourceNotFoundException("La respuesta no existe"));
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actAlumnoId).orElseThrow(() -> new RuntimeException("La actividad del alumno no existe"));
+        Pregunta pregunta = preguntaRepository.findById(preguntaId).orElseThrow(() -> new RuntimeException("La pregunta no existe"));
+        RespuestaMaestro respuestaObj = respuestaRepository.findById(respuestaId).orElseThrow(() -> new RuntimeException("La respuesta no existe"));
         Boolean correcta = respuestaObj.getCorrecta();
         String respuestaTexto = respuestaObj.getRespuesta();
         String comentariosRespVisible;
@@ -91,8 +84,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     @Override
     @Transactional(readOnly = true)
     public RespAlumnoGeneral readRespAlumnoGeneral(Long id) {
-        return respAlumnoGeneralRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("La respuesta del alumno no existe"));
+        return respAlumnoGeneralRepository.findById(id).orElseThrow(() -> new RuntimeException("La respuesta del alumno no existe"));
     }
 
 // ESTOS MÉTODOS QUEDAN DEFINIDOS POR SI ES NECESARIO UTILIZARLOS, 
@@ -101,29 +93,17 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     @Override
     @Transactional
     public RespAlumnoGeneral updateRespAlumnoGeneral(Long id,Boolean correcta, Long actAlumnoId, String respuesta, Long preguntaId) {
-        if (correcta == null) {
-            throw new IllegalArgumentException("El campo correcta es obligatorio");
-        }
-
-        String respuestaNormalizada = respuesta == null ? "" : respuesta.trim();
-        if (respuestaNormalizada.isEmpty()) {
-            throw new IllegalArgumentException("La respuesta es obligatoria");
-        }
-
-        RespAlumnoGeneral respAlumnoGeneral = respAlumnoGeneralRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("La respuesta del alumno no existe"));
+        RespAlumnoGeneral respAlumnoGeneral = respAlumnoGeneralRepository.findById(id).orElseThrow(() -> new RuntimeException("La respuesta del alumno no existe"));
         respAlumnoGeneral.setCorrecta(correcta);
-        respAlumnoGeneral.setRespuesta(respuestaNormalizada);
-        respAlumnoGeneral.setPregunta(preguntaRepository.findById(preguntaId)
-                .orElseThrow(() -> new ResourceNotFoundException("La pregunta no existe")));
+        respAlumnoGeneral.setRespuesta(respuesta);
+        respAlumnoGeneral.setPregunta(preguntaRepository.findById(preguntaId).orElseThrow(() -> new RuntimeException("La pregunta no existe")));
         return respAlumnoGeneralRepository.save(respAlumnoGeneral);
     }
 
     @Override
     @Transactional
     public void deleteRespAlumnoGeneral(Long id) {
-        RespAlumnoGeneral respAlumnoGeneral = respAlumnoGeneralRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("La respuesta del alumno no existe"));
+        RespAlumnoGeneral respAlumnoGeneral = respAlumnoGeneralRepository.findById(id).orElseThrow(() -> new RuntimeException("La respuesta del alumno no existe"));
         respAlumnoGeneralRepository.delete(respAlumnoGeneral);
     }
 
@@ -151,7 +131,9 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
             .orElseThrow(() -> new ResourceNotFoundException("RespuestaAlumnoGeneral", "id", id));
         List<RespuestaMaestro> respuestas = respuestaService.encontrarRespuestasPorPreguntaId(respuestaAlumno.getPregunta().getId());
         Boolean esCorrecta = false;
+        System.out.println("Respuesta del alumno: " + respuestaAlumno.getRespuesta());
         for (RespuestaMaestro r : respuestas) {
+                System.out.println("Respuesta correcta: " + r.getRespuesta() + " - Correcta: " + r.getCorrecta());
                 if(r.getRespuesta().equals(respuestaAlumno.getRespuesta()) ) {
                    esCorrecta = true;
                 }
@@ -166,14 +148,6 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     @Override
     @Transactional
     public HashMap<Long, String> corregirCrucigrama(LinkedHashMap<Long, String> respuestas, Long crucigramaId) {
-        if (respuestas == null || respuestas.isEmpty() || respuestas.size() > 5) {
-            throw new IllegalArgumentException("Debes enviar entre 1 y 5 respuestas");
-        }
-
-        if (crucigramaId == null) {
-            throw new IllegalArgumentException("El crucigrama es obligatorio");
-        }
-
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Alumno)) {
             throw new AccessDeniedException("Solo un alumno puede responder crucigramas");
@@ -182,9 +156,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         Alumno alumno = (Alumno) u;
         Integer nota = 0;
         Integer puntuacion = 0;
-        Integer puntuacionASumar = actividadRepository.findById(crucigramaId)
-            .orElseThrow(() -> new ResourceNotFoundException("El crucigrama no existe"))
-            .getPuntuacion() / respuestas.size();
+        Integer puntuacionASumar = actividadRepository.findById(crucigramaId).orElseThrow(() -> new RuntimeException("El crucigrama no existe")).getPuntuacion() / respuestas.size();
         List<RespAlumnoGeneral> respuestasAlumno = new java.util.ArrayList<>();
         
         // Buscar si ya existe ActividadAlumno para este alumno y actividad
@@ -206,8 +178,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
             Long preguntaId = entry.getKey();
             String respuestaDada = entry.getValue().strip().toLowerCase();
 
-                Pregunta pregunta = preguntaRepository.findById(preguntaId)
-                    .orElseThrow(() -> new ResourceNotFoundException("La pregunta no existe"));
+            Pregunta pregunta = preguntaRepository.findById(preguntaId).orElseThrow(() -> new RuntimeException("La pregunta no existe"));
             if (!pregunta.getActividad().getId().equals(crucigramaId)) {
                 throw new IllegalArgumentException("La pregunta con id " + preguntaId + " no pertenece al crucigrama con id " + crucigramaId);
             }
@@ -215,7 +186,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
             RespuestaMaestro respuestaCorrecta = respuestaService.encontrarRespuestasPorPreguntaId(preguntaId).stream()
                 .filter(RespuestaMaestro::getCorrecta)
                 .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("No se encontro una respuesta correcta para la pregunta con id " + preguntaId));
+                .orElseThrow(() -> new RuntimeException("No se encontró una respuesta correcta para la pregunta con id " + preguntaId));
 
             Boolean esCorrecta = respuestaDada.equals(respuestaCorrecta.getRespuesta().strip().toLowerCase());
 

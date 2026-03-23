@@ -11,9 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "respuesta_maestro")
@@ -24,19 +21,16 @@ public class RespuestaMaestro {
     private Long id;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    @NotBlank(message = "La respuesta es obligatoria")
     private String respuesta;
 
     private String imagen;
 
     @Column(nullable = false)
-    @NotNull(message = "El campo correcta es obligatorio")
     private Boolean correcta;
 
     //Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pregunta_id", nullable = false)
-    @NotNull(message = "La pregunta es obligatoria")
     private Pregunta pregunta;
 
     // Constructores

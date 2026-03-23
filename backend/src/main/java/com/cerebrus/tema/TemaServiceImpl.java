@@ -11,7 +11,6 @@ import com.cerebrus.actividad.Actividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.CursoRepository;
-import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.maestro.Maestro;
@@ -41,36 +40,33 @@ public class TemaServiceImpl implements TemaService {
 
     @Override
     public Tema crearTema(String titulo, Long cursoId, Long maestroId) {
-        String tituloNormalizado = normalizeAndValidateTitulo(titulo);
-
         // Verificar que el maestro existe
         Maestro maestro = maestroRepository.findById(maestroId)
-            .orElseThrow(() -> new ResourceNotFoundException("Maestro", "id", maestroId));
+                .orElseThrow(() -> new IllegalArgumentException("Maestro no encontrado"));
 
         // Verificar que el curso existe y pertenece al maestro
         Curso curso = cursoRepository.findById(cursoId)
-            .orElseThrow(() -> new ResourceNotFoundException("Curso", "id", cursoId));
+                .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
 
         if (!curso.getMaestro().getId().equals(maestroId)) {
             throw new IllegalArgumentException("El maestro no es propietario del curso");
         }
 
-        Tema tema = new Tema(tituloNormalizado, curso);
+        Tema tema = new Tema(titulo, curso);
         return temaRepository.save(tema);
     }
 
     @Override
     public Tema renombrarTema(Long temaId, String nuevoTitulo, Long maestroId) {
-        String tituloNormalizado = normalizeAndValidateTitulo(nuevoTitulo);
         // Verificar que el tema existe y pertenece a un curso del maestro
         Tema tema = temaRepository.findById(temaId)
-            .orElseThrow(() -> new ResourceNotFoundException("Tema", "id", temaId));
+                .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado"));
 
         if (!tema.getCurso().getMaestro().getId().equals(maestroId)) {
             throw new IllegalArgumentException("El maestro no es propietario del tema");
         }
 
-        tema.setTitulo(tituloNormalizado);
+        tema.setTitulo(nuevoTitulo);
         return temaRepository.save(tema);
     }
 
@@ -108,14 +104,14 @@ public class TemaServiceImpl implements TemaService {
     public Tema obtenerTemaPorId(Long temaId) {
 
         return temaRepository.findById(temaId)
-            .orElseThrow(() -> new ResourceNotFoundException("Tema", "id", temaId));
+                .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado con ID: " + temaId));
     }
 
     @Override
     public void eliminarTema(Long temaId) {
         
         Tema tema = temaRepository.findById(temaId)
-            .orElseThrow(() -> new ResourceNotFoundException("Tema", "id", temaId));
+                .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado"));
 
         Usuario usuario = usuarioService.findCurrentUser(); 
         if(usuario instanceof Maestro && tema.getCurso().getMaestro().getId().equals(usuario.getId())){
@@ -126,16 +122,4 @@ public class TemaServiceImpl implements TemaService {
             throw new IllegalArgumentException("El usuario no tiene permiso para eliminar este tema.");
         }
     }
-
-    private String normalizeAndValidateTitulo(String titulo) {
-        if (titulo == null) {
-            throw new IllegalArgumentException("El titulo no puede ser nulo");
-        }
-        String tituloNormalizado = titulo.trim();
-        if (tituloNormalizado.isEmpty()) {
-            throw new IllegalArgumentException("El titulo no puede estar vacio");
-        }
-        return tituloNormalizado;
-    }
-
 }

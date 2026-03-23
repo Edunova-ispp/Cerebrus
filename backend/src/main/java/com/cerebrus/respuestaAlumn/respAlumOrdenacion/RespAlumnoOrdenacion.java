@@ -16,9 +16,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "resp_alumno_ordenacion")
@@ -28,13 +25,11 @@ public class RespAlumnoOrdenacion extends RespuestaAlumno {
     @CollectionTable(name = "resp_alumno_ordenacion_valores", joinColumns = @JoinColumn(name = "respuesta_id"))
     @Column(name = "valor")
     @OrderColumn(name = "orden")
-    @NotEmpty(message = "Debes enviar al menos un valor")
-    private List<@NotBlank(message = "Los valores de la ordenacion no pueden estar vacios") String> valoresAlum = new ArrayList<>();
+    private List<String> valoresAlum = new ArrayList<>();
 
     //Relaciones
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ordenacion_id", nullable = false)
-    @NotNull(message = "La ordenacion es obligatoria")
     private Ordenacion ordenacion;
 
     // Constructores

@@ -5,12 +5,12 @@ import jakarta.validation.constraints.NotNull;
 
 public class PreguntaRequest {
 
-    @NotBlank(message = "El enunciado de la pregunta es obligatorio")
+    @NotBlank
     private String pregunta;
 
     private String imagen;
 
-    @NotNull(message = "La actividad es obligatoria")
+    @NotNull
     private Long actividadId;
 
     public PreguntaRequest() {}

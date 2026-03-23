@@ -11,8 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "punto_imagen")
@@ -23,18 +21,12 @@ public class PuntoImagen {
     private Long id;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    @NotNull(message = "La respuesta es obligatoria")
-    @NotBlank(message = "La respuesta no puede estar vacia")
     private String respuesta;
 
     @Column(nullable = false)
-    @NotNull(message = "La coordenada X es obligatoria")
-    @NotBlank(message = "La coordenada X no puede estar vacia")
     private Integer pixelX;
 
     @Column(nullable = false)
-    @NotNull(message = "La coordenada Y es obligatoria")
-    @NotBlank(message = "La coordenada Y no puede estar vacia")
     private Integer pixelY;
 
     //Relaciones

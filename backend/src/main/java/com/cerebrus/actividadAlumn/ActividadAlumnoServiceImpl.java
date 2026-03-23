@@ -1,6 +1,5 @@
 package com.cerebrus.actividadAlumn;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
@@ -21,8 +20,6 @@ import com.cerebrus.actividad.marcarImagen.MarcarImagenService;
 import com.cerebrus.actividad.ordenacion.Ordenacion;
 import com.cerebrus.actividad.ordenacion.OrdenacionService;
 import com.cerebrus.exceptions.ResourceNotFoundException;
-import com.cerebrus.inscripcion.Inscripcion;
-import com.cerebrus.inscripcion.InscripcionRepository;
 import com.cerebrus.respuestaAlumn.RespuestaAlumno;
 import com.cerebrus.respuestaAlumn.RespuestaAlumnoService;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneral;
@@ -34,7 +31,6 @@ import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.alumno.AlumnoRepository;
-import com.cerebrus.usuario.maestro.Maestro;
 
 @Service
 @Transactional
@@ -50,15 +46,13 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     private final UsuarioService usuarioService;
     private final MarcarImagenService marcarImagenService;
     private final RespAlumnoPuntoImagenService respAlumnoPuntoImagenService;
-    private final InscripcionRepository inscripcionRepository;
 
     @Autowired
     public ActividadAlumnoServiceImpl(ActividadAlumnoRepository actividadAlumnoRepository, 
         ActividadRepository actividadRepository, AlumnoRepository alumnoRepository, RespuestaAlumnoService respuestaAlumnoService,
         RespAlumnoGeneralService respAlumnoGeneralService, OrdenacionService ordenacionService, 
         RespAlumnoOrdenacionService respAlumnoOrdenacionService, UsuarioService usuarioService, 
-        MarcarImagenService marcarImagenService, RespAlumnoPuntoImagenService respAlumnoPuntoImagenService,
-        InscripcionRepository inscripcionRepository) {
+        MarcarImagenService marcarImagenService, RespAlumnoPuntoImagenService respAlumnoPuntoImagenService) {
         this.actividadAlumnoRepository = actividadAlumnoRepository;
         this.actividadRepository = actividadRepository;
         this.alumnoRepository = alumnoRepository;
@@ -69,26 +63,12 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         this.usuarioService = usuarioService;
         this.marcarImagenService = marcarImagenService;
         this.respAlumnoPuntoImagenService = respAlumnoPuntoImagenService;
-        this.inscripcionRepository = inscripcionRepository;
     }
 
     @Override
     @Transactional
     public ActividadAlumno crearActividadAlumno(Integer puntuacion, LocalDateTime fechaInicio,
         LocalDateTime fechaFin, Integer nota, Integer numAbandonos, Long alumnoId, Long actId) {
-
-        if (alumnoId == null || actId == null) {
-            throw new IllegalArgumentException("El alumno y la actividad son obligatorios");
-        }
-
-        Usuario current = usuarioService.findCurrentUser();
-        if (!(current instanceof Alumno)) {
-            throw new AccessDeniedException("Solo un alumno puede iniciar actividades");
-        }
-
-        if (!current.getId().equals(alumnoId)) {
-            throw new AccessDeniedException("No puedes iniciar actividades para otro alumno");
-        }
 
         // Idempotente: si ya existe la pareja (alumno, actividad), devolvemos la existente.
         Optional<ActividadAlumno> existing = actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumnoId, actId);
@@ -99,53 +79,21 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         Actividad actividad = actividadRepository.findById(actId).orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
         Alumno alumno = alumnoRepository.findById(alumnoId).orElseThrow(() -> new ResourceNotFoundException("El alumno no existe"));
 
-        LocalDate fechaActividad = (fechaInicio == null ? LocalDate.now() : fechaInicio.toLocalDate());
-        validarInscripcionPrevia(alumnoId, actividad, fechaActividad);
-
         ActividadAlumno actividadAlumno = new ActividadAlumno(puntuacion, 
             fechaInicio, fechaFin, nota, numAbandonos, alumno, actividad);
 
         return actividadAlumnoRepository.save(actividadAlumno);
     }
 
-    private void validarInscripcionPrevia(Long alumnoId, Actividad actividad, LocalDate fechaActividad) {
-        Long cursoId = actividad.getTema().getCurso().getId();
-        Inscripcion inscripcion = inscripcionRepository.findByAlumnoIdAndCursoId(alumnoId, cursoId);
-        if (inscripcion == null) {
-            throw new AccessDeniedException("El alumno no esta inscrito en el curso de la actividad");
-        }
-        if (inscripcion.getFechaInscripcion() != null && inscripcion.getFechaInscripcion().isAfter(fechaActividad)) {
-            throw new AccessDeniedException("No puedes realizar la actividad antes de la fecha de inscripcion");
-        }
-    }
-
     @Override
     @Transactional(readOnly = true)
     public ActividadAlumno readActividadAlumno(Long id) {
-        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
-        validarAccesoAlumnoOMaestroPropietario(actividadAlumno);
-        return actividadAlumno;
+        return actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<ActividadAlumno> readActividadAlumnoByAlumnoIdAndActividadId(Long alumnoId, Long actividadId) {
-        Usuario current = usuarioService.findCurrentUser();
-        if (current instanceof Alumno) {
-            if (!current.getId().equals(alumnoId)) {
-                throw new AccessDeniedException("No puedes consultar actividades de otro alumno");
-            }
-        } else if (current instanceof Maestro) {
-            Actividad actividad = actividadRepository.findById(actividadId)
-                    .orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
-            Long maestroCursoId = actividad.getTema().getCurso().getMaestro().getId();
-            if (maestroCursoId == null || !maestroCursoId.equals(current.getId())) {
-                throw new AccessDeniedException("Solo el maestro propietario puede consultar esta actividad");
-            }
-        } else {
-            throw new AccessDeniedException("No tienes permisos para consultar actividades de alumnos");
-        }
         return actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumnoId, actividadId);
     }
 
@@ -171,7 +119,6 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     public ActividadAlumno updateActividadAlumno(Long id, Integer puntuacion,
          LocalDateTime fechaInicio, LocalDateTime fechaFin, Integer nota, Integer numAbandonos) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
-        validarAccesoAlumnoOMaestroPropietario(actividadAlumno);
         actividadAlumno.setPuntuacion(puntuacion);
         actividadAlumno.setFechaInicio(fechaInicio);
         actividadAlumno.setFechaFin(fechaFin);
@@ -184,7 +131,6 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     @Transactional
     public void deleteActividadAlumno(Long id) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
-        validarAccesoAlumnoOMaestroPropietario(actividadAlumno);
         actividadAlumnoRepository.delete(actividadAlumno);
     }
 
@@ -218,7 +164,6 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     @Transactional
     public ActividadAlumno corregirActividadAlumnoManual(Long id, Integer nuevaNota, List<Long> nuevasCorreccionesRespuestasIds) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
-        validarAccesoMaestroPropietario(actividadAlumno);
         if (nuevaNota != null) {
             corregirNotaActividadAlumno(actividadAlumno, nuevaNota);
         }
@@ -250,7 +195,6 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     @Transactional
     public ActividadAlumno corregirActividadAlumnoAutomaticamente(Long id, List<Long> respuestasIds) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
-        validarAccesoAlumnoOMaestroPropietario(actividadAlumno);
         Actividad actividad = actividadAlumno.getActividad();
         LocalDateTime finalActividad = LocalDateTime.now();
         actividadAlumno.setFechaFin(finalActividad);
@@ -406,9 +350,6 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
     @Override
     public void corregirActividadAlumnoAutomaticamenteOrdenacion(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
-        if (respuestasIds == null || respuestasIds.isEmpty()) {
-            throw new IllegalArgumentException("Debes enviar una respuesta de ordenacion");
-        }
         Ordenacion actividadOrdenacion = ordenacionService.encontrarOrdenacionPorId(actividad.getId());
         Integer puntuacionTotal = actividad.getPuntuacion();
         Integer notaTotal = 10;
@@ -446,9 +387,6 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
     @Override
     public void corregirActividadAlumnoAutomaticamenteMarcarImagen(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
-        if (respuestasIds == null || respuestasIds.isEmpty()) {
-            throw new IllegalArgumentException("Debes enviar al menos una respuesta de marcar imagen");
-        }
         MarcarImagen actividadMarcarImagen = marcarImagenService.obtenerMarcarImagenPorId(actividad.getId());
         Integer puntuacionTotal = actividadMarcarImagen.getPuntuacion();
         Integer notaTotal = 10;
@@ -532,7 +470,6 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     @Override  
     public ActividadAlumno corregirActividadAlumnoAutomaticamenteGeneralClasificacion(Long actividadAlumnoId, List<Long> respuestasIds) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actividadAlumnoId).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
-        validarAccesoAlumnoOMaestroPropietario(actividadAlumno);
     
         General actividadGeneral = (General) actividadRepository.findById(actividadAlumno.getActividad().getId()).orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
         int numPreguntasTotales = actividadGeneral.getPreguntas().size();    
@@ -565,6 +502,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
             for (Long respuestaId : respuestasIds) {
                 
                 boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneralClasificacion(respuestaId);
+                System.out.println("Respuesta ID " + respuestaId + " es correcta? " + esCorrecta);
                 if (esCorrecta) {
                     puntuacionAcumulada += valorPuntoPorPregunta;
                     notaAcumulada += valorNotaPorPregunta;
@@ -588,39 +526,6 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         actividadAlumno.setFechaFin(LocalDateTime.now());
 
         return actividadAlumnoRepository.save(actividadAlumno);
-    }
-
-    private void validarAccesoAlumnoOMaestroPropietario(ActividadAlumno actividadAlumno) {
-        Usuario current = usuarioService.findCurrentUser();
-        if (current instanceof Alumno) {
-            Long alumnoIdActividad = actividadAlumno.getAlumno() == null ? null : actividadAlumno.getAlumno().getId();
-            if (alumnoIdActividad == null || !alumnoIdActividad.equals(current.getId())) {
-                throw new AccessDeniedException("No puedes acceder a una actividad que no es tuya");
-            }
-            return;
-        }
-
-        if (current instanceof Maestro) {
-            Long maestroCursoId = actividadAlumno.getActividad().getTema().getCurso().getMaestro().getId();
-            if (maestroCursoId == null || !maestroCursoId.equals(current.getId())) {
-                throw new AccessDeniedException("Solo el maestro propietario puede acceder a esta actividad");
-            }
-            return;
-        }
-
-        throw new AccessDeniedException("No tienes permisos para acceder a actividades de alumnos");
-    }
-
-    private void validarAccesoMaestroPropietario(ActividadAlumno actividadAlumno) {
-        Usuario current = usuarioService.findCurrentUser();
-        if (!(current instanceof Maestro)) {
-            throw new AccessDeniedException("Solo un maestro puede corregir manualmente una actividad");
-        }
-
-        Long maestroCursoId = actividadAlumno.getActividad().getTema().getCurso().getMaestro().getId();
-        if (maestroCursoId == null || !maestroCursoId.equals(current.getId())) {
-            throw new AccessDeniedException("Solo el maestro propietario puede corregir esta actividad");
-        }
     }
   
 }

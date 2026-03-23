@@ -3,20 +3,16 @@ package com.cerebrus.inscripcion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.constraints.NotBlank;
-
 
 @RestController
 @RequestMapping("/api/inscripciones")
 @CrossOrigin(origins = "*")
-@Validated
 public class InscripcionController {
 
     private final InscripcionService inscripcionService;
@@ -27,8 +23,7 @@ public class InscripcionController {
     }
 
     @PostMapping("/inscribe")
-    public ResponseEntity<String> inscribirAlumno(@RequestParam
-            @NotBlank(message = "El codigo del curso es obligatorio") String codigoCurso) {
+    public ResponseEntity<String> inscribirAlumno(@RequestParam String codigoCurso) {
         try {
             inscripcionService.CrearInscripcion(codigoCurso);
             

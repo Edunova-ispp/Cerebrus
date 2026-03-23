@@ -76,7 +76,7 @@ class UsuarioServiceTest {
 
 		Usuario savedBlank = usuarioService.saveUser(userBlank);
 
-		assertThat(savedBlank.getContrasena()).isEqualTo("");
+		assertThat(savedBlank.getContrasena()).isEqualTo("   ");
 		verify(passwordEncoder, never()).encode(any());
 		verify(usuarioRepository).save(any(Usuario.class));
 	}

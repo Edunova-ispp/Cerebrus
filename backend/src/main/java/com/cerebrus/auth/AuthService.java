@@ -31,34 +31,9 @@ public class AuthService {
     }
 
     public void registrarUsuario(SignupRequest request) {
-        // Validación de datos sanitaria: eliminar espacios en blanco
-        String nombre = request.getNombre().trim();
-        String primerApellido = request.getPrimerApellido().trim();
-        String username = request.getUsername().trim();
-        String email = request.getEmail().trim();
-        
-        // Validaciones de negocio
-        if (nombre.isEmpty()) {
-            throw new IllegalArgumentException("El nombre es obligatorio");
-        }
-        if (primerApellido.isEmpty()) {
-            throw new IllegalArgumentException("El primer apellido es obligatorio");
-        }
-        if (username.isEmpty()) {
-            throw new IllegalArgumentException("El nombre de usuario es obligatorio");
-        }
-        if (email.isEmpty()) {
-            throw new IllegalArgumentException("El correo electrónico es obligatorio");
-        }
-        
-        // Validación de puntos iniciales
-        Integer puntos = request.getPuntos();
-        if (puntos != null && puntos < 0) {
-            throw new IllegalArgumentException("Los puntos no pueden ser negativos");
-        }
-        
         Usuario nuevoUsuario = null;
-        String tipo = request.getTipoUsuario().toUpperCase().trim();
+
+        String tipo = request.getTipoUsuario().toUpperCase();
 
         switch (tipo) {
             case "ALUMNO":
@@ -72,12 +47,7 @@ public class AuthService {
                 break;
             case "ORGANIZACION":
                 Organizacion org = new Organizacion();
-                String nombreCentro = request.getNombreCentro();
-                if (nombreCentro != null && !nombreCentro.trim().isEmpty()) {
-                    org.setNombreCentro(nombreCentro.trim());
-                } else {
-                    throw new IllegalArgumentException("El nombre del centro es obligatorio para tipo ORGANIZACION");
-                }
+                org.setNombreCentro(request.getNombreCentro()); 
                 nuevoUsuario = org;
                 break;
             default:
@@ -86,9 +56,7 @@ public class AuthService {
 
         nuevoUsuario.setNombre(request.getNombre());
         nuevoUsuario.setPrimerApellido(request.getPrimerApellido());
-        if(request.getSegundoApellido() != null) {
-            nuevoUsuario.setSegundoApellido(request.getSegundoApellido().trim());
-        }
+        nuevoUsuario.setSegundoApellido(request.getSegundoApellido());
         nuevoUsuario.setNombreUsuario(request.getUsername());
         nuevoUsuario.setCorreoElectronico(request.getEmail());
         nuevoUsuario.setContrasena(passwordEncoder.encode(request.getPassword()));

@@ -1,6 +1,7 @@
 package com.cerebrus.estadisticas;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -135,6 +136,15 @@ public class EstadisticasMaestroController {
     @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/nota-media")
     public Integer notaMediaAlumno(@PathVariable Long alumnoId, @PathVariable Long cursoId, @PathVariable Long temaId) {
         return estadisticasMaestroService.notaMediaAlumno(alumnoId, cursoId, temaId);
+    }
+
+
+    
+   
+
+    @GetMapping("/")
+    public String getMethodName(@RequestParam String param) {
+        return new String();
     }
 
     // ==================== CONSULTAR TIEMPO DE ALUMNO ====================

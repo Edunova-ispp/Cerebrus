@@ -59,28 +59,14 @@ public class RespuestaMaestroServiceImpl implements RespuestaMaestroService {
     @Transactional
     public RespuestaMaestro updateRespuesta(Long id, String respuesta, String imagen, Boolean correcta) {
 
-        if (correcta == null) {
-            throw new IllegalArgumentException("El campo correcta es obligatorio");
-        }
-
-        String respuestaNormalizada = respuesta == null ? "" : respuesta.trim();
-        if (respuestaNormalizada.isEmpty()) {
-            throw new IllegalArgumentException("La respuesta es obligatoria");
-        }
-
-        String imagenNormalizada = imagen == null ? null : imagen.trim();
-        if (imagenNormalizada != null && imagenNormalizada.isEmpty()) {
-            imagenNormalizada = null;
-        }
-
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede actualizar respuestas");
         }
 
         RespuestaMaestro respuestaObj = respuestaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La respuesta no existe"));
-        respuestaObj.setRespuesta(respuestaNormalizada);
-        respuestaObj.setImagen(imagenNormalizada);
+        respuestaObj.setRespuesta(respuesta);
+        respuestaObj.setImagen(imagen);
         respuestaObj.setCorrecta(correcta);
         return respuestaRepository.save(respuestaObj);
     }

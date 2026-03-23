@@ -36,20 +36,6 @@ public class PreguntaServiceImpl implements PreguntaService {
     @Transactional
     public Pregunta crearPregunta(String pregunta, String imagen, Long actId) {
 
-        if (actId == null) {
-            throw new IllegalArgumentException("La actividad es obligatoria");
-        }
-
-        String preguntaNormalizada = pregunta == null ? "" : pregunta.trim();
-        if (preguntaNormalizada.isEmpty()) {
-            throw new IllegalArgumentException("El enunciado de la pregunta es obligatorio");
-        }
-
-        String imagenNormalizada = imagen == null ? null : imagen.trim();
-        if (imagenNormalizada != null && imagenNormalizada.isEmpty()) {
-            imagenNormalizada = null;
-        }
-
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede crear preguntas");
@@ -58,8 +44,8 @@ public class PreguntaServiceImpl implements PreguntaService {
         Actividad actividad = actividadRepository.findById(actId).orElseThrow(() -> new ResourceNotFoundException("La actividad de la pregunta no existe"));
         
         Pregunta preguntaObj = new Pregunta();
-        preguntaObj.setPregunta(preguntaNormalizada);
-        preguntaObj.setImagen(imagenNormalizada);
+        preguntaObj.setPregunta(pregunta);
+        preguntaObj.setImagen(imagen);
         preguntaObj.setActividad(actividad);
         return preguntaRepository.save(preguntaObj);
     }
@@ -77,24 +63,14 @@ public class PreguntaServiceImpl implements PreguntaService {
     @Transactional
     public Pregunta updatePregunta(Long id, String pregunta, String imagen) {
 
-        String preguntaNormalizada = pregunta == null ? "" : pregunta.trim();
-        if (preguntaNormalizada.isEmpty()) {
-            throw new IllegalArgumentException("El enunciado de la pregunta es obligatorio");
-        }
-
-        String imagenNormalizada = imagen == null ? null : imagen.trim();
-        if (imagenNormalizada != null && imagenNormalizada.isEmpty()) {
-            imagenNormalizada = null;
-        }
-
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede actualizar preguntas");
         }
 
         Pregunta preguntaObj = preguntaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La pregunta no existe"));
-        preguntaObj.setPregunta(preguntaNormalizada);
-        preguntaObj.setImagen(imagenNormalizada);
+        preguntaObj.setPregunta(pregunta);
+        preguntaObj.setImagen(imagen);
         return preguntaRepository.save(preguntaObj);
     }
 

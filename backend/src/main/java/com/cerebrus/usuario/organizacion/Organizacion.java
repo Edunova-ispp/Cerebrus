@@ -18,7 +18,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "organizacion")
@@ -29,7 +28,6 @@ public class Organizacion extends Usuario {
     private Long id;
 
     @Column(nullable = false)
-    @NotBlank(message = "El nombre del centro no puede estar vacío")
     private String nombreCentro;
 
     // Relaciones

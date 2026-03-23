@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,14 +20,9 @@ import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadService;
 import com.cerebrus.actividad.dtoo.ActividadDTO;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
 @RestController
 @RequestMapping("/api/temas")
 @CrossOrigin(origins = "*")
-@Validated
 public class TemaController {
 
     private final TemaService temaService;
@@ -51,24 +45,19 @@ public class TemaController {
     }
 
     @PutMapping("/{temaId}")
-    public ResponseEntity<TemaDTO> renombrarTema(@PathVariable Long temaId,
-            @Valid @RequestBody RenombrarTemaRequest request,
-            @RequestParam Long maestroId) {
+    public ResponseEntity<TemaDTO> renombrarTema(@PathVariable Long temaId, @RequestBody RenombrarTemaRequest request, @RequestParam Long maestroId) {
         try {
             Tema tema = temaService.renombrarTema(temaId, request.getNuevoTitulo(), maestroId);
-        List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
-        List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
-        return ResponseEntity.ok(new TemaDTO(tema, actividadesDTO));
+            List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
+            List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
+            return ResponseEntity.ok(new TemaDTO(tema, actividadesDTO));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
     public static class CrearTemaRequest {
-        @NotBlank(message = "El titulo no puede estar vacio")
         private String titulo;
-
-        @NotNull(message = "El cursoId es obligatorio")
         private Long cursoId;
 
         public String getTitulo() {
@@ -89,7 +78,6 @@ public class TemaController {
     }
 
     public static class RenombrarTemaRequest {
-        @NotBlank(message = "El nuevo titulo no puede estar vacio")
         private String nuevoTitulo;
 
         public String getNuevoTitulo() {

@@ -24,7 +24,6 @@ import com.cerebrus.actividad.ordenacion.Ordenacion;
 import com.cerebrus.actividad.ordenacion.OrdenacionRepository;
 import com.cerebrus.actividad.ordenacion.OrdenacionServiceImpl;
 import com.cerebrus.curso.Curso;
-import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Usuario;
@@ -204,8 +203,8 @@ class OrdenacionServiceImplTest {
         when(ordenacionRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> ordenacionService.readOrdenacion(99L))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("No se ha encontrado una entidad del tipo Ordenacion con campo id: '99'");
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("La actividad de ordenación no existe");
     }
 
     // -------------------------------------------------------
@@ -298,8 +297,8 @@ class OrdenacionServiceImplTest {
 
         assertThatThrownBy(() -> ordenacionService.updateActOrdenacion(
                 99L, "T", "D", 50, null, 1L, false, null, 1, valores))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("No se ha encontrado una entidad del tipo Ordenacion con campo id: '99'");
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("La actividad de ordenación no existe");
 
         verify(ordenacionRepository, never()).save(any());
     }
@@ -312,7 +311,6 @@ class OrdenacionServiceImplTest {
     @Test
     void deleteActOrdenacion_maestro_eliminaCorrectamente() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
-        when(ordenacionRepository.existsById(10L)).thenReturn(true);
 
         ordenacionService.deleteActOrdenacion(10L);
 

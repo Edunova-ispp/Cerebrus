@@ -13,11 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 
 @Entity
 @Table(name = "suscripcion")
@@ -28,28 +23,18 @@ public class Suscripcion {
     private Long id;
 
     @Column(nullable = false)
-    @NotNull(message = "El numero de maestros es obligatorio")
-    @Positive(message = "El numero de maestros debe ser mayor que 0")
     private Integer numMaestros;
 
     @Column(nullable = false)
-    @NotNull(message = "El numero de alumnos es obligatorio")
-    @Positive(message = "El numero de alumnos debe ser mayor que 0")
     private Integer numAlumnos;
 
     @Column(nullable = false)
-    @NotNull(message = "El precio es obligatorio")
-    @Positive(message = "El precio debe ser mayor que 0")
     private Double precio;
 
     @Column(nullable = false)
-    @NotNull(message = "La fecha de inicio es obligatoria")
-    @FutureOrPresent(message = "La fecha de inicio no puede estar en el pasado")
     private LocalDate fechaInicio;
 
     @Column(nullable = false)
-    @NotNull(message = "La fecha de fin es obligatoria")
-    @Future(message = "La fecha de fin debe ser futura")
     private LocalDate fechaFin;
 
     //Relaciones
@@ -126,14 +111,6 @@ public class Suscripcion {
 
     public void setOrganizacion(Organizacion organizacion) {
         this.organizacion = organizacion;
-    }
-
-    @AssertTrue(message = "La fecha de fin debe ser posterior a la fecha de inicio")
-    public boolean isRangoFechasValido() {
-        if (fechaInicio == null || fechaFin == null) {
-            return true;
-        }
-        return fechaFin.isAfter(fechaInicio);
     }
 
     @Override
