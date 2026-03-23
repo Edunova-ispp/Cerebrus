@@ -682,6 +682,10 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         if(!(usuario instanceof Maestro)){
             throw new AccessDeniedException("Solo un maestro puede crear actividades");
         }
+        Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
+        if (!tema.getCurso().getMaestro().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede crear actividades en ese tema");
+        }
         
         if (preguntasId == null || preguntasId.isEmpty()) {
             throw new IllegalArgumentException("Debe proporcionar al menos una pregunta");
@@ -755,6 +759,9 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         if (general.getTipo() != TipoActGeneral.ABIERTA) {
             throw new ResourceNotFoundException("La actividad no es de tipo abierta");
         }
+        if(general.getTema() != null && !general.getTema().getCurso().getMaestro().getId().equals(u.getId())){
+            throw new AccessDeniedException("Solo el maestro del curso puede acceder a esta actividad");
+        }
 
         general.getPreguntas().forEach(p -> p.getRespuestasMaestro().size());
 
@@ -784,6 +791,12 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
             throw new AccessDeniedException("Solo un maestro puede actualizar actividades tipo abierta");
         }
 
+        General general = generalRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
+        if (!general.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede actualizar esta actividad");
+        }
+        
         General tipoAbierta = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
             posicion, version, temaId);
         
