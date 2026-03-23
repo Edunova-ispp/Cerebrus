@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiertaRequest;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiertaResponse;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralCreateResponse;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralRequest;
 
 import jakarta.validation.Valid;
 
@@ -66,6 +70,23 @@ public class RespAlumnoGeneralController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    }
+
+    @PostMapping("/abierta")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<EvaluacionActividadAbiertaResponse> evaluarActividadAbierta(@RequestBody @Valid EvaluacionActividadAbiertaRequest request) {
+        try {
+            EvaluacionActividadAbiertaResponse respuesta = respAlumnoGeneralService.corregirActividadAbierta(request);
+            return new ResponseEntity<>(respuesta, HttpStatus.CREATED);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     

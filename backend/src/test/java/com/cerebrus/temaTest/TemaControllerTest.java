@@ -22,8 +22,8 @@ import com.cerebrus.actividad.ActividadService;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaController;
-import com.cerebrus.tema.TemaDTO;
 import com.cerebrus.tema.TemaService;
+import com.cerebrus.tema.dto.TemaDTO;
 import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
