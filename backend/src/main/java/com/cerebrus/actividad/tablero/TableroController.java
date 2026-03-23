@@ -1,6 +1,7 @@
 package com.cerebrus.actividad.tablero;
 
-
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,7 @@ public class TableroController {
 
 
     @PostMapping
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<TableroDTO> crearActividadTablero(@RequestBody @Valid TableroRequest actividad) {
         
         if ((actividad.getPreguntasYRespuestas().size() != 8 && actividad.getPreguntasYRespuestas().size() != 15) || (actividad.getTamano() && actividad.getPreguntasYRespuestas().size() != 8) || (!actividad.getTamano() && actividad.getPreguntasYRespuestas().size() != 15)) {
@@ -59,6 +61,7 @@ public class TableroController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> eliminarTablero(@PathVariable Long id) {
        
             tableroService.eliminarTablero(id);
@@ -67,6 +70,7 @@ public class TableroController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<TableroDTO> actualizarTablero(@PathVariable Long id, @RequestBody @Valid TableroRequest tablero) {
 
             if ((tablero.getPreguntasYRespuestas().size() != 8 && tablero.getPreguntasYRespuestas().size() != 15) || (tablero.getTamano() && tablero.getPreguntasYRespuestas().size() != 8) || (!tablero.getTamano() && tablero.getPreguntasYRespuestas().size() != 15)) {

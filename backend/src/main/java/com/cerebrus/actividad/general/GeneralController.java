@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,6 +47,7 @@ public class GeneralController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<General> crearActGeneral(@RequestBody @Valid General general) {
         
         General generalCreada = generalService.crearActGeneral(
@@ -61,6 +64,7 @@ public class GeneralController {
 
     @PostMapping("/test")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Long> crearTipoTest(@RequestBody @Valid General general) {
 
         List<Long> preguntasId = general.getPreguntas().stream()
@@ -102,6 +106,7 @@ public class GeneralController {
 
     @PostMapping("/cartas/maestro")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Long> crearTipoCarta(@RequestBody @Valid General general) {
 
         List<Long> preguntasId = general.getPreguntas().stream()
@@ -127,6 +132,7 @@ public class GeneralController {
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> updateActGeneral(@PathVariable Long id, @RequestBody @Valid General general){
         generalService.updateActGeneral(
             id,
@@ -143,6 +149,7 @@ public class GeneralController {
     }
     
     @PutMapping("/test/update/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<GeneralTestDTO> updateTipoTest(@PathVariable Long id, @RequestBody @Valid General general){
         generalService.updateTipoTest(
             id,
@@ -162,6 +169,7 @@ public class GeneralController {
     }
 
     @PutMapping("/cartas/update/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<GeneralCartaDTO> updateTipoCarta(@PathVariable Long id, @RequestBody @Valid General general) {
 
         generalService.updateTipoCarta(
@@ -181,6 +189,7 @@ public class GeneralController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> deleteActividad(@PathVariable Long id) {
         generalService.deleteActividad(id);
         return ResponseEntity.noContent().build();
@@ -188,6 +197,7 @@ public class GeneralController {
 
      @PostMapping("/clasificacion")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Long> crearTipoClasificacion(@RequestBody @Valid General general) {
 
     
@@ -215,6 +225,7 @@ public class GeneralController {
     }
 
     @PutMapping("/clasificacion/update/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<GeneralClasificacionMaestroDTO> updateTipoClasificacion(@PathVariable Long id, @RequestBody @Valid General general){
         GeneralClasificacionMaestroDTO actualizado = generalService.updateTipoClasificacion(
             id,
@@ -232,6 +243,7 @@ public class GeneralController {
     }
 
     @PostMapping("/crucigrama")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<CrucigramaDTO> crearTipoCrucigrama(@RequestBody @Valid CrucigramaRequest crucigrama) {
         
         // Se ha decidido limitar el crucigrama a un maximo de 5 preguntas
@@ -251,6 +263,7 @@ public class GeneralController {
     }
 
     @PutMapping("/crucigrama/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<CrucigramaDTO> updateTipoCrucigrama(@PathVariable Long id, @RequestBody CrucigramaRequest crucigrama) {
     
         CrucigramaDTO updated = generalService.updateTipoCrucigrama(id, crucigrama);
@@ -259,6 +272,7 @@ public class GeneralController {
 
     @PostMapping("/abierta/maestro")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Long> crearTipoAbierta(@RequestBody @Valid General general) {
 
         List<Long> preguntasId = general.getPreguntas().stream()
@@ -289,6 +303,7 @@ public class GeneralController {
     }
 
     @PutMapping("/abierta/update/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<GeneralAbiertaAlumnoDTO> updateTipoAbierta(@PathVariable Long id, @RequestBody @Valid General general) {
 
         generalService.updateTipoAbierta(

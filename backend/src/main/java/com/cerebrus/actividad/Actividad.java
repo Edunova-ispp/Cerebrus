@@ -19,6 +19,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "actividad")
@@ -29,17 +32,21 @@ public abstract class Actividad {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(nullable = false)
     private String titulo;
 
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
+    @NotNull
+    @Min(1)
     @Column(nullable = false)
     private Integer puntuacion;
 
     private String imagen;
 
+    @NotNull
     @Column(nullable = false)
     private Boolean respVisible = false;
 
@@ -53,6 +60,7 @@ public abstract class Actividad {
     private Integer version;
 
     //Relaciones
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tema_id", nullable = false)
     private Tema tema;

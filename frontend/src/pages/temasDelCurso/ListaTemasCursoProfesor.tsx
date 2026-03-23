@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import NavbarMisCursos from "../../components/NavbarMisCursos/NavbarMisCursos";
 import { apiFetch } from "../../utils/api";
-import type { Curso, Tema } from "../../types/curso";
+import { getCurrentUserRoles, type Curso, type Tema } from "../../types/curso";
 import "./ListaTemasCursoProfesor.css";
 
 interface Props {
@@ -22,6 +22,10 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+  const isMaestro = getCurrentUserRoles().some((r) =>
+    r.toUpperCase().includes("MAESTRO")
+  );
+
   // Si no llegó curso como prop, lo carga por el id de la URL
   useEffect(() => {
     if (cursoProp) {
@@ -132,14 +136,14 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
                     >
                       <span className="ltp-item-titulo">{tema.titulo}</span>
                       <div className="ltp-item-acciones">
-                        <button className="ltp-btn-icono" title="Editar" onClick={(e) => { e.stopPropagation(); onEditarTema ? onEditarTema(tema.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${tema.id}/editar`);}}>✎</button>                        
-                        <button className="ltp-btn-icono" title="Borrar" onClick={(e) => { e.stopPropagation(); handleEliminarTema(tema.id); }}>🗑</button>
+                        <button className="ltp-btn-icono" title="Editar" onClick={(e) => { e.stopPropagation(); isMaestro && (onEditarTema ? onEditarTema(tema.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${tema.id}/editar`)); }}>✎</button>                        
+                        <button className="ltp-btn-icono" title="Borrar" onClick={(e) => { e.stopPropagation(); isMaestro ? handleEliminarTema(tema.id) : undefined; }}>🗑</button>
                       </div>
                     </div>
                   ))
                 )}
               </div>
-              <button className="ltp-btn-añadir" onClick={() => onCrearTema ? onCrearTema() : navigate(`/cursos/${id ?? curso?.id}/temas/crear`)}>+ Añadir tema</button>
+              <button className="ltp-btn-añadir" onClick={() => isMaestro && (onCrearTema ? onCrearTema() : navigate(`/cursos/${id ?? curso?.id}/temas/crear`))}>+ Añadir tema</button>
             </div>
 
             {/* Panel derecho: Actividades */}
@@ -159,7 +163,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
                   title="Editar" 
                   onClick={(e) => { 
                     e.stopPropagation(); 
-                    onEditarActividad ? onEditarActividad(temaSeleccionado.id, act.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/${act.id}/editar`);
+                    isMaestro && (onEditarActividad ? onEditarActividad(temaSeleccionado.id, act.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/${act.id}/editar`));
                   }}
                 >
                   ✎
@@ -169,7 +173,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
                   title="Borrar" 
                   onClick={(e) => { 
                     e.stopPropagation(); 
-                    handleEliminarActividad(act.id); 
+                    isMaestro ? handleEliminarActividad(act.id) : undefined; 
                   }}
                 >
                   🗑
@@ -181,7 +185,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
       </div>
       <button 
         className="ltp-btn-añadir" 
-        onClick={() => onCrearActividad ? onCrearActividad(temaSeleccionado.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/crear`)}
+        onClick={() => isMaestro && (onCrearActividad ? onCrearActividad(temaSeleccionado.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/crear`))}
       >
         + Añadir actividad
       </button>

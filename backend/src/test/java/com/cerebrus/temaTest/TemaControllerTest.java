@@ -80,10 +80,9 @@ class TemaControllerTest {
 
         when(temaService.crearTema("Fracciones", 10L, 1L)).thenThrow(new IllegalArgumentException("Curso no encontrado"));
 
-        assertThatThrownBy(() -> temaController.crearTema(request, 1L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Curso no encontrado");
-
+        ResponseEntity<?> respuesta = temaController.crearTema(request, 1L);
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        // Puedes comprobar el mensaje de error en el body si lo necesitas
     }
 
     @Test
@@ -110,10 +109,9 @@ class TemaControllerTest {
 
         when(temaService.renombrarTema(100L, "Decimales", 1L)).thenThrow(new IllegalArgumentException("Tema no encontrado"));
 
-        assertThatThrownBy(() -> temaController.renombrarTema(100L, request, 1L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Tema no encontrado");
-        
+        ResponseEntity<?> respuesta = temaController.renombrarTema(100L, request, 1L);
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        // Puedes comprobar el mensaje de error en el body si lo necesitas
     }
 
     @Test

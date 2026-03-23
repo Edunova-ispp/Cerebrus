@@ -21,6 +21,11 @@ import com.cerebrus.actividad.ActividadService;
 import com.cerebrus.actividad.dtoo.ActividadDTO;
 import com.cerebrus.tema.dto.TemaDTO;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.security.access.prepost.PreAuthorize;
+
 @RestController
 @RequestMapping("/api/temas")
 @CrossOrigin(origins = "*")
@@ -36,25 +41,35 @@ public class TemaController {
     }
 
     @PostMapping
-    public ResponseEntity<TemaDTO> crearTema(@RequestBody CrearTemaRequest request, @RequestParam Long maestroId) {
-        
+    @PreAuthorize("hasAuthority('MAESTRO')")
+    public ResponseEntity<TemaDTO> crearTema(@RequestBody @Valid CrearTemaRequest request, @RequestParam Long maestroId) {
+        try {
             Tema tema = temaService.crearTema(request.getTitulo(), request.getCursoId(), maestroId);
             return ResponseEntity.status(HttpStatus.CREATED).body(new TemaDTO(tema, List.of()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
         
     }
 
     @PutMapping("/{temaId}")
-    public ResponseEntity<TemaDTO> renombrarTema(@PathVariable Long temaId, @RequestBody RenombrarTemaRequest request, @RequestParam Long maestroId) {
-        
+    @PreAuthorize("hasAuthority('MAESTRO')")
+    public ResponseEntity<TemaDTO> renombrarTema(@PathVariable Long temaId, @RequestBody @Valid RenombrarTemaRequest request, @RequestParam Long maestroId) {
+        try {
             Tema tema = temaService.renombrarTema(temaId, request.getNuevoTitulo(), maestroId);
             List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
             List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
             return ResponseEntity.ok(new TemaDTO(tema, actividadesDTO));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
         
     }
 
     public static class CrearTemaRequest {
+        @NotBlank
         private String titulo;
+        @NotNull
         private Long cursoId;
 
         public String getTitulo() {
@@ -75,6 +90,7 @@ public class TemaController {
     }
 
     public static class RenombrarTemaRequest {
+        @NotBlank
         private String nuevoTitulo;
 
         public String getNuevoTitulo() {
@@ -119,6 +135,7 @@ public class TemaController {
     }
 
     @DeleteMapping("/{temaId}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> eliminarTema(@PathVariable Long temaId) {
         
             temaService.eliminarTema(temaId);

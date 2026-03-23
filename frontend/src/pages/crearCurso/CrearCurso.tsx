@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import './CrearCurso.css';
+import { getCurrentUserRoles } from '../../types/curso';
 
 function getInitials(titulo: string): string {
   return titulo
@@ -19,6 +20,9 @@ export default function CrearCurso() {
   const [loading, setLoading] = useState(false);
   const [imagenError, setImagenError] = useState(false);
   const navigate = useNavigate();
+  const isMaestro = getCurrentUserRoles().some((r) =>
+    r.toUpperCase().includes("MAESTRO")
+  );
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,7 +82,7 @@ export default function CrearCurso() {
         </div>
 
         <div className="crear-curso-card">
-          <form onSubmit={handleSubmit} className="crear-curso-layout">
+          <form onSubmit={isMaestro ? handleSubmit : undefined} className="crear-curso-layout">
   {/* Columna Izquierda */}
   <div className="form-column">
     <div className="input-group">
