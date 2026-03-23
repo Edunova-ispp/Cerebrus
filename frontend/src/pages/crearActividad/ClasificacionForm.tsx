@@ -105,11 +105,11 @@ const [showIAModal, setShowIAModal] = useState(false);
   const addPregunta = () => setPreguntas([...preguntas, makeEmptyPregunta()]);
 
   const removePregunta = (index: number) => {
-    if (preguntas.length > 1) {
+    if (preguntas.length > 2) {
       setPreguntas(preguntas.filter((_, i) => i !== index));
       setError('');
     } else {
-      setError('No puede haber menos de una categoría.');
+      setError('Debe haber al menos 2 categorías.');
     }
   };
 
@@ -145,7 +145,42 @@ const [showIAModal, setShowIAModal] = useState(false);
     e.preventDefault();
     setError('');
 
+    // Validar campos requeridos
+    if (!titulo.trim()) {
+      setError('El título es requerido.');
+      return;
+    }
+
+    if (!puntuacion.trim()) {
+      setError('La puntuación es requerida.');
+      return;
+    }
+
     const pNum = Number.parseInt(puntuacion.trim(), 10);
+    if (isNaN(pNum) || pNum <= 0) {
+      setError('La puntuación debe ser un número mayor a 0.');
+      return;
+    }
+
+    // Validar al menos 2 categorías
+    if (preguntas.length < 2) {
+      setError('Debe haber al menos 2 categorías.');
+      return;
+    }
+
+    // Validar que cada categoría tenga al menos 1 elemento con texto
+    for (let i = 0; i < preguntas.length; i++) {
+      if (!preguntas[i].text.trim()) {
+        setError(`La categoría ${i + 1} debe tener un nombre.`);
+        return;
+      }
+      const elementosConTexto = preguntas[i].respuestas.filter(r => r.text.trim());
+      if (elementosConTexto.length === 0) {
+        setError(`La categoría ${i + 1} debe tener al menos 1 elemento.`);
+        return;
+      }
+    }
+
     const tIdNum = Number.parseInt(temaId!, 10);
 
     setLoading(true);
@@ -308,11 +343,11 @@ const handleIAResult = (data: any) => {
       <div className="ca-contenedor-blanco tf-header">
         <div className="tf-col">
           <div>
-            <label className="ca-text">Título</label>
-            <input type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} style={{ width: '100%' }} />
+            <label className="cf-label" htmlFor="cf-titulo">Título *</label>
+            <input type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} required style={{ width: '100%' }} />
           </div>
           <div>
-            <label className="ca-text">Descripción</label>
+            <label className="cf-label" htmlFor="cf-descripcion">Descripción</label>
             <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={3} style={{ width: '100%' }} />
           </div>
         </div>
@@ -324,8 +359,8 @@ const handleIAResult = (data: any) => {
             </button>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label className="ca-text">Puntuación</label>
-            <input type="number" value={puntuacion} onChange={(e) => setPuntuacion(e.target.value)} style={{ width: 90 }} />
+            <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
+            <input type="number" value={puntuacion} onChange={(e) => setPuntuacion(e.target.value)} required style={{ width: 90 }} />
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
