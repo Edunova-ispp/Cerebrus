@@ -40,7 +40,7 @@ const MAX_PALABRAS = 10;
 export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
     const [titulo, setTitulo] = useState('');
     const [descripcion, setDescripcion] = useState('');
-    const [puntuacion, setPuntuacion] = useState(10);
+    const [puntuacion, setPuntuacion] = useState('');
     const [respVisible, setRespVisible] = useState(true);
     const [preguntas, setPreguntas] = useState<PreguntaLocal[]>([{ pregunta: '', respuesta: '' }]);
     const [error, setError] = useState('');
@@ -56,7 +56,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
         if (!initialValues) return;
         setTitulo(initialValues.titulo || '');
         setDescripcion(initialValues.descripcion || '');
-        setPuntuacion(initialValues.puntuacion || 0);
+        setPuntuacion(String(initialValues.puntuacion) || '');
         setRespVisible(initialValues.respVisible !== undefined ? initialValues.respVisible : true);
 
         if (initialValues.preguntasYRespuestas && Object.keys(initialValues.preguntasYRespuestas).length > 0) {
@@ -101,8 +101,6 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
         setError('');
 
         try {
-            const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
-
             const mapaPreguntas: Record<string, string> = {};
             preguntas.forEach(p => {
                 if (p.pregunta.trim() && p.respuesta.trim()) {
@@ -113,6 +111,12 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
             if (Object.keys(mapaPreguntas).length === 0) {
                 throw new Error('Debes completar al menos una pregunta y su respuesta.');
             }
+
+            if (puntuacion <= 0) {
+                throw new Error('La puntuación debe ser un número mayor a 0');
+            }
+
+            const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
             const payload = {
                 titulo: titulo.trim(),
@@ -190,8 +194,9 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                             type="number"
                             className="cf-input"
                             value={puntuacion}
-                            min={0}
-                            onChange={e => setPuntuacion(Number(e.target.value))}
+                            min={1}
+                            onChange={e => setPuntuacion(e.target.value)}
+                            required
                         />
 
                         <label

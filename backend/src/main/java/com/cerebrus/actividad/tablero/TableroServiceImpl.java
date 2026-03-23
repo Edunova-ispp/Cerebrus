@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cerebrus.comun.enumerados.TamanoTablero;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.tablero.dto.TableroDTO;
+import com.cerebrus.actividad.tablero.dto.TableroRequest;
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
 import com.cerebrus.actividadAlumn.ActividadAlumnoService;

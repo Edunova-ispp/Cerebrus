@@ -91,6 +91,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
     if (!puntuacion.trim()) return 'La puntuación es requerida';
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
+    if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
 
     if (!temaIdNum) return 'Falta el id del tema en la URL';
     if (!cursoId) return 'Falta el id del curso en la URL';
@@ -189,7 +190,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
       style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
     >
       {error && (
-        <p className="ca-text" style={{ marginTop: 0 }}>
+        <p className="ca-text" style={{ marginTop: 0, color: '#c0392b !important' }}>
           {error}
         </p>
       )}
@@ -207,6 +208,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
               onChange={(e) => setTitulo(e.target.value)}
               style={{ width: '100%' }}
               placeholder="Ej: Señala los elementos correctos"
+              required
             />
           </div>
 
@@ -239,6 +241,8 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
               value={puntuacion}
               onChange={(e) => setPuntuacion(e.target.value)}
               style={{ width: 90 }}
+              min="1"
+              required
             />
           </div>
 
