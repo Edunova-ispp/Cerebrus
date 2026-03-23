@@ -3,6 +3,7 @@ package com.cerebrus.actividad;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.actividad.general.dto.TeoriaDTO;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping("/api/actividades")
@@ -48,6 +53,7 @@ public class ActividadController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> eliminarActividad(@PathVariable Long id) {
         try {
             actividadService.deleteActividad(id);
@@ -58,7 +64,8 @@ public class ActividadController {
     }
 
     @PostMapping("/teoria")
-    public ResponseEntity<TeoriaDTO> crearActividadTeoria(@RequestBody CrearActividadTeoriaRequest request) {
+    @PreAuthorize("hasAuthority('MAESTRO')")
+    public ResponseEntity<TeoriaDTO> crearActividadTeoria(@RequestBody @Valid CrearActividadTeoriaRequest request) {
         try {
             Actividad actividad = actividadService.crearActividadTeoria(
                 request.getTitulo(),
@@ -73,9 +80,10 @@ public class ActividadController {
     }
 
     @PutMapping("/teoria/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<TeoriaDTO> updateActividadTeoria(
             @PathVariable Long id,
-            @RequestBody CrearActividadTeoriaRequest request) {
+            @RequestBody @Valid CrearActividadTeoriaRequest request) {
         try {
             Actividad actividad = actividadService.updateActividadTeoria(
                 id,
@@ -101,10 +109,12 @@ public class ActividadController {
     }
 
     public static class CrearActividadTeoriaRequest {
+        @NotBlank
         private String titulo;
         private String descripcion;
         private Integer puntuacion;
         private String imagen;
+        @NotNull
         private Long temaId;
 
         public String getTitulo() { return titulo; }
