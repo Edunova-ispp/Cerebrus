@@ -37,24 +37,20 @@ public class TemaController {
 
     @PostMapping
     public ResponseEntity<TemaDTO> crearTema(@RequestBody CrearTemaRequest request, @RequestParam Long maestroId) {
-        try {
+        
             Tema tema = temaService.crearTema(request.getTitulo(), request.getCursoId(), maestroId);
             return ResponseEntity.status(HttpStatus.CREATED).body(new TemaDTO(tema, List.of()));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        
     }
 
     @PutMapping("/{temaId}")
     public ResponseEntity<TemaDTO> renombrarTema(@PathVariable Long temaId, @RequestBody RenombrarTemaRequest request, @RequestParam Long maestroId) {
-        try {
+        
             Tema tema = temaService.renombrarTema(temaId, request.getNuevoTitulo(), maestroId);
             List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
             List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
             return ResponseEntity.ok(new TemaDTO(tema, actividadesDTO));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        
     }
 
     public static class CrearTemaRequest {
@@ -92,14 +88,12 @@ public class TemaController {
 
     @GetMapping("/{temaId}")
     public ResponseEntity<TemaDTO> obtenerTemaPorId(@PathVariable Long temaId) {
-        try {
+        
             Tema tema = temaService.obtenerTemaPorId(temaId);
             List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
             List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
             return ResponseEntity.ok(new TemaDTO(tema, actividadesDTO));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        
     }
 
     @GetMapping("/curso/{cursoId}/alumno")
@@ -126,12 +120,10 @@ public class TemaController {
 
     @DeleteMapping("/{temaId}")
     public ResponseEntity<Void> eliminarTema(@PathVariable Long temaId) {
-        try {
+        
             temaService.eliminarTema(temaId);
             return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        
     }
 }
 

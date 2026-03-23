@@ -188,7 +188,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         Alumno alumno = (Alumno) current;
         Integer nota = 0;
         Integer puntuacion = 0;
-        Integer puntuacionASumar = actividadRepository.findById(crucigramaId).orElseThrow(() -> new RuntimeException("El crucigrama no existe")).getPuntuacion() / respuestas.size();
+        Integer puntuacionASumar = actividadRepository.findById(crucigramaId).orElseThrow(() -> new ResourceNotFoundException("El crucigrama no existe")).getPuntuacion() / respuestas.size();
         List<RespAlumnoGeneral> respuestasAlumno = new java.util.ArrayList<>();
         
         // Buscar si ya existe ActividadAlumno para este alumno y actividad

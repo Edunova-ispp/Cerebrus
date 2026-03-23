@@ -37,12 +37,15 @@ public class InscripcionServiceImpl implements InscripcionService {
             if (!cursoRepository.existsByCodigo(codigoCurso)) {
                 throw new RuntimeException("404 Not Found");
             }else{
-                if (inscripcionRepository.findByAlumnoIdAndCursoId(alumno.getId(), cursoRepository.findByCodigo(codigoCurso).getId()) != null) {
+                Curso curso = cursoRepository.findByCodigo(codigoCurso);
+                if (!Boolean.TRUE.equals(curso.getVisibilidad())) {
+                    throw new RuntimeException("403 Forbidden");
+                }
+                if (inscripcionRepository.findByAlumnoIdAndCursoId(alumno.getId(), curso.getId()) != null) {
                     throw new RuntimeException("400 Bad Request");
                 } else {
                     Inscripcion inscripcion = new Inscripcion();
                     inscripcion.setAlumno(alumno);
-                    Curso curso=cursoRepository.findByCodigo(codigoCurso);
                     inscripcion.setCurso(curso);
                     inscripcion.setPuntos(0);
                     inscripcion.setFechaInscripcion(LocalDate.now());

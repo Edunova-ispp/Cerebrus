@@ -100,6 +100,10 @@ public class ActividadServiceImpl implements ActividadService {
 
         Tema tema = temaService.obtenerTemaPorId(temaId);
 
+        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("No puedes crear actividades para temas que no son tuyos");
+        }
+
         Integer maxPosicion = actividadRepository.findMaxPosicionByTemaId(temaId);
         Integer nuevaPosicion = (maxPosicion != null) ? maxPosicion + 1 : 1;
 
