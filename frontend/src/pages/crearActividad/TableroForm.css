@@ -212,7 +212,7 @@
 /* ── Feedback ──────────────────────────────────────────────── */
 
 .tbl-error {
-  color: #c0392b;
+  color: #c0392b !important;
   margin: 8px 0;
   font-size: 0.95rem;
 }

@@ -160,6 +160,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
 
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
+    if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
 
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
@@ -392,6 +393,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Título del test"
+              required
             />
           </div>
 
@@ -439,6 +441,8 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
                 className="tf-input tf-input-sm"
                 value={puntuacion}
                 onChange={(e) => setPuntuacion(e.target.value)}
+                min="1"
+                required
               />
             </div>
             <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>

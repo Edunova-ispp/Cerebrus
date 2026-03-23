@@ -135,6 +135,39 @@ type CrucigramaMaestroDTO = {
   preguntasYRespuestas?: Record<string, string>;
 };
 
+type TemaActividadMetaDTO = {
+  id: number;
+  tipo: string;
+};
+
+type TemaWithActividadesDTO = {
+  actividades?: TemaActividadMetaDTO[];
+};
+
+const isCrucigramaMaestroDTO = (value: unknown): value is CrucigramaMaestroDTO => {
+  if (typeof value !== 'object' || value === null) return false;
+  const data = value as Record<string, unknown>;
+  return (
+    typeof data.titulo === 'string' &&
+    typeof data.descripcion === 'string' &&
+    typeof data.puntuacion === 'number' &&
+    typeof data.temaId === 'number' &&
+    Array.isArray(data.preguntas)
+  );
+};
+
+const isTeoriaDTO = (value: unknown): value is TeoriaDTO => {
+  if (typeof value !== 'object' || value === null) return false;
+  const data = value as Record<string, unknown>;
+  return (
+    typeof data.titulo === 'string' &&
+    typeof data.descripcion === 'string' &&
+    typeof data.posicion === 'number' &&
+    !('puntuacion' in data) &&
+    !Array.isArray(data.preguntas)
+  );
+};
+
 
 type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'marcarImagen' | 'clasificacion' | 'carta' | 'crucigrama' | null;
 
@@ -153,6 +186,7 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
     actividadId: string;
   }>();
   const cursoId = cursoIdProp ?? params.id;
+  const temaId = temaIdProp ?? params.temaId;
   const actividadId = actividadIdProp ?? params.actividadId;
 
   const navigate = useNavigate();
@@ -186,6 +220,21 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
       setGeneralCarta(null);
       setClasificacion(null);
       setCrucigrama(null);
+
+      let activityTypeHint: string | null = null;
+      const temaIdNum = Number.parseInt(String(temaId), 10);
+      const actividadIdNum = Number.parseInt(String(actividadId), 10);
+
+      if (!Number.isNaN(temaIdNum) && !Number.isNaN(actividadIdNum)) {
+        try {
+          const temaResponse = await apiFetch(`${apiBase}/api/temas/${temaIdNum}`);
+          const temaData = (await temaResponse.json()) as TemaWithActividadesDTO;
+          const actividadMeta = temaData.actividades?.find((item) => item.id === actividadIdNum);
+          activityTypeHint = actividadMeta?.tipo ?? null;
+        } catch {
+          // optional hint; continue with endpoint probing
+        }
+      }
 
       try {
         try {
@@ -244,17 +293,6 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
         }
 
         try {
-          const r = await apiFetch(`${apiBase}/api/generales/crucigrama/${actividadId}`);
-          const data = (await r.json()) as CrucigramaMaestroDTO;
-          if (cancelled) return;
-          setCrucigrama(data);
-          setKind('crucigrama');
-          return;
-        } catch {
-          // try next kind
-        }
-
-        try {
           const r = await apiFetch(`${apiBase}/api/generales/clasificacion/${actividadId}/maestro`);
           const data = (await r.json()) as ClasificacionMaestroDTO;
           if (cancelled) return;
@@ -265,9 +303,52 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
           // try next kind
         }
 
+        if (activityTypeHint === 'teoria') {
+          const r = await apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`);
+          const raw = await r.json();
+          if (!isTeoriaDTO(raw)) {
+            throw new Error('No se pudo identificar la actividad de teoría');
+          }
+          if (cancelled) return;
+          setTeoria(raw);
+          setKind('teoria');
+          return;
+        }
+
+        if (activityTypeHint === 'crucigrama') {
+          const r = await apiFetch(`${apiBase}/api/generales/crucigrama/${actividadId}`);
+          const raw = await r.json();
+          if (!isCrucigramaMaestroDTO(raw)) {
+            throw new Error('No se pudo identificar la actividad de crucigrama');
+          }
+          if (cancelled) return;
+          setCrucigrama(raw);
+          setKind('crucigrama');
+          return;
+        }
+
+        try {
+          const r = await apiFetch(`${apiBase}/api/generales/crucigrama/${actividadId}`);
+          const raw = await r.json();
+          if (!isCrucigramaMaestroDTO(raw)) {
+            throw new Error('No es un crucigrama');
+          }
+          const data = raw;
+          if (cancelled) return;
+          setCrucigrama(data);
+          setKind('crucigrama');
+          return;
+        } catch {
+          // try next kind
+        }
+
         try {
           const r = await apiFetch(`${apiBase}/api/actividades/${actividadId}/maestro`);
-          const data = (await r.json()) as TeoriaDTO;
+          const raw = await r.json();
+          if (!isTeoriaDTO(raw)) {
+            throw new Error('No es una teoría');
+          }
+          const data = raw;
           if (cancelled) return;
           setTeoria(data);
           setKind('teoria');
@@ -287,7 +368,7 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
     return () => {
       cancelled = true;
     };
-  }, [actividadId]);
+  }, [actividadId, temaId]);
 
   const tableroInitialValues: TableroFormInitialValues | undefined = tablero
     ? {
