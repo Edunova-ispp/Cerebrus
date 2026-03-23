@@ -234,7 +234,6 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     @Override
     @Transactional
     public RespAlumnoAbiertaResponse crearRespAlumnoAbierta(RespAlumnoAbiertaRequest request) {
-        
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Alumno)) {
             throw new AccessDeniedException("Solo un alumno puede crear respuestas de alumno");
@@ -264,36 +263,61 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
             modeloRespuesta.getRespuesta(),
             actividad.getPuntuacion()
         );
-        
-        Integer puntuacion = ((Number) evaluacion.get("puntuacion")).intValue();
-        String comentariosIA = (String) evaluacion.get("comentarios");
-        
-        RespAlumnoGeneral respAlumnoGeneralEntity = new RespAlumnoGeneral(
-            puntuacion > 0, 
-            actividadAlumno, 
-            request.getRespuestaAlumno(), 
-            pregunta
-        );
-        
-        RespAlumnoGeneral guardada = respAlumnoGeneralRepository.save(respAlumnoGeneralEntity);
-        
-        actividadAlumno.setPuntuacion(puntuacion);
-        actividadAlumno.setNota(puntuacion);
-        actividadAlumno.setFechaFin(LocalDateTime.now());
-        actividadAlumnoRepository.save(actividadAlumno);
-        
-        String comentariosRespVisible = "";
-        if (actividad.getRespVisible()) {
-            comentariosRespVisible = actividad.getComentariosRespVisible() != null ? 
-                actividad.getComentariosRespVisible() : "";
+
+        Integer puntuacion = 0;
+        String comentariosIA = "La IA no devolvió comentarios legibles";
+
+        for (Map.Entry<String, Object> entry : evaluacion.entrySet()) {
+            String clave = entry.getKey().toLowerCase();
+            
+            if (clave.contains("puntuacion") || clave.contains("puntuación")) {
+                puntuacion = Integer.valueOf(entry.getValue().toString());
+            }
+            if (clave.contains("comentario")) {
+                comentariosIA = entry.getValue().toString();
+            }
         }
-        
-        return new RespAlumnoAbiertaResponse(
-            guardada.getId(),
-            puntuacion,
-            comentariosIA,
-            actividad.getRespVisible(),
-            comentariosRespVisible
-        );
+
+        try {
+            RespAlumnoGeneral respAlumnoGeneralEntity = new RespAlumnoGeneral(
+                puntuacion > 0, 
+                actividadAlumno, 
+                request.getRespuestaAlumno(), 
+                pregunta
+            );
+            
+            RespAlumnoGeneral guardada = respAlumnoGeneralRepository.saveAndFlush(respAlumnoGeneralEntity);
+
+            actividadAlumno.setPuntuacion(puntuacion);
+            
+            int maxPuntuacion = (actividad.getPuntuacion() != null && actividad.getPuntuacion() > 0) 
+                                ? actividad.getPuntuacion() : 100;
+            
+            Integer notaFinal = Math.round(((float) puntuacion / maxPuntuacion) * 10);
+            
+            if (notaFinal > 10) notaFinal = 10;
+            else if (notaFinal < 0) notaFinal = 0;
+            
+            actividadAlumno.setNota(notaFinal);
+            actividadAlumno.setFechaFin(LocalDateTime.now());
+            actividadAlumnoRepository.saveAndFlush(actividadAlumno);
+
+            String comentariosRespVisible = "";
+            Boolean isRespVisible = actividad.getRespVisible();
+            if (Boolean.TRUE.equals(isRespVisible) && actividad.getComentariosRespVisible() != null) { 
+                comentariosRespVisible = actividad.getComentariosRespVisible();
+            }
+
+            return new RespAlumnoAbiertaResponse(
+                guardada.getId(),
+                puntuacion,
+                comentariosIA,
+                Boolean.TRUE.equals(isRespVisible),
+                comentariosRespVisible
+            );
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error guardando los datos de la evaluación abierta: " + e.getMessage(), e);
+        }
     }
 }
