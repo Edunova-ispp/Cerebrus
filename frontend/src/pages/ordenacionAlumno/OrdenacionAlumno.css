@@ -31,13 +31,12 @@
 .ord-items {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 18px;
   margin-bottom: 32px;
 }
 
 .ord-item {
-  width: min(680px, 100%);
+  width: 100%;
   display: grid;
   grid-template-columns: 48px 1fr auto;
   align-items: center;
@@ -142,27 +141,31 @@
 
 .ord-bottom {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 .ord-bottom-inner {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
 }
 
 .ord-feedback {
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1.15rem;
   color: #000;
-  text-align: right;
-  max-width: 680px;
+  text-align: center;
+  width: 100%;
   background: #fffde0;
   border: 3px solid #000;
   border-radius: 14px;
   padding: 10px 18px;
   box-shadow: 3px 3px 0px #000;
+  box-sizing: border-box;
 }
 /* Rey y bocadillo */
 
