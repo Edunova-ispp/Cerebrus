@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.general.dto.CrucigramaDTO;
+import com.cerebrus.actividad.general.dto.CrucigramaRequest;
 import com.cerebrus.actividad.general.dto.GeneralAbiertaMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaMaestroDTO;

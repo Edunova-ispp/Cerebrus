@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.actividad.general.dto.CrucigramaDTO;
+import com.cerebrus.actividad.general.dto.CrucigramaRequest;
 import com.cerebrus.actividad.general.dto.GeneralAbiertaAlumnoDTO;
 import com.cerebrus.actividad.general.dto.GeneralAbiertaMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaDTO;

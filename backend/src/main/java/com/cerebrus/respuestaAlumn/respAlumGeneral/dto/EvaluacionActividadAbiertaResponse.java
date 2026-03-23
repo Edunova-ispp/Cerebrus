@@ -1,4 +1,4 @@
-package com.cerebrus.respuestaAlumn.respAlumGeneral;
+package com.cerebrus.respuestaAlumn.respAlumGeneral.dto;
 
 import java.util.List;
 

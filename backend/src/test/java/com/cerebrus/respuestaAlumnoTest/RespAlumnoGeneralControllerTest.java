@@ -23,9 +23,9 @@ import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneral;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneralController;
-import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneralCreateResponse;
-import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneralRequest;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneralService;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralCreateResponse;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralRequest;
 
 @ExtendWith(MockitoExtension.class)
 public class RespAlumnoGeneralControllerTest {

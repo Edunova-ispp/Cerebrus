@@ -3,6 +3,7 @@ package com.cerebrus.actividad.general;
 import java.util.List;
 
 import com.cerebrus.actividad.general.dto.CrucigramaDTO;
+import com.cerebrus.actividad.general.dto.CrucigramaRequest;
 import com.cerebrus.actividad.general.dto.GeneralAbiertaAlumnoDTO;
 import com.cerebrus.actividad.general.dto.GeneralAbiertaMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaDTO;
