@@ -116,8 +116,8 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       return;
     }
 
-    if (valores.length === 0) {
-      setError('Debes añadir al menos un valor');
+    if (valores.length < 2) {
+      setError('Debes añadir al menos dos valores');
       return;
     }
 

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +14,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.ActividadRepository;
+import com.cerebrus.actividad.general.General;
+import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.iaconnection.IaConnectionService;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiertaRequest;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiertaResponse;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoAbiertaResponse;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralCreateResponse;
 import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
 import com.cerebrus.respuestaMaestro.RespuestaMaestroService;
@@ -37,11 +45,13 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     private final RespuestaMaestroService respuestaService;
     private final UsuarioService usuarioService;
     private final ActividadRepository actividadRepository;
+    private final IaConnectionService iaConnectionService;
 
     @Autowired
     public RespAlumnoGeneralServiceImpl(RespAlumnoGeneralRepository respAlumnoGeneralRepository, 
         ActividadAlumnoRepository actividadAlumnoRepository, PreguntaRepository preguntaRepository, 
-        RespuestaMaestroRepository respuestaRepository, RespuestaMaestroService respuestaService, UsuarioService usuarioService, ActividadRepository actividadRepository) {
+        RespuestaMaestroRepository respuestaRepository, RespuestaMaestroService respuestaService, UsuarioService usuarioService, ActividadRepository actividadRepository,
+        IaConnectionService iaConnectionService) {
         this.respAlumnoGeneralRepository = respAlumnoGeneralRepository;
         this.actividadAlumnoRepository = actividadAlumnoRepository;
         this.preguntaRepository = preguntaRepository;
@@ -49,6 +59,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         this.respuestaService = respuestaService;
         this.usuarioService = usuarioService;
         this.actividadRepository = actividadRepository;
+        this.iaConnectionService = iaConnectionService;
     }
 
     @Override
@@ -222,6 +233,103 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         actividadAlumnoRepository.save(actividadAlumno);
         resultado.put(-1L, "Nota final: " + nota + " - Puntuación final: " + puntuacion);
         return resultado;
-    
-}
+    }
+
+    @Override
+    @Transactional
+    public EvaluacionActividadAbiertaResponse corregirActividadAbierta(EvaluacionActividadAbiertaRequest request) {
+        Usuario u = usuarioService.findCurrentUser();
+        if (!(u instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede enviar respuestas de la actividad");
+        }
+
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(request.getActividadAlumnoId())
+            .orElseThrow(() -> new RuntimeException("La actividad del alumno no existe"));
+
+        General actividad = (General) actividadAlumno.getActividad();
+
+        if (actividad.getTipo() != TipoActGeneral.ABIERTA) {
+            throw new IllegalArgumentException("La actividad no es de tipo abierta");
+        }
+
+        LinkedHashMap<Long, String> respuestas = request.getRespuestasAlumno();
+
+        int puntuacionTotal = 0;
+        int numPreguntas = respuestas.size();
+        
+        int maxPuntuacionPorPregunta = (actividad.getPuntuacion() != null && actividad.getPuntuacion() > 0) 
+                                        ? actividad.getPuntuacion() / numPreguntas : 100 / numPreguntas;
+
+        List<RespAlumnoAbiertaResponse> detalles = new java.util.ArrayList<>();
+        Boolean isRespVisible = Boolean.TRUE.equals(actividad.getRespVisible());
+        String comentariosRespVisible = (isRespVisible && actividad.getComentariosRespVisible() != null) 
+                                        ? actividad.getComentariosRespVisible() : "";
+
+        for (Map.Entry<Long, String> entry : respuestas.entrySet()) {
+            Long preguntaId = entry.getKey();
+            String respuestaDada = entry.getValue();
+
+            Pregunta pregunta = preguntaRepository.findById(preguntaId)
+                .orElseThrow(() -> new RuntimeException("La pregunta " + preguntaId + " no existe"));
+            
+            if (!pregunta.getActividad().getId().equals(actividad.getId())) {
+                throw new IllegalArgumentException("La pregunta " + preguntaId + " no pertenece a la actividad");
+            }
+
+            RespuestaMaestro modeloRespuesta = respuestaService.encontrarRespuestasPorPreguntaId(preguntaId).stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No se encontró modelo de respuesta para la pregunta"));
+
+            Map<String, Object> evaluacion = iaConnectionService.evaluarRespuestaAbierta(
+                pregunta.getPregunta(),
+                respuestaDada,
+                modeloRespuesta.getRespuesta(),
+                maxPuntuacionPorPregunta 
+            );
+
+            Integer puntuacionPregunta = 0;
+            String comentariosIA = "La IA no devolvió comentarios legibles";
+
+            for (Map.Entry<String, Object> evalEntry : evaluacion.entrySet()) {
+                String clave = evalEntry.getKey().toLowerCase();
+                if (clave.contains("puntuacion") || clave.contains("puntuación")) {
+                    puntuacionPregunta = Integer.valueOf(evalEntry.getValue().toString());
+                }
+                if (clave.contains("comentario")) {
+                    comentariosIA = evalEntry.getValue().toString();
+                }
+            }
+
+            if (puntuacionPregunta > maxPuntuacionPorPregunta) puntuacionPregunta = maxPuntuacionPorPregunta;
+            else if (puntuacionPregunta < 0) puntuacionPregunta = 0;
+
+            puntuacionTotal += puntuacionPregunta;
+
+            RespAlumnoGeneral respAlumnoGeneralEntity = new RespAlumnoGeneral(puntuacionPregunta > 0, actividadAlumno, respuestaDada, pregunta);
+            RespAlumnoGeneral guardada = respAlumnoGeneralRepository.save(respAlumnoGeneralEntity);
+
+            String comentarioMostrar = isRespVisible ? comentariosIA : "Corrección oculta por configuración de la actividad.";
+
+            detalles.add(new RespAlumnoAbiertaResponse(
+                guardada.getId(),
+                puntuacionPregunta,
+                comentarioMostrar,
+                isRespVisible,
+                comentariosRespVisible
+            ));
+        }
+
+        int maxPuntuacionTotal = (actividad.getPuntuacion() != null && actividad.getPuntuacion() > 0) ? actividad.getPuntuacion() : 100;
+        Integer notaFinal = Math.round(((float) puntuacionTotal / maxPuntuacionTotal) * 10);
+        
+        if (notaFinal > 10) notaFinal = 10;
+        else if (notaFinal < 0) notaFinal = 0;
+
+        actividadAlumno.setPuntuacion(puntuacionTotal);
+        actividadAlumno.setNota(notaFinal);
+        actividadAlumno.setFechaFin(LocalDateTime.now());
+        actividadAlumnoRepository.save(actividadAlumno);
+
+        return new EvaluacionActividadAbiertaResponse(notaFinal, puntuacionTotal, detalles);
+    }
 }
