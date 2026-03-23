@@ -22,6 +22,7 @@ import com.cerebrus.actividad.general.dto.GeneralCartaDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralClasificacionDTO;
 import com.cerebrus.actividad.general.dto.GeneralClasificacionMaestroDTO;
+import com.cerebrus.actividad.general.dto.GeneralRequest;
 import com.cerebrus.actividad.general.dto.GeneralTestDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestMaestroDTO;
 import com.cerebrus.pregunta.Pregunta;
@@ -60,7 +61,7 @@ public class GeneralController {
 
     @PostMapping("/test")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Long> crearTipoTest(@RequestBody @Valid General general) {
+    public ResponseEntity<Long> crearTipoTest(@RequestBody @Valid GeneralRequest general) {
 
         List<Long> preguntasId = general.getPreguntas().stream()
             .map(Pregunta::getId)
@@ -101,7 +102,7 @@ public class GeneralController {
 
     @PostMapping("/cartas/maestro")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Long> crearTipoCarta(@RequestBody @Valid General general) {
+    public ResponseEntity<Long> crearTipoCarta(@RequestBody @Valid GeneralRequest general) {
 
         List<Long> preguntasId = general.getPreguntas().stream()
             .map(Pregunta::getId)
@@ -185,9 +186,9 @@ public class GeneralController {
         return ResponseEntity.noContent().build();
     }
 
-     @PostMapping("/clasificacion")
+    @PostMapping("/clasificacion")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Long> crearTipoClasificacion(@RequestBody @Valid General general) {
+    public ResponseEntity<Long> crearTipoClasificacion(@RequestBody @Valid GeneralRequest general) {
 
     
         
