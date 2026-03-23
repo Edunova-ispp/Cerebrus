@@ -29,6 +29,11 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final AuthTokenFilter authTokenFilter;
 
+    private static final String ORGANIZACION = "ORGANIZACION";
+	private static final String MAESTRO = "MAESTRO";
+    private static final String ALUMNO = "ALUMNO";
+
+
     public SecurityConfig(UserDetailsService userDetailsService, AuthTokenFilter authTokenFilter) {
         this.userDetailsService = userDetailsService;
         this.authTokenFilter = authTokenFilter;
@@ -82,7 +87,23 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html")
                         .permitAll()
+                        // Conexión con la IA solo para usuarios autenticados
                         .requestMatchers("/api/iaconnection/**").authenticated()
+                        // API restringida para que sea solo para alumnos´
+                        .requestMatchers(HttpMethod.POST, "/api/actividades-alumno").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.DELETE, "/api/actividades-alumno/delete/{id}").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.GET, "/api/actividades-alumno/ensure/{actividadId}").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.POST, "/api/actividades-alumno/{id}/abandon").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.PUT, "/api/actividades-alumno/corregir-automaticamente/{id}").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.PUT, "/api/actividades-alumno/corregir-automaticamente-general-clasificacion/{id}").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.POST, "/api/respuestas-alumno-punto-imagen").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.POST, "/api/respuestas-alumno-ordenacion").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.POST, "/api/respuestas-alumno-general").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.POST, "/api/respuestas-alumno-general/crucigrama/{crucigramaId}").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.POST, "/api/respuestas-alumno-general/abierta").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.PUT, "/api/respuestas-alumno-general/update/{id}").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.DELETE, "/api/respuestas-alumno-general/delete/{id}").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.POST, "/api/inscripciones/inscribe").hasAuthority(ALUMNO)
                         .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());

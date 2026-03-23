@@ -3,11 +3,13 @@ package com.cerebrus.inscripcion;
 import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
+import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 
@@ -29,9 +31,9 @@ public class InscripcionServiceImpl implements InscripcionService {
 
     @Override
     public Inscripcion CrearInscripcion(String codigoCurso) {
-        
-        if (usuarioService.findCurrentUser() instanceof Alumno) {
-            Alumno alumno = (Alumno) usuarioService.findCurrentUser();
+        Usuario current = usuarioService.findCurrentUser();
+        if (current instanceof Alumno) {
+            Alumno alumno = (Alumno) current;
             if (!cursoRepository.existsByCodigo(codigoCurso)) {
                 throw new RuntimeException("404 Not Found");
             }else{
@@ -48,7 +50,7 @@ public class InscripcionServiceImpl implements InscripcionService {
                 }
             }
         } else {
-            throw new RuntimeException("401 Unauthorized");
+            throw new AccessDeniedException("Solo un alumno puede inscribirse en un curso");
         }
     }
 }

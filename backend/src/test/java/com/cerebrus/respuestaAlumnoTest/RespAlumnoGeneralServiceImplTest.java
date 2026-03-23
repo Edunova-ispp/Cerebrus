@@ -91,10 +91,13 @@ class RespAlumnoGeneralServiceImplTest {
     // devuelve el comentario de la actividad, y guarda la entidad con los campos correctos
     @Test
     void crearRespAlumnoGeneral_ok_respVisibleTrue_devuelveComentarioDeActividad_yGuardaEntidad() {
-        when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
+        Alumno alumno = new Alumno();
+        alumno.setId(1L);
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
         ActividadAlumno actAlumno = new ActividadAlumno();
         actAlumno.setId(10L);
+        actAlumno.setAlumno(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actAlumno));
 
         Actividad actividad = org.mockito.Mockito.mock(Actividad.class);
@@ -132,9 +135,12 @@ class RespAlumnoGeneralServiceImplTest {
     // devuelve un comentario vacío, y guarda la entidad con los campos correctos
     @Test
     void crearRespAlumnoGeneral_ok_respVisibleFalse_devuelveComentarioVacio() {
-        when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
+        Alumno alumno = new Alumno();
+        alumno.setId(1L);
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
         ActividadAlumno actAlumno = new ActividadAlumno();
+        actAlumno.setAlumno(alumno);
         when(actividadAlumnoRepository.findById(1L)).thenReturn(Optional.of(actAlumno));
 
         Actividad actividad = org.mockito.Mockito.mock(Actividad.class);
@@ -162,9 +168,13 @@ class RespAlumnoGeneralServiceImplTest {
     // cuando respVisible es true, y guarda la entidad con comentariosRespVisible null
     @Test
     void crearRespAlumnoGeneral_ok_respVisibleTrue_permiteComentarioNull() {
-        when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
+        Alumno alumno = new Alumno();
+        alumno.setId(1L);
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
-        when(actividadAlumnoRepository.findById(1L)).thenReturn(Optional.of(new ActividadAlumno()));
+        ActividadAlumno actAlumno = new ActividadAlumno();
+        actAlumno.setAlumno(alumno);
+        when(actividadAlumnoRepository.findById(1L)).thenReturn(Optional.of(actAlumno));
 
         Actividad actividad = org.mockito.Mockito.mock(Actividad.class);
         when(actividad.getRespVisible()).thenReturn(true);
@@ -190,8 +200,13 @@ class RespAlumnoGeneralServiceImplTest {
     // y no interactúa con el repositorio de respuestas del alumno
     @Test
     void crearRespAlumnoGeneral_respVisibleNull_lanzaNullPointer() {
-        when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
-        when(actividadAlumnoRepository.findById(1L)).thenReturn(Optional.of(new ActividadAlumno()));
+        Alumno alumno = new Alumno();
+        alumno.setId(1L);
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
+        ActividadAlumno actAlumno = new ActividadAlumno();
+        actAlumno.setAlumno(alumno);
+        when(actividadAlumnoRepository.findById(1L)).thenReturn(Optional.of(actAlumno));
 
         Actividad actividad = org.mockito.Mockito.mock(Actividad.class);
         when(actividad.getRespVisible()).thenReturn(null);
@@ -228,8 +243,13 @@ class RespAlumnoGeneralServiceImplTest {
     // pregunta no existe, y no interactúa con el repositorio de respuestas del alumno ni con el repositorio de respuestas
     @Test
     void crearRespAlumnoGeneral_cuandoPreguntaNoExiste_lanzaRuntimeConMensaje() {
-        when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
-        when(actividadAlumnoRepository.findById(1L)).thenReturn(Optional.of(new ActividadAlumno()));
+        Alumno alumno = new Alumno();
+        alumno.setId(1L);
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
+        ActividadAlumno actAlumno = new ActividadAlumno();
+        actAlumno.setAlumno(alumno);
+        when(actividadAlumnoRepository.findById(1L)).thenReturn(Optional.of(actAlumno));
         when(preguntaRepository.findById(2L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.crearRespAlumnoGeneral(1L, 50L, 2L))
@@ -241,8 +261,13 @@ class RespAlumnoGeneralServiceImplTest {
     // respuesta no existe, y no interactúa con el repositorio de respuestas del alumno
     @Test
     void crearRespAlumnoGeneral_cuandoRespuestaNoExiste_lanzaRuntimeConMensaje() {
-        when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
-        when(actividadAlumnoRepository.findById(1L)).thenReturn(Optional.of(new ActividadAlumno()));
+        Alumno alumno = new Alumno();
+        alumno.setId(1L);
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
+        ActividadAlumno actAlumno = new ActividadAlumno();
+        actAlumno.setAlumno(alumno);
+        when(actividadAlumnoRepository.findById(1L)).thenReturn(Optional.of(actAlumno));
         Pregunta pregunta = new Pregunta();
         when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
 
@@ -257,9 +282,12 @@ class RespAlumnoGeneralServiceImplTest {
     // respuesta encontrada tiene correcta null, y que se guarda la entidad con los campos correctos
     @Test
     void crearRespAlumnoGeneral_respuestaCorrectaNull_seGuardaNull() {
-        when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
+        Alumno alumno = new Alumno();
+        alumno.setId(1L);
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
         ActividadAlumno actAlumno = new ActividadAlumno();
+        actAlumno.setAlumno(alumno);
         when(actividadAlumnoRepository.findById(1L)).thenReturn(Optional.of(actAlumno));
 
         Actividad actividad = org.mockito.Mockito.mock(Actividad.class);
@@ -314,10 +342,18 @@ class RespAlumnoGeneralServiceImplTest {
     // ni con el servicio de usuarios
     @Test
     void updateRespAlumnoGeneral_ok_actualizaCampos_yNoUsaActividadAlumnoNiRespuestaRepoNiUsuarioService() {
+        Alumno alumno = new Alumno();
+        alumno.setId(1L);
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
+        ActividadAlumno actAlumno = new ActividadAlumno();
+        actAlumno.setAlumno(alumno);
+
         RespAlumnoGeneral existing = new RespAlumnoGeneral();
         existing.setId(9L);
         existing.setCorrecta(false);
         existing.setRespuesta("ANTES");
+        existing.setActividadAlumno(actAlumno);
 
         Actividad actividad = org.mockito.Mockito.mock(Actividad.class);
         Pregunta nuevaPregunta = new Pregunta();
@@ -338,7 +374,7 @@ class RespAlumnoGeneralServiceImplTest {
         verify(respAlumnoGeneralRepository).findById(9L);
         verify(preguntaRepository).findById(77L);
         verify(respAlumnoGeneralRepository).save(existing);
-        verifyNoInteractions(actividadAlumnoRepository, respuestaRepository, usuarioService);
+        verifyNoInteractions(actividadAlumnoRepository, respuestaRepository);
     }
 
     // Test para verificar que el método updateRespAlumnoGeneral lanza RuntimeException con mensaje específico cuando la
@@ -358,22 +394,34 @@ class RespAlumnoGeneralServiceImplTest {
     // pregunta no existe, y no interactúa con el repositorio de respuestas del alumno ni con el servicio de usuarios
     @Test
     void updateRespAlumnoGeneral_cuandoPreguntaNoExiste_lanzaRuntimeConMensaje() {
-        when(respAlumnoGeneralRepository.findById(9L)).thenReturn(Optional.of(new RespAlumnoGeneral()));
+        Alumno alumno = new Alumno();
+        alumno.setId(1L);
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        RespAlumnoGeneral respAlumnoGeneral = new RespAlumnoGeneral();
+        ActividadAlumno actAlumno = new ActividadAlumno();
+        actAlumno.setAlumno(alumno);
+        respAlumnoGeneral.setActividadAlumno(actAlumno);
+        when(respAlumnoGeneralRepository.findById(9L)).thenReturn(Optional.of(respAlumnoGeneral));
         when(preguntaRepository.findById(2L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.updateRespAlumnoGeneral(9L, true, 1L, "X", 2L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La pregunta no existe");
         verify(respAlumnoGeneralRepository, never()).save(any());
-        verifyNoInteractions(usuarioService);
     }
 
     // Test para verificar que el método deleteRespAlumnoGeneral borra la entidad encontrada por el repositorio, 
     // y no interactúa con el servicio de usuarios
     @Test
     void deleteRespAlumnoGeneral_ok_borraEntidad() {
+        Alumno alumno = new Alumno();
+        alumno.setId(1L);
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         RespAlumnoGeneral existing = new RespAlumnoGeneral();
+        ActividadAlumno actAlumno = new ActividadAlumno();
+        actAlumno.setAlumno(alumno);
         existing.setId(3L);
+        existing.setActividadAlumno(actAlumno);
         when(respAlumnoGeneralRepository.findById(3L)).thenReturn(Optional.of(existing));
         doNothing().when(respAlumnoGeneralRepository).delete(existing);
 
@@ -381,7 +429,6 @@ class RespAlumnoGeneralServiceImplTest {
 
         verify(respAlumnoGeneralRepository).findById(3L);
         verify(respAlumnoGeneralRepository).delete(existing);
-        verifyNoInteractions(usuarioService);
     }
 
     // Test para verificar que el método deleteRespAlumnoGeneral lanza RuntimeException con mensaje específico cuando la

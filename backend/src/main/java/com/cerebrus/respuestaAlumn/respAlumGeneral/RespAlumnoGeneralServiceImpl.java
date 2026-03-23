@@ -66,12 +66,17 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     @Transactional
     public RespAlumnoGeneralCreateResponse crearRespAlumnoGeneral(Long actAlumnoId, Long respuestaId, Long preguntaId) {
 
-        Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Alumno)) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
             throw new AccessDeniedException("Solo un alumno puede crear respuestas de alumno");
         }
 
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actAlumnoId).orElseThrow(() -> new RuntimeException("La actividad del alumno no existe"));
+        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
+            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes crear una respuesta para una ActividadAlumno que no es tuya");
+        }
+
         Pregunta pregunta = preguntaRepository.findById(preguntaId).orElseThrow(() -> new RuntimeException("La pregunta no existe"));
         RespuestaMaestro respuestaObj = respuestaRepository.findById(respuestaId).orElseThrow(() -> new RuntimeException("La respuesta no existe"));
         Boolean correcta = respuestaObj.getCorrecta();
@@ -85,12 +90,12 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
 
         RespAlumnoGeneral respAlumnoGeneralEntity = new RespAlumnoGeneral(correcta, actividadAlumno, respuestaTexto, pregunta);
     
-    // IMPORTANTE: Guardamos y capturamos la entidad persistida (que ya tiene ID)
-    RespAlumnoGeneral guardada = respAlumnoGeneralRepository.save(respAlumnoGeneralEntity);
+        // IMPORTANTE: Guardamos y capturamos la entidad persistida (que ya tiene ID)
+        RespAlumnoGeneral guardada = respAlumnoGeneralRepository.save(respAlumnoGeneralEntity);
 
-    // Pasamos guardada.getId() al constructor
-    return new RespAlumnoGeneralCreateResponse(guardada.getId(), correcta, comentariosRespVisible);
-}
+        // Pasamos guardada.getId() al constructor
+        return new RespAlumnoGeneralCreateResponse(guardada.getId(), correcta, comentariosRespVisible);
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -105,6 +110,14 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     @Transactional
     public RespAlumnoGeneral updateRespAlumnoGeneral(Long id,Boolean correcta, Long actAlumnoId, String respuesta, Long preguntaId) {
         RespAlumnoGeneral respAlumnoGeneral = respAlumnoGeneralRepository.findById(id).orElseThrow(() -> new RuntimeException("La respuesta del alumno no existe"));
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede modificar una respuesta alumno");
+        }
+        if (respAlumnoGeneral.getActividadAlumno().getAlumno() == null || respAlumnoGeneral.getActividadAlumno().getAlumno().getId() == null
+            || !respAlumnoGeneral.getActividadAlumno().getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes modificar una respuesta alumno que no es tuya");
+        }
         respAlumnoGeneral.setCorrecta(correcta);
         respAlumnoGeneral.setRespuesta(respuesta);
         respAlumnoGeneral.setPregunta(preguntaRepository.findById(preguntaId).orElseThrow(() -> new RuntimeException("La pregunta no existe")));
@@ -115,6 +128,14 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     @Transactional
     public void deleteRespAlumnoGeneral(Long id) {
         RespAlumnoGeneral respAlumnoGeneral = respAlumnoGeneralRepository.findById(id).orElseThrow(() -> new RuntimeException("La respuesta del alumno no existe"));
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede eliminar una respuesta alumno");
+        }
+        if (respAlumnoGeneral.getActividadAlumno().getAlumno() == null || respAlumnoGeneral.getActividadAlumno().getAlumno().getId() == null
+            || !respAlumnoGeneral.getActividadAlumno().getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes eliminar una respuesta alumno que no es tuya");
+        }
         respAlumnoGeneralRepository.delete(respAlumnoGeneral);
     }
 
@@ -159,12 +180,12 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     @Override
     @Transactional
     public HashMap<Long, String> corregirCrucigrama(LinkedHashMap<Long, String> respuestas, Long crucigramaId) {
-        Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Alumno)) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
             throw new AccessDeniedException("Solo un alumno puede responder crucigramas");
         }
 
-        Alumno alumno = (Alumno) u;
+        Alumno alumno = (Alumno) current;
         Integer nota = 0;
         Integer puntuacion = 0;
         Integer puntuacionASumar = actividadRepository.findById(crucigramaId).orElseThrow(() -> new RuntimeException("El crucigrama no existe")).getPuntuacion() / respuestas.size();
@@ -183,6 +204,11 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
             actividadAlumno = actividadAlumnoRepository.save(new ActividadAlumno(0, LocalDateTime.now(), null, 0, 0, alumno, actividadRepository.findByID(crucigramaId)));
         }
         
+        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
+            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes enviar respuestas a una corrección automática una Actividad Alumno de crucigrama que no es tuya");
+        }
+
         HashMap<Long, String> resultado = new HashMap<>();
 
         for(Entry<Long, String> entry : respuestas.entrySet()) {
@@ -238,13 +264,18 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     @Override
     @Transactional
     public EvaluacionActividadAbiertaResponse corregirActividadAbierta(EvaluacionActividadAbiertaRequest request) {
-        Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Alumno)) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
             throw new AccessDeniedException("Solo un alumno puede enviar respuestas de la actividad");
         }
 
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(request.getActividadAlumnoId())
             .orElseThrow(() -> new RuntimeException("La actividad del alumno no existe"));
+
+        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
+            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes enviar respuestas a una corrección automática una Actividad Alumno que no es tuya");
+        }
 
         General actividad = (General) actividadAlumno.getActividad();
 
