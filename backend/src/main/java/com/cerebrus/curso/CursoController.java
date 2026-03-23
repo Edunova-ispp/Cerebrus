@@ -35,17 +35,9 @@ public class CursoController {
     
 @GetMapping("/{id}/detalles")
     public ResponseEntity<List<String>> obtenerDetallesCurso(@PathVariable Long id) {
-        try {
+        
             return ResponseEntity.ok(cursoService.obtenerDetallesCurso(id));
-        } catch (RuntimeException e) {
-            if (e.getMessage().equals("404 Not Found")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            } else if (e.getMessage().equals("403 Forbidden")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
-        }
+        
     }
 
     public static class CrearCursoRequest {
@@ -82,32 +74,16 @@ public class CursoController {
 
     @PatchMapping("/{id}/visibilidad")
     public ResponseEntity<Curso> cambiarVisibilidad(@PathVariable Long id) {
-        try {
+        
             return ResponseEntity.ok(cursoService.cambiarVisibilidad(id));
-        } catch (RuntimeException e) {
-            if (e.getMessage().equals("404 Not Found")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            } else if (e.getMessage().equals("403 Forbidden")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
-        }
+        
     }
 
     @GetMapping("/{id}/progreso")
     public ResponseEntity<ProgresoDTO> obtenerProgreso(@PathVariable Long id) {
-        try {
+        
             return ResponseEntity.ok(cursoService.getProgreso(id));
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("404")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            } else if (e.getMessage().contains("403")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
-        }
+       
     }
 
     public static class ActualizarCursoRequest {
@@ -133,7 +109,7 @@ public class CursoController {
     public ResponseEntity<Curso> actualizarCurso(
             @PathVariable Long id,
             @RequestBody @Valid ActualizarCursoRequest request) {
-        try {
+        
             if (id == null || id <= 0) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
@@ -144,47 +120,22 @@ public class CursoController {
                     request.getImagen()
             );
             return ResponseEntity.ok(cursoActualizado);
-        } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (RuntimeException e) {
-            if (e.getMessage().equals("404 Not Found")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            } else if (e.getMessage().equals("403 Forbidden")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
-        }
+        
     }
     @GetMapping("/{id}/NotasMedias")
     public ResponseEntity<List<Integer>> obtenerNotasMedias(@PathVariable Long id) {
-        try {
+       
             return ResponseEntity.ok(cursoService.getNotaMediaPorActividad(id));
-        } catch (RuntimeException e) {
-            if (e.getMessage().equals("404 Not Found")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            } else if (e.getMessage().equals("403 Forbidden")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
-        }
+        
     }
 
 
     @DeleteMapping("/{id}")
 public ResponseEntity<Void> eliminarCurso(@PathVariable Long id) {
-    try {
+    
         cursoService.eliminarCurso(id);
         return ResponseEntity.noContent().build();
-    } catch (AccessDeniedException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    } catch (RuntimeException e) {
-        if (e.getMessage().equals("404 Not Found")) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
+    
 }
 
    
