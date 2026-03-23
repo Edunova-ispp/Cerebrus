@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -60,16 +59,13 @@ public class RespAlumnoGeneralController {
     public ResponseEntity<HashMap<Long,String>> corregirCrucigrama(@RequestBody LinkedHashMap<Long, String> respuestas, @PathVariable Long crucigramaId) {
         try {
         if(respuestas.size() > 5 || respuestas.size() == 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();}
         HashMap<Long, String> resultado = respAlumnoGeneralService.corregirCrucigrama(respuestas, crucigramaId);
         return new ResponseEntity<>(resultado, HttpStatus.OK);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     

@@ -14,9 +14,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.PositiveOrZero;
 
 @Entity
 @Table(name = "inscripcion")
@@ -27,13 +24,9 @@ public class Inscripcion {
     private Long id;
 
     @Column(nullable = false)
-    @NotNull(message = "Los puntos son obligatorios")
-    @PositiveOrZero(message = "Los puntos no pueden ser negativos")
     private Integer puntos;
 
     @Column(nullable = false)
-    @NotNull(message = "La fecha de inscripcion es obligatoria")
-    @PastOrPresent(message = "La fecha de inscripcion no puede estar en el futuro")
     private LocalDate fechaInscripcion;
 
     //Relaciones

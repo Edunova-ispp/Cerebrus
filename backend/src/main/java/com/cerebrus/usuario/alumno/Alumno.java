@@ -16,14 +16,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.PositiveOrZero;
 
 @Entity
 @Table(name = "alumno")
 public class Alumno extends Usuario {
 
     @Column(nullable = false)
-    @PositiveOrZero(message = "Los puntos no pueden ser negativos")
     private Integer puntos;
 
     //Relaciones

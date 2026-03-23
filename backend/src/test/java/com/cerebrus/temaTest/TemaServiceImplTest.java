@@ -24,7 +24,6 @@ import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.curso.CursoServiceImpl;
-import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.tema.TemaServiceImpl;
@@ -102,8 +101,8 @@ class TemaServiceImplTest {
         when(cursoRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> temaService.crearTema("Fracciones", 999L, 1L))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("No se ha encontrado una entidad del tipo Curso con campo id: '999'");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Curso no encontrado");
 
         verify(temaRepository, never()).save(any());
     }
@@ -113,8 +112,8 @@ class TemaServiceImplTest {
         when(maestroRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> temaService.crearTema("Fracciones", 10L, 99L))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("No se ha encontrado una entidad del tipo Maestro con campo id: '99'");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Maestro no encontrado");
 
         verify(temaRepository, never()).save(any());
     }
@@ -147,8 +146,8 @@ class TemaServiceImplTest {
         when(temaRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> temaService.renombrarTema(999L, "Decimales", 1L))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("No se ha encontrado una entidad del tipo Tema con campo id: '999'");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Tema no encontrado");
     }
 
     @Test
@@ -221,8 +220,8 @@ class TemaServiceImplTest {
         when(temaRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> temaService.obtenerTemaPorId(999L))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("No se ha encontrado una entidad del tipo Tema con campo id: '999'");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Tema no encontrado con ID: 999");
     }
 
     @Test
@@ -248,8 +247,8 @@ class TemaServiceImplTest {
         when(temaRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> temaService.eliminarTema(999L))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("No se ha encontrado una entidad del tipo Tema con campo id: '999'");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Tema no encontrado");
     }
 
     @Test

@@ -8,20 +8,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "resp_alumno_general")
 public class RespAlumnoGeneral extends RespuestaAlumno {
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    @NotBlank(message = "La respuesta es obligatoria")
     private String respuesta;
 
     //Relaciones
     @ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
-    @NotNull(message = "La pregunta es obligatoria")
     private Pregunta pregunta;
 
     // Constructores

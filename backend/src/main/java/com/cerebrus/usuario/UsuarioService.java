@@ -11,8 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.exceptions.ResourceNotFoundException;
-import com.cerebrus.usuario.alumno.Alumno;
-import com.cerebrus.usuario.organizacion.Organizacion;
 
 @Service
 public class UsuarioService {
@@ -57,8 +55,7 @@ public class UsuarioService {
     }
 
     @Transactional
-    public Usuario saveUser(@Valid Usuario user) throws DataAccessException {
-        sanitizeAndValidateUser(user);
+    public Usuario saveUser(Usuario user) throws DataAccessException {
         if (user.getContrasena() != null && !user.getContrasena().trim().isEmpty()) {
             user.setContrasena(passwordEncoder.encode(user.getContrasena()));
         }
@@ -67,7 +64,6 @@ public class UsuarioService {
 
     @Transactional
     public Usuario updateUser(@Valid Usuario user, Long idToUpdate) {
-        sanitizeAndValidateUser(user);
         Usuario toUpdate = findById(idToUpdate);
         if (user.getContrasena() != null && !user.getContrasena().trim().isEmpty()) {
             user.setContrasena(passwordEncoder.encode(user.getContrasena()));
@@ -86,43 +82,5 @@ public class UsuarioService {
     public void deleteUser(Long id) {
         Usuario toDelete = findById(id);
         this.userRepository.delete(toDelete);
-    }
-
-    private void sanitizeAndValidateUser(Usuario user) {
-        if (user == null) {
-            throw new IllegalArgumentException("El usuario no puede ser nulo");
-        }
-
-        if (user.getNombre() != null) {
-            user.setNombre(user.getNombre().trim());
-        }
-        if (user.getPrimerApellido() != null) {
-            user.setPrimerApellido(user.getPrimerApellido().trim());
-        }
-        if (user.getSegundoApellido() != null) {
-            String segundoApellido = user.getSegundoApellido().trim();
-            user.setSegundoApellido(segundoApellido.isEmpty() ? null : segundoApellido);
-        }
-        if (user.getNombreUsuario() != null) {
-            user.setNombreUsuario(user.getNombreUsuario().trim());
-        }
-        if (user.getCorreoElectronico() != null) {
-            user.setCorreoElectronico(user.getCorreoElectronico().trim().toLowerCase());
-        }
-        if (user.getContrasena() != null) {
-            user.setContrasena(user.getContrasena().trim());
-        }
-
-        if (user instanceof Alumno alumno && alumno.getPuntos() != null && alumno.getPuntos() < 0) {
-            throw new IllegalArgumentException("Los puntos no pueden ser negativos");
-        }
-
-        if (user instanceof Organizacion organizacion) {
-            String nombreCentro = organizacion.getNombreCentro();
-            if (nombreCentro == null || nombreCentro.trim().isEmpty()) {
-                throw new IllegalArgumentException("El nombre del centro no puede estar vacío");
-            }
-            organizacion.setNombreCentro(nombreCentro.trim());
-        }
     }
 }
