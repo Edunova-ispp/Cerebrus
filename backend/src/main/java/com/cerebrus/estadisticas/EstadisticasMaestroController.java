@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,7 +38,7 @@ public class EstadisticasMaestroController {
 
     @GetMapping("/cursos/{cursoId}/actividades-completadas")
     public ResponseEntity<?> obtenerNumActividadesRealizadasPorAlumno(@PathVariable Long cursoId) {
-
+        try {
             Optional<Curso> curso = cursoRepository.findById(cursoId);
             
             if (curso.isEmpty()) {
@@ -46,20 +47,34 @@ public class EstadisticasMaestroController {
 
             Map<String, Long> estadisticas = estadisticasMaestroService.numActividadesRealizadasPorAlumno(curso.get());
             return ResponseEntity.ok(estadisticas);
-
-        
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(404).body(error);
+        } catch (AccessDeniedException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
+        } catch (Exception e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
     }
 
     @GetMapping("/cursos/{cursoId}/puntos")
     public ResponseEntity<HashMap<String, Integer>> obtenerPuntosCurso(@PathVariable Long cursoId) {
-
+        try {
             HashMap<String, Integer> puntosPorAlumno = estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(cursoId);
             if(puntosPorAlumno.isEmpty()) {
                 return ResponseEntity.ok(new HashMap<>());
             }
             return ResponseEntity.ok(puntosPorAlumno);
-        
-
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(403).body(null);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                return ResponseEntity.status(404).body(null);
+            }
+            return ResponseEntity.status(500).body(null);
+        }
     }
 
     @GetMapping("/cursos/{cursoId}/temas/{temaId}/estadisticas-actividades")
@@ -84,10 +99,20 @@ public class EstadisticasMaestroController {
 
     @GetMapping("/cursos/{cursoId}/alumnos/{alumnoId}")
     public ResponseEntity<?> obtenerResumenEstadisticasAlumno(@PathVariable Long cursoId, @PathVariable Long alumnoId) {
-        
+        try {
             EstadisticasAlumnoResumenDTO resultado = estadisticasMaestroService.obtenerResumenEstadisticasAlumno(cursoId, alumnoId);
             return ResponseEntity.ok(resultado);
-        
+        } catch (AccessDeniedException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
     }
 
     @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/estadisticas-alumno")
@@ -118,52 +143,112 @@ public class EstadisticasMaestroController {
 
     @GetMapping("/actividades/{actividadId}/alumno/{alumnoId}/tiempo")
     public ResponseEntity<?> obtenerTiempoAlumnoEnActividad(@PathVariable Long actividadId, @PathVariable Long alumnoId) {
-        
+        try {
             Integer tiempo = estadisticasMaestroService.obtenerTiempoAlumnoEnActividad(alumnoId, actividadId);
             return ResponseEntity.ok(Map.of("tiempoMinutos", tiempo));
-        
+        } catch (AccessDeniedException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
     }
 
     @GetMapping("/temas/{temaId}/alumno/{alumnoId}/tiempo")
     public ResponseEntity<?> obtenerTiempoAlumnoEnTema(@PathVariable Long temaId, @PathVariable Long alumnoId) {
-        
+        try {
             Integer tiempo = estadisticasMaestroService.obtenerTiempoAlumnoEnTema(alumnoId, temaId);
             return ResponseEntity.ok(Map.of("tiempoMinutos", tiempo));
-        
+        } catch (AccessDeniedException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
     }
 
     @GetMapping("/cursos/{cursoId}/alumno/{alumnoId}/tiempo")
     public ResponseEntity<?> obtenerTiempoAlumnoEnCurso(@PathVariable Long cursoId, @PathVariable Long alumnoId) {
-        
+        try {
             Integer tiempo = estadisticasMaestroService.obtenerTiempoAlumnoEnCurso(alumnoId, cursoId);
             return ResponseEntity.ok(Map.of("tiempoMinutos", tiempo));
-        
+        } catch (AccessDeniedException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
     }
 
     // ==================== CONSULTAR TIEMPO PROMEDIO ====================
 
     @GetMapping("/actividades/{actividadId}/tiempo-promedio")
     public ResponseEntity<?> obtenerTiempoMedioActividad(@PathVariable Long actividadId) {
-        
+        try {
             Double tiempoPromedio = estadisticasMaestroService.obtenerTiempoMedioActividad(actividadId);
             return ResponseEntity.ok(Map.of("tiempoPromedioMinutos", tiempoPromedio));
-        
+        } catch (AccessDeniedException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
     }
 
     @GetMapping("/temas/{temaId}/tiempo-promedio")
     public ResponseEntity<?> obtenerTiempoMedioTema(@PathVariable Long temaId) {
-        
+        try {
             Double tiempoPromedio = estadisticasMaestroService.obtenerTiempoMedioTema(temaId);
             return ResponseEntity.ok(Map.of("tiempoPromedioMinutos", tiempoPromedio));
-        
+        } catch (AccessDeniedException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
     }
 
     @GetMapping("/cursos/{cursoId}/tiempo-promedio")
     public ResponseEntity<?> obtenerTiempoMedioCurso(@PathVariable Long cursoId) {
-        
+        try {
             Double tiempoPromedio = estadisticasMaestroService.obtenerTiempoMedioCurso(cursoId);
             return ResponseEntity.ok(Map.of("tiempoPromedioMinutos", tiempoPromedio));
-        
+        } catch (AccessDeniedException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
     }
 
     // ==================== CONSULTAR ALUMNOS MÁS RÁPIDOS Y LENTOS ====================
@@ -171,28 +256,58 @@ public class EstadisticasMaestroController {
     @GetMapping("/actividades/{actividadId}/alumnos-rapidos-lentos")
     public ResponseEntity<?> obtenerAlumnosMasRapidosLentosActividad(@PathVariable Long actividadId, 
             @RequestParam(defaultValue = "3") Integer limite) {
-        
+        try {
             AlumnosMasRapidosLentosDTO resultado = estadisticasMaestroService.obtenerAlumnosMasRapidosLentosActividad(actividadId, limite);
             return ResponseEntity.ok(resultado);
-        
+        } catch (AccessDeniedException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
     }
 
     @GetMapping("/temas/{temaId}/alumnos-rapidos-lentos")
     public ResponseEntity<?> obtenerAlumnosMasRapidosLentosTema(@PathVariable Long temaId, 
             @RequestParam(defaultValue = "3") Integer limite) {
-        
+        try {
             AlumnosMasRapidosLentosDTO resultado = estadisticasMaestroService.obtenerAlumnosMasRapidosLentosTema(temaId, limite);
             return ResponseEntity.ok(resultado);
-        
+        } catch (AccessDeniedException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
     }
 
     @GetMapping("/cursos/{cursoId}/alumnos-rapidos-lentos")
     public ResponseEntity<?> obtenerAlumnosMasRapidosLentosCurso(@PathVariable Long cursoId, 
             @RequestParam(defaultValue = "3") Integer limite) {
-        
+        try {
             AlumnosMasRapidosLentosDTO resultado = estadisticasMaestroService.obtenerAlumnosMasRapidosLentosCurso(cursoId, limite);
             return ResponseEntity.ok(resultado);
-        
+        } catch (AccessDeniedException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
     }
 
 
