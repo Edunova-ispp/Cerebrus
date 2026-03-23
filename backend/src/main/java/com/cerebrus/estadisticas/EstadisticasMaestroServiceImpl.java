@@ -22,7 +22,7 @@ import com.cerebrus.actividad.general.General;
 import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 import com.cerebrus.actividad.ordenacion.Ordenacion;
 import com.cerebrus.actividad.tablero.Tablero;
-import com.cerebrus.actividadAlumno.ActividadAlumno;
+import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
