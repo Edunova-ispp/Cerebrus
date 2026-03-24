@@ -91,7 +91,7 @@ export default function OrdenacionAlumno() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
   const [feedback, setFeedback] = useState<{ correcta: boolean; comentario?: string } | null>(null);
-  const [incorrectos, setIncorrectos] = useState(0);
+  //const [incorrectos, setIncorrectos] = useState(0);
   const incorrectosRef = useRef(0);
   const pendingRespuestaIdRef = useRef<number | null>(null);
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
@@ -218,7 +218,6 @@ export default function OrdenacionAlumno() {
       // Respuesta incorrecta: contar intento fallido
       const nuevosIncorrectos = incorrectosRef.current + 1;
       incorrectosRef.current = nuevosIncorrectos;
-      setIncorrectos(nuevosIncorrectos);
       setFeedback({
         correcta,
         comentario: ordenacion.respVisible ? comentario : undefined,
