@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,12 +27,14 @@ import com.cerebrus.actividad.general.General;
 import com.cerebrus.actividad.general.GeneralRepository;
 import com.cerebrus.actividad.general.GeneralServiceImpl;
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
@@ -185,8 +188,25 @@ class GeneralServiceImplTest {
     // Tests para verificar que si se lee una actividad existente se devuelve correctamente
 	@Test
 	void readActividad_existente_devuelveActividad() {
+		Alumno alumno = new Alumno();
+		alumno.setId(1L);
+		when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
+		Inscripcion inscripcion = new Inscripcion();
+		inscripcion.setAlumno(alumno);
+
+		List<Inscripcion> inscripciones = new LinkedList<>();
+		inscripciones.add(inscripcion);
+
+		Curso curso = new Curso();
+		curso.setInscripciones(inscripciones);
+
+		Tema tema = new Tema();
+		tema.setCurso(curso);
+
 		General general = new General();
 		general.setId(5L);
+		general.setTema(tema);
 		when(generalRepository.findByIdWithPreguntas(5L)).thenReturn(Optional.of(general));
 
 		General resultado = generalService.readActividad(5L);

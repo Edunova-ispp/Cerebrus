@@ -94,7 +94,7 @@ public class GeneralController {
         return ResponseEntity.ok(generalService.readTipoTestMaestro(id));
     }
 
-      @GetMapping("/cartas/{id}")
+    @GetMapping("/cartas/{id}")
     public ResponseEntity<GeneralCartaDTO> readTipoCarta(@PathVariable Long id) {
         return ResponseEntity.ok(generalService.readTipoCarta(id));
     }
