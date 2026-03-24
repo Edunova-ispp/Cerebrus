@@ -112,10 +112,6 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                 throw new Error('Debes completar al menos una pregunta y su respuesta.');
             }
 
-            if (puntuacion <= 0) {
-                throw new Error('La puntuación debe ser un número mayor a 0');
-            }
-
             const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
             const payload = {

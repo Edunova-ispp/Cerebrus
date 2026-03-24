@@ -23,7 +23,7 @@ interface CrearActividadProps {
 export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDone }: CrearActividadProps = {}) {
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const [tipoSeleccionado, setTipoSeleccionado] = useState<string | null>(null);
 
   const formContent =
@@ -36,7 +36,7 @@ export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDo
     tipoSeleccionado === 'Clasificación' ? <ClasificacionForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
     tipoSeleccionado === 'Crucigrama' ? <CrucigramaForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
     <p className="ca-proximamente">Selecciona un tipo de actividad</p>;
-
+/*
   const handleVolver = () => {
     if (embedded && onDone) {
       onDone();
@@ -44,7 +44,7 @@ export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDo
       navigate(`/cursos/${cursoId}`);
     }
   };
-
+*/
   const sidebar = (
     <div className="ca-sidebar">
    

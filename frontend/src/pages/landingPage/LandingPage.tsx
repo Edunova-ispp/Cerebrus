@@ -46,7 +46,7 @@ const cards = [
 
 function LandingPage() {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [isLoggedIn] = useState(!!localStorage.getItem("token"));
 
   /*const handleLogout = () => {
     localStorage.removeItem("token");

@@ -88,7 +88,7 @@ export default function DetalleCursoProfesor({ curso }: Props) {
                   key={tab.key}
                   type="button"
                   className={`detalle-sidebar-btn${isActive ? " detalle-sidebar-btn--active" : ""}${isBack ? " detalle-sidebar-btn--back" : ""}`}
-                  onClick={() => setView({ tab: tab.key })}
+                  //onClick={() => setView({ tab: tab.key })}
                 >
                   {tab.label}
                   {isBack && <span className="detalle-sidebar-btn__back-hint">Pulsa para volver</span>}
