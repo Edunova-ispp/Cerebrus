@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.actividad.ordenacion.dto.OrdenacionDTO;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import jakarta.validation.Valid;
 
 
@@ -33,6 +34,7 @@ public class OrdenacionController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Long> crearActOrdenacion(@RequestBody @Valid Ordenacion ordenacion) {
         
         Ordenacion ordenacionCreada = ordenacionService.crearActOrdenacion(
@@ -63,6 +65,7 @@ public class OrdenacionController {
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Long> updateActOrdenacion(@PathVariable Long id,
          @RequestBody @Valid Ordenacion ordenacion) {
         Ordenacion ordenacionActualizada = ordenacionService.updateActOrdenacion(
@@ -82,6 +85,7 @@ public class OrdenacionController {
 
     @DeleteMapping("/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> deleteActOrdenacion(@PathVariable Long id) {
         ordenacionService.deleteActOrdenacion(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

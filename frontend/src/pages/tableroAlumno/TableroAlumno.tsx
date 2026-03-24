@@ -367,7 +367,7 @@ export default function TableroAlumno() {
           </div>
 
           {!isComplete && !modalCell && (
-            <p className="ta-hint">Pulsa una casilla <strong>?</strong> adyacente a Cerbero para responder</p>
+            <p className="tablero-hint">Pulsa una casilla <strong>?</strong> adyacente a Cerbero para responder</p>
           )}
 
           {isComplete && <CompletionPopup title="¡HAS COMPLETADO EL TABLERO!" onContinue={() => navigate(-1)} />}

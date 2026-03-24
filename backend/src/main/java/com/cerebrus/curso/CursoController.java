@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -70,6 +71,7 @@ public class CursoController {
     }
 
     @PostMapping("/curso")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Curso> crearCurso(@RequestBody @Valid CrearCursoRequest request){
         Curso creado = cursoService.crearCurso(request.getTitulo(), request.getDescripcion(), request.getImagen());
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
@@ -81,6 +83,7 @@ public class CursoController {
     }
 
     @PatchMapping("/{id}/visibilidad")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Curso> cambiarVisibilidad(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(cursoService.cambiarVisibilidad(id));
@@ -130,6 +133,7 @@ public class CursoController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Curso> actualizarCurso(
             @PathVariable Long id,
             @RequestBody @Valid ActualizarCursoRequest request) {
@@ -173,6 +177,7 @@ public class CursoController {
 
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
 public ResponseEntity<Void> eliminarCurso(@PathVariable Long id) {
     try {
         cursoService.eliminarCurso(id);

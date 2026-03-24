@@ -17,6 +17,7 @@ export interface MarcarImagenFormInitialValues {
   readonly puntuacion: number;
   readonly respVisible: boolean;
   readonly comentariosRespVisible: string | null;
+  readonly temaId?: number;
   readonly imagenAMarcar: string;
   readonly puntosImagen: readonly MarcarImagenFormInitialPoint[];
 }
@@ -55,7 +56,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
   const navigate = useNavigate();
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
-  const temaId = temaIdProp ?? params.temaId;
+  const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
   useEffect(() => {
     if (!initialValues) return;

@@ -14,6 +14,7 @@ export interface OrdenacionFormInitialValues {
   readonly respVisible: boolean;
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
+  readonly temaId?: number;
   readonly valores: string[];
 }
 
@@ -52,7 +53,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
   const navigate = useNavigate();
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
-  const temaId = temaIdProp ?? params.temaId;
+  const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
   useEffect(() => {
     if (!initialValues) return;

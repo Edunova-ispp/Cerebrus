@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.cerebrus.actividad.marcarImagen.dto.MarcarImagenDTO;
 import com.cerebrus.puntoImage.dto.PuntoImagenDTO;
@@ -34,6 +35,7 @@ public class MarcarImagenController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<MarcarImagenDTO> crearMarcarImagen(@RequestBody @Valid MarcarImagenDTO marcarImagenDTO) {
         MarcarImagen marcarImagenCreada = marcarImagenService.crearMarcarImagen(marcarImagenDTO);
         MarcarImagenDTO marcarImagenCreadaDTO = toMarcarImagenDTO(marcarImagenCreada);
@@ -50,6 +52,7 @@ public class MarcarImagenController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<MarcarImagenDTO> actualizarMarcarImagen(@PathVariable Long id, @RequestBody @Valid MarcarImagenDTO marcarImagenDTO) {
         MarcarImagen marcarImagenActualizada = marcarImagenService.actualizarMarcarImagen(id, marcarImagenDTO);
         MarcarImagenDTO marcarImagenActualizadaDTO = toMarcarImagenDTO(marcarImagenActualizada);
@@ -58,6 +61,7 @@ public class MarcarImagenController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> eliminarMarcarImagen(@PathVariable Long id) {
         marcarImagenService.eliminarMarcarImagen(id);
         return ResponseEntity.noContent().build();

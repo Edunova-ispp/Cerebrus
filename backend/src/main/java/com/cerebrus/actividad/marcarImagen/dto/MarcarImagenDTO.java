@@ -4,6 +4,9 @@ import java.util.List;
 
 import com.cerebrus.puntoImage.dto.PuntoImagenDTO;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,14 +15,21 @@ import lombok.Setter;
 public class MarcarImagenDTO {
     
     private final Long id;
+    @NotBlank
     private final String titulo;
     private final String descripcion;
+    @NotNull
+    @Min(1)
     private final Integer puntuacion;
     private final String imagenActividad;
+    @NotNull
     private final Boolean respVisible;
     private final String comentariosRespVisible;
+    @NotNull
     private final Long temaId;
+    @NotBlank
     private final String imagenAMarcar;
+    @NotNull
     private final List<PuntoImagenDTO> puntosImagen;
 
     public MarcarImagenDTO(

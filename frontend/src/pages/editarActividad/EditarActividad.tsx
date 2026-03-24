@@ -31,6 +31,7 @@ type TeoriaDTO = {
   descripcion: string;
   imagen: string;
   posicion: number;
+  temaId: number;
 };
 
 type GeneralTestMaestroDTO = {
@@ -394,6 +395,7 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
         respVisible: ordenacion.respVisible,
         comentariosRespVisible: ordenacion.comentariosRespVisible,
         posicion: ordenacion.posicion,
+        temaId: ordenacion.temaId,
         valores: ordenacion.valores ?? [],
       }
     : undefined;
@@ -408,6 +410,7 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
         comentariosRespVisible: generalTest.comentariosRespVisible,
         posicion: generalTest.posicion,
         version: generalTest.version,
+        temaId: generalTest.temaId,
         preguntas: generalTest.preguntas ?? [],
       }
     : undefined;
@@ -418,6 +421,7 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
         descripcion: teoria.descripcion,
         imagen: teoria.imagen,
         posicion: teoria.posicion,
+        temaId: teoria.temaId,
       }
     : undefined;
 
@@ -431,6 +435,7 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
         comentariosRespVisible: generalCarta.comentariosRespVisible,
         posicion: generalCarta.posicion,
         version: generalCarta.version,
+        temaId: generalCarta.temaId,
         preguntas: generalCarta.preguntas ?? [],
       }
     : undefined;
@@ -442,6 +447,7 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
         puntuacion: marcarImagen.puntuacion,
         respVisible: marcarImagen.respVisible,
         comentariosRespVisible: marcarImagen.comentariosRespVisible,
+        temaId: marcarImagen.temaId,
         imagenAMarcar: marcarImagen.imagenAMarcar,
         puntosImagen: (marcarImagen.puntosImagen ?? []).map((p) => ({
           id: p.id,
@@ -463,6 +469,7 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
         comentariosRespVisible: clasificacion.comentariosRespVisible,
         posicion: clasificacion.posicion,
         version: clasificacion.version,
+        temaId: clasificacion.temaId,
         preguntas: clasificacion.preguntas ?? [],
       }
     : undefined;
