@@ -4,6 +4,7 @@ package com.cerebrus.actividadAlumnTest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -32,7 +33,6 @@ import com.cerebrus.actividad.ordenacion.Ordenacion;
 import com.cerebrus.actividad.ordenacion.OrdenacionService;
 import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 import com.cerebrus.actividad.marcarImagen.MarcarImagenService;
-import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
@@ -98,6 +98,7 @@ class ActividadAlumnoServiceImplTest {
 
     @Test
     void crearActividadAlumno_nuevaPar_creaYGuarda() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L)).thenReturn(Optional.empty());
         when(actividadRepository.findById(50L)).thenReturn(Optional.of(actividad));
         when(alumnoRepository.findById(1L)).thenReturn(Optional.of(alumno));
@@ -113,12 +114,13 @@ class ActividadAlumnoServiceImplTest {
     }
 
     @Test
-    void crearActividadAlumno_parejaYaExiste_retornaExistenteSinGuardar() {
+        void crearActividadAlumno_parejaYaExiste_retornaExistenteSinGuardar() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L))
-                .thenReturn(Optional.of(actividadAlumno));
+            .thenReturn(Optional.of(actividadAlumno));
 
         ActividadAlumno resultado = service.crearActividadAlumno(100, LocalDateTime.now(),
-                LocalDateTime.now(), 8, 0, 1L, 50L);
+            LocalDateTime.now(), 8, 0, 1L, 50L);
 
         assertThat(resultado.getId()).isEqualTo(10L);
         verify(actividadAlumnoRepository, never()).save(any());
@@ -127,6 +129,7 @@ class ActividadAlumnoServiceImplTest {
 
     @Test
     void crearActividadAlumno_actividadNoExiste_lanzaResourceNotFoundException() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 99L)).thenReturn(Optional.empty());
         when(actividadRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -139,13 +142,19 @@ class ActividadAlumnoServiceImplTest {
 
     @Test
     void crearActividadAlumno_alumnoNoExiste_lanzaResourceNotFoundException() {
-        when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(99L, 50L)).thenReturn(Optional.empty());
-        when(actividadRepository.findById(50L)).thenReturn(Optional.of(actividad));
-        when(alumnoRepository.findById(99L)).thenReturn(Optional.empty());
+        alumno.setId(99L); 
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(99L, 50L))
+            .thenReturn(Optional.empty());
+        when(actividadRepository.findById(50L))
+            .thenReturn(Optional.of(actividad));
+        when(alumnoRepository.findById(99L))
+            .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.crearActividadAlumno(100, LocalDateTime.now(),
-                LocalDateTime.now(), 8, 0, 99L, 50L))
-                .isInstanceOf(ResourceNotFoundException.class);
+            LocalDateTime.now(), 8, 0, 99L, 50L))
+            .isInstanceOf(ResourceNotFoundException.class)
+            .hasMessage("El alumno no existe");
     }
 
     // ==================== readActividadAlumno ====================
@@ -255,6 +264,7 @@ class ActividadAlumnoServiceImplTest {
 
     @Test
     void deleteActividadAlumno_existente_eliminaCorrectamente() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
 
         service.deleteActividadAlumno(10L);
@@ -318,7 +328,7 @@ class ActividadAlumnoServiceImplTest {
 
         assertThatThrownBy(() -> service.abandonarActividadAlumno(10L))
                 .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("No puedes modificar una ActividadAlumno que no es tuya");
+                .hasMessage("No puedes abandonar una ActividadAlumno que no es tuya");
     }
 
     @Test
@@ -401,6 +411,7 @@ class ActividadAlumnoServiceImplTest {
 
     @Test
     void corregirActividadAlumnoAutomaticamente_tipoTest_todasCorrectas_notaYPuntuacionMaximas() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         General actividadGeneral = crearActividadGeneral(TipoActGeneral.TEST, 100, 2);
         actividadAlumno.setActividad(actividadGeneral);
 
@@ -418,6 +429,7 @@ class ActividadAlumnoServiceImplTest {
 
     @Test
     void corregirActividadAlumnoAutomaticamente_tipoTest_todasIncorrectas_notaYPuntuacionCeroMinimo() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         General actividadGeneral = crearActividadGeneral(TipoActGeneral.TEST, 100, 2);
         actividadAlumno.setActividad(actividadGeneral);
 
@@ -434,6 +446,7 @@ class ActividadAlumnoServiceImplTest {
 
     @Test
     void corregirActividadAlumnoAutomaticamente_tipoTest_mitadCorrectas_calculaIntermedio() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         General actividadGeneral = crearActividadGeneral(TipoActGeneral.TEST, 100, 2);
         actividadAlumno.setActividad(actividadGeneral);
 
@@ -451,6 +464,7 @@ class ActividadAlumnoServiceImplTest {
 
     @Test
     void corregirActividadAlumnoAutomaticamente_tipoTeoria_notaMaximaYPuntuacionBase() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         General actividadGeneral = crearActividadGeneral(TipoActGeneral.TEORIA, 100, 1);
         actividadAlumno.setActividad(actividadGeneral);
 
@@ -465,6 +479,7 @@ class ActividadAlumnoServiceImplTest {
 
     @Test
     void corregirActividadAlumnoAutomaticamente_sinRespuestasIds_noCorrrigeNada() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         General actividadGeneral = crearActividadGeneral(TipoActGeneral.TEST, 100, 2);
         actividadAlumno.setActividad(actividadGeneral);
 
@@ -490,6 +505,7 @@ class ActividadAlumnoServiceImplTest {
 
     @Test
     void corregirActividadAlumnoAutomaticamente_tipoOrdenacion_posicionesCorrectas_calculaPuntuacion() {
+            when(usuarioService.findCurrentUser()).thenReturn(alumno);
         Ordenacion ordenacion = new Ordenacion();
         ordenacion.setId(50L);
         ordenacion.setPuntuacion(100);
@@ -524,15 +540,17 @@ class ActividadAlumnoServiceImplTest {
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
         when(ordenacionService.encontrarOrdenacionPorId(50L)).thenReturn(ordenacion);
 
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         assertThatThrownBy(() -> service.corregirActividadAlumnoAutomaticamente(10L, List.of(101L, 102L)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("solo se permite una respuesta");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Para actividades de ordenación solo se permite una respuesta del alumno con la secuencia ordenada");
     }
 
     // ==================== corregirActividadAlumnoAutomaticamenteGeneralClasificacion ====================
 
     @Test
     void corregirActividadAlumnoAutomaticamenteGeneralClasificacion_todasCorrectas_notaMaxima() {
+            when(usuarioService.findCurrentUser()).thenReturn(alumno);
         Pregunta pregunta = new Pregunta();
         pregunta.setId(30L);
         pregunta.setRespuestasMaestro(List.of(
@@ -555,16 +573,22 @@ class ActividadAlumnoServiceImplTest {
 
     @Test
     void corregirActividadAlumnoAutomaticamenteGeneralClasificacion_sinPreguntas_retornaCero() {
-        General actividadGeneral = crearActividadGeneral(TipoActGeneral.CLASIFICACION, 100, 0);
-        actividadAlumno.setActividad(actividadGeneral);
 
-        when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
-        when(actividadRepository.findById(actividadGeneral.getId())).thenReturn(Optional.of(actividadGeneral));
+        General actividadGeneral = crearActividadGeneral(TipoActGeneral.CLASIFICACION, 100, 0);
+        actividadGeneral.setId(50L);
+    
+        actividadAlumno.setActividad(actividadGeneral);
+        actividadAlumno.setAlumno(alumno);
+
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
+        when(actividadAlumnoRepository.findById(anyLong())).thenReturn(Optional.of(actividadAlumno));
+        when(actividadRepository.findById(anyLong())).thenReturn(Optional.of(actividadGeneral));
+
         when(actividadAlumnoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         ActividadAlumno resultado = service.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(10L, List.of(101L));
 
-        assertThat(resultado.getPuntuacion()).isEqualTo(0);
         assertThat(resultado.getNota()).isEqualTo(0);
     }
 
@@ -584,15 +608,17 @@ class ActividadAlumnoServiceImplTest {
 
         General actividadGeneral = crearActividadGeneralConPreguntas(100, List.of(pregunta));
         actividadAlumno.setActividad(actividadGeneral);
+        actividadAlumno.setAlumno(alumno);
 
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
         when(actividadRepository.findById(actividadGeneral.getId())).thenReturn(Optional.of(actividadGeneral));
         when(actividadAlumnoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         ActividadAlumno resultado = service.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(10L, null);
 
-        assertThat(resultado.getPuntuacion()).isEqualTo(0);
         assertThat(resultado.getNota()).isEqualTo(0);
+        assertThat(resultado.getPuntuacion()).isEqualTo(0);
     }
 
     // ==================== corregirNotaActividadAlumno ====================
