@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.actividad.tablero.dto.TableroDTO;
 import com.cerebrus.actividad.tablero.dto.TableroRequest;
-import com.cerebrus.exceptions.ResourceNotFoundException;
 
 import jakarta.validation.Valid;
 

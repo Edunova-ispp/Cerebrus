@@ -22,6 +22,7 @@ import com.cerebrus.actividad.general.dto.GeneralTestDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestMaestroDTO;
 import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
@@ -155,16 +156,38 @@ public class GeneralServiceImpl implements GeneralService {
     @Override
     @Transactional(readOnly = true)
     public General readActividad(Long id) {
+        Usuario current = usuarioService.findCurrentUser();
         Optional<General> general = generalRepository.findByIdWithPreguntas(id);
         if (general.isEmpty()) {
             throw new ResourceNotFoundException("Actividad no encontrada");
         }
-        return general.get();
+        List<Inscripcion> inscripciones = general.get().getTema().getCurso().getInscripciones();
+        if(current instanceof Alumno) {
+            for (Inscripcion inscripcion : inscripciones) {
+                if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                    return general.get(); 
+                }
+            }
+            throw new AccessDeniedException("La actividad que buscas pertenece a un curso al que no estás inscrito");
+        } else if(current instanceof Maestro) {
+            if (general.get().getTema() != null && !general.get().getTema().getCurso().getMaestro().getId().equals(current.getId())) {
+                throw new AccessDeniedException("Solo el maestro del curso puede acceder a esta actividad");
+            } else {
+                return general.get();
+            }
+        } else {
+            throw new AccessDeniedException("No puedes obtener una actividad si no eres un alumno o un maestro");
+        }
     }
 
     @Override
     @Transactional(readOnly = true)
     public GeneralTestDTO readTipoTest(Long id) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("No tienes permiso para acceder a esta actividad");
+        }
+
         General general = generalRepository.findByIdWithPreguntas(id)
             .orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
 
@@ -180,18 +203,29 @@ public class GeneralServiceImpl implements GeneralService {
             return new PreguntaDTO(pregunta.getId(), pregunta.getPregunta(), pregunta.getImagen(), respuestasDTO);
         }).toList();
 
-        return new GeneralTestDTO(
-            general.getId(), general.getTitulo(), general.getDescripcion(),
-            general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
-            general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
-            general.getTema() == null ? null : general.getTema().getId(),
-            preguntasDTO
-        );
+        List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();
+        for (Inscripcion inscripcion : inscripciones) {
+            if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                return new GeneralTestDTO(
+                        general.getId(), general.getTitulo(), general.getDescripcion(),
+                        general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
+                        general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
+                        general.getTema() == null ? null : general.getTema().getId(),
+                        preguntasDTO
+                    );
+            }
+        }
+        throw new AccessDeniedException("La actividad que buscas pertenece a un curso al que no estás inscrito");
     }
 
     @Override
     @Transactional(readOnly = true)
     public GeneralCartaDTO readTipoCarta(Long id) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("No tienes permiso para acceder a esta actividad");
+        }
+
         General general = generalRepository.findByIdWithPreguntas(id)
             .orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
 
@@ -207,13 +241,19 @@ public class GeneralServiceImpl implements GeneralService {
             return new PreguntaDTO(pregunta.getId(), pregunta.getPregunta(), pregunta.getImagen(), respuestasDTO);
         }).toList();
 
-        return new GeneralCartaDTO(
-            general.getId(), general.getTitulo(), general.getDescripcion(),
-            general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
-            general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
-            general.getTema() == null ? null : general.getTema().getId(),
-            preguntasDTO
-        );
+        List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();
+        for (Inscripcion inscripcion : inscripciones) {
+            if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                return new GeneralCartaDTO(
+                    general.getId(), general.getTitulo(), general.getDescripcion(),
+                    general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
+                    general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
+                    general.getTema() == null ? null : general.getTema().getId(),
+                    preguntasDTO
+                );
+            }
+        }
+        throw new AccessDeniedException("La actividad que buscas pertenece a un curso al que no estás inscrito");
     }
 
     @Override
@@ -293,40 +333,40 @@ public class GeneralServiceImpl implements GeneralService {
     public General updateActGeneral(Long id, String titulo, String descripcion, Integer puntuacion, 
     Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Long temaId) {
     
-    Usuario u = usuarioService.findCurrentUser();
-    if (!(u instanceof Maestro)) {
-        throw new AccessDeniedException("Solo un maestro puede actualizar actividades");
-    }
-    
-    General actividad = generalRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
+        Usuario u = usuarioService.findCurrentUser();
+        if (!(u instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede actualizar actividades");
+        }
+        
+        General actividad = generalRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
 
-    if (!actividad.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
-        throw new AccessDeniedException("Solo el maestro del curso puede actualizar esta actividad");
-    }
-    
-    actividad.setTitulo(titulo);
-    actividad.setDescripcion(descripcion);
-    actividad.setPuntuacion(puntuacion);
-    
-    boolean visible = (respVisible != null && respVisible);
-    actividad.setRespVisible(visible);
-    
-    if (!visible || comentariosRespVisible == null || comentariosRespVisible.trim().isEmpty()) {
-        actividad.setComentariosRespVisible(null);
-    } else {
-        actividad.setComentariosRespVisible(comentariosRespVisible.trim());
-    }
+        if (!actividad.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede actualizar esta actividad");
+        }
+        
+        actividad.setTitulo(titulo);
+        actividad.setDescripcion(descripcion);
+        actividad.setPuntuacion(puntuacion);
+        
+        boolean visible = (respVisible != null && respVisible);
+        actividad.setRespVisible(visible);
+        
+        if (!visible || comentariosRespVisible == null || comentariosRespVisible.trim().isEmpty()) {
+            actividad.setComentariosRespVisible(null);
+        } else {
+            actividad.setComentariosRespVisible(comentariosRespVisible.trim());
+        }
 
-    actividad.setVersion(version + 1);
-    actividad.setPosicion(posicion);
+        actividad.setVersion(version + 1);
+        actividad.setPosicion(posicion);
 
-    Tema tema = temaRepository.findById(temaId)
-        .orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
-    actividad.setTema(tema);
-    
-    return actividad;
-}
+        Tema tema = temaRepository.findById(temaId)
+            .orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
+        actividad.setTema(tema);
+        
+        return actividad;
+    }
 
     @Override
     @Transactional
@@ -490,8 +530,8 @@ public class GeneralServiceImpl implements GeneralService {
     @Override
     @Transactional
     public GeneralClasificacionDTO readTipoClasificacion(Long id) {
-        Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Alumno)) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
             throw new AccessDeniedException("Solo un alumno puede leer actividades tipo clasificación");
         }
 
@@ -527,13 +567,19 @@ public class GeneralServiceImpl implements GeneralService {
             preguntasDTO.add(new PreguntaDTO(p.getId(), p.getPregunta(), p.getImagen(), asignadas));
         }
 
-        return new GeneralClasificacionDTO(
-            general.getId(), general.getTitulo(), general.getDescripcion(),
-            general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
-            general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
-            general.getTema() == null ? null : general.getTema().getId(),
-            preguntasDTO
-        );
+        List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();
+        for (Inscripcion inscripcion : inscripciones) {
+            if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                return new GeneralClasificacionDTO(
+                    general.getId(), general.getTitulo(), general.getDescripcion(),
+                    general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
+                    general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
+                    general.getTema() == null ? null : general.getTema().getId(),
+                    preguntasDTO
+                );
+            }
+        }
+        throw new AccessDeniedException("La actividad que buscas pertenece a un curso al que no estás inscrito");
     }
 
     @Override
@@ -613,22 +659,24 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
     @Transactional(readOnly = true)
     public CrucigramaDTO readTipoCrucigrama(Long id) {
         General crucigrama = generalRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Crucigrama no encontrado"));
-            Usuario u = usuarioService.findCurrentUser();
-            if (u instanceof Maestro) {
-                Maestro maestro = (Maestro) u;
-                if (!crucigrama.getTema().getCurso().getMaestro().getId().equals(maestro.getId())) {
-                    throw new AccessDeniedException("No tienes permiso para acceder a este crucigrama");
-                }
+        Usuario current = usuarioService.findCurrentUser();
+        if (current instanceof Maestro) {
+            Maestro maestro = (Maestro) current;
+            if (!crucigrama.getTema().getCurso().getMaestro().getId().equals(maestro.getId())) {
+                throw new AccessDeniedException("No tienes permiso para acceder a este crucigrama");
             }
-            else if (u instanceof Alumno) {
-                Alumno alumno = (Alumno) u;
-                if (!crucigrama.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
-                    throw new AccessDeniedException("No tienes permiso para acceder a este crucigrama");
-                }
-            }
-
-            
             return CrucigramaDTO.fromEntity(crucigrama);
+        }
+        else if (current instanceof Alumno) {
+            Alumno alumno = (Alumno) current;
+            if (!crucigrama.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
+                throw new AccessDeniedException("No tienes permiso para acceder a este crucigrama");
+            }
+            return CrucigramaDTO.fromEntity(crucigrama);
+        }
+        else {
+            throw new AccessDeniedException("Solo un usuario logueado como alumno o maestro puede obtener una actividad de tipo crucigrama");
+        }
     }
 
     @Override
@@ -725,6 +773,10 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
     @Override
     @Transactional(readOnly = true)
     public GeneralAbiertaAlumnoDTO readTipoAbierta(Long id) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede leer actividades tipo abierta");
+        }
         General general = generalRepository.findByIdWithPreguntas(id)
             .orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
 
@@ -735,6 +787,11 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         List<PreguntaAlumnoDTO> preguntasDTO = general.getPreguntas().stream()
             .map(pregunta -> new PreguntaAlumnoDTO(pregunta.getId(), pregunta.getPregunta(), pregunta.getImagen()))
             .toList();
+
+        Alumno alumno = (Alumno) current;
+        if (!general.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
+            throw new AccessDeniedException("No tienes permiso para acceder a esta actividad");
+        }
 
         return new GeneralAbiertaAlumnoDTO(
             general.getId(), general.getTitulo(), general.getDescripcion(),

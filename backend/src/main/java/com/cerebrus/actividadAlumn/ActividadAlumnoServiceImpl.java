@@ -69,6 +69,13 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     @Transactional
     public ActividadAlumno crearActividadAlumno(Integer puntuacion, LocalDateTime fechaInicio,
         LocalDateTime fechaFin, Integer nota, Integer numAbandonos, Long alumnoId, Long actId) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede crear una actividad alumno");
+        }
+        if (alumnoId == null || !alumnoId.equals(current.getId())) {
+            throw new AccessDeniedException("No puedes crear una ActividadAlumno para otro alumno");
+        }
 
         // Idempotente: si ya existe la pareja (alumno, actividad), devolvemos la existente.
         Optional<ActividadAlumno> existing = actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumnoId, actId);
@@ -104,6 +111,9 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         // No debe lanzar error si no existe.
         try {
             Usuario current = usuarioService.findCurrentUser();
+            if (!(current instanceof Alumno)) {
+                throw new AccessDeniedException("Solo un alumno puede comprobar si una actividad alumno es suya");
+            } 
             if (current == null || current.getId() == null) {
                 return 0;
             }
@@ -131,6 +141,14 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     @Transactional
     public void deleteActividadAlumno(Long id) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede eliminar una actividad alumno");
+        }
+        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
+            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes eliminar una ActividadAlumno que no es tuya");
+        }
         actividadAlumnoRepository.delete(actividadAlumno);
     }
 
@@ -147,7 +165,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
         if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
             || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
-            throw new AccessDeniedException("No puedes modificar una ActividadAlumno que no es tuya");
+            throw new AccessDeniedException("No puedes abandonar una ActividadAlumno que no es tuya");
         }
 
         // Si ya está acabada, no contamos abandono.
@@ -195,6 +213,14 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     @Transactional
     public ActividadAlumno corregirActividadAlumnoAutomaticamente(Long id, List<Long> respuestasIds) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede enviar a ser corregida automáticamente una actividad alumno");
+        }
+        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
+            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes enviar a una corrección automática una Actividad Alumno que no es tuya");
+        }
         Actividad actividad = actividadAlumno.getActividad();
         LocalDateTime finalActividad = LocalDateTime.now();
         actividadAlumno.setFechaFin(finalActividad);
@@ -470,6 +496,14 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     @Override  
     public ActividadAlumno corregirActividadAlumnoAutomaticamenteGeneralClasificacion(Long actividadAlumnoId, List<Long> respuestasIds) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actividadAlumnoId).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede enviar a ser corregida automáticamente una actividad alumno de clasificación");
+        }
+        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
+            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes enviar a una corrección automática una Actividad Alumno de clasificación que no es tuya");
+        }
     
         General actividadGeneral = (General) actividadRepository.findById(actividadAlumno.getActividad().getId()).orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
         int numPreguntasTotales = actividadGeneral.getPreguntas().size();    
