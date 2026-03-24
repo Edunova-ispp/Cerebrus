@@ -25,6 +25,7 @@ export interface TestFormInitialValues {
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly version: number;
+  readonly temaId?: number;
   readonly preguntas?: readonly TestFormInitialPregunta[];
 }
 
@@ -81,7 +82,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
   const navigate = useNavigate();
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
-  const temaId = temaIdProp ?? params.temaId;
+  const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
   useEffect(() => {
     if (!initialValues) return;
@@ -178,7 +179,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
           return `La opción ${oi + 1} de la pregunta ${qi + 1} está vacía`;
       }
       if (!q.options.some((o) => o.correcta))
-        return `Marca la respuesta correcta en la pregunta ${qi + 1}`;
+        return `Una de las respuestas debe ser marcada como correcta`;
     }
 
     if (mode === 'edit' && !generalId) return 'Falta el id de la actividad a editar';
@@ -372,8 +373,6 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
 
   return (
     <form onSubmit={handleSubmit} className="tf-form">
-      {error && <p className="ca-text tf-error">{error}</p>}
-
       <GenerarIAModal
         tipoActividad="TEST"
         open={iaModalOpen}
@@ -381,7 +380,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
         onResult={handleIAResult}
       />
 
-      {/* ── TOP: Metadata ── */
+      {/* ── TOP: Metadata ── */}
       <div className="tf-header">
         <div className="tf-col">
           <div>
@@ -474,7 +473,6 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
         </div>
       </div>
 
-    }
       <div className="tf-questions">
           <p className="tf-help">
             Añade las preguntas y opciones. Marca cuál es la correcta con <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
@@ -552,9 +550,14 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
         </div>
 
       <div className="ca-form-footer">
-        <button className="ca-btn-guardar" type="submit" disabled={loading}>
-          {loading ? 'Guardando...' : 'Guardar'}
-        </button>
+        <div className="tf-footer-stack">
+          <button className="ca-btn-guardar" type="submit" disabled={loading}>
+            {loading ? 'Guardando...' : 'Guardar'}
+          </button>
+          {error && <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+            {error}
+          </p>}
+        </div>
       </div>
     </form>
   );

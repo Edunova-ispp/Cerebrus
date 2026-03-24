@@ -49,7 +49,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
     const navigate = useNavigate();
     const params = useParams<{ id: string; temaId: string }>();
     const cursoId = cursoIdProp ?? params.id;
-    const temaId = temaIdProp ?? params.temaId;
+    const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
     // ── Load initial values ───────────────────────────────────────────────
     useEffect(() => {

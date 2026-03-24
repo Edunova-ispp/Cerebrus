@@ -11,6 +11,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "respuesta_maestro")
@@ -20,15 +22,18 @@ public class RespuestaMaestro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(nullable = false, columnDefinition = "TEXT")
     private String respuesta;
 
     private String imagen;
 
+    @NotNull
     @Column(nullable = false)
     private Boolean correcta;
 
     //Relaciones
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pregunta_id", nullable = false)
     private Pregunta pregunta;

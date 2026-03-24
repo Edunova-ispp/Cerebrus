@@ -107,8 +107,9 @@ public class ActividadServiceImpl implements ActividadService {
         Integer maxPosicion = actividadRepository.findMaxPosicionByTemaId(temaId);
         Integer nuevaPosicion = (maxPosicion != null) ? maxPosicion + 1 : 1;
 
-        Actividad actividad = new General(titulo, descripcion, 0, imagen, 
-            false, nuevaPosicion, 1, tema, TipoActGeneral.TEORIA);
+        // Las actividades de teoría no aportan puntuación, pero el campo requiere mínimo 1 por validación
+        Actividad actividad = new General(titulo, descripcion, 1, imagen, 
+        false, nuevaPosicion, 1, tema, TipoActGeneral.TEORIA);
 
         return actividadRepository.save(actividad);
     }

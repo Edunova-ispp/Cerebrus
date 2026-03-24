@@ -23,6 +23,7 @@ export interface ClasificacionFormInitialValues {
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly version: number;
+  readonly temaId?: number;
   readonly preguntas?: readonly ClasificacionFormInitialPregunta[];
 }
 
@@ -75,7 +76,7 @@ const [showIAModal, setShowIAModal] = useState(false);
   const navigate = useNavigate();
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
-  const temaId = temaIdProp ?? params.temaId;
+  const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
   useEffect(() => {
     if (!initialValues) return;
@@ -320,7 +321,7 @@ const [showIAModal, setShowIAModal] = useState(false);
       }
       if (onDone) onDone(); else navigate(`/cursos/${cursoId}`);
     } catch (err) {
-      setError('Error al guardar la actividad');
+      setError(err instanceof Error ? err.message : 'Error al guardar la actividad');
     } finally {
       setLoading(false);
     }

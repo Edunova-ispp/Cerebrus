@@ -175,6 +175,7 @@
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
+  text-align: center; /* <-- Añade esto */
   transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
 }
 

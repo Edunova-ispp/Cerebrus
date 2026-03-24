@@ -153,7 +153,7 @@ export default function MisCursos() {
                   key={curso.id}
                   curso={curso}
                   isMaestro={isMaestro}
-                  onToggleVisibilidad={handleToggleVisibilidad}
+                  onToggleVisibilidad={isMaestro ? handleToggleVisibilidad: undefined}
                   onEliminar={isMaestro ? handleEliminar : undefined}
                   onCardClick={() => navigate(`/cursos/${curso.id}`, { state: { curso } })}
                 />
