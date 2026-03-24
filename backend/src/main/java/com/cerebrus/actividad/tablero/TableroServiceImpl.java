@@ -1,6 +1,7 @@
 package com.cerebrus.actividad.tablero;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
 import com.cerebrus.actividadAlumn.ActividadAlumnoService;
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
 import com.cerebrus.respuestaAlumn.RespuestaAlumno;
@@ -111,15 +113,22 @@ public class TableroServiceImpl implements TableroService {
     @Transactional(readOnly = true)
     public TableroDTO getTablero(Long tableroId) {
         Tablero tablero = tableroRepository.findById(tableroId).orElseThrow(() -> new ResourceNotFoundException("Tablero no encontrado"));
-        Usuario u = usuarioService.findCurrentUser();
-        if (u instanceof Maestro) {
-            Maestro maestro = (Maestro) u;
+        Usuario current = usuarioService.findCurrentUser();
+        if (current instanceof Maestro) {
+            Maestro maestro = (Maestro) current;
             if (!tablero.getTema().getCurso().getMaestro().getId().equals(maestro.getId())) {
                 throw new AccessDeniedException("No tienes permiso para acceder a este tablero");
             }
+            return TableroDTO.fromEntity(tablero);
+        }
+        List<Inscripcion> inscripciones = tablero.getTema().getCurso().getInscripciones();
+        for (Inscripcion inscripcion : inscripciones) {
+            if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                return TableroDTO.fromEntity(tablero); 
+            }
         }
         // Alumnos can access tablero data to play the activity
-        return TableroDTO.fromEntity(tablero);
+        throw new AccessDeniedException("La actividad que buscas pertenece a un curso al que no estás inscrito");
     }
 
     @Override

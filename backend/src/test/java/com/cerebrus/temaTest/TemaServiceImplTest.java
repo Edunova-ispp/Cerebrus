@@ -208,6 +208,7 @@ class TemaServiceImplTest {
 
     @Test
     void obtenerTemaPorId_existente_retornaTema() {
+        when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(temaRepository.findById(100L)).thenReturn(Optional.of(tema));
 
         Tema resultado = temaService.obtenerTemaPorId(100L);
