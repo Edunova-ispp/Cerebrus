@@ -50,6 +50,8 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
     if (!cursoId) return 'Falta el id del curso en la URL';
+    if (!descripcion.trim()) return 'La descripción es requerida en una actividad de teoría';
+
     return null;
   };
 
