@@ -404,6 +404,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               rows={3}
+              style={{ resize: 'vertical' }}
               placeholder="Descripción opcional"
             />
           </div>
