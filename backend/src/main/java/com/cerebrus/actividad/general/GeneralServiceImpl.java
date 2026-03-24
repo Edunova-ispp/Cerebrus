@@ -618,24 +618,25 @@ public class GeneralServiceImpl implements GeneralService {
     }
 
     @Override
-    @Transactional
-    public General crearTipoAbierta(String titulo, String descripcion, Integer puntuacion, Long temaId, 
-        Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId) {
-        
-        Usuario usuario = usuarioService.findCurrentUser();
-        if(!(usuario instanceof Maestro)){
-            throw new AccessDeniedException("Solo un maestro puede crear actividades");
-        }
-        
-        if (preguntasId == null || preguntasId.isEmpty()) {
-            throw new IllegalArgumentException("Debe proporcionar al menos una pregunta");
-        }
-        
+@Transactional
+public General crearTipoAbierta(String titulo, String descripcion, Integer puntuacion, Long temaId, 
+    Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId) {
+    
+    Usuario usuario = usuarioService.findCurrentUser();
+    if(!(usuario instanceof Maestro)){
+        throw new AccessDeniedException("Solo un maestro puede crear actividades");
+    }
+    
+    // ── Se eliminan las validaciones de preguntasId vacío ──
+    // El frontend crea primero la actividad y luego añade las preguntas
+
+    General tipoAbierta = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
+    
+    if (preguntasId != null && !preguntasId.isEmpty()) {
         if (preguntasId.size() > 5) {
             throw new IllegalArgumentException("Las actividades de tipo ABIERTA no pueden tener más de 5 preguntas. Usted intenta crear " + preguntasId.size() + " preguntas");
         }
-        
-        General tipoAbierta = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
+
         List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
         
         if(preguntas.size() != preguntasId.size()){
@@ -658,9 +659,11 @@ public class GeneralServiceImpl implements GeneralService {
         }
         
         tipoAbierta.setPreguntas(preguntas);
-        tipoAbierta.setTipo(TipoActGeneral.ABIERTA);
-        return generalRepository.save(tipoAbierta);
     }
+    
+    tipoAbierta.setTipo(TipoActGeneral.ABIERTA);
+    return generalRepository.save(tipoAbierta);
+}
 
     @Override
     @Transactional(readOnly = true)
@@ -718,44 +721,29 @@ public class GeneralServiceImpl implements GeneralService {
         );
     }
 
-    @Override
-    @Transactional
-    public General updateTipoAbierta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
-        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId) {
-     
-        Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Maestro)) {
-            throw new AccessDeniedException("Solo un maestro puede actualizar actividades tipo abierta");
-        }
-
-        General tipoAbierta = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
-            posicion, version, temaId);
-        
-        if(preguntasId != null){
-            List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
-            if(preguntas.size() != preguntasId.size()){
-                throw new ResourceNotFoundException("Alguna de las preguntas no existe");
-            }
-            
-            Integer num = 1;
-            for(Pregunta pregunta : preguntas){
-                if (pregunta.getRespuestasMaestro().size() != 1){
-                    throw new IllegalArgumentException("La pregunta " + num + " no tiene exactamente una respuesta");
-                }
-                num++;
-            }
-            
-            tipoAbierta.getPreguntas().clear();
-            tipoAbierta.getPreguntas().addAll(preguntas);
-        } else {
-            throw new IllegalArgumentException("La lista de preguntas no puede ser null");
-        }
-        
-        if(tipoAbierta.getTipo() != TipoActGeneral.ABIERTA){
-            throw new IllegalArgumentException("La actividad no es de tipo abierta");
-        }
-        
-        return generalRepository.save(tipoAbierta);
+@Override
+@Transactional
+public General updateTipoAbierta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
+    String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId) {
+ 
+    Usuario u = usuarioService.findCurrentUser();
+    if (!(u instanceof Maestro)) {
+        throw new AccessDeniedException("No autorizado");
     }
 
+    // Actualizamos los datos generales
+    General tipoAbierta = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
+        posicion, version, temaId);
+    
+    // 🔥 FORZAMOS EL TIPO AQUÍ
+    tipoAbierta.setTipo(TipoActGeneral.ABIERTA); 
+    
+    if(preguntasId != null){
+        List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
+        tipoAbierta.getPreguntas().clear();
+        tipoAbierta.getPreguntas().addAll(preguntas);
+    }
+    
+    return generalRepository.save(tipoAbierta);
+}
 }
