@@ -4,7 +4,7 @@ import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 import maguitoImg from '../../assets/props/maguito.png';
-import mapaIcon from '../../assets/icons/mapa.svg';
+import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
 import './TeoriaAlumno.css';
 
@@ -28,6 +28,11 @@ export default function TeoriaAlumno() {
   const [isFlipped, setIsFlipped] = useState(false); 
 
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+  const teoriaImageSrc = teoria?.imagen
+    ? (/^https?:\/\//i.test(teoria.imagen) || teoria.imagen.startsWith('data:')
+        ? teoria.imagen
+        : `${apiBase}${teoria.imagen.startsWith('/') ? '' : '/'}${teoria.imagen}`)
+    : null;
 
   useEffect(() => {
     if (!actividadId) return;
@@ -110,12 +115,7 @@ export default function TeoriaAlumno() {
 
         {teoria && (
           <>
-            <div className="ta-top">
-              <button className="ta-map-btn" type="button" onClick={() => navigate(-1)}>
-                <img src={mapaIcon} alt="Mapa" className="ta-map-icon" />
-                <span>Mapa</span>
-              </button>
-            </div>
+            <ActivityHeader title={teoria.titulo} />
 
             <div 
               className={`ta-flashcard ${isFlipped ? 'flipped' : ''}`} 
@@ -127,12 +127,12 @@ export default function TeoriaAlumno() {
                 <div className="ta-card-front">
                   <div className="ta-card-content">
                     <h1 className="ta-title">{teoria.titulo}</h1>
-                    {teoria.imagen ? (
-                      <img src={teoria.imagen} alt="Ilustración" className="ta-main-img" />
+                    {teoriaImageSrc ? (
+                      <img src={teoriaImageSrc} alt="Ilustración" className="ta-main-img" />
                     ) : (
                       <img src={maguitoImg} alt="Maguito" className="ta-maguito-placeholder" />
                     )}
-                    <p className="ta-hint">PULSA PARA LEER LA LECCIÓN</p>
+                    <p className="teoria-hint">PULSA PARA LEER LA LECCIÓN</p>
                   </div>
                 </div>
 

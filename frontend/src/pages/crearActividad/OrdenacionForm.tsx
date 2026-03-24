@@ -14,6 +14,7 @@ export interface OrdenacionFormInitialValues {
   readonly respVisible: boolean;
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
+  readonly temaId?: number;
   readonly valores: string[];
 }
 
@@ -52,7 +53,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
   const navigate = useNavigate();
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
-  const temaId = temaIdProp ?? params.temaId;
+  const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
   useEffect(() => {
     if (!initialValues) return;
@@ -90,6 +91,10 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       setError('La puntuación debe ser un número válido');
       return;
     }
+    if (puntuacionNum <= 0) {
+      setError('La puntuación debe ser un número mayor a 0');
+      return;
+    }
 
     if (!temaId) {
       setError('Falta el id del tema en la URL');
@@ -112,8 +117,8 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       return;
     }
 
-    if (valores.length === 0) {
-      setError('Debes añadir al menos un valor');
+    if (valores.length < 2) {
+      setError('Debes añadir al menos dos valores');
       return;
     }
 
@@ -186,6 +191,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Título de la actividad"
+              required
             />
           </div>
           <div>
@@ -210,6 +216,8 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
               className="of-input of-input-sm"
               value={puntuacion}
               onChange={(e) => setPuntuacion(e.target.value)}
+              min="1"
+              required
             />
           </div>
 

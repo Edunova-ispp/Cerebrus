@@ -92,7 +92,7 @@ class ActividadServiceImplTest {
 
         assertThat(guardada.getTitulo()).isEqualTo("Título");
         assertThat(guardada.getDescripcion()).isEqualTo("Desc");
-        assertThat(guardada.getPuntuacion()).isEqualTo(0);
+        assertThat(guardada.getPuntuacion()).isEqualTo(1);
         assertThat(guardada.getImagen()).isNull();
         assertThat(guardada.getRespVisible()).isFalse();
         assertThat(guardada.getPosicion()).isEqualTo(1);

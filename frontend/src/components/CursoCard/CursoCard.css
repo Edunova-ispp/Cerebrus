@@ -54,6 +54,10 @@
 .curso-card:not(:has(.curso-card__maestro-info)) .curso-card__footer {
   border-bottom-left-radius: 14px;
   border-bottom-right-radius: 14px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .curso-card:nth-child(odd) .curso-card__footer {

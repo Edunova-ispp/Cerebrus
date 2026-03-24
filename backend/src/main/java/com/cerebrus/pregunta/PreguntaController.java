@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cerebrus.pregunta.dto.PreguntaRequest;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import jakarta.validation.Valid;
 
 
@@ -31,6 +34,7 @@ public class PreguntaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Long> crearPregunta(@RequestBody @Valid PreguntaRequest request) {
         Pregunta preguntaCreada = preguntaService.crearPregunta(
             request.getPregunta(),
@@ -49,6 +53,7 @@ public class PreguntaController {
 
     @PutMapping("/update/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> updatePregunta(@PathVariable Long id, @RequestBody @Valid Pregunta pregunta) {
         preguntaService.updatePregunta(
             id,
@@ -60,6 +65,7 @@ public class PreguntaController {
 
     @DeleteMapping("/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> deletePregunta(@PathVariable Long id) {
         preguntaService.deletePregunta(id);
         return ResponseEntity.noContent().build();

@@ -6,8 +6,7 @@
 }
 
 .tf-error {
-  color: #c0392b;
-  font-weight: bold;
+  color: #c0392b !important;
   margin-top: 0;
   margin-bottom: 12px;
   font-size: 0.95rem;

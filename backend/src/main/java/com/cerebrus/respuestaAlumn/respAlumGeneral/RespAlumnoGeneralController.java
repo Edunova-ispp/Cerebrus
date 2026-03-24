@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +18,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiertaRequest;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiertaResponse;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralCreateResponse;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralRequest;
 
 import jakarta.validation.Valid;
 
@@ -57,18 +60,23 @@ public class RespAlumnoGeneralController {
     // La nota final y la puntuacion de esta entrega es la entrada -1 en el HashMap
     @PostMapping("/crucigrama/{crucigramaId}")
     public ResponseEntity<HashMap<Long,String>> corregirCrucigrama(@RequestBody LinkedHashMap<Long, String> respuestas, @PathVariable Long crucigramaId) {
-        try {
+        
         if(respuestas.size() > 5 || respuestas.size() == 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();}
+            throw new IllegalArgumentException("El crucigrama debe tener entre 1 y 5 preguntas");}
         HashMap<Long, String> resultado = respAlumnoGeneralService.corregirCrucigrama(respuestas, crucigramaId);
         return new ResponseEntity<>(resultado, HttpStatus.OK);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        
     }
-    
+
+    @PostMapping("/abierta")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<EvaluacionActividadAbiertaResponse> evaluarActividadAbierta(@RequestBody @Valid EvaluacionActividadAbiertaRequest request) {
+        
+            EvaluacionActividadAbiertaResponse respuesta = respAlumnoGeneralService.corregirActividadAbierta(request);
+            return new ResponseEntity<>(respuesta, HttpStatus.CREATED);
+        
+    }
+
 
 // ESTOS MÉTODOS QUEDAN DEFINIDOS POR SI ES NECESARIO UTILIZARLOS, PERO PARA LA FEATURE 35 NO SON NECESARIOS
 

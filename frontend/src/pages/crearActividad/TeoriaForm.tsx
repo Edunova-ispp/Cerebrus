@@ -11,6 +11,7 @@ export interface TeoriaFormInitialValues {
   readonly descripcion: string;
   readonly imagen: string;
   readonly posicion: number;
+  readonly temaId?: number;
 }
 
 interface Props {
@@ -34,7 +35,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
   const navigate = useNavigate();
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
-  const temaId = temaIdProp ?? params.temaId;
+  const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
   useEffect(() => {
     console.log("Intial values", initialValues);
@@ -46,6 +47,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
 
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
+    if (!descripcion.trim()) return 'El contenido teórico es requerido';
 
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
@@ -77,6 +79,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
             imagen: imagen.trim(),
+            temaId: temaId ? Number.parseInt(temaId, 10) : null,
           }),
         });
       } else {
@@ -89,7 +92,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
           body: JSON.stringify({
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
-            imagen: '',
+            imagen: imagen.trim(),
             temaId: temaIdNum,
           }),
         });
@@ -122,7 +125,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
 
       <div className="of-meta-section" style={{ flexDirection: 'column' }}>
         <div>
-          <label className="of-label" htmlFor="teoria-titulo">Título de la Lección</label>
+          <label className="of-label" htmlFor="teoria-titulo">Título de la Lección *</label>
           <input
             type="text"
             id="teoria-titulo"
@@ -130,10 +133,11 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
             placeholder="Ej: Introducción a la materia"
+            required
           />
         </div>
         <div>
-          <label className="of-label" htmlFor="teoria-descripcion">Contenido Teórico</label>
+          <label className="of-label" htmlFor="teoria-descripcion">Contenido Teórico *</label>
           <textarea
             id="teoria-descripcion"
             className="of-textarea"
@@ -141,6 +145,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
             onChange={(e) => setDescripcion(e.target.value)}
             rows={10}
             placeholder="Escribe aquí el contenido..."
+            required
           />
         </div>
         <div>

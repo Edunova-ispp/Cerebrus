@@ -22,7 +22,31 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
   const res = await fetch(`${normalizedPath}`, { ...options, headers });
 
   if (!res.ok) {
-    throw new Error(`${options.method ?? "GET"} ${path} → ${res.status}`);
+    let message = `Error ${res.status}`;
+    try {
+      const body = await res.clone().json();
+      if (body.errors && Array.isArray(body.errors)) {
+        // Spring @Valid: lista de errores de campo
+        const fieldErrors = body.errors
+          .map((e: { field?: string; defaultMessage?: string }) =>
+            e.field ? `${e.field}: ${e.defaultMessage}` : e.defaultMessage
+          )
+          .filter(Boolean);
+        if (fieldErrors.length > 0) message = fieldErrors.join('. ');
+      } else if (body.detail) {
+        message = body.detail;
+      } else if (body.message) {
+        message = body.message;
+      }
+    } catch {
+      // body no era JSON, usar mensaje genérico
+    }
+
+    if (res.status === 403) {
+      message = 'No tienes permisos para realizar esta acción';
+    }
+
+    throw new Error(message);
   }
 
   return res;

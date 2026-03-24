@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cerebrus.comun.enumerados.TamanoTablero;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.tablero.dto.TableroDTO;
+import com.cerebrus.actividad.tablero.dto.TableroRequest;
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
 import com.cerebrus.actividadAlumn.ActividadAlumnoService;
@@ -129,7 +130,7 @@ public class TableroServiceImpl implements TableroService {
         if (u instanceof Maestro) {
             Maestro maestro = (Maestro) u;
             if (!tablero.getTema().getCurso().getMaestro().getId().equals(maestro.getId())) {
-                throw new AccessDeniedException("No tienes permiso para eliminar este tablero");
+                throw new AccessDeniedException("No tienes permiso para eliminar este tablero porque no eres el maestro del curso");
             }
         } else {
             throw new AccessDeniedException("Solo un maestro puede eliminar actividades de tablero");
@@ -145,7 +146,7 @@ public class TableroServiceImpl implements TableroService {
         if (u instanceof Maestro) {
             Maestro maestro = (Maestro) u;
             if (!tableroExistente.getTema().getCurso().getMaestro().getId().equals(maestro.getId())) {
-                throw new AccessDeniedException("No tienes permiso para actualizar este tablero");
+                throw new AccessDeniedException("No tienes permiso para actualizar este tablero porque no eres el maestro del curso");
             }
         } else {
             throw new AccessDeniedException("Solo un maestro puede actualizar actividades de tablero");
