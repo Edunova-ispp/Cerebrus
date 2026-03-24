@@ -126,7 +126,7 @@ class InscripcionServiceImplTest {
 
         assertThatThrownBy(() -> inscripcionService.CrearInscripcion("ABC123"))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessage("401 Unauthorized");
+                .hasMessage("Solo un alumno puede inscribirse en un curso");
 
         verify(inscripcionRepository, never()).save(any());
         verify(cursoRepository, never()).existsByCodigo(any());
