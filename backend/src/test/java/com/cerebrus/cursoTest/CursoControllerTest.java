@@ -135,9 +135,9 @@ class CursoControllerTest {
         when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(10L))
                 .thenThrow(new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos"));
 
-        assertThatThrownBy(() -> estadisticasMaestroController.obtenerPuntosCurso(10L))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("Solo un maestro puede visualizar los puntos de los alumnos");
+        ResponseEntity<HashMap<String, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(10L);
+
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     // Test para verificar que obtenerPuntosCurso retorna 404 cuando el service lanza RuntimeException con mensaje 404
@@ -145,9 +145,9 @@ class CursoControllerTest {
     void obtenerPuntosCurso_cursoNoExiste_retorna404() {
         when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(99L)).thenThrow(new RuntimeException("404 Not Found"));
 
-        assertThatThrownBy(() -> estadisticasMaestroController.obtenerPuntosCurso(99L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("404 Not Found");
+        ResponseEntity<HashMap<String, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(99L);
+
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     // Test para verificar que obtenerPuntosCurso retorna 500 cuando el service lanza una RuntimeException inesperada
@@ -155,9 +155,9 @@ class CursoControllerTest {
     void obtenerPuntosCurso_errorInesperado_retorna500() {
         when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(10L)).thenThrow(new RuntimeException("Error interno"));
 
-        assertThatThrownBy(() -> estadisticasMaestroController.obtenerPuntosCurso(10L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("Error interno");
+        ResponseEntity<HashMap<String, Integer>> respuesta = estadisticasMaestroController.obtenerPuntosCurso(10L);
+
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // -------------------------------------------------------
