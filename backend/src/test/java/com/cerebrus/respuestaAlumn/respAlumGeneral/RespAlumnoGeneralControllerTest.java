@@ -1,4 +1,4 @@
-package com.cerebrus.respuestaAlumnoTest;
+package com.cerebrus.respuestaAlumn.respAlumGeneral;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
