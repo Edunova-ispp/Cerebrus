@@ -222,7 +222,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               rows={3}
-              style={{ width: '100%' }}
+              style={{ width: '100%', resize: 'vertical' }}
               placeholder="Instrucciones para el alumno"
             />
           </div>

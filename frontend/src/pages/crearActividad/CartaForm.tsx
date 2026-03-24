@@ -346,6 +346,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
                 rows={3}
+                style={{ resize: 'vertical' }}
                 placeholder="Descripción opcional"
               />
             </div>
