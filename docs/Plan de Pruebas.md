@@ -11,8 +11,7 @@
    4.2 [Entorno de pruebas](https://claude.ai/chat/11db82c3-6a13-46a7-9697-4c751562e165#42-entorno-de-pruebas)
 5. [Planificación de pruebas](https://claude.ai/chat/11db82c3-6a13-46a7-9697-4c751562e165#5-planificaci%C3%B3n-de-pruebas)
    5.1 [Cobertura de pruebas](https://claude.ai/chat/11db82c3-6a13-46a7-9697-4c751562e165#51-cobertura-de-pruebas)
-   5.2 [Matriz de trazabilidad de historias de usuario](https://claude.ai/chat/11db82c3-6a13-46a7-9697-4c751562e165#52-matriz-de-trazabilidad-de-historias-de-usuario)
-   5.3 [Matriz de trazabilidad entre pruebas e historias de usuario](https://claude.ai/chat/11db82c3-6a13-46a7-9697-4c751562e165#53-matriz-de-trazabilidad-entre-pruebas-e-historias-de-usuario)
+   5.2 [Matriz de trazabilidad entre pruebas e historias de usuario](https://claude.ai/chat/11db82c3-6a13-46a7-9697-4c751562e165#53-matriz-de-trazabilidad-entre-pruebas-e-historias-de-usuario)
 6. [Criterios de aceptación](https://claude.ai/chat/11db82c3-6a13-46a7-9697-4c751562e165#6-criterios-de-aceptaci%C3%B3n)
 7. [Conclusión](https://claude.ai/chat/11db82c3-6a13-46a7-9697-4c751562e165#7-conclusi%C3%B3n)
 
@@ -36,7 +35,7 @@ El alcance de este plan de pruebas incluye:
 * **Pruebas unitarias** : se realizarán para verificar que los componentes individuales del software funcionen correctamente de forma aislada.
 * **Pruebas unitarias de backend** : pruebas de los servicios y repositorios responsables de la lógica de la aplicación, la gestión de usuarios, y el acceso a datos. Se validará que cada método de servicio, repositorio y funcionalidad relacionada con la aplicación (como creación de cursos, creación de actividades, etc.) se comporte correctamente.
 * **Pruebas unitarias de frontend** : se probarán los componentes de la interfaz de usuario, asegurando que las funciones JavaScript y los componentes de React devuelvan los resultados esperados y se comporten correctamente. Esto incluye funciones como login, registro, gestión de los cursos y visualización de las estadísticas.
-* **Pruebas unitarias de interfaz de usuario** : validación de la correcta interacción de los usuarios con la UI, verificando que los componentes visuales respondan adecuadamente a las acciones del usuario.
+* **Pruebas de carga** : se validará el comportamiento de la aplicación frente al flujo de múltiles usuarios utilizandola de manera simultánea. Esto incluirá: al menos 10 profores y 100 alumnos a la vez.
 * **Pruebas de integración** : se enfocarán en verificar que la interacción entre los distintos módulos del sistema sea correcta. Esto incluirá la validación de:
 * La correcta comunicación entre el backend y el frontend, mediante la API y los controladores.
 * La correcta interacción entre las diferentes entidades del sistema.
@@ -227,157 +226,9 @@ Las pruebas se ejecutarán en el entorno de desarrollo local y en el servidor de
 
 La cobertura de pruebas se enfoca en garantizar la máxima cobertura en todos los servicios y controladores del sistema. Se espera alcanzar al menos una cobertura del **70%** en el código del backend y frontend.
 
-### 5.2 Matriz de Trazabilidad de Historias de Usuario
+### 5.2 Matriz de Trazabilidad entre Pruebas e Historias de Usuario
 
-#### 5.2.1 Historias de Usuario - Pantalla Inicial
-
- **HU-01** : Como cliente quiero que en la pantalla inicial de Cerebrus se me muestren tres opciones de entrada a elegir: como aventurero, maestro o dueño, para así poder entrar a secciones concretas dependiendo del rol que se adopte (alumno, maestro u organización, respectivamente).
-
-#### 5.2.2 Historias de Usuario - Centro Dueño (Organización)
-
- **HU-02** : Como centro dueño de la organización quiero poder registrarme introduciendo mi nombre, apellido, correo electrónico y contraseña para poder crearme una cuenta y poder acceder a la plataforma.
-
- **HU-03** : Como centro dueño de la organización quiero iniciar sesión introduciendo mi nombre de usuario y mi contraseña, para poder acceder a mi cuenta de manera rápida, fácil y sencilla.
-
- **HU-04** : Como centro dueño de la organización quiero acceder a una página explicativa donde aparezca la definición de Cerebrus; y a un simulador de planes de suscripción junto con los precios de cada una para entender como beneficia mi herramienta a mi organización y calcular su coste de implementación.
-
- **HU-05** : Como centro dueño de la organización quiero poder elegir entre configurar un plan de pago personalizado o activar una prueba gratuita, para poder decidir como quiero empezar en Cerebrus según mi presupuesto.
-
- **HU-06** : Como centro dueño de la organización quiero configurar los datos básicos de mi centro (nombre, etc.) justo después de activar la suscripción, para establecer la identidad de la organización en la plataforma.
-
- **HU-07** : Como centro dueño de la organización quiero definir el número de maestros, alumnos y cursos que necesito, para crear una organización con características adaptadas a mi centro y conocer el precio final.
-
- **HU-08** : Como centro dueño de la organización quiero dar de alta cuentas de otros maestros de forma individual o mediante la importación de un archivo, para que mi equipo docente pueda acceder a la plataforma.
-
- **HU-09** : Como centro dueño de la organización quiero crear cuentas de estudiantes de forma individual o masiva solicitando solo nombre y apellidos, para darles acceso al contenido educativo sin requerir datos sensibles innecesarios.
-
- **HU-10** : Como centro dueño de la organización quiero poder añadir nuevas cuentas a mi plan de suscripción en cualquier momento del mes, para dar acceso inmediato a nuevos usuarios sin tener que esperar al siguiente ciclo de facturación.
-
- **HU-11** : Como centro dueño de la organización quiero poder eliminar cuentas específicas de mi suscripción en cualquier momento, para dejar de pagar por usuarios que ya no están activos y ajustar mi factura del mes siguiente.
-
- **HU-12** : Como centro dueño de la organización quiero poder eliminar cuentas de maestros y estudiantes de mi organización, para gestionar el acceso y mantener la base de datos de usuarios actualizada.
-
- **HU-13** : Como centro dueño de la organización quiero que el sistema permita la cancelación de la suscripción con reembolso automático dentro de un margen de 6 días tras el cobro, para ofrecer una garantía de satisfacción al cliente y automatizar la gestión de devoluciones sin intervención manual.
-
- **HU-14** : Como centro dueño de la organización quiero poder cerrar mi sesión de forma segura, para evitar que otras personas accedan a mi cuenta en un dispositivo compartido.
-
-#### 5.2.3 Historias de Usuario - Maestro
-
- **HU-15** : Como maestro quiero que al pulsar el botón "¿Eres un Maestro?" desde la pantalla inicial de Cerebrus, se me muestre una ventana de información con todo lo que la aplicación web ofrece para los docentes junto con un botón de inicio de sesión, para así poder dar los primeros pasos con el conocimiento necesario.
-
- **HU-16** : Como maestro quiero que al pulsar el botón de inicio de sesión desde la pantalla de información de Cerebrus, se me redirija a otra pantalla donde se me solicite tanto un nombre de usuario como una contraseña, para así poder usar la cuenta generada automáticamente por el sistema y poder autenticarme.
-
- **HU-17** : Como maestro quiero que una vez que inicie sesión, se me redirija a una página "Mis Cursos", donde pueda visualizar lo siguiente: mis cursos creados hasta el momento, la visibilidad de cada uno de ellos, un botón que me permita crear un nuevo curso, y otro ubicado dentro de una top bar que me permita acceder a mi perfil, para así poder gestionar todos mis cursos y acciones respectivas disponibles.
-
- **HU-18** : Como maestro quiero cambiar mi contraseña una vez iniciada mi sesión desde la pantalla a la que se me redirige al pulsar el botón de "Mi perfil" desde la página "Mis Cursos", para así poder reforzar la seguridad y privacidad de mi cuenta ante cualquier situación.
-
- **HU-19** : Como maestro quiero que al pulsar sobre un curso en la pantalla "Mis Cursos", se muestren los detalles del curso, un botón que te lleve al mapa y otro botón que me lleve a las estadísticas de los usuarios, para así poder acceder fácilmente a cada una de estas funcionalidades dentro de un curso.
-
- **HU-20** : Como maestro quiero activar o desactivar temas y cursos para así modificar la visualización de estos mismos cuando yo crea conveniente.
-
- **HU-21** : Como maestro quiero que al pulsar el botón "Crear curso nuevo" desde la pantalla de "Mis Cursos", se me redirija a otra nueva que me muestre un formulario a rellenar con los siguientes datos del curso a crear: título, descripción, imagen, si se desea que el curso inicialmente sea visible o no para los alumnos, y en caso de responder que sí a esta misma, el código aleatorio para el acceso a dicho curso, para así poder crear un curso nuevo con todos sus datos correctamente.
-
- **HU-22** : Como maestro quiero que, al crear correctamente un curso, se me redirija a una nueva pantalla que contenga todos los temas que componen dicho curso en una side bar, además de mostrar las actividades que conforman cada tema en forma de mapa, donde inicialmente se partirá de forma automática de un único tema, cuyo nombre podré cambiar, y de un mapa con 5 actividades, para así poder tener todo el espacio de desarrollo del curso en una misma pantalla intuitiva.
-
- **HU-23** : Como maestro quiero que, dentro de la pantalla de un determinado curso, se me dé la opción de publicarlo a través de un botón, que, en caso de pulsarlo, me redirija a la pantalla de "Mis Cursos", para así poder visualizar instantáneamente el cambio que se ha producido.
-
- **HU-24** : Como maestro quiero, en la side bar que contiene todos los temas que componen dicho curso, poder cambiar de un tema a otro, además de crear y eliminar el que yo desee, para así poder gestionar los temas con una facilidad e intuición mayor.
-
- **HU-25** : Como maestro quiero que, al pulsar el botón "Crear actividad" desde la página de creación de actividades, se me redirija automáticamente a la pantalla del mapa del tema y se genere un siguiente círculo de actividad en él, para así poder visualizar instantáneamente el cambio que se ha producido en el mapa.
-
- **HU-26** : Como maestro quiero que, al pulsar un icono de los puntos del mapa de actividades, se me redirija a una nueva pantalla donde se me muestren en una side bar los diferentes tipos de actividades a poder crear, junto con el formulario correspondiente a rellenar para cada tipo, para así poder crear diferentes actividades de un tema específico de forma fácil e intuitiva.
-
- **HU-27** : Como maestro quiero que en la pantalla de crear actividad exista un botón que permita generar la actividad con Inteligencia Artificial, a partir de un documento que tendrá que ser subido o bien dando una descripción textual, para así poder automatizar dicha creación.
-
- **HU-28** : Como maestro quiero crear una actividad de clasificación bajo un criterio y de opción múltiple, que me permita definir una lista de la compra con los elementos que deben encontrarse entre varias opciones presentadas como stickers, para que el alumno seleccione aquellos que cumplen el criterio, los introduzca en la bolsa y valide su respuesta.
-
- **HU-29** : Como maestro quiero crear una actividad de pregunta-valor basada en un tablero tipo ajedrez 3x3, cuyo tamaño pueda adaptarse al nivel de dificultad, en la que cada casilla contenga una pregunta u operación, para que el alumno avance un peón por el tablero a otra casilla únicamente cuando responda correctamente a la pregunta de dicha casilla y trate de alcanzar una meta final dada al principio.
-
- **HU-30** : Como maestro quiero crear una actividad de pregunta-valor basada en la subida de una imagen y la definición sobre ella de distintos puntos interactivos a los que pueda asignar una respuesta o valor correcto, para que el alumno complete esos puntos introduciendo la información adecuada y posteriormente valide su trabajo.
-
- **HU-31** : Como maestro quiero crear una actividad de clasificación definiendo dos categorías o criterios principales y una lista de elementos mezclados, para que el alumno desarrolle habilidades de discriminación y organización asignando cada elemento a su grupo correcto.
-
- **HU-32** : Como maestro quiero crear una actividad de un juego de cartas de memoria definiendo pares de elementos relacionados (Pregunta-Respuesta, Concepto-Definición, Operación-Resultado), para que el alumno ejercite su memoria visual y consolide conocimientos.
-
- **HU-33** : Como maestro, quiero crear una actividad donde haya mazos de tarjetas didácticas de doble cara con opciones de temporización, para que los alumnos puedan estudiar visualizando una cara e intentando recordar la información oculta en la otra antes de que se voltee o cambie.
-
- **HU-34** : Como maestro quiero crear una actividad tipo de "respuesta-valor", implementando un crucigrama sobre una temática específica, para que mis alumnos puedan repasar conceptos (matemáticas, lengua, ciencias) de forma lúdica y visual.
-
- **HU-35** : Como maestro quiero crear una actividad de texto libre, concretamente de "Identificación y Corrección de Errores" en la que se le muestre al alumno una frase con fallos intencionados (gramaticales, ortográficos o de datos) seguido de una caja de texto, para que el alumno refuerce su aprendizaje reescribiendo la frase correctamente y reciba una evaluación inmediata (vía IA) o diferida (vía maestro) que le ayude a distinguir el uso correcto del incorrecto.
-
- **HU-36** : Como maestro quiero crear una actividad de tipo ordenación donde se defina una lista de elementos en su orden correcto, para que el sistema se los muestre desordenados al alumno y este deba reconstruir la secuencia lógica, cronológica o sintáctica arrastrando los bloques.
-
- **HU-37** : Como maestro quiero crear una actividad de tipo test con múltiples opciones, definiendo un enunciado y un conjunto cerrado de opciones de respuesta (donde yo redacto tanto la correcta como los distractores), para que el alumno demuestre sus conocimientos seleccionando la opción adecuada.
-
- **HU-39** : Como maestro quiero crear una actividad de tipo pregunta de desarrollo (respuesta abierta) que sean evaluadas automáticamente por una Inteligencia Artificial en una escala del 1 al 10, para que el resultado del alumno se traduzca visualmente en el estado de una "elaboración" (comida cocinada o poción preparada), ofreciendo un feedback inmediato, intuitivo y divertido sobre la calidad de su respuesta.
-
- **HU-40** : Como maestro quiero poder indicar si el alumnado puede ver las respuestas correctas tras realizar una actividad para controlar el nivel de retroalimentación.
-
- **HU-41** : Como maestro quiero poder corregir manualmente las actividades del alumnado para poder evaluar de forma personalizada su desempeño.
-
- **HU-42** : Como maestro quiero visualizar estadísticas generales de mi clase para poder analizar el rendimiento global del curso.
-
- **HU-43** : Como maestro quiero consultar los puntos obtenidos por cada alumno para poder evaluar su progreso individual.
-
- **HU-44** : Como maestro quiero ver el número de actividades realizadas por cada alumno para conocer su nivel de participación.
-
- **HU-45** : Como maestro quiero consultar los fallos y repeticiones en las actividades de cada alumno para detectar dificultades de aprendizaje.
-
- **HU-46** : Como maestro quiero visualizar una gráfica de mejora del alumno con sus notas a lo largo del tiempo para analizar su evolución académica.
-
- **HU-47** : Como maestro quiero conocer el tiempo que cada alumno ha pasado dentro del curso para evaluar su implicación.
-
- **HU-48** : Como maestro quiero ver el tiempo que cada alumno tarda en completar cada actividad para detectar problemas de comprensión o dificultad.
-
- **HU-49** : Como maestro quiero consultar la nota media de la clase en cada actividad para analizar el nivel general de comprensión.
-
- **HU-50** : Como maestro quiero visualizar el tiempo medio empleado en cada actividad para evaluar su nivel de dificultad.
-
- **HU-51** : Como maestro quiero identificar la actividad con mayor y menor nota media para mejorar el diseño del contenido.
-
- **HU-52** : Como maestro quiero consultar la media de puntos del alumnado y su arena correspondiente para conocer el nivel global de la clase.
-
- **HU-53** : Como maestro quiero acceder a estadísticas individuales detalladas desde el perfil de cada alumno para realizar un seguimiento personalizado.
-
- **HU-54** : Como maestro quiero acceder a estadísticas grupales desde el panel del curso para tomar decisiones pedagógicas basadas en datos.
-
- **HU-55** : Como maestro quiero poder cerrar mi sesión para poder dejar de utilizar Cerebrus de manera segura y correcta.
-
-#### 5.2.4 Historias de Usuario - Alumno
-
- **HU-56** : Como alumno quiero que se me proporcione las credenciales con las que poder iniciar sesión para poder acceder al sistema sin necesidad de registrarme.
-
- **HU-57** : Como alumno quiero que, al pulsar el botón de inicio de sesión, se me redirija a otra pantalla donde poder introducir las credenciales proporcionadas, para autenticarme.
-
- **HU-58** : Como alumno quiero poder cambiar mi contraseña una vez dentro del sistema para poder mantener mi seguridad.
-
- **HU-59** : Como alumno quiero poder añadir cursos nuevos mediante un código que se me proporcione para poder acceder a su contenido.
-
- **HU-60** : Como alumno quiero poder acceder a mis diferentes cursos desde la misma pantalla donde los añado para que me sea más sencillo la navegabilidad.
-
- **HU-61** : Como alumno quiero que cuando entre en un curso se me dirija automáticamente a la pantalla de temas para que desde dicha pantalla pueda acceder a los diferentes temas disponibles.
-
- **HU-62** : Como alumno quiero que, una vez seleccionado el tema que quiero realizar, se me lleve al mapa correspondiente para poder realizar las actividades correspondientes del tema.
-
- **HU-63** : Como alumno quiero que, cuando elija una actividad, pueda hacerla desde la interfaz de usuario y, que cuando la finalice, la pueda enviar para que el maestro pueda corregirme y evaluarme.
-
- **HU-64** : Como alumno quiero que los puntos que obtengo salgan de las actividades que realizo en función del tiempo que tarde en realizarlas y los errores que cometa. Dichos puntos los obtendré una vez completada la actividad. Para así hacer evolucionar a mi cerbero y subir de arena.
-
- **HU-65** : Como alumno quiero poder repetir las actividades que ya he realizado con anterioridad para poder repasar mis conocimientos y obtener más puntos.
-
- **HU-66** : Como alumno quiero poder acceder a una pestaña especial dentro de cada uno de mis cursos donde se me muestre la evolución de mi cerbero y mi arena actual para poder ver mi avance personal en función de los puntos que haya conseguido en las actividades.
-
- **HU-67** : Como alumno quiero que mi personaje evolucione y cambie de aspecto automáticamente cuando alcance una cantidad determinada de puntos en una Arena (asignatura/curso), para que mi esfuerzo se vea recompensado visualmente y pueda presumir de mi nivel de experiencia.
-
- **HU-68** : Como alumno quiero poder acceder al leaderboard de cada uno de mis cursos desde la pantalla de dichos cursos para ver mi progreso con respecto al de mis compañeros.
-
- **HU-69** : Como alumno quiero poder cerrar mi sesión de forma segura, para evitar que otras personas puedan acceder a mi cuenta.
-
----
-
-### 5.3 Matriz de Trazabilidad entre Pruebas e Historias de Usuario
-
-#### 5.3.1 Estrategia de Cobertura
+#### 5.2.1 Estrategia de Cobertura
 
 La estrategia de cobertura garantiza que todas las 69 historias de usuario cumplan con los requisitos de pruebas a nivel:
 
@@ -385,7 +236,7 @@ La estrategia de cobertura garantiza que todas las 69 historias de usuario cumpl
 * **Integración** : Se prueba la interacción entre controladores y servicios.
 * **E2E** : Se prueban los flujos completos de usuario desde el frontend hasta el backend usando Selenium WebDriver.
 
-#### 5.3.2 Mapping de HUs a Servicios y Controladores
+#### 5.2.2 Mapping de HUs a Servicios y Controladores
 
 | Rol           | HUs           | Servicios Principales                                                                                         | Controladores Principales                                                                                                       | Tipo de Pruebas             |
 | ------------- | ------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
@@ -394,7 +245,7 @@ La estrategia de cobertura garantiza que todas las 69 historias de usuario cumpl
 | Maestro       | HU-15 a HU-55 | CursoService, TemaService, ActividadService, PreguntaService, EstadisticasMaestroService, IaConnectionService | CursoController, TemaController, ActividadController, PreguntaController, EstadisticasMaestroController, IaConnectionController | Unitaria, Integración, E2E |
 | Alumno        | HU-56 a HU-69 | InscripcionService, ActividadAlumnoService, RespuestaAlumnoService, PuntoImagenService                        | InscripcionController, ActividadAlumnoController, RespuestaAlumnoController, PuntoImagenController                              | Unitaria, Integración, E2E |
 
-#### 5.3.3 Trazabilidad Detallada por Historia de Usuario
+#### 5.2.3 Trazabilidad Detallada por Historia de Usuario
 
 La siguiente tabla detalla, para cada historia de usuario, las pruebas unitarias, de integración y E2E asociadas, así como los servicios y controladores que se validan.
 
