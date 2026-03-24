@@ -61,6 +61,7 @@ class RespAlumnoOrdenacionServiceImplTest {
 
         actividadAlumno = new ActividadAlumno();
         actividadAlumno.setId(10L);
+        actividadAlumno.setAlumno(alumno); // Asegura que el alumno autenticado es el dueño
         // numFallos is calculated from respuestasAlumno list, not set directly
 
         ordenacion = new Ordenacion();

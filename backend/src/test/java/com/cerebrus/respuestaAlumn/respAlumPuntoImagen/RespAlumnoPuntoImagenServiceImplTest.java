@@ -59,6 +59,7 @@ class RespAlumnoPuntoImagenServiceImplTest {
 
         actividadAlumno = new ActividadAlumno();
         actividadAlumno.setId(10L);
+        actividadAlumno.setAlumno(alumno); // Asegura que el alumno autenticado es el dueño
     }
 
     // ==================== crearRespuestaAlumnoPuntoImagen ====================

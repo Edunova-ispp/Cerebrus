@@ -81,6 +81,7 @@ class RespAlumnoGeneralServiceImplTest {
         actividadAlumno = new ActividadAlumno();
         actividadAlumno.setId(10L);
         actividadAlumno.setActividad(actividad);
+        actividadAlumno.setAlumno(alumno);
         // numFallos is calculated from respuestasAlumno list, not set directly
         actividadAlumno.setNumAbandonos(0);
 
@@ -248,10 +249,13 @@ class RespAlumnoGeneralServiceImplTest {
     void updateRespAlumnoGeneral_existente_actualizaCamposYGuarda() {
         RespAlumnoGeneral resp = new RespAlumnoGeneral(false, actividadAlumno, "Madrid", pregunta);
         resp.setId(100L);
+        resp.getActividadAlumno().setAlumno(alumno);
         Pregunta nuevaPregunta = new Pregunta();
         nuevaPregunta.setId(31L);
         nuevaPregunta.setActividad(actividad);
 
+        // Asegura que el usuario autenticado es el alumno dueño de la respuesta
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(respAlumnoGeneralRepository.findById(100L)).thenReturn(Optional.of(resp));
         when(preguntaRepository.findById(31L)).thenReturn(Optional.of(nuevaPregunta));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -277,12 +281,15 @@ class RespAlumnoGeneralServiceImplTest {
     void updateRespAlumnoGeneral_preguntaNoExiste_lanzaRuntimeException() {
         RespAlumnoGeneral resp = new RespAlumnoGeneral(false, actividadAlumno, "Madrid", pregunta);
         resp.setId(100L);
+        resp.getActividadAlumno().setAlumno(alumno);
+        // Asegura que el usuario autenticado es el alumno dueño de la respuesta
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(respAlumnoGeneralRepository.findById(100L)).thenReturn(Optional.of(resp));
         when(preguntaRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.updateRespAlumnoGeneral(100L, true, 10L, "París", 99L))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("La pregunta no existe");
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("La pregunta no existe");
     }
 
     // ==================== deleteRespAlumnoGeneral ====================
@@ -291,6 +298,9 @@ class RespAlumnoGeneralServiceImplTest {
     void deleteRespAlumnoGeneral_existente_eliminaCorrectamente() {
         RespAlumnoGeneral resp = new RespAlumnoGeneral(true, actividadAlumno, "París", pregunta);
         resp.setId(100L);
+        resp.getActividadAlumno().setAlumno(alumno);
+        // Asegura que el usuario autenticado es el alumno dueño de la respuesta
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(respAlumnoGeneralRepository.findById(100L)).thenReturn(Optional.of(resp));
 
         service.deleteRespAlumnoGeneral(100L);
@@ -315,6 +325,7 @@ class RespAlumnoGeneralServiceImplTest {
     void corregirRespuestaAlumnoGeneral_respuestaCoincideConCorrecta_retornaTrue() {
         RespAlumnoGeneral resp = new RespAlumnoGeneral(false, actividadAlumno, "París", pregunta);
         resp.setId(100L);
+        resp.getActividadAlumno().setAlumno(alumno);
         when(respAlumnoGeneralRepository.findById(100L)).thenReturn(Optional.of(resp));
         when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta, respuestaIncorrecta));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -330,6 +341,7 @@ class RespAlumnoGeneralServiceImplTest {
     void corregirRespuestaAlumnoGeneral_respuestaNoCoincide_retornaFalse() {
         RespAlumnoGeneral resp = new RespAlumnoGeneral(false, actividadAlumno, "Berlín", pregunta);
         resp.setId(100L);
+        resp.getActividadAlumno().setAlumno(alumno);
         when(respAlumnoGeneralRepository.findById(100L)).thenReturn(Optional.of(resp));
         when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta, respuestaIncorrecta));
 
@@ -344,6 +356,7 @@ class RespAlumnoGeneralServiceImplTest {
         // La respuesta del alumno coincide con una opción del maestro marcada como incorrecta
         RespAlumnoGeneral resp = new RespAlumnoGeneral(false, actividadAlumno, "Madrid", pregunta);
         resp.setId(100L);
+        resp.getActividadAlumno().setAlumno(alumno);
         when(respAlumnoGeneralRepository.findById(100L)).thenReturn(Optional.of(resp));
         when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta, respuestaIncorrecta));
 
@@ -365,6 +378,7 @@ class RespAlumnoGeneralServiceImplTest {
     void corregirRespuestaAlumnoGeneral_sinRespuestasMaestro_retornaFalse() {
         RespAlumnoGeneral resp = new RespAlumnoGeneral(false, actividadAlumno, "París", pregunta);
         resp.setId(100L);
+        resp.getActividadAlumno().setAlumno(alumno);
         when(respAlumnoGeneralRepository.findById(100L)).thenReturn(Optional.of(resp));
         when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of());
 
@@ -445,6 +459,7 @@ class RespAlumnoGeneralServiceImplTest {
         ActividadAlumno nueva = new ActividadAlumno();
         nueva.setId(99L);
         nueva.setActividad(actividad);
+        nueva.setAlumno(alumno);
         // numFallos is calculated from respuestasAlumno list, not set directly
         nueva.setNumAbandonos(0);
 
