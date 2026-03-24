@@ -190,7 +190,6 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         Integer puntuacion = 0;
         Integer puntuacionASumar = actividadRepository.findById(crucigramaId).orElseThrow(() -> new ResourceNotFoundException("El crucigrama no existe")).getPuntuacion() / respuestas.size();
         List<RespAlumnoGeneral> respuestasAlumno = new java.util.ArrayList<>();
-        
         // Buscar si ya existe ActividadAlumno para este alumno y actividad
         // Si NO existe, crear UNA NUEVA
         // Si existe, reutilizar la misma y actualizar datos
@@ -203,23 +202,18 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
             // NO existe: crear una nueva
             actividadAlumno = actividadAlumnoRepository.save(new ActividadAlumno(0, LocalDateTime.now(), null, 0, 0, alumno, actividadRepository.findByID(crucigramaId)));
         }
-        
-        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
-            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
-            throw new AccessDeniedException("No puedes enviar respuestas a una corrección automática una Actividad Alumno de crucigrama que no es tuya");
-        }
 
         HashMap<Long, String> resultado = new HashMap<>();
-
         for(Entry<Long, String> entry : respuestas.entrySet()) {
             Long preguntaId = entry.getKey();
             String respuestaDada = entry.getValue().strip().toLowerCase();
 
+            
             Pregunta pregunta = preguntaRepository.findById(preguntaId).orElseThrow(() -> new RuntimeException("La pregunta no existe"));
             if (!pregunta.getActividad().getId().equals(crucigramaId)) {
                 throw new IllegalArgumentException("La pregunta con id " + preguntaId + " no pertenece al crucigrama con id " + crucigramaId);
             }
-
+            
             RespuestaMaestro respuestaCorrecta = respuestaService.encontrarRespuestasPorPreguntaId(preguntaId).stream()
                 .filter(RespuestaMaestro::getCorrecta)
                 .findFirst()
