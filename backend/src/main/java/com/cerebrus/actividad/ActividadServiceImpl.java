@@ -57,8 +57,8 @@ public class ActividadServiceImpl implements ActividadService {
 
     @Override
     public Actividad encontrarActividadPorIdAlumno(Long id) {
-        Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Alumno)) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
             throw new AccessDeniedException("No tienes permiso para acceder a esta actividad");
         } else {
             Actividad actividad = actividadRepository.findById(id)
@@ -66,7 +66,7 @@ public class ActividadServiceImpl implements ActividadService {
         	
             List<Inscripcion> inscripciones = actividad.getTema().getCurso().getInscripciones();
             for (Inscripcion inscripcion : inscripciones) {
-                if (inscripcion.getAlumno().getId().equals(u.getId())) {
+                if (inscripcion.getAlumno().getId().equals(current.getId())) {
                     return actividad; 
                 }
             }

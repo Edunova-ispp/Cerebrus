@@ -104,6 +104,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/respuestas-alumno-general/update/{id}").hasAuthority(ALUMNO)
                         .requestMatchers(HttpMethod.DELETE, "/api/respuestas-alumno-general/delete/{id}").hasAuthority(ALUMNO)
                         .requestMatchers(HttpMethod.POST, "/api/inscripciones/inscribe").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.GET, "/api/ordenaciones/{id}").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.GET, "/api/generales/cartas/{id}").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.GET, "/api/generales/test/{id}").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.GET, "/api/generales/clasificacion/{id}").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.GET, "/api/generales/abierta/{id}").hasAuthority(ALUMNO)
                         .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());

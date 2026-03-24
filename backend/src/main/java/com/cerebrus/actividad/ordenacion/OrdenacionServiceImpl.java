@@ -9,10 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
 
 
@@ -71,27 +73,37 @@ public class OrdenacionServiceImpl implements OrdenacionService {
     @Override
     @Transactional(readOnly = true)
     public Ordenacion readOrdenacion(Long id) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("No tienes permiso para acceder a esta actividad");
+        }
         
         Ordenacion ordenacion = ordenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
+        List<Inscripcion> inscripciones = ordenacion.getTema().getCurso().getInscripciones();
         List<String> valores = ordenacion.getValores();
         List<String> valoresDesordenados = CerebrusUtils.shuffleCollection(valores).stream().toList();
         ordenacion.setValores(valoresDesordenados);
-        return ordenacion;
+        for (Inscripcion inscripcion : inscripciones) {
+            if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                return ordenacion; 
+            }
+        }
+        throw new AccessDeniedException("La actividad que buscas pertenece a un curso al que no estás inscrito");
     }
 
     @Override
     @Transactional(readOnly = true)
     public Ordenacion readOrdenacionMaestro(Long id) {
 
-        Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Maestro)) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede leer actividades de ordenación para edición");
         }
 
         Ordenacion ordenacion = ordenacionRepository.findWithValoresById(id)
             .orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
 
-        if (ordenacion.getTema() != null && ordenacion.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+        if (ordenacion.getTema() != null && ordenacion.getTema().getCurso().getMaestro().getId().equals(current.getId())) {
             throw new AccessDeniedException("No puedes leer actividades de cursos que no son tuyos");
         }
 

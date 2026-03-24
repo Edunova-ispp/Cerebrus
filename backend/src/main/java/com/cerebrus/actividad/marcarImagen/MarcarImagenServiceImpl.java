@@ -91,14 +91,14 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
     @Override
     @Transactional(readOnly = true)
     public MarcarImagen obtenerMarcarImagenPorId(Long id) {
-        Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Maestro) && !(u instanceof Alumno)) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Maestro) && !(current instanceof Alumno)) {
             throw new AccessDeniedException("Solo un usuario logueado como alumno o maestro puede obtener una actividad de marcar imagen");
         }
         MarcarImagen marcarImagen = marcarImagenRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Marcar Imagen", "id", id));
 
-        if (!marcarImagen.getTema().getCurso().getMaestro().getId().equals(u.getId()) && !marcarImagen.getTema().getCurso().getInscripciones().stream().anyMatch(a -> a.getAlumno().getId().equals(u.getId()))) {
+        if (!marcarImagen.getTema().getCurso().getMaestro().getId().equals(current.getId()) && !marcarImagen.getTema().getCurso().getInscripciones().stream().anyMatch(a -> a.getAlumno().getId().equals(current.getId()))) {
             throw new AccessDeniedException("Solo alguien perteneciente al curso puede acceder a esta actividad");
         }
 
