@@ -10,8 +10,9 @@ import { TestForm } from './TestForm';
 import { CartaForm } from './CartaForm';
 import { TableroForm } from './TableroForm';
 import { CrucigramaForm } from './CrucigramaForm';
+import { PreguntaAbiertaForm } from './PreguntaAbiertaForm';
 
-const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden', 'Marcar en imagen', 'Tablero', 'Clasificación', 'Carta', 'Crucigrama'];
+const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden', 'Marcar en imagen', 'Tablero', 'Clasificación', 'Carta', 'Crucigrama', 'Pregunta Abierta'];
 
 interface CrearActividadProps {
   readonly cursoIdProp?: string;
@@ -35,6 +36,7 @@ export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDo
     tipoSeleccionado === 'Carta' ? <CartaForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
     tipoSeleccionado === 'Clasificación' ? <ClasificacionForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
     tipoSeleccionado === 'Crucigrama' ? <CrucigramaForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
+    tipoSeleccionado === 'Pregunta Abierta' ? <PreguntaAbiertaForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
     <p className="ca-proximamente">Selecciona un tipo de actividad</p>;
 
   const handleVolver = () => {
