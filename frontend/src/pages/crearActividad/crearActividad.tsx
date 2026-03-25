@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { ClasificacionForm } from './ClasificacionForm';
 import './crearActividad.css';
@@ -24,7 +24,6 @@ interface CrearActividadProps {
 export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDone }: CrearActividadProps = {}) {
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
-  const navigate = useNavigate();
   const [tipoSeleccionado, setTipoSeleccionado] = useState<string | null>(null);
 
   const formContent =
@@ -38,7 +37,7 @@ export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDo
     tipoSeleccionado === 'Crucigrama' ? <CrucigramaForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
     tipoSeleccionado === 'Pregunta Abierta' ? <PreguntaAbiertaForm mode="create" temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
     <p className="ca-proximamente">Selecciona un tipo de actividad</p>;
-
+/*
   const handleVolver = () => {
     if (embedded && onDone) {
       onDone();
@@ -46,7 +45,7 @@ export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDo
       navigate(`/cursos/${cursoId}`);
     }
   };
-
+*/
   const sidebar = (
     <div className="ca-sidebar">
    

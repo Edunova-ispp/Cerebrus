@@ -61,13 +61,13 @@ function formatearNumero2Dec(valor: number | null | undefined): string {
   if (typeof valor !== 'number' || !Number.isFinite(valor)) return '0';
   return String(Math.round(valor * 100) / 100);
 }
-
+/*
 function formatearTiempoCurso(minutos: number | null | undefined): string {
   if (typeof minutos !== 'number' || !Number.isFinite(minutos) || minutos <= 0) return '0 mins';
   const redondeado = Math.round(minutos);
   return formatearTiempo(redondeado);
 }
-
+*/
 export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCursoProps = {}) {
   const params = useParams<{ id: string }>();
   const id = cursoId ?? params.id;
