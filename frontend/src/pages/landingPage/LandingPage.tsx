@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./LandingPage.css";
 import logo from "../../assets/logo.png";
 import maguito from "../../assets/props/maguito.png";
@@ -7,7 +7,6 @@ import dragon from "../../assets/props/dragon.png";
 import libro from "../../assets/props/libro.png";
 import dueno from "../../assets/props/dueño.png";
 import ProfileIcon from "../../assets/icons/profile.svg?react";
-import { Link } from 'react-router-dom';
 
 // Alternating primary/secondary, except 'u' which uses accent
 const TITLE = [

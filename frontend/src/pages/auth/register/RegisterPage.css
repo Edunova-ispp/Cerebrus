@@ -204,14 +204,14 @@
 }
 .register-submit-btn:disabled {
   background-color: #d3d3d3;
-  color: #888;
+  color: #555;
   cursor: not-allowed;
   opacity: 0.6;
-  box-shadow: 2px 2px 0 #888;
+  box-shadow: 2px 2px 0 #555;
 }
 
 .register-submit-btn:disabled:hover {
   background-color: #d3d3d3;
   transform: none;
-  box-shadow: 2px 2px 0 #888;
+  box-shadow: 2px 2px 0 #555;
 }
