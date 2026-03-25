@@ -1,6 +1,7 @@
 package com.cerebrus.iaconnection;
 
 import com.cerebrus.comun.enumerados.TipoAct;
+import com.cerebrus.exceptions.QuotaExceededException;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.maestro.Maestro;
@@ -8,6 +9,8 @@ import com.cerebrus.usuario.maestro.Maestro;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -249,6 +253,26 @@ public class IaConnectionServiceImpl implements IaConnectionService {
             .replaceAll("\\n?```$", "")
             .trim();
     }
+
+    private String resolveApiKeyByIndex(Integer index) {
+        return switch (index) {
+            case 1 -> apiKey1;
+            case 2 -> apiKey2;
+            case 3 -> apiKey3;
+            case 4 -> apiKey4;
+            case 5 -> apiKey5;
+            default -> throw new IllegalArgumentException("Error al seleccionar la clave de API");
+        };
+    }
+
+    private boolean rotateToNextApiKeySameDay() {
+        if (IndiceKey < 5) {
+            IndiceKey++;
+            peticionesDiarias = 0;
+            return true;
+        }
+        return false;
+    }
     
     private Boolean validateActivityResponse(String response, TipoAct tipoActividad) {
         try {
@@ -368,49 +392,80 @@ public class IaConnectionServiceImpl implements IaConnectionService {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
         
         try {
-            if(peticionesDiarias >= PeticionesMaximasDiariasPorKey){
-                if(IndiceKey<5){
-                    IndiceKey++;
-                    peticionesDiarias=0;
-                }else{
-                    if(fechaUltimaPeticion == null || !fechaUltimaPeticion.isEqual(LocalDate.now())) {
-                        fechaUltimaPeticion = LocalDate.now();
-                        IndiceKey=1;
-                        peticionesDiarias=0;
-                    }else{
-                        throw new IllegalArgumentException("429 Too Many Requests: Se han alcanzado el límite de peticiones diarias");
+            HttpStatusCodeException last429Exception = null;
+
+            for (int intento = 0; intento < 5; intento++) {
+                if (peticionesDiarias >= PeticionesMaximasDiariasPorKey) {
+                    boolean rotated = rotateToNextApiKeySameDay();
+                    if (!rotated) {
+                        if (fechaUltimaPeticion == null || !fechaUltimaPeticion.isEqual(LocalDate.now())) {
+                            fechaUltimaPeticion = LocalDate.now();
+                            IndiceKey = 1;
+                            peticionesDiarias = 0;
+                        } else {
+                            throw new QuotaExceededException("Se ha alcanzado la cuota diaria de IA. Podrás volver a intentarlo mañana.");
+                        }
                     }
                 }
+
+                apikeyActual = resolveApiKeyByIndex(IndiceKey);
+                String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apikeyActual;
+
+                try {
+                    ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+
+                    List candidates = (List) response.getBody().get("candidates");
+                    Map firstCandidate = (Map) candidates.get(0);
+                    Map content = (Map) firstCandidate.get("content");
+                    List parts = (List) content.get("parts");
+                    Map firstPart = (Map) parts.get(0);
+                    String respuesta = (String) firstPart.get("text");
+
+                    String cleanedResponse = cleanJsonResponse(respuesta);
+                    Map<String, Object> evaluacion = new com.fasterxml.jackson.databind.ObjectMapper()
+                        .readValue(cleanedResponse, Map.class);
+
+                    peticionesDiarias++;
+                    return evaluacion;
+                } catch (HttpStatusCodeException e) {
+                    String responseBody = e.getResponseBodyAsString();
+                    String errorTextRaw = (responseBody != null && !responseBody.isBlank()) ? responseBody : e.getMessage();
+                    String errorText = errorTextRaw.toLowerCase();
+
+                    if (!(e.getStatusCode().value() == 429 || errorText.contains("resource_exhausted") || errorText.contains("quota exceeded"))) {
+                        throw new IllegalArgumentException("Error al evaluar la respuesta: " + e.getMessage());
+                    }
+
+                    last429Exception = e;
+
+                    boolean rotated = rotateToNextApiKeySameDay();
+                    if (rotated) {
+                        continue;
+                    }
+
+                    if (errorText.contains("perday") || errorText.contains("generaterequestsperdayperprojectpermodel-freetier")) {
+                        throw new QuotaExceededException("Se ha alcanzado la cuota diaria de IA. Podrás volver a intentarlo mañana.");
+                    }
+
+                    Matcher retryMatcher = Pattern.compile("retry in\\s+([0-9]+(?:\\.[0-9]+)?)s", Pattern.CASE_INSENSITIVE)
+                        .matcher(errorTextRaw);
+                    if (retryMatcher.find()) {
+                        double retrySeconds = Double.parseDouble(retryMatcher.group(1));
+                        int retrySecondsRounded = (int) Math.ceil(retrySeconds);
+                        throw new QuotaExceededException("La IA está temporalmente saturada. Reintenta en " + retrySecondsRounded + " segundos.");
+                    }
+
+                    throw new QuotaExceededException("La cuota de IA está agotada temporalmente. Inténtalo de nuevo más tarde.");
+                }
             }
-            
-            switch (IndiceKey) {
-                case 1 -> apikeyActual = apiKey1;
-                case 2 -> apikeyActual = apiKey2;
-                case 3 -> apikeyActual = apiKey3;
-                case 4 -> apikeyActual = apiKey4;
-                case 5 -> apikeyActual = apiKey5;
-                default -> throw new IllegalArgumentException("Error al seleccionar la clave de API");
+
+            if (last429Exception != null) {
+                throw new QuotaExceededException("La cuota de IA está agotada temporalmente. Inténtalo de nuevo más tarde.");
             }
-            
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apikeyActual;
-            
-            ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
-            
-            List candidates = (List) response.getBody().get("candidates");
-            Map firstCandidate = (Map) candidates.get(0);
-            Map content = (Map) firstCandidate.get("content");
-            List parts = (List) content.get("parts");
-            Map firstPart = (Map) parts.get(0);
-            String respuesta = (String) firstPart.get("text");
-            
-            String cleanedResponse = cleanJsonResponse(respuesta);
-            Map<String, Object> evaluacion = new com.fasterxml.jackson.databind.ObjectMapper()
-                .readValue(cleanedResponse, Map.class);
-            
-            peticionesDiarias++;
-            
-            return evaluacion;
-            
+
+            throw new IllegalArgumentException("Error al evaluar la respuesta: no se pudo completar la evaluación");
+        } catch (QuotaExceededException e) {
+            throw e;
         } catch (Exception e) {
             throw new IllegalArgumentException("Error al evaluar la respuesta: " + e.getMessage());
         }

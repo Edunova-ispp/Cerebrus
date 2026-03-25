@@ -298,7 +298,8 @@ public class GeneralController {
             general.getTema().getId(),
             general.getRespVisible(),
             general.getComentariosRespVisible(),
-            preguntasId
+            preguntasId,
+            general.getImagen()
         );
 
         return new ResponseEntity<>(generalCreada.getId(), HttpStatus.CREATED);
@@ -316,7 +317,7 @@ public class GeneralController {
 
     @PutMapping("/abierta/update/{id}")
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<GeneralAbiertaAlumnoDTO> updateTipoAbierta(@PathVariable Long id, @RequestBody @Valid General general) {
+    public ResponseEntity<GeneralAbiertaMaestroDTO> updateTipoAbierta(@PathVariable Long id, @RequestBody @Valid General general) {
 
         generalService.updateTipoAbierta(
         id,
@@ -328,10 +329,11 @@ public class GeneralController {
         general.getPreguntas().stream().map(Pregunta::getId).toList(),
         general.getPosicion(),
         general.getVersion(),
-        general.getTema().getId()
+        general.getTema().getId(),
+        general.getImagen()
         );
 
-        return ResponseEntity.ok(generalService.readTipoAbierta(id));
+        return ResponseEntity.ok(generalService.readTipoAbiertaMaestro(id));
     }
 
 }

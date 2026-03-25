@@ -1,4 +1,4 @@
- package com.cerebrus.actividad.general;
+package com.cerebrus.actividad.general;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,7 +90,8 @@ public class GeneralServiceImpl implements GeneralService {
             actividad.setComentariosRespVisible(comentariosRespVisible);
         }
         actividad.setVersion(1);
-        actividad.setPosicion(tema.getActividades().size());
+        Integer maxPosicion = actividadRepository.findMaxPosicionByTemaId(temaId);
+        actividad.setPosicion((maxPosicion != null ? maxPosicion : 0) + 1);
         actividad.setTema(tema);
         return actividad;
     }
@@ -739,7 +740,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
     @Override
     @Transactional
     public General crearTipoAbierta(String titulo, String descripcion, Integer puntuacion, Long temaId, 
-        Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId) {
+        Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, String imagen) {
         
         Usuario usuario = usuarioService.findCurrentUser();
         if(!(usuario instanceof Maestro)){
@@ -750,37 +751,38 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
             throw new AccessDeniedException("Solo el maestro del curso puede crear actividades en ese tema");
         }
         
-        if (preguntasId == null || preguntasId.isEmpty()) {
-            throw new IllegalArgumentException("Debe proporcionar al menos una pregunta");
-        }
-        
-        if (preguntasId.size() > 5) {
-            throw new IllegalArgumentException("Las actividades de tipo ABIERTA no pueden tener más de 5 preguntas. Usted intenta crear " + preguntasId.size() + " preguntas");
-        }
-        
         General tipoAbierta = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
-        List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
-        
-        if(preguntas.size() != preguntasId.size()){
-            throw new ResourceNotFoundException("Alguna de las preguntas no existe");
-        }
-        
-        Integer num = 1;
-        for(Pregunta pregunta : preguntas){
-            List<RespuestaMaestro> respuestas = respuestaMaestroRepository.findRespuestaByPreguntaId(pregunta.getId());
-            
-            if (respuestas == null || respuestas.isEmpty()) {
-                throw new IllegalArgumentException("La pregunta " + num + " no tiene respuesta. Cada pregunta debe tener exactamente una respuesta");
+        tipoAbierta.setImagen(imagen);
+
+        if (preguntasId != null && !preguntasId.isEmpty()) {
+            if (preguntasId.size() > 5) {
+                throw new IllegalArgumentException("Las actividades de tipo ABIERTA no pueden tener más de 5 preguntas. Usted intenta crear " + preguntasId.size() + " preguntas");
             }
-            
-            if (respuestas.size() > 1) {
-                throw new IllegalArgumentException("La pregunta " + num + " tiene " + respuestas.size() + " respuestas. En actividades ABIERTA solo se permite una respuesta por pregunta");
-            }
-            
-            num++;
-        }
+
+            List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
         
-        tipoAbierta.setPreguntas(preguntas);
+            if(preguntas.size() != preguntasId.size()){
+                throw new ResourceNotFoundException("Alguna de las preguntas no existe");
+            }
+        
+            Integer num = 1;
+            for(Pregunta pregunta : preguntas){
+                List<RespuestaMaestro> respuestas = respuestaMaestroRepository.findRespuestaByPreguntaId(pregunta.getId());
+            
+                if (respuestas == null || respuestas.isEmpty()) {
+                    throw new IllegalArgumentException("La pregunta " + num + " no tiene respuesta. Cada pregunta debe tener exactamente una respuesta");
+                }
+            
+                if (respuestas.size() > 1) {
+                    throw new IllegalArgumentException("La pregunta " + num + " tiene " + respuestas.size() + " respuestas. En actividades ABIERTA solo se permite una respuesta por pregunta");
+                }
+            
+                num++;
+            }
+        
+            tipoAbierta.setPreguntas(preguntas);
+        }
+
         tipoAbierta.setTipo(TipoActGeneral.ABIERTA);
         return generalRepository.save(tipoAbierta);
     }
@@ -865,7 +867,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
     @Override
     @Transactional
     public General updateTipoAbierta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
-        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId) {
+        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen) {
      
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -880,6 +882,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         
         General tipoAbierta = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
             posicion, version, temaId);
+        tipoAbierta.setImagen(imagen);
         
         if(preguntasId != null){
             List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
@@ -907,5 +910,4 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         
         return generalRepository.save(tipoAbierta);
     }
-
 }

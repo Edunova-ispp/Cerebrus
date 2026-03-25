@@ -23,6 +23,7 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.curso.Curso;
+import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.general.General;
 import com.cerebrus.actividad.general.GeneralRepository;
 import com.cerebrus.actividad.general.GeneralServiceImpl;
@@ -36,6 +37,7 @@ import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
 
 @ExtendWith(MockitoExtension.class)
 class GeneralServiceImplTest {
@@ -51,6 +53,12 @@ class GeneralServiceImplTest {
 
 	@Mock
 	private UsuarioService usuarioService;
+
+	@Mock
+	private RespuestaMaestroRepository respuestaMaestroRepository;
+
+	@Mock
+	private ActividadRepository actividadRepository;
 
 	@InjectMocks
 	private GeneralServiceImpl generalService;
@@ -94,6 +102,7 @@ class GeneralServiceImplTest {
 		when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 		Tema tema = crearTema(1L);
 		when(temaRepository.findById(1L)).thenReturn(Optional.of(tema));
+		when(actividadRepository.findMaxPosicionByTemaId(1L)).thenReturn(3);
 
 		General general = generalService.crearActGeneral("Título", "Desc", 20, 1L, true, "ok");
 
@@ -104,7 +113,7 @@ class GeneralServiceImplTest {
 		assertThat(general.getRespVisible()).isTrue();
 		assertThat(general.getComentariosRespVisible()).isEqualTo("ok");
 		assertThat(general.getVersion()).isEqualTo(1);
-		assertThat(general.getPosicion()).isEqualTo(tema.getActividades().size());
+		assertThat(general.getPosicion()).isEqualTo(4);
 		assertThat(general.getTema()).isSameAs(tema);
 	}
 
