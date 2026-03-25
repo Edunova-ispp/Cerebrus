@@ -103,7 +103,7 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         Ordenacion ordenacion = ordenacionRepository.findWithValoresById(id)
             .orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
 
-        if (ordenacion.getTema() != null && ordenacion.getTema().getCurso().getMaestro().getId().equals(current.getId())) {
+        if (ordenacion.getTema() != null && !ordenacion.getTema().getCurso().getMaestro().getId().equals(current.getId())) {
             throw new AccessDeniedException("No puedes leer actividades de cursos que no son tuyos");
         }
 

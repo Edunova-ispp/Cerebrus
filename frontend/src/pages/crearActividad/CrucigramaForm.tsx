@@ -36,6 +36,11 @@ interface PreguntaLocal {
 }
 
 const MAX_PALABRAS = 10;
+const ONLY_LETTERS_REGEX = /^\p{L}+$/u;
+
+function sanitizeRespuesta(value: string): string {
+    return value.replace(/[^\p{L}]/gu, '').toUpperCase();
+}
 
 export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
     const [titulo, setTitulo] = useState('');
@@ -79,7 +84,8 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
     // ── Handlers ──────────────────────────────────────────────────────────
     const handlePreguntaChange = (index: number, field: keyof PreguntaLocal, value: string) => {
         const updated = [...preguntas];
-        updated[index] = { ...updated[index], [field]: value };
+        const normalizedValue = field === 'respuesta' ? sanitizeRespuesta(value) : value;
+        updated[index] = { ...updated[index], [field]: normalizedValue };
         setPreguntas(updated);
     };
 
@@ -104,7 +110,11 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
             const mapaPreguntas: Record<string, string> = {};
             preguntas.forEach(p => {
                 if (p.pregunta.trim() && p.respuesta.trim()) {
-                    mapaPreguntas[p.pregunta.trim()] = p.respuesta.trim().toUpperCase();
+                    const normalizedRespuesta = sanitizeRespuesta(p.respuesta.trim());
+                    if (!ONLY_LETTERS_REGEX.test(normalizedRespuesta)) {
+                        throw new Error('Las respuestas del crucigrama solo pueden contener letras.');
+                    }
+                    mapaPreguntas[p.pregunta.trim()] = normalizedRespuesta;
                 }
             });
 
@@ -240,6 +250,8 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                                 className="cf-input cf-input-upper"
                                 placeholder="MADRID"
                                 value={p.respuesta}
+                                inputMode="text"
+                                pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+"
                                 onChange={e => handlePreguntaChange(index, 'respuesta', e.target.value)}
                                 required
                             />
