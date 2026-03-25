@@ -18,7 +18,7 @@ const TermsPage: React.FC = () => {
         <img 
           src={logo} 
           alt="Cerebrus Logo" 
-          style={{ width: '120px', height: 'auto', dropShadow: '0 4px 6px rgba(0,0,0,0.1)' }} 
+          style={{ width: '250px', height: 'auto' }} 
         />
       </div>
 
