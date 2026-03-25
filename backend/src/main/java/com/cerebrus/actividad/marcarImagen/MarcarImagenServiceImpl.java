@@ -129,12 +129,6 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
                 }
             })
             .toList());
-        List<PuntoImagen> puntosExistentes = new ArrayList<>(marcarImagenAActualizar.getPuntosImagen());
-        for(PuntoImagen puntoExistente : puntosExistentes) {
-            if(puntosImagen.stream().noneMatch(p -> p.getId().equals(puntoExistente.getId()))) {
-                puntosImagen.add(puntoExistente);
-            }
-        }
 
         marcarImagenAActualizar.setTitulo(marcarImagenDTO.getTitulo());
         marcarImagenAActualizar.setDescripcion(marcarImagenDTO.getDescripcion());
