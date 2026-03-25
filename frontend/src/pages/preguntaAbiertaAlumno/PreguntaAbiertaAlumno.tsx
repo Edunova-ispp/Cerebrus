@@ -11,6 +11,13 @@ import '../testAlumno/TestAlumno.css';
 import dragonImg from '../../assets/props/dragon.png';
 import caballeroImg from '../../assets/props/caballero.png';
 
+type ModalPhase = 'confirm' | 'evaluating' | 'result';
+
+interface EvaluacionAbiertaResponse {
+  notaFinal?: number;
+  puntuacionFinal?: number;
+}
+
 export default function PreguntaAbiertaAlumno() {
   const { actividadId } = useParams<{ actividadId: string }>();
   const navigate = useNavigate();
@@ -25,6 +32,9 @@ export default function PreguntaAbiertaAlumno() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [finished, setFinished] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [modalPhase, setModalPhase] = useState<ModalPhase>('confirm');
+  const [notaFinal, setNotaFinal] = useState<number | null>(null);
+  const [puntuacionFinal, setPuntuacionFinal] = useState<number | null>(null);
 
   useEffect(() => {
     if (!actividadId) return;
@@ -68,6 +78,7 @@ export default function PreguntaAbiertaAlumno() {
     if (!actividadAlumnoId || !actividad) return;
     
     setSubmitting(true);
+    setModalPhase('evaluating');
     try {
       const respuestasAlumnoObj: Record<string, string> = {};
       respuestas.forEach((valor, clave) => {
@@ -87,18 +98,26 @@ export default function PreguntaAbiertaAlumno() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || "Error al procesar la corrección");
+        const backendMessage = errorData?.mensaje || errorData?.message || "Error al procesar la corrección";
+        throw new Error(backendMessage);
       }
 
-      await res.json();
-      navigate(-1);
+      const resultado: EvaluacionAbiertaResponse = await res.json();
+      setNotaFinal(typeof resultado?.notaFinal === 'number' ? resultado.notaFinal : null);
+      setPuntuacionFinal(typeof resultado?.puntuacionFinal === 'number' ? resultado.puntuacionFinal : null);
+      setModalPhase('result');
 
     } catch (error) {
       console.error("Error en el envío final:", error);
-      alert("No se pudo procesar la entrega. Verifica tu conexión.");
+      const msg = error instanceof Error ? error.message : '';
+      if (msg.includes('cuota') || msg.includes('límite') || msg.includes('429') || msg.toLowerCase().includes('reintenta')) {
+        alert(msg || 'La IA ha alcanzado su límite de peticiones. Inténtalo de nuevo más tarde.');
+      } else {
+        alert("No se pudo procesar la entrega. Verifica tu conexión.");
+      }
+      setModalPhase('confirm');
     } finally {
       setSubmitting(false);
-      setFinished(false);
     }
   };
 
@@ -182,6 +201,9 @@ export default function PreguntaAbiertaAlumno() {
                       alert('Debes responder a todas las preguntas antes de enviar.');
                       return;
                     }
+                    setModalPhase('confirm');
+                    setNotaFinal(null);
+                    setPuntuacionFinal(null);
                     setFinished(true);
                   }} 
                   className="ta-nav-btn ta-nav-btn--submit" 
@@ -196,9 +218,23 @@ export default function PreguntaAbiertaAlumno() {
 
         {finished && (
           <CompletionPopup 
-            title={submitting ? "LA IA ESTÁ EVALUANDO..." : "¿LISTO PARA ENVIAR?"} 
-            onContinue={handleContinuar} 
-            onCancel={() => !submitting && setFinished(false)}
+            title={
+              modalPhase === 'evaluating'
+                ? 'LA IA ESTÁ EVALUANDO...'
+                : modalPhase === 'result'
+                  ? '¡ACTIVIDAD CORREGIDA!'
+                  : '¿LISTO PARA ENVIAR?'
+            }
+            subtitle={
+              modalPhase === 'result'
+                ? `Nota: ${notaFinal ?? '-'}${puntuacionFinal !== null ? `  •  Puntos: ${puntuacionFinal}` : ''}`
+                : undefined
+            }
+            showContinueButton={modalPhase !== 'evaluating'}
+            onContinue={modalPhase === 'result' ? () => navigate(-1) : handleContinuar}
+            onCancel={() => {
+              if (!submitting) setFinished(false);
+            }}
           />
         )}
       </main>

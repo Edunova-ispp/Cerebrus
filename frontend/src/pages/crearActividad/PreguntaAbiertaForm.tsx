@@ -29,6 +29,11 @@ interface PreguntaAbiertaFormProps {
   onDone?: () => void;
 }
 
+interface PreguntaAbiertaMeta {
+  posicion?: number;
+  version?: number;
+}
+
 export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
   mode,
   preguntaAbiertaId,
@@ -106,6 +111,8 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
       const tId = Number(temaIdProp);
       let gId = preguntaAbiertaId;
       const idsFinales: number[] = [];
+      let posicionFinal = initialValues?.posicion;
+      let versionFinal = initialValues?.version;
 
       // PASO 1: Crear si es nuevo
       if (mode === 'create') {
@@ -124,6 +131,13 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
           }),
         });
         gId = await res.json();
+
+        if (gId) {
+          const metaRes = await apiFetch(`${apiBase}/api/generales/abierta/${gId}/maestro`);
+          const meta = (await metaRes.json()) as PreguntaAbiertaMeta;
+          posicionFinal = meta?.posicion;
+          versionFinal = meta?.version;
+        }
       }
 
       // PASO 2: Borrar preguntas eliminadas de la DB (Solo en edición)
@@ -176,8 +190,8 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
           comentariosRespVisible: comentariosRespVisible.trim() || null,
           tipo: 'ABIERTA',
           tema: { id: tId },
-          posicion: initialValues?.posicion ?? 0,
-          version: initialValues?.version ?? 1,
+          posicion: typeof posicionFinal === 'number' ? posicionFinal : 1,
+          version: typeof versionFinal === 'number' ? versionFinal : 1,
           preguntasId: idsFinales,
           preguntas: idsFinales.map(id => ({ id })) 
         }),

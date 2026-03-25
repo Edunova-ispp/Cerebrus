@@ -88,7 +88,8 @@ public class GeneralServiceImpl implements GeneralService {
             actividad.setComentariosRespVisible(comentariosRespVisible);
         }
         actividad.setVersion(1);
-        actividad.setPosicion(tema.getActividades().size());
+        Integer maxPosicion = actividadRepository.findMaxPosicionByTemaId(temaId);
+        actividad.setPosicion((maxPosicion != null ? maxPosicion : 0) + 1);
         actividad.setTema(tema);
         return actividad;
     }
