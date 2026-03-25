@@ -187,6 +187,29 @@ class MarcarImagenServiceImplTest {
     }
 
     @Test
+    void obtenerMarcarImagenPorId_cursoOculto_lanzaAccessDeniedException() {
+        Alumno alumno = new Alumno();
+        alumno.setId(1L);
+        Maestro maestro = crearMaestro(2L);
+        Tema tema = crearTema(10L, maestro);
+        tema.getCurso().setVisibilidad(false);
+        com.cerebrus.inscripcion.Inscripcion inscripcion = new com.cerebrus.inscripcion.Inscripcion();
+        inscripcion.setAlumno(alumno);
+        tema.getCurso().setInscripciones(List.of(inscripcion));
+
+        MarcarImagen marcarImagen = new MarcarImagen();
+        marcarImagen.setId(6L);
+        marcarImagen.setTema(tema);
+
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        when(marcarImagenRepository.findById(6L)).thenReturn(Optional.of(marcarImagen));
+
+        assertThatThrownBy(() -> service.obtenerMarcarImagenPorId(6L))
+            .isInstanceOf(AccessDeniedException.class)
+            .hasMessageContaining("curso oculto");
+    }
+
+    @Test
     void obtenerMarcarImagenPorId_maestroPropietario_devuelveActividad() {
         Maestro maestro = crearMaestro(1L);
         Tema tema = crearTema(10L, maestro);
@@ -427,6 +450,7 @@ class MarcarImagenServiceImplTest {
         tema.setId(id);
         com.cerebrus.curso.Curso curso = new com.cerebrus.curso.Curso();
         curso.setMaestro(maestro);
+        curso.setVisibilidad(true);
         tema.setCurso(curso);
         return tema;
     }

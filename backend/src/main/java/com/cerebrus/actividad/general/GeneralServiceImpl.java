@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.general.dto.CrucigramaDTO;
 import com.cerebrus.actividad.general.dto.CrucigramaRequest;
+import com.cerebrus.actividad.general.dto.GeneralAbiertaAlumnoDTO;
 import com.cerebrus.actividad.general.dto.GeneralAbiertaMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaMaestroDTO;
@@ -20,25 +21,26 @@ import com.cerebrus.actividad.general.dto.GeneralClasificacionDTO;
 import com.cerebrus.actividad.general.dto.GeneralClasificacionMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestMaestroDTO;
+import com.cerebrus.comun.enumerados.TipoActGeneral;
+import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.pregunta.Pregunta;
+import com.cerebrus.pregunta.PreguntaRepository;
+import com.cerebrus.pregunta.dto.PreguntaAlumnoDTO;
+import com.cerebrus.pregunta.dto.PreguntaDTO;
+import com.cerebrus.pregunta.dto.PreguntaMaestroDTO;
+import com.cerebrus.respuestaMaestro.RespuestaMaestro;
+import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
+import com.cerebrus.respuestaMaestro.dto.RespuestaDTO;
+import com.cerebrus.respuestaMaestro.dto.RespuestaMaestroDTO;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
-import com.cerebrus.pregunta.PreguntaRepository;
-import com.cerebrus.pregunta.dto.PreguntaDTO;
-import com.cerebrus.pregunta.dto.PreguntaMaestroDTO;
-import com.cerebrus.pregunta.dto.PreguntaAlumnoDTO;
-import com.cerebrus.actividad.general.dto.GeneralAbiertaAlumnoDTO;
-import com.cerebrus.respuestaMaestro.RespuestaMaestro;
-import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
-import com.cerebrus.respuestaMaestro.dto.RespuestaDTO;
-import com.cerebrus.respuestaMaestro.dto.RespuestaMaestroDTO;
 
 @Service
 @Transactional
@@ -163,8 +165,10 @@ public class GeneralServiceImpl implements GeneralService {
         }
         List<Inscripcion> inscripciones = general.get().getTema().getCurso().getInscripciones();
         if(current instanceof Alumno) {
+            validarCursoVisibleParaAlumno(general.get());
             for (Inscripcion inscripcion : inscripciones) {
                 if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                    AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general.get(), current.getId());
                     return general.get(); 
                 }
             }
@@ -195,6 +199,8 @@ public class GeneralServiceImpl implements GeneralService {
             throw new ResourceNotFoundException("La actividad no es de tipo test");
         }
 
+        validarCursoVisibleParaAlumno(general);
+
         List<PreguntaDTO> preguntasDTO = general.getPreguntas().stream().map(pregunta -> {
             List<RespuestaDTO> respuestasDTO = CerebrusUtils.shuffleCollection(pregunta.getRespuestasMaestro())
                 .stream()
@@ -206,6 +212,7 @@ public class GeneralServiceImpl implements GeneralService {
         List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();
         for (Inscripcion inscripcion : inscripciones) {
             if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general, current.getId());
                 return new GeneralTestDTO(
                         general.getId(), general.getTitulo(), general.getDescripcion(),
                         general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
@@ -233,6 +240,8 @@ public class GeneralServiceImpl implements GeneralService {
             throw new ResourceNotFoundException("La actividad no es de tipo carta");
         }
 
+        validarCursoVisibleParaAlumno(general);
+
         List<PreguntaDTO> preguntasDTO = general.getPreguntas().stream().map(pregunta -> {
             List<RespuestaDTO> respuestasDTO = CerebrusUtils.shuffleCollection(pregunta.getRespuestasMaestro())
                 .stream()
@@ -244,6 +253,7 @@ public class GeneralServiceImpl implements GeneralService {
         List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();
         for (Inscripcion inscripcion : inscripciones) {
             if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general, current.getId());
                 return new GeneralCartaDTO(
                     general.getId(), general.getTitulo(), general.getDescripcion(),
                     general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
@@ -542,6 +552,8 @@ public class GeneralServiceImpl implements GeneralService {
             throw new ResourceNotFoundException("La actividad no es de tipo clasificación");
         }
 
+        validarCursoVisibleParaAlumno(general);
+
         general.getPreguntas().forEach(p -> p.getRespuestasMaestro().size());
         List<RespuestaMaestro> todasLasRespuestas = new ArrayList<>();
         for (Pregunta p : general.getPreguntas()) {
@@ -570,6 +582,7 @@ public class GeneralServiceImpl implements GeneralService {
         List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();
         for (Inscripcion inscripcion : inscripciones) {
             if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general, current.getId());
                 return new GeneralClasificacionDTO(
                     general.getId(), general.getTitulo(), general.getDescripcion(),
                     general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
@@ -669,9 +682,11 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         }
         else if (current instanceof Alumno) {
             Alumno alumno = (Alumno) current;
+            validarCursoVisibleParaAlumno(crucigrama);
             if (!crucigrama.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
                 throw new AccessDeniedException("No tienes permiso para acceder a este crucigrama");
             }
+            AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(crucigrama, alumno.getId());
             return CrucigramaDTO.fromEntity(crucigrama);
         }
         else {
@@ -784,6 +799,8 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
             throw new ResourceNotFoundException("La actividad no es de tipo abierta");
         }
 
+        validarCursoVisibleParaAlumno(general);
+
         List<PreguntaAlumnoDTO> preguntasDTO = general.getPreguntas().stream()
             .map(pregunta -> new PreguntaAlumnoDTO(pregunta.getId(), pregunta.getPregunta(), pregunta.getImagen()))
             .toList();
@@ -792,6 +809,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         if (!general.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
             throw new AccessDeniedException("No tienes permiso para acceder a esta actividad");
         }
+        AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general, alumno.getId());
 
         return new GeneralAbiertaAlumnoDTO(
             general.getId(), general.getTitulo(), general.getDescripcion(),
@@ -800,6 +818,12 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
             general.getTema() == null ? null : general.getTema().getId(),
             preguntasDTO
         );
+    }
+
+    private void validarCursoVisibleParaAlumno(General general) {
+        if (!Boolean.TRUE.equals(general.getTema().getCurso().getVisibilidad())) {
+            throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
+        }
     }
 
     @Override

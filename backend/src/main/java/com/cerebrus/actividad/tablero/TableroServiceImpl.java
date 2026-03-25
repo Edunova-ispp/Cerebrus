@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.comun.enumerados.TamanoTablero;
+import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.tablero.dto.TableroDTO;
 import com.cerebrus.actividad.tablero.dto.TableroRequest;
@@ -121,9 +122,13 @@ public class TableroServiceImpl implements TableroService {
             }
             return TableroDTO.fromEntity(tablero);
         }
+        if (!Boolean.TRUE.equals(tablero.getTema().getCurso().getVisibilidad())) {
+            throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
+        }
         List<Inscripcion> inscripciones = tablero.getTema().getCurso().getInscripciones();
         for (Inscripcion inscripcion : inscripciones) {
             if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(tablero, current.getId());
                 return TableroDTO.fromEntity(tablero); 
             }
         }
@@ -201,9 +206,13 @@ public class TableroServiceImpl implements TableroService {
 
         if (u instanceof Alumno) {
             Alumno alumno = (Alumno) u;
+            if (!Boolean.TRUE.equals(tablero.getTema().getCurso().getVisibilidad())) {
+                throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
+            }
             if (!tablero.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
                 throw new AccessDeniedException("No tienes permiso para responder a este tablero porque no esta inscrito");
             }
+            AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(tablero, alumno.getId());
             if(!tablero.getPreguntas().stream().anyMatch(p -> p.getId().equals(preguntaId))) {
                 throw new AccessDeniedException("La pregunta no pertenece a este tablero");
             }

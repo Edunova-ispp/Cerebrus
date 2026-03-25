@@ -7,6 +7,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.inscripcion.Inscripcion;
@@ -79,12 +80,16 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         }
         
         Ordenacion ordenacion = ordenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
+        if (!Boolean.TRUE.equals(ordenacion.getTema().getCurso().getVisibilidad())) {
+            throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
+        }
         List<Inscripcion> inscripciones = ordenacion.getTema().getCurso().getInscripciones();
         List<String> valores = ordenacion.getValores();
         List<String> valoresDesordenados = CerebrusUtils.shuffleCollection(valores).stream().toList();
         ordenacion.setValores(valoresDesordenados);
         for (Inscripcion inscripcion : inscripciones) {
             if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(ordenacion, current.getId());
                 return ordenacion; 
             }
         }
