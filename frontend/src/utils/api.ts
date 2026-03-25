@@ -25,6 +25,12 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
     let message = `Error ${res.status}`;
     try {
       const body = await res.clone().json();
+      if (body.errores && typeof body.errores === 'object' && !Array.isArray(body.errores)) {
+        const fieldErrors = Object.entries(body.errores)
+          .map(([field, detail]) => `${field}: ${String(detail)}`)
+          .filter(Boolean);
+        if (fieldErrors.length > 0) message = fieldErrors.join('. ');
+      }
       if (body.errors && Array.isArray(body.errors)) {
         // Spring @Valid: lista de errores de campo
         const fieldErrors = body.errors
@@ -37,6 +43,8 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
         message = body.detail;
       } else if (body.message) {
         message = body.message;
+      } else if (body.mensaje) {
+        message = body.mensaje;
       }
     } catch {
       // body no era JSON, usar mensaje genérico

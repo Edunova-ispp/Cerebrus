@@ -269,6 +269,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
                   respuesta: card.respuesta.trim(),
                   imagen: null,
                   correcta: true,
+                  pregunta: { id: card.id },
                 }),
               });
             } else {
