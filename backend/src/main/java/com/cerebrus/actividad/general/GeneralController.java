@@ -286,7 +286,8 @@ public class GeneralController {
             general.getTema().getId(),
             general.getRespVisible(),
             general.getComentariosRespVisible(),
-            preguntasId
+            preguntasId,
+            general.getImagen()
         );
 
         return new ResponseEntity<>(generalCreada.getId(), HttpStatus.CREATED);

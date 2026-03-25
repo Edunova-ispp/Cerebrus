@@ -724,7 +724,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
     @Override
     @Transactional
     public General crearTipoAbierta(String titulo, String descripcion, Integer puntuacion, Long temaId, 
-        Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId) {
+        Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, String imagen) {
         
         Usuario usuario = usuarioService.findCurrentUser();
         if(!(usuario instanceof Maestro)){
@@ -736,6 +736,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         }
         
         General tipoAbierta = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
+        tipoAbierta.setImagen(imagen);
 
         if (preguntasId != null && !preguntasId.isEmpty()) {
             if (preguntasId.size() > 5) {

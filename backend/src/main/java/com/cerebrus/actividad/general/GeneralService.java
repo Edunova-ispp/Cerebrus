@@ -35,7 +35,7 @@ public interface GeneralService {
     CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama);
     CrucigramaDTO readTipoCrucigrama(Long id);
     CrucigramaDTO updateTipoCrucigrama(Long id, CrucigramaRequest crucigrama);
-    General crearTipoAbierta(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId);
+    General crearTipoAbierta(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, String imagen);
     GeneralAbiertaAlumnoDTO readTipoAbierta(Long id);
     GeneralAbiertaMaestroDTO readTipoAbiertaMaestro(Long id);
     General updateTipoAbierta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId);

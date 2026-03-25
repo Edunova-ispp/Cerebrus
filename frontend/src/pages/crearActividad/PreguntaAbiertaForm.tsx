@@ -42,6 +42,8 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
   const [descripcion, setDescripcion] = useState('');
   const [puntos, setPuntos] = useState<number | ''>('');
   const [imagen, setImagen] = useState('');
+  // NUEVO ESTADO PARA CONTROLAR ERRORES DE IMAGEN
+  const [imagenError, setImagenError] = useState(false); 
   const [respVisible, setRespVisible] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
   const [preguntas, setPreguntas] = useState<{ id?: number; pregunta: string; respuesta: string; respuestaId?: number }[]>(
@@ -59,9 +61,14 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setPuntos(initialValues.puntuacion ?? '');
+    
+    // Al cargar los datos para edición, seteamos la imagen y reseteamos el error
     setImagen(initialValues.imagen ?? '');
+    setImagenError(false);
+    
     setRespVisible(Boolean(initialValues.respVisible));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
+    
     if (initialValues.preguntas && initialValues.preguntas.length > 0) {
       originalQuestionsRef.current = [...initialValues.preguntas];
       setPreguntas(initialValues.preguntas);
@@ -206,9 +213,32 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
 
           <div>
             <label className="tf-label">URL de imagen (opcional)</label>
-            <input type="url" className="tf-input" value={imagen} onChange={e => setImagen(e.target.value)} placeholder="https://..." />
-            {imagen.trim() && (
-              <img src={imagen.trim()} alt="Preview" className="tf-img-preview" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} onLoad={e => { (e.target as HTMLImageElement).style.display = 'block'; }} />
+            <input 
+              type="url" 
+              className="tf-input" 
+              value={imagen} 
+              onChange={e => {
+                setImagen(e.target.value);
+                setImagenError(false); // Reseteamos el error si el usuario cambia la URL
+              }} 
+              placeholder="https://..." 
+            />
+            
+            {/* Renderizado condicional de la imagen usando el estado */}
+            {imagen.trim() && !imagenError && (
+              <img 
+                src={imagen.trim()} 
+                alt="Preview" 
+                className="tf-img-preview" 
+                onError={() => setImagenError(true)} 
+              />
+            )}
+            
+            {/* Mensaje de error visual para el usuario (opcional pero recomendado) */}
+            {imagen.trim() && imagenError && (
+              <span style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                No se pudo cargar la imagen. Comprueba la URL.
+              </span>
             )}
           </div>
         </div>
@@ -234,32 +264,32 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
       </div>
 
       <div className="tf-questions">
-      <p className="tf-help">
-        Añade las preguntas y la respuesta modelo. La IA evaluará la respuesta del alumno comparándola con tu respuesta.
-      </p>
+        <p className="tf-help">
+          Añade las preguntas y la respuesta modelo. La IA evaluará la respuesta del alumno comparándola con tu respuesta.
+        </p>
 
-      <div className="paf-preguntas-header">
-        <span className="ca-text" style={{ fontWeight: 'bold' }}>Preguntas y Respuestas</span>
-        <span className="paf-badge">{preguntas.length} / 5</span>
-      </div>
-
-      {preguntas.map((p, index) => (
-        <div key={index} className="paf-pregunta-row">
-          <div className="paf-input-group">
-            <input className="tf-input" value={p.pregunta} onChange={e => handlePreguntaChange(index, 'pregunta', e.target.value)} placeholder={`Pregunta ${index + 1}`} />
-            <input className="tf-input" value={p.respuesta} onChange={e => handlePreguntaChange(index, 'respuesta', e.target.value)} placeholder="Respuesta modelo" />
-          </div>
-          {preguntas.length > 1 && (
-            <button type="button" className="paf-btn-remove" onClick={() => handleRemovePregunta(index)}>✕</button>
-          )}
+        <div className="paf-preguntas-header">
+          <span className="ca-text" style={{ fontWeight: 'bold' }}>Preguntas y Respuestas</span>
+          <span className="paf-badge">{preguntas.length} / 5</span>
         </div>
-      ))}
 
-      {preguntas.length < 5 && (
-        <button type="button" className="paf-btn-add" onClick={handleAddPregunta}>
-          + Añadir pregunta
-        </button>
-      )}
+        {preguntas.map((p, index) => (
+          <div key={index} className="paf-pregunta-row">
+            <div className="paf-input-group">
+              <input className="tf-input" value={p.pregunta} onChange={e => handlePreguntaChange(index, 'pregunta', e.target.value)} placeholder={`Pregunta ${index + 1}`} />
+              <input className="tf-input" value={p.respuesta} onChange={e => handlePreguntaChange(index, 'respuesta', e.target.value)} placeholder="Respuesta modelo" />
+            </div>
+            {preguntas.length > 1 && (
+              <button type="button" className="paf-btn-remove" onClick={() => handleRemovePregunta(index)}>✕</button>
+            )}
+          </div>
+        ))}
+
+        {preguntas.length < 5 && (
+          <button type="button" className="paf-btn-add" onClick={handleAddPregunta}>
+            + Añadir pregunta
+          </button>
+        )}
       </div>{/* close tf-questions */}
 
       <div className="ca-form-footer">
