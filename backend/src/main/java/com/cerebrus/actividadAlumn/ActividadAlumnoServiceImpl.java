@@ -19,6 +19,7 @@ import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 import com.cerebrus.actividad.marcarImagen.MarcarImagenService;
 import com.cerebrus.actividad.ordenacion.Ordenacion;
 import com.cerebrus.actividad.ordenacion.OrdenacionService;
+import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.respuestaAlumn.RespuestaAlumno;
 import com.cerebrus.respuestaAlumn.RespuestaAlumnoService;
@@ -85,6 +86,8 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         
         Actividad actividad = actividadRepository.findById(actId).orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
         Alumno alumno = alumnoRepository.findById(alumnoId).orElseThrow(() -> new ResourceNotFoundException("El alumno no existe"));
+
+        AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(actividad, alumno.getId());
 
         ActividadAlumno actividadAlumno = new ActividadAlumno(puntuacion, 
             fechaInicio, fechaFin, nota, numAbandonos, alumno, actividad);

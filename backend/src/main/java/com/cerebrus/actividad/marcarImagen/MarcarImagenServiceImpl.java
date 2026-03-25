@@ -9,6 +9,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.actividad.marcarImagen.dto.MarcarImagenDTO;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.puntoImage.PuntoImagen;
@@ -104,6 +105,10 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
 
         if (!marcarImagen.getTema().getCurso().getMaestro().getId().equals(current.getId()) && !marcarImagen.getTema().getCurso().getInscripciones().stream().anyMatch(a -> a.getAlumno().getId().equals(current.getId()))) {
             throw new AccessDeniedException("Solo alguien perteneciente al curso puede acceder a esta actividad");
+        }
+
+        if (current instanceof Alumno) {
+            AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(marcarImagen, current.getId());
         }
 
         return marcarImagen;

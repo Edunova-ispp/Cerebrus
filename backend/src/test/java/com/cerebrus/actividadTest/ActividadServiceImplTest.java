@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,7 @@ import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.ActividadServiceImpl;
 import com.cerebrus.actividad.general.General;
 import com.cerebrus.curso.Curso;
+import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaService;
 import com.cerebrus.usuario.UsuarioService;
@@ -262,6 +264,74 @@ class ActividadServiceImplTest {
         when(actividadRepository.findById(5L)).thenReturn(java.util.Optional.of(actividad));
         Actividad result = actividadService.encontrarActividadPorIdAlumno(5L);
         assertThat(result).isSameAs(actividad);
+    }
+
+    @Test
+    void encontrarActividadPorIdAlumno_actividadFuturaBloqueada_lanzaAccessDeniedException() {
+        com.cerebrus.usuario.alumno.Alumno alumno = new com.cerebrus.usuario.alumno.Alumno();
+        alumno.setId(1L);
+        Maestro maestro = crearMaestro(2L);
+        Curso curso = crearCurso(maestro);
+        Tema tema = crearTema(10L, curso);
+
+        Actividad actividad1 = new General();
+        actividad1.setId(100L);
+        actividad1.setPosicion(1);
+        actividad1.setTema(tema);
+
+        Actividad actividad2 = new General();
+        actividad2.setId(200L);
+        actividad2.setPosicion(2);
+        actividad2.setTema(tema);
+
+        tema.setActividades(List.of(actividad1, actividad2));
+
+        com.cerebrus.inscripcion.Inscripcion inscripcion = new com.cerebrus.inscripcion.Inscripcion();
+        inscripcion.setAlumno(alumno);
+        curso.setInscripciones(List.of(inscripcion));
+
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        when(actividadRepository.findById(200L)).thenReturn(java.util.Optional.of(actividad2));
+
+        assertThatThrownBy(() -> actividadService.encontrarActividadPorIdAlumno(200L))
+            .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
+            .hasMessageContaining("todavía no está desbloqueada");
+    }
+
+    @Test
+    void encontrarActividadPorIdAlumno_siguienteDesbloqueadaSiAnteriorTerminada_devuelveActividad() {
+        com.cerebrus.usuario.alumno.Alumno alumno = new com.cerebrus.usuario.alumno.Alumno();
+        alumno.setId(1L);
+        Maestro maestro = crearMaestro(2L);
+        Curso curso = crearCurso(maestro);
+        Tema tema = crearTema(10L, curso);
+
+        Actividad actividad1 = new General();
+        actividad1.setId(100L);
+        actividad1.setPosicion(1);
+        actividad1.setTema(tema);
+
+        ActividadAlumno progresoActividad1 = new ActividadAlumno();
+        progresoActividad1.setAlumno(alumno);
+        progresoActividad1.setFechaFin(LocalDateTime.now());
+        actividad1.setActividadesAlumno(List.of(progresoActividad1));
+
+        Actividad actividad2 = new General();
+        actividad2.setId(200L);
+        actividad2.setPosicion(2);
+        actividad2.setTema(tema);
+
+        tema.setActividades(List.of(actividad1, actividad2));
+
+        com.cerebrus.inscripcion.Inscripcion inscripcion = new com.cerebrus.inscripcion.Inscripcion();
+        inscripcion.setAlumno(alumno);
+        curso.setInscripciones(List.of(inscripcion));
+
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        when(actividadRepository.findById(200L)).thenReturn(java.util.Optional.of(actividad2));
+
+        Actividad result = actividadService.encontrarActividadPorIdAlumno(200L);
+        assertThat(result).isSameAs(actividad2);
     }
 
     @Test

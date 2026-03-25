@@ -22,6 +22,7 @@ import com.cerebrus.actividad.general.dto.GeneralClasificacionMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestMaestroDTO;
 import com.cerebrus.comun.enumerados.TipoActGeneral;
+import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.inscripcion.Inscripcion;
@@ -167,6 +168,7 @@ public class GeneralServiceImpl implements GeneralService {
             validarCursoVisibleParaAlumno(general.get());
             for (Inscripcion inscripcion : inscripciones) {
                 if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                    AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general.get(), current.getId());
                     return general.get(); 
                 }
             }
@@ -210,6 +212,7 @@ public class GeneralServiceImpl implements GeneralService {
         List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();
         for (Inscripcion inscripcion : inscripciones) {
             if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general, current.getId());
                 return new GeneralTestDTO(
                         general.getId(), general.getTitulo(), general.getDescripcion(),
                         general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
@@ -250,6 +253,7 @@ public class GeneralServiceImpl implements GeneralService {
         List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();
         for (Inscripcion inscripcion : inscripciones) {
             if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general, current.getId());
                 return new GeneralCartaDTO(
                     general.getId(), general.getTitulo(), general.getDescripcion(),
                     general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
@@ -578,6 +582,7 @@ public class GeneralServiceImpl implements GeneralService {
         List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();
         for (Inscripcion inscripcion : inscripciones) {
             if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general, current.getId());
                 return new GeneralClasificacionDTO(
                     general.getId(), general.getTitulo(), general.getDescripcion(),
                     general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
@@ -681,6 +686,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
             if (!crucigrama.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
                 throw new AccessDeniedException("No tienes permiso para acceder a este crucigrama");
             }
+            AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(crucigrama, alumno.getId());
             return CrucigramaDTO.fromEntity(crucigrama);
         }
         else {
@@ -803,6 +809,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         if (!general.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
             throw new AccessDeniedException("No tienes permiso para acceder a esta actividad");
         }
+        AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general, alumno.getId());
 
         return new GeneralAbiertaAlumnoDTO(
             general.getId(), general.getTitulo(), general.getDescripcion(),

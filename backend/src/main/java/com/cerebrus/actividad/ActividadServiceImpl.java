@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.general.General;
 import com.cerebrus.comun.enumerados.TipoActGeneral;
+import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaService;
@@ -71,6 +72,7 @@ public class ActividadServiceImpl implements ActividadService {
             List<Inscripcion> inscripciones = actividad.getTema().getCurso().getInscripciones();
             for (Inscripcion inscripcion : inscripciones) {
                 if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                    AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(actividad, current.getId());
                     return actividad; 
                 }
             }
