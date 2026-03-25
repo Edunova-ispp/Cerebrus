@@ -53,6 +53,7 @@ services:
       WATCHPACK_POLLING: "true"
       WDS_SOCKET_PORT: "5173"
       VITE_API_URL: "http://localhost:8080"
+      VITE_WATCHBUG_URL: "http://localhost:5000"
       VITE_LOGROCKET_ID: "${LOGROCKET_ID}"
       VITE_LOGROCKET_MANUAL_RECORDING: "${LOGROCKET_MANUAL_RECORDING:-true}"
     volumes:

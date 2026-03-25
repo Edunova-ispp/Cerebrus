@@ -5,9 +5,9 @@
  * y los envía al sistema Watchbug para análisis.
  */
 
-(function() {
+(function () {
     'use strict';
-    
+
     // Configuración inyectada desde Python (será reemplazada dinámicamente)
     const WATCHBUG_CONFIG = window.__WATCHBUG_CONFIG__ || {
         enabled: false,
@@ -18,12 +18,12 @@
         },
         apiEndpoint: '/watchbug/report'
     };
-    
+
     if (!WATCHBUG_CONFIG.enabled) {
         console.log('[Watchbug] Widget desactivado');
         return;
     }
-    
+
     // ============================================
     // Estado Global del Widget
     // ============================================
@@ -36,16 +36,16 @@
         isReportDialogOpen: false,
         capturedScreenshot: null  // Screenshot pre-capturado antes de abrir modal
     };
-    
+
     // Exponer estado para debugging
     window.WatchbugState = WatchbugState;
     // Exponer updateErrorBadge para que el ErrorBoundary de React pueda actualizarlo
-    window.updateErrorBadge = function() { updateErrorBadge(); };
-    
+    window.updateErrorBadge = function () { updateErrorBadge(); };
+
     // ============================================
     // LogRocket - Carga Dinámica
     // ============================================
-    
+
     /**
      * Carga dinámicamente el SDK de LogRocket cuando el usuario lo solicita
      * @returns {Promise<boolean>} true si se cargó correctamente, false si hubo error
@@ -55,23 +55,23 @@
             console.log('[Watchbug] LogRocket ya está cargado');
             return true;
         }
-        
+
         if (!WATCHBUG_CONFIG.logrocketId) {
             console.error('[Watchbug] No hay logrocketId configurado');
             return false;
         }
-        
+
         return new Promise((resolve) => {
             const script = document.createElement('script');
             script.src = 'https://cdn.lr-ingest.com/LogRocket.min.js';
             script.crossOrigin = 'anonymous';
-            
+
             script.onload = () => {
                 try {
                     if (window.LogRocket) {
                         window.LogRocket.init(WATCHBUG_CONFIG.logrocketId);
                         console.log('[Watchbug] LogRocket cargado e inicializado:', WATCHBUG_CONFIG.logrocketId);
-                        
+
                         // Esperar 2 segundos para que LogRocket genere la sessionURL
                         setTimeout(() => {
                             try {
@@ -84,7 +84,7 @@
                                 console.warn('[Watchbug] Error capturando LogRocket sessionURL:', e);
                             }
                         }, 2000);
-                        
+
                         resolve(true);
                     } else {
                         console.error('[Watchbug] LogRocket no se cargó correctamente');
@@ -95,25 +95,25 @@
                     resolve(false);
                 }
             };
-            
+
             script.onerror = () => {
                 console.error('[Watchbug] Error cargando script de LogRocket (posiblemente bloqueado por ad-blocker)');
                 resolve(false);
             };
-            
+
             document.head.appendChild(script);
         });
     }
-    
+
     // ============================================
     // Interceptores de Errores
     // ============================================
-    
+
     /**
      * Intercepta errores globales de JavaScript
      */
     const originalOnError = window.onerror;
-    window.onerror = function(message, source, lineno, colno, error) {
+    window.onerror = function (message, source, lineno, colno, error) {
         WatchbugState.errors.push({
             type: 'javascript',
             message: message,
@@ -124,18 +124,18 @@
             timestamp: new Date().toISOString()
         });
         updateErrorBadge();
-        
+
         // Llamar al handler original si existe
         if (originalOnError) {
             return originalOnError.apply(this, arguments);
         }
         return false;
     };
-    
+
     /**
      * Intercepta promesas rechazadas no manejadas
      */
-    window.addEventListener('unhandledrejection', function(event) {
+    window.addEventListener('unhandledrejection', function (event) {
         WatchbugState.errors.push({
             type: 'unhandled_promise',
             message: event.reason ? event.reason.toString() : 'Unhandled Promise Rejection',
@@ -144,27 +144,27 @@
         });
         updateErrorBadge();
     });
-    
+
     /**
      * Intercepta console.error
      */
     const originalConsoleError = console.error;
-    console.error = function() {
+    console.error = function () {
         const args = Array.from(arguments);
         WatchbugState.consoleErrors.push({
             message: args.join(' '),
             timestamp: new Date().toISOString()
         });
-        
+
         // Llamar al console.error original
         originalConsoleError.apply(console, arguments);
     };
-    
+
     /**
      * Intercepta peticiones fetch fallidas
      */
     const originalFetch = window.fetch;
-    window.fetch = function() {
+    window.fetch = function () {
         return originalFetch.apply(this, arguments).then(response => {
             if (!response.ok) {
                 WatchbugState.networkErrors.push({
@@ -186,23 +186,23 @@
             throw error;
         });
     };
-    
+
     /**
      * Intercepta peticiones XMLHttpRequest fallidas
      */
     const originalXHROpen = XMLHttpRequest.prototype.open;
     const originalXHRSend = XMLHttpRequest.prototype.send;
-    
-    XMLHttpRequest.prototype.open = function(method, url) {
+
+    XMLHttpRequest.prototype.open = function (method, url) {
         this._watchbug_url = url;
         this._watchbug_method = method;
         return originalXHROpen.apply(this, arguments);
     };
-    
-    XMLHttpRequest.prototype.send = function() {
+
+    XMLHttpRequest.prototype.send = function () {
         const xhr = this;
-        
-        const errorHandler = function() {
+
+        const errorHandler = function () {
             WatchbugState.networkErrors.push({
                 type: 'xhr',
                 method: xhr._watchbug_method,
@@ -211,8 +211,8 @@
                 timestamp: new Date().toISOString()
             });
         };
-        
-        const loadHandler = function() {
+
+        const loadHandler = function () {
             if (xhr.status >= 400) {
                 WatchbugState.networkErrors.push({
                     type: 'xhr',
@@ -224,17 +224,17 @@
                 });
             }
         };
-        
+
         this.addEventListener('error', errorHandler);
         this.addEventListener('load', loadHandler);
-        
+
         return originalXHRSend.apply(this, arguments);
     };
-    
+
     // ============================================
     // Extracción de IDs de Servicios Externos
     // ============================================
-    
+
     /**
      * Extrae el último eventId de Sentry si está disponible
      */
@@ -244,7 +244,7 @@
         }
         return WatchbugState.sentryEventId;
     }
-    
+
     /**
      * Extrae la sessionURL de LogRocket si está disponible
      */
@@ -254,11 +254,11 @@
         }
         return WatchbugState.logrocketSessionURL;
     }
-    
+
     // ============================================
     // Sistema de Captura de Pantalla
     // ============================================
-    
+
     /**
      * Captura el estado actual del DOM como imagen
      * Requiere html2canvas (se carga dinámicamente si no está disponible)
@@ -269,14 +269,14 @@
             console.warn('[Watchbug] html2canvas no disponible, captura de pantalla omitida');
             return null;
         }
-        
+
         try {
             const canvas = await window.html2canvas(document.body, {
                 logging: false,
                 useCORS: true,
                 allowTaint: true
             });
-            
+
             // Convertir canvas a blob
             return new Promise((resolve) => {
                 canvas.toBlob((blob) => {
@@ -288,7 +288,7 @@
             return null;
         }
     }
-    
+
     /**
      * Carga html2canvas dinámicamente si no está disponible
      */
@@ -298,7 +298,7 @@
                 resolve();
                 return;
             }
-            
+
             // Intentar primero desde archivo local; si no existe, usar CDN
             function tryLoad(src, onFail) {
                 const script = document.createElement('script');
@@ -308,16 +308,16 @@
                 document.head.appendChild(script);
             }
 
-            tryLoad('/html2canvas.min.js', function() {
+            tryLoad('/html2canvas.min.js', function () {
                 // Fallback al CDN si el archivo local no existe
                 tryLoad(
                     'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
-                    function() { reject(new Error('No se pudo cargar html2canvas')); }
+                    function () { reject(new Error('No se pudo cargar html2canvas')); }
                 );
             });
         });
     }
-    
+
     // ============================================
     // Badge de errores en el botón flotante
     // ============================================
@@ -365,7 +365,7 @@
     // ============================================
     // UI del Widget - Botón Flotante
     // ============================================
-    
+
     /**
      * Crea el botón de grabación manual 📹 para LogRocket
      */
@@ -374,7 +374,7 @@
         button.id = 'watchbug-recording-btn';
         button.innerHTML = '📹';
         button.title = 'Iniciar grabación de sesión';
-        
+
         // Estilos del botón
         Object.assign(button.style, {
             position: 'fixed',
@@ -395,20 +395,20 @@
             alignItems: 'center',
             justifyContent: 'center'
         });
-        
+
         let isRecording = false;
-        
+
         button.addEventListener('click', async () => {
             if (isRecording) {
                 return; // Ya está grabando
             }
-            
+
             // Deshabilitar botón mientras carga
             button.style.cursor = 'wait';
             button.style.opacity = '0.6';
-            
+
             const success = await loadLogRocket();
-            
+
             if (success) {
                 isRecording = true;
                 button.innerHTML = '🔴';
@@ -416,10 +416,10 @@
                 button.style.background = '#dc3545';
                 button.style.cursor = 'default';
                 button.style.opacity = '1';
-                
+
                 // Animación de pulso para indicar que está grabando
                 button.style.animation = 'watchbug-pulse 2s infinite';
-                
+
                 // Añadir estilos de animación si no existen
                 if (!document.getElementById('watchbug-recording-styles')) {
                     const style = document.createElement('style');
@@ -439,7 +439,7 @@
                 alert('No se pudo iniciar la grabación. Verifica tu conexión o desactiva el bloqueador de anuncios.');
             }
         });
-        
+
         // Hover effect (solo si no está grabando)
         button.addEventListener('mouseenter', () => {
             if (!isRecording) {
@@ -447,17 +447,17 @@
                 button.style.background = '#5a6268';
             }
         });
-        
+
         button.addEventListener('mouseleave', () => {
             if (!isRecording) {
                 button.style.transform = 'scale(1)';
                 button.style.background = '#6c757d';
             }
         });
-        
+
         return button;
     }
-    
+
     /**
      * Crea el botón flotante de reporte de bugs
      */
@@ -466,7 +466,7 @@
         button.id = 'watchbug-floating-btn';
         button.innerHTML = '🐛';
         button.title = 'Reportar un problema';
-        
+
         // Estilos inline para el botón
         Object.assign(button.style, {
             position: 'fixed',
@@ -487,23 +487,23 @@
             alignItems: 'center',
             justifyContent: 'center'
         });
-        
+
         // Efectos hover
         button.addEventListener('mouseenter', () => {
             button.style.transform = 'scale(1.1)';
             button.style.boxShadow = '0 6px 16px rgba(0,0,0,0.4)';
         });
-        
+
         button.addEventListener('mouseleave', () => {
             button.style.transform = 'scale(1)';
             button.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
         });
-        
+
         button.addEventListener('click', openReportDialog);
-        
+
         return button;
     }
-    
+
     /**
      * Crea el botón del dashboard de administración
      */
@@ -512,7 +512,7 @@
         button.id = 'watchbug-dashboard-btn';
         button.innerHTML = '📊';
         button.title = 'Dashboard de Watchbug';
-        
+
         // Estilos inline para el botón (a la izquierda del botón de reporte)
         Object.assign(button.style, {
             position: 'fixed',
@@ -533,33 +533,33 @@
             alignItems: 'center',
             justifyContent: 'center'
         });
-        
+
         // Efectos hover
         button.addEventListener('mouseenter', () => {
             button.style.transform = 'scale(1.1)';
             button.style.boxShadow = '0 6px 16px rgba(0,0,0,0.4)';
         });
-        
+
         button.addEventListener('mouseleave', () => {
             button.style.transform = 'scale(1)';
             button.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
         });
-        
-        // Click handler - abrir dashboard
+        const WATCHBUG_URL = window.__WATCHBUG_URL__ || "http://localhost:5000";
+
         button.addEventListener('click', () => {
-            window.location.href = 'http://localhost:5000/watchbug/dashboard';
+            window.location.href = `${WATCHBUG_URL}/watchbug/dashboard`;
         });
-        
+
         return button;
     }
-    
+
     /**
      * Crea el modal de reporte de bugs
      */
     function createReportModal() {
         const overlay = document.createElement('div');
         overlay.id = 'watchbug-overlay';
-        
+
         Object.assign(overlay.style, {
             position: 'fixed',
             top: '0',
@@ -572,10 +572,10 @@
             alignItems: 'center',
             justifyContent: 'center'
         });
-        
+
         const dialog = document.createElement('div');
         dialog.id = 'watchbug-dialog';
-        
+
         Object.assign(dialog.style, {
             backgroundColor: 'white',
             borderRadius: '12px',
@@ -585,7 +585,7 @@
             boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
             position: 'relative'
         });
-        
+
         dialog.innerHTML = `
             <button id="watchbug-close" style="
                 position: absolute;
@@ -663,31 +663,31 @@
                 font-size: 14px;
             "></div>
         `;
-        
+
         overlay.appendChild(dialog);
-        
+
         // Event listeners
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
                 closeReportDialog();
             }
         });
-        
+
         dialog.querySelector('#watchbug-close').addEventListener('click', closeReportDialog);
         dialog.querySelector('#watchbug-cancel').addEventListener('click', closeReportDialog);
         dialog.querySelector('#watchbug-submit').addEventListener('click', submitReport);
-        
+
         return overlay;
     }
-    
+
     /**
      * Abre el diálogo de reporte
      */
     async function openReportDialog() {
         if (WatchbugState.isReportDialogOpen) return;
-        
+
         WatchbugState.isReportDialogOpen = true;
-        
+
         // IMPORTANTE: Capturar screenshot ANTES de mostrar el modal
         console.log('[Watchbug] Capturando screenshot antes de abrir modal...');
         try {
@@ -698,7 +698,7 @@
             console.warn('[Watchbug] No se pudo cargar html2canvas, el reporte se enviará sin screenshot:', error);
             WatchbugState.capturedScreenshot = null;
         }
-        
+
         // Ahora sí, mostrar el modal con los contadores actualizados
         const overlay = document.getElementById('watchbug-overlay');
         overlay.style.display = 'flex';
@@ -710,13 +710,13 @@
         if (jsErrEl) jsErrEl.textContent = WatchbugState.errors.length;
         if (consoleErrEl) consoleErrEl.textContent = WatchbugState.consoleErrors.length;
         if (networkErrEl) networkErrEl.textContent = WatchbugState.networkErrors.length;
-        
+
         // Focus en el textarea
         setTimeout(() => {
             document.getElementById('watchbug-comment').focus();
         }, 100);
     }
-    
+
     /**
      * Cierra el diálogo de reporte
      */
@@ -724,15 +724,15 @@
         WatchbugState.isReportDialogOpen = false;
         const overlay = document.getElementById('watchbug-overlay');
         overlay.style.display = 'none';
-        
+
         // Limpiar el formulario
         document.getElementById('watchbug-comment').value = '';
         document.getElementById('watchbug-status').style.display = 'none';
-        
+
         // Limpiar screenshot capturado
         WatchbugState.capturedScreenshot = null;
     }
-    
+
     /**
      * Muestra un mensaje de estado en el diálogo
      */
@@ -740,48 +740,48 @@
         const statusDiv = document.getElementById('watchbug-status');
         statusDiv.textContent = message;
         statusDiv.style.display = 'block';
-        
+
         const colors = {
             info: { bg: '#E3F2FD', text: '#1976D2' },
             success: { bg: '#E8F5E9', text: '#388E3C' },
             error: { bg: '#FFEBEE', text: '#D32F2F' }
         };
-        
+
         const color = colors[type] || colors.info;
         statusDiv.style.backgroundColor = color.bg;
         statusDiv.style.color = color.text;
     }
-    
+
     /**
      * Envía el reporte al backend
      */
     async function submitReport() {
         const comment = document.getElementById('watchbug-comment').value.trim();
-        
+
         if (!comment) {
             showStatus('Por favor, describe el problema que encontraste', 'error');
             return;
         }
-        
+
         showStatus('Preparando reporte... 📋', 'info');
-        
+
         // Deshabilitar botón de envío
         const submitBtn = document.getElementById('watchbug-submit');
         const cancelBtn = document.getElementById('watchbug-cancel');
         submitBtn.disabled = true;
         cancelBtn.disabled = true;
         submitBtn.textContent = 'Enviando...';
-        
+
         try {
             // Usar el screenshot pre-capturado (capturado ANTES de abrir el modal)
             const screenshot = WatchbugState.capturedScreenshot;
-            
+
             if (screenshot) {
                 console.log('[Watchbug] Usando screenshot pre-capturado');
             } else {
                 console.warn('[Watchbug] No hay screenshot pre-capturado disponible');
             }
-            
+
             // Recopilar toda la información
             const reportData = {
                 comment: comment,
@@ -798,31 +798,31 @@
                 sentryEventId: getSentryEventId(),
                 logrocketSessionURL: getLogrocketSessionURL()
             };
-            
+
             console.log('[Watchbug] Enviando reporte:', reportData);
-            
+
             // Crear FormData para enviar archivo + JSON
             const formData = new FormData();
             formData.append('data', JSON.stringify(reportData));
-            
+
             if (screenshot) {
                 formData.append('screenshot', screenshot, 'screenshot.png');
             }
-            
+
             // Enviar al backend
             showStatus('Enviando reporte...', 'info');
             const response = await fetch(WATCHBUG_CONFIG.apiEndpoint, {
                 method: 'POST',
                 body: formData
             });
-            
+
             console.log('[Watchbug] Respuesta del servidor:', response.status);
-            
+
             if (response.ok) {
                 const result = await response.json();
                 console.log('[Watchbug] Resultado:', result);
                 showStatus('✅ Reporte enviado correctamente. ¡Gracias!', 'success');
-                
+
                 // Cerrar después de 2 segundos
                 setTimeout(() => {
                     closeReportDialog();
@@ -832,60 +832,60 @@
                 console.error('[Watchbug] Error del servidor:', errorText);
                 throw new Error(`HTTP ${response.status}: ${errorText}`);
             }
-            
+
         } catch (error) {
             console.error('[Watchbug] Error enviando reporte:', error);
             showStatus('❌ Error: ' + error.message, 'error');
-            
+
             // Re-habilitar botones
             submitBtn.disabled = false;
             cancelBtn.disabled = false;
             submitBtn.textContent = 'Enviar Reporte';
         }
     }
-    
+
     // ============================================
     // Inicialización del Widget
     // ============================================
-    
+
     function init() {
         console.log('[Watchbug] Inicializando widget...');
-        
+
         // Esperar a que el DOM esté listo
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
             return;
         }
-        
+
         // Crear UI
         document.body.appendChild(createFloatingButton());
         document.body.appendChild(createReportModal());
         updateErrorBadge(); // actualizar badge por si hubo errores antes de que el DOM estuviese listo
-        
+
         // Crear botón de grabación si LogRocket está en modo manual
         if (WATCHBUG_CONFIG.services.logrocket && WATCHBUG_CONFIG.logrocketManual) {
             document.body.appendChild(createRecordingButton());
             console.log('[Watchbug] Botón de grabación manual activado 📹');
         }
-        
+
         // Crear botón de dashboard si está habilitado
         if (WATCHBUG_CONFIG.admin === true) {
             document.body.appendChild(createDashboardButton());
         }
-        
+
         console.log('[Watchbug] Widget listo ✓');
         console.log('[Watchbug] Servicios activos:', {
             sentry: WATCHBUG_CONFIG.services.sentry,
             logrocket: WATCHBUG_CONFIG.services.logrocket,
             supabase: WATCHBUG_CONFIG.services.supabase
         });
-        
+
         if (WATCHBUG_CONFIG.admin === true) {
             console.log('[Watchbug] Dashboard de administración habilitado en /watchbug/dashboard');
         }
     }
-    
+
     // Iniciar
     init();
-    
+
 })();
