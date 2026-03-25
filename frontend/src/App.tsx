@@ -112,7 +112,10 @@ function App() {
         <Route path="/ordenaciones/:ordenacionId/alumno" element={
           <ProtectedRoute allowedRoles={['ALUMNO']}><OrdenacionAlumno /></ProtectedRoute>
         } />
-        <Route path="/marcar/:ordenacionId/alumno" element={
+        <Route path="/marcar/:marcarImagenId/alumno" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><MarcarImagenAlumno /></ProtectedRoute>
+        } />
+        <Route path="/marcar-imagenes/:marcarImagenId/alumno" element={
           <ProtectedRoute allowedRoles={['ALUMNO']}><MarcarImagenAlumno /></ProtectedRoute>
         } />
         <Route path="/clasificaciones/:clasificacionId/alumno" element={
