@@ -19,7 +19,6 @@ export default function PreguntaAbiertaAlumno() {
   const [actividad, setActividad] = useState<any>(null);
   const [actividadAlumnoId, setActividadAlumnoId] = useState<number | null>(null);
   
-  // Guardamos las respuestas en un Map <ID_Pregunta, Texto>
   const [respuestas, setRespuestas] = useState<Map<number, string>>(new Map());
   
   const [loading, setLoading] = useState(true);
@@ -33,12 +32,10 @@ export default function PreguntaAbiertaAlumno() {
     const loadData = async () => {
       try {
         setLoading(true);
-        // 1. Obtener la actividad
         const res = await apiFetch(`${apiBase}/api/generales/abierta/${actividadId}`);
         const data = await res.json();
         setActividad(data);
 
-        // 2. Registrar el inicio de la actividad para el alumno
         const info = getCurrentUserInfo() as any;
         const alumnoId = info?.id || info?.userId;
         
@@ -63,25 +60,16 @@ export default function PreguntaAbiertaAlumno() {
     
     setSubmitting(true);
     try {
-      /**
-       * CONVERSIÓN AL TIPO LinkedHashMap<Long, String>
-       * Creamos un objeto plano donde las llaves son los IDs de las preguntas.
-       * Jackson en Java transformará estas llaves String a Long automáticamente.
-       */
       const respuestasAlumnoObj: Record<string, string> = {};
       respuestas.forEach((valor, clave) => {
         respuestasAlumnoObj[clave.toString()] = valor;
       });
 
-      // El payload debe coincidir con EvaluacionActividadAbiertaRequest.java
       const payload = {
         actividadAlumnoId: Number(actividadAlumnoId),
         respuestasAlumno: respuestasAlumnoObj
       };
 
-      console.log("Enviando evaluación...", payload);
-
-      // IMPORTANTE: Asegúrate de que esta URL sea la que acepta el método POST en tu Controller
       const res = await apiFetch(`${apiBase}/api/respuestas-alumno-general/abierta`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -93,10 +81,7 @@ export default function PreguntaAbiertaAlumno() {
         throw new Error(errorData.message || "Error al procesar la corrección");
       }
 
-      const dataFinal = await res.json();
-      console.log("Resultado de la IA:", dataFinal);
-
-      // Redirigir tras el éxito
+      await res.json();
       navigate(-1);
 
     } catch (error) {
@@ -134,18 +119,33 @@ export default function PreguntaAbiertaAlumno() {
 
             <div className="ta-question-card">
               <h3 className="ta-question-counter">Pregunta {currentIndex + 1} de {totalPreguntas}</h3>
-              <p className="ta-question-text">{currentPregunta.pregunta}</p>
-              
-              <textarea
-                className="ta-open-input"
-                placeholder="Escribe aquí tu respuesta detallada..."
-                value={respuestas.get(currentPregunta.id) || ''}
-                onChange={(e) => {
-                  const newMap = new Map(respuestas);
-                  newMap.set(currentPregunta.id, e.target.value);
-                  setRespuestas(newMap);
-                }}
-              />
+
+              {/* Layout dos columnas: texto+textarea izquierda · imagen derecha */}
+              <div className="ta-card-body">
+                <div className="ta-card-left">
+                  <p className="ta-question-text">{currentPregunta.pregunta}</p>
+                  <textarea
+                    className="ta-open-input"
+                    placeholder="Escribe aquí tu respuesta detallada..."
+                    value={respuestas.get(currentPregunta.id) || ''}
+                    onChange={(e) => {
+                      const newMap = new Map(respuestas);
+                      newMap.set(currentPregunta.id, e.target.value);
+                      setRespuestas(newMap);
+                    }}
+                  />
+                </div>
+
+                {actividad.imagen && (
+                  <div className="ta-card-right">
+                    <img
+                      src={actividad.imagen}
+                      alt={actividad.titulo}
+                      className="ta-activity-image"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="ta-nav-buttons">
