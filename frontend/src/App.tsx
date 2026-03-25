@@ -32,6 +32,7 @@ import CrucigramaAlumno from "./pages/crucigramaAlumno/CrucigramaAlumno";
 import EstadisticasAlumno from "./pages/estadisticasCurso/EstadisticasAlumno.tsx";
 import EstadisticasActividad from "./pages/estadisticasCurso/EstadisticasActividad.tsx";
 import EstadisticasTema from "./pages/estadisticasCurso/EstadisticasTema.tsx";
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
 class WatchbugErrorBoundary extends Component<
@@ -83,41 +84,99 @@ function App() {
   return (
     <WatchbugErrorBoundary>
       <Routes>
+      {/* Rutas públicas */}
       <Route path="/deploy_testing" element={<DeployTesting />} />
       <Route path="/" element={<LandingPage />} />
-      <Route path="/infoAlumnos"   element={<InfoPage userType="alumno" />} />
-      <Route path="/infoProfesores" element={<InfoPage userType="profesor" />} />
-      <Route path="/infoDueños"    element={<InfoPage userType="dueno" />} />
-      <Route path="/misCursos"     element={<MisCursos />} />
-      <Route path="/crearCurso"    element={<CrearCurso />} />
-      <Route path="/editarCurso/:id" element={<EditarCurso />} />
-      <Route path="/mapa/:id"      element={<MapaCurso />} />
-      <Route path="/cursos/:id"    element={<DetalleCurso />} />
-      <Route path="/cursos/:id/temas/crear" element={<CrearTema />} />
-      <Route path="/cursos/:id/temas/:temaId/editar" element={<EditarTema />} />
-      <Route path="/cursos/:id/temas/:temaId/actividades/:actividadId/editar" element={<EditarActividad />} />
       <Route path="/auth/login"    element={<LoginPage />} />
       <Route path="/auth/register"    element={<RegisterPage />} />
       <Route path="/auth/logout"    element={<LogoutPage />} />
-      <Route path="/cursos/:id/temas/:temaId/actividades/crear" element={<CrearActividad />} />
-      <Route path="/ordenaciones/:ordenacionId/alumno" element={<OrdenacionAlumno />} />
-      <Route path="/marcar-imagenes/:marcarImagenId/alumno" element={<MarcarImagenAlumno />} />
-      <Route path="/clasificaciones/:clasificacionId/alumno" element={<ClasificacionAlumno />} />
-      <Route path="/crucigrama/:crucigramaId/alumno" element={<CrucigramaAlumno />} />
-      <Route path="/actividades/teoria/:actividadId" element={<TeoriaAlumno />} />
+      <Route path="/infoAlumnos"   element={<InfoPage userType="alumno" />} />
+      <Route path="/infoProfesores" element={<InfoPage userType="profesor" />} />
+      <Route path="/infoDueños"    element={<InfoPage userType="dueno" />} />
 
-      <Route path="/generales/test/:testId/alumno" element={<TestAlumno />} />
-      <Route path="/tableros/:tableroId/alumno" element={<TableroAlumno />} />
-      <Route path="/generales/carta/:cartaId/alumno" element={<CartaAlumno />} />
-      <Route path="/estadisticas/:id" element={<EstadisticasCurso />} />
-      <Route path="/estadisticas/:id/actividades" element={<EstadisticasActividades />} />
-      <Route path="/estadisticas/:cursoId/actividades/graficas" element={<GraficasActividades />} />
-      <Route path="/estadisticas/:id/temas" element={<EstadisticasTemas />} />
-      <Route path="/estadisticas/:cursoId/temas/graficas" element={<GraficasTemas />} />
-      <Route path="/perfil" element={<Perfil />} />
-      <Route path="/estadisticas/cursos/:cursoId/alumno/:alumnoNombre" element={<EstadisticasAlumno />} />
-      <Route path="/estadisticas/temas/:id" element={<EstadisticasTema />} />
-      <Route path="/estadisticas/actividades/:id" element={<EstadisticasActividad />} />
+      {/* Rutas roles */}
+      <Route path="/misCursos" element={
+          <ProtectedRoute allowedRoles={['ALUMNO', 'MAESTRO', 'DUENO']}><MisCursos /></ProtectedRoute>
+        } />
+        <Route path="/cursos/:id" element={
+          <ProtectedRoute allowedRoles={['ALUMNO', 'MAESTRO', 'DUENO']}><DetalleCurso /></ProtectedRoute>
+        } />
+        <Route path="/perfil" element={
+          <ProtectedRoute allowedRoles={['ALUMNO', 'MAESTRO', 'DUENO']}><Perfil /></ProtectedRoute>
+        } />
+
+      {/* Rutas alumnos */}
+      <Route path="/mapa/:id" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><MapaCurso /></ProtectedRoute>
+        } />
+        <Route path="/ordenaciones/:ordenacionId/alumno" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><OrdenacionAlumno /></ProtectedRoute>
+        } />
+        <Route path="/marcar/:ordenacionId/alumno" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><MarcarImagenAlumno /></ProtectedRoute>
+        } />
+        <Route path="/clasificaciones/:clasificacionId/alumno" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><ClasificacionAlumno /></ProtectedRoute>
+        } />
+        <Route path="/crucigrama/:crucigramaId/alumno" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><CrucigramaAlumno /></ProtectedRoute>
+        } />
+        <Route path="/actividades/teoria/:actividadId" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><TeoriaAlumno /></ProtectedRoute>
+        } />
+        <Route path="/generales/test/:testId/alumno" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><TestAlumno /></ProtectedRoute>
+        } />
+        <Route path="/tableros/:tableroId/alumno" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><TableroAlumno /></ProtectedRoute>
+        } />
+        <Route path="/generales/carta/:cartaId/alumno" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><CartaAlumno /></ProtectedRoute>
+        } />
+        <Route path="/estadisticas/:id" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><EstadisticasAlumno /></ProtectedRoute>
+        } />
+
+      {/* Rutas profesores y dueños */}
+        <Route path="/crearCurso" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><CrearCurso /></ProtectedRoute>
+        } />  
+        <Route path="/editarCurso/:id" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EditarCurso /></ProtectedRoute>
+        } /> 
+        <Route path="/cursos/:id/temas/crear" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><CrearTema /></ProtectedRoute>
+        } /> 
+        <Route path="/cursos/:id/temas/:temaId/editar" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EditarTema /></ProtectedRoute>
+        } /> 
+        <Route path="/cursos/:id/temas/:temaId/actividades/:actividadId/editar" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EditarActividad /></ProtectedRoute>
+        } /> 
+        <Route path="/cursos/:id/temas/:temaId/actividades/crear" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><CrearActividad /></ProtectedRoute>
+        } /> 
+        <Route path="/estadisticas/:id/actividades" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EstadisticasActividades /></ProtectedRoute>
+        } /> 
+        <Route path="/estadisticas/:cursoId/actividades/graficas" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><GraficasActividades /></ProtectedRoute>
+        } /> 
+        <Route path="/estadisticas/:id/temas" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EstadisticasTemas /></ProtectedRoute>
+        } />
+        <Route path="/estadisticas/:cursoId/temas/graficas" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><GraficasTemas /></ProtectedRoute>
+        } />
+        <Route path="/estadisticas/cursos/:cursoId/alumno/:alumnoNombre" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EstadisticasAlumno /></ProtectedRoute>
+        } />
+        <Route path="/estadisticas/temas/:id" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EstadisticasTema /></ProtectedRoute>
+        } />
+        <Route path="/estadisticas/actividades/:id" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EstadisticasActividad /></ProtectedRoute>
+        } />
     </Routes>
     </WatchbugErrorBoundary>
   );
