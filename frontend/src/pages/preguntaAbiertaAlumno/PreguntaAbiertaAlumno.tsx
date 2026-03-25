@@ -36,6 +36,15 @@ export default function PreguntaAbiertaAlumno() {
         const data = await res.json();
         setActividad(data);
 
+        // Inicializar respuestas con todas las preguntas
+        const initialMap = new Map<number, string>();
+        if (data.preguntas) {
+          for (const p of data.preguntas) {
+            initialMap.set(p.id, '');
+          }
+        }
+        setRespuestas(initialMap);
+
         const info = getCurrentUserInfo() as any;
         const alumnoId = info?.id || info?.userId;
         
@@ -167,7 +176,14 @@ export default function PreguntaAbiertaAlumno() {
                 </button>
               ) : (
                 <button 
-                  onClick={() => setFinished(true)} 
+                  onClick={() => {
+                    const sinResponder = actividad?.preguntas?.some((p: any) => !respuestas.get(p.id)?.trim());
+                    if (sinResponder) {
+                      alert('Debes responder a todas las preguntas antes de enviar.');
+                      return;
+                    }
+                    setFinished(true);
+                  }} 
                   className="ta-nav-btn ta-nav-btn--submit" 
                   disabled={submitting}
                 >
