@@ -7,6 +7,7 @@ import dragon from "../../assets/props/dragon.png";
 import libro from "../../assets/props/libro.png";
 import dueno from "../../assets/props/dueño.png";
 import ProfileIcon from "../../assets/icons/profile.svg?react";
+import { Link } from 'react-router-dom';
 
 // Alternating primary/secondary, except 'u' which uses accent
 const TITLE = [
@@ -109,8 +110,13 @@ function LandingPage() {
           </div>
         ))}
       </div>
-    </div>
+      
+    {/* FOOTER LEGAL */}
+      <footer className="landing-footer">
+        <Link to="/terminos">Política de Privacidad y Términos de Servicio</Link>
+      </footer>
+    </div> 
   );
-}
+};
 
 export default LandingPage;
