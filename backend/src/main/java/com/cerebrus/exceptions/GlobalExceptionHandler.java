@@ -1,6 +1,5 @@
 package com.cerebrus.exceptions;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -136,6 +135,24 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(body);
     }
+
+        /**
+         * Maneja errores de cuota agotada de proveedores externos de IA
+         * Retorna 429 Too Many Requests
+         */
+        @ExceptionHandler(QuotaExceededException.class)
+        public ResponseEntity<?> handleQuotaExceeded(
+                        QuotaExceededException ex,
+                        WebRequest request) {
+
+                Map<String, Object> body = new HashMap<>();
+                body.put("status", HttpStatus.TOO_MANY_REQUESTS.value());
+                body.put("mensaje", ex.getMessage() != null ? ex.getMessage() : "Se ha alcanzado el límite de peticiones");
+
+                return ResponseEntity
+                                .status(HttpStatus.TOO_MANY_REQUESTS)
+                                .body(body);
+        }
 
         /**
          * Maneja excepciones de acceso denegado

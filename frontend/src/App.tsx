@@ -33,6 +33,7 @@ import EstadisticasAlumno from "./pages/estadisticasCurso/EstadisticasAlumno.tsx
 import EstadisticasActividad from "./pages/estadisticasCurso/EstadisticasActividad.tsx";
 import EstadisticasTema from "./pages/estadisticasCurso/EstadisticasTema.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import PreguntaAbiertaAlumno from "./pages/preguntaAbiertaAlumno/PreguntaAbiertaAlumno.tsx";
 
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
 class WatchbugErrorBoundary extends Component<

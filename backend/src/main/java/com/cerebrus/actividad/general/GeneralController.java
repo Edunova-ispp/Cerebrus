@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,9 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.actividad.general.dto.CrucigramaDTO;
@@ -250,6 +249,9 @@ public class GeneralController {
         if(crucigrama.getPreguntasYRespuestas().size() > 5) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
+        if (!sonRespuestasCrucigramaValidas(crucigrama)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
         CrucigramaDTO generalCreada = generalService.crearTipoCrucigrama(crucigrama);
         return ResponseEntity.ok(generalCreada);
         
@@ -265,9 +267,19 @@ public class GeneralController {
     @PutMapping("/crucigrama/{id}")
     @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<CrucigramaDTO> updateTipoCrucigrama(@PathVariable Long id, @RequestBody CrucigramaRequest crucigrama) {
-    
+        if (!sonRespuestasCrucigramaValidas(crucigrama)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
         CrucigramaDTO updated = generalService.updateTipoCrucigrama(id, crucigrama);
         return ResponseEntity.ok(updated);
+    }
+
+    private boolean sonRespuestasCrucigramaValidas(CrucigramaRequest crucigrama) {
+        if (crucigrama.getPreguntasYRespuestas() == null || crucigrama.getPreguntasYRespuestas().isEmpty()) {
+            return false;
+        }
+        return crucigrama.getPreguntasYRespuestas().values().stream()
+            .allMatch(respuesta -> respuesta != null && respuesta.strip().matches("^[\\p{L}]+$"));
     }
 
     @PostMapping("/abierta/maestro")
@@ -286,7 +298,8 @@ public class GeneralController {
             general.getTema().getId(),
             general.getRespVisible(),
             general.getComentariosRespVisible(),
-            preguntasId
+            preguntasId,
+            general.getImagen()
         );
 
         return new ResponseEntity<>(generalCreada.getId(), HttpStatus.CREATED);
@@ -304,7 +317,7 @@ public class GeneralController {
 
     @PutMapping("/abierta/update/{id}")
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<GeneralAbiertaAlumnoDTO> updateTipoAbierta(@PathVariable Long id, @RequestBody @Valid General general) {
+    public ResponseEntity<GeneralAbiertaMaestroDTO> updateTipoAbierta(@PathVariable Long id, @RequestBody @Valid General general) {
 
         generalService.updateTipoAbierta(
         id,
@@ -316,10 +329,11 @@ public class GeneralController {
         general.getPreguntas().stream().map(Pregunta::getId).toList(),
         general.getPosicion(),
         general.getVersion(),
-        general.getTema().getId()
+        general.getTema().getId(),
+        general.getImagen()
         );
 
-        return ResponseEntity.ok(generalService.readTipoAbierta(id));
+        return ResponseEntity.ok(generalService.readTipoAbiertaMaestro(id));
     }
 
 }

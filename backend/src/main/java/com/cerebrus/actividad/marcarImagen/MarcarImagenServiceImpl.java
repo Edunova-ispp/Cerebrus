@@ -9,6 +9,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.actividad.marcarImagen.dto.MarcarImagenDTO;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.puntoImage.PuntoImagen;
@@ -98,8 +99,16 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
         MarcarImagen marcarImagen = marcarImagenRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Marcar Imagen", "id", id));
 
+        if (current instanceof Alumno && !Boolean.TRUE.equals(marcarImagen.getTema().getCurso().getVisibilidad())) {
+            throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
+        }
+
         if (!marcarImagen.getTema().getCurso().getMaestro().getId().equals(current.getId()) && !marcarImagen.getTema().getCurso().getInscripciones().stream().anyMatch(a -> a.getAlumno().getId().equals(current.getId()))) {
             throw new AccessDeniedException("Solo alguien perteneciente al curso puede acceder a esta actividad");
+        }
+
+        if (current instanceof Alumno) {
+            AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(marcarImagen, current.getId());
         }
 
         return marcarImagen;
@@ -129,12 +138,6 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
                 }
             })
             .toList());
-        List<PuntoImagen> puntosExistentes = new ArrayList<>(marcarImagenAActualizar.getPuntosImagen());
-        for(PuntoImagen puntoExistente : puntosExistentes) {
-            if(puntosImagen.stream().noneMatch(p -> p.getId().equals(puntoExistente.getId()))) {
-                puntosImagen.add(puntoExistente);
-            }
-        }
 
         marcarImagenAActualizar.setTitulo(marcarImagenDTO.getTitulo());
         marcarImagenAActualizar.setDescripcion(marcarImagenDTO.getDescripcion());

@@ -1,18 +1,19 @@
- package com.cerebrus.actividad.general;
+package com.cerebrus.actividad.general;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.general.dto.CrucigramaDTO;
 import com.cerebrus.actividad.general.dto.CrucigramaRequest;
+import com.cerebrus.actividad.general.dto.GeneralAbiertaAlumnoDTO;
 import com.cerebrus.actividad.general.dto.GeneralAbiertaMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaMaestroDTO;
@@ -20,25 +21,26 @@ import com.cerebrus.actividad.general.dto.GeneralClasificacionDTO;
 import com.cerebrus.actividad.general.dto.GeneralClasificacionMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestMaestroDTO;
+import com.cerebrus.comun.enumerados.TipoActGeneral;
+import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.pregunta.Pregunta;
+import com.cerebrus.pregunta.PreguntaRepository;
+import com.cerebrus.pregunta.dto.PreguntaAlumnoDTO;
+import com.cerebrus.pregunta.dto.PreguntaDTO;
+import com.cerebrus.pregunta.dto.PreguntaMaestroDTO;
+import com.cerebrus.respuestaMaestro.RespuestaMaestro;
+import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
+import com.cerebrus.respuestaMaestro.dto.RespuestaDTO;
+import com.cerebrus.respuestaMaestro.dto.RespuestaMaestroDTO;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
-import com.cerebrus.pregunta.PreguntaRepository;
-import com.cerebrus.pregunta.dto.PreguntaDTO;
-import com.cerebrus.pregunta.dto.PreguntaMaestroDTO;
-import com.cerebrus.pregunta.dto.PreguntaAlumnoDTO;
-import com.cerebrus.actividad.general.dto.GeneralAbiertaAlumnoDTO;
-import com.cerebrus.respuestaMaestro.RespuestaMaestro;
-import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
-import com.cerebrus.respuestaMaestro.dto.RespuestaDTO;
-import com.cerebrus.respuestaMaestro.dto.RespuestaMaestroDTO;
 
 @Service
 @Transactional
@@ -88,7 +90,8 @@ public class GeneralServiceImpl implements GeneralService {
             actividad.setComentariosRespVisible(comentariosRespVisible);
         }
         actividad.setVersion(1);
-        actividad.setPosicion(tema.getActividades().size());
+        Integer maxPosicion = actividadRepository.findMaxPosicionByTemaId(temaId);
+        actividad.setPosicion((maxPosicion != null ? maxPosicion : 0) + 1);
         actividad.setTema(tema);
         return actividad;
     }
@@ -163,8 +166,10 @@ public class GeneralServiceImpl implements GeneralService {
         }
         List<Inscripcion> inscripciones = general.get().getTema().getCurso().getInscripciones();
         if(current instanceof Alumno) {
+            validarCursoVisibleParaAlumno(general.get());
             for (Inscripcion inscripcion : inscripciones) {
                 if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                    AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general.get(), current.getId());
                     return general.get(); 
                 }
             }
@@ -195,6 +200,8 @@ public class GeneralServiceImpl implements GeneralService {
             throw new ResourceNotFoundException("La actividad no es de tipo test");
         }
 
+        validarCursoVisibleParaAlumno(general);
+
         List<PreguntaDTO> preguntasDTO = general.getPreguntas().stream().map(pregunta -> {
             List<RespuestaDTO> respuestasDTO = CerebrusUtils.shuffleCollection(pregunta.getRespuestasMaestro())
                 .stream()
@@ -206,6 +213,7 @@ public class GeneralServiceImpl implements GeneralService {
         List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();
         for (Inscripcion inscripcion : inscripciones) {
             if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general, current.getId());
                 return new GeneralTestDTO(
                         general.getId(), general.getTitulo(), general.getDescripcion(),
                         general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
@@ -233,6 +241,8 @@ public class GeneralServiceImpl implements GeneralService {
             throw new ResourceNotFoundException("La actividad no es de tipo carta");
         }
 
+        validarCursoVisibleParaAlumno(general);
+
         List<PreguntaDTO> preguntasDTO = general.getPreguntas().stream().map(pregunta -> {
             List<RespuestaDTO> respuestasDTO = CerebrusUtils.shuffleCollection(pregunta.getRespuestasMaestro())
                 .stream()
@@ -244,6 +254,7 @@ public class GeneralServiceImpl implements GeneralService {
         List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();
         for (Inscripcion inscripcion : inscripciones) {
             if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general, current.getId());
                 return new GeneralCartaDTO(
                     general.getId(), general.getTitulo(), general.getDescripcion(),
                     general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
@@ -542,6 +553,8 @@ public class GeneralServiceImpl implements GeneralService {
             throw new ResourceNotFoundException("La actividad no es de tipo clasificación");
         }
 
+        validarCursoVisibleParaAlumno(general);
+
         general.getPreguntas().forEach(p -> p.getRespuestasMaestro().size());
         List<RespuestaMaestro> todasLasRespuestas = new ArrayList<>();
         for (Pregunta p : general.getPreguntas()) {
@@ -570,6 +583,7 @@ public class GeneralServiceImpl implements GeneralService {
         List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();
         for (Inscripcion inscripcion : inscripciones) {
             if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general, current.getId());
                 return new GeneralClasificacionDTO(
                     general.getId(), general.getTitulo(), general.getDescripcion(),
                     general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
@@ -669,9 +683,11 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         }
         else if (current instanceof Alumno) {
             Alumno alumno = (Alumno) current;
+            validarCursoVisibleParaAlumno(crucigrama);
             if (!crucigrama.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
                 throw new AccessDeniedException("No tienes permiso para acceder a este crucigrama");
             }
+            AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(crucigrama, alumno.getId());
             return CrucigramaDTO.fromEntity(crucigrama);
         }
         else {
@@ -724,7 +740,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
     @Override
     @Transactional
     public General crearTipoAbierta(String titulo, String descripcion, Integer puntuacion, Long temaId, 
-        Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId) {
+        Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, String imagen) {
         
         Usuario usuario = usuarioService.findCurrentUser();
         if(!(usuario instanceof Maestro)){
@@ -735,37 +751,38 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
             throw new AccessDeniedException("Solo el maestro del curso puede crear actividades en ese tema");
         }
         
-        if (preguntasId == null || preguntasId.isEmpty()) {
-            throw new IllegalArgumentException("Debe proporcionar al menos una pregunta");
-        }
-        
-        if (preguntasId.size() > 5) {
-            throw new IllegalArgumentException("Las actividades de tipo ABIERTA no pueden tener más de 5 preguntas. Usted intenta crear " + preguntasId.size() + " preguntas");
-        }
-        
         General tipoAbierta = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
-        List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
-        
-        if(preguntas.size() != preguntasId.size()){
-            throw new ResourceNotFoundException("Alguna de las preguntas no existe");
-        }
-        
-        Integer num = 1;
-        for(Pregunta pregunta : preguntas){
-            List<RespuestaMaestro> respuestas = respuestaMaestroRepository.findRespuestaByPreguntaId(pregunta.getId());
-            
-            if (respuestas == null || respuestas.isEmpty()) {
-                throw new IllegalArgumentException("La pregunta " + num + " no tiene respuesta. Cada pregunta debe tener exactamente una respuesta");
+        tipoAbierta.setImagen(imagen);
+
+        if (preguntasId != null && !preguntasId.isEmpty()) {
+            if (preguntasId.size() > 5) {
+                throw new IllegalArgumentException("Las actividades de tipo ABIERTA no pueden tener más de 5 preguntas. Usted intenta crear " + preguntasId.size() + " preguntas");
             }
-            
-            if (respuestas.size() > 1) {
-                throw new IllegalArgumentException("La pregunta " + num + " tiene " + respuestas.size() + " respuestas. En actividades ABIERTA solo se permite una respuesta por pregunta");
-            }
-            
-            num++;
-        }
+
+            List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
         
-        tipoAbierta.setPreguntas(preguntas);
+            if(preguntas.size() != preguntasId.size()){
+                throw new ResourceNotFoundException("Alguna de las preguntas no existe");
+            }
+        
+            Integer num = 1;
+            for(Pregunta pregunta : preguntas){
+                List<RespuestaMaestro> respuestas = respuestaMaestroRepository.findRespuestaByPreguntaId(pregunta.getId());
+            
+                if (respuestas == null || respuestas.isEmpty()) {
+                    throw new IllegalArgumentException("La pregunta " + num + " no tiene respuesta. Cada pregunta debe tener exactamente una respuesta");
+                }
+            
+                if (respuestas.size() > 1) {
+                    throw new IllegalArgumentException("La pregunta " + num + " tiene " + respuestas.size() + " respuestas. En actividades ABIERTA solo se permite una respuesta por pregunta");
+                }
+            
+                num++;
+            }
+        
+            tipoAbierta.setPreguntas(preguntas);
+        }
+
         tipoAbierta.setTipo(TipoActGeneral.ABIERTA);
         return generalRepository.save(tipoAbierta);
     }
@@ -784,6 +801,8 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
             throw new ResourceNotFoundException("La actividad no es de tipo abierta");
         }
 
+        validarCursoVisibleParaAlumno(general);
+
         List<PreguntaAlumnoDTO> preguntasDTO = general.getPreguntas().stream()
             .map(pregunta -> new PreguntaAlumnoDTO(pregunta.getId(), pregunta.getPregunta(), pregunta.getImagen()))
             .toList();
@@ -792,6 +811,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         if (!general.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
             throw new AccessDeniedException("No tienes permiso para acceder a esta actividad");
         }
+        AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(general, alumno.getId());
 
         return new GeneralAbiertaAlumnoDTO(
             general.getId(), general.getTitulo(), general.getDescripcion(),
@@ -800,6 +820,12 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
             general.getTema() == null ? null : general.getTema().getId(),
             preguntasDTO
         );
+    }
+
+    private void validarCursoVisibleParaAlumno(General general) {
+        if (!Boolean.TRUE.equals(general.getTema().getCurso().getVisibilidad())) {
+            throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
+        }
     }
 
     @Override
@@ -841,7 +867,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
     @Override
     @Transactional
     public General updateTipoAbierta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
-        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId) {
+        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen) {
      
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -856,6 +882,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         
         General tipoAbierta = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
             posicion, version, temaId);
+        tipoAbierta.setImagen(imagen);
         
         if(preguntasId != null){
             List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
@@ -883,5 +910,4 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         
         return generalRepository.save(tipoAbierta);
     }
-
 }
