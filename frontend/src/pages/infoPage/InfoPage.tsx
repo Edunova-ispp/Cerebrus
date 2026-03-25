@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "./InfoPage.css";
 import logo from "../../assets/logo.png";
-import ProfileIcon from "../../assets/icons/profile.svg?react";
 
 export type UserType = "alumno" | "profesor" | "dueno";
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams, Navigate } from "react-router-dom";
 import { getCurrentUserRoles } from "../../types/curso";
 import type { Curso, ProgresoAlumno } from "../../types/curso";
-import { apiFetch, fetchProgresoAlumno } from "../../utils/api";
+import { apiFetch } from "../../utils/api";
 import DetalleCursoProfesor from "./DetalleCursoProfesor";
 import DetalleCursoAlumno from "./DetalleCursoAlumno";
 
