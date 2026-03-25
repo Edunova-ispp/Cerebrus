@@ -26,6 +26,7 @@ export interface CartaFormInitialValues {
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly version: number;
+  readonly temaId?: number;
   readonly preguntas?: readonly CartaFormInitialPregunta[];
 }
 
@@ -46,13 +47,16 @@ interface Props {
   readonly mode?: CartaFormMode;
   readonly generalId?: number;
   readonly initialValues?: CartaFormInitialValues;
+  readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
+  readonly onDone?: () => void;
 }
 
 function makeEmptyCard(): Card {
   return { localKey: makeLocalCardKey(), pregunta: '', respuesta: '', imagen: '' };
 }
 
-export function CartaForm({ mode = 'create', generalId, initialValues }: Props) {
+export function CartaForm({ mode = 'create', generalId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -68,7 +72,9 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
   const originalCardsRef = useRef<CartaFormInitialPregunta[]>([]);
 
   const navigate = useNavigate();
-  const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+  const params = useParams<{ id: string; temaId: string }>();
+  const cursoId = cursoIdProp ?? params.id;
+  const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
   useEffect(() => {
     if (!initialValues) return;
@@ -151,6 +157,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
 
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
+    if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
 
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
@@ -163,6 +170,11 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
       if (!c.pregunta.trim()) return `La carta ${ci + 1} no tiene pregunta`;
       if (!c.respuesta.trim()) return `La carta ${ci + 1} no tiene respuesta`;
     }
+
+    const preguntas = cards.map(c => c.pregunta.trim().toLowerCase());
+    const respuestas = cards.map(c => c.respuesta.trim().toLowerCase());
+    if (new Set(preguntas).size !== preguntas.length) return 'Hay preguntas repetidas en las cartas';
+    if (new Set(respuestas).size !== respuestas.length) return 'Hay respuestas repetidas en las cartas';
 
     if (mode === 'edit' && !generalId) return 'Falta el id de la actividad a editar';
 
@@ -262,6 +274,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
                   respuesta: card.respuesta.trim(),
                   imagen: null,
                   correcta: true,
+                  pregunta: { id: card.id },
                 }),
               });
             } else {
@@ -299,7 +312,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
         }
       }
 
-      navigate(`/cursos/${cursoId}/temas`);
+      if (onDone) onDone(); else navigate(`/cursos/${cursoId}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error guardando la actividad de cartas';
       setError(msg);
@@ -327,6 +340,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 placeholder="Título de la actividad de cartas"
+                required
               />
             </div>
 
@@ -338,6 +352,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
                 rows={3}
+                style={{ resize: 'vertical' }}
                 placeholder="Descripción opcional"
               />
             </div>
@@ -379,6 +394,8 @@ export function CartaForm({ mode = 'create', generalId, initialValues }: Props) 
                 className="cf-input cf-input-sm"
                 value={puntuacion}
                 onChange={(e) => setPuntuacion(e.target.value)}
+                min="1"
+                required
               />
             </div>
 

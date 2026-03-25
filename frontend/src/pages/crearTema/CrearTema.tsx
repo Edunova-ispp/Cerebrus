@@ -5,8 +5,15 @@ import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 import './CrearTema.css';
 
-export default function CrearTema() {
-  const { id: cursoId } = useParams<{ id: string }>();
+interface CrearTemaProps {
+  readonly cursoIdProp?: string;
+  readonly embedded?: boolean;
+  readonly onDone?: () => void;
+}
+
+export default function CrearTema({ cursoIdProp, embedded, onDone }: CrearTemaProps = {}) {
+  const params = useParams<{ id: string }>();
+  const cursoId = cursoIdProp ?? params.id;
   const [titulo, setTitulo] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,7 +45,7 @@ export default function CrearTema() {
           cursoId: Number(cursoId),
         }),
       });
-      navigate(`/cursos/${cursoId}/temas`);
+      if (onDone) { onDone(); } else { navigate(`/cursos/${cursoId}`); }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear el tema');
     } finally {
@@ -47,16 +54,17 @@ export default function CrearTema() {
   };
 
   return (
-    <div className="crear-tema-page"> {/* Reutilizamos la clase de página */}
-      <NavbarMisCursos />
+    <div className={embedded ? 'crear-tema-embedded' : 'crear-tema-page'}>
+      {!embedded && <NavbarMisCursos />}
 
       <main className="crear-tema-main">
-        {/* Botón Volver alineado a la izquierda */}
-        <button className="detalle-volver" onClick={() => navigate(-1)}>
-          ← 
-        </button>
+        {!embedded && (
+          <button className="detalle-volver" onClick={() => navigate(-1)}>
+            ← 
+          </button>
+        )}
 
-        <h2 className="welcome-text">Bienvenido al creador de temas</h2>
+        <h2 className="welcome-text">Crear tema</h2>
 
         <div className="crear-tema-card">
           <form onSubmit={handleSubmit} className="crear-tema-layout-simple">

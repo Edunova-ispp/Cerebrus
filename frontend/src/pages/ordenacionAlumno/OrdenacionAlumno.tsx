@@ -29,7 +29,14 @@ type RespAlumnoOrdenacionCreateResponse = {
   readonly comentario: string;
 };
 
-type ActividadAlumnoDTO = { readonly id: number };
+type ActividadAlumnoDTO = {
+  readonly id: number;
+  readonly puntuacion?: number;
+  readonly nota?: number;
+  readonly fechaInicio?: string;
+  readonly fechaFin?: string;
+  readonly numAbandonos?: number;
+};
 
 function getCurrentUserIdFromJwt(): number | null {
   const info = getCurrentUserInfo();
@@ -84,6 +91,9 @@ export default function OrdenacionAlumno() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
   const [feedback, setFeedback] = useState<{ correcta: boolean; comentario?: string } | null>(null);
+  const [incorrectos, setIncorrectos] = useState(0);
+  const incorrectosRef = useRef(0);
+  const pendingRespuestaIdRef = useRef<number | null>(null);
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
   
   const ordenacionIdNum = useMemo(() => {
@@ -190,28 +200,25 @@ export default function OrdenacionAlumno() {
           valoresAlum: items,
         }),
       });
-if (!res.ok) throw new TypeError('Error al guardar la respuesta');
-
+      if (!res.ok) throw new TypeError('Error al guardar la respuesta');
 
       const data = (await res.json()) as RespAlumnoOrdenacionCreateResponse;
       const respuestaId = data?.respAlumnoOrdenacion?.id;
-      if (respuestaId) {
-        // 3. LLAMADA CRÍTICA: Corregir automáticamente la actividad (PUT)
-        // Mandamos el ID en un array tal como espera el controlador
-        await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
-          method: 'PUT',
-          body: JSON.stringify([respuestaId]),
-        });
-      }
       const correcta = Boolean(data?.respAlumnoOrdenacion?.correcta);
       const comentario = typeof data?.comentario === 'string' ? data.comentario : '';
 
       if (correcta) {
+        // Guardamos el id para usarlo en handleContinuar
+        if (respuestaId) pendingRespuestaIdRef.current = respuestaId;
         completedRef.current = true;
         setFeedback({ correcta: true, comentario: undefined });
         return;
       }
 
+      // Respuesta incorrecta: contar intento fallido
+      const nuevosIncorrectos = incorrectosRef.current + 1;
+      incorrectosRef.current = nuevosIncorrectos;
+      setIncorrectos(nuevosIncorrectos);
       setFeedback({
         correcta,
         comentario: ordenacion.respVisible ? comentario : undefined,
@@ -222,6 +229,45 @@ if (!res.ok) throw new TypeError('Error al guardar la respuesta');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleContinuar = async () => {
+    const rid = pendingRespuestaIdRef.current;
+    console.log('[OrdenacionAlumno] handleContinuar — actividadAlumnoId:', actividadAlumnoId, 'pendingRespuestaId:', rid, 'incorrectos:', incorrectosRef.current);
+    if (actividadAlumnoId && rid !== null) {
+      try {
+        // Registrar la actividad como completada y obtener puntuación del backend
+        const aaRes = await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
+          method: 'PUT',
+          body: JSON.stringify([rid]),
+        });
+        const aaData = (await aaRes.json()) as ActividadAlumnoDTO;
+        console.log('[OrdenacionAlumno] corregir-automaticamente response:', aaData);
+
+        // Aplicar penalización por intentos incorrectos (20% por cada fallo, mínimo 10%)
+        const inc = incorrectosRef.current;
+        if (inc > 0) {
+          const factor = Math.max(1 - inc * 0.2, 0.1);
+          const updateBody = {
+            puntuacion: Math.max(Math.round((aaData.puntuacion ?? 0) * factor), 0),
+            nota: Math.max(Math.round((aaData.nota ?? 0) * factor), 0),
+            fechaInicio: aaData.fechaInicio ?? null,
+            fechaFin: aaData.fechaFin ?? null,
+            numAbandonos: aaData.numAbandonos ?? 0,
+          };
+          console.log(`[OrdenacionAlumno] aplicando penalización (${inc} fallos, factor=${factor.toFixed(2)}):`, updateBody);
+          await apiFetch(`${apiBase}/api/actividades-alumno/update/${actividadAlumnoId}`, {
+            method: 'PUT',
+            body: JSON.stringify(updateBody),
+          });
+        }
+      } catch (e) {
+        console.error('[OrdenacionAlumno] error registrando completión:', e);
+      }
+    } else {
+      console.warn('[OrdenacionAlumno] no se puede registrar — actividadAlumnoId:', actividadAlumnoId, 'rid:', rid);
+    }
+    navigate(-1);
   };
 
   if (loading) {
@@ -272,7 +318,7 @@ if (!res.ok) throw new TypeError('Error al guardar la respuesta');
     <div className="ord-items">
       {items.map((value, index) => (
         <div key={`${value}-${index}`} className="ord-item">
-          <div className="ord-item-index">{index + 1}.</div>
+          <div className="ord-item-index">{index + 1}</div>
 
           <div className="ord-item-value">
             {isImageString(value) ? (
@@ -331,7 +377,7 @@ if (!res.ok) throw new TypeError('Error al guardar la respuesta');
 
         {!ordenacion && !error && <p className="ca-text">No se encontró la ordenación.</p>}
 
-        {feedback?.correcta && <CompletionPopup title="¡ORDENACIÓN COMPLETADA!" onContinue={() => navigate(-1)} />}
+        {feedback?.correcta && <CompletionPopup title="¡ORDENACIÓN COMPLETADA!" onContinue={handleContinuar} />}
       </main>
     </div>
   );

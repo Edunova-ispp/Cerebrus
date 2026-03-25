@@ -1,3 +1,4 @@
+/* ── Page ── */
 .detalle-alumno-page {
   position: absolute;
   top: 0;
@@ -14,146 +15,189 @@
 
 .detalle-alumno-main {
   flex: 1;
-  max-width: 900px;
+  max-width: 560px;
   width: 100%;
   margin: 0 auto;
-  padding: 16px 24px 60px;
+  padding: 20px 24px 60px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 28px;
+  gap: 24px;
 }
 
-/* Botón Volver */
+/* ── Botón Volver ── */
 .detalle-volver {
   align-self: flex-start;
-  background: var(--color-accent);
+  background: var(--color-accent, #FFF294);
   color: #000;
   border: 3px solid #000;
   border-radius: 12px;
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1.1rem;
-  padding: 6px 18px;
+  font-weight: bold;
+  padding: 8px 20px;
   cursor: pointer;
-  box-shadow: 3px 3px 0px #000;
-  transition: transform 0.1s;
+  box-shadow: 4px 4px 0 #000;
+  transition: transform 0.1s, box-shadow 0.1s;
 }
 
 .detalle-volver:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0px #000;
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
 }
 
 .detalle-volver:active {
-  transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0px #000;
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 #000;
 }
 
-/* Imagen / cover */
-.detalle-alumno-cover {
+/* ── Hero card ── */
+.detalle-hero {
   width: 100%;
-  max-width: 480px;
-  aspect-ratio: 16/9;
+  background: var(--color-secondary, #7C4DFF);
   border: 4px solid #000;
-  border-radius: 16px;
-  box-shadow: 6px 6px 0px #000;
+  border-radius: 20px;
+  box-shadow: 6px 6px 0 #000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* ── Badge de estado (arriba derecha, posición absoluta) ── */
+.detalle-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 5;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 4px 14px;
+  border: 3px solid #000;
+  border-radius: 10px;
+  box-shadow: 2px 2px 0 #000;
+  white-space: nowrap;
+}
+
+.detalle-badge--new {
+  background: var(--color-accent, #FFF294);
+  color: #000;
+}
+
+.detalle-badge--progress {
+  background: var(--color-primary, #D10057);
+  color: #fff;
+}
+
+.detalle-badge--done {
+  background: #adf7b6;
+  color: #000;
+}
+
+.detalle-hero-cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #E285A9;
+  background: var(--color-primary, #D10057);
 }
 
-.detalle-alumno-cover img {
+.detalle-hero-cover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.detalle-alumno-initials {
+.detalle-hero-initials {
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 4rem;
+  font-size: 4.5rem;
   font-weight: bold;
   color: #fff;
-  text-shadow: 3px 3px 0px #000;
+  text-shadow: 4px 4px 0 #000;
 }
 
-/* Info del curso */
-.detalle-alumno-info {
-  width: 100%;
-  max-width: 480px;
+.detalle-hero-body {
+  padding: 20px 24px 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  text-align: center;
 }
 
-.detalle-alumno-titulo {
+/* ── Título y descripción ── */
+.detalle-hero-titulo {
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
   font-weight: bold;
-  color: #0F1338;
+  color: #fff;
   margin: 0;
+  line-height: 1.15;
 }
 
-.detalle-alumno-descripcion {
+.detalle-hero-desc {
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.1rem;
-  color: #444;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
   margin: 0;
+  line-height: 1.4;
 }
 
-/* Div de acción principal */
-.detalle-alumno-accion {
-  width: 100%;
-  max-width: 480px;
-  min-height: 120px;
-  border: 4px solid #000;
-  border-radius: 20px;
-  box-shadow: 6px 6px 0px #000;
+/* ── Acción (su propia línea, full width) ── */
+.detalle-hero-action {
+  padding: 0 24px 24px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+}
+
+.detalle-hero-loading {
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 2rem;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 10px 0;
+}
+
+.detalle-hero-btn {
+  width: 100%;
+  text-align: center;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.3rem;
   font-weight: bold;
-  transition: transform 0.1s;
+  border: 3px solid #000;
+  border-radius: 14px;
+  padding: 14px 28px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #000;
+  transition: transform 0.1s, box-shadow 0.1s;
 }
 
-.detalle-alumno-accion:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 8px 8px 0px #000;
-}
-
-.detalle-alumno-accion:active {
-  transform: translate(1px, 1px);
-  box-shadow: 4px 4px 0px #000;
-}
-
-.detalle-alumno-accion--comenzar {
-  background: #A7E3A0;
+.detalle-hero-btn--comenzar,
+.detalle-hero-btn--continuar {
+  background: var(--color-accent, #FFF294);
   color: #000;
 }
 
-.detalle-alumno-accion--continuar {
-  background: #A0C8E3;
+.detalle-hero-btn--comenzar:hover,
+.detalle-hero-btn--continuar:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.detalle-hero-btn--comenzar:active,
+.detalle-hero-btn--continuar:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 #000;
+}
+
+.detalle-hero-btn--acabado {
+  background: #adf7b6;
   color: #000;
+  display: block;
 }
 
-.detalle-alumno-accion--acabado {
-  background: var(--color-accent);
-  color: #555;
-  cursor: default;
-}
 
-.detalle-alumno-accion--acabado:hover {
-  transform: none;
-  box-shadow: 6px 6px 0px #000;
-}
-
-/* Modal de finalización */
+/* ── Modal (sin cambios funcionales) ── */
 .detalle-modal-overlay {
   position: fixed;
   inset: 0;
@@ -168,7 +212,7 @@
   background: #FAF6ED;
   border: 4px solid #000;
   border-radius: 24px;
-  box-shadow: 8px 8px 0px #000;
+  box-shadow: 8px 8px 0 #000;
   padding: 40px 48px;
   max-width: 460px;
   width: 90%;
@@ -195,7 +239,7 @@
 }
 
 .detalle-modal__close {
-  background: #E285A9;
+  background: var(--color-accent, #FFF294);
   color: #000;
   border: 4px solid #000;
   border-radius: 14px;
@@ -204,11 +248,36 @@
   font-weight: bold;
   padding: 8px 32px;
   cursor: pointer;
-  box-shadow: 4px 4px 0px #000;
-  transition: transform 0.1s;
+  box-shadow: 4px 4px 0 #000;
+  transition: transform 0.1s, box-shadow 0.1s;
 }
 
 .detalle-modal__close:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px #000;
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.detalle-modal__close:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 #000;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .detalle-alumno-main {
+    padding: 16px 16px 40px;
+  }
+
+  .detalle-hero-body {
+    padding: 16px 18px 10px;
+  }
+
+  .detalle-hero-action {
+    padding: 0 18px 20px;
+  }
+
+  .detalle-hero-btn {
+    font-size: 1.1rem;
+    padding: 12px 20px;
+  }
 }

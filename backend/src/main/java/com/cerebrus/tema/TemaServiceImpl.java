@@ -13,6 +13,7 @@ import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
 import com.cerebrus.usuario.maestro.MaestroRepository;
 import com.cerebrus.actividad.ActividadRepository;;
@@ -103,8 +104,16 @@ public class TemaServiceImpl implements TemaService {
     @Override
     public Tema obtenerTemaPorId(Long temaId) {
 
-        return temaRepository.findById(temaId)
-                .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado con ID: " + temaId));
+        Usuario current = usuarioService.findCurrentUser();
+        Tema tema = temaRepository.findById(temaId)
+                        .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado con ID: " + temaId));
+        if (!(current instanceof Maestro) && !(current instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un usuario logueado como alumno o maestro puede obtener un tema");
+        }
+        if (!tema.getCurso().getMaestro().getId().equals(current.getId()) && !tema.getCurso().getInscripciones().stream().anyMatch(a -> a.getAlumno().getId().equals(current.getId()))) {
+            throw new AccessDeniedException("Solo alguien perteneciente al curso puede acceder a este tema");
+        }
+        return tema;
     }
 
     @Override
@@ -119,7 +128,7 @@ public class TemaServiceImpl implements TemaService {
             actividades.forEach(actividad -> actividadRepository.delete(actividad));
             temaRepository.delete(tema);
         } else {
-            throw new IllegalArgumentException("El usuario no tiene permiso para eliminar este tema.");
+            throw new AccessDeniedException("El usuario no tiene permiso para eliminar este tema.");
         }
     }
 }

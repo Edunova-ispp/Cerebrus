@@ -23,6 +23,7 @@ export interface ClasificacionFormInitialValues {
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly version: number;
+  readonly temaId?: number;
   readonly preguntas?: readonly ClasificacionFormInitialPregunta[];
 }
 
@@ -47,6 +48,9 @@ interface Props {
   readonly mode?: ClasificacionFormMode;
   readonly clasificacionId?: number;
   readonly initialValues?: ClasificacionFormInitialValues;
+  readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
+  readonly onDone?: () => void;
 }
 
 function makeEmptyRespuesta(): RespuestaOption {
@@ -57,7 +61,7 @@ function makeEmptyPregunta(): Pregunta {
   return { localKey: makeLocalKey(), text: '', respuestas: [makeEmptyRespuesta()] };
 }
 
-export function ClasificacionForm({ mode = 'create', clasificacionId, initialValues }: Props) {
+export function ClasificacionForm({ mode = 'create', clasificacionId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -70,7 +74,9 @@ const [showIAModal, setShowIAModal] = useState(false);
 
   const originalPreguntasRef = useRef<ClasificacionFormInitialPregunta[]>([]);
   const navigate = useNavigate();
-  const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+  const params = useParams<{ id: string; temaId: string }>();
+  const cursoId = cursoIdProp ?? params.id;
+  const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
   useEffect(() => {
     if (!initialValues) return;
@@ -100,11 +106,11 @@ const [showIAModal, setShowIAModal] = useState(false);
   const addPregunta = () => setPreguntas([...preguntas, makeEmptyPregunta()]);
 
   const removePregunta = (index: number) => {
-    if (preguntas.length > 1) {
+    if (preguntas.length > 2) {
       setPreguntas(preguntas.filter((_, i) => i !== index));
       setError('');
     } else {
-      setError('No puede haber menos de una categoría.');
+      setError('Debe haber al menos 2 categorías.');
     }
   };
 
@@ -136,11 +142,47 @@ const [showIAModal, setShowIAModal] = useState(false);
     setPreguntas(updated);
   };
 
+  const validate = (): string | null => {
+    if (!titulo.trim()) return 'El título es requerido';
+    if (!puntuacion.trim()) return 'La puntuación es requerida';
+
+    const pNum = Number.parseInt(puntuacion.trim(), 10);
+    if (isNaN(pNum) || pNum <= 0) return 'La puntuación debe ser un número mayor a 0';
+
+    if (preguntas.length < 2) return 'Debe haber al menos 2 categorías';
+
+    for (let i = 0; i < preguntas.length; i++) {
+      if (!preguntas[i].text.trim()) {
+        return `La categoría ${i + 1} debe tener un nombre`;
+      }
+      if (preguntas[i].respuestas.length === 0) {
+        return `La categoría ${i + 1} debe tener al menos 1 elemento`;
+      }
+      const tieneElementosVacios = preguntas[i].respuestas.some((r) => !r.text.trim());
+      if (tieneElementosVacios) {
+        return `Todos los elementos de la categoría ${i + 1} deben estar rellenos`;
+      }
+    }
+
+    if (!temaId) return 'Falta el id del tema en la URL';
+    if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
+    if (!cursoId) return 'Falta el id del curso en la URL';
+
+    return null;
+  };
+
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     const pNum = Number.parseInt(puntuacion.trim(), 10);
+
     const tIdNum = Number.parseInt(temaId!, 10);
 
     setLoading(true);
@@ -246,9 +288,9 @@ const [showIAModal, setShowIAModal] = useState(false);
           }
         }
       }
-      navigate(`/cursos/${cursoId}/temas`);
-    } catch (err) {
-      setError('Error al guardar la actividad');
+      if (onDone) onDone(); else navigate(`/cursos/${cursoId}`);
+    } catch {
+      setError('No se ha podido guardar la actividad. Inténtalo de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -292,7 +334,7 @@ const handleIAResult = (data: any) => {
 
   return (
     <form onSubmit={handleSubmit} className="tf-form">
-      {error && <p className="ca-text tf-error">{error}</p>}
+      {error && <p className="tf-error">{error}</p>}
       <GenerarIAModal
         tipoActividad="CLASIFICACION"
         open={showIAModal}
@@ -303,12 +345,12 @@ const handleIAResult = (data: any) => {
       <div className="ca-contenedor-blanco tf-header">
         <div className="tf-col">
           <div>
-            <label className="ca-text">Título</label>
-            <input type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} style={{ width: '100%' }} />
+            <label className="cf-label" htmlFor="cf-titulo">Título *</label>
+            <input type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} required style={{ width: '100%' }} />
           </div>
           <div>
-            <label className="ca-text">Descripción</label>
-            <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={3} style={{ width: '100%' }} />
+            <label className="cf-label" htmlFor="cf-descripcion">Descripción</label>
+            <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={3} style={{ width: '100%', resize: 'vertical' }} />
           </div>
         </div>
 
@@ -319,8 +361,8 @@ const handleIAResult = (data: any) => {
             </button>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label className="ca-text">Puntuación</label>
-            <input type="number" value={puntuacion} onChange={(e) => setPuntuacion(e.target.value)} style={{ width: 90 }} />
+            <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
+            <input type="number" value={puntuacion} onChange={(e) => setPuntuacion(e.target.value)} required style={{ width: 90 }} />
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>

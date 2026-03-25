@@ -102,7 +102,7 @@ export default function MisCursos() {
   };
 
   return (
-    <div className="mis-cursos-page">
+    <div className={`mis-cursos-page${isMaestro ? ' maestro' : ''}`}>
       <NavbarMisCursos />
 
       <main className="mis-cursos-main">
@@ -153,7 +153,7 @@ export default function MisCursos() {
                   key={curso.id}
                   curso={curso}
                   isMaestro={isMaestro}
-                  onToggleVisibilidad={handleToggleVisibilidad}
+                  onToggleVisibilidad={isMaestro ? handleToggleVisibilidad: undefined}
                   onEliminar={isMaestro ? handleEliminar : undefined}
                   onCardClick={() => navigate(`/cursos/${curso.id}`, { state: { curso } })}
                 />

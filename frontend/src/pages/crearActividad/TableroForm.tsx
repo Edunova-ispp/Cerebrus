@@ -22,6 +22,9 @@ interface Props {
   readonly mode?: TableroFormMode;
   readonly tableroId?: number;
   readonly initialValues?: TableroFormInitialValues;
+  readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
+  readonly onDone?: () => void;
 }
 
 const PREGUNTAS_3X3 = 8;
@@ -39,7 +42,7 @@ function makeQuestions(count: number): QPair[] {
 
 const isCellDark = (row: number, col: number) => (row + col) % 2 === 1;
 
-export function TableroForm({ mode = 'create', tableroId, initialValues }: Props) {
+export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -53,7 +56,9 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
   const [showIAModal, setShowIAModal] = useState(false);
 
   const navigate = useNavigate();
-  const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+  const params = useParams<{ id: string; temaId: string }>();
+  const cursoId = cursoIdProp ?? params.id;
+  const temaId = temaIdProp ?? params.temaId;
 
   // Role check
   const isMaestro = getCurrentUserRoles().some((r) => r.includes('MAESTRO'));
@@ -86,7 +91,7 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
     const pts = Number.parseInt(puntuacion.trim(), 10);
-    if (Number.isNaN(pts) || pts < 0) return 'La puntuación debe ser un número válido';
+    if (Number.isNaN(pts) || pts <= 0) return 'La puntuación debe ser un número mayor a 0';
     if (tamano === null) return 'Selecciona el tamaño del tablero';
     if (mode === 'create' && !temaId) return 'Falta el id del tema en la URL';
     if (mode === 'edit' && !tableroId) return 'Falta el id del tablero a editar';
@@ -136,13 +141,13 @@ export function TableroForm({ mode = 'create', tableroId, initialValues }: Props
           method: 'POST',
           body: JSON.stringify(buildPayload()),
         });
-        navigate(`/cursos/${cursoId}/temas`);
+        if (onDone) onDone(); else navigate(`/cursos/${cursoId}`);
       } else {
         await apiFetch(`${apiBase}/api/tableros/${tableroId}`, {
           method: 'PUT',
           body: JSON.stringify(buildPayload()),
         });
-        navigate(`/cursos/${cursoId}/temas`);
+        if (onDone) onDone(); else navigate(`/cursos/${cursoId}`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar el tablero');
@@ -217,6 +222,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
             placeholder="Título del tablero"
+            required
           />
           <label className="tbl-label">Descripción</label>
           <textarea
@@ -232,10 +238,11 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
           <input
             className="tbl-input"
             type="number"
-            min={0}
+            min={1}
             value={puntuacion}
             onChange={(e) => setPuntuacion(e.target.value)}
             placeholder="Ej. 100"
+            required
           />
           <label className="tbl-label tbl-label--check">
             <input

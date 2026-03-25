@@ -114,6 +114,15 @@
 			<scope>provided</scope>
 		</dependency>
 
+    <!-- Selenium E2E -->
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <version>4.27.0</version>
+      <scope>test</scope>
+    </dependency>
+
+
   </dependencies>
 
   <build>
@@ -123,6 +132,17 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+
+      <!-- Excluir tests E2E del ciclo de test normal -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/e2e/**</exclude>
+          </excludes>
+        </configuration>
       </plugin>
 
 			<plugin>
@@ -151,8 +171,64 @@
 				</configuration>
 			</plugin>
 
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.11</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
     </plugins>
 
   </build>
+
+  <profiles>
+    <!-- Ejecutar tests E2E con Selenium: mvn verify -Pe2e [-Dselenium.baseUrl=http://localhost:3000] [-Dselenium.headless=false] -->
+    <profile>
+      <id>e2e</id>
+      <properties>
+        <selenium.baseUrl>http://localhost:5173</selenium.baseUrl>
+        <selenium.headless>true</selenium.headless>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <includes>
+                <include>**/e2e/**IT.java</include>
+              </includes>
+              <systemPropertyVariables>
+                <selenium.baseUrl>${selenium.baseUrl}</selenium.baseUrl>
+                <selenium.headless>${selenium.headless}</selenium.headless>
+              </systemPropertyVariables>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

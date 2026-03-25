@@ -1,7 +1,10 @@
 package com.cerebrus.curso;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -9,9 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.ActividadRepository;
-import com.cerebrus.actividadAlumno.ActividadAlumno;
-import com.cerebrus.actividadAlumno.ActividadAlumnoProgreso;
-import com.cerebrus.actividadAlumno.ActividadAlumnoRepository;
+import com.cerebrus.actividadAlumn.ActividadAlumno;
+import com.cerebrus.actividadAlumn.ActividadAlumnoProgreso;
+import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
 import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.usuario.Usuario;
@@ -185,16 +188,28 @@ public class CursoServiceImpl implements CursoService {
         return new ProgresoDTO("SIN_EMPEZAR", 0);
     }
 
+    // Para cada actividad, quedarse solo con el intento más reciente (igual que las stats del maestro)
+    Map<Long, ActividadAlumnoProgreso> ultimoPorActividad = new HashMap<>();
+    for (ActividadAlumnoProgreso r : registros) {
+        Long actId = r.getActividadId();
+        ActividadAlumnoProgreso actual = ultimoPorActividad.get(actId);
+        if (actual == null || esProgresoMasReciente(r, actual)) {
+            ultimoPorActividad.put(actId, r);
+        }
+    }
+    List<ActividadAlumnoProgreso> ultimos = new ArrayList<>(ultimoPorActividad.values());
+
     // 1. CALCULAMOS LA SUMA TOTAL DE PUNTOS
     // Sumamos el campo 'puntuacion' de todas las actividades que tengan valor
-    int puntosTotales = registros.stream()
+    int puntosTotales = ultimos.stream()
             .filter(aa -> aa.getPuntuacion() != null)
             .mapToInt(aa -> aa.getPuntuacion())
             .sum();
 
     // 2. CALCULAMOS EL ESTADO
-    long acabadas = registros.stream()
-            .filter(aa -> aa.getAcabada() != null)
+    // Ignoramos fechas epoch (1970-01-01) que se almacenan como "sin finish" en algunas actividades
+    long acabadas = ultimos.stream()
+            .filter(aa -> aa.getAcabada() != null && aa.getAcabada().getYear() > 1970)
             .count();
 
     if (acabadas == totalActividades) {
@@ -202,7 +217,7 @@ public class CursoServiceImpl implements CursoService {
         return new ProgresoDTO("TERMINADA", puntosTotales);
     }
 
-    long conInicio = registros.stream()
+    long conInicio = ultimos.stream()
             .filter(aa -> aa.getInicio() != null)
             .count();
 
@@ -212,6 +227,15 @@ public class CursoServiceImpl implements CursoService {
     }
 
     return new ProgresoDTO("SIN_EMPEZAR", puntosTotales);
+}
+
+private boolean esProgresoMasReciente(ActividadAlumnoProgreso candidata, ActividadAlumnoProgreso actual) {
+    LocalDateTime fechaCandidato = candidata.getAcabada() != null ? candidata.getAcabada() : candidata.getInicio();
+    LocalDateTime fechaActual    = actual.getAcabada()    != null ? actual.getAcabada()    : actual.getInicio();
+    if (fechaCandidato == null && fechaActual == null) return false;
+    if (fechaCandidato == null) return false;
+    if (fechaActual    == null) return true;
+    return fechaCandidato.isAfter(fechaActual);
 }
 
     @Transactional

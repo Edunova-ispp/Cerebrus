@@ -1,6 +1,6 @@
 .tbl-form,
 .tbl-form * {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   text-align: left;
   box-sizing: border-box;
 }
@@ -41,19 +41,19 @@
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 10px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
   color: #000;
   transition: background 0.15s;
 }
 
 .tbl-input:hover {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .tbl-input:focus {
   outline: none;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .tbl-textarea {
@@ -62,7 +62,7 @@
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 10px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
   color: #000;
   resize: vertical;
@@ -70,12 +70,12 @@
 }
 
 .tbl-textarea:hover {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .tbl-textarea:focus {
   outline: none;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 /* ── Secciones ─────────────────────────────────────────────── */
@@ -108,7 +108,7 @@
   border: 3px solid #000;
   border-radius: 12px;
   cursor: pointer;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   transition: transform 0.12s, box-shadow 0.12s, background 0.15s;
   box-shadow: 4px 4px 0 #000;
 }
@@ -120,7 +120,7 @@
 }
 
 .tbl-tamano-btn--active {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
   transform: translate(-2px, -2px);
   box-shadow: 6px 6px 0 #000;
 }
@@ -201,18 +201,18 @@
 }
 
 .tbl-respuesta-input:hover {
-  background: var(--color-accent-dark) !important;
+  background: var( --color-accent-light) !important;
 }
 
 .tbl-respuesta-input:focus {
-  background: var(--color-accent-dark) !important;
+  background: var( --color-accent-light) !important;
   border-color: #000 !important;
 }
 
 /* ── Feedback ──────────────────────────────────────────────── */
 
 .tbl-error {
-  color: #c0392b;
+  color: #c0392b !important;
   margin: 8px 0;
   font-size: 0.95rem;
 }

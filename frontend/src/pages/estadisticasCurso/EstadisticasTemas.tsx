@@ -16,8 +16,14 @@ interface EstadisticasTemaDTO {
   notaMinimaTema: number | null;
 }
 
-export default function EstadisticasTemas() {
-  const { id } = useParams<{ id: string }>();
+interface EstadisticasTemasProps {
+  readonly cursoIdProp?: string;
+  readonly embedded?: boolean;
+}
+
+export default function EstadisticasTemas({ cursoIdProp, embedded }: EstadisticasTemasProps = {}) {
+  const params = useParams<{ id: string }>();
+  const id = cursoIdProp ?? params.id;
   const navigate = useNavigate();
 
   const [temas, setTemas] = useState<Tema[]>([]);
@@ -94,13 +100,17 @@ export default function EstadisticasTemas() {
   };
 
   return (
-    <div className="estadisticas-page">
-      <NavbarMisCursos />
+    <div className={embedded ? 'estadisticas-embedded' : 'estadisticas-page'}>
+      {!embedded && <NavbarMisCursos />}
       <main className="estadisticas-main">
-        <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
-          ← Volver
-        </button>
-        <h1 className="estadisticas-titulo-curso">Temas del Curso</h1>
+        {!embedded && (
+          <>
+            <button className="btn-volver-pixel" onClick={() => navigate(-1)}>
+              ← Volver
+            </button>
+            <h1 className="estadisticas-titulo-curso">Temas del Curso</h1>
+          </>
+        )}
 
         {loading && <p className="msg-placeholder">Cargando datos...</p>}
         {error && (
@@ -151,17 +161,7 @@ export default function EstadisticasTemas() {
           </section>
         )}
 
-        <div className="botones-footer">
-          <button className="btn-medias-pixel" onClick={cargarTodo}>
-            Actualizar ↻
-          </button>
-          <button
-            className="btn-medias-pixel"
-            onClick={() => navigate(`/estadisticas/${id}/temas/graficas`)}
-          >
-            Gráficas
-          </button>
-        </div>
+       
       </main>
     </div>
   );

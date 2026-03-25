@@ -1,8 +1,10 @@
 package com.cerebrus.cursoTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +28,7 @@ import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.estadisticas.EstadisticasMaestroController;
 import com.cerebrus.estadisticas.EstadisticasMaestroServiceImpl;
+import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
 

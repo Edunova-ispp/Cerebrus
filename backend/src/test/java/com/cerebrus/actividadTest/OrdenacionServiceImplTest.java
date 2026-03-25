@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.lenient;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,10 +25,12 @@ import com.cerebrus.actividad.ordenacion.Ordenacion;
 import com.cerebrus.actividad.ordenacion.OrdenacionRepository;
 import com.cerebrus.actividad.ordenacion.OrdenacionServiceImpl;
 import com.cerebrus.curso.Curso;
+import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +49,7 @@ class OrdenacionServiceImplTest {
     private OrdenacionServiceImpl ordenacionService;
 
     private Maestro maestro;
+    private Alumno alumno;
     private Usuario usuarioNoMaestro;
     private Ordenacion ordenacion;
     private List<String> valores;
@@ -54,7 +58,17 @@ class OrdenacionServiceImplTest {
     @BeforeEach
     void setUp() {
         maestro = new Maestro();
+        maestro.setId(2L);
         usuarioNoMaestro = new Usuario() {};
+
+        alumno = new Alumno();
+		alumno.setId(1L);
+
+        Inscripcion inscripcion = new Inscripcion();
+		inscripcion.setAlumno(alumno);
+
+		List<Inscripcion> inscripciones = new LinkedList<>();
+		inscripciones.add(inscripcion);
 
         // Tema de prueba existente (necesario porque el servicio valida que temaId exista)
         Curso curso = new Curso();
@@ -62,6 +76,8 @@ class OrdenacionServiceImplTest {
         curso.setTitulo("Curso test");
         curso.setCodigo("COD-TEST");
         curso.setVisibilidad(true);
+        curso.setMaestro(maestro);
+        curso.setInscripciones(inscripciones);
 
         tema = new Tema();
         tema.setId(1L);
@@ -83,6 +99,7 @@ class OrdenacionServiceImplTest {
         ordenacion.setPosicion(1);
         ordenacion.setVersion(1);
         ordenacion.setValores(new ArrayList<>(valores));
+        ordenacion.setTema(tema);
     }
 
     // -------------------------------------------------------
@@ -167,6 +184,8 @@ class OrdenacionServiceImplTest {
     // Test para verificar que readOrdenacion retorna la ordenación con sus valores (posiblemente reordenados por shuffle)
     @Test
     void readOrdenacion_existente_retornaOrdenacionConValores() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
         when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
 
         Ordenacion resultado = ordenacionService.readOrdenacion(10L);
@@ -178,6 +197,8 @@ class OrdenacionServiceImplTest {
     // Test para verificar que readOrdenacion retorna la ordenación con lista de valores vacía cuando no tiene valores
     @Test
     void readOrdenacion_sinValores_retornaListaVacia() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
         ordenacion.setValores(new ArrayList<>());
         when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
 
@@ -189,6 +210,8 @@ class OrdenacionServiceImplTest {
     // Test para verificar que readOrdenacion retorna el único valor sin modificaciones (caso límite de shuffle)
     @Test
     void readOrdenacion_unSoloValor_retornaMismoValor() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
         ordenacion.setValores(new ArrayList<>(List.of("Único")));
         when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
 
@@ -200,11 +223,23 @@ class OrdenacionServiceImplTest {
     // Test para verificar que readOrdenacion lanza RuntimeException cuando la ordenación no existe
     @Test
     void readOrdenacion_noExiste_lanzaRuntimeException() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(ordenacionRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> ordenacionService.readOrdenacion(99L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La actividad de ordenación no existe");
+    }
+
+    @Test
+    void readOrdenacion_cursoOculto_lanzaAccessDeniedException() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        tema.getCurso().setVisibilidad(false);
+        when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
+
+        assertThatThrownBy(() -> ordenacionService.readOrdenacion(10L))
+            .isInstanceOf(AccessDeniedException.class)
+            .hasMessageContaining("curso oculto");
     }
 
     // -------------------------------------------------------
@@ -311,6 +346,7 @@ class OrdenacionServiceImplTest {
     @Test
     void deleteActOrdenacion_maestro_eliminaCorrectamente() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
 
         ordenacionService.deleteActOrdenacion(10L);
 

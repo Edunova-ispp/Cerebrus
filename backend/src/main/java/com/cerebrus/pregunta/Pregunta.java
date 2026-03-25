@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cerebrus.actividad.Actividad;
-import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneral;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneral;
 import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 
 import jakarta.persistence.CascadeType;
@@ -18,6 +18,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "pregunta")
@@ -27,6 +28,7 @@ public class Pregunta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(nullable = false, columnDefinition = "TEXT")
     private String pregunta;
 

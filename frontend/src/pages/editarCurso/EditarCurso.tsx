@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import '../crearCurso/CrearCurso.css';
+import { getCurrentUserRoles } from '../../types/curso';
 
 function getInitials(titulo: string): string {
   return titulo
@@ -11,19 +12,28 @@ function getInitials(titulo: string): string {
     .join("");
 }
 
-export default function EditarCurso() {
+interface EditarCursoProps {
+  readonly cursoId?: string;
+  readonly embedded?: boolean;
+}
+
+export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [imagen, setImagen] = useState('');
   const [error, setError] = useState('');
-  const [imagenError, setImagenError] = useState(false); // Estado para controlar si la URL de imagen falla
+  const [imagenError, setImagenError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
 
-  const { id } = useParams();
+  const params = useParams();
+  const id = cursoId ?? params.id;
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+  const isMaestro = getCurrentUserRoles().some((r) =>
+    r.toUpperCase().includes("MAESTRO")
+  );
 
   // Cargar los datos del curso al iniciar
   useEffect(() => {
@@ -108,8 +118,8 @@ export default function EditarCurso() {
 
   if (loading) {
     return (
-      <div className="crear-curso-page">
-        <NavbarMisCursos />
+      <div className={embedded ? 'crear-curso-embedded' : 'crear-curso-page'}>
+        {!embedded && <NavbarMisCursos />}
         <main className="crear-curso-main">
           <p className="welcome-text">Cargando datos del curso...</p>
         </main>
@@ -118,18 +128,20 @@ export default function EditarCurso() {
   }
 
   return (
-    <div className="crear-curso-page">
-      <NavbarMisCursos />
+    <div className={embedded ? 'crear-curso-embedded' : 'crear-curso-page'}>
+      {!embedded && <NavbarMisCursos />}
       
       <main className="crear-curso-main">
-        <button className="detalle-volver" onClick={() => navigate(`/cursos/${id}`)}>
-          ← 
-        </button>
+        {!embedded && (
+          <button className="detalle-volver" onClick={() => navigate(`/cursos/${id}`)}>
+            ← 
+          </button>
+        )}
 
         <h2 className="welcome-text">Editar detalles del curso</h2>
 
         <div className="crear-curso-card">
-          <form onSubmit={handleSubmit} className="crear-curso-layout">
+          <form onSubmit={isMaestro ? handleSubmit : undefined} className="crear-curso-layout">
             
             {/* Columna Izquierda: Formulario */}
             <div className="form-column">

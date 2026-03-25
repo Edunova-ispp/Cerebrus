@@ -13,9 +13,9 @@
   background: #b49aff;
   border: 3px solid #000;
   border-radius: 12px;
-  padding: 6px 14px;
-  font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.55rem;
+  padding: 10px 14px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 2rem;
   font-weight: bold;
   cursor: pointer;
   display: flex;
@@ -47,22 +47,23 @@
   background-color: #7C4DFF;
   color: #fff;
   border: 4px solid #000;
-  border-radius: 20px;
+  border-radius: 12px;
   box-shadow: 5px 5px 0px #000;
-  padding: 14px 22px;
+  padding: 12px 22px;
   text-align: center;
 }
 
 .ah-title {
   margin: 0;
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
-  line-height: 1.15;
+  font-size: 2rem;
 }
 
+/* Subtitle sits below the banner, outside of it */
 .ah-subtitle {
-  margin: 4px 0 0;
+  margin: 8px 0 0;
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.1rem;
-  color: #ffffffcc;
+  font-size: 1.05rem;
+  color: #000;
+  text-align: center;
 }
