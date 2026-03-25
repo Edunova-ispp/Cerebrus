@@ -34,6 +34,7 @@ import com.cerebrus.actividad.ordenacion.OrdenacionService;
 import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 import com.cerebrus.actividad.marcarImagen.MarcarImagenService;
 import com.cerebrus.comun.enumerados.TipoActGeneral;
+import com.cerebrus.curso.Curso;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.respuestaAlumn.RespuestaAlumno;
@@ -43,6 +44,7 @@ import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneralService;
 import com.cerebrus.respuestaAlumn.respAlumOrdenacion.RespAlumnoOrdenacionService;
 import com.cerebrus.respuestaAlumn.respAlumPuntoImagen.RespAlumnoPuntoImagen;
 import com.cerebrus.respuestaAlumn.respAlumPuntoImagen.RespAlumnoPuntoImagenService;
+import com.cerebrus.tema.Tema;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.alumno.AlumnoRepository;
@@ -81,7 +83,14 @@ class ActividadAlumnoServiceImplTest {
 
         actividad = new General();
         actividad.setId(50L);
+        actividad.setPosicion(1);
         actividad.setPuntuacion(100);
+
+        Curso curso = new Curso();
+        Tema tema = new Tema();
+        tema.setCurso(curso);
+        tema.setActividades(List.of(actividad));
+        actividad.setTema(tema);
 
         actividadAlumno = new ActividadAlumno();
         actividadAlumno.setId(10L);
