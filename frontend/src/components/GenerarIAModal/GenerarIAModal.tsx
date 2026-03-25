@@ -20,6 +20,49 @@ function cleanJsonResponse(text: string): string {
     .trim();
 }
 
+function getFriendlyIaErrorMessage(errorMessage: string): string {
+  const normalized = errorMessage.toLowerCase();
+
+  if (
+    normalized.includes('429') ||
+    normalized.includes('too many requests') ||
+    normalized.includes('límite de peticiones') ||
+    normalized.includes('limite de peticiones') ||
+    normalized.includes('cuota') ||
+    normalized.includes('quota')
+  ) {
+    return 'Se ha alcanzado el límite temporal de uso de la IA. Inténtalo de nuevo en unos minutos.';
+  }
+
+  if (
+    normalized.includes('403') ||
+    normalized.includes('forbidden') ||
+    normalized.includes('no es un maestro') ||
+    normalized.includes('no tienes permisos')
+  ) {
+    return 'No tienes permisos para generar actividades con IA.';
+  }
+
+  if (
+    normalized.includes('401') ||
+    normalized.includes('unauthorized') ||
+    normalized.includes('sesión') ||
+    normalized.includes('sesion')
+  ) {
+    return 'Tu sesión no es válida. Cierra sesión, vuelve a entrar e inténtalo de nuevo.';
+  }
+
+  if (
+    normalized.includes('500') ||
+    normalized.includes('internal server error') ||
+    normalized.includes('gemini')
+  ) {
+    return 'La generación con IA no está disponible ahora mismo. Inténtalo de nuevo más tarde.';
+  }
+
+  return 'No se ha podido generar la actividad con IA. Inténtalo de nuevo.';
+}
+
 export default function GenerarIAModal({
   tipoActividad,
   open,
@@ -73,7 +116,7 @@ export default function GenerarIAModal({
         setError('Error de conexión. Comprueba tu red e inténtalo de nuevo.');
       } else {
         const msg = err instanceof Error ? err.message : 'Error generando la actividad.';
-        setError(msg);
+        setError(getFriendlyIaErrorMessage(msg));
       }
     } finally {
       clearTimeout(timeoutId);
