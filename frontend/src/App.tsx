@@ -12,7 +12,6 @@ import DetalleCurso from "./pages/detalleCurso/DetalleCurso";
 import EditarActividad from "./pages/editarActividad/EditarActividad";
 import EditarCurso from "./pages/editarCurso/EditarCurso";
 import EditarTema from "./pages/editarTema/EditarTema";
-import EstadisticasCurso from "./pages/estadisticasCurso/EstadisticasCurso";
 import EstadisticasActividades from "./pages/estadisticasCurso/EstadisticasActividades.tsx";
 import EstadisticasTemas from "./pages/estadisticasCurso/EstadisticasTemas";
 import GraficasActividades from "./pages/estadisticasCurso/GraficasActividades";
@@ -138,6 +137,9 @@ function App() {
         } />
         <Route path="/generales/carta/:cartaId/alumno" element={
           <ProtectedRoute allowedRoles={['ALUMNO']}><CartaAlumno /></ProtectedRoute>
+        } />
+        <Route path="/abierta/:actividadId/alumno" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><PreguntaAbiertaAlumno /></ProtectedRoute>
         } />
         <Route path="/estadisticas/:id" element={
           <ProtectedRoute allowedRoles={['ALUMNO']}><EstadisticasAlumno /></ProtectedRoute>

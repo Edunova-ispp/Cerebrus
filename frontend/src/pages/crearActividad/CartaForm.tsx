@@ -171,6 +171,11 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
       if (!c.respuesta.trim()) return `La carta ${ci + 1} no tiene respuesta`;
     }
 
+    const preguntas = cards.map(c => c.pregunta.trim().toLowerCase());
+    const respuestas = cards.map(c => c.respuesta.trim().toLowerCase());
+    if (new Set(preguntas).size !== preguntas.length) return 'Hay preguntas repetidas en las cartas';
+    if (new Set(respuestas).size !== respuestas.length) return 'Hay respuestas repetidas en las cartas';
+
     if (mode === 'edit' && !generalId) return 'Falta el id de la actividad a editar';
 
     return null;

@@ -382,7 +382,7 @@ public class GeneralServiceImpl implements GeneralService {
     @Override
     @Transactional
     public General updateTipoTest(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
-        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId) {
+        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen) {
      
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -397,8 +397,8 @@ public class GeneralServiceImpl implements GeneralService {
 
         General tipoTest = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
             posicion, version, temaId);
+        tipoTest.setImagen(imagen);
 
-        
         if(preguntasId != null){
             List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
             tipoTest.getPreguntas().clear();
@@ -420,7 +420,7 @@ public class GeneralServiceImpl implements GeneralService {
     @Override
     @Transactional
     public General updateTipoCarta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
-        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId) {
+        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen) {
      
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -435,6 +435,7 @@ public class GeneralServiceImpl implements GeneralService {
 
         General tipoCarta = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
             posicion, version, temaId);
+        tipoCarta.setImagen(imagen);
         if(preguntasId != null){
             List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
             if(preguntas.size() != preguntasId.size()){

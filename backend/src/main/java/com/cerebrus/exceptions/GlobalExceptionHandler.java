@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -171,6 +172,34 @@ public class GlobalExceptionHandler {
                                 .status(HttpStatus.FORBIDDEN)
                                 .body(body);
         }
+
+    /**
+     * Maneja violaciones de integridad de datos (valores demasiado grandes, duplicados, etc.)
+     * Retorna 422 Unprocessable Entity
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<?> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex,
+            WebRequest request) {
+        
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
+
+        String rootMsg = ex.getMostSpecificCause().getMessage();
+        if (rootMsg != null && rootMsg.toLowerCase().contains("data truncation")) {
+            body.put("mensaje", "Algún campo excede el tamaño máximo permitido. Reduce el texto o el valor e inténtalo de nuevo.");
+        } else if (rootMsg != null && rootMsg.toLowerCase().contains("out of range")) {
+            body.put("mensaje", "El valor numérico introducido es demasiado grande.");
+        } else if (rootMsg != null && rootMsg.toLowerCase().contains("duplicate")) {
+            body.put("mensaje", "Ya existe un registro con esos datos.");
+        } else {
+            body.put("mensaje", "Los datos introducidos no son válidos. Revisa los campos e inténtalo de nuevo.");
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(body);
+    }
 
     /**
      * Maneja excepciones generales
