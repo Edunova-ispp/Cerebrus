@@ -142,7 +142,8 @@ public class GeneralController {
             general.getComentariosRespVisible(),
             general.getPosicion(),
             general.getVersion(),
-            general.getTema().getId()
+            general.getTema().getId(),
+            general.getImagen()
         );
         return ResponseEntity.noContent().build();
     }

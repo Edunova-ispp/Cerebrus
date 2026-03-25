@@ -2,6 +2,7 @@ package com.cerebrus.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -194,6 +195,33 @@ public class GlobalExceptionHandler {
             body.put("mensaje", "Ya existe un registro con esos datos.");
         } else {
             body.put("mensaje", "Los datos introducidos no son válidos. Revisa los campos e inténtalo de nuevo.");
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(body);
+    }
+
+    /**
+     * Maneja errores de deserialización JSON (ej: número demasiado grande para Integer)
+     * Retorna 422 Unprocessable Entity
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
+
+        Throwable cause = ex.getCause();
+        if (cause instanceof InvalidFormatException ife && Number.class.isAssignableFrom(ife.getTargetType())) {
+            String field = ife.getPath().stream()
+                    .map(ref -> ref.getFieldName())
+                    .collect(Collectors.joining("."));
+            body.put("mensaje", "El valor numérico de '" + field + "' es demasiado grande.");
+        } else {
+            body.put("mensaje", "Los datos enviados no tienen un formato válido. Revisa los campos e inténtalo de nuevo.");
         }
 
         return ResponseEntity
