@@ -201,9 +201,10 @@
 
 /* ── Hint & info ───────────────────────────────────────── */
 
-.ta-hint {
-  font-size: 0.9rem;
-  color: #555;
+.tablero-hint {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.5rem;
+  color: var(--color-text, #000638);
   text-align: center;
   margin: 0;
 }

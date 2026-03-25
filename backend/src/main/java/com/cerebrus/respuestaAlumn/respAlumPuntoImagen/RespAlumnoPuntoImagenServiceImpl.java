@@ -32,14 +32,19 @@ public class RespAlumnoPuntoImagenServiceImpl implements RespAlumnoPuntoImagenSe
     @Override
     @Transactional
     public RespAlumnoPuntoImagen crearRespuestaAlumnoPuntoImagen(String respuesta, Long puntoImagenId, Long actividadAlumnoId) {
-        Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Alumno)) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
             throw new AccessDeniedException("Solo un alumno puede crear respuestas para puntos de imagen");
         }
 
         RespAlumnoPuntoImagen respAlumnoPuntoImagen = new RespAlumnoPuntoImagen();
         PuntoImagen puntoImagen = puntoImagenService.obtenerPuntoImagenPorId(puntoImagenId);
         ActividadAlumno actividadAlumno = respAlumnoPuntoImagenRepository.encontrarActividadAlumnoPorId(actividadAlumnoId); 
+        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
+            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes crear una respuesta para una ActividadAlumno que no es tuya");
+        }
+        
         respAlumnoPuntoImagen.setRespuesta(respuesta);
         respAlumnoPuntoImagen.setPuntoImagen(puntoImagen);
         respAlumnoPuntoImagen.setActividadAlumno(actividadAlumno);

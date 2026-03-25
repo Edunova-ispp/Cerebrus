@@ -5,16 +5,16 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.actividad.general.dto.CrucigramaDTO;
@@ -27,7 +27,6 @@ import com.cerebrus.actividad.general.dto.GeneralClasificacionDTO;
 import com.cerebrus.actividad.general.dto.GeneralClasificacionMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestMaestroDTO;
-import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.pregunta.Pregunta;
 
 import jakarta.validation.Valid;
@@ -47,6 +46,7 @@ public class GeneralController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<General> crearActGeneral(@RequestBody @Valid General general) {
         
         General generalCreada = generalService.crearActGeneral(
@@ -63,6 +63,7 @@ public class GeneralController {
 
     @PostMapping("/test")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Long> crearTipoTest(@RequestBody @Valid General general) {
 
         List<Long> preguntasId = general.getPreguntas().stream()
@@ -92,7 +93,7 @@ public class GeneralController {
         return ResponseEntity.ok(generalService.readTipoTestMaestro(id));
     }
 
-      @GetMapping("/cartas/{id}")
+    @GetMapping("/cartas/{id}")
     public ResponseEntity<GeneralCartaDTO> readTipoCarta(@PathVariable Long id) {
         return ResponseEntity.ok(generalService.readTipoCarta(id));
     }
@@ -104,6 +105,7 @@ public class GeneralController {
 
     @PostMapping("/cartas/maestro")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Long> crearTipoCarta(@RequestBody @Valid General general) {
 
         List<Long> preguntasId = general.getPreguntas().stream()
@@ -129,6 +131,7 @@ public class GeneralController {
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> updateActGeneral(@PathVariable Long id, @RequestBody @Valid General general){
         generalService.updateActGeneral(
             id,
@@ -145,6 +148,7 @@ public class GeneralController {
     }
     
     @PutMapping("/test/update/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<GeneralTestDTO> updateTipoTest(@PathVariable Long id, @RequestBody @Valid General general){
         generalService.updateTipoTest(
             id,
@@ -164,6 +168,7 @@ public class GeneralController {
     }
 
     @PutMapping("/cartas/update/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<GeneralCartaDTO> updateTipoCarta(@PathVariable Long id, @RequestBody @Valid General general) {
 
         generalService.updateTipoCarta(
@@ -183,6 +188,7 @@ public class GeneralController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> deleteActividad(@PathVariable Long id) {
         generalService.deleteActividad(id);
         return ResponseEntity.noContent().build();
@@ -190,6 +196,7 @@ public class GeneralController {
 
      @PostMapping("/clasificacion")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Long> crearTipoClasificacion(@RequestBody @Valid General general) {
 
     
@@ -217,6 +224,7 @@ public class GeneralController {
     }
 
     @PutMapping("/clasificacion/update/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<GeneralClasificacionMaestroDTO> updateTipoClasificacion(@PathVariable Long id, @RequestBody @Valid General general){
         GeneralClasificacionMaestroDTO actualizado = generalService.updateTipoClasificacion(
             id,
@@ -234,51 +242,49 @@ public class GeneralController {
     }
 
     @PostMapping("/crucigrama")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<CrucigramaDTO> crearTipoCrucigrama(@RequestBody @Valid CrucigramaRequest crucigrama) {
-        try {
-            // Se ha decidido limitar el crucigrama a un maximo de 5 preguntas
+        
+        // Se ha decidido limitar el crucigrama a un maximo de 5 preguntas
         if(crucigrama.getPreguntasYRespuestas().size() > 5) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        if (!sonRespuestasCrucigramaValidas(crucigrama)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
         CrucigramaDTO generalCreada = generalService.crearTipoCrucigrama(crucigrama);
         return ResponseEntity.ok(generalCreada);
-        }
-        catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        
+        
     }
 
     @GetMapping("/crucigrama/{id}")
     public ResponseEntity<CrucigramaDTO> readTipoCrucigrama(@PathVariable Long id) {
-        try {
             CrucigramaDTO crucigrama = generalService.readTipoCrucigrama(id);
             return ResponseEntity.ok(crucigrama);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
     }
 
     @PutMapping("/crucigrama/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<CrucigramaDTO> updateTipoCrucigrama(@PathVariable Long id, @RequestBody CrucigramaRequest crucigrama) {
-        try {
-            CrucigramaDTO updated = generalService.updateTipoCrucigrama(id, crucigrama);
-            return ResponseEntity.ok(updated);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        if (!sonRespuestasCrucigramaValidas(crucigrama)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
+        CrucigramaDTO updated = generalService.updateTipoCrucigrama(id, crucigrama);
+        return ResponseEntity.ok(updated);
+    }
+
+    private boolean sonRespuestasCrucigramaValidas(CrucigramaRequest crucigrama) {
+        if (crucigrama.getPreguntasYRespuestas() == null || crucigrama.getPreguntasYRespuestas().isEmpty()) {
+            return false;
+        }
+        return crucigrama.getPreguntasYRespuestas().values().stream()
+            .allMatch(respuesta -> respuesta != null && respuesta.strip().matches("^[\\p{L}]+$"));
     }
 
     @PostMapping("/abierta/maestro")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Long> crearTipoAbierta(@RequestBody @Valid General general) {
 
         List<Long> preguntasId = general.getPreguntas().stream()
@@ -292,7 +298,8 @@ public class GeneralController {
             general.getTema().getId(),
             general.getRespVisible(),
             general.getComentariosRespVisible(),
-            preguntasId
+            preguntasId,
+            general.getImagen()
         );
 
         return new ResponseEntity<>(generalCreada.getId(), HttpStatus.CREATED);
@@ -309,7 +316,8 @@ public class GeneralController {
     }
 
     @PutMapping("/abierta/update/{id}")
-    public ResponseEntity<GeneralAbiertaAlumnoDTO> updateTipoAbierta(@PathVariable Long id, @RequestBody @Valid General general) {
+    @PreAuthorize("hasAuthority('MAESTRO')")
+    public ResponseEntity<GeneralAbiertaMaestroDTO> updateTipoAbierta(@PathVariable Long id, @RequestBody @Valid General general) {
 
         generalService.updateTipoAbierta(
         id,
@@ -321,10 +329,11 @@ public class GeneralController {
         general.getPreguntas().stream().map(Pregunta::getId).toList(),
         general.getPosicion(),
         general.getVersion(),
-        general.getTema().getId()
+        general.getTema().getId(),
+        general.getImagen()
         );
 
-        return ResponseEntity.ok(generalService.readTipoAbierta(id));
+        return ResponseEntity.ok(generalService.readTipoAbiertaMaestro(id));
     }
 
 }

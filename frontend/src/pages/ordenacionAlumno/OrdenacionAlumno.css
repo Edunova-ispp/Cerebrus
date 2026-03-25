@@ -17,12 +17,12 @@
   max-width: 1100px;
   width: 100%;
   margin: 0 auto;
-  padding: 16px 24px 60px;
+  padding: 24px 28px 60px;
   box-sizing: border-box;
 }
 
 .ord-description {
-  margin: 0 0 18px;
+  margin: 0 0 22px;
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1.15rem;
   color: #000;
@@ -31,45 +31,62 @@
 .ord-items {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 28px;
+  gap: 18px;
+  margin-bottom: 32px;
 }
 
 .ord-item {
-  width: min(760px, 100%);
+  width: 100%;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 48px 1fr auto;
   align-items: center;
-  gap: 14px;
-  background-color: #D10057;
-  color: #fff;
-  border: 4px solid #000;
-  border-radius: 26px;
-  padding: 12px 14px;
+  gap: 0;
+  background-color: #fff;
+  color: #000;
+  border: 3px solid #000;
+  border-radius: 18px;
+  padding: 0;
+  box-shadow: 4px 4px 0px #000;
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.ord-item:hover {
+  transform: translate(-1px, -1px);
   box-shadow: 5px 5px 0px #000;
 }
 
 .ord-item-index {
-  width: 30px;
-  text-align: right;
+  width: 48px;
+  height: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--color-primary);
 }
 
 .ord-item-value {
   min-width: 0;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
+  padding: 12px 16px;
+  flex: 1;
 }
 
 .ord-item-text {
   width: 100%;
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1.15rem;
-  color: #fff;
+  font-weight: 600;
+  color: var(--color-text, #000638);
   overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .ord-item-img {
@@ -77,57 +94,87 @@
   height: 80px;
   object-fit: cover;
   display: block;
-  border-radius: 16px;
-  border: 3px solid #000;
+  border-radius: 12px;
+  border: 2px solid #000;
 }
 
 .ord-item-actions {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 8px 4px 0;
 }
 
 .ord-arrow-btn {
-  background-color: #D10057;
-  color: #fff;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 14px;
+  background: var(--color-accent, #FFF294);
+  color: #000;
+  border: 2px solid #000;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.2rem;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 2px 0px #000;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.1s;
+}
+
+.ord-arrow-btn:hover {
+  background: var(--color-accent-dark, #ffe62b);
+}
+
+.ord-arrow-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px #000;
 }
 
 .ord-arrow-btn:disabled {
-  opacity: 0.55;
+  opacity: 0.35;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: 2px 2px 0px #000;
 }
 
 .ord-bottom {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 .ord-bottom-inner {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
 }
 
 .ord-feedback {
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   color: #000;
-  text-align: right;
-  max-width: 760px;
+  text-align: center;
+  width: 100%;
+  background: #fffde0;
+  border: 3px solid #000;
+  border-radius: 14px;
+  padding: 10px 18px;
+  box-shadow: 3px 3px 0px #000;
+  box-sizing: border-box;
 }
 /* Rey y bocadillo */
 
 .ord-content-row {
   display: grid;
   grid-template-columns: 160px 1fr;
-  gap: 24px;
+  gap: 32px;
   align-items: start;
+  margin-top: 18px;
 }
 
 .ord-left-col {

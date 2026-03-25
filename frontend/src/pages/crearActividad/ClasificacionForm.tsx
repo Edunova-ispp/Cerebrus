@@ -23,6 +23,7 @@ export interface ClasificacionFormInitialValues {
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly version: number;
+  readonly temaId?: number;
   readonly preguntas?: readonly ClasificacionFormInitialPregunta[];
 }
 
@@ -75,7 +76,7 @@ const [showIAModal, setShowIAModal] = useState(false);
   const navigate = useNavigate();
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
-  const temaId = temaIdProp ?? params.temaId;
+  const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
   useEffect(() => {
     if (!initialValues) return;
@@ -154,9 +155,12 @@ const [showIAModal, setShowIAModal] = useState(false);
       if (!preguntas[i].text.trim()) {
         return `La categoría ${i + 1} debe tener un nombre`;
       }
-      const elementosConTexto = preguntas[i].respuestas.filter(r => r.text.trim());
-      if (elementosConTexto.length === 0) {
+      if (preguntas[i].respuestas.length === 0) {
         return `La categoría ${i + 1} debe tener al menos 1 elemento`;
+      }
+      const tieneElementosVacios = preguntas[i].respuestas.some((r) => !r.text.trim());
+      if (tieneElementosVacios) {
+        return `Todos los elementos de la categoría ${i + 1} deben estar rellenos`;
       }
     }
 
@@ -177,41 +181,7 @@ const [showIAModal, setShowIAModal] = useState(false);
       return;
     }
 
-    // Validar campos requeridos
-    if (!titulo.trim()) {
-      setError('El título es requerido.');
-      return;
-    }
-
-    if (!puntuacion.trim()) {
-      setError('La puntuación es requerida.');
-      return;
-    }
-
     const pNum = Number.parseInt(puntuacion.trim(), 10);
-    if (isNaN(pNum) || pNum <= 0) {
-      setError('La puntuación debe ser un número mayor a 0.');
-      return;
-    }
-
-    // Validar al menos 2 categorías
-    if (preguntas.length < 2) {
-      setError('Debe haber al menos 2 categorías.');
-      return;
-    }
-
-    // Validar que cada categoría tenga al menos 1 elemento con texto
-    for (let i = 0; i < preguntas.length; i++) {
-      if (!preguntas[i].text.trim()) {
-        setError(`La categoría ${i + 1} debe tener un nombre.`);
-        return;
-      }
-      const elementosConTexto = preguntas[i].respuestas.filter(r => r.text.trim());
-      if (elementosConTexto.length === 0) {
-        setError(`La categoría ${i + 1} debe tener al menos 1 elemento.`);
-        return;
-      }
-    }
 
     const tIdNum = Number.parseInt(temaId!, 10);
 
@@ -319,8 +289,8 @@ const [showIAModal, setShowIAModal] = useState(false);
         }
       }
       if (onDone) onDone(); else navigate(`/cursos/${cursoId}`);
-    } catch (err) {
-      setError('Error al guardar la actividad');
+    } catch {
+      setError('No se ha podido guardar la actividad. Inténtalo de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -380,7 +350,7 @@ const handleIAResult = (data: any) => {
           </div>
           <div>
             <label className="cf-label" htmlFor="cf-descripcion">Descripción</label>
-            <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={3} style={{ width: '100%' }} />
+            <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={3} style={{ width: '100%', resize: 'vertical' }} />
           </div>
         </div>
 

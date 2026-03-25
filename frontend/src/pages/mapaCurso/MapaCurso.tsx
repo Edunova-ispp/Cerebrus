@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { getCurrentUserInfo } from '../../types/curso';
-import { apiFetch } from '../../utils/api';
+import { apiFetch, fetchProgresoAlumno } from '../../utils/api';
 import './MapaCurso.css';
 
 import inicialMapIcon from '../../assets/props/mapa/act_mapa_inicial.svg';
@@ -110,10 +110,20 @@ useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     if (!cursoId) return;
 
-    // Envolvemos el fetch y las actualizaciones de estado en una función
-    const cargarTemas = () => {
+    const cargarTemas = async () => {
       setError('');
       console.log('[MapaCurso] Cargando temas/actividades', { cursoId });
+
+      // Comprobar si el curso está completado → redirigir a misCursos
+      try {
+        const prog = await fetchProgresoAlumno(Number(cursoId));
+        if (prog.estado === 'TERMINADA') {
+          navigate('/misCursos', { replace: true });
+          return;
+        }
+      } catch (e) {
+        console.error('[MapaCurso] Error comprobando progreso', e);
+      }
       
       apiFetch(`${apiBase}/api/temas/curso/${cursoId}/alumno`)
         .then(async (r) => {
@@ -134,9 +144,8 @@ useEffect(() => {
         .finally(() => setLoading(false));
     };
 
-    // Ejecutamos la función
     cargarTemas();
-  }, [cursoId]);
+  }, [cursoId, navigate]);
 
   useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
@@ -206,6 +215,7 @@ useEffect(() => {
     else if (tipoReal === 'MARCARIMAGEN') navigate(`/marcar-imagenes/${act.id}/alumno`);
     else if (tipoReal === 'CLASIFICACION') navigate(`/clasificaciones/${act.id}/alumno`);
     else if (tipoReal === 'CRUCIGRAMA') navigate(`/crucigrama/${act.id}/alumno`);
+    else if (tipoReal === 'ABIERTA') navigate(`/abierta/${act.id}/alumno`);
   };
 
   const selectedTema = temas[selectedIndex] ?? null;
@@ -337,7 +347,7 @@ useEffect(() => {
                             const locked = !isUnlocked;
 
                             const tipo = (act.tipo ?? '').toUpperCase();
-                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'CLASIFICACION', 'MARCARIMAGEN', 'TABLERO', 'CARTA', 'CRUCIGRAMA'].includes(tipo);
+                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'CLASIFICACION', 'MARCARIMAGEN', 'TABLERO', 'CARTA', 'CRUCIGRAMA', 'ABIERTA' ].includes(tipo);
 
                             const iconSrc = getActivityIconSrc(tipo, act.posicion);
                             const nodeBg = getNodeBgColor(linearIndex);

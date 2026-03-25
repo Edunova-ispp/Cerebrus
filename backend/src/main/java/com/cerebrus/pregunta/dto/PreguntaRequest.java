@@ -10,7 +10,6 @@ public class PreguntaRequest {
 
     private String imagen;
 
-    @NotNull
     private Long actividadId;
 
     public PreguntaRequest() {}

@@ -11,6 +11,7 @@ export interface TeoriaFormInitialValues {
   readonly descripcion: string;
   readonly imagen: string;
   readonly posicion: number;
+  readonly temaId?: number;
 }
 
 interface Props {
@@ -34,7 +35,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
   const navigate = useNavigate();
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
-  const temaId = temaIdProp ?? params.temaId;
+  const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
   useEffect(() => {
     console.log("Intial values", initialValues);
@@ -51,6 +52,8 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
     if (!cursoId) return 'Falta el id del curso en la URL';
+    if (!descripcion.trim()) return 'La descripción es requerida en una actividad de teoría';
+
     return null;
   };
 
@@ -76,6 +79,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
             imagen: imagen.trim(),
+            temaId: temaId ? Number.parseInt(temaId, 10) : null,
           }),
         });
       } else {

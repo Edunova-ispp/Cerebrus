@@ -30,22 +30,23 @@
 
 /* ── Progress bar ── */
 .cr-progress-wrap {
-  background: #fff;
-  border: 3px solid #000;
-  border-radius: 12px;
+  background: var(--color-secondary, #7C4DFF);
+  border: 4px solid #000;
+  border-radius: 16px;
   box-shadow: 4px 4px 0 #000;
   padding: 10px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 0.9rem;
+  font-size: 1.9rem;
   font-weight: 700;
+  color: #fff;
 }
 
 .cr-timer {
-  background: #b49aff;
-  color: #000;
+  background: var(--color-accent);
+  color: #000000;
   border: 3px solid #000;
   border-radius: 12px;
   padding: 6px 14px;
@@ -58,43 +59,44 @@
 
 .cr-progress-bar {
   flex: 1;
-  height: 16px;
-  background: #f0e6ff;
-  border: 2px solid #000;
-  border-radius: 8px;
+  height: 22px;
+  background: #333;
+  border: 3px solid #000;
+  border-radius: 10px;
   overflow: hidden;
 }
 
 .cr-progress-fill {
   height: 100%;
-  background: #a855f7;
-  border-radius: 6px;
-  transition: width 0.4s ease;
+  background: var(--color-accent, #FFF294);
+  border-radius: 8px;
+  transition: width 0.35s ease;
 }
 
 .cr-progress-label {
-  color: #7c3aed;
+  color: #fff;
   min-width: 60px;
   text-align: right;
 }
 
 /* ── Active clue banner ── */
 .cr-active-clue {
-  background: #fce8a6;
-  border: 3px solid #d4a017;
-  border-radius: 12px;
+  background: var(--color-primary, #D10057);
+  border: 4px solid #000;
+  border-radius: 14px;
   box-shadow: 4px 4px 0 #000;
   padding: 10px 16px;
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 0.95rem;
+  font-size: 1.95rem;
   min-height: 42px;
   display: flex;
   align-items: center;
   gap: 8px;
+  color: #fff;
 }
 
 .cr-active-clue-dir {
-  background: #7c3aed;
+  background: var(--color-secondary, #7C4DFF);
   color: #fff;
   border-radius: 6px;
   padding: 2px 8px;
@@ -104,11 +106,11 @@
 }
 
 .cr-active-clue-dir.vertical {
-  background: #db2777;
+  background: var(--color-secondary, #7C4DFF);
 }
 
 .cr-active-clue-text {
-  color: #555;
+  color: #ffffff !important;
 }
 
 /* ── Body layout ── */
@@ -153,7 +155,7 @@
 }
 
 .cr-cell:hover:not(.blocked) {
-  background: #f5e6cc;
+  background: #f0e0ff;
   transform: translate(-1px, -1px);
 }
 
@@ -164,18 +166,18 @@
   cursor: default;
 }
 
-.cr-cell.cell-h  { background: #e0d4ff; }
-.cr-cell.cell-v  { background: #ffd6e7; }
-.cr-cell.cell-hv { background: #d4f0ff; }
+.cr-cell.cell-h  { background: #f0e0ff; }
+.cr-cell.cell-v  { background: #f0e0ff; }
+.cr-cell.cell-hv { background: #f0e0ff; }
 
 .cr-cell.active {
-  background: #fce8a6 !important;
-  border-color: #d4a017 !important;
+  background: var(--color-accent, #FFF294) !important;
+  border-color: #000 !important;
   box-shadow: 3px 3px 0 #000 !important;
   transform: translate(-1px, -1px);
 }
 
-.cr-cell.active-word { background: #fff9d4 !important; }
+.cr-cell.active-word { background: var(--color-accent-light, #FCEF91) !important; }
 .cr-cell.correct     { background: #adf7b6 !important; border-color: #1a7a40 !important; }
 .cr-cell.wrong       { background: #fdd    !important; border-color: #c0392b !important; }
 
@@ -207,25 +209,27 @@
 }
 
 .cr-clue-section {
-  background: #fff;
+  background: var(--color-secondary, #7C4DFF);
   border: 3px solid #000;
   border-radius: 14px;
   box-shadow: 4px 4px 0 #000;
   padding: 12px 14px;
+  color: #fff;
 }
 
 .cr-clue-title {
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1rem;
+  font-size: 2rem;
   font-weight: 700;
   margin-bottom: 10px;
   display: flex;
   align-items: center;
   gap: 8px;
+  color: #fff;
 }
 
-.cr-clue-title.horizontal { color: #7c3aed; }
-.cr-clue-title.vertical   { color: #db2777; }
+.cr-clue-title.horizontal { color: #fff; }
+.cr-clue-title.vertical   { color: #fff; }
 
 .cr-arrow-badge {
   width: 24px;
@@ -238,8 +242,8 @@
   font-weight: 700;
 }
 
-.cr-arrow-badge.h { background: #e0d4ff; color: #7c3aed; }
-.cr-arrow-badge.v { background: #ffd6e7; color: #db2777; }
+.cr-arrow-badge.h { background: var(--color-accent); color: #000000; }
+.cr-arrow-badge.v { background: var(--color-accent); color: #000000; }
 
 .cr-clue-item {
   display: flex;
@@ -247,18 +251,18 @@
   gap: 8px;
   margin-bottom: 6px;
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 0.85rem;
+  font-size: 1.85rem;
   cursor: pointer;
   padding: 4px 6px;
   border-radius: 8px;
   transition: background 0.1s;
 }
 
-.cr-clue-item:hover { background: #f5e6cc; }
+.cr-clue-item:hover { background: rgba(255, 255, 255, 0.15); }
 
 .cr-clue-item.active-clue-item {
-  background: #fce8a6;
-  border: 2px solid #d4a017;
+  background: rgba(255, 243, 134, 0.525);
+  border: 2px solid var(--color-accent);
 }
 
 .cr-clue-num {
@@ -278,14 +282,14 @@
 .cr-clue-num.done { background: #1a7a40; }
 
 .cr-clue-text {
-  color: #333;
+  color: #fff;
   flex: 1;
   line-height: 1.3;
 }
 
 /* ── Score banner ── */
 .cr-score-banner {
-  background: #fce8a6;
+  background: var(--color-primary, #D10057);
   border: 4px solid #000;
   border-radius: 16px;
   box-shadow: 5px 5px 0 #000;
@@ -294,6 +298,7 @@
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1.4rem;
   font-weight: 700;
+  color: #fff;
 }
 
 .cr-score-banner.perfect {
@@ -325,39 +330,34 @@
 }
 
 .cr-btn:hover:not(:disabled) {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 #000;
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
 }
 
 .cr-btn:active:not(:disabled) {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 #000;
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 #000;
 }
 
 .cr-btn:disabled {
   opacity: 0.4;
   cursor: default;
-  box-shadow: 2px 2px 0 #aaa;
+  box-shadow: 2px 2px 0 #000000;
 }
 
 .cr-btn-check {
-  background: #D10057;
-  color: #fff;
-  animation: cr-pulse 1.8s ease-in-out infinite;
+  background: var(--color-accent, #FFF294);
+  color: #000;
+  animation: none;
 }
 
 .cr-btn-check:disabled {
   animation: none;
-  background: #e8a0b8;
+  opacity: 0.38;
 }
 
-.cr-btn-reveal { background: #f0e6ff; color: #7c3aed; }
-.cr-btn-back   { background: #fff48d; color: #5a4700; }
-
-@keyframes cr-pulse {
-  0%, 100% { box-shadow: 4px 4px 0 #000; }
-  50%       { box-shadow: 4px 4px 0 #000, 0 0 16px 4px rgba(209,0,87,0.4); }
-}
+.cr-btn-reveal { background: var(--color-accent, #FFF294); color: #000; }
+.cr-btn-back   { background: var(--color-accent, #FFF294); color: #000; }
 
 /* ── Hint ── */
 .cr-hint {

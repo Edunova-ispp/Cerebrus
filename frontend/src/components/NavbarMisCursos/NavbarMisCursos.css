@@ -1,3 +1,22 @@
+.navbar-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 50;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.navbar-wrap--hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.navbar-spacer {
+  height: 90px;
+}
+
 .navbar {
   width: 100%;
   padding: 6px 12px;
@@ -10,8 +29,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* Reemplazado color-mix para compatiblidad con html2canvas / watchbug */
   background-color: #d1005794;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 4px solid #000;
   border-radius: 20px;
   padding: 0px 70px;

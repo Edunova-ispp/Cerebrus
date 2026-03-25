@@ -3,14 +3,15 @@ package com.cerebrus.actividad;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cerebrus.comun.enumerados.*;
 import com.cerebrus.actividad.general.General;
-import com.cerebrus.tema.Tema;
-import org.springframework.security.access.AccessDeniedException;
+import com.cerebrus.comun.enumerados.TipoActGeneral;
+import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.inscripcion.Inscripcion;
+import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaService;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
@@ -57,16 +58,21 @@ public class ActividadServiceImpl implements ActividadService {
 
     @Override
     public Actividad encontrarActividadPorIdAlumno(Long id) {
-        Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Alumno)) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
             throw new AccessDeniedException("No tienes permiso para acceder a esta actividad");
         } else {
             Actividad actividad = actividadRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada"));
+
+            if (!Boolean.TRUE.equals(actividad.getTema().getCurso().getVisibilidad())) {
+                throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
+            }
         	
             List<Inscripcion> inscripciones = actividad.getTema().getCurso().getInscripciones();
             for (Inscripcion inscripcion : inscripciones) {
-                if (inscripcion.getAlumno().getId().equals(u.getId())) {
+                if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                    AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(actividad, current.getId());
                     return actividad; 
                 }
             }
@@ -100,11 +106,16 @@ public class ActividadServiceImpl implements ActividadService {
 
         Tema tema = temaService.obtenerTemaPorId(temaId);
 
+        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("No puedes crear actividades para temas que no son tuyos");
+        }
+
         Integer maxPosicion = actividadRepository.findMaxPosicionByTemaId(temaId);
         Integer nuevaPosicion = (maxPosicion != null) ? maxPosicion + 1 : 1;
 
-        Actividad actividad = new General(titulo, descripcion, 0, imagen, 
-            false, nuevaPosicion, 1, tema, TipoActGeneral.TEORIA);
+        // Las actividades de teoría no aportan puntuación, pero el campo requiere mínimo 1 por validación
+        Actividad actividad = new General(titulo, descripcion, 1, imagen, 
+        false, nuevaPosicion, 1, tema, TipoActGeneral.TEORIA);
 
         return actividadRepository.save(actividad);
     }

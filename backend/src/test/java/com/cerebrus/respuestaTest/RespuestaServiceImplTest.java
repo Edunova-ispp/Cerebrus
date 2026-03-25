@@ -54,9 +54,23 @@ class RespuestaServiceImplTest {
 	@Test
 	void crearRespuesta_guardaRespuesta_cuandoUsuarioEsMaestro_yPreguntaExiste() {
 		Maestro maestro = crearMaestro("maestro1", "m1@cerebrus.com");
+		maestro.setId(2L);
 		when(usuarioService.findCurrentUser()).thenReturn(maestro);
 		Pregunta pregunta = new Pregunta();
 		pregunta.setId(7L);
+		pregunta.setActividad(new com.cerebrus.actividad.Actividad() {
+			{
+				setTema(new com.cerebrus.tema.Tema() {
+					{
+						setCurso(new com.cerebrus.curso.Curso() {
+							{
+								setMaestro(maestro);
+							}
+						});
+					}
+				});
+			}
+		});
 		when(preguntaRepository.findById(7L)).thenReturn(Optional.of(pregunta));
 		when(respuestaRepository.save(any(RespuestaMaestro.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -110,9 +124,23 @@ class RespuestaServiceImplTest {
 	@Test
 	void crearRespuesta_permitaCorrectaNull() {
 		Maestro maestro = crearMaestro("maestro1", "m1@cerebrus.com");
+		maestro.setId(2L);
 		when(usuarioService.findCurrentUser()).thenReturn(maestro);
 		Pregunta pregunta = new Pregunta();
 		pregunta.setId(7L);
+		pregunta.setActividad(new com.cerebrus.actividad.Actividad() {
+			{
+				setTema(new com.cerebrus.tema.Tema() {
+					{
+						setCurso(new com.cerebrus.curso.Curso() {
+							{
+								setMaestro(maestro);
+							}
+						});
+					}
+				});
+			}
+		});
 		when(preguntaRepository.findById(7L)).thenReturn(Optional.of(pregunta));
 		when(respuestaRepository.save(any(RespuestaMaestro.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -155,12 +183,29 @@ class RespuestaServiceImplTest {
 	@Test
 	void updateRespuesta_actualizaYGuarda_cuandoUsuarioEsMaestro_yRespuestaExiste() {
 		Maestro maestro = crearMaestro("maestro1", "m1@cerebrus.com");
+		maestro.setId(2L);
 		when(usuarioService.findCurrentUser()).thenReturn(maestro);
+		Pregunta pregunta = new Pregunta();
+		pregunta.setId(7L);
+		pregunta.setActividad(new com.cerebrus.actividad.Actividad() {
+			{
+				setTema(new com.cerebrus.tema.Tema() {
+					{
+						setCurso(new com.cerebrus.curso.Curso() {
+							{
+								setMaestro(maestro);
+							}
+						});
+					}
+				});
+			}
+		});
 		RespuestaMaestro existing = new RespuestaMaestro();
 		existing.setId(5L);
 		existing.setRespuesta("old");
 		existing.setImagen("old.png");
 		existing.setCorrecta(false);
+		existing.setPregunta(pregunta);
 		when(respuestaRepository.findById(5L)).thenReturn(Optional.of(existing));
 		when(respuestaRepository.save(any(RespuestaMaestro.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -213,9 +258,26 @@ class RespuestaServiceImplTest {
 	@Test
 	void deleteRespuesta_elimina_cuandoUsuarioEsMaestro_yRespuestaExiste() {
 		Maestro maestro = crearMaestro("maestro1", "m1@cerebrus.com");
+		maestro.setId(2L);
+		Pregunta pregunta = new Pregunta();
+		pregunta.setId(7L);
+		pregunta.setActividad(new com.cerebrus.actividad.Actividad() {
+			{
+				setTema(new com.cerebrus.tema.Tema() {
+					{
+						setCurso(new com.cerebrus.curso.Curso() {
+							{
+								setMaestro(maestro);
+							}
+						});
+					}
+				});
+			}
+		});
 		when(usuarioService.findCurrentUser()).thenReturn(maestro);
 		RespuestaMaestro existing = new RespuestaMaestro();
 		existing.setId(9L);
+		existing.setPregunta(pregunta);
 		when(respuestaRepository.findById(9L)).thenReturn(Optional.of(existing));
 
 		respuestaService.deleteRespuesta(9L);

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import jakarta.validation.Valid;
 
 
@@ -31,6 +32,7 @@ public class RespuestaMaestroController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Long> crearRespuesta(@RequestBody @Valid RespuestaMaestro respuesta) {
         RespuestaMaestro respuestaCreada = respuestaService.crearRespuesta(
             respuesta.getRespuesta(),
@@ -50,6 +52,7 @@ public class RespuestaMaestroController {
 
     @PutMapping("/update/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> updateRespuesta(@PathVariable Long id, @RequestBody @Valid RespuestaMaestro respuesta) {
         respuestaService.updateRespuesta(
             id,
@@ -62,6 +65,7 @@ public class RespuestaMaestroController {
 
     @DeleteMapping("/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> deleteRespuesta(@PathVariable Long id) {
         respuestaService.deleteRespuesta(id);
         return ResponseEntity.noContent().build();
