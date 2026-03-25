@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { apiFetch } from '../../utils/api';
-import '../crearActividad/TestForm.css';
+import './TestForm.css';
 import './PreguntaAbiertaForm.css';
 
 export interface PreguntaAbiertaFormInitialValues {
