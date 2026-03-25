@@ -3,14 +3,14 @@ package com.cerebrus.actividad;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cerebrus.comun.enumerados.*;
 import com.cerebrus.actividad.general.General;
-import com.cerebrus.tema.Tema;
-import org.springframework.security.access.AccessDeniedException;
+import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.inscripcion.Inscripcion;
+import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaService;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
@@ -63,6 +63,10 @@ public class ActividadServiceImpl implements ActividadService {
         } else {
             Actividad actividad = actividadRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada"));
+
+            if (!Boolean.TRUE.equals(actividad.getTema().getCurso().getVisibilidad())) {
+                throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
+            }
         	
             List<Inscripcion> inscripciones = actividad.getTema().getCurso().getInscripciones();
             for (Inscripcion inscripcion : inscripciones) {

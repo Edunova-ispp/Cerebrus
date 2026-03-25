@@ -121,6 +121,9 @@ public class TableroServiceImpl implements TableroService {
             }
             return TableroDTO.fromEntity(tablero);
         }
+        if (!Boolean.TRUE.equals(tablero.getTema().getCurso().getVisibilidad())) {
+            throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
+        }
         List<Inscripcion> inscripciones = tablero.getTema().getCurso().getInscripciones();
         for (Inscripcion inscripcion : inscripciones) {
             if (inscripcion.getAlumno().getId().equals(current.getId())) {
@@ -201,6 +204,9 @@ public class TableroServiceImpl implements TableroService {
 
         if (u instanceof Alumno) {
             Alumno alumno = (Alumno) u;
+            if (!Boolean.TRUE.equals(tablero.getTema().getCurso().getVisibilidad())) {
+                throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
+            }
             if (!tablero.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
                 throw new AccessDeniedException("No tienes permiso para responder a este tablero porque no esta inscrito");
             }

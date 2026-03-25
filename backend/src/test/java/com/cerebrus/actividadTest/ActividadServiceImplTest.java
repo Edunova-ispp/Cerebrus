@@ -223,6 +223,29 @@ class ActividadServiceImplTest {
     }
 
     @Test
+    void encontrarActividadPorIdAlumno_cursoOculto_lanzaAccessDeniedException() {
+        com.cerebrus.usuario.alumno.Alumno alumno = new com.cerebrus.usuario.alumno.Alumno();
+        alumno.setId(1L);
+        Maestro maestro = crearMaestro(2L);
+        Curso curso = crearCurso(maestro);
+        curso.setVisibilidad(false);
+        Tema tema = crearTema(10L, curso);
+        Actividad actividad = new General();
+        actividad.setId(5L);
+        actividad.setTema(tema);
+        com.cerebrus.inscripcion.Inscripcion inscripcion = new com.cerebrus.inscripcion.Inscripcion();
+        inscripcion.setAlumno(alumno);
+        curso.setInscripciones(List.of(inscripcion));
+
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        when(actividadRepository.findById(5L)).thenReturn(java.util.Optional.of(actividad));
+
+        assertThatThrownBy(() -> actividadService.encontrarActividadPorIdAlumno(5L))
+            .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
+            .hasMessageContaining("curso oculto");
+    }
+
+    @Test
     void encontrarActividadPorIdAlumno_alumnoInscrito_devuelveActividad() {
         com.cerebrus.usuario.alumno.Alumno alumno = new com.cerebrus.usuario.alumno.Alumno();
         alumno.setId(1L);
@@ -330,6 +353,7 @@ class ActividadServiceImplTest {
     private static Curso crearCurso(Maestro maestro) {
         Curso curso = new Curso();
         curso.setMaestro(maestro);
+        curso.setVisibilidad(true);
         return curso;
     }
 

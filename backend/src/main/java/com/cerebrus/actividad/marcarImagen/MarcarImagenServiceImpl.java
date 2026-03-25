@@ -98,6 +98,10 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
         MarcarImagen marcarImagen = marcarImagenRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Marcar Imagen", "id", id));
 
+        if (current instanceof Alumno && !Boolean.TRUE.equals(marcarImagen.getTema().getCurso().getVisibilidad())) {
+            throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
+        }
+
         if (!marcarImagen.getTema().getCurso().getMaestro().getId().equals(current.getId()) && !marcarImagen.getTema().getCurso().getInscripciones().stream().anyMatch(a -> a.getAlumno().getId().equals(current.getId()))) {
             throw new AccessDeniedException("Solo alguien perteneciente al curso puede acceder a esta actividad");
         }

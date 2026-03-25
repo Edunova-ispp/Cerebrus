@@ -200,6 +200,7 @@ class GeneralServiceImplTest {
 
 		Curso curso = new Curso();
 		curso.setInscripciones(inscripciones);
+		curso.setVisibilidad(true);
 
 		Tema tema = new Tema();
 		tema.setCurso(curso);
@@ -212,6 +213,32 @@ class GeneralServiceImplTest {
 		General resultado = generalService.readActividad(5L);
 
 		assertThat(resultado).isSameAs(general);
+	}
+
+	@Test
+	void readActividad_cursoOculto_lanzaAccessDeniedException() {
+		Alumno alumno = new Alumno();
+		alumno.setId(1L);
+		when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
+		Inscripcion inscripcion = new Inscripcion();
+		inscripcion.setAlumno(alumno);
+
+		Curso curso = new Curso();
+		curso.setInscripciones(List.of(inscripcion));
+		curso.setVisibilidad(false);
+
+		Tema tema = new Tema();
+		tema.setCurso(curso);
+
+		General general = new General();
+		general.setId(6L);
+		general.setTema(tema);
+		when(generalRepository.findByIdWithPreguntas(6L)).thenReturn(Optional.of(general));
+
+		assertThatThrownBy(() -> generalService.readActividad(6L))
+				.isInstanceOf(AccessDeniedException.class)
+				.hasMessageContaining("curso oculto");
 	}
 
     // Tests para verificar que se lanza ResourceNotFoundException si la actividad no existe al leer, 
@@ -450,6 +477,7 @@ class GeneralServiceImplTest {
 		Curso curso = new Curso();
 		curso.setId(id);
 		curso.setMaestro(maestro);
+		curso.setVisibilidad(true);
 		return curso;
 	}
 }
