@@ -179,15 +179,13 @@ public class IaConnectionServiceImpl implements IaConnectionService {
     
      @Override
     public String generarActividad(TipoAct tipoActividad, String prompt) {
-        String apikeyActual ;
-       
-       
-       Integer PeticionesMaximasDiariasPorKey = 20;
+        String apikeyActual;
+        Integer PeticionesMaximasDiariasPorKey = 20;
         Usuario usuario = usuarioService.findCurrentUser();
         if(!(usuario instanceof Maestro)){
             throw new IllegalArgumentException("403 Forbidden: El usuario no es un maestro");
         }
-       String promptDepurado = crearPromt(tipoActividad, prompt);
+        String promptDepurado = crearPromt(tipoActividad, prompt);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -199,50 +197,84 @@ public class IaConnectionServiceImpl implements IaConnectionService {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
        
         try {
-            if(peticionesDiarias >= PeticionesMaximasDiariasPorKey){
-                
-                if(IndiceKey<5){
-                    IndiceKey++;
-                  
-                   peticionesDiarias=0;
-                   
-                }else{
-                    if(fechaUltimaPeticion == null || !fechaUltimaPeticion.isEqual(LocalDate.now())) {
-                        fechaUltimaPeticion = LocalDate.now();
-                        IndiceKey=1;
-                        peticionesDiarias=0;}
-                    throw new IllegalArgumentException("429 Too Many Requests: Se han alcanzado el límite de peticiones diarias para todas las claves de API disponibles. Por favor, inténtalo de nuevo mañana.");
+            HttpStatusCodeException last429Exception = null;
+
+            for (int intento = 0; intento < 5; intento++) {
+                if (peticionesDiarias >= PeticionesMaximasDiariasPorKey) {
+                    boolean rotated = rotateToNextApiKeySameDay();
+                    if (!rotated) {
+                        if (fechaUltimaPeticion == null || !fechaUltimaPeticion.isEqual(LocalDate.now())) {
+                            fechaUltimaPeticion = LocalDate.now();
+                            IndiceKey = 1;
+                            peticionesDiarias = 0;
+                        } else {
+                            throw new QuotaExceededException("Se ha alcanzado la cuota diaria de IA. Podrás volver a intentarlo mañana.");
+                        }
+                    }
+                }
+
+                apikeyActual = resolveApiKeyByIndex(IndiceKey);
+                System.out.println("Usando la clave de API " + IndiceKey + ": ****" + apikeyActual.substring(apikeyActual.length()-4));
+                String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apikeyActual;
+
+                try {
+                    ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
+
+                    List candidates = (List) response.getBody().get("candidates");
+                    Map firstCandidate = (Map) candidates.get(0);
+                    Map content = (Map) firstCandidate.get("content");
+                    List parts = (List) content.get("parts");
+                    Map firstPart = (Map) parts.get(0);
+                    String respuesta = (String) firstPart.get("text");
+
+                    if (!validateActivityResponse(respuesta, tipoActividad)) {
+                        throw new IllegalArgumentException("respuesta no válida: " + respuesta);
+                    }
+
+                    peticionesDiarias++;
+                    System.out.println("Peticiones diarias realizadas con la clave actual (" + apikeyActual.substring(apikeyActual.length()-4) + "): " + peticionesDiarias);
+                    return respuesta;
+                } catch (HttpStatusCodeException e) {
+                    String responseBody = e.getResponseBodyAsString();
+                    String errorTextRaw = (responseBody != null && !responseBody.isBlank()) ? responseBody : e.getMessage();
+                    String errorText = errorTextRaw.toLowerCase();
+
+                    if (!(e.getStatusCode().value() == 429 || errorText.contains("resource_exhausted") || errorText.contains("quota exceeded"))) {
+                        throw new IllegalArgumentException("Error al generar la actividad: " + e.getMessage());
+                    }
+
+                    last429Exception = e;
+
+                    boolean rotated = rotateToNextApiKeySameDay();
+                    if (rotated) {
+                        continue;
+                    }
+
+                    if (errorText.contains("perday") || errorText.contains("generaterequestsperdayperprojectpermodel-freetier")) {
+                        throw new QuotaExceededException("Se ha alcanzado la cuota diaria de IA. Podrás volver a intentarlo mañana.");
+                    }
+
+                    Matcher retryMatcher = Pattern.compile("retry in\\s+([0-9]+(?:\\.[0-9]+)?)s", Pattern.CASE_INSENSITIVE)
+                        .matcher(errorTextRaw);
+                    if (retryMatcher.find()) {
+                        double retrySeconds = Double.parseDouble(retryMatcher.group(1));
+                        int retrySecondsRounded = (int) Math.ceil(retrySeconds);
+                        throw new QuotaExceededException("La IA está temporalmente saturada. Reintenta en " + retrySecondsRounded + " segundos.");
+                    }
+
+                    throw new QuotaExceededException("La cuota de IA está agotada temporalmente. Inténtalo de nuevo más tarde.");
                 }
             }
-             switch (IndiceKey) {
-                    case 1 -> apikeyActual = apiKey1;
-                    case 2 -> apikeyActual = apiKey2;
-                    case 3 -> apikeyActual = apiKey3;
-                    case 4 -> apikeyActual = apiKey4;
-                    case 5 -> apikeyActual = apiKey5;
-                    default -> throw new IllegalArgumentException("400 Bad Request: Error al seleccionar la clave de API");
-                   }
-                   System.out.println("Usando la clave de API " + IndiceKey + ": ****" + apikeyActual.substring(apikeyActual.length()-4));
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apikeyActual;
 
-            ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
-            
-            
-            List candidates = (List) response.getBody().get("candidates");
-            Map firstCandidate = (Map) candidates.get(0);
-            Map content = (Map) firstCandidate.get("content");
-            List parts = (List) content.get("parts");
-            Map firstPart = (Map) parts.get(0);
-            String respuesta = (String) firstPart.get("text");
-          
-           if (!validateActivityResponse(respuesta, tipoActividad)) {
-              throw new IllegalArgumentException("respuesta no válida: " + respuesta);
+            if (last429Exception != null) {
+                throw new QuotaExceededException("La cuota de IA está agotada temporalmente. Inténtalo de nuevo más tarde.");
             }
-            peticionesDiarias++;
-            System.out.println("Peticiones diarias realizadas con la clave actual (" + apikeyActual.substring(apikeyActual.length()-4) + "): " + peticionesDiarias);
-            return respuesta;
+
+            throw new IllegalArgumentException("Error al generar la actividad: no se pudo completar la solicitud");
+        } catch (QuotaExceededException e) {
+            throw e;
         } catch (Exception e) {
-            throw new IllegalArgumentException("500 Internal Server Error: "+" Error interno de la api de geminis: " + e.getMessage());
+            throw new IllegalArgumentException("Error al generar la actividad: " + e.getMessage());
         }
          
     }

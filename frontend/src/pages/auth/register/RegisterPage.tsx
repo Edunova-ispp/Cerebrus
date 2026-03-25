@@ -16,6 +16,7 @@ const RegisterPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [tipoUsuario, setTipoUsuario] = useState('ALUMNO');
   const [puntos, setPuntos] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -188,8 +189,23 @@ const RegisterPage = () => {
           {error && <p className="register-feedback register-feedback-error">{error}</p>}
           {success && <p className="register-feedback register-feedback-success">{success}</p>}
 
+          <div className="register-terms-container" style={{ margin: '1rem 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <input 
+              type="checkbox" 
+              id="terms" 
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              required
+            />
+            <label htmlFor="terms" style={{ fontSize: '0.9rem', color: '#555' }}>
+              He leído y acepto los <Link to="/terminos" target="_blank" rel="noopener noreferrer">Términos y Condiciones</Link> y la Política de Privacidad.
+            </label>
+          </div>
+
           <div className="register-submit-container">
-            <button type="submit" className="register-submit-btn">Registrarse</button>
+            <button type="submit" className="register-submit-btn" disabled={!acceptedTerms}>
+              Registrarse
+            </button>
           </div>
         </form>
       </div>
