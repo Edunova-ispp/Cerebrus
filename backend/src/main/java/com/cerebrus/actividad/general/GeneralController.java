@@ -304,7 +304,7 @@ public class GeneralController {
 
     @PutMapping("/abierta/update/{id}")
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<GeneralAbiertaAlumnoDTO> updateTipoAbierta(@PathVariable Long id, @RequestBody @Valid General general) {
+    public ResponseEntity<GeneralAbiertaMaestroDTO> updateTipoAbierta(@PathVariable Long id, @RequestBody @Valid General general) {
 
         generalService.updateTipoAbierta(
         id,
@@ -319,7 +319,7 @@ public class GeneralController {
         general.getTema().getId()
         );
 
-        return ResponseEntity.ok(generalService.readTipoAbierta(id));
+        return ResponseEntity.ok(generalService.readTipoAbiertaMaestro(id));
     }
 
 }

@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { apiFetch } from '../../utils/api';
+import '../crearActividad/TestForm.css';
 import './PreguntaAbiertaForm.css';
 
 export interface PreguntaAbiertaFormInitialValues {
   titulo: string;
   descripcion?: string;
   puntuacion: number;
+  imagen?: string | null;
   respVisible: boolean;
+  comentariosRespVisible?: string | null;
   version?: number;
   posicion?: number;
   preguntas: {
@@ -36,21 +39,29 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
   const [titulo, setTitulo] = useState('');
+  const [descripcion, setDescripcion] = useState('');
   const [puntos, setPuntos] = useState<number | ''>('');
+  const [imagen, setImagen] = useState('');
+  const [respVisible, setRespVisible] = useState(false);
+  const [comentariosRespVisible, setComentariosRespVisible] = useState('');
   const [preguntas, setPreguntas] = useState<{ id?: number; pregunta: string; respuesta: string; respuestaId?: number }[]>(
     [{ pregunta: '', respuesta: '' }]
   );
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [success, setSuccess] = useState('');  
 
   const originalQuestionsRef = useRef<PreguntaAbiertaFormInitialValues['preguntas']>([]);
 
   useEffect(() => {
     if (!initialValues) return;
     setTitulo(initialValues.titulo ?? '');
+    setDescripcion(initialValues.descripcion ?? '');
     setPuntos(initialValues.puntuacion ?? '');
+    setImagen(initialValues.imagen ?? '');
+    setRespVisible(Boolean(initialValues.respVisible));
+    setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
     if (initialValues.preguntas && initialValues.preguntas.length > 0) {
       originalQuestionsRef.current = [...initialValues.preguntas];
       setPreguntas(initialValues.preguntas);
@@ -95,7 +106,11 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
           method: 'POST',
           body: JSON.stringify({
             titulo: titulo.trim(),
+            descripcion: descripcion.trim() || null,
             puntuacion: Number(puntos),
+            imagen: imagen.trim() || null,
+            respVisible,
+            comentariosRespVisible: comentariosRespVisible.trim() || null,
             tema: { id: tId },
             tipo: 'ABIERTA',
             preguntas: []
@@ -124,7 +139,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
           if (p.respuestaId) {
             await apiFetch(`${apiBase}/api/respuestas/update/${p.respuestaId}`, {
               method: 'PUT',
-              body: JSON.stringify({ respuesta: p.respuesta.trim(), correcta: true }),
+              body: JSON.stringify({ respuesta: p.respuesta.trim(), correcta: true, pregunta: { id: p.id } }),
             });
           }
           idsFinales.push(p.id);
@@ -147,14 +162,16 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
         method: 'PUT',
         body: JSON.stringify({
           titulo: titulo.trim(),
-          descripcion: 'ACTIVIDAD_ABIERTA',
+          descripcion: descripcion.trim() || null,
           puntuacion: Number(puntos),
-          respVisible: true,
+          imagen: imagen.trim() || null,
+          respVisible,
+          comentariosRespVisible: comentariosRespVisible.trim() || null,
           tipo: 'ABIERTA',
           tema: { id: tId },
           posicion: initialValues?.posicion ?? 0,
           version: initialValues?.version ?? 1,
-          preguntasId: idsFinales, // Enviamos lista de IDs para el servicio
+          preguntasId: idsFinales,
           preguntas: idsFinales.map(id => ({ id })) 
         }),
       });
@@ -162,40 +179,75 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
       setSuccess('¡Guardado correctamente!');
       setTimeout(() => onDone?.(), 1000);
     } catch (e) {
-      setError('Error al guardar');
+      const msg = e instanceof Error ? e.message : 'Error al guardar';
+      setError(msg);
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="paf-wrapper">
-      {error && <p className="paf-error">{error}</p>}
-      {success && <p className="paf-success">{success}</p>}
-      
-      <div className="paf-top-row">
-        <div className="paf-field">
-          <label className="paf-label">Título</label>
-          <input className="paf-input" value={titulo} onChange={e => setTitulo(e.target.value)} placeholder="Título de la actividad" />
+    <div className="paf-wrapper tf-form">
+      {error && <p className="tf-error">{error}</p>}
+      {success && <p className="ca-text" style={{ color: '#27ae60' }}>{success}</p>}
+
+      {/* ── TOP: Metadata ── */}
+      <div className="tf-header">
+        <div className="tf-col">
+          <div>
+            <label className="tf-label">Título *</label>
+            <input className="tf-input" value={titulo} onChange={e => setTitulo(e.target.value)} placeholder="Título de la actividad" />
+          </div>
+
+          <div>
+            <label className="tf-label">Descripción</label>
+            <textarea className="tf-input" value={descripcion} onChange={e => setDescripcion(e.target.value)} rows={3} style={{ resize: 'vertical' }} placeholder="Descripción opcional" />
+          </div>
+
+          <div>
+            <label className="tf-label">URL de imagen (opcional)</label>
+            <input type="url" className="tf-input" value={imagen} onChange={e => setImagen(e.target.value)} placeholder="https://..." />
+            {imagen.trim() && (
+              <img src={imagen.trim()} alt="Preview" className="tf-img-preview" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} onLoad={e => { (e.target as HTMLImageElement).style.display = 'block'; }} />
+            )}
+          </div>
         </div>
-        <div className="paf-field">
-          <label className="paf-label">Puntos</label>
-          <input className="paf-input-puntos" type="number" value={puntos} onChange={e => setPuntos(e.target.value === '' ? '' : Number(e.target.value))} placeholder="0" />
+
+        <div className="tf-col">
+          <div>
+            <label className="tf-label">Puntuación *</label>
+            <input type="number" className="tf-input tf-input-sm" value={puntos} onChange={e => setPuntos(e.target.value === '' ? '' : Number(e.target.value))} min="1" />
+          </div>
+
+          <label className="tf-check-label">
+            <input type="checkbox" checked={respVisible} onChange={e => setRespVisible(e.target.checked)} />
+            <span>Mostrar correcciones al alumno</span>
+          </label>
+
+          {respVisible && (
+            <div>
+              <label className="tf-label">Comentarios</label>
+              <input type="text" className="tf-input" value={comentariosRespVisible} onChange={e => setComentariosRespVisible(e.target.value)} />
+            </div>
+          )}
         </div>
       </div>
 
-      <hr className="paf-divider" />
+      <div className="tf-questions">
+      <p className="tf-help">
+        Añade las preguntas y la respuesta modelo. La IA evaluará la respuesta del alumno comparándola con tu respuesta.
+      </p>
 
       <div className="paf-preguntas-header">
-        <span>Preguntas y Respuestas</span>
+        <span className="ca-text" style={{ fontWeight: 'bold' }}>Preguntas y Respuestas</span>
         <span className="paf-badge">{preguntas.length} / 5</span>
       </div>
 
       {preguntas.map((p, index) => (
         <div key={index} className="paf-pregunta-row">
           <div className="paf-input-group">
-            <input className="paf-input" value={p.pregunta} onChange={e => handlePreguntaChange(index, 'pregunta', e.target.value)} placeholder={`Pregunta ${index + 1}`} />
-            <input className="paf-input" value={p.respuesta} onChange={e => handlePreguntaChange(index, 'respuesta', e.target.value)} placeholder="Respuesta" />
+            <input className="tf-input" value={p.pregunta} onChange={e => handlePreguntaChange(index, 'pregunta', e.target.value)} placeholder={`Pregunta ${index + 1}`} />
+            <input className="tf-input" value={p.respuesta} onChange={e => handlePreguntaChange(index, 'respuesta', e.target.value)} placeholder="Respuesta modelo" />
           </div>
           {preguntas.length > 1 && (
             <button type="button" className="paf-btn-remove" onClick={() => handleRemovePregunta(index)}>✕</button>
@@ -205,13 +257,14 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
 
       {preguntas.length < 5 && (
         <button type="button" className="paf-btn-add" onClick={handleAddPregunta}>
-          + Añadir otra pregunta
+          + Añadir pregunta
         </button>
       )}
+      </div>{/* close tf-questions */}
 
-      <div className="paf-footer">
-        <button className="paf-save-btn" onClick={handleGuardar} disabled={saving || !isValid}>
-          {saving ? 'Guardando...' : 'GUARDAR ACTIVIDAD'}
+      <div className="ca-form-footer">
+        <button className="ca-btn-guardar" onClick={handleGuardar} disabled={saving || !isValid}>
+          {saving ? 'GUARDANDO...' : 'GUARDAR'}
         </button>
       </div>
     </div>

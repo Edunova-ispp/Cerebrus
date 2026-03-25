@@ -6,10 +6,13 @@
   min-height: 100vh;
   box-sizing: border-box;
   background-color: #FAF6ED;
-  color: #000;
+  color: var(--color-accent);
+  text-shadow: 2px 2px#000;
   display: flex;
+  font-size: 1.8rem;
   flex-direction: column;
   overflow-x: hidden;
+  font-family: 'Pixelify sans';
   z-index: 10;
 }
 
@@ -122,6 +125,7 @@
 .ta-question-counter-text {
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1rem;
+  text-shadow: none;
   font-weight: bold;
   color: var(--color-text);
   letter-spacing: 0.04em;
@@ -153,10 +157,11 @@
 
 .ta-question-text {
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: bold;
   margin: 0 0 14px;
   color: #fff;
+  text-shadow: none;
   line-height: 1.4;
 }
 

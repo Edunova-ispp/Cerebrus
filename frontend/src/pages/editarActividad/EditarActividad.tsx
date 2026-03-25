@@ -75,7 +75,9 @@ type PreguntaAbiertaMaestroDTO = {
     titulo: string;
     descripcion: string;
     puntuacion: number;
+    imagen: string | null;
     respVisible: boolean;
+    comentariosRespVisible: string | null;
     posicion: number;
     version: number;
     temaId: number;
@@ -399,7 +401,9 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             titulo: preguntaAbierta.titulo,
             descripcion: preguntaAbierta.descripcion,
             puntuacion: preguntaAbierta.puntuacion,
+            imagen: preguntaAbierta.imagen,
             respVisible: preguntaAbierta.respVisible,
+            comentariosRespVisible: preguntaAbierta.comentariosRespVisible,
             posicion: preguntaAbierta.posicion,
             version: preguntaAbierta.version,
             preguntas: (preguntaAbierta.preguntas ?? []).map((p) => ({

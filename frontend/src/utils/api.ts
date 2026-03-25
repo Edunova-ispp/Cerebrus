@@ -26,17 +26,35 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
     try {
       const body = await res.clone().json();
       if (body.errors && Array.isArray(body.errors)) {
-        // Spring @Valid: lista de errores de campo
+        // Spring @Valid: lista de errores de campo (formato array)
         const fieldErrors = body.errors
           .map((e: { field?: string; defaultMessage?: string }) =>
             e.field ? `${e.field}: ${e.defaultMessage}` : e.defaultMessage
           )
           .filter(Boolean);
         if (fieldErrors.length > 0) message = fieldErrors.join('. ');
+      } else if (body.errores && typeof body.errores === 'object') {
+        // GlobalExceptionHandler 422: {errores: {campo: "mensaje"}, mensaje: "..."}
+        // Traducir nombres de campo técnicos a mensajes legibles
+        const friendlyNames: Record<string, string> = {
+          pregunta: 'La pregunta',
+          respuesta: 'La respuesta',
+          titulo: 'El título',
+          puntuacion: 'La puntuación',
+          descripcion: 'La descripción',
+          comentariosRespVisible: 'El comentario de corrección',
+          imagen: 'La imagen',
+          tema: 'El tema',
+          correcta: 'La opción correcta',
+        };
+        const fieldErrors = Object.entries(body.errores)
+          .map(([field, msg]) => `${friendlyNames[field] ?? field} ${msg}`)
+          .filter(Boolean);
+        if (fieldErrors.length > 0) message = fieldErrors.join('. ');
       } else if (body.detail) {
         message = body.detail;
-      } else if (body.message) {
-        message = body.message;
+      } else if (body.message || body.mensaje) {
+        message = body.message || body.mensaje;
       }
     } catch {
       // body no era JSON, usar mensaje genérico

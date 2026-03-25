@@ -7,6 +7,7 @@ import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 
 import './PreguntaAbiertaAlumno.css'; 
+import '../testAlumno/TestAlumno.css';
 import dragonImg from '../../assets/props/dragon.png';
 import caballeroImg from '../../assets/props/caballero.png';
 
@@ -96,7 +97,7 @@ export default function PreguntaAbiertaAlumno() {
       console.log("Resultado de la IA:", dataFinal);
 
       // Redirigir tras el éxito
-      navigate('/mis-cursos');
+      navigate(-1);
 
     } catch (error) {
       console.error("Error en el envío final:", error);
@@ -149,6 +150,7 @@ export default function PreguntaAbiertaAlumno() {
 
             <div className="ta-nav-buttons">
               <button 
+                className="ta-nav-btn ta-nav-btn--prev"
                 onClick={() => setCurrentIndex(prev => prev - 1)} 
                 disabled={currentIndex === 0 || submitting}
               >
@@ -157,6 +159,7 @@ export default function PreguntaAbiertaAlumno() {
               
               {currentIndex < totalPreguntas - 1 ? (
                 <button 
+                  className="ta-nav-btn ta-nav-btn--next"
                   onClick={() => setCurrentIndex(prev => prev + 1)} 
                   disabled={submitting}
                 >
@@ -165,7 +168,7 @@ export default function PreguntaAbiertaAlumno() {
               ) : (
                 <button 
                   onClick={() => setFinished(true)} 
-                  className="ta-nav-btn--submit" 
+                  className="ta-nav-btn ta-nav-btn--submit" 
                   disabled={submitting}
                 >
                   ¡TERMINAR!
