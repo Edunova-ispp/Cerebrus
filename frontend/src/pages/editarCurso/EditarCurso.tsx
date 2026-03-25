@@ -67,14 +67,34 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
       }
     };
 
-    if (id && token && apiBase) {
-      fetchCurso();
+    if (!id) {
+      setError('No se pudo identificar el curso a editar.');
+      setLoading(false);
+      return;
     }
+
+    if (!token) {
+      setError('Tu sesión no es válida. Inicia sesión de nuevo.');
+      setLoading(false);
+      return;
+    }
+
+    fetchCurso();
   }, [id, apiBase, token]);
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+
+    if (!id) {
+      setError('No se pudo identificar el curso a editar.');
+      return;
+    }
+
+    if (!token) {
+      setError('Tu sesión no es válida. Inicia sesión de nuevo.');
+      return;
+    }
     
     if (!titulo.trim()) {
       setError('El título del curso es requerido');
