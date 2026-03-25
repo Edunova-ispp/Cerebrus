@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import '../crearCurso/CrearCurso.css';
+import { getCurrentUserRoles } from '../../types/curso';
 
 function getInitials(titulo: string): string {
   return titulo
@@ -30,6 +31,9 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+  const isMaestro = getCurrentUserRoles().some((r) =>
+    r.toUpperCase().includes("MAESTRO")
+  );
 
   // Cargar los datos del curso al iniciar
   useEffect(() => {
@@ -137,7 +141,7 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
         <h2 className="welcome-text">Editar detalles del curso</h2>
 
         <div className="crear-curso-card">
-          <form onSubmit={handleSubmit} className="crear-curso-layout">
+          <form onSubmit={isMaestro ? handleSubmit : undefined} className="crear-curso-layout">
             
             {/* Columna Izquierda: Formulario */}
             <div className="form-column">

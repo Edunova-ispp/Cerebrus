@@ -468,8 +468,8 @@ export default function TestAlumno() {
 
             {/* Hint when on last question but not all answered */}
             {!submitted && !allAnswered && isLastQuestion && (
-              <><p className="ta-hint">
-                Responde todas las preguntas para enviar.</p><p className="ta-hint">
+              <><p className="test-hint">
+                Responde todas las preguntas para enviar.</p><p className="test-hint">
                   Usa ← Anterior para revisar.
                 </p></>
             )}

@@ -135,7 +135,7 @@ function buildGridItems(
       const isCerbero = r === cr && c === cc;
       const qIdx = cellToQIndex(r, c, size);
       const isAnswered = qIdx !== null && answeredSet.has(qIdx);
-      const isClickable = qIdx !== null && !isAnswered && isNeighbor(cr, cc, r, c) && !isComplete;
+      const isClickable = qIdx !== null && isNeighbor(cr, cc, r, c) && !isComplete;
       const isDark = (r + c) % 2 === 1;
 
       const cellVariant =
@@ -296,8 +296,14 @@ export default function TableroAlumno() {
   const handleCellClick = (r: number, c: number) => {
     if (isComplete) return;
     const qIdx = cellToQIndex(r, c, size);
-    if (qIdx === null || answeredSet.has(qIdx)) return;
+    if (qIdx === null) return;
     if (!isNeighbor(cerberoPos[0], cerberoPos[1], r, c)) return;
+
+    if (answeredSet.has(qIdx)) {
+      setCerberoPos([r, c]);
+      return;
+    }
+
     setModalCell([r, c]);
     setInputAnswer('');
     setFeedback(null);
@@ -367,7 +373,7 @@ export default function TableroAlumno() {
           </div>
 
           {!isComplete && !modalCell && (
-            <p className="ta-hint">Pulsa una casilla <strong>?</strong> adyacente a Cerbero para responder</p>
+            <p className="tablero-hint">Pulsa una casilla adyacente a Cerbero para responder o retroceder</p>
           )}
 
           {isComplete && <CompletionPopup title="¡HAS COMPLETADO EL TABLERO!" onContinue={() => navigate(-1)} />}

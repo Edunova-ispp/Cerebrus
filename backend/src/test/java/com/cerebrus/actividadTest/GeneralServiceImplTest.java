@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,17 +22,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.comun.enumerados.TipoActGeneral;
+import com.cerebrus.curso.Curso;
 import com.cerebrus.actividad.general.General;
 import com.cerebrus.actividad.general.GeneralRepository;
 import com.cerebrus.actividad.general.GeneralServiceImpl;
-import com.cerebrus.actividad.general.dto.GeneralDTO;
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
 
 @ExtendWith(MockitoExtension.class)
@@ -185,8 +188,25 @@ class GeneralServiceImplTest {
     // Tests para verificar que si se lee una actividad existente se devuelve correctamente
 	@Test
 	void readActividad_existente_devuelveActividad() {
+		Alumno alumno = new Alumno();
+		alumno.setId(1L);
+		when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
+		Inscripcion inscripcion = new Inscripcion();
+		inscripcion.setAlumno(alumno);
+
+		List<Inscripcion> inscripciones = new LinkedList<>();
+		inscripciones.add(inscripcion);
+
+		Curso curso = new Curso();
+		curso.setInscripciones(inscripciones);
+
+		Tema tema = new Tema();
+		tema.setCurso(curso);
+
 		General general = new General();
 		general.setId(5L);
+		general.setTema(tema);
 		when(generalRepository.findByIdWithPreguntas(5L)).thenReturn(Optional.of(general));
 
 		General resultado = generalService.readActividad(5L);
@@ -239,6 +259,8 @@ class GeneralServiceImplTest {
 		when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 		General general = new General();
 		general.setId(1L);
+		Tema tema = crearTema(2L);
+		general.setTema(tema);
 		when(generalRepository.findById(1L)).thenReturn(Optional.of(general));
 		when(temaRepository.findById(123L)).thenReturn(Optional.empty());
 
@@ -259,6 +281,7 @@ class GeneralServiceImplTest {
 		general.setComentariosRespVisible("prev");
 		when(generalRepository.findById(1L)).thenReturn(Optional.of(general));
 		Tema tema = crearTema(50L);
+		general.setTema(tema);
 		when(temaRepository.findById(50L)).thenReturn(Optional.of(tema));
 
 		General actualizada = generalService.updateActGeneral(
@@ -284,6 +307,8 @@ class GeneralServiceImplTest {
 		General general = new General();
 		general.setId(1L);
 		general.setRespVisible(false);
+		Tema tema = crearTema(50L);
+		general.setTema(tema);
 		when(generalRepository.findById(1L)).thenReturn(Optional.of(general));
 		when(temaRepository.findById(1L)).thenReturn(Optional.of(crearTema(1L)));
 
@@ -316,6 +341,8 @@ class GeneralServiceImplTest {
         General general = new General();
         general.setId(1L);
         general.setPreguntas(new ArrayList<>(List.of(new Pregunta())));
+		Tema tema = crearTema(2L);
+		general.setTema(tema);
 
         when(generalRepository.findById(1L)).thenReturn(Optional.of(general));
         when(temaRepository.findById(1L)).thenReturn(Optional.of(crearTema(1L)));
@@ -341,6 +368,8 @@ class GeneralServiceImplTest {
 		general.setId(1L);
 		general.setTipo(TipoActGeneral.TEST);
 		general.setPreguntas(new ArrayList<>(List.of(antigua)));
+		Tema tema = crearTema(2L);
+		general.setTema(tema);
 
 		when(generalRepository.findById(1L)).thenReturn(Optional.of(general));
 		when(temaRepository.findById(1L)).thenReturn(Optional.of(crearTema(1L)));
@@ -412,6 +441,15 @@ class GeneralServiceImplTest {
 	private static Tema crearTema(Long id) {
 		Tema tema = new Tema();
 		tema.setId(id);
+		Curso curso = crearCurso(1L, crearMaestro());
+		tema.setCurso(curso);
 		return tema;
+	}
+
+	private static Curso crearCurso(Long id, Maestro maestro) {
+		Curso curso = new Curso();
+		curso.setId(id);
+		curso.setMaestro(maestro);
+		return curso;
 	}
 }

@@ -1,14 +1,13 @@
 package com.cerebrus.estadisticas;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,18 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
-import com.cerebrus.estadisticas.dto.AlumnoBasicoDTO;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasAlumnoResumenDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
-import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
 
 @RestController
 @RequestMapping("/api/estadisticas")
+@PreAuthorize("hasAuthority('MAESTRO')")
 public class EstadisticasMaestroController {
 
     private final EstadisticasMaestroService estadisticasMaestroService;
@@ -46,20 +44,20 @@ public class EstadisticasMaestroController {
             Optional<Curso> curso = cursoRepository.findById(cursoId);
             
             if (curso.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "El curso con ID " + cursoId + " no existe."));
+                throw new IllegalArgumentException("El curso con ID " + cursoId + " no existe.");
             }
 
             Map<String, Long> estadisticas = estadisticasMaestroService.numActividadesRealizadasPorAlumno(curso.get());
             return ResponseEntity.ok(estadisticas);
-
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(404).body(error);
         } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", e.getMessage()));
-
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Ocurrió un error inesperado al calcular las estadísticas."));
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
         }
     }
 
@@ -72,17 +70,13 @@ public class EstadisticasMaestroController {
             }
             return ResponseEntity.ok(puntosPorAlumno);
         } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }catch (RuntimeException e) {
-            if (e.getMessage().equals("404 Not Found")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            } else if (e.getMessage().equals("403 Forbidden")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(403).body(null);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                return ResponseEntity.status(404).body(null);
             }
+            return ResponseEntity.status(500).body(null);
         }
-
     }
 
     @GetMapping("/cursos/{cursoId}/temas/{temaId}/estadisticas-actividades")
@@ -111,15 +105,15 @@ public class EstadisticasMaestroController {
             EstadisticasAlumnoResumenDTO resultado = estadisticasMaestroService.obtenerResumenEstadisticasAlumno(cursoId, alumnoId);
             return ResponseEntity.ok(resultado);
         } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", e.getMessage()));
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
         } catch (RuntimeException e) {
-            if (e.getMessage() != null && e.getMessage().startsWith("404")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", e.getMessage()));
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
             }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Ocurrió un error inesperado."));
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
         }
     }
 
@@ -155,14 +149,15 @@ public class EstadisticasMaestroController {
             Integer tiempo = estadisticasMaestroService.obtenerTiempoAlumnoEnActividad(alumnoId, actividadId);
             return ResponseEntity.ok(Map.of("tiempoMinutos", tiempo));
         } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", e.getMessage()));
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Ocurrió un error inesperado."));
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
         }
     }
 
@@ -172,14 +167,15 @@ public class EstadisticasMaestroController {
             Integer tiempo = estadisticasMaestroService.obtenerTiempoAlumnoEnTema(alumnoId, temaId);
             return ResponseEntity.ok(Map.of("tiempoMinutos", tiempo));
         } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", e.getMessage()));
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Ocurrió un error inesperado."));
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
         }
     }
 
@@ -189,14 +185,15 @@ public class EstadisticasMaestroController {
             Integer tiempo = estadisticasMaestroService.obtenerTiempoAlumnoEnCurso(alumnoId, cursoId);
             return ResponseEntity.ok(Map.of("tiempoMinutos", tiempo));
         } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", e.getMessage()));
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Ocurrió un error inesperado."));
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
         }
     }
 
@@ -208,14 +205,15 @@ public class EstadisticasMaestroController {
             Double tiempoPromedio = estadisticasMaestroService.obtenerTiempoMedioActividad(actividadId);
             return ResponseEntity.ok(Map.of("tiempoPromedioMinutos", tiempoPromedio));
         } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", e.getMessage()));
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Ocurrió un error inesperado."));
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
         }
     }
 
@@ -225,14 +223,15 @@ public class EstadisticasMaestroController {
             Double tiempoPromedio = estadisticasMaestroService.obtenerTiempoMedioTema(temaId);
             return ResponseEntity.ok(Map.of("tiempoPromedioMinutos", tiempoPromedio));
         } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", e.getMessage()));
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Ocurrió un error inesperado."));
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
         }
     }
 
@@ -242,14 +241,15 @@ public class EstadisticasMaestroController {
             Double tiempoPromedio = estadisticasMaestroService.obtenerTiempoMedioCurso(cursoId);
             return ResponseEntity.ok(Map.of("tiempoPromedioMinutos", tiempoPromedio));
         } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", e.getMessage()));
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Ocurrió un error inesperado."));
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
         }
     }
 
@@ -262,14 +262,15 @@ public class EstadisticasMaestroController {
             AlumnosMasRapidosLentosDTO resultado = estadisticasMaestroService.obtenerAlumnosMasRapidosLentosActividad(actividadId, limite);
             return ResponseEntity.ok(resultado);
         } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", e.getMessage()));
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Ocurrió un error inesperado."));
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
         }
     }
 
@@ -280,14 +281,15 @@ public class EstadisticasMaestroController {
             AlumnosMasRapidosLentosDTO resultado = estadisticasMaestroService.obtenerAlumnosMasRapidosLentosTema(temaId, limite);
             return ResponseEntity.ok(resultado);
         } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", e.getMessage()));
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Ocurrió un error inesperado."));
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
         }
     }
 
@@ -298,14 +300,15 @@ public class EstadisticasMaestroController {
             AlumnosMasRapidosLentosDTO resultado = estadisticasMaestroService.obtenerAlumnosMasRapidosLentosCurso(cursoId, limite);
             return ResponseEntity.ok(resultado);
         } catch (AccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", e.getMessage()));
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Ocurrió un error inesperado."));
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
         }
     }
 

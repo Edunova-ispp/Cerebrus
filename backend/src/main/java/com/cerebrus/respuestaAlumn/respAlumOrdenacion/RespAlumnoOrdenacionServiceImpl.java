@@ -41,12 +41,17 @@ public class RespAlumnoOrdenacionServiceImpl implements RespAlumnoOrdenacionServ
     @Transactional
     public RespAlumnoOrdenacionCreateResponse crearRespAlumnoOrdenacion(Long actAlumnoId, List<String> valoresAlum, Long actOrdId) {
         
-        Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Alumno)) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
             throw new AccessDeniedException("Solo un alumno puede crear respuestas de alumno a actividades de ordenación");
         }
 
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actAlumnoId).orElseThrow(() -> new RuntimeException("La actividad del alumno no existe"));
+        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
+            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes crear una respuesta para una ActividadAlumno que no es tuya");
+        }
+        
         Ordenacion ordenacion = ordenacionRepository.findById(actOrdId).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
 
         List<String> valoresCorrectos = ordenacion.getValores();

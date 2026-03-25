@@ -26,6 +26,7 @@ export interface CartaFormInitialValues {
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly version: number;
+  readonly temaId?: number;
   readonly preguntas?: readonly CartaFormInitialPregunta[];
 }
 
@@ -73,7 +74,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
   const navigate = useNavigate();
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
-  const temaId = temaIdProp ?? params.temaId;
+  const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
   useEffect(() => {
     if (!initialValues) return;
@@ -345,6 +346,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
                 rows={3}
+                style={{ resize: 'vertical' }}
                 placeholder="Descripción opcional"
               />
             </div>
