@@ -1,19 +1,24 @@
 package com.cerebrus.marcarImagenTest;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
-import com.cerebrus.actividad.marcarImagen.*;
+import com.cerebrus.actividad.marcarImagen.MarcarImagen;
+import com.cerebrus.actividad.marcarImagen.MarcarImagenRepository;
+import com.cerebrus.actividad.marcarImagen.MarcarImagenServiceImpl;
 import com.cerebrus.actividad.marcarImagen.dto.MarcarImagenDTO;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.puntoImage.PuntoImagen;
@@ -21,11 +26,10 @@ import com.cerebrus.puntoImage.PuntoImagenService;
 import com.cerebrus.puntoImage.dto.PuntoImagenDTO;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaService;
+import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
-import com.cerebrus.usuario.Usuario;
-import org.springframework.security.access.AccessDeniedException;
 
 @ExtendWith(MockitoExtension.class)
 class MarcarImagenServiceImplTest {
@@ -369,7 +373,7 @@ class MarcarImagenServiceImplTest {
         when(marcarImagenRepository.save(any(MarcarImagen.class))).thenReturn(existente);
         MarcarImagen result = service.actualizarMarcarImagen(10L, dto);
         // El punto con id=1L ya no está, solo queda el nuevo
-        assertThat(result.getPuntosImagen()).containsExactly(puntoNuevo, puntoExistente);
+        assertThat(result.getPuntosImagen()).containsExactly(puntoNuevo);
         verify(puntoImagenService).actualizarPuntoImagen(puntoDTO);
         verify(marcarImagenRepository).save(any(MarcarImagen.class));
     }
