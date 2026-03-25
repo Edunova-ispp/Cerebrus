@@ -15,7 +15,14 @@ function getCurrentUserIdFromJwt(): number | null {
   return typeof userId === 'number' && Number.isFinite(userId) ? userId : null;
 }
 
-type ActividadAlumnoDTO = { readonly id: number; readonly puntuacion?: number };
+type ActividadAlumnoDTO = {
+  readonly id: number;
+  readonly puntuacion?: number;
+  readonly nota?: number;
+  readonly numAbandonos?: number;
+  readonly alumnoId?: number;
+  readonly actividadId?: number;
+};
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -55,6 +62,7 @@ type Selection = {
 const GRID_SIZE = 10; // always 10x10
 const CELL_SIZE = 46; // px
 const GAP = 6;        // px between cells
+const REVEAL_PENALTY_SECONDS = 86400;
 
 // ── Crossword layout builder ──────────────────────────────────────────────
 
@@ -190,7 +198,6 @@ export default function CrucigramaAlumno() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [revealed, setRevealed] = useState(false);
   const [checked, setChecked] = useState(false);
   const [answers, setAnswers] = useState<Map<string, string>>(new Map());
   const [selection, setSelection] = useState<Selection | null>(null);
@@ -241,7 +248,29 @@ export default function CrucigramaAlumno() {
             `${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${data.id}`,
           );
           const aaData = (await getAA.json()) as ActividadAlumnoDTO;
-          if (typeof aaData?.id === 'number') setActividadAlumnoId(aaData.id);
+          if (typeof aaData?.id === 'number') {
+            // Reinicia intento para que la corrección por tiempo use esta sesión
+            const now = new Date().toISOString().slice(0, 19);
+            const resetRes = await apiFetch(
+              `${apiBase}/api/actividades-alumno/update/${aaData.id}`,
+              {
+                method: 'PUT',
+                body: JSON.stringify({
+                  id: aaData.id,
+                  puntuacion: 0,
+                  fechaInicio: now,
+                  fechaFin: '1970-01-01T00:00:00',
+                  nota: 0,
+                  numAbandonos: aaData.numAbandonos ?? 0,
+                  alumnoId,
+                  actividadId: data.id,
+                }),
+              },
+            );
+            const aaReset = (await resetRes.json()) as ActividadAlumnoDTO;
+            if (typeof aaReset?.id === 'number') setActividadAlumnoId(aaReset.id);
+            else setActividadAlumnoId(aaData.id);
+          }
         } else {
           const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
             method: 'POST',
@@ -419,11 +448,47 @@ export default function CrucigramaAlumno() {
     }
   };
 
-  const handleReveal = () => {
+  const handleReveal = async () => {
     const full = new Map<string, string>();
     cellMap.forEach((cell, key) => full.set(key, cell.letter));
     setAnswers(full);
-    setRevealed(true);
+    setSubmitted(true);
+
+    if (actividadAlumnoId) {
+      try {
+        const currentAARes = await apiFetch(`${apiBase}/api/actividades-alumno/${actividadAlumnoId}`);
+        const currentAA = (await currentAARes.json()) as ActividadAlumnoDTO;
+
+        const now = new Date();
+        const penalizedStart = new Date(now.getTime() - REVEAL_PENALTY_SECONDS * 1000)
+          .toISOString()
+          .slice(0, 19);
+
+        await apiFetch(`${apiBase}/api/actividades-alumno/update/${actividadAlumnoId}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            id: actividadAlumnoId,
+            puntuacion: 0,
+            fechaInicio: penalizedStart,
+            fechaFin: '1970-01-01T00:00:00',
+            nota: 0,
+            numAbandonos: currentAA.numAbandonos ?? 0,
+            alumnoId: currentAA.alumnoId,
+            actividadId: currentAA.actividadId,
+          }),
+        });
+
+        const res = await apiFetch(
+          `${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`,
+          { method: 'PUT', body: JSON.stringify([]) },
+        );
+        const data = (await res.json()) as ActividadAlumnoDTO;
+        if (typeof data?.puntuacion === 'number') setEarnedPoints(data.puntuacion);
+      } catch {
+      } finally {
+        completedRef.current = true;
+      }
+    }
   };
 
   const handleClueClick = (wi: number) => {
@@ -621,28 +686,28 @@ export default function CrucigramaAlumno() {
                 <button type="button" className="cr-btn cr-btn-back" onClick={() => navigate(-1)}>
                   VOLVER AL CURSO
                 </button>
-              ) : revealed ? (
-                <>
-                  <button type="button" className="cr-btn cr-btn-check" onClick={handleCheck}>
-                    COMPROBAR
-                  </button>
-                  <button type="button" className="cr-btn cr-btn-back" onClick={() => navigate(-1)}>
-                    VOLVER AL CURSO
-                  </button>
-                </>
               ) : (
                 <>
                   <button type="button" className="cr-btn cr-btn-check" onClick={handleCheck} disabled={!allFilled}>
                     COMPROBAR
                   </button>
                   {crucigrama.respVisible && (
-                    <button type="button" className="cr-btn cr-btn-reveal" onClick={handleReveal}>
+                    <button
+                      type="button"
+                      className="cr-btn cr-btn-reveal"
+                      onClick={handleReveal}
+                      title="Ver solución cierra el intento y aplica penalización máxima por tiempo"
+                    >
                       VER SOLUCIÓN
                     </button>
                   )}
                 </>
               )}
             </div>
+
+            {!submitted && crucigrama.respVisible && (
+              <p className="cr-hint">⚠️ Ver solución cierra el intento y aplica penalización máxima por tiempo.</p>
+            )}
 
             {!submitted && !allFilled && (
               <p className="cr-hint">Escribe con el teclado · Haz clic en una celda para seleccionarla</p>
