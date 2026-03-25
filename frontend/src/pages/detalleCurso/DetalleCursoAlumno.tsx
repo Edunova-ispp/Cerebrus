@@ -91,9 +91,13 @@ export default function DetalleCursoAlumno({ curso, progreso }: Props) {
             )}
 
             {progreso?.estado === "TERMINADA" && (
-              <span className="detalle-hero-btn detalle-hero-btn--acabado">
-                ✅ Completado
-              </span>
+              <button
+                className="detalle-hero-btn detalle-hero-btn--acabado"
+                onClick={() => navigate(`/mapa/${curso.id}`)}
+                aria-label="Curso completado, repetir curso"
+              >
+                ✅ Completado · 🔁 Repetir curso
+              </button>
             )}
           </div>
         </div>

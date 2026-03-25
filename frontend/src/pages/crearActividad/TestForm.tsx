@@ -302,6 +302,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
                       respuesta: opt.text.trim(),
                       imagen: null,
                       correcta: opt.correcta,
+                      pregunta: { id: q.id },
                     }),
                   });
                 }

@@ -231,6 +231,17 @@ class OrdenacionServiceImplTest {
                 .hasMessage("La actividad de ordenación no existe");
     }
 
+    @Test
+    void readOrdenacion_cursoOculto_lanzaAccessDeniedException() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        tema.getCurso().setVisibilidad(false);
+        when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
+
+        assertThatThrownBy(() -> ordenacionService.readOrdenacion(10L))
+            .isInstanceOf(AccessDeniedException.class)
+            .hasMessageContaining("curso oculto");
+    }
+
     // -------------------------------------------------------
     // updateActOrdenacion
     // -------------------------------------------------------

@@ -1,0 +1,75 @@
+/* ── Styles specific to PreguntaAbiertaAlumno ─────────────────── */
+/* Reuses ta-* classes from TestAlumno.css for layout consistency  */
+
+/* ── Layout dos columnas dentro de la card ── */
+.ta-card-body {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.ta-card-left {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0; /* evita overflow en flex */
+}
+
+.ta-card-right {
+  flex: 0 0 260px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* ── Imagen de la actividad ── */
+.ta-activity-image {
+  width: 100%;
+  max-width: 260px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  display: block;
+}
+
+/* ── Textarea respuesta abierta ── */
+.ta-open-input {
+  width: 100%;
+  min-height: 150px;
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 15px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.8rem;
+  background-color: var(--color-accent);
+  box-shadow: 4px 4px 0 #000;
+  outline: none;
+  resize: vertical;
+  color: #000000;
+  box-sizing: border-box;
+  transition: background 0.15s;
+}
+
+.ta-open-input:focus {
+  background-color: var(--color-accent-light);
+}
+
+/* ── Responsive: apila columnas en móvil ── */
+@media (max-width: 640px) {
+  .ta-card-body {
+    flex-direction: column;
+  }
+
+  .ta-card-right {
+    flex: unset;
+    width: 100%;
+  }
+
+  .ta-activity-image {
+    max-width: 100%;
+    height: 180px;
+  }
+}
