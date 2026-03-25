@@ -842,7 +842,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
     @Override
     @Transactional
     public General updateTipoAbierta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
-        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId) {
+        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen) {
      
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -857,6 +857,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         
         General tipoAbierta = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
             posicion, version, temaId);
+        tipoAbierta.setImagen(imagen);
         
         if(preguntasId != null){
             List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);

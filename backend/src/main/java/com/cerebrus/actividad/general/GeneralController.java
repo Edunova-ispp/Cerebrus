@@ -317,7 +317,8 @@ public class GeneralController {
         general.getPreguntas().stream().map(Pregunta::getId).toList(),
         general.getPosicion(),
         general.getVersion(),
-        general.getTema().getId()
+        general.getTema().getId(),
+        general.getImagen()
         );
 
         return ResponseEntity.ok(generalService.readTipoAbiertaMaestro(id));
