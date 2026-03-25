@@ -12,7 +12,6 @@ import DetalleCurso from "./pages/detalleCurso/DetalleCurso";
 import EditarActividad from "./pages/editarActividad/EditarActividad";
 import EditarCurso from "./pages/editarCurso/EditarCurso";
 import EditarTema from "./pages/editarTema/EditarTema";
-import EstadisticasCurso from "./pages/estadisticasCurso/EstadisticasCurso";
 import EstadisticasActividades from "./pages/estadisticasCurso/EstadisticasActividades.tsx";
 import EstadisticasTemas from "./pages/estadisticasCurso/EstadisticasTemas";
 import GraficasActividades from "./pages/estadisticasCurso/GraficasActividades";
@@ -33,7 +32,6 @@ import EstadisticasAlumno from "./pages/estadisticasCurso/EstadisticasAlumno.tsx
 import EstadisticasActividad from "./pages/estadisticasCurso/EstadisticasActividad.tsx";
 import EstadisticasTema from "./pages/estadisticasCurso/EstadisticasTema.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
-import PreguntaAbiertaAlumno from "./pages/preguntaAbiertaAlumno/PreguntaAbiertaAlumno.tsx";
 
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
 class WatchbugErrorBoundary extends Component<
