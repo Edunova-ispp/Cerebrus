@@ -193,19 +193,9 @@
 .detalle-hero-btn--acabado {
   background: #adf7b6;
   color: #000;
-  cursor: pointer;
   display: block;
 }
 
-.detalle-hero-btn--acabado:hover {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 #000;
-}
-
-.detalle-hero-btn--acabado:active {
-  transform: translate(4px, 4px);
-  box-shadow: 0 0 0 #000;
-}
 
 /* ── Modal (sin cambios funcionales) ── */
 .detalle-modal-overlay {
