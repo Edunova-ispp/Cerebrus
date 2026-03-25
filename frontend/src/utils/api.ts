@@ -1,4 +1,35 @@
 const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+
+function getFriendlyStatusMessage(status: number): string {
+  switch (status) {
+    case 400:
+      return 'La solicitud no es válida. Revisa los datos e inténtalo de nuevo.';
+    case 401:
+      return 'Tu sesión ha caducado o no es válida. Inicia sesión de nuevo.';
+    case 403:
+      return 'No tienes permisos para realizar esta acción.';
+    case 404:
+      return 'No se encontró el recurso solicitado.';
+    case 409:
+      return 'No se pudo completar la acción por un conflicto de datos.';
+    case 422:
+      return 'Hay datos inválidos en el formulario. Revisa los campos e inténtalo de nuevo.';
+    case 429:
+      return 'Se han realizado demasiadas solicitudes. Espera un momento e inténtalo de nuevo.';
+    case 500:
+      return 'Ha ocurrido un error interno. Inténtalo de nuevo en unos minutos.';
+    case 502:
+    case 503:
+    case 504:
+      return 'El servicio no está disponible temporalmente. Inténtalo de nuevo más tarde.';
+    default:
+      if (status >= 400 && status < 500) {
+        return 'No se pudo completar la acción. Revisa los datos e inténtalo de nuevo.';
+      }
+      return 'Ha ocurrido un error inesperado. Inténtalo de nuevo más tarde.';
+  }
+}
+
 export async function toggleVisibilidadCurso(id: number): Promise<import('../types/curso').Curso> {
   const res = await apiFetch(`${apiBase}/api/cursos/${id}/visibilidad`, { method: "PATCH" });
   return res.json();
@@ -22,9 +53,15 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
   const res = await fetch(`${normalizedPath}`, { ...options, headers });
 
   if (!res.ok) {
-    let message = `Error ${res.status}`;
+    let message = getFriendlyStatusMessage(res.status);
     try {
       const body = await res.clone().json();
+      if (body.errores && typeof body.errores === 'object' && !Array.isArray(body.errores)) {
+        const fieldErrors = Object.entries(body.errores)
+          .map(([field, detail]) => `${field}: ${String(detail)}`)
+          .filter(Boolean);
+        if (fieldErrors.length > 0) message = fieldErrors.join('. ');
+      }
       if (body.errors && Array.isArray(body.errors)) {
         // Spring @Valid: lista de errores de campo
         const fieldErrors = body.errors
@@ -37,13 +74,15 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
         message = body.detail;
       } else if (body.message) {
         message = body.message;
+      } else if (body.mensaje) {
+        message = body.mensaje;
       }
     } catch {
       // body no era JSON, usar mensaje genérico
     }
 
-    if (res.status === 403) {
-      message = 'No tienes permisos para realizar esta acción';
+    if (/^Error\s+\d{3}$/.test(message)) {
+      message = getFriendlyStatusMessage(res.status);
     }
 
     throw new Error(message);
