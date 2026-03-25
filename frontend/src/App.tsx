@@ -32,6 +32,8 @@ import EstadisticasAlumno from "./pages/estadisticasCurso/EstadisticasAlumno.tsx
 import EstadisticasActividad from "./pages/estadisticasCurso/EstadisticasActividad.tsx";
 import EstadisticasTema from "./pages/estadisticasCurso/EstadisticasTema.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import PreguntaAbiertaAlumno from "./pages/preguntaAbiertaAlumno/PreguntaAbiertaAlumno.tsx";
+import TermsPage from "./pages/legal/TermsPage.tsx";
 
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
 class WatchbugErrorBoundary extends Component<
@@ -84,6 +86,7 @@ function App() {
     <WatchbugErrorBoundary>
       <Routes>
       {/* Rutas públicas */}
+      <Route path="/terminos" element={<TermsPage />} />
       <Route path="/deploy_testing" element={<DeployTesting />} />
       <Route path="/" element={<LandingPage />} />
       <Route path="/auth/login"    element={<LoginPage />} />
@@ -134,6 +137,9 @@ function App() {
         } />
         <Route path="/generales/carta/:cartaId/alumno" element={
           <ProtectedRoute allowedRoles={['ALUMNO']}><CartaAlumno /></ProtectedRoute>
+        } />
+        <Route path="/abierta/:actividadId/alumno" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><PreguntaAbiertaAlumno /></ProtectedRoute>
         } />
         <Route path="/estadisticas/:id" element={
           <ProtectedRoute allowedRoles={['ALUMNO']}><EstadisticasAlumno /></ProtectedRoute>

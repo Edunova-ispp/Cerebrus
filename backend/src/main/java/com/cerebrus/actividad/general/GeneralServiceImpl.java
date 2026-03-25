@@ -342,7 +342,7 @@ public class GeneralServiceImpl implements GeneralService {
     }
 
     public General updateActGeneral(Long id, String titulo, String descripcion, Integer puntuacion, 
-    Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Long temaId) {
+    Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Long temaId, String imagen) {
     
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -359,6 +359,7 @@ public class GeneralServiceImpl implements GeneralService {
         actividad.setTitulo(titulo);
         actividad.setDescripcion(descripcion);
         actividad.setPuntuacion(puntuacion);
+        actividad.setImagen(imagen);
         
         boolean visible = (respVisible != null && respVisible);
         actividad.setRespVisible(visible);
@@ -382,7 +383,7 @@ public class GeneralServiceImpl implements GeneralService {
     @Override
     @Transactional
     public General updateTipoTest(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
-        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId) {
+        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen) {
      
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -396,9 +397,8 @@ public class GeneralServiceImpl implements GeneralService {
         }
 
         General tipoTest = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
-            posicion, version, temaId);
+            posicion, version, temaId, imagen);
 
-        
         if(preguntasId != null){
             List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
             tipoTest.getPreguntas().clear();
@@ -420,7 +420,7 @@ public class GeneralServiceImpl implements GeneralService {
     @Override
     @Transactional
     public General updateTipoCarta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
-        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId) {
+        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen) {
      
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -434,7 +434,7 @@ public class GeneralServiceImpl implements GeneralService {
         }
 
         General tipoCarta = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
-            posicion, version, temaId);
+            posicion, version, temaId, imagen);
         if(preguntasId != null){
             List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
             if(preguntas.size() != preguntasId.size()){
@@ -613,7 +613,7 @@ public class GeneralServiceImpl implements GeneralService {
             throw new AccessDeniedException("Solo el maestro del curso puede actualizar esta actividad");
         }
             General tipoClasificacion = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
-                posicion, version, temaId);
+                posicion, version, temaId, null);
                 System.out.println("Actividad base actualizada, procesando preguntas...");
             if(preguntasId != null){
                 List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
@@ -881,8 +881,7 @@ public CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama) {
         }
         
         General tipoAbierta = updateActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
-            posicion, version, temaId);
-        tipoAbierta.setImagen(imagen);
+            posicion, version, temaId, imagen);
         
         if(preguntasId != null){
             List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./LandingPage.css";
 import logo from "../../assets/logo.png";
 import maguito from "../../assets/props/maguito.png";
@@ -109,8 +109,13 @@ function LandingPage() {
           </div>
         ))}
       </div>
-    </div>
+      
+    {/* FOOTER LEGAL */}
+      <footer className="landing-footer">
+        <Link to="/terminos">Política de Privacidad y Términos de Servicio</Link>
+      </footer>
+    </div> 
   );
-}
+};
 
 export default LandingPage;
