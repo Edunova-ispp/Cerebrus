@@ -139,6 +139,9 @@ function App() {
         <Route path="/generales/carta/:cartaId/alumno" element={
           <ProtectedRoute allowedRoles={['ALUMNO']}><CartaAlumno /></ProtectedRoute>
         } />
+        <Route path="/abierta/:actividadId/alumno" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><PreguntaAbiertaAlumno /></ProtectedRoute>
+        } />
         <Route path="/estadisticas/:id" element={
           <ProtectedRoute allowedRoles={['ALUMNO']}><EstadisticasAlumno /></ProtectedRoute>
         } />

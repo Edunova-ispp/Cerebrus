@@ -19,7 +19,7 @@ interface EvaluacionAbiertaResponse {
 }
 
 export default function PreguntaAbiertaAlumno() {
-  const { actividadId } = useParams<{ actividadId: string }>();
+  const { actividadId } = useParams<{ actividadId?: string }>();
   const navigate = useNavigate();
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
@@ -37,7 +37,10 @@ export default function PreguntaAbiertaAlumno() {
   const [puntuacionFinal, setPuntuacionFinal] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!actividadId) return;
+    if (!actividadId) {
+      setLoading(false);
+      return;
+    }
     
     const loadData = async () => {
       try {
