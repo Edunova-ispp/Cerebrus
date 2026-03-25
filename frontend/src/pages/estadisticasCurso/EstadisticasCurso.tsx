@@ -294,10 +294,6 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
         <div className="curso-indicador-label">Nota mín.</div>
         <div className="curso-indicador-value">{estadisticasCurso?.notaMinimaCurso ?? 0}</div>
       </div>
-      <div className="curso-indicador">
-        <div className="curso-indicador-label">Tiempo medio</div>
-        <div className="curso-indicador-value">{formatearTiempoCurso(estadisticasCurso?.tiempoMedioCurso)}</div>
-      </div>
     </div>
   ) : null;
 
