@@ -3,6 +3,9 @@ package com.cerebrus.actividad.general;
 import java.util.List;
 
 import com.cerebrus.actividad.general.dto.CrucigramaDTO;
+import com.cerebrus.actividad.general.dto.CrucigramaRequest;
+import com.cerebrus.actividad.general.dto.GeneralAbiertaAlumnoDTO;
+import com.cerebrus.actividad.general.dto.GeneralAbiertaMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaDTO;
 import com.cerebrus.actividad.general.dto.GeneralCartaMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralClasificacionDTO;
@@ -32,4 +35,8 @@ public interface GeneralService {
     CrucigramaDTO crearTipoCrucigrama(CrucigramaRequest crucigrama);
     CrucigramaDTO readTipoCrucigrama(Long id);
     CrucigramaDTO updateTipoCrucigrama(Long id, CrucigramaRequest crucigrama);
+    General crearTipoAbierta(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, String imagen);
+    GeneralAbiertaAlumnoDTO readTipoAbierta(Long id);
+    GeneralAbiertaMaestroDTO readTipoAbiertaMaestro(Long id);
+    General updateTipoAbierta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen);
 }

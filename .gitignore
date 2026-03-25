@@ -3,3 +3,4 @@
 .env.*
 !.env.example
 !.env.template
+python.tar

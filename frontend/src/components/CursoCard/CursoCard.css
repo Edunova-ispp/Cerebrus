@@ -54,6 +54,10 @@
 .curso-card:not(:has(.curso-card__maestro-info)) .curso-card__footer {
   border-bottom-left-radius: 14px;
   border-bottom-right-radius: 14px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .curso-card:nth-child(odd) .curso-card__footer {
@@ -104,16 +108,141 @@
 
 .curso-card__maestro-value {
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1rem;
+  font-size: 1.3rem;
+  font-weight: bolder;
   color: #000;
 }
 
 .curso-card__codigo {
-  background: #F0F0F0;
-  border: 2px solid #000;
   padding: 2px 8px;
   border-radius: 4px;
-  letter-spacing: 0.05em;
+}
+
+/* === Expand button next to code === */
+.curso-card__codigo-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.curso-card__expand-btn {
+  background: #FCEF91;
+  border: 2.5px solid #000;
+  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 2px 0 #000;
+  transition: transform 0.1s, box-shadow 0.1s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.curso-card__expand-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 #000;
+}
+
+.curso-card__expand-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+/* === Code modal === */
+.codigo-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.codigo-modal {
+  position: relative;
+  background: #FFF9CA;
+  border: 4px solid #000;
+  border-radius: 16px;
+  box-shadow: 8px 8px 0 #000;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  min-width: 280px;
+}
+
+.codigo-modal__label {
+  font-family: 'Oxygen';
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #666;
+  margin: 0;
+}
+
+.codigo-modal__value {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #000;
+  letter-spacing: 0.06em;
+  margin: 0;
+  line-height: 1;
+}
+
+.codigo-modal__copy-btn {
+  background: #FCEF91;
+  color: #000;
+  border: 3px solid #000;
+  border-radius: 10px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 10px 28px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #000;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.codigo-modal__copy-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 #000;
+}
+
+.codigo-modal__copy-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.codigo-modal__close-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #c0392b;
+  color: #fff;
+  border: 3px solid #000;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 3px 3px 0 #000;
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+.codigo-modal__close-btn:hover {
+  background: #e74c3c;
 }
 
 /* === Toggle switch === */
@@ -188,4 +317,13 @@
 .curso-card__delete-btn:hover {
   background: #e74c3c;
   transform: scale(1.1);
+}
+
+/* === PROFESOR: Oxygen === */
+.maestro .curso-card__initials,
+.maestro .curso-card__titulo,
+.maestro .curso-card__maestro-label,
+.maestro .curso-card__maestro-value,
+.maestro .curso-card__delete-btn {
+  font-family: 'Oxygen', sans-serif;
 }

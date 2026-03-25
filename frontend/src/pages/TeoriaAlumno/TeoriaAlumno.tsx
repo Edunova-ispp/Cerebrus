@@ -4,7 +4,7 @@ import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 import maguitoImg from '../../assets/props/maguito.png';
-import mapaIcon from '../../assets/icons/mapa.svg';
+import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
 import './TeoriaAlumno.css';
 
@@ -28,6 +28,11 @@ export default function TeoriaAlumno() {
   const [isFlipped, setIsFlipped] = useState(false); 
 
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+  const teoriaImageSrc = teoria?.imagen
+    ? (/^https?:\/\//i.test(teoria.imagen) || teoria.imagen.startsWith('data:')
+        ? teoria.imagen
+        : `${apiBase}${teoria.imagen.startsWith('/') ? '' : '/'}${teoria.imagen}`)
+    : null;
 
   useEffect(() => {
     if (!actividadId) return;
@@ -66,29 +71,28 @@ export default function TeoriaAlumno() {
 
   const [finished, setFinished] = useState(false);
 
-  // Función para finalizar la teoría y sumar el punto/completado
-  const handleFinalizar = async () => {
-    if (!actividadAlumnoId) {
-      console.warn("Aún no se ha cargado el ID de la actividad del alumno.");
-      return; 
-    }
+  // Muestra el popup inmediatamente; el registro al backend ocurre al hacer clic en Continuar
+  const handleFinalizar = () => {
+    setFinished(true);
+  };
 
-    try {
-      const res = await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
-        method: 'PUT',
-        body: JSON.stringify([]), 
-      });
-
-      if (!res.ok) {
-        throw new Error(`Error en la respuesta del servidor: ${res.status}`);
+  const handleContinuar = async () => {
+    console.log('[TeoriaAlumno] handleContinuar — actividadAlumnoId:', actividadAlumnoId);
+    if (actividadAlumnoId) {
+      try {
+        const res = await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
+          method: 'PUT',
+          body: JSON.stringify([]),
+        });
+        const data = await res.json();
+        console.log('[TeoriaAlumno] corregir-automaticamente response:', data);
+      } catch (e) {
+        console.error('[TeoriaAlumno] error registrando completión:', e);
       }
-
-      setFinished(true); 
-
-    } catch (e) {
-      console.error("No se pudo marcar como finalizada", e);
-   
+    } else {
+      console.warn('[TeoriaAlumno] actividadAlumnoId es null — no se puede registrar la completión');
     }
+    navigate(-1);
   };
 
   if (loading) {
@@ -111,12 +115,7 @@ export default function TeoriaAlumno() {
 
         {teoria && (
           <>
-            <div className="ta-top">
-              <button className="ta-map-btn" type="button" onClick={() => navigate(-1)}>
-                <img src={mapaIcon} alt="Mapa" className="ta-map-icon" />
-                <span>Mapa</span>
-              </button>
-            </div>
+            <ActivityHeader title={teoria.titulo} />
 
             <div 
               className={`ta-flashcard ${isFlipped ? 'flipped' : ''}`} 
@@ -128,12 +127,12 @@ export default function TeoriaAlumno() {
                 <div className="ta-card-front">
                   <div className="ta-card-content">
                     <h1 className="ta-title">{teoria.titulo}</h1>
-                    {teoria.imagen ? (
-                      <img src={teoria.imagen} alt="Ilustración" className="ta-main-img" />
+                    {teoriaImageSrc ? (
+                      <img src={teoriaImageSrc} alt="Ilustración" className="ta-main-img" />
                     ) : (
                       <img src={maguitoImg} alt="Maguito" className="ta-maguito-placeholder" />
                     )}
-                    <p className="ta-hint">PULSA PARA LEER LA LECCIÓN</p>
+                    <p className="teoria-hint">PULSA PARA LEER LA LECCIÓN</p>
                   </div>
                 </div>
 
@@ -175,7 +174,7 @@ export default function TeoriaAlumno() {
 
         {!teoria && !error && <p className="ca-text">No se encontró la lección.</p>}
 
-        {finished && <CompletionPopup title="¡LECCIÓN COMPLETADA!" onContinue={() => navigate(-1)} />}
+        {finished && <CompletionPopup title="¡LECCIÓN COMPLETADA!" onContinue={handleContinuar} />}
       </main>
     </div>
   );

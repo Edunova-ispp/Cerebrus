@@ -1,18 +1,29 @@
-﻿.tf-form,
+.tf-form,
 .tf-form * {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   text-align: left;
   box-sizing: border-box;
 }
 
 .tf-error {
-  color: #c0392b;
+  color: #c0392b !important;
   margin-top: 0;
   margin-bottom: 12px;
   font-size: 0.95rem;
 }
 
-/* ── Header columns ──────────────────────────────────────────── */
+.tf-footer-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tf-footer-stack .tf-error {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+/* -- Header columns -------------------------------------------- */
 
 .tf-header {
   display: flex;
@@ -52,7 +63,7 @@
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 10px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
   color: #000;
   transition: background 0.15s;
@@ -61,7 +72,7 @@
 .tf-input:hover,
 .tf-input:focus {
   outline: none;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .tf-input-sm {
@@ -79,7 +90,7 @@
   border-radius: 8px;
 }
 
-/* ── Help text ───────────────────────────────────────────────── */
+/* -- Help text ------------------------------------------------- */
 
 .tf-help {
   font-size: 0.92rem;
@@ -88,7 +99,7 @@
   color: #555;
 }
 
-/* ── Question blocks ─────────────────────────────────────────── */
+/* -- Question blocks ------------------------------------------- */
 
 .tf-questions {
   display: flex;
@@ -126,7 +137,7 @@
   border: 2px solid #000;
   border-radius: 8px;
   padding: 8px 10px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
   color: #000;
   transition: background 0.15s;
@@ -135,10 +146,10 @@
 .tf-question-input:hover,
 .tf-question-input:focus {
   outline: none;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
-/* ── Options ─────────────────────────────────────────────────── */
+/* -- Options --------------------------------------------------- */
 
 .tf-options {
   display: flex;
@@ -174,7 +185,7 @@
   border: 2px solid #000;
   border-radius: 8px;
   padding: 6px 10px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
   color: #000;
   min-width: 0;
@@ -184,15 +195,15 @@
 .tf-option-input:hover,
 .tf-option-input:focus {
   outline: none;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .tf-option--correct .tf-option-input {
   border-color: #000;
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
-/* ── Buttons ─────────────────────────────────────────────────── */
+/* -- Buttons --------------------------------------------------- */
 
 .tf-btn-correct {
   background: #eee;
@@ -214,7 +225,7 @@
 }
 
 .tf-btn-correct--active {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
   color: #000;
   border-color: #000;
 }
@@ -257,7 +268,7 @@
   border: 2px solid #000;
   border-radius: 8px;
   padding: 4px 12px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 0.9rem;
   cursor: pointer;
   margin-left: 30px;
@@ -265,7 +276,7 @@
 }
 
 .tf-btn-add-option:hover {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
 }
 
 .tf-btn-add-question {
@@ -274,7 +285,7 @@
   border: 3px solid #000;
   border-radius: 12px;
   padding: 10px 24px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
@@ -285,7 +296,7 @@
 }
 
 .tf-btn-add-question:hover {
-  background: var(--color-accent-dark);
+  background: var( --color-accent-light);
   transform: translate(-2px, -2px);
   box-shadow: 6px 6px 0px #000;
 }

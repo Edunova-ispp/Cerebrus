@@ -6,10 +6,13 @@
   min-height: 100vh;
   box-sizing: border-box;
   background-color: #FAF6ED;
-  color: #000;
+  color: var(--color-accent);
+  text-shadow: 2px 2px#000;
   display: flex;
+  font-size: 1.8rem;
   flex-direction: column;
   overflow-x: hidden;
+  font-family: 'Pixelify sans';
   z-index: 10;
 }
 
@@ -51,7 +54,12 @@
 .ta-battle-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  background: #9b6dff;
+  border: 4px solid #000;
+  border-radius: 16px;
+  padding: 12px 16px;
+  box-shadow: 5px 5px 0 #000;
 }
 
 .ta-knight-img {
@@ -88,26 +96,22 @@
 .ta-progress-track {
   flex: 1;
   position: relative;
-  height: 20px;
-  background: #FFF8EE;
+  height: 22px;
+  background: #333;
   border: 3px solid #000;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 3px 3px 0 #000;
+}
+
+.ta-progress-fill {
+  height: 100%;
+  background: var(--color-accent, #FFF294);
+  transition: width 0.35s ease;
 }
 
 
 .ta-spell-head {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 22px;
-  height: 22px;
-  background: radial-gradient(circle, #fff 10%, #c4b5fd 50%, #7C4DFF 100%);
-  border-radius: 50%;
-  box-shadow: 0 0 10px 4px rgba(196, 181, 253, 0.9), 0 0 4px 1px #7C4DFF;
-  transition: left 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: none;
+  display: none;
 }
 
 /* == Question counter == */
@@ -121,20 +125,22 @@
 .ta-question-counter-text {
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1rem;
+  text-shadow: none;
   font-weight: bold;
-  color: #D10057;
+  color: var(--color-text);
   letter-spacing: 0.04em;
 }
 
 .ta-answered-badge {
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: bold;
-  background: #e0d4ff;
-  border: 2px solid #7C4DFF;
-  border-radius: 20px;
-  padding: 2px 10px;
-  color: #4a0080;
+  background: #d1005794;
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 4px 14px;
+  color: #ffffff;
+  box-shadow: 3px 3px 0 #000;
 }
 
 /* ── Questions ──────────────────────────────────────────────────── */
@@ -142,19 +148,20 @@
 /* == Question card == */
 
 .ta-question-card {
-  background: #fff;
-  border: 3px solid #000;
+  background: var(--color-primary, #D10057);
+  border: 4px solid #000;
   border-radius: 16px;
   padding: 22px 24px;
-  box-shadow: 4px 4px 0 #000;
+  box-shadow: 5px 5px 0 #000;
 }
 
 .ta-question-text {
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: bold;
   margin: 0 0 14px;
-  color: #000;
+  color: #fff;
+  text-shadow: none;
   line-height: 1.4;
 }
 
@@ -180,13 +187,13 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #FFF8EE;
+  background: var(--color-secondary, #7C4DFF);
   border: 2px solid #000;
   border-radius: 10px;
   padding: 10px 14px;
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1.05rem;
-  color: #000;
+  color: #fff;
   cursor: pointer;
   text-align: left;
   transition: background 0.15s, border-color 0.15s, transform 0.1s;
@@ -194,8 +201,7 @@
 }
 
 .ta-option:hover:not(:disabled) {
-  background: #F5E6CC;
-  transform: translate(-1px, -1px);
+  background: #6a3de8;
 }
 
 .ta-option:disabled {
@@ -203,8 +209,9 @@
 }
 
 .ta-option--selected {
-  background: #e93f86;
-  border-color: #ff4db5;
+  background: #5a2dd6;
+  border-color: var(--color-accent, #FFF294);
+  border-width: 3px;
 }
 
 .ta-option--correct {
@@ -221,13 +228,13 @@
 .ta-option-letter {
   font-weight: bold;
   min-width: 22px;
-  color: #555;
+  color: #fff;
 }
 
 .ta-option--selected .ta-option-letter,
 .ta-option--correct .ta-option-letter,
 .ta-option--wrong .ta-option-letter {
-  color: #000;
+  color: #fff;
 }
 
 .ta-option-text {
@@ -281,68 +288,76 @@
   padding: 10px 24px;
   cursor: pointer;
   box-shadow: 4px 4px 0 #000;
-  transition: transform 0.1s, box-shadow 0.1s;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.1s;
   min-width: 140px;
+  background: var(--color-accent, #FFF294);
+  color: #000;
 }
 
 .ta-nav-btn:hover:not(:disabled) {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 #000;
+  background: var(--color-accent-light, #FCEF91);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
 }
 
 .ta-nav-btn:active:not(:disabled) {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 #000;
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 #000;
 }
 
 .ta-nav-btn:disabled {
   opacity: 0.38;
   cursor: default;
-  box-shadow: 2px 2px 0 #aaa;
+  box-shadow: 2px 2px 0 #000000;
+  transform: none;
 }
 
 .ta-nav-btn--prev {
-  background: #f0e6ff;
-  color: #000;
+  background: var(--color-accent, #FFF294);
+  box-shadow: 4px 4px 0 #000;
+}
+
+.ta-nav-btn--prev:hover:not(:disabled) {
+  background: var(--color-accent-light, #FCEF91);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
 }
 
 .ta-nav-btn--next {
-  background: #fff48d;
-  color: #fff;
+  background: var(--color-accent, #FFF294);
 }
 
 .ta-nav-btn--submit {
-  background: #D10057;
-  color: #fff;
-  animation: ta-btn-pulse 1.8s ease-in-out infinite;
-}
-
-@keyframes ta-btn-pulse {
-  0%, 100% { box-shadow: 4px 4px 0 #000; }
-  50%       { box-shadow: 4px 4px 0 #000, 0 0 16px 4px rgba(209, 0, 87, 0.5); }
+  background: var(--color-accent, #FFF294);
+  color: #000;
+  animation: none;
 }
 
 .ta-nav-btn--submit:disabled {
   animation: none;
-  background: #e8a0b8;
+  opacity: 0.38;
 }
 
 
 
-.ta-hint {
+.test-hint {
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 0.9rem;
-  color: #888;
-  margin: 0;
+  font-size: 1.5rem;
+  color: var(--color-text, #000638) !important;
   text-align: center;
+    text-shadow: 0px 0px 0px #000 !important;
+
+  -webkit-text-stroke: none !important;
+  margin: 2px 0 0;
 }
 /* Estilos para la nueva imagen del dragón */
 .ta-dragon-img {
-  width: 50px;       /* Ajusta el tamaño según tu imagen */
-  height: 50px;      /* Ajusta el tamaño según tu imagen */
+  width: 60px;
+  height: 60px;
   object-fit: contain;
   flex-shrink: 0;
   filter: drop-shadow(2px 2px 0 #000);
+  image-rendering: pixelated;
   transition: filter 0.3s, transform 0.3s;
 }
 

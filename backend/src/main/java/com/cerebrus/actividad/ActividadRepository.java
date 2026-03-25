@@ -13,7 +13,7 @@ public interface ActividadRepository extends JpaRepository<Actividad, Long> {
     @Query("SELECT COALESCE(MAX(a.posicion), 0) FROM Actividad a WHERE a.tema.id = :temaId")
     Integer findMaxPosicionByTemaId(@Param("temaId") Long temaId);
 
-    @Query("SELECT a FROM Actividad a WHERE a.tema.id = :temaId")
+    @Query("SELECT a FROM Actividad a WHERE a.tema.id = :temaId ORDER BY a.posicion ASC, a.id ASC")
     List<Actividad> findByTemaId(@Param("temaId") Long temaId);
 
     @Query("SELECT COUNT(a) FROM Actividad a WHERE a.tema.curso.id = :cursoId")

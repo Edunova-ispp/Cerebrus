@@ -25,6 +25,9 @@ interface Props {
     readonly mode?: CrucigramaFormMode;
     readonly crucigramaId?: number;
     readonly initialValues?: CrucigramaFormInitialValues;
+    readonly temaIdProp?: string;
+    readonly cursoIdProp?: string;
+    readonly onDone?: () => void;
 }
 
 interface PreguntaLocal {
@@ -33,25 +36,32 @@ interface PreguntaLocal {
 }
 
 const MAX_PALABRAS = 10;
+const ONLY_LETTERS_REGEX = /^\p{L}+$/u;
 
-export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues }: Props) {
+function sanitizeRespuesta(value: string): string {
+    return value.replace(/[^\p{L}]/gu, '').toUpperCase();
+}
+
+export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
     const [titulo, setTitulo] = useState('');
     const [descripcion, setDescripcion] = useState('');
-    const [puntuacion, setPuntuacion] = useState(10);
+    const [puntuacion, setPuntuacion] = useState('');
     const [respVisible, setRespVisible] = useState(true);
     const [preguntas, setPreguntas] = useState<PreguntaLocal[]>([{ pregunta: '', respuesta: '' }]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
-    const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+    const params = useParams<{ id: string; temaId: string }>();
+    const cursoId = cursoIdProp ?? params.id;
+    const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
     // ── Load initial values ───────────────────────────────────────────────
     useEffect(() => {
         if (!initialValues) return;
         setTitulo(initialValues.titulo || '');
         setDescripcion(initialValues.descripcion || '');
-        setPuntuacion(initialValues.puntuacion || 0);
+        setPuntuacion(String(initialValues.puntuacion) || '');
         setRespVisible(initialValues.respVisible !== undefined ? initialValues.respVisible : true);
 
         if (initialValues.preguntasYRespuestas && Object.keys(initialValues.preguntasYRespuestas).length > 0) {
@@ -74,7 +84,8 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues }:
     // ── Handlers ──────────────────────────────────────────────────────────
     const handlePreguntaChange = (index: number, field: keyof PreguntaLocal, value: string) => {
         const updated = [...preguntas];
-        updated[index] = { ...updated[index], [field]: value };
+        const normalizedValue = field === 'respuesta' ? sanitizeRespuesta(value) : value;
+        updated[index] = { ...updated[index], [field]: normalizedValue };
         setPreguntas(updated);
     };
 
@@ -96,18 +107,26 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues }:
         setError('');
 
         try {
-            const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
-
             const mapaPreguntas: Record<string, string> = {};
             preguntas.forEach(p => {
                 if (p.pregunta.trim() && p.respuesta.trim()) {
-                    mapaPreguntas[p.pregunta.trim()] = p.respuesta.trim().toUpperCase();
+                    const normalizedRespuesta = sanitizeRespuesta(p.respuesta.trim());
+                    if (!ONLY_LETTERS_REGEX.test(normalizedRespuesta)) {
+                        throw new Error('Las respuestas del crucigrama solo pueden contener letras.');
+                    }
+                    mapaPreguntas[p.pregunta.trim()] = normalizedRespuesta;
                 }
             });
 
             if (Object.keys(mapaPreguntas).length === 0) {
                 throw new Error('Debes completar al menos una pregunta y su respuesta.');
             }
+
+            if (puntuacion <= 0) {
+                throw new Error('La puntuación debe ser un número mayor a 0');
+            }
+
+            const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
             const payload = {
                 titulo: titulo.trim(),
@@ -133,7 +152,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues }:
                 throw new Error((errorData as any).message || 'Error del servidor al guardar');
             }
 
-            navigate(`/cursos/${cursoId}/temas`);
+            if (onDone) onDone(); else navigate(`/cursos/${cursoId}/temas`);
         } catch (err: any) {
             setError(err.message || 'No se pudo conectar con el servidor.');
         } finally {
@@ -185,8 +204,9 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues }:
                             type="number"
                             className="cf-input"
                             value={puntuacion}
-                            min={0}
-                            onChange={e => setPuntuacion(Number(e.target.value))}
+                            min={1}
+                            onChange={e => setPuntuacion(e.target.value)}
+                            required
                         />
 
                         <label
@@ -230,6 +250,8 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues }:
                                 className="cf-input cf-input-upper"
                                 placeholder="MADRID"
                                 value={p.respuesta}
+                                inputMode="text"
+                                pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+"
                                 onChange={e => handlePreguntaChange(index, 'respuesta', e.target.value)}
                                 required
                             />
@@ -263,8 +285,8 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues }:
                 {loading
                     ? 'PROCESANDO...'
                     : mode === 'edit'
-                        ? 'ACTUALIZAR CRUCIGRAMA'
-                        : 'GUARDAR CRUCIGRAMA'}
+                        ? 'GUARDAR'
+                        : 'GUARDAR '}
             </button>
         </form>
     );

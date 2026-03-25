@@ -3,6 +3,7 @@ package com.cerebrus.actividad;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.actividad.general.dto.TeoriaDTO;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping("/api/actividades")
@@ -29,37 +34,32 @@ public class ActividadController {
 
     @GetMapping("/{id}/maestro")
     public ResponseEntity<TeoriaDTO> getActividadMaestro(@PathVariable Long id) {
-        try {
-            Actividad actividad = actividadService.encontrarActividadPorIdMaestro(id);
-            return ResponseEntity.ok(toTeoriaDto(actividad));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+       
+        Actividad actividad = actividadService.encontrarActividadPorIdMaestro(id);
+        return ResponseEntity.ok(toTeoriaDto(actividad));
+       
     }
 
     @GetMapping("/{id}/alumno")
     public ResponseEntity<TeoriaDTO> getActividadAlumno(@PathVariable Long id) {
-        try {
-            Actividad actividad = actividadService.encontrarActividadPorIdAlumno(id);
-            return ResponseEntity.ok(toTeoriaDto(actividad));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        
+        Actividad actividad = actividadService.encontrarActividadPorIdAlumno(id);
+        return ResponseEntity.ok(toTeoriaDto(actividad));
+       
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Void> eliminarActividad(@PathVariable Long id) {
-        try {
-            actividadService.deleteActividad(id);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        
+        actividadService.deleteActividad(id);
+        return ResponseEntity.noContent().build();
+        
     }
 
     @PostMapping("/teoria")
-    public ResponseEntity<TeoriaDTO> crearActividadTeoria(@RequestBody CrearActividadTeoriaRequest request) {
-        try {
+    @PreAuthorize("hasAuthority('MAESTRO')")
+    public ResponseEntity<TeoriaDTO> crearActividadTeoria(@RequestBody @Valid CrearActividadTeoriaRequest request) {
             Actividad actividad = actividadService.crearActividadTeoria(
                 request.getTitulo(),
                 request.getDescripcion(),
@@ -67,16 +67,14 @@ public class ActividadController {
                 request.getTemaId()
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(toTeoriaDto(actividad));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        
     }
 
     @PutMapping("/teoria/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<TeoriaDTO> updateActividadTeoria(
             @PathVariable Long id,
-            @RequestBody CrearActividadTeoriaRequest request) {
-        try {
+            @RequestBody @Valid CrearActividadTeoriaRequest request) {
             Actividad actividad = actividadService.updateActividadTeoria(
                 id,
                 request.getTitulo(),
@@ -84,9 +82,6 @@ public class ActividadController {
                 request.getImagen()
             );
             return ResponseEntity.ok(toTeoriaDto(actividad));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
     }
 
     private static TeoriaDTO toTeoriaDto(Actividad actividad) {
@@ -101,10 +96,12 @@ public class ActividadController {
     }
 
     public static class CrearActividadTeoriaRequest {
+        @NotBlank
         private String titulo;
         private String descripcion;
         private Integer puntuacion;
         private String imagen;
+        @NotNull
         private Long temaId;
 
         public String getTitulo() { return titulo; }

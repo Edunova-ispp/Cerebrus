@@ -1,6 +1,7 @@
 package com.cerebrus.actividad.tablero;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,17 +10,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.comun.enumerados.TamanoTablero;
+import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.tablero.dto.TableroDTO;
-import com.cerebrus.actividadAlumno.ActividadAlumno;
-import com.cerebrus.actividadAlumno.ActividadAlumnoRepository;
-import com.cerebrus.actividadAlumno.ActividadAlumnoService;
+import com.cerebrus.actividad.tablero.dto.TableroRequest;
+import com.cerebrus.actividadAlumn.ActividadAlumno;
+import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
+import com.cerebrus.actividadAlumn.ActividadAlumnoService;
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
-import com.cerebrus.respuestaAlumno.RespuestaAlumno;
-import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneral;
-import com.cerebrus.respuestaAlumno.respAlumGeneral.RespAlumnoGeneralRepository;
+import com.cerebrus.respuestaAlumn.RespuestaAlumno;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneral;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneralRepository;
 import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
 import com.cerebrus.tema.Tema;
@@ -110,15 +114,26 @@ public class TableroServiceImpl implements TableroService {
     @Transactional(readOnly = true)
     public TableroDTO getTablero(Long tableroId) {
         Tablero tablero = tableroRepository.findById(tableroId).orElseThrow(() -> new ResourceNotFoundException("Tablero no encontrado"));
-        Usuario u = usuarioService.findCurrentUser();
-        if (u instanceof Maestro) {
-            Maestro maestro = (Maestro) u;
+        Usuario current = usuarioService.findCurrentUser();
+        if (current instanceof Maestro) {
+            Maestro maestro = (Maestro) current;
             if (!tablero.getTema().getCurso().getMaestro().getId().equals(maestro.getId())) {
                 throw new AccessDeniedException("No tienes permiso para acceder a este tablero");
             }
+            return TableroDTO.fromEntity(tablero);
+        }
+        if (!Boolean.TRUE.equals(tablero.getTema().getCurso().getVisibilidad())) {
+            throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
+        }
+        List<Inscripcion> inscripciones = tablero.getTema().getCurso().getInscripciones();
+        for (Inscripcion inscripcion : inscripciones) {
+            if (inscripcion.getAlumno().getId().equals(current.getId())) {
+                AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(tablero, current.getId());
+                return TableroDTO.fromEntity(tablero); 
+            }
         }
         // Alumnos can access tablero data to play the activity
-        return TableroDTO.fromEntity(tablero);
+        throw new AccessDeniedException("La actividad que buscas pertenece a un curso al que no estás inscrito");
     }
 
     @Override
@@ -129,7 +144,7 @@ public class TableroServiceImpl implements TableroService {
         if (u instanceof Maestro) {
             Maestro maestro = (Maestro) u;
             if (!tablero.getTema().getCurso().getMaestro().getId().equals(maestro.getId())) {
-                throw new AccessDeniedException("No tienes permiso para eliminar este tablero");
+                throw new AccessDeniedException("No tienes permiso para eliminar este tablero porque no eres el maestro del curso");
             }
         } else {
             throw new AccessDeniedException("Solo un maestro puede eliminar actividades de tablero");
@@ -145,7 +160,7 @@ public class TableroServiceImpl implements TableroService {
         if (u instanceof Maestro) {
             Maestro maestro = (Maestro) u;
             if (!tableroExistente.getTema().getCurso().getMaestro().getId().equals(maestro.getId())) {
-                throw new AccessDeniedException("No tienes permiso para actualizar este tablero");
+                throw new AccessDeniedException("No tienes permiso para actualizar este tablero porque no eres el maestro del curso");
             }
         } else {
             throw new AccessDeniedException("Solo un maestro puede actualizar actividades de tablero");
@@ -191,9 +206,13 @@ public class TableroServiceImpl implements TableroService {
 
         if (u instanceof Alumno) {
             Alumno alumno = (Alumno) u;
+            if (!Boolean.TRUE.equals(tablero.getTema().getCurso().getVisibilidad())) {
+                throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
+            }
             if (!tablero.getTema().getCurso().getInscripciones().stream().anyMatch(i -> i.getAlumno().getId().equals(alumno.getId()))) {
                 throw new AccessDeniedException("No tienes permiso para responder a este tablero porque no esta inscrito");
             }
+            AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(tablero, alumno.getId());
             if(!tablero.getPreguntas().stream().anyMatch(p -> p.getId().equals(preguntaId))) {
                 throw new AccessDeniedException("La pregunta no pertenece a este tablero");
             }

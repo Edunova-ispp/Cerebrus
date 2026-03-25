@@ -25,6 +25,7 @@ export interface TestFormInitialValues {
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly version: number;
+  readonly temaId?: number;
   readonly preguntas?: readonly TestFormInitialPregunta[];
 }
 
@@ -50,6 +51,9 @@ interface Props {
   readonly mode?: TestFormMode;
   readonly generalId?: number;
   readonly initialValues?: TestFormInitialValues;
+  readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
+  readonly onDone?: () => void;
 }
 
 function makeEmptyOption(): QuestionOption {
@@ -60,7 +64,7 @@ function makeEmptyQuestion(): Question {
   return { localKey: makeLocalKey(), text: '', options: [makeEmptyOption(), makeEmptyOption()] };
 }
 
-export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
+export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -76,7 +80,9 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
   const originalQuestionsRef = useRef<TestFormInitialPregunta[]>([]);
 
   const navigate = useNavigate();
-  const { id: cursoId, temaId } = useParams<{ id: string; temaId: string }>();
+  const params = useParams<{ id: string; temaId: string }>();
+  const cursoId = cursoIdProp ?? params.id;
+  const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
   useEffect(() => {
     if (!initialValues) return;
@@ -155,6 +161,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
 
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
+    if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
 
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
@@ -172,7 +179,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
           return `La opción ${oi + 1} de la pregunta ${qi + 1} está vacía`;
       }
       if (!q.options.some((o) => o.correcta))
-        return `Marca la respuesta correcta en la pregunta ${qi + 1}`;
+        return `Una de las respuestas debe ser marcada como correcta`;
     }
 
     if (mode === 'edit' && !generalId) return 'Falta el id de la actividad a editar';
@@ -295,6 +302,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
                       respuesta: opt.text.trim(),
                       imagen: null,
                       correcta: opt.correcta,
+                      pregunta: { id: q.id },
                     }),
                   });
                 }
@@ -333,7 +341,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
         }
       }
 
-      navigate(`/cursos/${cursoId}/temas`);
+      if (onDone) onDone(); else navigate(`/cursos/${cursoId}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error guardando el test';
       setError(msg);
@@ -366,8 +374,6 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="tf-form">
-      {error && <p className="ca-text tf-error">{error}</p>}
-
       <GenerarIAModal
         tipoActividad="TEST"
         open={iaModalOpen}
@@ -375,7 +381,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
         onResult={handleIAResult}
       />
 
-      {/* ── TOP: Metadata ── */
+      {/* ── TOP: Metadata ── */}
       <div className="tf-header">
         <div className="tf-col">
           <div>
@@ -387,6 +393,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Título del test"
+              required
             />
           </div>
 
@@ -398,6 +405,7 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               rows={3}
+              style={{ resize: 'vertical' }}
               placeholder="Descripción opcional"
             />
           </div>
@@ -434,6 +442,8 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
                 className="tf-input tf-input-sm"
                 value={puntuacion}
                 onChange={(e) => setPuntuacion(e.target.value)}
+                min="1"
+                required
               />
             </div>
             <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
@@ -465,7 +475,6 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
         </div>
       </div>
 
-    }
       <div className="tf-questions">
           <p className="tf-help">
             Añade las preguntas y opciones. Marca cuál es la correcta con <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
@@ -543,9 +552,14 @@ export function TestForm({ mode = 'create', generalId, initialValues }: Props) {
         </div>
 
       <div className="ca-form-footer">
-        <button className="ca-btn-guardar" type="submit" disabled={loading}>
-          {loading ? 'Guardando...' : 'Guardar'}
-        </button>
+        <div className="tf-footer-stack">
+          <button className="ca-btn-guardar" type="submit" disabled={loading}>
+            {loading ? 'Guardando...' : 'Guardar'}
+          </button>
+          {error && <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+            {error}
+          </p>}
+        </div>
       </div>
     </form>
   );
