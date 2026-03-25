@@ -1,0 +1,119 @@
+/* Contenedor Principal */
+.abierta-alumno-container {
+  min-height: 100vh;
+  background-color: #FAF6ED;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  font-family: 'Pixelify Sans', sans-serif;
+}
+
+/* Header de la actividad (Mapa y Título) */
+.abierta-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 20px;
+}
+
+.abierta-titulo-banner {
+  flex: 1;
+  background: #7C4DFF;
+  border: 4px solid #000;
+  border-radius: 15px;
+  padding: 12px;
+  color: white;
+  text-align: center;
+  font-size: 2rem;
+  box-shadow: 6px 6px 0 #000;
+}
+
+/* Card del Ejercicio */
+.abierta-card {
+  background: white;
+  border: 4px solid #000;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 700px;
+  padding: 40px;
+  box-shadow: 8px 8px 0 #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.abierta-pregunta-texto {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* Textarea Estilizado */
+.abierta-textarea {
+  width: 100%;
+  min-height: 150px;
+  border: 4px solid #000;
+  border-radius: 12px;
+  padding: 15px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.2rem;
+  background-color: #fffde7; /* Color amarillento suave estilo papel */
+  box-shadow: 4px 4px 0 #000;
+  outline: none;
+  resize: none;
+  transition: transform 0.1s;
+}
+
+.abierta-textarea:focus {
+  transform: scale(1.01);
+  background-color: #fff;
+}
+
+/* Botones de Navegación/Acción */
+.abierta-footer {
+  display: flex;
+  gap: 20px;
+  margin-top: 30px;
+  width: 100%;
+  max-width: 700px;
+  justify-content: center;
+}
+
+.btn-pixel {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-weight: bold;
+  padding: 12px 25px;
+  border: 4px solid #000;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.1s;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.btn-pixel:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.btn-volver {
+  background-color: #eee;
+}
+
+.btn-finalizar {
+  background-color: #D10057;
+  color: white;
+  font-size: 1.4rem;
+  padding: 15px 40px;
+}
+
+.btn-finalizar:hover {
+  background-color: #ff006a;
+}

@@ -206,6 +206,7 @@ useEffect(() => {
     else if (tipoReal === 'MARCARIMAGEN') navigate(`/marcar-imagenes/${act.id}/alumno`);
     else if (tipoReal === 'CLASIFICACION') navigate(`/clasificaciones/${act.id}/alumno`);
     else if (tipoReal === 'CRUCIGRAMA') navigate(`/crucigrama/${act.id}/alumno`);
+    else if (tipoReal === 'ABIERTA') navigate(`/abierta/${act.id}/alumno`);
   };
 
   const selectedTema = temas[selectedIndex] ?? null;
@@ -337,7 +338,7 @@ useEffect(() => {
                             const locked = !isUnlocked;
 
                             const tipo = (act.tipo ?? '').toUpperCase();
-                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'CLASIFICACION', 'MARCARIMAGEN', 'TABLERO', 'CARTA', 'CRUCIGRAMA'].includes(tipo);
+                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'CLASIFICACION', 'MARCARIMAGEN', 'TABLERO', 'CARTA', 'CRUCIGRAMA', 'ABIERTA' ].includes(tipo);
 
                             const iconSrc = getActivityIconSrc(tipo, act.posicion);
                             const nodeBg = getNodeBgColor(linearIndex);
