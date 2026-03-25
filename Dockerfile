@@ -18,6 +18,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
+    python3-venv \
     nginx \
     supervisor \
     curl \
@@ -31,8 +32,13 @@ COPY --from=frontend-build /app/frontend/dist /app/frontend/dist
 COPY --from=backend-build /app/backend/target/*.jar /app/backend/app.jar
 
 COPY watchbug-app /app/watchbug-app
-RUN pip3 install --no-cache-dir -r /app/watchbug-app/requirements.txt && \
-    pip3 install --no-cache-dir /app/watchbug-app/watchbug
+
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r /app/watchbug-app/requirements.txt && \
+    pip install --no-cache-dir /app/watchbug-app/watchbug
 
 COPY deploy/nginx.render.conf /etc/nginx/sites-available/default
 COPY deploy/supervisord.conf /app/deploy/supervisord.conf
