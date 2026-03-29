@@ -4,12 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +27,10 @@ import org.springframework.http.ResponseEntity;
 import com.cerebrus.actividad.general.General;
 import com.cerebrus.actividad.general.GeneralController;
 import com.cerebrus.actividad.general.GeneralService;
+import com.cerebrus.actividad.general.dto.CrucigramaDTO;
+import com.cerebrus.actividad.general.dto.CrucigramaRequest;
+import com.cerebrus.actividad.general.dto.GeneralAbiertaMaestroDTO;
+import com.cerebrus.actividad.general.dto.GeneralClasificacionMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestDTO;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.dto.PreguntaDTO;
@@ -297,5 +304,121 @@ class GeneralControllerTest {
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 		verify(generalService).deleteActividad(77L);
+	}
+
+	// --- TESTS PARA CRUCIGRAMA (CON VALIDACIÓN DE NEGOCIO EN CONTROLADOR) ---
+
+    @Test
+    void crearTipoCrucigrama_respuestasInvalidas_devuelve400() {
+        CrucigramaRequest request = new CrucigramaRequest();
+        // Respuesta con números o caracteres especiales no permitidos por el regex ^[\p{L}]+$
+        request.setPreguntasYRespuestas(Map.of("Pregunta 1", "Respuesta123")); 
+
+        ResponseEntity<CrucigramaDTO> response = generalController.crearTipoCrucigrama(request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        verifyNoInteractions(generalService);
+    }
+
+    @Test
+    void crearTipoCrucigrama_masDeCincoPreguntas_devuelve400() {
+        CrucigramaRequest request = new CrucigramaRequest();
+        Map<String, String> muchasPreguntas = new HashMap<>();
+        for (int i = 0; i < 6; i++) { muchasPreguntas.put("P" + i, "R" + i); }
+        request.setPreguntasYRespuestas(muchasPreguntas);
+
+        ResponseEntity<CrucigramaDTO> response = generalController.crearTipoCrucigrama(request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+	void crearTipoCrucigrama_ok_devuelve201() {
+		CrucigramaRequest request = new CrucigramaRequest();
+		request.setPreguntasYRespuestas(Map.of("P1", "Respuesta"));
+		
+		// Si no tiene constructor vacío, mockeamos el DTO
+		CrucigramaDTO dtoMock = mock(CrucigramaDTO.class);
+		when(dtoMock.getId()).thenReturn(1L);
+
+		when(generalService.crearTipoCrucigrama(any(CrucigramaRequest.class))).thenReturn(dtoMock);
+
+		ResponseEntity<CrucigramaDTO> response = generalController.crearTipoCrucigrama(request);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK); // Tu controlador devuelve .ok()
+		assertThat(response.getBody().getId()).isEqualTo(1L);
+	}
+
+    // --- TESTS PARA ACTIVIDAD ABIERTA ---
+
+    @Test
+    void crearTipoAbierta_mapeaIdsYDevuelve201() {
+        General request = new General();
+        request.setTitulo("Abierta");
+        Tema tema = new Tema(); tema.setId(5L);
+        request.setTema(tema);
+        
+        Pregunta p = new Pregunta(); p.setId(10L);
+        request.setPreguntas(List.of(p));
+
+        General creada = new General();
+        creada.setId(100L);
+
+        when(generalService.crearTipoAbierta(any(), any(), any(), any(), any(), any(), any(), any()))
+            .thenReturn(creada);
+
+        ResponseEntity<Long> response = generalController.crearTipoAbierta(request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isEqualTo(100L);
+        
+        verify(generalService).crearTipoAbierta(
+            eq("Abierta"), any(), any(), eq(5L), any(), any(), preguntasIdCaptor.capture(), any()
+        );
+        assertThat(preguntasIdCaptor.getValue()).containsExactly(10L);
+    }
+
+    @Test
+	void updateTipoAbierta_llamaReadMaestroParaRetorno() {
+		General request = new General();
+		request.setTitulo("Update");
+		Tema tema = new Tema(); tema.setId(1L);
+		request.setTema(tema);
+		request.setPreguntas(List.of());
+		
+		// Usamos mock para evitar el error del constructor undefined
+		GeneralAbiertaMaestroDTO dtoMaestroMock = mock(GeneralAbiertaMaestroDTO.class);
+		
+		// El controlador en el PUT llama primero al update y luego al readTipoAbiertaMaestro
+		when(generalService.readTipoAbiertaMaestro(1L)).thenReturn(dtoMaestroMock);
+
+		ResponseEntity<GeneralAbiertaMaestroDTO> response = generalController.updateTipoAbierta(1L, request);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).isSameAs(dtoMaestroMock);
+	}
+
+    // --- TESTS PARA CLASIFICACIÓN ---
+
+    @Test
+	void updateTipoClasificacion_devuelveDTORefrescado() {
+		// 1. Preparamos el Request
+		General request = new General();
+		Tema tema = new Tema(); tema.setId(2L);
+		request.setTema(tema);
+		request.setPreguntas(List.of()); // Lista vacía para evitar NPE en el stream
+
+		// 2. Mockeamos el DTO de retorno
+		GeneralClasificacionMaestroDTO dtoMock = mock(GeneralClasificacionMaestroDTO.class);
+		
+		when(generalService.updateTipoClasificacion(eq(1L), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+			.thenReturn(dtoMock);
+
+		// 3. Ejecución
+		ResponseEntity<GeneralClasificacionMaestroDTO> response = generalController.updateTipoClasificacion(1L, request);
+
+		// 4. Verificación
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).isSameAs(dtoMock);
 	}
 }
