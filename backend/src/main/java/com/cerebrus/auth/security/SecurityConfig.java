@@ -62,7 +62,8 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000", 
                 "http://localhost:5173",
-                "https://cerebrus-frontend.onrender.com", 
+                "https://cerebrus-frontend.onrender.com",
+                "https://cerebrus-ylzn.onrender.com",
                 "https://*.koyeb.app",
                 "http://*.koyeb.app",
                 "https://cerebrus.koyeb.app"));
