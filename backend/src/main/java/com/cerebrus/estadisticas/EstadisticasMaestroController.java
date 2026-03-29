@@ -38,6 +38,21 @@ public class EstadisticasMaestroController {
         this.cursoRepository = cursoRepository;
     }
 
+    @GetMapping("/cursos/{cursoId}/estadisiticas-curso")
+    public EstadisticasCursoDTO obtenerEstadisticasCurso(@PathVariable Long cursoId) {
+        return estadisticasMaestroService.obtenerEstadisticasCurso(cursoId);
+    }
+
+    @GetMapping("/cursos/{cursoId}/estadisticas-temas")
+    public Map<Long, EstadisticasTemaDTO> obtenerEstadisticasCursoTema(@PathVariable Long cursoId) {
+        return estadisticasMaestroService.obtenerEstadisticasCursoTema(cursoId);
+    }   
+
+    @GetMapping("/cursos/{cursoId}/temas/{temaId}/estadisticas-actividades")
+    public Map<Long, EstadisticasActividadDTO> obtenerEstadisticasCursoActividad(@PathVariable Long cursoId, @PathVariable Long temaId) {
+        return estadisticasMaestroService.obtenerEstadisticasCursoActividad(cursoId, temaId);
+    }
+
     @GetMapping("/cursos/{cursoId}/actividades-completadas")
     public ResponseEntity<?> obtenerNumActividadesRealizadasPorAlumno(@PathVariable Long cursoId) {
         try {
@@ -79,24 +94,24 @@ public class EstadisticasMaestroController {
         }
     }
 
-    @GetMapping("/cursos/{cursoId}/temas/{temaId}/estadisticas-actividades")
-    public Map<Long, EstadisticasActividadDTO> obtenerEstadisticasCursoActividad(@PathVariable Long cursoId, @PathVariable Long temaId) {
-        return estadisticasMaestroService.obtenerEstadisticasCursoActividad(cursoId, temaId);
-    }
-
     @GetMapping("/cursos/{cursoId}/temas/{temaId}/repeticiones-actividades")
     public Map<Long, RepeticionesActividadDTO> obtenerRepeticionesCursoActividad(@PathVariable Long cursoId, @PathVariable Long temaId) {
         return estadisticasMaestroService.obtenerRepeticionesCursoActividad(cursoId, temaId);
     }
 
-    @GetMapping("/cursos/{cursoId}/estadisticas-temas")
-    public Map<Long, EstadisticasTemaDTO> obtenerEstadisticasCursoTema(@PathVariable Long cursoId) {
-        return estadisticasMaestroService.obtenerEstadisticasCursoTema(cursoId);
-    }   
+    @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/completado")
+    public Boolean temaCompletado(@PathVariable Long alumnoId, @PathVariable Long cursoId, @PathVariable Long temaId) {
+        return estadisticasMaestroService.temaCompletado(alumnoId, cursoId, temaId);
+    }
 
-    @GetMapping("/cursos/{cursoId}/estadisiticas-curso")
-    public EstadisticasCursoDTO obtenerEstadisticasCurso(@PathVariable Long cursoId) {
-        return estadisticasMaestroService.obtenerEstadisticasCurso(cursoId);
+    @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/nota-media")
+    public Integer notaMediaAlumno(@PathVariable Long alumnoId, @PathVariable Long cursoId, @PathVariable Long temaId) {
+        return estadisticasMaestroService.notaMediaAlumno(alumnoId, cursoId, temaId);
+    }
+
+    @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/estadisticas-alumno")
+    public Map<Long, EstadisticasAlumnoDTO> obtenerEstadisticasAlumno(@PathVariable Long alumnoId, @PathVariable Long cursoId, @PathVariable Long temaId) {
+        return estadisticasMaestroService.obtenerEstadisticasAlumno(alumnoId, cursoId, temaId);
     }
 
     @GetMapping("/cursos/{cursoId}/alumnos/{alumnoId}")
@@ -117,25 +132,6 @@ public class EstadisticasMaestroController {
         }
     }
 
-    @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/estadisticas-alumno")
-    public Map<Long, EstadisticasAlumnoDTO> obtenerEstadisticasAlumno(@PathVariable Long alumnoId, @PathVariable Long cursoId, @PathVariable Long temaId) {
-        return estadisticasMaestroService.obtenerEstadisticasAlumno(alumnoId, cursoId, temaId);
-    }
-
-    @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/completado")
-    public Boolean temaCompletado(@PathVariable Long alumnoId, @PathVariable Long cursoId, @PathVariable Long temaId) {
-        return estadisticasMaestroService.temaCompletado(alumnoId, cursoId, temaId);
-    }
-
-    @GetMapping("/alumnos/{alumnoId}/cursos/{cursoId}/temas/{temaId}/nota-media")
-    public Integer notaMediaAlumno(@PathVariable Long alumnoId, @PathVariable Long cursoId, @PathVariable Long temaId) {
-        return estadisticasMaestroService.notaMediaAlumno(alumnoId, cursoId, temaId);
-    }
-
-
-    
-   
-
     @GetMapping("/")
     public String getMethodName(@RequestParam String param) {
         return new String();
@@ -143,10 +139,10 @@ public class EstadisticasMaestroController {
 
     // ==================== CONSULTAR TIEMPO DE ALUMNO ====================
 
-    @GetMapping("/actividades/{actividadId}/alumno/{alumnoId}/tiempo")
-    public ResponseEntity<?> obtenerTiempoAlumnoEnActividad(@PathVariable Long actividadId, @PathVariable Long alumnoId) {
+    @GetMapping("/cursos/{cursoId}/alumno/{alumnoId}/tiempo")
+    public ResponseEntity<?> obtenerTiempoAlumnoEnCurso(@PathVariable Long cursoId, @PathVariable Long alumnoId) {
         try {
-            Integer tiempo = estadisticasMaestroService.obtenerTiempoAlumnoEnActividad(alumnoId, actividadId);
+            Integer tiempo = estadisticasMaestroService.obtenerTiempoAlumnoEnCurso(alumnoId, cursoId);
             return ResponseEntity.ok(Map.of("tiempoMinutos", tiempo));
         } catch (AccessDeniedException e) {
             Map<String, Object> error = Map.of("error", e.getMessage());
@@ -179,10 +175,10 @@ public class EstadisticasMaestroController {
         }
     }
 
-    @GetMapping("/cursos/{cursoId}/alumno/{alumnoId}/tiempo")
-    public ResponseEntity<?> obtenerTiempoAlumnoEnCurso(@PathVariable Long cursoId, @PathVariable Long alumnoId) {
+    @GetMapping("/actividades/{actividadId}/alumno/{alumnoId}/tiempo")
+    public ResponseEntity<?> obtenerTiempoAlumnoEnActividad(@PathVariable Long actividadId, @PathVariable Long alumnoId) {
         try {
-            Integer tiempo = estadisticasMaestroService.obtenerTiempoAlumnoEnCurso(alumnoId, cursoId);
+            Integer tiempo = estadisticasMaestroService.obtenerTiempoAlumnoEnActividad(alumnoId, actividadId);
             return ResponseEntity.ok(Map.of("tiempoMinutos", tiempo));
         } catch (AccessDeniedException e) {
             Map<String, Object> error = Map.of("error", e.getMessage());

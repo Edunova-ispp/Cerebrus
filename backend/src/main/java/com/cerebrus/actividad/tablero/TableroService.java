@@ -5,14 +5,10 @@ import com.cerebrus.actividad.tablero.dto.TableroRequest;
 
 public interface TableroService {
 
-    TableroDTO crearActividadTablero(TableroRequest actividad);
-
-    TableroDTO getTablero(Long tableroId);
-
-    void eliminarTablero(Long tableroId);
-
-    TableroDTO actualizarTablero(Long id, TableroRequest tablero);
-
-    String crearRespuestaAPreguntaTablero(String respuesta, Long tableroId, Long preguntaId);
+    TableroDTO crearActTablero(TableroRequest actividad);
+    TableroDTO encontrarActTableroPorId(Long tableroId);
+    TableroDTO actualizarActTablero(Long id, TableroRequest tablero);
+    void eliminarActTableroPorId(Long tableroId);
+    String crearRespuestaAPreguntaEnActTablero(String respuesta, Long tableroId, Long preguntaId);
 
 }

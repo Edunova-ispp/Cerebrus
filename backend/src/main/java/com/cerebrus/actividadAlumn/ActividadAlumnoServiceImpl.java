@@ -68,7 +68,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
     @Override
     @Transactional
-    public ActividadAlumno crearActividadAlumno(Integer puntuacion, LocalDateTime fechaInicio,
+    public ActividadAlumno crearActAlumno(Integer puntuacion, LocalDateTime fechaInicio,
         LocalDateTime fechaFin, Integer nota, Integer numAbandonos, Long alumnoId, Long actId) {
         Usuario current = usuarioService.findCurrentUser();
         if (!(current instanceof Alumno)) {
@@ -97,19 +97,47 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
     @Override
     @Transactional(readOnly = true)
-    public ActividadAlumno readActividadAlumno(Long id) {
+    public ActividadAlumno encontrarActAlumnoPorId(Long id) {
         return actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<ActividadAlumno> readActividadAlumnoByAlumnoIdAndActividadId(Long alumnoId, Long actividadId) {
+    public Optional<ActividadAlumno> encontrarActAlumnoPorAlumnoIdYActId(Long alumnoId, Long actividadId) {
         return actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumnoId, actividadId);
     }
 
     @Override
+    @Transactional
+    public ActividadAlumno actualizarActAlumno(Long id, Integer puntuacion,
+         LocalDateTime fechaInicio, LocalDateTime fechaFin, Integer nota, Integer numAbandonos) {
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
+        actividadAlumno.setPuntuacion(puntuacion);
+        actividadAlumno.setFechaInicio(fechaInicio);
+        actividadAlumno.setFechaFin(fechaFin);
+        actividadAlumno.setNota(nota);
+        actividadAlumno.setNumAbandonos(numAbandonos);
+        return actividadAlumnoRepository.save(actividadAlumno);
+    }
+
+    @Override
+    @Transactional
+    public void eliminarActAlumnoPorId(Long id) {
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede eliminar una actividad alumno");
+        }
+        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
+            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes eliminar una ActividadAlumno que no es tuya");
+        }
+        actividadAlumnoRepository.delete(actividadAlumno);
+    }
+
+    @Override
     @Transactional(readOnly = true)
-    public Integer ensureActividadAlumno(Long actividadId) {
+    public Integer existeActAlumnoPorActIdYCurrentUserId(Long actividadId) {
         // Devuelve 1 si existe ActividadAlumno para el alumno autenticado y actividadId; si no 0.
         // No debe lanzar error si no existe.
         try {
@@ -129,35 +157,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
     @Override
     @Transactional
-    public ActividadAlumno updateActividadAlumno(Long id, Integer puntuacion,
-         LocalDateTime fechaInicio, LocalDateTime fechaFin, Integer nota, Integer numAbandonos) {
-        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
-        actividadAlumno.setPuntuacion(puntuacion);
-        actividadAlumno.setFechaInicio(fechaInicio);
-        actividadAlumno.setFechaFin(fechaFin);
-        actividadAlumno.setNota(nota);
-        actividadAlumno.setNumAbandonos(numAbandonos);
-        return actividadAlumnoRepository.save(actividadAlumno);
-    }
-
-    @Override
-    @Transactional
-    public void deleteActividadAlumno(Long id) {
-        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
-        Usuario current = usuarioService.findCurrentUser();
-        if (!(current instanceof Alumno)) {
-            throw new AccessDeniedException("Solo un alumno puede eliminar una actividad alumno");
-        }
-        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
-            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
-            throw new AccessDeniedException("No puedes eliminar una ActividadAlumno que no es tuya");
-        }
-        actividadAlumnoRepository.delete(actividadAlumno);
-    }
-
-    @Override
-    @Transactional
-    public ActividadAlumno abandonarActividadAlumno(Long actividadAlumnoId) {
+    public ActividadAlumno abandonarActAlumnoPorId(Long actividadAlumnoId) {
         Usuario current = usuarioService.findCurrentUser();
         if (!(current instanceof Alumno)) {
             throw new AccessDeniedException("Solo un alumno puede abandonar su actividad");
@@ -183,24 +183,24 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
     @Override
     @Transactional
-    public ActividadAlumno corregirActividadAlumnoManual(Long id, Integer nuevaNota, List<Long> nuevasCorreccionesRespuestasIds) {
+    public ActividadAlumno corregirActAlumnoManual(Long id, Integer nuevaNota, List<Long> nuevasCorreccionesRespuestasIds) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         if (nuevaNota != null) {
-            corregirNotaActividadAlumno(actividadAlumno, nuevaNota);
+            corregirNotaActAlumno(actividadAlumno, nuevaNota);
         }
         if (nuevasCorreccionesRespuestasIds != null && !nuevasCorreccionesRespuestasIds.isEmpty()) {
-            corregirRespuestasActividadAlumno(actividadAlumno, nuevasCorreccionesRespuestasIds);
+            corregirRespuestasActAlumno(actividadAlumno, nuevasCorreccionesRespuestasIds);
         }
         return actividadAlumnoRepository.save(actividadAlumno);
     }
 
     @Override
-    public void corregirNotaActividadAlumno(ActividadAlumno actividadAlumno, Integer nuevaNota) {
+    public void corregirNotaActAlumno(ActividadAlumno actividadAlumno, Integer nuevaNota) {
         actividadAlumno.setNota(nuevaNota);
     }
 
     @Override
-    public void corregirRespuestasActividadAlumno(ActividadAlumno actividadAlumno, List<Long> nuevasCorreccionesRespuestasIds) {
+    public void corregirRespuestasActAlumno(ActividadAlumno actividadAlumno, List<Long> nuevasCorreccionesRespuestasIds) {
         for (Long respuestaId: nuevasCorreccionesRespuestasIds) {
             RespuestaAlumno respuestaAlumno = respuestaAlumnoService.encontrarRespuestaAlumnoPorId(respuestaId);
             if(respuestaAlumno == null) {
@@ -214,7 +214,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
     @Override
     @Transactional
-    public ActividadAlumno corregirActividadAlumnoAutomaticamente(Long id, List<Long> respuestasIds) {
+    public ActividadAlumno corregirActAlumnoAutomaticamente(Long id, List<Long> respuestasIds) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         Usuario current = usuarioService.findCurrentUser();
         if (!(current instanceof Alumno)) {
@@ -229,29 +229,28 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         actividadAlumno.setFechaFin(finalActividad);
         if(actividad instanceof General){
             if (((General) actividad).getTipo() == TipoActGeneral.TEST) {
-                corregirActividadAlumnoAutomaticamenteGeneral(actividadAlumno, respuestasIds, actividad);
+                corregirActAlumnoAutomaticamenteGeneral(actividadAlumno, respuestasIds, actividad);
             } else if (((General) actividad).getTipo() == TipoActGeneral.CARTA){
-                corregirActividadAlumnoAutomaticamenteCartaGeneral(actividadAlumno, respuestasIds, actividad);
+                corregirActAlumnoAutomaticamenteTipoCarta(actividadAlumno, respuestasIds, actividad);
             } else if (((General) actividad).getTipo() == TipoActGeneral.TEORIA){
               // CASO PARA TEORÍA: Simplemente marcamos como terminada y damos la puntuación base
                actividadAlumno.setPuntuacion(actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 1);
                actividadAlumno.setNota(10); // Nota máxima por leer
                actividadAlumno.setFechaFin(LocalDateTime.now());
             } else if (((General) actividad).getTipo() == TipoActGeneral.CRUCIGRAMA){
-                corregirActividadAlumnoAutomaticamenteCrucigrama(actividadAlumno, actividad);
+                corregirActAlumnoAutomaticamenteTipoCrucigrama(actividadAlumno, actividad);
             }
         } else if(actividad instanceof Ordenacion) {
-            corregirActividadAlumnoAutomaticamenteOrdenacion(actividadAlumno, respuestasIds, actividad);
+            corregirActAlumnoAutomaticamenteTipoOrdenacion(actividadAlumno, respuestasIds, actividad);
         } else if(actividad instanceof MarcarImagen){
-            corregirActividadAlumnoAutomaticamenteMarcarImagen(actividadAlumno, respuestasIds, actividad);
+            corregirActAlumnoAutomaticamenteTipoMarcarImagen(actividadAlumno, respuestasIds, actividad);
         } else {    
         // CASO PARA TEORÍA: se ha movido dentro de instancia de GENERAL porque la actividad de teoria es una actividad general
         }
         return actividadAlumnoRepository.save(actividadAlumno);
     }
 
-    @Override
-    public void corregirActividadAlumnoAutomaticamenteGeneral(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
+    private void corregirActAlumnoAutomaticamenteGeneral(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
         // 1. Obtenemos el número REAL de preguntas que tiene el test
         // Usamos la colección de la entidad actividad
         General actividadGeneral = (General) actividad;
@@ -289,20 +288,19 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
             }
         }
 
-    // 3. Guardar y redondear
-    if(puntuacionAcumulada < 0) {
-        puntuacionAcumulada = 0;
-    }
-    if(notaAcumulada < 0) {
-        notaAcumulada = 0;
-    }
-    actividadAlumno.setPuntuacion((int) Math.round(puntuacionAcumulada));
-    actividadAlumno.setNota((int) Math.round(notaAcumulada));
-    actividadAlumno.setFechaFin(LocalDateTime.now());
+        // 3. Guardar y redondear
+        if(puntuacionAcumulada < 0) {
+            puntuacionAcumulada = 0;
+        }
+        if(notaAcumulada < 0) {
+            notaAcumulada = 0;
+        }
+        actividadAlumno.setPuntuacion((int) Math.round(puntuacionAcumulada));
+        actividadAlumno.setNota((int) Math.round(notaAcumulada));
+        actividadAlumno.setFechaFin(LocalDateTime.now());
     }
 
-    @Override
-    public void corregirActividadAlumnoAutomaticamenteCartaGeneral(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
+    private void corregirActAlumnoAutomaticamenteTipoCarta(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
         General actividadGeneral = (General) actividad;
         int totalPreguntas = actividadGeneral.getPreguntas().size();
 
@@ -326,7 +324,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         Set<Long> preguntasRespondidas = new HashSet<>();
 
         for (Long respuestaAlumnoId : respuestasIds) {
-            RespAlumnoGeneral respAlumno = respAlumnoGeneralService.readRespAlumnoGeneral(respuestaAlumnoId);
+            RespAlumnoGeneral respAlumno = respAlumnoGeneralService.encontrarRespuestaAlumnoGeneralPorId(respuestaAlumnoId);
 
             if (!respAlumno.getActividadAlumno().getId().equals(actividadAlumno.getId())) {
                 throw new IllegalArgumentException("Una de las respuestas no pertenece a esta actividad del alumno");
@@ -377,9 +375,8 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         actividadAlumno.setFechaFin(LocalDateTime.now());
     }
 
-    @Override
-    public void corregirActividadAlumnoAutomaticamenteOrdenacion(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
-        Ordenacion actividadOrdenacion = ordenacionService.encontrarOrdenacionPorId(actividad.getId());
+    private void corregirActAlumnoAutomaticamenteTipoOrdenacion(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
+        Ordenacion actividadOrdenacion = ordenacionService.encontrarActOrdenacionPorId(actividad.getId());
         Integer puntuacionTotal = actividad.getPuntuacion();
         Integer notaTotal = 10;
         Integer puntuacionFinal = 0;
@@ -414,9 +411,8 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         actividadAlumno.setNota(notaFinal);
     }
 
-    @Override
-    public void corregirActividadAlumnoAutomaticamenteMarcarImagen(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
-        MarcarImagen actividadMarcarImagen = marcarImagenService.obtenerMarcarImagenPorId(actividad.getId());
+    private void corregirActAlumnoAutomaticamenteTipoMarcarImagen(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
+        MarcarImagen actividadMarcarImagen = marcarImagenService.encontrarActMarcarImagenPorId(actividad.getId());
         Integer puntuacionTotal = actividadMarcarImagen.getPuntuacion();
         Integer notaTotal = 10;
         Integer puntuacionFinal = 0;
@@ -453,7 +449,7 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         actividadAlumno.setNota(notaFinal);
     }
 
-    public void corregirActividadAlumnoAutomaticamenteCrucigrama(ActividadAlumno actividadAlumno, Actividad actividad) {
+    private void corregirActAlumnoAutomaticamenteTipoCrucigrama(ActividadAlumno actividadAlumno, Actividad actividad) {
         // Fetch the General entity fresh to ensure preguntas collection is loaded
         General actividadGeneral = (General) actividadRepository.findById(actividad.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
@@ -496,8 +492,9 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         }
     }
 
-    @Override  
-    public ActividadAlumno corregirActividadAlumnoAutomaticamenteGeneralClasificacion(Long actividadAlumnoId, List<Long> respuestasIds) {
+    @Override
+    @Transactional  
+    public ActividadAlumno corregirActAlumnoAutomaticamenteClasificacion(Long actividadAlumnoId, List<Long> respuestasIds) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actividadAlumnoId).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         Usuario current = usuarioService.findCurrentUser();
         if (!(current instanceof Alumno)) {

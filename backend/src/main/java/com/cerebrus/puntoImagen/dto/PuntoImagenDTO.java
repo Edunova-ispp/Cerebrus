@@ -1,4 +1,4 @@
-package com.cerebrus.puntoImage.dto;
+package com.cerebrus.puntoImagen.dto;
 
 import lombok.Getter;
 import lombok.Setter;

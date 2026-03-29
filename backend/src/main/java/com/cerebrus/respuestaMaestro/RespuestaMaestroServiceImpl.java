@@ -34,7 +34,7 @@ public class RespuestaMaestroServiceImpl implements RespuestaMaestroService {
 
     @Override
     @Transactional
-    public RespuestaMaestro crearRespuesta(String respuesta, String imagen, Boolean correcta, Long preguntaId) {
+    public RespuestaMaestro crearRespuestaMaestro(String respuesta, String imagen, Boolean correcta, Long preguntaId) {
         
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -69,13 +69,18 @@ public class RespuestaMaestroServiceImpl implements RespuestaMaestroService {
 
     @Override
     @Transactional(readOnly = true)
-    public RespuestaMaestro readRespuesta(Long id) {
+    public RespuestaMaestro encontrarRespuestaMaestroPorId(Long id) {
         return respuestaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La respuesta no existe"));
     }
 
     @Override
+    public List<RespuestaMaestro> encontrarRespuestasMaestroPorPreguntaId(Long preguntaId) {
+        return respuestaRepository.findRespuestaByPreguntaId(preguntaId);
+    }
+
+    @Override
     @Transactional
-    public RespuestaMaestro updateRespuesta(Long id, String respuesta, String imagen, Boolean correcta) {
+    public RespuestaMaestro actualizarRespuestaMaestro(Long id, String respuesta, String imagen, Boolean correcta) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -94,7 +99,7 @@ public class RespuestaMaestroServiceImpl implements RespuestaMaestroService {
 
     @Override
     @Transactional
-    public void deleteRespuesta(Long id) {
+    public void eliminarRespuestaMaestroPorId(Long id) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -108,8 +113,4 @@ public class RespuestaMaestroServiceImpl implements RespuestaMaestroService {
         respuestaRepository.delete(respuestaObj);
     }
 
-    @Override
-    public List<RespuestaMaestro> encontrarRespuestasPorPreguntaId(Long preguntaId) {
-        return respuestaRepository.findRespuestaByPreguntaId(preguntaId);
-    }
 }

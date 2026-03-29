@@ -100,10 +100,10 @@ class RespAlumnoGeneralServiceImplTest {
         respuestaIncorrecta.setCorrecta(false);
     }
 
-    // ==================== crearRespAlumnoGeneral ====================
+    // ==================== crearRespuestaAlumnoGeneral ====================
 
     @Test
-    void crearRespAlumnoGeneral_respuestaCorrecta_retornaResponseConCorrectaTrue() {
+    void crearRespuestaAlumnoGeneral_respuestaCorrecta_retornaResponseConCorrectaTrue() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
         when(preguntaRepository.findById(30L)).thenReturn(Optional.of(pregunta));
@@ -115,7 +115,7 @@ class RespAlumnoGeneralServiceImplTest {
                     return r;
                 });
 
-        RespAlumnoGeneralCreateResponse resultado = service.crearRespAlumnoGeneral(10L, 40L, 30L);
+        RespAlumnoGeneralCreateResponse resultado = service.crearRespuestaAlumnoGeneral(10L, 40L, 30L);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.getId()).isEqualTo(100L);
@@ -124,7 +124,7 @@ class RespAlumnoGeneralServiceImplTest {
     }
 
     @Test
-    void crearRespAlumnoGeneral_respuestaIncorrecta_retornaResponseConCorrectaFalse() {
+    void crearRespuestaAlumnoGeneral_respuestaIncorrecta_retornaResponseConCorrectaFalse() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
         when(preguntaRepository.findById(30L)).thenReturn(Optional.of(pregunta));
@@ -132,13 +132,13 @@ class RespAlumnoGeneralServiceImplTest {
         when(respAlumnoGeneralRepository.save(any(RespAlumnoGeneral.class)))
                 .thenAnswer(inv -> { RespAlumnoGeneral r = inv.getArgument(0); r.setId(101L); return r; });
 
-        RespAlumnoGeneralCreateResponse resultado = service.crearRespAlumnoGeneral(10L, 41L, 30L);
+        RespAlumnoGeneralCreateResponse resultado = service.crearRespuestaAlumnoGeneral(10L, 41L, 30L);
 
         assertThat(resultado.getCorrecta()).isFalse();
     }
 
     @Test
-    void crearRespAlumnoGeneral_respVisibleTrue_devuelveComentario() {
+    void crearRespuestaAlumnoGeneral_respVisibleTrue_devuelveComentario() {
         actividad.setRespVisible(true);
         actividad.setComentariosRespVisible("Excelente");
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
@@ -148,13 +148,13 @@ class RespAlumnoGeneralServiceImplTest {
         when(respAlumnoGeneralRepository.save(any(RespAlumnoGeneral.class)))
                 .thenAnswer(inv -> { RespAlumnoGeneral r = inv.getArgument(0); r.setId(100L); return r; });
 
-        RespAlumnoGeneralCreateResponse resultado = service.crearRespAlumnoGeneral(10L, 40L, 30L);
+        RespAlumnoGeneralCreateResponse resultado = service.crearRespuestaAlumnoGeneral(10L, 40L, 30L);
 
         assertThat(resultado.getComentario()).isEqualTo("Excelente");
     }
 
     @Test
-    void crearRespAlumnoGeneral_respVisibleFalse_devuelveComentarioVacio() {
+    void crearRespuestaAlumnoGeneral_respVisibleFalse_devuelveComentarioVacio() {
         actividad.setRespVisible(false);
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
@@ -163,16 +163,16 @@ class RespAlumnoGeneralServiceImplTest {
         when(respAlumnoGeneralRepository.save(any(RespAlumnoGeneral.class)))
                 .thenAnswer(inv -> { RespAlumnoGeneral r = inv.getArgument(0); r.setId(100L); return r; });
 
-        RespAlumnoGeneralCreateResponse resultado = service.crearRespAlumnoGeneral(10L, 40L, 30L);
+        RespAlumnoGeneralCreateResponse resultado = service.crearRespuestaAlumnoGeneral(10L, 40L, 30L);
 
         assertThat(resultado.getComentario()).isEmpty();
     }
 
     @Test
-    void crearRespAlumnoGeneral_usuarioNoAlumno_lanzaAccessDeniedException() {
+    void crearRespuestaAlumnoGeneral_usuarioNoAlumno_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
 
-        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(10L, 40L, 30L))
+        assertThatThrownBy(() -> service.crearRespuestaAlumnoGeneral(10L, 40L, 30L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un alumno puede crear respuestas de alumno");
 
@@ -181,11 +181,11 @@ class RespAlumnoGeneralServiceImplTest {
     }
 
     @Test
-    void crearRespAlumnoGeneral_actividadAlumnoNoExiste_lanzaRuntimeException() {
+    void crearRespuestaAlumnoGeneral_actividadAlumnoNoExiste_lanzaRuntimeException() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(99L, 40L, 30L))
+        assertThatThrownBy(() -> service.crearRespuestaAlumnoGeneral(99L, 40L, 30L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La actividad del alumno no existe");
 
@@ -193,12 +193,12 @@ class RespAlumnoGeneralServiceImplTest {
     }
 
     @Test
-    void crearRespAlumnoGeneral_preguntaNoExiste_lanzaRuntimeException() {
+    void crearRespuestaAlumnoGeneral_preguntaNoExiste_lanzaRuntimeException() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
         when(preguntaRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(10L, 40L, 99L))
+        assertThatThrownBy(() -> service.crearRespuestaAlumnoGeneral(10L, 40L, 99L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La pregunta no existe");
 
@@ -206,28 +206,28 @@ class RespAlumnoGeneralServiceImplTest {
     }
 
     @Test
-    void crearRespAlumnoGeneral_respuestaNoExiste_lanzaRuntimeException() {
+    void crearRespuestaAlumnoGeneral_respuestaNoExiste_lanzaRuntimeException() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
         when(preguntaRepository.findById(30L)).thenReturn(Optional.of(pregunta));
         when(respuestaRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.crearRespAlumnoGeneral(10L, 99L, 30L))
+        assertThatThrownBy(() -> service.crearRespuestaAlumnoGeneral(10L, 99L, 30L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La respuesta no existe");
 
         verify(respAlumnoGeneralRepository, never()).save(any());
     }
 
-    // ==================== readRespAlumnoGeneral ====================
+    // ==================== encontrarRespuestaAlumnoGeneralPorId ====================
 
     @Test
-    void readRespAlumnoGeneral_existente_retornaEntidad() {
+    void encontrarRespuestaAlumnoGeneralPorId_existente_retornaEntidad() {
         RespAlumnoGeneral resp = new RespAlumnoGeneral(true, actividadAlumno, "París", pregunta);
         resp.setId(100L);
         when(respAlumnoGeneralRepository.findById(100L)).thenReturn(Optional.of(resp));
 
-        RespAlumnoGeneral resultado = service.readRespAlumnoGeneral(100L);
+        RespAlumnoGeneral resultado = service.encontrarRespuestaAlumnoGeneralPorId(100L);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.getId()).isEqualTo(100L);
@@ -235,18 +235,18 @@ class RespAlumnoGeneralServiceImplTest {
     }
 
     @Test
-    void readRespAlumnoGeneral_noExiste_lanzaRuntimeException() {
+    void encontrarRespuestaAlumnoGeneralPorId_noExiste_lanzaRuntimeException() {
         when(respAlumnoGeneralRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.readRespAlumnoGeneral(99L))
+        assertThatThrownBy(() -> service.encontrarRespuestaAlumnoGeneralPorId(99L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La respuesta del alumno no existe");
     }
 
-    // ==================== updateRespAlumnoGeneral ====================
+    // ==================== actualizarRespuestaAlumnoGeneral ====================
 
     @Test
-    void updateRespAlumnoGeneral_existente_actualizaCamposYGuarda() {
+    void actualizarRespuestaAlumnoGeneral_existente_actualizaCamposYGuarda() {
         RespAlumnoGeneral resp = new RespAlumnoGeneral(false, actividadAlumno, "Madrid", pregunta);
         resp.setId(100L);
         resp.getActividadAlumno().setAlumno(alumno);
@@ -260,7 +260,7 @@ class RespAlumnoGeneralServiceImplTest {
         when(preguntaRepository.findById(31L)).thenReturn(Optional.of(nuevaPregunta));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        RespAlumnoGeneral resultado = service.updateRespAlumnoGeneral(100L, true, 10L, "París", 31L);
+        RespAlumnoGeneral resultado = service.actualizarRespuestaAlumnoGeneral(100L, true, 10L, "París", 31L);
 
         assertThat(resultado.getCorrecta()).isTrue();
         assertThat(resultado.getRespuesta()).isEqualTo("París");
@@ -269,16 +269,16 @@ class RespAlumnoGeneralServiceImplTest {
     }
 
     @Test
-    void updateRespAlumnoGeneral_noExiste_lanzaRuntimeException() {
+    void actualizarRespuestaAlumnoGeneral_noExiste_lanzaRuntimeException() {
         when(respAlumnoGeneralRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.updateRespAlumnoGeneral(99L, true, 10L, "París", 30L))
+        assertThatThrownBy(() -> service.actualizarRespuestaAlumnoGeneral(99L, true, 10L, "París", 30L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La respuesta del alumno no existe");
     }
 
     @Test
-    void updateRespAlumnoGeneral_preguntaNoExiste_lanzaRuntimeException() {
+    void actualizarRespuestaAlumnoGeneral_preguntaNoExiste_lanzaRuntimeException() {
         RespAlumnoGeneral resp = new RespAlumnoGeneral(false, actividadAlumno, "Madrid", pregunta);
         resp.setId(100L);
         resp.getActividadAlumno().setAlumno(alumno);
@@ -287,15 +287,15 @@ class RespAlumnoGeneralServiceImplTest {
         when(respAlumnoGeneralRepository.findById(100L)).thenReturn(Optional.of(resp));
         when(preguntaRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.updateRespAlumnoGeneral(100L, true, 10L, "París", 99L))
+        assertThatThrownBy(() -> service.actualizarRespuestaAlumnoGeneral(100L, true, 10L, "París", 99L))
             .isInstanceOf(RuntimeException.class)
             .hasMessage("La pregunta no existe");
     }
 
-    // ==================== deleteRespAlumnoGeneral ====================
+    // ==================== eliminarRespuestaAlumnoGeneralPorId ====================
 
     @Test
-    void deleteRespAlumnoGeneral_existente_eliminaCorrectamente() {
+    void eliminarRespuestaAlumnoGeneralPorId_existente_eliminaCorrectamente() {
         RespAlumnoGeneral resp = new RespAlumnoGeneral(true, actividadAlumno, "París", pregunta);
         resp.setId(100L);
         resp.getActividadAlumno().setAlumno(alumno);
@@ -303,16 +303,16 @@ class RespAlumnoGeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(respAlumnoGeneralRepository.findById(100L)).thenReturn(Optional.of(resp));
 
-        service.deleteRespAlumnoGeneral(100L);
+        service.eliminarRespuestaAlumnoGeneralPorId(100L);
 
         verify(respAlumnoGeneralRepository).delete(resp);
     }
 
     @Test
-    void deleteRespAlumnoGeneral_noExiste_lanzaRuntimeException() {
+    void eliminarRespuestaAlumnoGeneralPorId_noExiste_lanzaRuntimeException() {
         when(respAlumnoGeneralRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.deleteRespAlumnoGeneral(99L))
+        assertThatThrownBy(() -> service.eliminarRespuestaAlumnoGeneralPorId(99L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La respuesta del alumno no existe");
 
@@ -327,7 +327,7 @@ class RespAlumnoGeneralServiceImplTest {
         resp.setId(100L);
         resp.getActividadAlumno().setAlumno(alumno);
         when(respAlumnoGeneralRepository.findById(100L)).thenReturn(Optional.of(resp));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta, respuestaIncorrecta));
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta, respuestaIncorrecta));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         Boolean resultado = service.corregirRespuestaAlumnoGeneral(100L);
@@ -343,7 +343,7 @@ class RespAlumnoGeneralServiceImplTest {
         resp.setId(100L);
         resp.getActividadAlumno().setAlumno(alumno);
         when(respAlumnoGeneralRepository.findById(100L)).thenReturn(Optional.of(resp));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta, respuestaIncorrecta));
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta, respuestaIncorrecta));
 
         Boolean resultado = service.corregirRespuestaAlumnoGeneral(100L);
 
@@ -358,7 +358,7 @@ class RespAlumnoGeneralServiceImplTest {
         resp.setId(100L);
         resp.getActividadAlumno().setAlumno(alumno);
         when(respAlumnoGeneralRepository.findById(100L)).thenReturn(Optional.of(resp));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta, respuestaIncorrecta));
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta, respuestaIncorrecta));
 
         Boolean resultado = service.corregirRespuestaAlumnoGeneral(100L);
 
@@ -380,7 +380,7 @@ class RespAlumnoGeneralServiceImplTest {
         resp.setId(100L);
         resp.getActividadAlumno().setAlumno(alumno);
         when(respAlumnoGeneralRepository.findById(100L)).thenReturn(Optional.of(resp));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of());
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of());
 
         Boolean resultado = service.corregirRespuestaAlumnoGeneral(100L);
 
@@ -405,7 +405,7 @@ class RespAlumnoGeneralServiceImplTest {
         when(actividadRepository.findById(50L)).thenReturn(Optional.of(actividad));
         when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L)).thenReturn(Optional.of(actividadAlumno));
         when(preguntaRepository.findById(30L)).thenReturn(Optional.of(pregunta));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(rm));
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of(rm));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> { RespAlumnoGeneral r = inv.getArgument(0); r.setId(200L); return r; });
 
         var resultado = service.corregirCrucigrama(respuestas, 50L);
@@ -434,7 +434,7 @@ class RespAlumnoGeneralServiceImplTest {
         when(actividadRepository.findById(50L)).thenReturn(Optional.of(actividad));
         when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L)).thenReturn(Optional.of(actividadAlumno));
         when(preguntaRepository.findById(30L)).thenReturn(Optional.of(pregunta));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(rm));
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of(rm));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> { RespAlumnoGeneral r = inv.getArgument(0); r.setId(200L); return r; });
 
         var resultado = service.corregirCrucigrama(respuestas, 50L);
@@ -469,7 +469,7 @@ class RespAlumnoGeneralServiceImplTest {
         when(actividadRepository.findByID(50L)).thenReturn(actividad);
         when(actividadAlumnoRepository.save(any(ActividadAlumno.class))).thenReturn(nueva);
         when(preguntaRepository.findById(30L)).thenReturn(Optional.of(pregunta));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(rm));
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of(rm));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> { RespAlumnoGeneral r = inv.getArgument(0); r.setId(200L); return r; });
 
         var resultado = service.corregirCrucigrama(respuestas, 50L);
@@ -492,7 +492,7 @@ class RespAlumnoGeneralServiceImplTest {
         when(actividadRepository.findById(50L)).thenReturn(Optional.of(actividad));
         when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L)).thenReturn(Optional.of(actividadAlumno));
         when(preguntaRepository.findById(30L)).thenReturn(Optional.of(pregunta));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(rm));
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of(rm));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> { RespAlumnoGeneral r = inv.getArgument(0); r.setId(200L); return r; });
 
         var resultado = service.corregirCrucigrama(respuestas, 50L);
@@ -549,7 +549,7 @@ class RespAlumnoGeneralServiceImplTest {
         when(actividadRepository.findById(50L)).thenReturn(Optional.of(actividad));
         when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L)).thenReturn(Optional.of(actividadAlumno));
         when(preguntaRepository.findById(30L)).thenReturn(Optional.of(pregunta));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(rm));
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of(rm));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> { RespAlumnoGeneral r = inv.getArgument(0); r.setId(200L); return r; });
 
         var resultado = service.corregirCrucigrama(respuestas, 50L);
@@ -572,7 +572,7 @@ class RespAlumnoGeneralServiceImplTest {
         when(actividadRepository.findById(50L)).thenReturn(Optional.of(actividad));
         when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L)).thenReturn(Optional.of(actividadAlumno));
         when(preguntaRepository.findById(30L)).thenReturn(Optional.of(pregunta));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(rm));
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of(rm));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> { RespAlumnoGeneral r = inv.getArgument(0); r.setId(200L); return r; });
 
         var resultado = service.corregirCrucigrama(respuestas, 50L);
@@ -597,7 +597,7 @@ class RespAlumnoGeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
         when(preguntaRepository.findById(30L)).thenReturn(Optional.of(pregunta));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta));
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta));
         when(iaConnectionService.evaluarRespuestaAbierta(any(), any(), any(), any()))
                 .thenReturn(Map.of("puntuacion", 80, "comentarios", "Bien respondido"));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> { RespAlumnoGeneral r = inv.getArgument(0); r.setId(200L); return r; });
@@ -627,7 +627,7 @@ class RespAlumnoGeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
         when(preguntaRepository.findById(30L)).thenReturn(Optional.of(pregunta));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta));
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta));
         when(iaConnectionService.evaluarRespuestaAbierta(any(), any(), any(), any()))
                 .thenReturn(Map.of("puntuacion", 50, "comentarios", "Comentario IA"));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> { RespAlumnoGeneral r = inv.getArgument(0); r.setId(200L); return r; });
@@ -653,7 +653,7 @@ class RespAlumnoGeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
         when(preguntaRepository.findById(30L)).thenReturn(Optional.of(pregunta));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta));
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta));
         when(iaConnectionService.evaluarRespuestaAbierta(any(), any(), any(), any()))
                 .thenReturn(Map.of("puntuacion", 50, "comentarios", "Comentario IA"));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> { RespAlumnoGeneral r = inv.getArgument(0); r.setId(200L); return r; });
@@ -679,7 +679,7 @@ class RespAlumnoGeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
         when(preguntaRepository.findById(30L)).thenReturn(Optional.of(pregunta));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta));
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta));
         when(iaConnectionService.evaluarRespuestaAbierta(any(), any(), any(), any()))
                 .thenReturn(Map.of("puntuacion", 9999, "comentarios", "Excelente"));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> { RespAlumnoGeneral r = inv.getArgument(0); r.setId(200L); return r; });
@@ -706,7 +706,7 @@ class RespAlumnoGeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
         when(preguntaRepository.findById(30L)).thenReturn(Optional.of(pregunta));
-        when(respuestaService.encontrarRespuestasPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta));
+        when(respuestaService.encontrarRespuestasMaestroPorPreguntaId(30L)).thenReturn(List.of(respuestaCorrecta));
         when(iaConnectionService.evaluarRespuestaAbierta(any(), any(), any(), any()))
                 .thenReturn(Map.of("puntuacion", -50, "comentarios", "Muy mal"));
         when(respAlumnoGeneralRepository.save(any())).thenAnswer(inv -> { RespAlumnoGeneral r = inv.getArgument(0); r.setId(200L); return r; });

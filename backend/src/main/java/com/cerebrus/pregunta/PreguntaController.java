@@ -46,16 +46,16 @@ public class PreguntaController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Pregunta> readPregunta(@PathVariable Long id) {
-        Pregunta pregunta = preguntaService.readPregunta(id);
+    public ResponseEntity<Pregunta> encontrarPreguntaPorId(@PathVariable Long id) {
+        Pregunta pregunta = preguntaService.encontrarPreguntaPorId(id);
         return new ResponseEntity<>(pregunta, HttpStatus.OK);
     }
 
     @PutMapping("/update/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<Void> updatePregunta(@PathVariable Long id, @RequestBody @Valid Pregunta pregunta) {
-        preguntaService.updatePregunta(
+    public ResponseEntity<Void> actualizarPregunta(@PathVariable Long id, @RequestBody @Valid Pregunta pregunta) {
+        preguntaService.actualizarPregunta(
             id,
             pregunta.getPregunta(),
             pregunta.getImagen()
@@ -66,8 +66,8 @@ public class PreguntaController {
     @DeleteMapping("/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<Void> deletePregunta(@PathVariable Long id) {
-        preguntaService.deletePregunta(id);
+    public ResponseEntity<Void> eliminarPreguntaPorId(@PathVariable Long id) {
+        preguntaService.eliminarPreguntaPorId(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -1,4 +1,4 @@
-package com.cerebrus.puntoImage;
+package com.cerebrus.puntoImagen;
 
 import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 

@@ -35,29 +35,31 @@ public class ActividadServiceImpl implements ActividadService {
     }
 
     @Override
-    public List<Actividad> ObtenerActividadesPorTema(Long temaId) {
-        return actividadRepository.findByTemaId(temaId);
-    }
+    public Actividad crearActTeoria(String titulo, String descripcion, String imagen, Long temaId) {
 
-    @Override
-    public Actividad encontrarActividadPorIdMaestro(Long id) {
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
-            throw new AccessDeniedException("No tienes permiso para acceder a esta actividad");
-        } else {
-
-            Actividad actividad = actividadRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada"));
-            	
-            if (!actividad.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
-                throw new AccessDeniedException("La actividad que buscas pertenece a un curso que no es tuyo");
-            }
-            return actividad; 
+            throw new AccessDeniedException("Solo un maestro puede crear actividades de teoría");
         }
+
+        Tema tema = temaService.encontrarTemaPorId(temaId);
+
+        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("No puedes crear actividades para temas que no son tuyos");
+        }
+
+        Integer maxPosicion = actividadRepository.findMaxPosicionByTemaId(temaId);
+        Integer nuevaPosicion = (maxPosicion != null) ? maxPosicion + 1 : 1;
+
+        // Las actividades de teoría no aportan puntuación, pero el campo requiere mínimo 1 por validación
+        Actividad actividad = new General(titulo, descripcion, 1, imagen, 
+        false, nuevaPosicion, 1, tema, TipoActGeneral.TEORIA);
+
+        return actividadRepository.save(actividad);
     }
 
     @Override
-    public Actividad encontrarActividadPorIdAlumno(Long id) {
+    public Actividad encontrarActTeoriaPorId(Long id) {
         Usuario current = usuarioService.findCurrentUser();
         if (!(current instanceof Alumno)) {
             throw new AccessDeniedException("No tienes permiso para acceder a esta actividad");
@@ -81,47 +83,29 @@ public class ActividadServiceImpl implements ActividadService {
     }
 
     @Override
-    public void deleteActividad(Long id) {
+    public Actividad encontrarActTeoriaMaestroPorId(Long id) {
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
-            throw new AccessDeniedException("Solo un maestro puede borrar actividades");
+            throw new AccessDeniedException("No tienes permiso para acceder a esta actividad");
         } else {
+
             Actividad actividad = actividadRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada"));
-            
+            	
             if (!actividad.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
-                throw new AccessDeniedException("No puedes eliminar actividades de cursos que no son tuyos");
+                throw new AccessDeniedException("La actividad que buscas pertenece a un curso que no es tuyo");
             }
-        actividadRepository.delete(actividad);
-        }   
+            return actividad; 
+        }
     }
 
     @Override
-    public Actividad crearActividadTeoria(String titulo, String descripcion, String imagen, Long temaId) {
-
-        Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Maestro)) {
-            throw new AccessDeniedException("Solo un maestro puede crear actividades de teoría");
-        }
-
-        Tema tema = temaService.obtenerTemaPorId(temaId);
-
-        if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
-            throw new AccessDeniedException("No puedes crear actividades para temas que no son tuyos");
-        }
-
-        Integer maxPosicion = actividadRepository.findMaxPosicionByTemaId(temaId);
-        Integer nuevaPosicion = (maxPosicion != null) ? maxPosicion + 1 : 1;
-
-        // Las actividades de teoría no aportan puntuación, pero el campo requiere mínimo 1 por validación
-        Actividad actividad = new General(titulo, descripcion, 1, imagen, 
-        false, nuevaPosicion, 1, tema, TipoActGeneral.TEORIA);
-
-        return actividadRepository.save(actividad);
+    public List<Actividad> encontrarActividadesPorTema(Long temaId) {
+        return actividadRepository.findByTemaId(temaId);
     }
 
     @Override
-    public Actividad updateActividadTeoria(Long id, String titulo, String descripcion,String imagen ) {
+    public Actividad actualizarActTeoria(Long id, String titulo, String descripcion,String imagen ) {
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede editar actividades de teoría");
@@ -139,5 +123,20 @@ public class ActividadServiceImpl implements ActividadService {
         }
     }
 
+    @Override
+    public void eliminarActTeoriaPorId(Long id) {
+        Usuario u = usuarioService.findCurrentUser();
+        if (!(u instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede borrar actividades");
+        } else {
+            Actividad actividad = actividadRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada"));
+            
+            if (!actividad.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+                throw new AccessDeniedException("No puedes eliminar actividades de cursos que no son tuyos");
+            }
+        actividadRepository.delete(actividad);
+        }   
+    }
     
 }

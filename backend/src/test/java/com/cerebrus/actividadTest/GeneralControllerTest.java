@@ -127,7 +127,7 @@ class GeneralControllerTest {
     // Tests para verificar que devuelve 201 al crear una actividad tipo test con un request válido, y que 
     // se mapea correctamente la lista de preguntasId del request al llamar al servicio
 	@Test
-	void crearTipoTest_requestValido_mapeaPreguntasId_yDevuelve201() {
+	void crearActTipoTest_requestValido_mapeaPreguntasId_yDevuelve201() {
 		Tema tema = new Tema();
 		tema.setId(10L);
 
@@ -148,15 +148,15 @@ class GeneralControllerTest {
 		General creada = new General();
 		creada.setId(99L);
 
-		when(generalService.crearTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(true), eq("c"), any()))
+		when(generalService.crearActTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(true), eq("c"), any()))
 				.thenReturn(creada);
 
-		ResponseEntity<Long> response = generalController.crearTipoTest(request);
+		ResponseEntity<Long> response = generalController.crearActTipoTest(request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(response.getBody()).isEqualTo(99L);
 
-		verify(generalService).crearTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(true), eq("c"),
+		verify(generalService).crearActTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(true), eq("c"),
 				preguntasIdCaptor.capture());
 		assertThat(preguntasIdCaptor.getValue()).containsExactly(1L, 2L);
 	}
@@ -164,7 +164,7 @@ class GeneralControllerTest {
     // Tests para verificar que si se crea un tipo test con preguntas vacías, se pasa una lista vacía al servicio, 
     // y se devuelve 201
 	@Test
-	void crearTipoTest_preguntasVacias_pasaListaVacia() {
+	void crearActTipoTest_preguntasVacias_pasaListaVacia() {
 		Tema tema = new Tema();
 		tema.setId(10L);
 
@@ -177,12 +177,12 @@ class GeneralControllerTest {
 		request.setComentariosRespVisible(null);
 		request.setPreguntas(List.of());
 
-		when(generalService.crearTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(false), eq(null), any()))
+		when(generalService.crearActTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(false), eq(null), any()))
 				.thenReturn(new General());
 
-		generalController.crearTipoTest(request);
+		generalController.crearActTipoTest(request);
 
-		verify(generalService).crearTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(false), eq(null),
+		verify(generalService).crearActTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(false), eq(null),
 				preguntasIdCaptor.capture());
 		assertThat(preguntasIdCaptor.getValue()).isEmpty();
 	}
@@ -190,7 +190,7 @@ class GeneralControllerTest {
     // Tests para verificar que se lanza NullPointerException si preguntas es null al crear un tipo test, 
     // y no se llama al servicio
 	@Test
-	void crearTipoTest_preguntasNull_lanzaNullPointer() {
+	void crearActTipoTest_preguntasNull_lanzaNullPointer() {
 		Tema tema = new Tema();
 		tema.setId(10L);
 
@@ -203,32 +203,32 @@ class GeneralControllerTest {
 		request.setComentariosRespVisible(null);
 		request.setPreguntas(null);
 
-		assertThatThrownBy(() -> generalController.crearTipoTest(request))
+		assertThatThrownBy(() -> generalController.crearActTipoTest(request))
 				.isInstanceOf(NullPointerException.class);
 
-		verify(generalService, never()).crearTipoTest(any(), any(), any(), any(), any(), any(), any());
+		verify(generalService, never()).crearActTipoTest(any(), any(), any(), any(), any(), any(), any());
 	}
 
     // Tests para verificar que se devuelve 200 con la actividad actualizada si el request es válido al actualizar una 
     // actividad general
 	@Test
-	void readActividad_ok_devuelve200_yBody() {
+	void encontrarActGeneralPorId_ok_devuelve200_yBody() {
 		General general = new General();
 		general.setId(7L);
 
-		when(generalService.readActividad(7L)).thenReturn(general);
+		when(generalService.encontrarActGeneralPorId(7L)).thenReturn(general);
 
-		ResponseEntity<General> response = generalController.readActividad(7L);
+		ResponseEntity<General> response = generalController.encontrarActGeneralPorId(7L);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).isSameAs(general);
-		verify(generalService).readActividad(7L);
+		verify(generalService).encontrarActGeneralPorId(7L);
 	}
 
     // Tests para verificar que se crea una actividad general con un request válido, y que se llama al servicio con 
     // los campos correctos
 	@Test
-	void updateActGeneral_requestValido() {
+	void actualizarActGeneral_requestValido() {
 		Tema tema = new Tema();
 		tema.setId(5L);
 
@@ -242,16 +242,16 @@ class GeneralControllerTest {
 		request.setVersion(4);
 		request.setTema(tema);
 
-		ResponseEntity<Void> response = generalController.updateActGeneral(12L, request);
+		ResponseEntity<Void> response = generalController.actualizarActGeneral(12L, request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-		verify(generalService).updateActGeneral(12L, "Nuevo", "Desc", 10, false, "c", 3, 4, 5L);
+		verify(generalService).actualizarActGeneral(12L, "Nuevo", "Desc", Integer.valueOf(10), false, "c", Integer.valueOf(3), Integer.valueOf(4), 5L, null);
 	}
 
     // Tests para verificar que se actualiza una actividad tipo test con un request válido, y que se llama al servicio 
     // con los campos correctos
 	@Test
-	void updateTipoTest_requestValido_mapeaPreguntasId_yDevuelve200() {
+	void actualizarActTipoTest_requestValido_mapeaPreguntasId_yDevuelve200() {
 		Tema tema = new Tema();
 		tema.setId(5L);
 
@@ -272,28 +272,28 @@ class GeneralControllerTest {
 		GeneralTestDTO esperado = new GeneralTestDTO(
 				12L, "Nuevo", "Desc", 10, null, true, "c", 3, 4, 5L, List.of());
 
-		when(generalService.updateTipoTest(eq(12L), eq("Nuevo"), eq("Desc"), eq(10), eq(true), eq("c"), any(), eq(3), eq(4), eq(5L)))
+		when(generalService.actualizarActTipoTest(eq(12L), eq("Nuevo"), eq("Desc"), eq(10), eq(true), eq("c"), any(), eq(3), eq(4), eq(5L), eq(null)))
 				.thenReturn(new General());
-		when(generalService.readTipoTest(12L)).thenReturn(esperado);
+		when(generalService.encontrarActTipoTestPorId(12L)).thenReturn(esperado);
 
-		ResponseEntity<GeneralTestDTO> response = generalController.updateTipoTest(12L, request);
+		ResponseEntity<GeneralTestDTO> response = generalController.actualizarActTipoTest(12L, request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).isSameAs(esperado);
 
-		verify(generalService).updateTipoTest(eq(12L), eq("Nuevo"), eq("Desc"), eq(10), eq(true), eq("c"),
-				preguntasIdCaptor.capture(), eq(3), eq(4), eq(5L));
+		verify(generalService).actualizarActTipoTest(eq(12L), eq("Nuevo"), eq("Desc"), eq(10), eq(true), eq("c"),
+				preguntasIdCaptor.capture(), eq(3), eq(4), eq(5L), eq(null));
 		assertThat(preguntasIdCaptor.getValue()).containsExactly(1L);
-		verify(generalService).readTipoTest(12L);
+		verify(generalService).encontrarActTipoTestPorId(12L);
 	}
 
     // Tests para verificar que al borrar una actividad tipo test, se devuelve 204 y se llama al servicio con el id 
     // correcto
 	@Test
-	void deleteActividad_ok_devuelve204() {
-		ResponseEntity<Void> response = generalController.deleteActividad(77L);
+	void eliminarActGeneralPorId_ok_devuelve204() {
+		ResponseEntity<Void> response = generalController.eliminarActGeneralPorId(77L);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-		verify(generalService).deleteActividad(77L);
+		verify(generalService).eliminarActGeneralPorId(77L);
 	}
 }

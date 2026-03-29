@@ -58,51 +58,7 @@ public class TemaServiceImpl implements TemaService {
     }
 
     @Override
-    public Tema renombrarTema(Long temaId, String nuevoTitulo, Long maestroId) {
-        // Verificar que el tema existe y pertenece a un curso del maestro
-        Tema tema = temaRepository.findById(temaId)
-                .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado"));
-
-        if (!tema.getCurso().getMaestro().getId().equals(maestroId)) {
-            throw new IllegalArgumentException("El maestro no es propietario del tema");
-        }
-
-        tema.setTitulo(nuevoTitulo);
-        return temaRepository.save(tema);
-    }
-
-    @Override
-    public List<Tema> ObtenerTemasPorCursoAlumno(Long cursoId) {
-        //Esta funcion devuelve una lista con todos los temas de un curso, 
-        // si el usuario está inscrito en el curso, si no lo está devuelve una excepcion 403 Forbidden.
-        List<Curso> cursos = cursoService.ObtenerCursosUsuarioLogueado();
-        boolean estaInscrito = cursos.stream().anyMatch(c -> c.getId().equals(cursoId));
-        if(!estaInscrito){
-            throw new AccessDeniedException("El alumno logueado no está inscrito en este curso.");
-        } else {
-            return temaRepository.findByCursoId(cursoId);
-        }
-    }
-
-    @Override
-    public List<Tema> ObtenerTemasPorCursoMaestro(Long cursoId) {
-        Usuario usuario = usuarioService.findCurrentUser(); 
-        if(!(usuario instanceof Maestro)) {
-            throw new AccessDeniedException("El usuario no es un maestro.");
-        } else {
-
-            List<Tema> temas = temaRepository.findByCursoId(cursoId);
-
-            if (!cursoService.getCursoById(cursoId).getMaestro().getId().equals(usuario.getId())) {
-                throw new AccessDeniedException("El maestro no es propietario del curso.");
-            }
-            return temas;
-        }
-        
-    }
-
-    @Override
-    public Tema obtenerTemaPorId(Long temaId) {
+    public Tema encontrarTemaPorId(Long temaId) {
 
         Usuario current = usuarioService.findCurrentUser();
         Tema tema = temaRepository.findById(temaId)
@@ -117,7 +73,37 @@ public class TemaServiceImpl implements TemaService {
     }
 
     @Override
-    public void eliminarTema(Long temaId) {
+    public List<Tema> encontrarTemasPorCursoAlumnoId(Long cursoId) {
+        //Esta funcion devuelve una lista con todos los temas de un curso, 
+        // si el usuario está inscrito en el curso, si no lo está devuelve una excepcion 403 Forbidden.
+        List<Curso> cursos = cursoService.encontrarCursosPorUsuarioLogueado();
+        boolean estaInscrito = cursos.stream().anyMatch(c -> c.getId().equals(cursoId));
+        if(!estaInscrito){
+            throw new AccessDeniedException("El alumno logueado no está inscrito en este curso.");
+        } else {
+            return temaRepository.findByCursoId(cursoId);
+        }
+    }
+
+    @Override
+    public List<Tema> encontrarTemasPorCursoMaestroId(Long cursoId) {
+        Usuario usuario = usuarioService.findCurrentUser(); 
+        if(!(usuario instanceof Maestro)) {
+            throw new AccessDeniedException("El usuario no es un maestro.");
+        } else {
+
+            List<Tema> temas = temaRepository.findByCursoId(cursoId);
+
+            if (!cursoService.encontrarCursoPorId(cursoId).getMaestro().getId().equals(usuario.getId())) {
+                throw new AccessDeniedException("El maestro no es propietario del curso.");
+            }
+            return temas;
+        }
+        
+    }
+
+    @Override
+    public void eliminarTemaPorId(Long temaId) {
         
         Tema tema = temaRepository.findById(temaId)
                 .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado"));
@@ -131,4 +117,19 @@ public class TemaServiceImpl implements TemaService {
             throw new AccessDeniedException("El usuario no tiene permiso para eliminar este tema.");
         }
     }
+
+    @Override
+    public Tema renombrarTema(Long temaId, String nuevoTitulo, Long maestroId) {
+        // Verificar que el tema existe y pertenece a un curso del maestro
+        Tema tema = temaRepository.findById(temaId)
+                .orElseThrow(() -> new IllegalArgumentException("Tema no encontrado"));
+
+        if (!tema.getCurso().getMaestro().getId().equals(maestroId)) {
+            throw new IllegalArgumentException("El maestro no es propietario del tema");
+        }
+
+        tema.setTitulo(nuevoTitulo);
+        return temaRepository.save(tema);
+    }
+
 }

@@ -8,10 +8,10 @@ import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiert
 import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralCreateResponse;
 
 public interface RespAlumnoGeneralService {
-    RespAlumnoGeneralCreateResponse crearRespAlumnoGeneral(Long actAlumnoId, Long respuestaId, Long preguntaId);
-    RespAlumnoGeneral readRespAlumnoGeneral(Long id);
-    RespAlumnoGeneral updateRespAlumnoGeneral(Long id, Boolean correcta, Long actAlumnoId, String respuesta, Long preguntaId);
-    void deleteRespAlumnoGeneral(Long id);
+    RespAlumnoGeneralCreateResponse crearRespuestaAlumnoGeneral(Long actAlumnoId, Long respuestaId, Long preguntaId);
+    RespAlumnoGeneral encontrarRespuestaAlumnoGeneralPorId(Long id);
+    RespAlumnoGeneral actualizarRespuestaAlumnoGeneral(Long id, Boolean correcta, Long actAlumnoId, String respuesta, Long preguntaId);
+    void eliminarRespuestaAlumnoGeneralPorId(Long id);
     Boolean corregirRespuestaAlumnoGeneral(Long id);
     boolean corregirRespuestaAlumnoGeneralClasificacion(Long id);
     HashMap<Long, String> corregirCrucigrama(LinkedHashMap<Long,String> respuestas, Long crucigramaId);

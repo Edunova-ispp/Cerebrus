@@ -124,14 +124,14 @@ class PreguntaServiceImplTest {
     }
 
     @Test
-    void readPregunta_existente_retornaPreguntaConRespuestas() {
+    void encontrarPreguntaPorId_existente_retornaPreguntaConRespuestas() {
         RespuestaMaestro r1 = new RespuestaMaestro("4", null, true, pregunta);
         RespuestaMaestro r2 = new RespuestaMaestro("5", null, false, pregunta);
         RespuestaMaestro r3 = new RespuestaMaestro("3", null, false, pregunta);
         pregunta.setRespuestasMaestro(new ArrayList<>(List.of(r1, r2, r3)));
         when(preguntaRepository.findById(10L)).thenReturn(Optional.of(pregunta));
 
-        Pregunta resultado = preguntaService.readPregunta(10L);
+        Pregunta resultado = preguntaService.encontrarPreguntaPorId(10L);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.getRespuestasMaestro()).hasSize(3);
@@ -139,42 +139,42 @@ class PreguntaServiceImplTest {
     }
 
     @Test
-    void readPregunta_sinRespuestas_retornaPreguntaConListaVacia() {
+    void encontrarPreguntaPorId_sinRespuestas_retornaPreguntaConListaVacia() {
         pregunta.setRespuestasMaestro(new ArrayList<>());
         when(preguntaRepository.findById(10L)).thenReturn(Optional.of(pregunta));
 
-        Pregunta resultado = preguntaService.readPregunta(10L);
+        Pregunta resultado = preguntaService.encontrarPreguntaPorId(10L);
 
         assertThat(resultado.getRespuestasMaestro()).isEmpty();
     }
 
     @Test
-    void readPregunta_unaRespuesta_retornaMismaRespuesta() {
+    void encontrarPreguntaPorId_unaRespuesta_retornaMismaRespuesta() {
         RespuestaMaestro r1 = new RespuestaMaestro("4", null, true, pregunta);
         pregunta.setRespuestasMaestro(new ArrayList<>(List.of(r1)));
         when(preguntaRepository.findById(10L)).thenReturn(Optional.of(pregunta));
 
-        Pregunta resultado = preguntaService.readPregunta(10L);
+        Pregunta resultado = preguntaService.encontrarPreguntaPorId(10L);
 
         assertThat(resultado.getRespuestasMaestro()).containsExactly(r1);
     }
 
     @Test
-    void readPregunta_noExiste_lanzaResourceNotFoundException() {
+    void encontrarPreguntaPorId_noExiste_lanzaResourceNotFoundException() {
         when(preguntaRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> preguntaService.readPregunta(99L))
+        assertThatThrownBy(() -> preguntaService.encontrarPreguntaPorId(99L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("La pregunta no existe");
     }
 
     @Test
-    void updatePregunta_maestro_retornaPreguntaActualizada() {
+    void actualizarPregunta_maestro_retornaPreguntaActualizada() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(preguntaRepository.findById(10L)).thenReturn(Optional.of(pregunta));
         when(preguntaRepository.save(any(Pregunta.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Pregunta resultado = preguntaService.updatePregunta(10L, "¿Nueva pregunta?", "nueva.png");
+        Pregunta resultado = preguntaService.actualizarPregunta(10L, "¿Nueva pregunta?", "nueva.png");
 
         assertThat(resultado.getPregunta()).isEqualTo("¿Nueva pregunta?");
         assertThat(resultado.getImagen()).isEqualTo("nueva.png");
@@ -182,22 +182,22 @@ class PreguntaServiceImplTest {
     }
 
     @Test
-    void updatePregunta_imagenNull_actualizaCorrectamente() {
+    void actualizarPregunta_imagenNull_actualizaCorrectamente() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(preguntaRepository.findById(10L)).thenReturn(Optional.of(pregunta));
         when(preguntaRepository.save(any(Pregunta.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Pregunta resultado = preguntaService.updatePregunta(10L, "Texto actualizado", null);
+        Pregunta resultado = preguntaService.actualizarPregunta(10L, "Texto actualizado", null);
 
         assertThat(resultado.getPregunta()).isEqualTo("Texto actualizado");
         assertThat(resultado.getImagen()).isNull();
     }
 
     @Test
-    void updatePregunta_usuarioNoMaestro_lanzaAccessDeniedException() {
+    void actualizarPregunta_usuarioNoMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(usuarioNoMaestro);
 
-        assertThatThrownBy(() -> preguntaService.updatePregunta(10L, "¿?", null))
+        assertThatThrownBy(() -> preguntaService.actualizarPregunta(10L, "¿?", null))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede actualizar preguntas");
 
@@ -206,11 +206,11 @@ class PreguntaServiceImplTest {
     }
 
     @Test
-    void updatePregunta_preguntaNoExiste_lanzaResourceNotFoundException() {
+    void actualizarPregunta_preguntaNoExiste_lanzaResourceNotFoundException() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(preguntaRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> preguntaService.updatePregunta(99L, "¿?", null))
+        assertThatThrownBy(() -> preguntaService.actualizarPregunta(99L, "¿?", null))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("La pregunta no existe");
 
@@ -218,21 +218,21 @@ class PreguntaServiceImplTest {
     }
 
     @Test
-    void deletePregunta_maestro_eliminaCorrectamente() {
+    void eliminarPreguntaPorId_maestro_eliminaCorrectamente() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(preguntaRepository.findById(10L)).thenReturn(Optional.of(pregunta));
         doNothing().when(preguntaRepository).delete(pregunta);
 
-        preguntaService.deletePregunta(10L);
+        preguntaService.eliminarPreguntaPorId(10L);
 
         verify(preguntaRepository).delete(pregunta);
     }
 
     @Test
-    void deletePregunta_usuarioNoMaestro_lanzaAccessDeniedException() {
+    void eliminarPreguntaPorId_usuarioNoMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(usuarioNoMaestro);
 
-        assertThatThrownBy(() -> preguntaService.deletePregunta(10L))
+        assertThatThrownBy(() -> preguntaService.eliminarPreguntaPorId(10L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede eliminar preguntas");
 
@@ -241,11 +241,11 @@ class PreguntaServiceImplTest {
     }
 
     @Test
-    void deletePregunta_preguntaNoExiste_lanzaResourceNotFoundException() {
+    void eliminarPreguntaPorId_preguntaNoExiste_lanzaResourceNotFoundException() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(preguntaRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> preguntaService.deletePregunta(99L))
+        assertThatThrownBy(() -> preguntaService.eliminarPreguntaPorId(99L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("La pregunta no existe");
 

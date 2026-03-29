@@ -67,6 +67,93 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
     }
 
     @Transactional(readOnly = true)
+    public EstadisticasCursoDTO obtenerEstadisticasCurso(Long cursoId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        if (!(usuario instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
+        }
+
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
+        }
+
+        return new EstadisticasCursoDTO(
+                    cursoCompletadoPorTodos(curso),
+                    notaMediaCurso(curso),
+                    tiempoMedioCurso(curso),
+                    obtenerNotaMaximaCurso(curso),
+                    obtenerNotaMinimaCurso(curso));
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, EstadisticasTemaDTO> obtenerEstadisticasCursoTema(Long cursoId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        if (!(usuario instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
+        }
+
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
+        }
+
+        List<Tema> temas = curso.getTemas();
+        Map<Long, EstadisticasTemaDTO> resultado = new HashMap<>();
+
+        for(Tema tema:temas){
+            List<Actividad> actividades = tema.getActividades();
+            EstadisticasTemaDTO stats = new EstadisticasTemaDTO(
+                    temaCompletadoPorTodos(curso, actividades),
+                    notaMediaTema(actividades),
+                    tiempoMedioTema(actividades),
+                    notaMaximaTema(actividades),
+                    notaMinimaTema(actividades));
+
+            resultado.put(tema.getId(), stats);
+        }
+
+        return resultado;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, EstadisticasActividadDTO> obtenerEstadisticasCursoActividad(Long cursoId, Long temaId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        if (!(usuario instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
+        }
+
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
+        }
+
+        Tema tema = curso.getTemas().stream()
+                .filter(t -> t.getId().equals(temaId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El tema con ID " + temaId + " no existe en el curso con ID " + cursoId + "."));
+
+        List<Actividad> actividades = tema.getActividades();
+        Map<Long, EstadisticasActividadDTO> resultado = new HashMap<>();
+
+        for (Actividad actividad : actividades) {
+            EstadisticasActividadDTO stats = new EstadisticasActividadDTO(
+                    actividadCompletadaPorTodos(curso, actividad),
+                    tiempoMedioActividad(actividad),
+                    notaMediaActividad(actividad),
+                    notaMaximaActividad(actividad),
+                    notaMinimaActividad(actividad));
+
+            resultado.put(actividad.getId(), stats);
+        }
+
+        return resultado;
+    }
+
+    @Transactional(readOnly = true)
     public Map<String, Long> numActividadesRealizadasPorAlumno(Curso curso) {
 
         Usuario usuario = usuarioService.findCurrentUser(); 
@@ -134,43 +221,6 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         }
         log.info("[PUNTOS] resultado final: {} alumnos", puntosPorAlumno.size());
         return puntosPorAlumno;
-        }
-
-    
-
-    @Transactional(readOnly = true)
-    public Map<Long, EstadisticasActividadDTO> obtenerEstadisticasCursoActividad(Long cursoId, Long temaId) {
-        Usuario usuario = usuarioService.findCurrentUser();
-        Curso curso = cursoRepository.findById(cursoId)
-                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
-        if (!(usuario instanceof Maestro)) {
-            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
-        }
-
-        if (!curso.getMaestro().getId().equals(usuario.getId())) {
-            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
-        }
-
-        Tema tema = curso.getTemas().stream()
-                .filter(t -> t.getId().equals(temaId))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("404 Not Found: El tema con ID " + temaId + " no existe en el curso con ID " + cursoId + "."));
-
-        List<Actividad> actividades = tema.getActividades();
-        Map<Long, EstadisticasActividadDTO> resultado = new HashMap<>();
-
-        for (Actividad actividad : actividades) {
-            EstadisticasActividadDTO stats = new EstadisticasActividadDTO(
-                    actividadCompletadaPorTodos(curso, actividad),
-                    tiempoMedioActividad(actividad),
-                    notaMediaActividad(actividad),
-                    notaMaximaActividad(actividad),
-                    notaMinimaActividad(actividad));
-
-            resultado.put(actividad.getId(), stats);
-        }
-
-        return resultado;
     }
 
     @Transactional(readOnly = true)
@@ -221,76 +271,24 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         return resultado;
     }
 
-    @Transactional(readOnly = true)
-    public Map<Long, EstadisticasTemaDTO> obtenerEstadisticasCursoTema(Long cursoId) {
-        Usuario usuario = usuarioService.findCurrentUser();
-        Curso curso = cursoRepository.findById(cursoId)
-                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
-        if (!(usuario instanceof Maestro)) {
-            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
-        }
-
-        if (!curso.getMaestro().getId().equals(usuario.getId())) {
-            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
-        }
-
-        List<Tema> temas = curso.getTemas();
-        Map<Long, EstadisticasTemaDTO> resultado = new HashMap<>();
-
-        for(Tema tema:temas){
-            List<Actividad> actividades = tema.getActividades();
-            EstadisticasTemaDTO stats = new EstadisticasTemaDTO(
-                    temaCompletadoPorTodos(curso, actividades),
-                    notaMediaTema(actividades),
-                    tiempoMedioTema(actividades),
-                    notaMaximaTema(actividades),
-                    notaMinimaTema(actividades));
-
-            resultado.put(tema.getId(), stats);
-        }
-
-        return resultado;
-    }
-
-    @Transactional(readOnly = true)
-    public EstadisticasCursoDTO obtenerEstadisticasCurso(Long cursoId) {
-        Usuario usuario = usuarioService.findCurrentUser();
-        Curso curso = cursoRepository.findById(cursoId)
-                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
-        if (!(usuario instanceof Maestro)) {
-            throw new AccessDeniedException("Solo un maestro puede visualizar los puntos de los alumnos");
-        }
-
-        if (!curso.getMaestro().getId().equals(usuario.getId())) {
-            throw new AccessDeniedException("Solo un maestro propietario del curso puede visualizar los puntos de los alumnos");
-        }
-
-        return new EstadisticasCursoDTO(
-                    cursoCompletadoPorTodos(curso),
-                    notaMediaCurso(curso),
-                    tiempoMedioCurso(curso),
-                    obtenerNotaMaximaCurso(curso),
-                    obtenerNotaMinimaCurso(curso));
-    }
-
     // ==================== MÉTODOS DE CONSULTA DE TIEMPOS ====================
 
     @Transactional(readOnly = true)
-    public Integer obtenerTiempoAlumnoEnActividad(Long alumnoId, Long actividadId) {
+    public Integer obtenerTiempoAlumnoEnCurso(Long alumnoId, Long cursoId) {
         Usuario usuario = usuarioService.findCurrentUser();
         Maestro maestro = validarMaestro(usuario);
 
-        Actividad actividad = actividadRepository.findById(actividadId)
-                .orElseThrow(() -> new RuntimeException("404 Not Found: La actividad con ID " + actividadId + " no existe."));
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
 
-        validarPropietarioTema(maestro, actividad.getTema());
+        validarPropietarioCurso(maestro, curso);
 
-        ActividadAlumno actividadAlumno = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
-                .filter(aa -> aa.getAlumno().getId().equals(alumnoId))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("404 Not Found: El alumno no tiene registro en esta actividad."));
+        int tiempoTotal = 0;
+        for (Tema tema : curso.getTemas()) {
+            tiempoTotal += obtenerTiempoAlumnoEnTema(alumnoId, tema.getId());
+        }
 
-        return actividadAlumno.getTiempoMinutos();
+        return tiempoTotal;
     }
 
     @Transactional(readOnly = true)
@@ -322,25 +320,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
     }
 
     @Transactional(readOnly = true)
-    public Integer obtenerTiempoAlumnoEnCurso(Long alumnoId, Long cursoId) {
-        Usuario usuario = usuarioService.findCurrentUser();
-        Maestro maestro = validarMaestro(usuario);
-
-        Curso curso = cursoRepository.findById(cursoId)
-                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
-
-        validarPropietarioCurso(maestro, curso);
-
-        int tiempoTotal = 0;
-        for (Tema tema : curso.getTemas()) {
-            tiempoTotal += obtenerTiempoAlumnoEnTema(alumnoId, tema.getId());
-        }
-
-        return tiempoTotal;
-    }
-
-    @Transactional(readOnly = true)
-    public Double obtenerTiempoMedioActividad(Long actividadId) {
+    public Integer obtenerTiempoAlumnoEnActividad(Long alumnoId, Long actividadId) {
         Usuario usuario = usuarioService.findCurrentUser();
         Maestro maestro = validarMaestro(usuario);
 
@@ -349,16 +329,41 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
 
         validarPropietarioTema(maestro, actividad.getTema());
 
-        List<Integer> tiempos = actividad.getActividadesAlumno().stream()
-                .filter(aa -> aa.getEstadoActividad() == EstadoActividad.TERMINADA)
-                .map(ActividadAlumno::getTiempoMinutos)
-                .collect(Collectors.toList());
+        ActividadAlumno actividadAlumno = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
+                .filter(aa -> aa.getAlumno().getId().equals(alumnoId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El alumno no tiene registro en esta actividad."));
 
-        if (tiempos.isEmpty()) {
+        return actividadAlumno.getTiempoMinutos();
+    }
+
+    @Transactional(readOnly = true)
+    public Double obtenerTiempoMedioCurso(Long cursoId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+
+        validarPropietarioCurso(maestro, curso);
+
+        List<Integer> tiemposPorAlumno = new ArrayList<>();
+        
+        for (Inscripcion inscripcion : curso.getInscripciones()) {
+            int tiempoTotal = 0;
+            for (Tema tema : curso.getTemas()) {
+                tiempoTotal += obtenerTiempoAlumnoEnTema(inscripcion.getAlumno().getId(), tema.getId());
+            }
+            if (tiempoTotal > 0) {
+                tiemposPorAlumno.add(tiempoTotal);
+            }
+        }
+
+        if (tiemposPorAlumno.isEmpty()) {
             return 0.0;
         }
 
-        return tiempos.stream()
+        return tiemposPorAlumno.stream()
                 .mapToInt(Integer::intValue)
                 .average()
                 .orElse(0.0);
@@ -415,41 +420,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
     }
 
     @Transactional(readOnly = true)
-    public Double obtenerTiempoMedioCurso(Long cursoId) {
-        Usuario usuario = usuarioService.findCurrentUser();
-        Maestro maestro = validarMaestro(usuario);
-
-        Curso curso = cursoRepository.findById(cursoId)
-                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
-
-        validarPropietarioCurso(maestro, curso);
-
-        List<Integer> tiemposPorAlumno = new ArrayList<>();
-        
-        for (Inscripcion inscripcion : curso.getInscripciones()) {
-            int tiempoTotal = 0;
-            for (Tema tema : curso.getTemas()) {
-                tiempoTotal += obtenerTiempoAlumnoEnTema(inscripcion.getAlumno().getId(), tema.getId());
-            }
-            if (tiempoTotal > 0) {
-                tiemposPorAlumno.add(tiempoTotal);
-            }
-        }
-
-        if (tiemposPorAlumno.isEmpty()) {
-            return 0.0;
-        }
-
-        return tiemposPorAlumno.stream()
-                .mapToInt(Integer::intValue)
-                .average()
-                .orElse(0.0);
-    }
-
-    // ==================== MÉTODOS DE ALUMNOS MÁS RÁPIDOS Y LENTOS ====================
-
-    @Transactional(readOnly = true)
-    public AlumnosMasRapidosLentosDTO obtenerAlumnosMasRapidosLentosActividad(Long actividadId, Integer limite) {
+    public Double obtenerTiempoMedioActividad(Long actividadId) {
         Usuario usuario = usuarioService.findCurrentUser();
         Maestro maestro = validarMaestro(usuario);
 
@@ -458,10 +429,66 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
 
         validarPropietarioTema(maestro, actividad.getTema());
 
-        List<TiempoAlumnoDTO> tiempos = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
+        List<Integer> tiempos = actividad.getActividadesAlumno().stream()
                 .filter(aa -> aa.getEstadoActividad() == EstadoActividad.TERMINADA)
-                .map(aa -> new TiempoAlumnoDTO(aa.getAlumno().getNombre(), aa.getAlumno().getId(), aa.getTiempoMinutos()))
+                .map(ActividadAlumno::getTiempoMinutos)
                 .collect(Collectors.toList());
+
+        if (tiempos.isEmpty()) {
+            return 0.0;
+        }
+
+        return tiempos.stream()
+                .mapToInt(Integer::intValue)
+                .average()
+                .orElse(0.0);
+    }
+
+    // ==================== MÉTODOS DE ALUMNOS MÁS RÁPIDOS Y LENTOS ====================
+
+    @Transactional(readOnly = true)
+    public AlumnosMasRapidosLentosDTO obtenerAlumnosMasRapidosLentosCurso(Long cursoId, Integer limite) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+
+        validarPropietarioCurso(maestro, curso);
+
+        Map<Long, TiempoAlumnoDTO> tiemposPorAlumno = new HashMap<>();
+        List<Inscripcion> inscripcionesCurso = curso.getInscripciones();
+        List<Tema> temasCurso = curso.getTemas();
+        log.info("[ALUMNOS-TIEMPOS] cursoId={}, inscripciones={}, temas={}", cursoId, inscripcionesCurso != null ? inscripcionesCurso.size() : "null", temasCurso != null ? temasCurso.size() : "null");
+
+        for (Inscripcion inscripcion : inscripcionesCurso) {
+            Alumno alumno = inscripcion.getAlumno();
+            log.info("[ALUMNOS-TIEMPOS] procesando alumno='{}' id={}", alumno.getNombre(), alumno.getId());
+            int tiempoTotal = 0;
+
+            for (Tema tema : temasCurso) {
+                List<Actividad> actividades = actividadRepository.findByTemaId(tema.getId());
+                
+                for (Actividad actividad : actividades) {
+                    ActividadAlumno aa = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
+                            .filter(a -> a.getAlumno().getId().equals(alumno.getId()) && 
+                                    a.getEstadoActividad() == EstadoActividad.TERMINADA)
+                            .findFirst()
+                            .orElse(null);
+                    
+                    if (aa != null) {
+                        tiempoTotal += aa.getTiempoMinutos();
+                    }
+                }
+            }
+
+            log.info("[ALUMNOS-TIEMPOS] alumno='{}' tiempoTotal={}", alumno.getNombre(), tiempoTotal);
+            // Incluir TODOS los alumnos inscritos, incluso con tiempo 0
+            tiemposPorAlumno.put(alumno.getId(), 
+                    new TiempoAlumnoDTO(alumno.getNombre(), alumno.getId(), tiempoTotal));
+        }
+
+        List<TiempoAlumnoDTO> tiempos = new ArrayList<>(tiemposPorAlumno.values());
 
         if (tiempos.isEmpty()) {
             return new AlumnosMasRapidosLentosDTO(new ArrayList<>(), new ArrayList<>(), 0.0);
@@ -541,48 +568,19 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
     }
 
     @Transactional(readOnly = true)
-    public AlumnosMasRapidosLentosDTO obtenerAlumnosMasRapidosLentosCurso(Long cursoId, Integer limite) {
+    public AlumnosMasRapidosLentosDTO obtenerAlumnosMasRapidosLentosActividad(Long actividadId, Integer limite) {
         Usuario usuario = usuarioService.findCurrentUser();
         Maestro maestro = validarMaestro(usuario);
 
-        Curso curso = cursoRepository.findById(cursoId)
-                .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        Actividad actividad = actividadRepository.findById(actividadId)
+                .orElseThrow(() -> new RuntimeException("404 Not Found: La actividad con ID " + actividadId + " no existe."));
 
-        validarPropietarioCurso(maestro, curso);
+        validarPropietarioTema(maestro, actividad.getTema());
 
-        Map<Long, TiempoAlumnoDTO> tiemposPorAlumno = new HashMap<>();
-        List<Inscripcion> inscripcionesCurso = curso.getInscripciones();
-        List<Tema> temasCurso = curso.getTemas();
-        log.info("[ALUMNOS-TIEMPOS] cursoId={}, inscripciones={}, temas={}", cursoId, inscripcionesCurso != null ? inscripcionesCurso.size() : "null", temasCurso != null ? temasCurso.size() : "null");
-
-        for (Inscripcion inscripcion : inscripcionesCurso) {
-            Alumno alumno = inscripcion.getAlumno();
-            log.info("[ALUMNOS-TIEMPOS] procesando alumno='{}' id={}", alumno.getNombre(), alumno.getId());
-            int tiempoTotal = 0;
-
-            for (Tema tema : temasCurso) {
-                List<Actividad> actividades = actividadRepository.findByTemaId(tema.getId());
-                
-                for (Actividad actividad : actividades) {
-                    ActividadAlumno aa = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
-                            .filter(a -> a.getAlumno().getId().equals(alumno.getId()) && 
-                                    a.getEstadoActividad() == EstadoActividad.TERMINADA)
-                            .findFirst()
-                            .orElse(null);
-                    
-                    if (aa != null) {
-                        tiempoTotal += aa.getTiempoMinutos();
-                    }
-                }
-            }
-
-            log.info("[ALUMNOS-TIEMPOS] alumno='{}' tiempoTotal={}", alumno.getNombre(), tiempoTotal);
-            // Incluir TODOS los alumnos inscritos, incluso con tiempo 0
-            tiemposPorAlumno.put(alumno.getId(), 
-                    new TiempoAlumnoDTO(alumno.getNombre(), alumno.getId(), tiempoTotal));
-        }
-
-        List<TiempoAlumnoDTO> tiempos = new ArrayList<>(tiemposPorAlumno.values());
+        List<TiempoAlumnoDTO> tiempos = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
+                .filter(aa -> aa.getEstadoActividad() == EstadoActividad.TERMINADA)
+                .map(aa -> new TiempoAlumnoDTO(aa.getAlumno().getNombre(), aa.getAlumno().getId(), aa.getTiempoMinutos()))
+                .collect(Collectors.toList());
 
         if (tiempos.isEmpty()) {
             return new AlumnosMasRapidosLentosDTO(new ArrayList<>(), new ArrayList<>(), 0.0);

@@ -31,45 +31,6 @@ public class CursoController {
         this.cursoService = cursoService;
     }
 
-
-
-    
-@GetMapping("/{id}/detalles")
-    public ResponseEntity<List<String>> obtenerDetallesCurso(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(cursoService.obtenerDetallesCurso(id));
-        } catch (RuntimeException e) {
-            if (e.getMessage().equals("404 Not Found")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            } else if (e.getMessage().equals("403 Forbidden")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
-        }
-    }
-
-    public static class CrearCursoRequest {
-
-        @NotBlank
-        private String titulo;
-
-        private String descripcion;
-        private String imagen;
-
-        public String getTitulo() { return titulo; }
-        public void setTitulo(String titulo) { this.titulo = titulo; }
-
-        public String getDescripcion() { return descripcion; }
-        public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-
-        public String getImagen() { return imagen; }
-        public void setImagen(String imagen) { this.imagen = imagen; }
-        
-        public CrearCursoRequest() {
-    }
-    }
-
     @PostMapping("/curso")
     @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Curso> crearCurso(@RequestBody @Valid CrearCursoRequest request){
@@ -77,16 +38,10 @@ public class CursoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Curso>> obtenerCursos() {
-        return ResponseEntity.ok(cursoService.ObtenerCursosUsuarioLogueado());
-    }
-
-    @PatchMapping("/{id}/visibilidad")
-    @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<Curso> cambiarVisibilidad(@PathVariable Long id) {
+    @GetMapping("/{id}/detalles")
+    public ResponseEntity<List<String>> encontrarDetallesCursoPorId(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(cursoService.cambiarVisibilidad(id));
+            return ResponseEntity.ok(cursoService.encontrarDetallesCursoPorId(id));
         } catch (RuntimeException e) {
             if (e.getMessage().equals("404 Not Found")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -98,38 +53,9 @@ public class CursoController {
         }
     }
 
-    @GetMapping("/{id}/progreso")
-    public ResponseEntity<ProgresoDTO> obtenerProgreso(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(cursoService.getProgreso(id));
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("404")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            } else if (e.getMessage().contains("403")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
-        }
-    }
-
-    public static class ActualizarCursoRequest {
-        @NotBlank(message = "El título no puede estar vacío")
-        private String titulo;
-
-        private String descripcion;
-        private String imagen;
-
-        public String getTitulo() { return titulo; }
-        public void setTitulo(String titulo) { this.titulo = titulo; }
-
-        public String getDescripcion() { return descripcion; }
-        public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-
-        public String getImagen() { return imagen; }
-        public void setImagen(String imagen) { this.imagen = imagen; }
-
-        public ActualizarCursoRequest() {}
+    @GetMapping
+    public ResponseEntity<List<Curso>> encontrarCursosPorUsuarioLogueado() {
+        return ResponseEntity.ok(cursoService.encontrarCursosPorUsuarioLogueado());
     }
 
     @PatchMapping("/{id}")
@@ -160,10 +86,43 @@ public class CursoController {
             }
         }
     }
-    @GetMapping("/{id}/NotasMedias")
-    public ResponseEntity<List<Integer>> obtenerNotasMedias(@PathVariable Long id) {
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
+    public ResponseEntity<Void> eliminarCursoPorId(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(cursoService.getNotaMediaPorActividad(id));
+            cursoService.eliminarCursoPorId(id);
+            return ResponseEntity.noContent().build();
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("404 Not Found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/{id}/progreso")
+    public ResponseEntity<ProgresoDTO> encontrarProgresoPorCursoId(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(cursoService.encontrarProgresoPorCursoId(id));
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("404")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            } else if (e.getMessage().contains("403")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+    }
+
+    @PatchMapping("/{id}/visibilidad")
+    @PreAuthorize("hasAuthority('MAESTRO')")
+    public ResponseEntity<Curso> cambiarVisibilidad(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(cursoService.cambiarVisibilidad(id));
         } catch (RuntimeException e) {
             if (e.getMessage().equals("404 Not Found")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -175,22 +134,58 @@ public class CursoController {
         }
     }
 
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('MAESTRO')")
-public ResponseEntity<Void> eliminarCurso(@PathVariable Long id) {
-    try {
-        cursoService.eliminarCurso(id);
-        return ResponseEntity.noContent().build();
-    } catch (AccessDeniedException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    } catch (RuntimeException e) {
-        if (e.getMessage().equals("404 Not Found")) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    @GetMapping("/{id}/NotasMedias")
+    public ResponseEntity<List<Integer>> obtenerNotaMediaPorActividadPorCursoId(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(cursoService.obtenerNotaMediaPorActividadPorCursoId(id));
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("404 Not Found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            } else if (e.getMessage().equals("403 Forbidden")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
         }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-}
 
+    public static class CrearCursoRequest {
+
+        @NotBlank
+        private String titulo;
+
+        private String descripcion;
+        private String imagen;
+
+        public String getTitulo() { return titulo; }
+        public void setTitulo(String titulo) { this.titulo = titulo; }
+
+        public String getDescripcion() { return descripcion; }
+        public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+
+        public String getImagen() { return imagen; }
+        public void setImagen(String imagen) { this.imagen = imagen; }
+        
+        public CrearCursoRequest() {}
+    }
+
+    public static class ActualizarCursoRequest {
+        @NotBlank(message = "El título no puede estar vacío")
+        private String titulo;
+
+        private String descripcion;
+        private String imagen;
+
+        public String getTitulo() { return titulo; }
+        public void setTitulo(String titulo) { this.titulo = titulo; }
+
+        public String getDescripcion() { return descripcion; }
+        public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+
+        public String getImagen() { return imagen; }
+        public void setImagen(String imagen) { this.imagen = imagen; }
+
+        public ActualizarCursoRequest() {}
+    }
    
 }

@@ -51,7 +51,7 @@ public class PreguntaServiceImpl implements PreguntaService {
     }
 
     @Override
-    public Pregunta readPregunta(Long id) {
+    public Pregunta encontrarPreguntaPorId(Long id) {
         Pregunta preguntaObj = preguntaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La pregunta no existe"));
         List<RespuestaMaestro> respuestas = preguntaObj.getRespuestasMaestro();
         List<RespuestaMaestro> respuestasDesordenadas = CerebrusUtils.shuffleCollection(respuestas).stream().toList();
@@ -61,7 +61,7 @@ public class PreguntaServiceImpl implements PreguntaService {
 
     @Override
     @Transactional
-    public Pregunta updatePregunta(Long id, String pregunta, String imagen) {
+    public Pregunta actualizarPregunta(Long id, String pregunta, String imagen) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -76,7 +76,7 @@ public class PreguntaServiceImpl implements PreguntaService {
 
     @Override
     @Transactional
-    public void deletePregunta(Long id) {
+    public void eliminarPreguntaPorId(Long id) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {

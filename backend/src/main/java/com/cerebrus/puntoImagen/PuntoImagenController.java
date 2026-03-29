@@ -1,4 +1,4 @@
-package com.cerebrus.puntoImage;
+package com.cerebrus.puntoImagen;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cerebrus.puntoImage.dto.PuntoImagenDTO;
+import com.cerebrus.puntoImagen.dto.PuntoImagenDTO;
 
 @RestController
 @RequestMapping("/api/puntos-imagen")
@@ -27,18 +27,18 @@ public class PuntoImagenController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<PuntoImagenDTO> obtenerPuntoImagenPorId(@PathVariable Long id) {
-        return new ResponseEntity<>(toPuntoImagenDTO(puntoImagenService.obtenerPuntoImagenPorId(id)), HttpStatus.OK);
+    public ResponseEntity<PuntoImagenDTO> encontrarPuntoImagenPorId(@PathVariable Long id) {
+        return new ResponseEntity<>(obtenerPuntoImagenDTO(puntoImagenService.encontrarPuntoImagenPorId(id)), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> eliminarPuntoImagen(@PathVariable Long id) {
-        puntoImagenService.eliminarPuntoImagen(id);
+    public ResponseEntity<Void> eliminarPuntoImagenPorId(@PathVariable Long id) {
+        puntoImagenService.eliminarPuntoImagenPorId(id);
         return ResponseEntity.noContent().build();
     }
 
-    private static PuntoImagenDTO toPuntoImagenDTO(PuntoImagen puntoImagen) {
+    private static PuntoImagenDTO obtenerPuntoImagenDTO(PuntoImagen puntoImagen) {
         return new PuntoImagenDTO(
                 puntoImagen.getId(),
                 puntoImagen.getRespuesta(),

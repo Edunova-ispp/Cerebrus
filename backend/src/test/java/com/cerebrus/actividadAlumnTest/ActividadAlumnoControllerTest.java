@@ -65,19 +65,19 @@ class ActividadAlumnoControllerTest {
         actividadAlumno.setActividad(actividad);
     }
 
-    // ==================== crearActividadAlumno ====================
+    // ==================== crearActAlumno ====================
 
     @Test
-    void crearActividadAlumno_datosCompletos_retorna201ConDTO() {
+    void crearActAlumno_datosCompletos_retorna201ConDTO() {
         ActividadAlumnoDTO request = new ActividadAlumnoDTO(
                 null, 100, LocalDateTime.of(2024, 1, 1, 9, 0),
                 LocalDateTime.of(2024, 1, 1, 9, 30), 8, 0, 1L, 50L);
-        when(actividadAlumnoService.crearActividadAlumno(
+        when(actividadAlumnoService.crearActAlumno(
                 eq(100), any(LocalDateTime.class), any(LocalDateTime.class),
                 eq(8), eq(0), eq(1L), eq(50L)))
                 .thenReturn(actividadAlumno);
 
-        ResponseEntity<ActividadAlumnoDTO> respuesta = controller.crearActividadAlumno(request);
+        ResponseEntity<ActividadAlumnoDTO> respuesta = controller.crearActAlumno(request);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(respuesta.getBody()).isNotNull();
@@ -89,56 +89,56 @@ class ActividadAlumnoControllerTest {
     }
 
     @Test
-    void crearActividadAlumno_puntuacionNull_usaCero() {
+    void crearActAlumno_puntuacionNull_usaCero() {
         ActividadAlumnoDTO request = new ActividadAlumnoDTO(
                 null, null, LocalDateTime.now(), LocalDateTime.now(), null, null, 1L, 50L);
         actividadAlumno.setPuntuacion(0);
         actividadAlumno.setNota(0);
         actividadAlumno.setNumAbandonos(0);
-        when(actividadAlumnoService.crearActividadAlumno(
+        when(actividadAlumnoService.crearActAlumno(
                 eq(0), any(LocalDateTime.class), any(LocalDateTime.class),
                 eq(0), eq(0), eq(1L), eq(50L)))
                 .thenReturn(actividadAlumno);
 
-        ResponseEntity<ActividadAlumnoDTO> respuesta = controller.crearActividadAlumno(request);
+        ResponseEntity<ActividadAlumnoDTO> respuesta = controller.crearActAlumno(request);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(respuesta.getBody().getPuntuacion()).isEqualTo(0);
     }
 
     @Test
-    void crearActividadAlumno_actividadNoExiste_propagaResourceNotFoundException() {
+    void crearActAlumno_actividadNoExiste_propagaResourceNotFoundException() {
         ActividadAlumnoDTO request = new ActividadAlumnoDTO(
                 null, 100, LocalDateTime.now(), LocalDateTime.now(), 8, 0, 1L, 99L);
-        when(actividadAlumnoService.crearActividadAlumno(
+        when(actividadAlumnoService.crearActAlumno(
                 anyInt(), any(), any(), anyInt(), anyInt(), anyLong(), anyLong()))
                 .thenThrow(new ResourceNotFoundException("La actividad no existe"));
 
-        assertThatThrownBy(() -> controller.crearActividadAlumno(request))
+        assertThatThrownBy(() -> controller.crearActAlumno(request))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
-    void crearActividadAlumno_parejaYaExiste_retorna201ConExistente() {
+    void crearActAlumno_parejaYaExiste_retorna201ConExistente() {
         ActividadAlumnoDTO request = new ActividadAlumnoDTO(
                 null, 100, LocalDateTime.now(), LocalDateTime.now(), 8, 0, 1L, 50L);
-        when(actividadAlumnoService.crearActividadAlumno(
+        when(actividadAlumnoService.crearActAlumno(
                 anyInt(), any(), any(), anyInt(), anyInt(), anyLong(), anyLong()))
                 .thenReturn(actividadAlumno);
 
-        ResponseEntity<ActividadAlumnoDTO> respuesta = controller.crearActividadAlumno(request);
+        ResponseEntity<ActividadAlumnoDTO> respuesta = controller.crearActAlumno(request);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(respuesta.getBody().getId()).isEqualTo(10L);
     }
 
-    // ==================== readActividadAlumno ====================
+    // ==================== encontrarActAlumnoPorId ====================
 
     @Test
-    void readActividadAlumno_existente_retorna200ConDTO() {
-        when(actividadAlumnoService.readActividadAlumno(10L)).thenReturn(actividadAlumno);
+    void encontrarActAlumnoPorId_existente_retorna200ConDTO() {
+        when(actividadAlumnoService.encontrarActAlumnoPorId(10L)).thenReturn(actividadAlumno);
 
-        ResponseEntity<ActividadAlumnoDTO> respuesta = controller.readActividadAlumno(10L);
+        ResponseEntity<ActividadAlumnoDTO> respuesta = controller.encontrarActAlumnoPorId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody().getId()).isEqualTo(10L);
@@ -146,99 +146,99 @@ class ActividadAlumnoControllerTest {
     }
 
     @Test
-    void readActividadAlumno_noExiste_propagaResourceNotFoundException() {
-        when(actividadAlumnoService.readActividadAlumno(99L))
+    void encontrarActAlumnoPorId_noExiste_propagaResourceNotFoundException() {
+        when(actividadAlumnoService.encontrarActAlumnoPorId(99L))
                 .thenThrow(new ResourceNotFoundException("La actividad del alumno no existe"));
 
-        assertThatThrownBy(() -> controller.readActividadAlumno(99L))
+        assertThatThrownBy(() -> controller.encontrarActAlumnoPorId(99L))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
-    // ==================== updateActividadAlumno ====================
+    // ==================== actualizarActAlumno ====================
 
     @Test
-    void updateActividadAlumno_datosValidos_retorna200ConDTOActualizado() {
+    void actualizarActAlumno_datosValidos_retorna200ConDTOActualizado() {
         ActividadAlumnoDTO request = new ActividadAlumnoDTO(
                 null, 200, LocalDateTime.now(), LocalDateTime.now(), 9, 1, 1L, 50L);
         actividadAlumno.setPuntuacion(200);
         actividadAlumno.setNota(9);
         actividadAlumno.setNumAbandonos(1);
-        when(actividadAlumnoService.updateActividadAlumno(
+        when(actividadAlumnoService.actualizarActAlumno(
                 eq(10L), eq(200), any(), any(), eq(9), eq(1)))
                 .thenReturn(actividadAlumno);
 
-        ResponseEntity<ActividadAlumnoDTO> respuesta = controller.updateActividadAlumno(10L, request);
+        ResponseEntity<ActividadAlumnoDTO> respuesta = controller.actualizarActAlumno(10L, request);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody().getPuntuacion()).isEqualTo(200);
         assertThat(respuesta.getBody().getNota()).isEqualTo(9);
         assertThat(respuesta.getBody().getNumAbandonos()).isEqualTo(1);
-        verify(actividadAlumnoService).updateActividadAlumno(eq(10L), eq(200), any(), any(), eq(9), eq(1));
+        verify(actividadAlumnoService).actualizarActAlumno(eq(10L), eq(200), any(), any(), eq(9), eq(1));
     }
 
     @Test
-    void updateActividadAlumno_noExiste_propagaResourceNotFoundException() {
+    void actualizarActAlumno_noExiste_propagaResourceNotFoundException() {
         ActividadAlumnoDTO request = new ActividadAlumnoDTO(
                 null, 100, LocalDateTime.now(), LocalDateTime.now(), 8, 0, 1L, 50L);
-        when(actividadAlumnoService.updateActividadAlumno(
+        when(actividadAlumnoService.actualizarActAlumno(
                 eq(99L), any(), any(), any(), any(), any()))
                 .thenThrow(new ResourceNotFoundException("La actividad del alumno no existe"));
 
-        assertThatThrownBy(() -> controller.updateActividadAlumno(99L, request))
+        assertThatThrownBy(() -> controller.actualizarActAlumno(99L, request))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
-    // ==================== deleteActividadAlumno ====================
+    // ==================== eliminarActAlumnoPorId ====================
 
     @Test
-    void deleteActividadAlumno_existente_retorna204SinCuerpo() {
-        ResponseEntity<Void> respuesta = controller.deleteActividadAlumno(10L);
+    void eliminarActAlumnoPorId_existente_retorna204SinCuerpo() {
+        ResponseEntity<Void> respuesta = controller.eliminarActAlumnoPorId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(respuesta.getBody()).isNull();
-        verify(actividadAlumnoService).deleteActividadAlumno(10L);
+        verify(actividadAlumnoService).eliminarActAlumnoPorId(10L);
     }
 
     @Test
-    void deleteActividadAlumno_noExiste_propagaResourceNotFoundException() {
+    void eliminarActAlumnoPorId_noExiste_propagaResourceNotFoundException() {
         org.mockito.Mockito.doThrow(new ResourceNotFoundException("La actividad del alumno no existe"))
-                .when(actividadAlumnoService).deleteActividadAlumno(99L);
+                .when(actividadAlumnoService).eliminarActAlumnoPorId(99L);
 
-        assertThatThrownBy(() -> controller.deleteActividadAlumno(99L))
+        assertThatThrownBy(() -> controller.eliminarActAlumnoPorId(99L))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
-    // ==================== ensureActividadAlumno ====================
+    // ==================== existeActAlumnoPorActIdYCurrentUserId ====================
 
     @Test
-    void ensureActividadAlumno_existe_retorna200Con1() {
-        when(actividadAlumnoService.ensureActividadAlumno(50L)).thenReturn(1);
+    void existeActAlumnoPorActIdYCurrentUserId_existe_retorna200Con1() {
+        when(actividadAlumnoService.existeActAlumnoPorActIdYCurrentUserId(50L)).thenReturn(1);
 
-        ResponseEntity<Integer> respuesta = controller.ensureActividadAlumno(50L);
+        ResponseEntity<Integer> respuesta = controller.existeActAlumnoPorActIdYCurrentUserId(50L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).isEqualTo(1);
     }
 
     @Test
-    void ensureActividadAlumno_noExiste_retorna200Con0() {
-        when(actividadAlumnoService.ensureActividadAlumno(50L)).thenReturn(0);
+    void existeActAlumnoPorActIdYCurrentUserId_noExiste_retorna200Con0() {
+        when(actividadAlumnoService.existeActAlumnoPorActIdYCurrentUserId(50L)).thenReturn(0);
 
-        ResponseEntity<Integer> respuesta = controller.ensureActividadAlumno(50L);
+        ResponseEntity<Integer> respuesta = controller.existeActAlumnoPorActIdYCurrentUserId(50L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).isEqualTo(0);
     }
 
-    // ==================== readActividadAlumnoByAlumnoIdAndActividadId ====================
+    // ==================== encontrarActAlumnoPorAlumnoIdYActId ====================
 
     @Test
-    void readActividadAlumnoByAlumnoIdAndActividadId_existe_retorna200ConDTO() {
-        when(actividadAlumnoService.readActividadAlumnoByAlumnoIdAndActividadId(1L, 50L))
+    void encontrarActAlumnoPorAlumnoIdYActId_existe_retorna200ConDTO() {
+        when(actividadAlumnoService.encontrarActAlumnoPorAlumnoIdYActId(1L, 50L))
                 .thenReturn(Optional.of(actividadAlumno));
 
         ResponseEntity<ActividadAlumnoDTO> respuesta =
-                controller.readActividadAlumnoByAlumnoIdAndActividadId(1L, 50L);
+                controller.encontrarActAlumnoPorAlumnoIdYActId(1L, 50L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody().getId()).isEqualTo(10L);
@@ -247,161 +247,161 @@ class ActividadAlumnoControllerTest {
     }
 
     @Test
-    void readActividadAlumnoByAlumnoIdAndActividadId_noExiste_retorna404() {
-        when(actividadAlumnoService.readActividadAlumnoByAlumnoIdAndActividadId(1L, 99L))
+    void encontrarActAlumnoPorAlumnoIdYActId_noExiste_retorna404() {
+        when(actividadAlumnoService.encontrarActAlumnoPorAlumnoIdYActId(1L, 99L))
                 .thenReturn(Optional.empty());
 
         ResponseEntity<ActividadAlumnoDTO> respuesta =
-                controller.readActividadAlumnoByAlumnoIdAndActividadId(1L, 99L);
+                controller.encontrarActAlumnoPorAlumnoIdYActId(1L, 99L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(respuesta.getBody()).isNull();
     }
 
-    // ==================== abandonarActividadAlumno ====================
+    // ==================== abandonarActAlumnoPorId ====================
 
     @Test
-    void abandonarActividadAlumno_alumnoValido_retorna200ConDTOActualizado() {
+    void abandonarActAlumnoPorId_alumnoValido_retorna200ConDTOActualizado() {
         actividadAlumno.setNumAbandonos(1);
-        when(actividadAlumnoService.abandonarActividadAlumno(10L)).thenReturn(actividadAlumno);
+        when(actividadAlumnoService.abandonarActAlumnoPorId(10L)).thenReturn(actividadAlumno);
 
-        ResponseEntity<ActividadAlumnoDTO> respuesta = controller.abandonarActividadAlumno(10L);
+        ResponseEntity<ActividadAlumnoDTO> respuesta = controller.abandonarActAlumnoPorId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody().getNumAbandonos()).isEqualTo(1);
-        verify(actividadAlumnoService).abandonarActividadAlumno(10L);
+        verify(actividadAlumnoService).abandonarActAlumnoPorId(10L);
     }
 
     @Test
-    void abandonarActividadAlumno_noExiste_propagaResourceNotFoundException() {
-        when(actividadAlumnoService.abandonarActividadAlumno(99L))
+    void abandonarActAlumnoPorId_noExiste_propagaResourceNotFoundException() {
+        when(actividadAlumnoService.abandonarActAlumnoPorId(99L))
                 .thenThrow(new ResourceNotFoundException("La actividad del alumno no existe"));
 
-        assertThatThrownBy(() -> controller.abandonarActividadAlumno(99L))
+        assertThatThrownBy(() -> controller.abandonarActAlumnoPorId(99L))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
-    void abandonarActividadAlumno_usuarioNoAlumno_propagaAccessDeniedException() {
-        when(actividadAlumnoService.abandonarActividadAlumno(10L))
+    void abandonarActAlumnoPorId_usuarioNoAlumno_propagaAccessDeniedException() {
+        when(actividadAlumnoService.abandonarActAlumnoPorId(10L))
                 .thenThrow(new org.springframework.security.access.AccessDeniedException("Solo un alumno puede abandonar su actividad"));
 
-        assertThatThrownBy(() -> controller.abandonarActividadAlumno(10L))
+        assertThatThrownBy(() -> controller.abandonarActAlumnoPorId(10L))
                 .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
     }
 
-    // ==================== corregirActividadAlumnoManual ====================
+    // ==================== corregirActAlumnoManual ====================
 
     @Test
-    void corregirActividadAlumnoManual_notaYRespuestas_retorna200ConDTOCorregido() {
+    void corregirActAlumnoManual_notaYRespuestas_retorna200ConDTOCorregido() {
         CorreccionManualDTO dto = new CorreccionManualDTO(7, List.of(101L, 102L));
         actividadAlumno.setNota(7);
-        when(actividadAlumnoService.corregirActividadAlumnoManual(10L, 7, List.of(101L, 102L)))
+        when(actividadAlumnoService.corregirActAlumnoManual(10L, 7, List.of(101L, 102L)))
                 .thenReturn(actividadAlumno);
 
         ResponseEntity<ActividadAlumnoDTO> respuesta =
-                controller.corregirActividadAlumnoManual(10L, dto);
+                controller.corregirActAlumnoManual(10L, dto);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody().getNota()).isEqualTo(7);
-        verify(actividadAlumnoService).corregirActividadAlumnoManual(10L, 7, List.of(101L, 102L));
+        verify(actividadAlumnoService).corregirActAlumnoManual(10L, 7, List.of(101L, 102L));
     }
 
     @Test
-    void corregirActividadAlumnoManual_soloNota_retorna200() {
+    void corregirActAlumnoManual_soloNota_retorna200() {
         CorreccionManualDTO dto = new CorreccionManualDTO(5, null);
         actividadAlumno.setNota(5);
-        when(actividadAlumnoService.corregirActividadAlumnoManual(10L, 5, null))
+        when(actividadAlumnoService.corregirActAlumnoManual(10L, 5, null))
                 .thenReturn(actividadAlumno);
 
         ResponseEntity<ActividadAlumnoDTO> respuesta =
-                controller.corregirActividadAlumnoManual(10L, dto);
+                controller.corregirActAlumnoManual(10L, dto);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody().getNota()).isEqualTo(5);
     }
 
     @Test
-    void corregirActividadAlumnoManual_noExiste_propagaResourceNotFoundException() {
+    void corregirActAlumnoManual_noExiste_propagaResourceNotFoundException() {
         CorreccionManualDTO dto = new CorreccionManualDTO(7, List.of(101L));
-        when(actividadAlumnoService.corregirActividadAlumnoManual(99L, 7, List.of(101L)))
+        when(actividadAlumnoService.corregirActAlumnoManual(99L, 7, List.of(101L)))
                 .thenThrow(new ResourceNotFoundException("La actividad del alumno no existe"));
 
-        assertThatThrownBy(() -> controller.corregirActividadAlumnoManual(99L, dto))
+        assertThatThrownBy(() -> controller.corregirActAlumnoManual(99L, dto))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
-    // ==================== corregirActividadAlumnoAutomaticamente ====================
+    // ==================== corregirActAlumnoAutomaticamente ====================
 
     @Test
-    void corregirActividadAlumnoAutomaticamente_conRespuestasIds_retorna200ConDTO() {
+    void corregirActAlumnoAutomaticamente_conRespuestasIds_retorna200ConDTO() {
         List<Long> ids = List.of(101L, 102L);
-        when(actividadAlumnoService.corregirActividadAlumnoAutomaticamente(10L, ids))
+        when(actividadAlumnoService.corregirActAlumnoAutomaticamente(10L, ids))
                 .thenReturn(actividadAlumno);
 
         ResponseEntity<ActividadAlumnoDTO> respuesta =
-                controller.corregirActividadAlumnoAutomaticamente(10L, ids);
+                controller.corregirActAlumnoAutomaticamente(10L, ids);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody().getId()).isEqualTo(10L);
-        verify(actividadAlumnoService).corregirActividadAlumnoAutomaticamente(10L, ids);
+        verify(actividadAlumnoService).corregirActAlumnoAutomaticamente(10L, ids);
     }
 
     @Test
-    void corregirActividadAlumnoAutomaticamente_sinCuerpo_pasaNull() {
-        when(actividadAlumnoService.corregirActividadAlumnoAutomaticamente(10L, null))
+    void corregirActAlumnoAutomaticamente_sinCuerpo_pasaNull() {
+        when(actividadAlumnoService.corregirActAlumnoAutomaticamente(10L, null))
                 .thenReturn(actividadAlumno);
 
         ResponseEntity<ActividadAlumnoDTO> respuesta =
-                controller.corregirActividadAlumnoAutomaticamente(10L, null);
+                controller.corregirActAlumnoAutomaticamente(10L, null);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
-        verify(actividadAlumnoService).corregirActividadAlumnoAutomaticamente(10L, null);
+        verify(actividadAlumnoService).corregirActAlumnoAutomaticamente(10L, null);
     }
 
     @Test
-    void corregirActividadAlumnoAutomaticamente_noExiste_propagaResourceNotFoundException() {
-        when(actividadAlumnoService.corregirActividadAlumnoAutomaticamente(99L, null))
+    void corregirActAlumnoAutomaticamente_noExiste_propagaResourceNotFoundException() {
+        when(actividadAlumnoService.corregirActAlumnoAutomaticamente(99L, null))
                 .thenThrow(new ResourceNotFoundException("La actividad del alumno no existe"));
 
-        assertThatThrownBy(() -> controller.corregirActividadAlumnoAutomaticamente(99L, null))
+        assertThatThrownBy(() -> controller.corregirActAlumnoAutomaticamente(99L, null))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
-    // ==================== corregirActividadAlumnoAutomaticamenteGeneralClasificacion ====================
+    // ==================== corregirActAlumnoAutomaticamenteClasificacion ====================
 
     @Test
-    void corregirActividadAlumnoAutomaticamenteGeneralClasificacion_conIds_retorna200ConDTO() {
+    void corregirActAlumnoAutomaticamenteClasificacion_conIds_retorna200ConDTO() {
         List<Long> ids = List.of(201L, 202L);
-        when(actividadAlumnoService.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(10L, ids))
+        when(actividadAlumnoService.corregirActAlumnoAutomaticamenteClasificacion(10L, ids))
                 .thenReturn(actividadAlumno);
 
         ResponseEntity<ActividadAlumnoDTO> respuesta =
-                controller.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(10L, ids);
+                controller.corregirActAlumnoAutomaticamenteClasificacion(10L, ids);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody().getId()).isEqualTo(10L);
-        verify(actividadAlumnoService).corregirActividadAlumnoAutomaticamenteGeneralClasificacion(10L, ids);
+        verify(actividadAlumnoService).corregirActAlumnoAutomaticamenteClasificacion(10L, ids);
     }
 
     @Test
-    void corregirActividadAlumnoAutomaticamenteGeneralClasificacion_sinCuerpo_pasaNull() {
-        when(actividadAlumnoService.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(10L, null))
+    void corregirActAlumnoAutomaticamenteClasificacion_sinCuerpo_pasaNull() {
+        when(actividadAlumnoService.corregirActAlumnoAutomaticamenteClasificacion(10L, null))
                 .thenReturn(actividadAlumno);
 
         ResponseEntity<ActividadAlumnoDTO> respuesta =
-                controller.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(10L, null);
+                controller.corregirActAlumnoAutomaticamenteClasificacion(10L, null);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
-    void corregirActividadAlumnoAutomaticamenteGeneralClasificacion_noExiste_propagaResourceNotFoundException() {
-        when(actividadAlumnoService.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(99L, null))
+    void corregirActAlumnoAutomaticamenteClasificacion_noExiste_propagaResourceNotFoundException() {
+        when(actividadAlumnoService.corregirActAlumnoAutomaticamenteClasificacion(99L, null))
                 .thenThrow(new ResourceNotFoundException("La actividad del alumno no existe"));
 
         assertThatThrownBy(() ->
-                controller.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(99L, null))
+                controller.corregirActAlumnoAutomaticamenteClasificacion(99L, null))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 }

@@ -39,8 +39,8 @@ public class RespAlumnoGeneralController {
     }
 
     @PostMapping
-    public ResponseEntity<RespAlumnoGeneralCreateResponse> crearRespAlumnoGeneral(@RequestBody @Valid RespAlumnoGeneralRequest request) {
-        RespAlumnoGeneralCreateResponse respAlumnoGeneralCreada = respAlumnoGeneralService.crearRespAlumnoGeneral(
+    public ResponseEntity<RespAlumnoGeneralCreateResponse> crearRespuestaAlumnoGeneral(@RequestBody @Valid RespAlumnoGeneralRequest request) {
+        RespAlumnoGeneralCreateResponse respAlumnoGeneralCreada = respAlumnoGeneralService.crearRespuestaAlumnoGeneral(
     
             request.getActividadAlumnoId(),
             request.getRespuestaId(),
@@ -51,11 +51,34 @@ public class RespAlumnoGeneralController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<RespAlumnoGeneral> readRespAlumnoGeneral(@PathVariable Long id) {
-        RespAlumnoGeneral respAlumnoGeneral = respAlumnoGeneralService.readRespAlumnoGeneral(id);
+    public ResponseEntity<RespAlumnoGeneral> encontrarRespuestaAlumnoGeneralPorId(@PathVariable Long id) {
+        RespAlumnoGeneral respAlumnoGeneral = respAlumnoGeneralService.encontrarRespuestaAlumnoGeneralPorId(id);
         return new ResponseEntity<>(respAlumnoGeneral, HttpStatus.OK);
     }
 
+    // ESTOS MÉTODOS QUEDAN DEFINIDOS POR SI ES NECESARIO UTILIZARLOS, PERO PARA LA FEATURE 35 NO SON NECESARIOS
+
+    @PutMapping("/update/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<RespAlumnoGeneral> actualizarRespuestaAlumnoGeneral(@PathVariable Long id, @RequestBody @Valid RespAlumnoGeneral respAlumnoGeneral) {
+        RespAlumnoGeneral respAlumnoGeneralActualizada = respAlumnoGeneralService.actualizarRespuestaAlumnoGeneral(
+            id,
+            respAlumnoGeneral.getCorrecta(),
+            respAlumnoGeneral.getActividadAlumno().getId(),
+            respAlumnoGeneral.getRespuesta(),
+            respAlumnoGeneral.getPregunta().getId()
+        );
+        return new ResponseEntity<>(respAlumnoGeneralActualizada, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> eliminarRespuestaAlumnoGeneralPorId(@PathVariable Long id) {
+        respAlumnoGeneralService.eliminarRespuestaAlumnoGeneralPorId(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Estos métodos si se usan
     // Este metodo toma como entrada un map con el id de la pregunta y la respuesta dada por el alumno, y devuelve un map con el id de la pregunta y si la respuesta es correcta o no
     // La nota final y la puntuacion de esta entrega es la entrada -1 en el HashMap
     @PostMapping("/crucigrama/{crucigramaId}")
@@ -70,33 +93,11 @@ public class RespAlumnoGeneralController {
 
     @PostMapping("/abierta")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<EvaluacionActividadAbiertaResponse> evaluarActividadAbierta(@RequestBody @Valid EvaluacionActividadAbiertaRequest request) {
+    public ResponseEntity<EvaluacionActividadAbiertaResponse> corregirActividadAbierta(@RequestBody @Valid EvaluacionActividadAbiertaRequest request) {
         
             EvaluacionActividadAbiertaResponse respuesta = respAlumnoGeneralService.corregirActividadAbierta(request);
             return new ResponseEntity<>(respuesta, HttpStatus.CREATED);
         
     }
 
-
-// ESTOS MÉTODOS QUEDAN DEFINIDOS POR SI ES NECESARIO UTILIZARLOS, PERO PARA LA FEATURE 35 NO SON NECESARIOS
-
-    @PutMapping("/update/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<RespAlumnoGeneral> updateRespAlumnoGeneral(@PathVariable Long id, @RequestBody @Valid RespAlumnoGeneral respAlumnoGeneral) {
-        RespAlumnoGeneral respAlumnoGeneralActualizada = respAlumnoGeneralService.updateRespAlumnoGeneral(
-            id,
-            respAlumnoGeneral.getCorrecta(),
-            respAlumnoGeneral.getActividadAlumno().getId(),
-            respAlumnoGeneral.getRespuesta(),
-            respAlumnoGeneral.getPregunta().getId()
-        );
-        return new ResponseEntity<>(respAlumnoGeneralActualizada, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/delete/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> deleteRespAlumnoGeneral(@PathVariable Long id) {
-        respAlumnoGeneralService.deleteRespAlumnoGeneral(id);
-        return ResponseEntity.noContent().build();
-    }
 }

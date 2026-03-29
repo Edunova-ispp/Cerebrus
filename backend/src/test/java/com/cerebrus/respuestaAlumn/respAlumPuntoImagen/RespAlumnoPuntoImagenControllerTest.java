@@ -20,7 +20,7 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.exceptions.ResourceNotFoundException;
-import com.cerebrus.puntoImage.PuntoImagen;
+import com.cerebrus.puntoImagen.PuntoImagen;
 import com.cerebrus.respuestaAlumn.respAlumPuntoImagen.dto.RespAlumnoPuntoImagenDTO;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,15 +53,15 @@ class RespAlumnoPuntoImagenControllerTest {
         entidadGuardada.setCorrecta(false);
     }
 
-    // ==================== crearRespAlumnoPuntoImagen ====================
+    // ==================== crearRespuestaAlumnoPuntoImagen ====================
 
     @Test
-    void crearRespAlumnoPuntoImagen_datosValidos_retorna201ConDTO() {
+    void crearRespuestaAlumnoPuntoImagen_datosValidos_retorna201ConDTO() {
         when(respAlumnoPuntoImagenService.crearRespuestaAlumnoPuntoImagen("París", 5L, 10L))
                 .thenReturn(entidadGuardada);
 
         ResponseEntity<RespAlumnoPuntoImagenDTO> resultado =
-                controller.crearRespAlumnoPuntoImagen(requestDTO);
+                controller.crearRespuestaAlumnoPuntoImagen(requestDTO);
 
         assertThat(resultado.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(resultado.getBody()).isNotNull();
@@ -73,44 +73,44 @@ class RespAlumnoPuntoImagenControllerTest {
     }
 
     @Test
-    void crearRespAlumnoPuntoImagen_respuestaVacia_retorna201ConDTOVacio() {
+    void crearRespuestaAlumnoPuntoImagen_respuestaVacia_retorna201ConDTOVacio() {
         RespAlumnoPuntoImagenDTO reqVacio = new RespAlumnoPuntoImagenDTO(null, "", 5L, 10L);
         entidadGuardada.setRespuesta("");
         when(respAlumnoPuntoImagenService.crearRespuestaAlumnoPuntoImagen("", 5L, 10L))
                 .thenReturn(entidadGuardada);
 
         ResponseEntity<RespAlumnoPuntoImagenDTO> resultado =
-                controller.crearRespAlumnoPuntoImagen(reqVacio);
+                controller.crearRespuestaAlumnoPuntoImagen(reqVacio);
 
         assertThat(resultado.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(resultado.getBody().getRespuesta()).isEmpty();
     }
 
     @Test
-    void crearRespAlumnoPuntoImagen_usuarioNoAlumno_propagaAccessDeniedException() {
+    void crearRespuestaAlumnoPuntoImagen_usuarioNoAlumno_propagaAccessDeniedException() {
         when(respAlumnoPuntoImagenService.crearRespuestaAlumnoPuntoImagen(anyString(), anyLong(), anyLong()))
                 .thenThrow(new AccessDeniedException("Solo un alumno puede crear respuestas para puntos de imagen"));
 
-        assertThatThrownBy(() -> controller.crearRespAlumnoPuntoImagen(requestDTO))
+        assertThatThrownBy(() -> controller.crearRespuestaAlumnoPuntoImagen(requestDTO))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un alumno puede crear respuestas para puntos de imagen");
     }
 
     @Test
-    void crearRespAlumnoPuntoImagen_puntoImagenNoExiste_propagaResourceNotFoundException() {
+    void crearRespuestaAlumnoPuntoImagen_puntoImagenNoExiste_propagaResourceNotFoundException() {
         when(respAlumnoPuntoImagenService.crearRespuestaAlumnoPuntoImagen(anyString(), anyLong(), anyLong()))
                 .thenThrow(new ResourceNotFoundException("PuntoImagen", "id", 5L));
 
-        assertThatThrownBy(() -> controller.crearRespAlumnoPuntoImagen(requestDTO))
+        assertThatThrownBy(() -> controller.crearRespuestaAlumnoPuntoImagen(requestDTO))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
-    void crearRespAlumnoPuntoImagen_actividadAlumnoNoExiste_propagaRuntimeException() {
+    void crearRespuestaAlumnoPuntoImagen_actividadAlumnoNoExiste_propagaRuntimeException() {
         when(respAlumnoPuntoImagenService.crearRespuestaAlumnoPuntoImagen(anyString(), anyLong(), anyLong()))
                 .thenThrow(new RuntimeException("Actividad alumno no encontrada"));
 
-        assertThatThrownBy(() -> controller.crearRespAlumnoPuntoImagen(requestDTO))
+        assertThatThrownBy(() -> controller.crearRespuestaAlumnoPuntoImagen(requestDTO))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("Actividad alumno no encontrada");
     }
