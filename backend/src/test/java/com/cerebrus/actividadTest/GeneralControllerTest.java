@@ -245,7 +245,7 @@ class GeneralControllerTest {
 		ResponseEntity<Void> response = generalController.updateActGeneral(12L, request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-		verify(generalService).updateActGeneral(12L, "Nuevo", "Desc", 10, false, "c", 3, 4, 5L);
+		verify(generalService).updateActGeneral(12L, "Nuevo", "Desc", 10, false, "c", 3, 4, 5L, null);
 	}
 
     // Tests para verificar que se actualiza una actividad tipo test con un request válido, y que se llama al servicio 
@@ -272,7 +272,9 @@ class GeneralControllerTest {
 		GeneralTestDTO esperado = new GeneralTestDTO(
 				12L, "Nuevo", "Desc", 10, null, true, "c", 3, 4, 5L, List.of());
 
-		when(generalService.updateTipoTest(eq(12L), eq("Nuevo"), eq("Desc"), eq(10), eq(true), eq("c"), any(), eq(3), eq(4), eq(5L)))
+		String extraArg = null;
+
+		when(generalService.updateTipoTest(eq(12L), eq("Nuevo"), eq("Desc"), eq(10), eq(true), eq("c"), any(), eq(3), eq(4), eq(5L), eq(extraArg)))
 				.thenReturn(new General());
 		when(generalService.readTipoTest(12L)).thenReturn(esperado);
 
@@ -282,7 +284,7 @@ class GeneralControllerTest {
 		assertThat(response.getBody()).isSameAs(esperado);
 
 		verify(generalService).updateTipoTest(eq(12L), eq("Nuevo"), eq("Desc"), eq(10), eq(true), eq("c"),
-				preguntasIdCaptor.capture(), eq(3), eq(4), eq(5L));
+				preguntasIdCaptor.capture(), eq(3), eq(4), eq(5L), eq(null));
 		assertThat(preguntasIdCaptor.getValue()).containsExactly(1L);
 		verify(generalService).readTipoTest(12L);
 	}
