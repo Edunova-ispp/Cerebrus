@@ -4,9 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.cerebrus.curso.Curso;
-import java.util.List;
 
-import com.cerebrus.estadisticas.dto.AlumnoBasicoDTO;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;

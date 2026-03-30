@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.List;
 
-import com.cerebrus.actividad.Actividad;
-
 public interface ActividadAlumnoService {
     ActividadAlumno crearActAlumno(Integer puntuacion, LocalDateTime fechaInicio,
         LocalDateTime fechaFin,Integer nota, Integer numAbandonos, Long alumnoId, Long actId);

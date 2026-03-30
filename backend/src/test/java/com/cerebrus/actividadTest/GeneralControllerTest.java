@@ -26,7 +26,6 @@ import com.cerebrus.actividad.general.GeneralController;
 import com.cerebrus.actividad.general.GeneralService;
 import com.cerebrus.actividad.general.dto.GeneralTestDTO;
 import com.cerebrus.pregunta.Pregunta;
-import com.cerebrus.pregunta.dto.PreguntaDTO;
 import com.cerebrus.tema.Tema;
 
 @ExtendWith(MockitoExtension.class)

@@ -21,9 +21,6 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.pregunta.Pregunta;
-import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneral;
-import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneralController;
-import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneralService;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralCreateResponse;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralRequest;
 
