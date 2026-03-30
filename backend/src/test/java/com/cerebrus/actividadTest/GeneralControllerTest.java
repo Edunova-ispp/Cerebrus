@@ -30,8 +30,11 @@ import com.cerebrus.actividad.general.GeneralService;
 import com.cerebrus.actividad.general.dto.CrucigramaDTO;
 import com.cerebrus.actividad.general.dto.CrucigramaRequest;
 import com.cerebrus.actividad.general.dto.GeneralAbiertaMaestroDTO;
+import com.cerebrus.actividad.general.dto.GeneralCartaDTO;
+import com.cerebrus.actividad.general.dto.GeneralCartaMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralClasificacionMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestDTO;
+import com.cerebrus.actividad.general.dto.GeneralTestMaestroDTO;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.dto.PreguntaDTO;
 import com.cerebrus.tema.Tema;
@@ -421,4 +424,279 @@ class GeneralControllerTest {
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).isSameAs(dtoMock);
 	}
+
+	// --- TESTS PARA readTipoTest (Alumno y Maestro) ---
+
+    @Test
+    void readTipoTest_devuelveStatusOkYDTOCorrecto() {
+        // 1. Setup
+        GeneralTestDTO dtoMock = mock(GeneralTestDTO.class);
+        when(generalService.readTipoTest(1L)).thenReturn(dtoMock);
+
+        // 2. Ejecución
+        ResponseEntity<GeneralTestDTO> response = generalController.readTipoTest(1L);
+
+        // 3. Verificaciones
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(dtoMock);
+        verify(generalService).readTipoTest(1L);
+    }
+
+    @Test
+    void readTipoTestMaestro_devuelveStatusOkYDTOCorrecto() {
+        // 1. Setup
+        GeneralTestMaestroDTO dtoMock = mock(GeneralTestMaestroDTO.class);
+        when(generalService.readTipoTestMaestro(1L)).thenReturn(dtoMock);
+
+        // 2. Ejecución
+        ResponseEntity<GeneralTestMaestroDTO> response = generalController.readTipoTestMaestro(1L);
+
+        // 3. Verificaciones
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(dtoMock);
+        verify(generalService).readTipoTestMaestro(1L);
+    }
+
+    // --- TESTS PARA readTipoCarta (Alumno y Maestro) ---
+
+    @Test
+    void readTipoCarta_devuelveStatusOkYDTOCorrecto() {
+        // 1. Setup
+        GeneralCartaDTO dtoMock = mock(GeneralCartaDTO.class);
+        when(generalService.readTipoCarta(1L)).thenReturn(dtoMock);
+
+        // 2. Ejecución
+        ResponseEntity<GeneralCartaDTO> response = generalController.readTipoCarta(1L);
+
+        // 3. Verificaciones
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(dtoMock);
+        verify(generalService).readTipoCarta(1L);
+    }
+
+    @Test
+    void readTipoCartaMaestro_devuelveStatusOkYDTOCorrecto() {
+        // 1. Setup
+        GeneralCartaMaestroDTO dtoMock = mock(GeneralCartaMaestroDTO.class);
+        when(generalService.readTipoCartaMaestro(1L)).thenReturn(dtoMock);
+
+        // 2. Ejecución
+        ResponseEntity<GeneralCartaMaestroDTO> response = generalController.readTipoCartaMaestro(1L);
+
+        // 3. Verificaciones
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(dtoMock);
+        verify(generalService).readTipoCartaMaestro(1L);
+    }
+
+	@Test
+    void crearTipoCarta_devuelveIdYStatusCreated() {
+        // 1. Preparamos el objeto de entrada (Request Body)
+        General request = new General();
+        request.setTitulo("Test Cartas");
+        request.setDescripcion("Desc");
+        request.setPuntuacion(10);
+        request.setRespVisible(true);
+        request.setComentariosRespVisible("Comentarios");
+
+        // Seteamos el Tema (necesario para el getId)
+        Tema tema = new Tema();
+        tema.setId(5L);
+        request.setTema(tema);
+
+        // Seteamos una lista de preguntas para que el stream().map() funcione
+        Pregunta p1 = new Pregunta(); p1.setId(100L);
+        Pregunta p2 = new Pregunta(); p2.setId(101L);
+        request.setPreguntas(List.of(p1, p2));
+
+        // 2. Preparamos el objeto que devolverá el servicio (Mock)
+        General generalCreada = new General();
+        generalCreada.setId(999L); // Este es el ID que esperamos en el body
+
+        // Configuramos el comportamiento del mock del servicio
+        // Usamos eq() para los valores fijos y any() o la lista específica para el resto
+        when(generalService.crearTipoCarta(
+                eq("Test Cartas"), 
+                eq("Desc"), 
+                eq(10), 
+                eq(5L), 
+                eq(true), 
+                eq("Comentarios"), 
+                any() // La lista de IDs [100, 101]
+        )).thenReturn(generalCreada);
+
+        // 3. Ejecución
+        ResponseEntity<Long> response = generalController.crearTipoCarta(request);
+
+        // 4. Verificaciones
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isEqualTo(999L);
+        
+        // Verificamos que se extrajeron los IDs correctamente (100 y 101)
+        verify(generalService).crearTipoCarta(
+                any(), any(), any(), any(), any(), any(), 
+                eq(List.of(100L, 101L))
+        );
+    }
+
+	@Test
+    void updateTipoCarta_ejecutaUpdateYDevuelveDTORefrescado() {
+        // 1. Preparar el objeto de entrada (Request Body)
+        General request = new General();
+        request.setTitulo("Cartas Actualizado");
+        request.setDescripcion("Nueva Desc");
+        request.setPuntuacion(20);
+        request.setRespVisible(false);
+        request.setComentariosRespVisible("Sin comentarios");
+        request.setPosicion(2);
+        request.setVersion(1);
+        request.setImagen("imagen.png");
+
+        Tema tema = new Tema();
+        tema.setId(10L);
+        request.setTema(tema);
+
+        // Importante: Al menos una pregunta para cubrir el stream().map()
+        Pregunta p = new Pregunta();
+        p.setId(50L);
+        request.setPreguntas(List.of(p));
+
+        // 2. Mockear el DTO que devuelve el segundo método del servicio
+        GeneralCartaDTO dtoMock = mock(GeneralCartaDTO.class);
+        
+        // El controlador hace un update (void o ignorado) y luego un read
+        when(generalService.readTipoCarta(1L)).thenReturn(dtoMock);
+
+        // 3. Ejecución
+        ResponseEntity<GeneralCartaDTO> response = generalController.updateTipoCarta(1L, request);
+
+        // 4. Verificaciones
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(dtoMock);
+
+        // Verificamos que se llamó al update con los datos del objeto 'request'
+        verify(generalService).updateTipoCarta(
+                eq(1L),
+                eq("Cartas Actualizado"),
+                eq("Nueva Desc"),
+                eq(20),
+                eq(false),
+                eq("Sin comentarios"),
+                eq(List.of(50L)), // Resultado del stream().map()
+                eq(2),
+                eq(1),
+                eq(10L),
+                eq("imagen.png")
+        );
+
+        // Verificamos que se llamó al read para obtener la respuesta final
+        verify(generalService).readTipoCarta(1L);
+    }
+
+	@Test
+    void crearTipoClasificacion_devuelveIdYStatusCreated() {
+        // 1. Preparar el objeto de entrada (Request Body)
+        General request = new General();
+        request.setTitulo("Nueva Clasificación");
+        request.setDescripcion("Descripción de prueba");
+        request.setPuntuacion(15);
+        request.setRespVisible(true);
+        request.setComentariosRespVisible("Comentario Clasificación");
+
+        Tema tema = new Tema();
+        tema.setId(7L);
+        request.setTema(tema);
+
+        // 2. Preparar el objeto que devolverá el servicio (Mock)
+        General generalCreada = new General();
+        generalCreada.setId(500L); // El ID que esperamos recibir en la respuesta
+
+        when(generalService.crearGeneralClasificacion(
+                eq("Nueva Clasificación"),
+                eq("Descripción de prueba"),
+                eq(15),
+                eq(7L),
+                eq(true),
+                eq("Comentario Clasificación")
+        )).thenReturn(generalCreada);
+
+        // 3. Ejecución
+        ResponseEntity<Long> response = generalController.crearTipoClasificacion(request);
+
+        // 4. Verificaciones
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isEqualTo(500L);
+
+        // Verificamos que se llamó al servicio exactamente con los datos del request
+        verify(generalService).crearGeneralClasificacion(
+                any(), any(), any(), any(), any(), any()
+        );
+    }
+
+	// --- TESTS PARA UPDATE TIPO CRUCIGRAMA ---
+
+    @Test
+    void updateTipoCrucigrama_ok_devuelveStatusOk() {
+        // 1. Setup del Request válido (solo letras, sin espacios)
+        CrucigramaRequest request = new CrucigramaRequest();
+        Map<String, String> preguntasYRespuestas = new HashMap<>();
+        preguntasYRespuestas.put("¿Color del cielo?", "Azul");
+        request.setPreguntasYRespuestas(preguntasYRespuestas);
+
+        CrucigramaDTO dtoMock = mock(CrucigramaDTO.class);
+        when(generalService.updateTipoCrucigrama(eq(1L), any(CrucigramaRequest.class))).thenReturn(dtoMock);
+
+        // 2. Ejecución
+        ResponseEntity<CrucigramaDTO> response = generalController.updateTipoCrucigrama(1L, request);
+
+        // 3. Verificación
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(dtoMock);
+        verify(generalService).updateTipoCrucigrama(eq(1L), any());
+    }
+
+    @Test
+    void updateTipoCrucigrama_error_cuandoMapaEsNullOVacio() {
+        // Caso: Mapa null
+        CrucigramaRequest requestNull = new CrucigramaRequest();
+        requestNull.setPreguntasYRespuestas(null);
+
+        ResponseEntity<CrucigramaDTO> responseNull = generalController.updateTipoCrucigrama(1L, requestNull);
+        assertThat(responseNull.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
+        // Caso: Mapa vacío
+        CrucigramaRequest requestVacio = new CrucigramaRequest();
+        requestVacio.setPreguntasYRespuestas(new HashMap<>());
+
+        ResponseEntity<CrucigramaDTO> responseVacio = generalController.updateTipoCrucigrama(1L, requestVacio);
+        assertThat(responseVacio.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        
+        verifyNoInteractions(generalService);
+    }
+
+    @Test
+    void updateTipoCrucigrama_error_cuandoRespuestaContieneNumerosOSimbolos() {
+        // El regex ^[\p{L}]+$ solo permite letras
+        CrucigramaRequest requestInvalido = new CrucigramaRequest();
+        Map<String, String> mapaInvalido = new HashMap<>();
+        mapaInvalido.put("Pregunta 1", "Respuesta123"); // Contiene números
+        requestInvalido.setPreguntasYRespuestas(mapaInvalido);
+
+        ResponseEntity<CrucigramaDTO> response = generalController.updateTipoCrucigrama(1L, requestInvalido);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        verifyNoInteractions(generalService);
+    }
+
+    @Test
+    void updateTipoCrucigrama_error_cuandoRespuestaEsNull() {
+        CrucigramaRequest request = new CrucigramaRequest();
+        Map<String, String> mapa = new HashMap<>();
+        mapa.put("Pregunta", null); 
+        request.setPreguntasYRespuestas(mapa);
+
+        ResponseEntity<CrucigramaDTO> response = generalController.updateTipoCrucigrama(1L, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
 }

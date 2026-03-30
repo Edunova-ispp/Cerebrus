@@ -364,4 +364,58 @@ class OrdenacionServiceImplTest {
 
         verify(ordenacionRepository, never()).deleteById(any());
     }
+
+    // -------------------------------------------------------
+    // readOrdenacionMaestro
+    // -------------------------------------------------------
+
+    @Test
+    void readOrdenacionMaestro_exito_retornaOrdenacion() {
+        // 1. Mock de usuario maestro
+        when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        // 2. Mock del repositorio usando el método específico con valores
+        when(ordenacionRepository.findWithValoresById(10L)).thenReturn(Optional.of(ordenacion));
+
+        Ordenacion resultado = ordenacionService.readOrdenacionMaestro(10L);
+
+        // 3. Verificaciones
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getId()).isEqualTo(10L);
+        verify(ordenacionRepository).findWithValoresById(10L);
+    }
+
+    @Test
+    void readOrdenacionMaestro_noEsMaestro_lanzaAccessDeniedException() {
+        // 1. Mock de usuario alumno (no es instancia de Maestro)
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
+        assertThatThrownBy(() -> ordenacionService.readOrdenacionMaestro(10L))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("Solo un maestro puede leer");
+    }
+
+    @Test
+    void readOrdenacionMaestro_maestroDiferente_lanzaAccessDeniedException() {
+        // 1. Creamos otro maestro diferente al dueño del curso
+        Maestro otroMaestro = new Maestro();
+        otroMaestro.setId(99L);
+        when(usuarioService.findCurrentUser()).thenReturn(otroMaestro);
+        
+        // 2. La ordenación existe, pero su tema/curso pertenece al maestro original (ID 2L)
+        when(ordenacionRepository.findWithValoresById(10L)).thenReturn(Optional.of(ordenacion));
+
+        assertThatThrownBy(() -> ordenacionService.readOrdenacionMaestro(10L))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("No puedes leer actividades de cursos que no son tuyos");
+    }
+    
+    @Test
+    void readOrdenacionMaestro_noExiste_lanzaRuntimeException() {
+        when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        when(ordenacionRepository.findWithValoresById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> ordenacionService.readOrdenacionMaestro(99L))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("La actividad de ordenación no existe");
+    }
 }
