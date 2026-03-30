@@ -49,10 +49,10 @@ class RespuestaServiceImplTest {
 	@Captor
 	private ArgumentCaptor<RespuestaMaestro> respuestaCaptor;
 
-	// Test para el método crearRespuesta que verifica que se guarda correctamente una respuesta cuando el usuario 
+	// Test para el método crearRespuestaMaestro que verifica que se guarda correctamente una respuesta cuando el usuario 
 	// es un maestro y la pregunta existe
 	@Test
-	void crearRespuesta_guardaRespuesta_cuandoUsuarioEsMaestro_yPreguntaExiste() {
+	void crearRespuestaMaestro_guardaRespuesta_cuandoUsuarioEsMaestro_yPreguntaExiste() {
 		Maestro maestro = crearMaestro("maestro1", "m1@cerebrus.com");
 		maestro.setId(2L);
 		when(usuarioService.findCurrentUser()).thenReturn(maestro);
@@ -74,7 +74,7 @@ class RespuestaServiceImplTest {
 		when(preguntaRepository.findById(7L)).thenReturn(Optional.of(pregunta));
 		when(respuestaRepository.save(any(RespuestaMaestro.class))).thenAnswer(inv -> inv.getArgument(0));
 
-		RespuestaMaestro created = respuestaService.crearRespuesta("R1", "img.png", true, 7L);
+		RespuestaMaestro created = respuestaService.crearRespuestaMaestro("R1", "img.png", true, 7L);
 
 		assertThat(created).isNotNull();
 		verify(usuarioService).findCurrentUser();
@@ -87,14 +87,14 @@ class RespuestaServiceImplTest {
 		assertThat(saved.getPregunta()).isSameAs(pregunta);
 	}
 
-	// Test para el método crearRespuesta que verifica que se lanza una excepción de acceso denegado cuando el
+	// Test para el método crearRespuestaMaestro que verifica que se lanza una excepción de acceso denegado cuando el
 	// usuario no es un maestro
 	@Test
-	void crearRespuesta_lanzaAccessDenied_cuandoUsuarioNoEsMaestro() {
+	void crearRespuestaMaestro_lanzaAccessDenied_cuandoUsuarioNoEsMaestro() {
 		Usuario alumno = crearAlumno("alumno1", "a1@cerebrus.com");
 		when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
-		assertThatThrownBy(() -> respuestaService.crearRespuesta("R1", null, false, 7L))
+		assertThatThrownBy(() -> respuestaService.crearRespuestaMaestro("R1", null, false, 7L))
 				.isInstanceOf(AccessDeniedException.class)
 				.hasMessageContaining("Solo un maestro puede crear respuestas");
 
@@ -103,15 +103,15 @@ class RespuestaServiceImplTest {
 		verify(respuestaRepository, never()).save(any());
 	}
 
-	// Test para el método crearRespuesta que verifica que se lanza una excepción ResourceNotFound cuando
+	// Test para el método crearRespuestaMaestro que verifica que se lanza una excepción ResourceNotFound cuando
 	// la pregunta no existe
 	@Test
-	void crearRespuesta_lanzaResourceNotFound_cuandoPreguntaNoExiste() {
+	void crearRespuestaMaestro_lanzaResourceNotFound_cuandoPreguntaNoExiste() {
 		Maestro maestro = crearMaestro("maestro1", "m1@cerebrus.com");
 		when(usuarioService.findCurrentUser()).thenReturn(maestro);
 		when(preguntaRepository.findById(999L)).thenReturn(Optional.empty());
 
-		assertThatThrownBy(() -> respuestaService.crearRespuesta("R1", "img.png", true, 999L))
+		assertThatThrownBy(() -> respuestaService.crearRespuestaMaestro("R1", "img.png", true, 999L))
 				.isInstanceOf(ResourceNotFoundException.class)
 				.hasMessageContaining("La pregunta de la respuesta no existe");
 
@@ -120,9 +120,9 @@ class RespuestaServiceImplTest {
 		verify(respuestaRepository, never()).save(any());
 	}
 
-	// Test para el método crearRespuesta que verifica que se permite un valor null para el atributo correcta
+	// Test para el método crearRespuestaMaestro que verifica que se permite un valor null para el atributo correcta
 	@Test
-	void crearRespuesta_permitaCorrectaNull() {
+	void crearRespuestaMaestro_permitaCorrectaNull() {
 		Maestro maestro = crearMaestro("maestro1", "m1@cerebrus.com");
 		maestro.setId(2L);
 		when(usuarioService.findCurrentUser()).thenReturn(maestro);
@@ -144,44 +144,44 @@ class RespuestaServiceImplTest {
 		when(preguntaRepository.findById(7L)).thenReturn(Optional.of(pregunta));
 		when(respuestaRepository.save(any(RespuestaMaestro.class))).thenAnswer(inv -> inv.getArgument(0));
 
-		RespuestaMaestro created = respuestaService.crearRespuesta("R1", null, null, 7L);
+		RespuestaMaestro created = respuestaService.crearRespuestaMaestro("R1", null, null, 7L);
 
 		assertThat(created).isNotNull();
 		verify(respuestaRepository).save(respuestaCaptor.capture());
 		assertThat(respuestaCaptor.getValue().getCorrecta()).isNull();
 	}
 
-	// Test para el método readRespuesta que verifica que se devuelve la respuesta correcta cuando existe
+	// Test para el método encontrarRespuestaMaestroPorId que verifica que se devuelve la respuesta correcta cuando existe
 	@Test
-	void readRespuesta_devuelveRespuesta_cuandoExiste() {
+	void encontrarRespuestaMaestroPorId_devuelveRespuesta_cuandoExiste() {
 		RespuestaMaestro expected = new RespuestaMaestro();
 		expected.setId(1L);
 		when(respuestaRepository.findById(1L)).thenReturn(Optional.of(expected));
 
-		RespuestaMaestro found = respuestaService.readRespuesta(1L);
+		RespuestaMaestro found = respuestaService.encontrarRespuestaMaestroPorId(1L);
 
 		assertThat(found).isSameAs(expected);
 		verify(respuestaRepository).findById(1L);
 		verify(usuarioService, never()).findCurrentUser();
 	}
 
-	// Test para el método readRespuesta que verifica que se lanza una excepción ResourceNotFound cuando la respuesta
+	// Test para el método encontrarRespuestaMaestroPorId que verifica que se lanza una excepción ResourceNotFound cuando la respuesta
 	// no existe
 	@Test
-	void readRespuesta_lanzaResourceNotFound_cuandoNoExiste() {
+	void encontrarRespuestaMaestroPorId_lanzaResourceNotFound_cuandoNoExiste() {
 		when(respuestaRepository.findById(404L)).thenReturn(Optional.empty());
 
-		assertThatThrownBy(() -> respuestaService.readRespuesta(404L))
+		assertThatThrownBy(() -> respuestaService.encontrarRespuestaMaestroPorId(404L))
 				.isInstanceOf(ResourceNotFoundException.class)
 				.hasMessageContaining("La respuesta no existe");
 		verify(respuestaRepository).findById(404L);
 		verify(usuarioService, never()).findCurrentUser();
 	}
 
-	// Test para el método updateRespuesta que verifica que se actualiza y guarda correctamente una respuesta cuando el
+	// Test para el método actualizarRespuestaMaestro que verifica que se actualiza y guarda correctamente una respuesta cuando el
 	// usuario es un maestro y la respuesta existe
 	@Test
-	void updateRespuesta_actualizaYGuarda_cuandoUsuarioEsMaestro_yRespuestaExiste() {
+	void actualizarRespuestaMaestro_actualizaYGuarda_cuandoUsuarioEsMaestro_yRespuestaExiste() {
 		Maestro maestro = crearMaestro("maestro1", "m1@cerebrus.com");
 		maestro.setId(2L);
 		when(usuarioService.findCurrentUser()).thenReturn(maestro);
@@ -209,7 +209,7 @@ class RespuestaServiceImplTest {
 		when(respuestaRepository.findById(5L)).thenReturn(Optional.of(existing));
 		when(respuestaRepository.save(any(RespuestaMaestro.class))).thenAnswer(inv -> inv.getArgument(0));
 
-		RespuestaMaestro updated = respuestaService.updateRespuesta(5L, "new", null, true);
+		RespuestaMaestro updated = respuestaService.actualizarRespuestaMaestro(5L, "new", null, true);
 
 		assertThat(updated).isSameAs(existing);
 		assertThat(updated.getRespuesta()).isEqualTo("new");
@@ -220,14 +220,14 @@ class RespuestaServiceImplTest {
 		verify(respuestaRepository).save(existing);
 	}
 
-	// Test para el método updateRespuesta que verifica que se lanza una excepción AccessDenied cuando el
+	// Test para el método actualizarRespuestaMaestro que verifica que se lanza una excepción AccessDenied cuando el
 	// usuario no es un maestro
 	@Test
-	void updateRespuesta_lanzaAccessDenied_cuandoUsuarioNoEsMaestro() {
+	void actualizarRespuestaMaestro_lanzaAccessDenied_cuandoUsuarioNoEsMaestro() {
 		Usuario alumno = crearAlumno("alumno1", "a1@cerebrus.com");
 		when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
-		assertThatThrownBy(() -> respuestaService.updateRespuesta(5L, "new", "img.png", true))
+		assertThatThrownBy(() -> respuestaService.actualizarRespuestaMaestro(5L, "new", "img.png", true))
 				.isInstanceOf(AccessDeniedException.class)
 				.hasMessageContaining("Solo un maestro puede actualizar respuestas");
 
@@ -236,15 +236,15 @@ class RespuestaServiceImplTest {
 		verify(respuestaRepository, never()).save(any());
 	}
 
-	// Test para el método updateRespuesta que verifica que se lanza una excepción ResourceNotFound cuando la respuesta
+	// Test para el método actualizarRespuestaMaestro que verifica que se lanza una excepción ResourceNotFound cuando la respuesta
 	// no existe
 	@Test
-	void updateRespuesta_lanzaResourceNotFound_cuandoRespuestaNoExiste() {
+	void actualizarRespuestaMaestro_lanzaResourceNotFound_cuandoRespuestaNoExiste() {
 		Maestro maestro = crearMaestro("maestro1", "m1@cerebrus.com");
 		when(usuarioService.findCurrentUser()).thenReturn(maestro);
 		when(respuestaRepository.findById(404L)).thenReturn(Optional.empty());
 
-		assertThatThrownBy(() -> respuestaService.updateRespuesta(404L, "new", "img.png", true))
+		assertThatThrownBy(() -> respuestaService.actualizarRespuestaMaestro(404L, "new", "img.png", true))
 				.isInstanceOf(ResourceNotFoundException.class)
 				.hasMessageContaining("La respuesta no existe");
 
@@ -253,10 +253,10 @@ class RespuestaServiceImplTest {
 		verify(respuestaRepository, never()).save(any());
 	}
 
-	// Test para el método deleteRespuesta que verifica que se elimina correctamente una respuesta cuando el
+	// Test para el método eliminarRespuestaMaestroPorId que verifica que se elimina correctamente una respuesta cuando el
 	// usuario es un maestro y la respuesta existe
 	@Test
-	void deleteRespuesta_elimina_cuandoUsuarioEsMaestro_yRespuestaExiste() {
+	void eliminarRespuestaMaestroPorId_elimina_cuandoUsuarioEsMaestro_yRespuestaExiste() {
 		Maestro maestro = crearMaestro("maestro1", "m1@cerebrus.com");
 		maestro.setId(2L);
 		Pregunta pregunta = new Pregunta();
@@ -280,21 +280,21 @@ class RespuestaServiceImplTest {
 		existing.setPregunta(pregunta);
 		when(respuestaRepository.findById(9L)).thenReturn(Optional.of(existing));
 
-		respuestaService.deleteRespuesta(9L);
+		respuestaService.eliminarRespuestaMaestroPorId(9L);
 
 		verify(usuarioService).findCurrentUser();
 		verify(respuestaRepository).findById(9L);
 		verify(respuestaRepository).delete(existing);
 	}
 
-	// Test para el método deleteRespuesta que verifica que se lanza una excepción AccessDenied cuando el
+	// Test para el método eliminarRespuestaMaestroPorId que verifica que se lanza una excepción AccessDenied cuando el
 	// usuario no es un maestro
 	@Test
-	void deleteRespuesta_lanzaAccessDenied_cuandoUsuarioNoEsMaestro() {
+	void eliminarRespuestaMaestroPorId_lanzaAccessDenied_cuandoUsuarioNoEsMaestro() {
 		Usuario alumno = crearAlumno("alumno1", "a1@cerebrus.com");
 		when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
-		assertThatThrownBy(() -> respuestaService.deleteRespuesta(9L))
+		assertThatThrownBy(() -> respuestaService.eliminarRespuestaMaestroPorId(9L))
 				.isInstanceOf(AccessDeniedException.class)
 				.hasMessageContaining("Solo un maestro puede eliminar respuestas");
 
@@ -303,15 +303,15 @@ class RespuestaServiceImplTest {
 		verify(respuestaRepository, never()).delete(any());
 	}
 
-	// Test para el método deleteRespuesta que verifica que se lanza una excepción ResourceNotFound cuando la respuesta
+	// Test para el método eliminarRespuestaMaestroPorId que verifica que se lanza una excepción ResourceNotFound cuando la respuesta
 	// no existe
 	@Test
-	void deleteRespuesta_lanzaResourceNotFound_cuandoRespuestaNoExiste() {
+	void eliminarRespuestaMaestroPorId_lanzaResourceNotFound_cuandoRespuestaNoExiste() {
 		Maestro maestro = crearMaestro("maestro1", "m1@cerebrus.com");
 		when(usuarioService.findCurrentUser()).thenReturn(maestro);
 		when(respuestaRepository.findById(404L)).thenReturn(Optional.empty());
 
-		assertThatThrownBy(() -> respuestaService.deleteRespuesta(404L))
+		assertThatThrownBy(() -> respuestaService.eliminarRespuestaMaestroPorId(404L))
 				.isInstanceOf(ResourceNotFoundException.class)
 				.hasMessageContaining("La respuesta no existe");
 

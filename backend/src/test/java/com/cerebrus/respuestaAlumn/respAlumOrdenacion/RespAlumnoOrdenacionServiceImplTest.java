@@ -72,10 +72,10 @@ class RespAlumnoOrdenacionServiceImplTest {
         ordenacion.setComentariosRespVisible("Muy bien");
     }
 
-    // ==================== crearRespAlumnoOrdenacion ====================
+    // ==================== crearRespuestaAlumnoOrdenacion ====================
 
     @Test
-    void crearRespAlumnoOrdenacion_respuestaCorrecta_guardaYCalculaNotaYPuntuacion() {
+    void crearRespuestaAlumnoOrdenacion_respuestaCorrecta_guardaYCalculaNotaYPuntuacion() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
         when(ordenacionRepository.findById(20L)).thenReturn(Optional.of(ordenacion));
@@ -83,7 +83,7 @@ class RespAlumnoOrdenacionServiceImplTest {
                 .thenAnswer(inv -> inv.getArgument(0));
 
         RespAlumnoOrdenacionCreateResponse resultado =
-                respAlumnoOrdenacionService.crearRespAlumnoOrdenacion(10L, List.of("A", "B", "C"), 20L);
+                respAlumnoOrdenacionService.crearRespuestaAlumnoOrdenacion(10L, List.of("A", "B", "C"), 20L);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.getRespAlumnoOrdenacion().getCorrecta()).isTrue();
@@ -94,7 +94,7 @@ class RespAlumnoOrdenacionServiceImplTest {
     }
 
     @Test
-    void crearRespAlumnoOrdenacion_respuestaIncorrecta_noActualizaActividadAlumno() {
+    void crearRespuestaAlumnoOrdenacion_respuestaIncorrecta_noActualizaActividadAlumno() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
         when(ordenacionRepository.findById(20L)).thenReturn(Optional.of(ordenacion));
@@ -102,7 +102,7 @@ class RespAlumnoOrdenacionServiceImplTest {
                 .thenAnswer(inv -> inv.getArgument(0));
 
         RespAlumnoOrdenacionCreateResponse resultado =
-                respAlumnoOrdenacionService.crearRespAlumnoOrdenacion(10L, List.of("C", "B", "A"), 20L);
+                respAlumnoOrdenacionService.crearRespuestaAlumnoOrdenacion(10L, List.of("C", "B", "A"), 20L);
 
         assertThat(resultado.getRespAlumnoOrdenacion().getCorrecta()).isFalse();
         assertThat(actividadAlumno.getFechaFin()).isEqualTo(LocalDateTime.of(1970, 1, 1, 0, 0)); // Default value, not updated for incorrect response
@@ -110,7 +110,7 @@ class RespAlumnoOrdenacionServiceImplTest {
     }
 
     @Test
-    void crearRespAlumnoOrdenacion_conFallosPrevios_notaSeReduceCorrectamente() {
+    void crearRespuestaAlumnoOrdenacion_conFallosPrevios_notaSeReduceCorrectamente() {
         // Add 3 previous incorrect responses
         for (int i = 0; i < 3; i++) {
             RespAlumnoOrdenacion respIncorrecta = new RespAlumnoOrdenacion();
@@ -125,13 +125,13 @@ class RespAlumnoOrdenacionServiceImplTest {
         when(respAlumnoOrdenacionRepository.save(any(RespAlumnoOrdenacion.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
-        respAlumnoOrdenacionService.crearRespAlumnoOrdenacion(10L, List.of("A", "B", "C"), 20L);
+        respAlumnoOrdenacionService.crearRespuestaAlumnoOrdenacion(10L, List.of("A", "B", "C"), 20L);
 
         assertThat(actividadAlumno.getNota()).isEqualTo(7); // 10 - 3 fallos
     }
 
     @Test
-    void crearRespAlumnoOrdenacion_muchosFallos_notaMinima1() {
+    void crearRespuestaAlumnoOrdenacion_muchosFallos_notaMinima1() {
         // Add 15 previous incorrect responses
         for (int i = 0; i < 15; i++) {
             RespAlumnoOrdenacion respIncorrecta = new RespAlumnoOrdenacion();
@@ -146,13 +146,13 @@ class RespAlumnoOrdenacionServiceImplTest {
         when(respAlumnoOrdenacionRepository.save(any(RespAlumnoOrdenacion.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
-        respAlumnoOrdenacionService.crearRespAlumnoOrdenacion(10L, List.of("A", "B", "C"), 20L);
+        respAlumnoOrdenacionService.crearRespuestaAlumnoOrdenacion(10L, List.of("A", "B", "C"), 20L);
 
         assertThat(actividadAlumno.getNota()).isEqualTo(1); // nunca menor que 1
     }
 
     @Test
-    void crearRespAlumnoOrdenacion_respVisibleTrue_devuelveComentario() {
+    void crearRespuestaAlumnoOrdenacion_respVisibleTrue_devuelveComentario() {
         ordenacion.setRespVisible(true);
         ordenacion.setComentariosRespVisible("Excelente respuesta");
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
@@ -162,13 +162,13 @@ class RespAlumnoOrdenacionServiceImplTest {
                 .thenAnswer(inv -> inv.getArgument(0));
 
         RespAlumnoOrdenacionCreateResponse resultado =
-                respAlumnoOrdenacionService.crearRespAlumnoOrdenacion(10L, List.of("A", "B", "C"), 20L);
+                respAlumnoOrdenacionService.crearRespuestaAlumnoOrdenacion(10L, List.of("A", "B", "C"), 20L);
 
         assertThat(resultado.getComentario()).isEqualTo("Excelente respuesta");
     }
 
     @Test
-    void crearRespAlumnoOrdenacion_respVisibleFalse_devuelveComentarioVacio() {
+    void crearRespuestaAlumnoOrdenacion_respVisibleFalse_devuelveComentarioVacio() {
         ordenacion.setRespVisible(false);
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
@@ -177,17 +177,17 @@ class RespAlumnoOrdenacionServiceImplTest {
                 .thenAnswer(inv -> inv.getArgument(0));
 
         RespAlumnoOrdenacionCreateResponse resultado =
-                respAlumnoOrdenacionService.crearRespAlumnoOrdenacion(10L, List.of("A", "B", "C"), 20L);
+                respAlumnoOrdenacionService.crearRespuestaAlumnoOrdenacion(10L, List.of("A", "B", "C"), 20L);
 
         assertThat(resultado.getComentario()).isEmpty();
     }
 
     @Test
-    void crearRespAlumnoOrdenacion_usuarioNoAlumno_lanzaAccessDeniedException() {
+    void crearRespuestaAlumnoOrdenacion_usuarioNoAlumno_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
 
         assertThatThrownBy(() ->
-                respAlumnoOrdenacionService.crearRespAlumnoOrdenacion(10L, List.of("A", "B", "C"), 20L))
+                respAlumnoOrdenacionService.crearRespuestaAlumnoOrdenacion(10L, List.of("A", "B", "C"), 20L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un alumno puede crear respuestas de alumno a actividades de ordenación");
 
@@ -197,12 +197,12 @@ class RespAlumnoOrdenacionServiceImplTest {
     }
 
     @Test
-    void crearRespAlumnoOrdenacion_actividadAlumnoNoExiste_lanzaRuntimeException() {
+    void crearRespuestaAlumnoOrdenacion_actividadAlumnoNoExiste_lanzaRuntimeException() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                respAlumnoOrdenacionService.crearRespAlumnoOrdenacion(99L, List.of("A", "B", "C"), 20L))
+                respAlumnoOrdenacionService.crearRespuestaAlumnoOrdenacion(99L, List.of("A", "B", "C"), 20L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La actividad del alumno no existe");
 
@@ -210,13 +210,13 @@ class RespAlumnoOrdenacionServiceImplTest {
     }
 
     @Test
-    void crearRespAlumnoOrdenacion_ordenacionNoExiste_lanzaRuntimeException() {
+    void crearRespuestaAlumnoOrdenacion_ordenacionNoExiste_lanzaRuntimeException() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
         when(ordenacionRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                respAlumnoOrdenacionService.crearRespAlumnoOrdenacion(10L, List.of("A", "B", "C"), 99L))
+                respAlumnoOrdenacionService.crearRespuestaAlumnoOrdenacion(10L, List.of("A", "B", "C"), 99L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La actividad de ordenación no existe");
 
@@ -224,7 +224,7 @@ class RespAlumnoOrdenacionServiceImplTest {
     }
 
     @Test
-    void crearRespAlumnoOrdenacion_numFallosNull_trataComo0YNotaEs10() {
+    void crearRespuestaAlumnoOrdenacion_numFallosNull_trataComo0YNotaEs10() {
         // Don't add any previous responses, so numFallos should be 0
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
@@ -232,21 +232,21 @@ class RespAlumnoOrdenacionServiceImplTest {
         when(respAlumnoOrdenacionRepository.save(any(RespAlumnoOrdenacion.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
-        respAlumnoOrdenacionService.crearRespAlumnoOrdenacion(10L, List.of("A", "B", "C"), 20L);
+        respAlumnoOrdenacionService.crearRespuestaAlumnoOrdenacion(10L, List.of("A", "B", "C"), 20L);
 
         assertThat(actividadAlumno.getNota()).isEqualTo(10);
     }
 
-    // ==================== readRespAlumnoOrdenacion ====================
+    // ==================== encontrarRespuestaAlumnoOrdenacionPorId ====================
 
     @Test
-    void readRespAlumnoOrdenacion_existente_retornaRespuesta() {
+    void encontrarRespuestaAlumnoOrdenacionPorId_existente_retornaRespuesta() {
         RespAlumnoOrdenacion resp = new RespAlumnoOrdenacion();
         resp.setId(100L);
         resp.setCorrecta(true);
         when(respAlumnoOrdenacionRepository.findById(100L)).thenReturn(Optional.of(resp));
 
-        RespAlumnoOrdenacion resultado = respAlumnoOrdenacionService.readRespAlumnoOrdenacion(100L);
+        RespAlumnoOrdenacion resultado = respAlumnoOrdenacionService.encontrarRespuestaAlumnoOrdenacionPorId(100L);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.getId()).isEqualTo(100L);
@@ -254,22 +254,22 @@ class RespAlumnoOrdenacionServiceImplTest {
     }
 
     @Test
-    void readRespAlumnoOrdenacion_correctaFalse_retornaRespuestaConCorrectaFalse() {
+    void encontrarRespuestaAlumnoOrdenacionPorId_correctaFalse_retornaRespuestaConCorrectaFalse() {
         RespAlumnoOrdenacion resp = new RespAlumnoOrdenacion();
         resp.setId(101L);
         resp.setCorrecta(false);
         when(respAlumnoOrdenacionRepository.findById(101L)).thenReturn(Optional.of(resp));
 
-        RespAlumnoOrdenacion resultado = respAlumnoOrdenacionService.readRespAlumnoOrdenacion(101L);
+        RespAlumnoOrdenacion resultado = respAlumnoOrdenacionService.encontrarRespuestaAlumnoOrdenacionPorId(101L);
 
         assertThat(resultado.getCorrecta()).isFalse();
     }
 
     @Test
-    void readRespAlumnoOrdenacion_noExiste_lanzaRuntimeException() {
+    void encontrarRespuestaAlumnoOrdenacionPorId_noExiste_lanzaRuntimeException() {
         when(respAlumnoOrdenacionRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> respAlumnoOrdenacionService.readRespAlumnoOrdenacion(99L))
+        assertThatThrownBy(() -> respAlumnoOrdenacionService.encontrarRespuestaAlumnoOrdenacionPorId(99L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La respuesta del alumno a la actividad de ordenación no existe");
     }

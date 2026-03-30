@@ -37,8 +37,8 @@ public class ActividadAlumnoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<ActividadAlumnoDTO> crearActividadAlumno(@RequestBody @Valid ActividadAlumnoDTO actividadAlumno) {
-        ActividadAlumno actividadAlumnoCreada = actividadAlumnoService.crearActividadAlumno(
+    public ResponseEntity<ActividadAlumnoDTO> crearActAlumno(@RequestBody @Valid ActividadAlumnoDTO actividadAlumno) {
+        ActividadAlumno actividadAlumnoCreada = actividadAlumnoService.crearActAlumno(
             actividadAlumno.getPuntuacion() == null ? 0 : actividadAlumno.getPuntuacion(),
             actividadAlumno.getFechaInicio() == null ? LocalDateTime.now() : actividadAlumno.getFechaInicio(),
             actividadAlumno.getFechaFin() == null ? LocalDateTime.of(1970, 1, 1, 0, 0) : actividadAlumno.getFechaFin(),
@@ -47,20 +47,31 @@ public class ActividadAlumnoController {
             actividadAlumno.getAlumnoId(),
             actividadAlumno.getActividadId()
         );
-        return new ResponseEntity<>(toDto(actividadAlumnoCreada), HttpStatus.CREATED);
+        return new ResponseEntity<>(obtenerActAlumnoDto(actividadAlumnoCreada), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumnoDTO> readActividadAlumno(@PathVariable Long id) {
-        ActividadAlumno actividadAlumno = actividadAlumnoService.readActividadAlumno(id);
-        return new ResponseEntity<>(toDto(actividadAlumno), HttpStatus.OK);
+    public ResponseEntity<ActividadAlumnoDTO> encontrarActAlumnoPorId(@PathVariable Long id) {
+        ActividadAlumno actividadAlumno = actividadAlumnoService.encontrarActAlumnoPorId(id);
+        return new ResponseEntity<>(obtenerActAlumnoDto(actividadAlumno), HttpStatus.OK);
+    }
+
+    @GetMapping("/alumno/{alumnoId}/actividad/{actividadId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ActividadAlumnoDTO> encontrarActAlumnoPorAlumnoIdYActId(
+        @PathVariable Long alumnoId,
+        @PathVariable Long actividadId
+    ) {
+        return actividadAlumnoService.encontrarActAlumnoPorAlumnoIdYActId(alumnoId, actividadId)
+            .map(aa -> new ResponseEntity<>(obtenerActAlumnoDto(aa), HttpStatus.OK))
+            .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PutMapping("/update/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumnoDTO> updateActividadAlumno(@PathVariable Long id, @RequestBody @Valid ActividadAlumnoDTO actividadAlumno) {
-        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.updateActividadAlumno(
+    public ResponseEntity<ActividadAlumnoDTO> actualizarActAlumno(@PathVariable Long id, @RequestBody @Valid ActividadAlumnoDTO actividadAlumno) {
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.actualizarActAlumno(
             id,
             actividadAlumno.getPuntuacion(),
             actividadAlumno.getFechaInicio(),
@@ -68,73 +79,62 @@ public class ActividadAlumnoController {
             actividadAlumno.getNota(),
             actividadAlumno.getNumAbandonos()
         );
-        return new ResponseEntity<>(toDto(actividadAlumnoActualizada), HttpStatus.OK);
+        return new ResponseEntity<>(obtenerActAlumnoDto(actividadAlumnoActualizada), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> deleteActividadAlumno(@PathVariable Long id) {
-        actividadAlumnoService.deleteActividadAlumno(id);
+    public ResponseEntity<Void> eliminarActAlumnoPorId(@PathVariable Long id) {
+        actividadAlumnoService.eliminarActAlumnoPorId(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/ensure/{actividadId}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Integer> ensureActividadAlumno(@PathVariable Long actividadId) {
-        Integer exists = actividadAlumnoService.ensureActividadAlumno(actividadId);
+    public ResponseEntity<Integer> existeActAlumnoPorActIdYCurrentUserId(@PathVariable Long actividadId) {
+        Integer exists = actividadAlumnoService.existeActAlumnoPorActIdYCurrentUserId(actividadId);
         return new ResponseEntity<>(exists, HttpStatus.OK);
-    }
-
-    @GetMapping("/alumno/{alumnoId}/actividad/{actividadId}")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumnoDTO> readActividadAlumnoByAlumnoIdAndActividadId(
-        @PathVariable Long alumnoId,
-        @PathVariable Long actividadId
-    ) {
-        return actividadAlumnoService.readActividadAlumnoByAlumnoIdAndActividadId(alumnoId, actividadId)
-            .map(aa -> new ResponseEntity<>(toDto(aa), HttpStatus.OK))
-            .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping("/{id}/abandon")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumnoDTO> abandonarActividadAlumno(@PathVariable Long id) {
-        ActividadAlumno updated = actividadAlumnoService.abandonarActividadAlumno(id);
-        return new ResponseEntity<>(toDto(updated), HttpStatus.OK);
+    public ResponseEntity<ActividadAlumnoDTO> abandonarActAlumnoPorId(@PathVariable Long id) {
+        ActividadAlumno updated = actividadAlumnoService.abandonarActAlumnoPorId(id);
+        return new ResponseEntity<>(obtenerActAlumnoDto(updated), HttpStatus.OK);
     }
 
     
     @PutMapping("/corregir-manualmente/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoManual(@PathVariable Long id, @RequestBody CorreccionManualDTO correccionManualDTO) {
-        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoManual(id, correccionManualDTO.getNuevaNota(), correccionManualDTO.getNuevasCorreccionesRespuestasIds());
-        return new ResponseEntity<>(toDto(actividadAlumnoActualizada), HttpStatus.OK);
+    public ResponseEntity<ActividadAlumnoDTO> corregirActAlumnoManual(@PathVariable Long id, @RequestBody CorreccionManualDTO correccionManualDTO) {
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActAlumnoManual(id, correccionManualDTO.getNuevaNota(), correccionManualDTO.getNuevasCorreccionesRespuestasIds());
+        return new ResponseEntity<>(obtenerActAlumnoDto(actividadAlumnoActualizada), HttpStatus.OK);
     }
     
     @PutMapping("/corregir-automaticamente/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoAutomaticamente(
+    public ResponseEntity<ActividadAlumnoDTO> corregirActAlumnoAutomaticamente(
         @PathVariable Long id,
         @RequestBody(required = false) List<Long> respuestasIds
     ) {
         // cuando la petición no envía cuerpo el parámetro llega como null, el
         // servicio se encarga de recopilar los ids a partir de las respuestas
-        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamente(id, respuestasIds);
-        return new ResponseEntity<>(toDto(actividadAlumnoActualizada), HttpStatus.OK);
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActAlumnoAutomaticamente(id, respuestasIds);
+        return new ResponseEntity<>(obtenerActAlumnoDto(actividadAlumnoActualizada), HttpStatus.OK);
     }
     
     @PutMapping("/corregir-automaticamente-general-clasificacion/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<ActividadAlumnoDTO> corregirActividadAlumnoAutomaticamenteGeneralClasificacion(
+    public ResponseEntity<ActividadAlumnoDTO> corregirActAlumnoAutomaticamenteClasificacion(
         @PathVariable Long id,
         @RequestBody(required = false) List<Long> respuestasIds
     ) {
-        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActividadAlumnoAutomaticamenteGeneralClasificacion(id, respuestasIds);
-        ActividadAlumnoDTO actividadAlumnoDTO = toDto(actividadAlumnoActualizada);
+        ActividadAlumno actividadAlumnoActualizada = actividadAlumnoService.corregirActAlumnoAutomaticamenteClasificacion(id, respuestasIds);
+        ActividadAlumnoDTO actividadAlumnoDTO = obtenerActAlumnoDto(actividadAlumnoActualizada);
         return new ResponseEntity<>(actividadAlumnoDTO, HttpStatus.OK);
     }
 
-    private static ActividadAlumnoDTO toDto(ActividadAlumno aa) {
+    private static ActividadAlumnoDTO obtenerActAlumnoDto(ActividadAlumno aa) {
         return new ActividadAlumnoDTO(
             aa.getId(),
             aa.getTiempoMinutos(),

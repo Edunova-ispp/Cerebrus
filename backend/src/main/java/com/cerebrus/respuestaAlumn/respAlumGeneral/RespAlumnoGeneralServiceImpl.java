@@ -64,7 +64,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
 
     @Override
     @Transactional
-    public RespAlumnoGeneralCreateResponse crearRespAlumnoGeneral(Long actAlumnoId, Long respuestaId, Long preguntaId) {
+    public RespAlumnoGeneralCreateResponse crearRespuestaAlumnoGeneral(Long actAlumnoId, Long respuestaId, Long preguntaId) {
 
         Usuario current = usuarioService.findCurrentUser();
         if (!(current instanceof Alumno)) {
@@ -99,7 +99,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
 
     @Override
     @Transactional(readOnly = true)
-    public RespAlumnoGeneral readRespAlumnoGeneral(Long id) {
+    public RespAlumnoGeneral encontrarRespuestaAlumnoGeneralPorId(Long id) {
         return respAlumnoGeneralRepository.findById(id).orElseThrow(() -> new RuntimeException("La respuesta del alumno no existe"));
     }
 
@@ -108,7 +108,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
 
     @Override
     @Transactional
-    public RespAlumnoGeneral updateRespAlumnoGeneral(Long id,Boolean correcta, Long actAlumnoId, String respuesta, Long preguntaId) {
+    public RespAlumnoGeneral actualizarRespuestaAlumnoGeneral(Long id,Boolean correcta, Long actAlumnoId, String respuesta, Long preguntaId) {
         RespAlumnoGeneral respAlumnoGeneral = respAlumnoGeneralRepository.findById(id).orElseThrow(() -> new RuntimeException("La respuesta del alumno no existe"));
         Usuario current = usuarioService.findCurrentUser();
         if (!(current instanceof Alumno)) {
@@ -126,7 +126,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
 
     @Override
     @Transactional
-    public void deleteRespAlumnoGeneral(Long id) {
+    public void eliminarRespuestaAlumnoGeneralPorId(Long id) {
         RespAlumnoGeneral respAlumnoGeneral = respAlumnoGeneralRepository.findById(id).orElseThrow(() -> new RuntimeException("La respuesta del alumno no existe"));
         Usuario current = usuarioService.findCurrentUser();
         if (!(current instanceof Alumno)) {
@@ -143,7 +143,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     public Boolean corregirRespuestaAlumnoGeneral(Long id) {
         RespAlumnoGeneral respuestaAlumno = respAlumnoGeneralRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("RespuestaAlumnoGeneral", "id", id));
-        List<RespuestaMaestro> respuestas = respuestaService.encontrarRespuestasPorPreguntaId(respuestaAlumno.getPregunta().getId());
+        List<RespuestaMaestro> respuestas = respuestaService.encontrarRespuestasMaestroPorPreguntaId(respuestaAlumno.getPregunta().getId());
         Boolean esCorrecta = false;
 
         for (RespuestaMaestro r : respuestas) {
@@ -161,7 +161,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     public boolean corregirRespuestaAlumnoGeneralClasificacion(Long id) {
         RespAlumnoGeneral respuestaAlumno = respAlumnoGeneralRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("RespuestaAlumnoGeneral", "id", id));
-        List<RespuestaMaestro> respuestas = respuestaService.encontrarRespuestasPorPreguntaId(respuestaAlumno.getPregunta().getId());
+        List<RespuestaMaestro> respuestas = respuestaService.encontrarRespuestasMaestroPorPreguntaId(respuestaAlumno.getPregunta().getId());
         Boolean esCorrecta = false;
         System.out.println("Respuesta del alumno: " + respuestaAlumno.getRespuesta());
         for (RespuestaMaestro r : respuestas) {
@@ -171,9 +171,6 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
                 }
         }
         
-           
-        
-
         return esCorrecta;
     }
 
@@ -214,7 +211,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
                 throw new IllegalArgumentException("La pregunta con id " + preguntaId + " no pertenece al crucigrama con id " + crucigramaId);
             }
             
-            RespuestaMaestro respuestaCorrecta = respuestaService.encontrarRespuestasPorPreguntaId(preguntaId).stream()
+            RespuestaMaestro respuestaCorrecta = respuestaService.encontrarRespuestasMaestroPorPreguntaId(preguntaId).stream()
                 .filter(RespuestaMaestro::getCorrecta)
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("No se encontró una respuesta correcta para la pregunta con id " + preguntaId));
@@ -301,7 +298,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
                 throw new IllegalArgumentException("La pregunta " + preguntaId + " no pertenece a la actividad");
             }
 
-            RespuestaMaestro modeloRespuesta = respuestaService.encontrarRespuestasPorPreguntaId(preguntaId).stream()
+            RespuestaMaestro modeloRespuesta = respuestaService.encontrarRespuestasMaestroPorPreguntaId(preguntaId).stream()
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("No se encontró modelo de respuesta para la pregunta"));
 

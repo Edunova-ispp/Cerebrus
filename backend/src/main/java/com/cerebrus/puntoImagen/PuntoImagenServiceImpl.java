@@ -1,4 +1,4 @@
-package com.cerebrus.puntoImage;
+package com.cerebrus.puntoImagen;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 import com.cerebrus.exceptions.ResourceNotFoundException;
-import com.cerebrus.puntoImage.dto.PuntoImagenDTO;
+import com.cerebrus.puntoImagen.dto.PuntoImagenDTO;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
@@ -38,7 +38,7 @@ public class PuntoImagenServiceImpl implements PuntoImagenService {
 
     @Override
     @Transactional(readOnly = true)
-    public PuntoImagen obtenerPuntoImagenPorId(Long id) {
+    public PuntoImagen encontrarPuntoImagenPorId(Long id) {
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro) && !(u instanceof Alumno)) {
             throw new AccessDeniedException("Solo un usuario logueado como alumno o maestro puede obtener los puntos de la imagen");
@@ -49,27 +49,28 @@ public class PuntoImagenServiceImpl implements PuntoImagenService {
     }
 
     @Override
+    public PuntoImagen encontrarPuntoImagenPorCoordenada(Long marcarImagenId, Integer pixelX, Integer pixelY) {
+        return puntoImagenRepository.findByMarcarImagenIdAndPixelXAndPixelY(marcarImagenId, pixelX, pixelY)
+                .orElseThrow(() -> new ResourceNotFoundException("PuntoImagen", "marcarImagenId, pixelX, pixelY", marcarImagenId + ", " + pixelX + ", " + pixelY));
+    }
+
+    @Override
     public PuntoImagen actualizarPuntoImagen(PuntoImagenDTO puntoImagenDTO) {
-        PuntoImagen puntoImagen = obtenerPuntoImagenPorId(puntoImagenDTO.getId());
+        PuntoImagen puntoImagen = encontrarPuntoImagenPorId(puntoImagenDTO.getId());
         puntoImagen.setRespuesta(puntoImagenDTO.getRespuesta());
         return puntoImagenRepository.save(puntoImagen);
     }
 
     @Override
     @Transactional
-    public void eliminarPuntoImagen(Long id) {
+    public void eliminarPuntoImagenPorId(Long id) {
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede eliminar puntos de la imagen");
         }
 
-        PuntoImagen puntoImagen = obtenerPuntoImagenPorId(id);
+        PuntoImagen puntoImagen = encontrarPuntoImagenPorId(id);
         puntoImagenRepository.delete(puntoImagen);
     }
 
-    @Override
-    public PuntoImagen encontrarPuntoImagenPorCoordenada(Long marcarImagenId, Integer pixelX, Integer pixelY) {
-        return puntoImagenRepository.findByMarcarImagenIdAndPixelXAndPixelY(marcarImagenId, pixelX, pixelY)
-                .orElseThrow(() -> new ResourceNotFoundException("PuntoImagen", "marcarImagenId, pixelX, pixelY", marcarImagenId + ", " + pixelX + ", " + pixelY));
-    }
 }

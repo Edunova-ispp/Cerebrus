@@ -73,7 +73,7 @@ public class OrdenacionServiceImpl implements OrdenacionService {
 
     @Override
     @Transactional(readOnly = true)
-    public Ordenacion readOrdenacion(Long id) {
+    public Ordenacion encontrarActOrdenacionPorId(Long id) {
         Usuario current = usuarioService.findCurrentUser();
         if (!(current instanceof Alumno)) {
             throw new AccessDeniedException("No tienes permiso para acceder a esta actividad");
@@ -98,7 +98,7 @@ public class OrdenacionServiceImpl implements OrdenacionService {
 
     @Override
     @Transactional(readOnly = true)
-    public Ordenacion readOrdenacionMaestro(Long id) {
+    public Ordenacion encontrarActOrdenacionMaestroPorId(Long id) {
 
         Usuario current = usuarioService.findCurrentUser();
         if (!(current instanceof Maestro)) {
@@ -122,7 +122,7 @@ public class OrdenacionServiceImpl implements OrdenacionService {
     }
 
     @Override
-    public Ordenacion updateActOrdenacion(Long id, String titulo, String descripcion, 
+    public Ordenacion actualizarActOrdenacion(Long id, String titulo, String descripcion, 
         Integer puntuacion, String imagen, Long temaId, Boolean respVisible, 
         String comentariosRespVisible, Integer posicion, List<String> valores) {
 
@@ -155,7 +155,7 @@ public class OrdenacionServiceImpl implements OrdenacionService {
     }
 
     @Override
-    public void deleteActOrdenacion(Long id) {
+    public void eliminarActOrdenacionPorId(Long id) {
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede eliminar actividades de ordenación");
@@ -167,10 +167,5 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         }
         
         ordenacionRepository.deleteById(id);
-    }
-
-    @Override 
-    public Ordenacion encontrarOrdenacionPorId(Long id) {
-        return ordenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
     }
 }

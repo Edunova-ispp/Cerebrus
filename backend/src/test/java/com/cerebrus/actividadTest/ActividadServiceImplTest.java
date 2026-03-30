@@ -48,12 +48,12 @@ class ActividadServiceImplTest {
     private ArgumentCaptor<Actividad> actividadCaptor;
 
     @Test
-    void crearActividadTeoria_temaNoExiste_lanzaIllegalArgumentException() {
+    void crearActTeoria_temaNoExiste_lanzaIllegalArgumentException() {
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro(1L));
-        when(temaService.obtenerTemaPorId(99L))
+        when(temaService.encontrarTemaPorId(99L))
                 .thenThrow(new IllegalArgumentException("Tema no encontrado con ID: 99"));
 
-        assertThatThrownBy(() -> actividadService.crearActividadTeoria("Titulo", "Desc", null, 99L))
+        assertThatThrownBy(() -> actividadService.crearActTeoria("Titulo", "Desc", null, 99L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Tema no encontrado");
 
@@ -61,27 +61,27 @@ class ActividadServiceImplTest {
     }
 
     @Test
-    void crearActividadTeoria_usuarioNoEsMaestro_lanzaAccessDeniedException() {
+    void crearActTeoria_usuarioNoEsMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(new com.cerebrus.usuario.Usuario() {});
 
-        assertThatThrownBy(() -> actividadService.crearActividadTeoria("T", "D", null, 1L))
+        assertThatThrownBy(() -> actividadService.crearActTeoria("T", "D", null, 1L))
                 .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
 
         verify(actividadRepository, never()).save(any());
     }
 
     @Test
-    void crearActividadTeoria_maxPosicionNull_asignaPosicion1_yGuardaGeneralTeoria() {
+    void crearActTeoria_maxPosicionNull_asignaPosicion1_yGuardaGeneralTeoria() {
         Maestro propietario = crearMaestro(7L);
         Curso curso = crearCurso(propietario);
         Tema tema = crearTema(55L, curso);
 
         when(usuarioService.findCurrentUser()).thenReturn(propietario);
-        when(temaService.obtenerTemaPorId(55L)).thenReturn(tema);
+        when(temaService.encontrarTemaPorId(55L)).thenReturn(tema);
         when(actividadRepository.findMaxPosicionByTemaId(55L)).thenReturn(null);
         when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Actividad resultado = actividadService.crearActividadTeoria("Título", "Desc", null, 55L);
+        Actividad resultado = actividadService.crearActTeoria("Título", "Desc", null, 55L);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado).isInstanceOf(General.class);
@@ -103,72 +103,72 @@ class ActividadServiceImplTest {
     }
 
     @Test
-    void crearActividadTeoria_maxPosicion0_asignaPosicion1_yGuarda() {
+    void crearActTeoria_maxPosicion0_asignaPosicion1_yGuarda() {
         Maestro propietario = crearMaestro(7L);
         Curso curso = crearCurso(propietario);
         Tema tema = crearTema(56L, curso);
 
         when(usuarioService.findCurrentUser()).thenReturn(propietario);
-        when(temaService.obtenerTemaPorId(56L)).thenReturn(tema);
+        when(temaService.encontrarTemaPorId(56L)).thenReturn(tema);
         when(actividadRepository.findMaxPosicionByTemaId(56L)).thenReturn(0);
         when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        actividadService.crearActividadTeoria("T", "D", null, 56L);
+        actividadService.crearActTeoria("T", "D", null, 56L);
 
         verify(actividadRepository).save(actividadCaptor.capture());
         assertThat(actividadCaptor.getValue().getPosicion()).isEqualTo(1);
     }
 
     @Test
-    void crearActividadTeoria_maxPosicionMayor_asignaMaxMasUno_yGuarda() {
+    void crearActTeoria_maxPosicionMayor_asignaMaxMasUno_yGuarda() {
         Maestro propietario = crearMaestro(7L);
         Curso curso = crearCurso(propietario);
         Tema tema = crearTema(57L, curso);
 
         when(usuarioService.findCurrentUser()).thenReturn(propietario);
-        when(temaService.obtenerTemaPorId(57L)).thenReturn(tema);
+        when(temaService.encontrarTemaPorId(57L)).thenReturn(tema);
         when(actividadRepository.findMaxPosicionByTemaId(57L)).thenReturn(12);
         when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        actividadService.crearActividadTeoria("T", "D", null, 57L);
+        actividadService.crearActTeoria("T", "D", null, 57L);
 
         verify(actividadRepository).save(actividadCaptor.capture());
         assertThat(actividadCaptor.getValue().getPosicion()).isEqualTo(13);
     }
 
     @Test
-    void obtenerActividadesPorTema_listaVacia_devuelveVacio() {
+    void encontrarActividadesPorTema_listaVacia_devuelveVacio() {
         when(actividadRepository.findByTemaId(1L)).thenReturn(List.of());
 
-        List<Actividad> resultado = actividadService.ObtenerActividadesPorTema(1L);
+        List<Actividad> resultado = actividadService.encontrarActividadesPorTema(1L);
 
         assertThat(resultado).isEmpty();
         verify(actividadRepository).findByTemaId(1L);
     }
 
     @Test
-    void obtenerActividadesPorTema_conElementos_devuelveMismaLista() {
+    void encontrarActividadesPorTema_conElementos_devuelveMismaLista() {
         Actividad a1 = new Actividad() {};
         Actividad a2 = new Actividad() {};
         List<Actividad> lista = List.of(a1, a2);
         when(actividadRepository.findByTemaId(2L)).thenReturn(lista);
 
-        List<Actividad> resultado = actividadService.ObtenerActividadesPorTema(2L);
+        List<Actividad> resultado = actividadService.encontrarActividadesPorTema(2L);
 
         assertThat(resultado).containsExactly(a1, a2);
         verify(actividadRepository).findByTemaId(2L);
     }
 
         @Test
-    void encontrarActividadPorIdMaestro_usuarioNoEsMaestro_lanzaAccessDeniedException() {
+    void encontrarActTeoriaMaestroPorId_usuarioNoEsMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(new com.cerebrus.usuario.Usuario() {});
-        assertThatThrownBy(() -> actividadService.encontrarActividadPorIdMaestro(1L))
+        assertThatThrownBy(() -> actividadService.encontrarActTeoriaMaestroPorId(1L))
             .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
             .hasMessageContaining("No tienes permiso");
     }
 
     @Test
-    void encontrarActividadPorIdMaestro_maestroNoPropietario_lanzaAccessDeniedException() {
+    void encontrarActTeoriaMaestroPorId_maestroNoPropietario_lanzaAccessDeniedException() {
         Maestro maestro = crearMaestro(1L);
         Maestro otroMaestro = crearMaestro(2L);
         Curso curso = crearCurso(otroMaestro);
@@ -178,13 +178,13 @@ class ActividadServiceImplTest {
         actividad.setTema(tema);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(actividadRepository.findById(5L)).thenReturn(java.util.Optional.of(actividad));
-        assertThatThrownBy(() -> actividadService.encontrarActividadPorIdMaestro(5L))
+        assertThatThrownBy(() -> actividadService.encontrarActTeoriaMaestroPorId(5L))
             .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
             .hasMessageContaining("no es tuyo");
     }
 
     @Test
-    void encontrarActividadPorIdMaestro_maestroPropietario_devuelveActividad() {
+    void encontrarActTeoriaMaestroPorId_maestroPropietario_devuelveActividad() {
         Maestro maestro = crearMaestro(1L);
         Curso curso = crearCurso(maestro);
         Tema tema = crearTema(10L, curso);
@@ -193,20 +193,20 @@ class ActividadServiceImplTest {
         actividad.setTema(tema);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(actividadRepository.findById(5L)).thenReturn(java.util.Optional.of(actividad));
-        Actividad result = actividadService.encontrarActividadPorIdMaestro(5L);
+        Actividad result = actividadService.encontrarActTeoriaMaestroPorId(5L);
         assertThat(result).isSameAs(actividad);
     }
 
     @Test
-    void encontrarActividadPorIdAlumno_usuarioNoEsAlumno_lanzaAccessDeniedException() {
+    void encontrarActTeoriaPorId_usuarioNoEsAlumno_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(new com.cerebrus.usuario.Usuario() {});
-        assertThatThrownBy(() -> actividadService.encontrarActividadPorIdAlumno(1L))
+        assertThatThrownBy(() -> actividadService.encontrarActTeoriaPorId(1L))
             .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
             .hasMessageContaining("No tienes permiso");
     }
 
     @Test
-    void encontrarActividadPorIdAlumno_alumnoNoInscrito_lanzaAccessDeniedException() {
+    void encontrarActTeoriaPorId_alumnoNoInscrito_lanzaAccessDeniedException() {
         com.cerebrus.usuario.alumno.Alumno alumno = new com.cerebrus.usuario.alumno.Alumno();
         alumno.setId(1L);
         Maestro maestro = crearMaestro(2L);
@@ -219,13 +219,13 @@ class ActividadServiceImplTest {
         when(actividadRepository.findById(5L)).thenReturn(java.util.Optional.of(actividad));
         // No inscripciones
         curso.setInscripciones(List.of());
-        assertThatThrownBy(() -> actividadService.encontrarActividadPorIdAlumno(5L))
+        assertThatThrownBy(() -> actividadService.encontrarActTeoriaPorId(5L))
             .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
             .hasMessageContaining("no estás inscrito");
     }
 
     @Test
-    void encontrarActividadPorIdAlumno_cursoOculto_lanzaAccessDeniedException() {
+    void encontrarActTeoriaPorId_cursoOculto_lanzaAccessDeniedException() {
         com.cerebrus.usuario.alumno.Alumno alumno = new com.cerebrus.usuario.alumno.Alumno();
         alumno.setId(1L);
         Maestro maestro = crearMaestro(2L);
@@ -242,13 +242,13 @@ class ActividadServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadRepository.findById(5L)).thenReturn(java.util.Optional.of(actividad));
 
-        assertThatThrownBy(() -> actividadService.encontrarActividadPorIdAlumno(5L))
+        assertThatThrownBy(() -> actividadService.encontrarActTeoriaPorId(5L))
             .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
             .hasMessageContaining("curso oculto");
     }
 
     @Test
-    void encontrarActividadPorIdAlumno_alumnoInscrito_devuelveActividad() {
+    void encontrarActTeoriaPorId_alumnoInscrito_devuelveActividad() {
         com.cerebrus.usuario.alumno.Alumno alumno = new com.cerebrus.usuario.alumno.Alumno();
         alumno.setId(1L);
         Maestro maestro = crearMaestro(2L);
@@ -262,12 +262,12 @@ class ActividadServiceImplTest {
         curso.setInscripciones(List.of(inscripcion));
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadRepository.findById(5L)).thenReturn(java.util.Optional.of(actividad));
-        Actividad result = actividadService.encontrarActividadPorIdAlumno(5L);
+        Actividad result = actividadService.encontrarActTeoriaPorId(5L);
         assertThat(result).isSameAs(actividad);
     }
 
     @Test
-    void encontrarActividadPorIdAlumno_actividadFuturaBloqueada_lanzaAccessDeniedException() {
+    void encontrarActTeoriaPorId_actividadFuturaBloqueada_lanzaAccessDeniedException() {
         com.cerebrus.usuario.alumno.Alumno alumno = new com.cerebrus.usuario.alumno.Alumno();
         alumno.setId(1L);
         Maestro maestro = crearMaestro(2L);
@@ -293,13 +293,13 @@ class ActividadServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadRepository.findById(200L)).thenReturn(java.util.Optional.of(actividad2));
 
-        assertThatThrownBy(() -> actividadService.encontrarActividadPorIdAlumno(200L))
+        assertThatThrownBy(() -> actividadService.encontrarActTeoriaPorId(200L))
             .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
             .hasMessageContaining("todavía no está desbloqueada");
     }
 
     @Test
-    void encontrarActividadPorIdAlumno_siguienteDesbloqueadaSiAnteriorTerminada_devuelveActividad() {
+    void encontrarActTeoriaPorId_siguienteDesbloqueadaSiAnteriorTerminada_devuelveActividad() {
         com.cerebrus.usuario.alumno.Alumno alumno = new com.cerebrus.usuario.alumno.Alumno();
         alumno.setId(1L);
         Maestro maestro = crearMaestro(2L);
@@ -330,20 +330,20 @@ class ActividadServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadRepository.findById(200L)).thenReturn(java.util.Optional.of(actividad2));
 
-        Actividad result = actividadService.encontrarActividadPorIdAlumno(200L);
+        Actividad result = actividadService.encontrarActTeoriaPorId(200L);
         assertThat(result).isSameAs(actividad2);
     }
 
     @Test
-    void deleteActividad_usuarioNoEsMaestro_lanzaAccessDeniedException() {
+    void eliminarActTeoriaPorId_usuarioNoEsMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(new com.cerebrus.usuario.Usuario() {});
-        assertThatThrownBy(() -> actividadService.deleteActividad(1L))
+        assertThatThrownBy(() -> actividadService.eliminarActTeoriaPorId(1L))
             .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
             .hasMessageContaining("Solo un maestro");
     }
 
     @Test
-    void deleteActividad_maestroNoPropietario_lanzaAccessDeniedException() {
+    void eliminarActTeoriaPorId_maestroNoPropietario_lanzaAccessDeniedException() {
         Maestro maestro = crearMaestro(1L);
         Maestro otroMaestro = crearMaestro(2L);
         Curso curso = crearCurso(otroMaestro);
@@ -353,13 +353,13 @@ class ActividadServiceImplTest {
         actividad.setTema(tema);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(actividadRepository.findById(5L)).thenReturn(java.util.Optional.of(actividad));
-        assertThatThrownBy(() -> actividadService.deleteActividad(5L))
+        assertThatThrownBy(() -> actividadService.eliminarActTeoriaPorId(5L))
             .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
             .hasMessageContaining("no son tuyos");
     }
 
     @Test
-    void deleteActividad_maestroPropietario_eliminaActividad() {
+    void eliminarActTeoriaPorId_maestroPropietario_eliminaActividad() {
         Maestro maestro = crearMaestro(1L);
         Curso curso = crearCurso(maestro);
         Tema tema = crearTema(10L, curso);
@@ -368,20 +368,20 @@ class ActividadServiceImplTest {
         actividad.setTema(tema);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(actividadRepository.findById(5L)).thenReturn(java.util.Optional.of(actividad));
-        actividadService.deleteActividad(5L);
+        actividadService.eliminarActTeoriaPorId(5L);
         verify(actividadRepository).delete(actividad);
     }
 
     @Test
-    void updateActividadTeoria_usuarioNoEsMaestro_lanzaAccessDeniedException() {
+    void actualizarActTeoria_usuarioNoEsMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(new com.cerebrus.usuario.Usuario() {});
-        assertThatThrownBy(() -> actividadService.updateActividadTeoria(1L, "T", "D", null))
+        assertThatThrownBy(() -> actividadService.actualizarActTeoria(1L, "T", "D", null))
             .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
             .hasMessageContaining("Solo un maestro");
     }
 
     @Test
-    void updateActividadTeoria_maestroNoPropietario_lanzaAccessDeniedException() {
+    void actualizarActTeoria_maestroNoPropietario_lanzaAccessDeniedException() {
         Maestro maestro = crearMaestro(1L);
         Maestro otroMaestro = crearMaestro(2L);
         Curso curso = crearCurso(otroMaestro);
@@ -391,13 +391,13 @@ class ActividadServiceImplTest {
         actividad.setTema(tema);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(actividadRepository.findById(5L)).thenReturn(java.util.Optional.of(actividad));
-        assertThatThrownBy(() -> actividadService.updateActividadTeoria(5L, "T", "D", null))
+        assertThatThrownBy(() -> actividadService.actualizarActTeoria(5L, "T", "D", null))
             .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
             .hasMessageContaining("no son tuyos");
     }
 
     @Test
-    void updateActividadTeoria_maestroPropietario_actualizaYGuarda() {
+    void actualizarActTeoria_maestroPropietario_actualizaYGuarda() {
         Maestro maestro = crearMaestro(1L);
         Curso curso = crearCurso(maestro);
         Tema tema = crearTema(10L, curso);
@@ -407,7 +407,7 @@ class ActividadServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(actividadRepository.findById(5L)).thenReturn(java.util.Optional.of(actividad));
         when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
-        Actividad result = actividadService.updateActividadTeoria(5L, "Nuevo T", "Nueva D", "img.png");
+        Actividad result = actividadService.actualizarActTeoria(5L, "Nuevo T", "Nueva D", "img.png");
         assertThat(result.getTitulo()).isEqualTo("Nuevo T");
         assertThat(result.getDescripcion()).isEqualTo("Nueva D");
         assertThat(result.getImagen()).isEqualTo("img.png");

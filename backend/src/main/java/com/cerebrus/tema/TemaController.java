@@ -52,12 +52,53 @@ public class TemaController {
         
     }
 
+    @GetMapping("/{temaId}")
+    public ResponseEntity<TemaDTO> encontrarTemaPorId(@PathVariable Long temaId) {
+        
+            Tema tema = temaService.encontrarTemaPorId(temaId);
+            List<Actividad> actividades = actividadService.encontrarActividadesPorTema(tema.getId());
+            List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
+            return ResponseEntity.ok(new TemaDTO(tema, actividadesDTO));
+        
+    }
+
+    @GetMapping("/curso/{cursoId}/alumno")
+    public ResponseEntity<List<TemaDTO>> encontrarTemasPorCursoAlumnoId(@PathVariable Long cursoId) {
+        List<Tema> temas = temaService.encontrarTemasPorCursoAlumnoId(cursoId);
+        List<TemaDTO> temasDTO = temas.stream().map(tema -> {
+            List<Actividad> actividades = actividadService.encontrarActividadesPorTema(tema.getId());
+            List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
+            return new TemaDTO(tema, actividadesDTO);
+        }).toList();
+        return ResponseEntity.ok(temasDTO);
+    }
+
+    @GetMapping("/curso/{cursoId}/maestro")
+    public ResponseEntity<List<TemaDTO>> encontrarTemasPorCursoMaestroId(@PathVariable Long cursoId) {
+        List<Tema> temas = temaService.encontrarTemasPorCursoMaestroId(cursoId);
+        List<TemaDTO> temasDTO = temas.stream().map(tema -> {
+            List<Actividad> actividades = actividadService.encontrarActividadesPorTema(tema.getId());
+            List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
+            return new TemaDTO(tema, actividadesDTO);
+        }).toList();
+        return ResponseEntity.ok(temasDTO);
+    }
+
+    @DeleteMapping("/{temaId}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
+    public ResponseEntity<Void> eliminarTemaPorId(@PathVariable Long temaId) {
+        
+            temaService.eliminarTemaPorId(temaId);
+            return ResponseEntity.noContent().build();
+        
+    }
+
     @PutMapping("/{temaId}")
     @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<TemaDTO> renombrarTema(@PathVariable Long temaId, @RequestBody @Valid RenombrarTemaRequest request, @RequestParam Long maestroId) {
         try {
             Tema tema = temaService.renombrarTema(temaId, request.getNuevoTitulo(), maestroId);
-            List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
+            List<Actividad> actividades = actividadService.encontrarActividadesPorTema(tema.getId());
             List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
             return ResponseEntity.ok(new TemaDTO(tema, actividadesDTO));
         } catch (IllegalArgumentException e) {
@@ -102,45 +143,5 @@ public class TemaController {
         }
     }
 
-    @GetMapping("/{temaId}")
-    public ResponseEntity<TemaDTO> obtenerTemaPorId(@PathVariable Long temaId) {
-        
-            Tema tema = temaService.obtenerTemaPorId(temaId);
-            List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
-            List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
-            return ResponseEntity.ok(new TemaDTO(tema, actividadesDTO));
-        
-    }
-
-    @GetMapping("/curso/{cursoId}/alumno")
-    public ResponseEntity<List<TemaDTO>> ObtenerTemasPorCursoAlumno(@PathVariable Long cursoId) {
-        List<Tema> temas = temaService.ObtenerTemasPorCursoAlumno(cursoId);
-        List<TemaDTO> temasDTO = temas.stream().map(tema -> {
-            List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
-            List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
-            return new TemaDTO(tema, actividadesDTO);
-        }).toList();
-        return ResponseEntity.ok(temasDTO);
-    }
-
-    @GetMapping("/curso/{cursoId}/maestro")
-    public ResponseEntity<List<TemaDTO>> ObtenerTemasPorCursoMaestro(@PathVariable Long cursoId) {
-        List<Tema> temas = temaService.ObtenerTemasPorCursoMaestro(cursoId);
-        List<TemaDTO> temasDTO = temas.stream().map(tema -> {
-            List<Actividad> actividades = actividadService.ObtenerActividadesPorTema(tema.getId());
-            List<ActividadDTO> actividadesDTO = actividades.stream().map(ActividadDTO::new).toList();
-            return new TemaDTO(tema, actividadesDTO);
-        }).toList();
-        return ResponseEntity.ok(temasDTO);
-    }
-
-    @DeleteMapping("/{temaId}")
-    @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<Void> eliminarTema(@PathVariable Long temaId) {
-        
-            temaService.eliminarTema(temaId);
-            return ResponseEntity.noContent().build();
-        
-    }
 }
 

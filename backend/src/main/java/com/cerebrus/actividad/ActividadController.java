@@ -32,59 +32,58 @@ public class ActividadController {
         this.actividadService = actividadService;
     }
 
-    @GetMapping("/{id}/maestro")
-    public ResponseEntity<TeoriaDTO> getActividadMaestro(@PathVariable Long id) {
-       
-        Actividad actividad = actividadService.encontrarActividadPorIdMaestro(id);
-        return ResponseEntity.ok(toTeoriaDto(actividad));
-       
-    }
-
-    @GetMapping("/{id}/alumno")
-    public ResponseEntity<TeoriaDTO> getActividadAlumno(@PathVariable Long id) {
-        
-        Actividad actividad = actividadService.encontrarActividadPorIdAlumno(id);
-        return ResponseEntity.ok(toTeoriaDto(actividad));
-       
-    }
-
-    @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<Void> eliminarActividad(@PathVariable Long id) {
-        
-        actividadService.deleteActividad(id);
-        return ResponseEntity.noContent().build();
-        
-    }
-
     @PostMapping("/teoria")
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<TeoriaDTO> crearActividadTeoria(@RequestBody @Valid CrearActividadTeoriaRequest request) {
-            Actividad actividad = actividadService.crearActividadTeoria(
+    public ResponseEntity<TeoriaDTO> crearActTeoria(@RequestBody @Valid CrearActTeoriaRequest request) {
+            Actividad actividad = actividadService.crearActTeoria(
                 request.getTitulo(),
                 request.getDescripcion(),
                 request.getImagen(),
                 request.getTemaId()
             );
-            return ResponseEntity.status(HttpStatus.CREATED).body(toTeoriaDto(actividad));
+            return ResponseEntity.status(HttpStatus.CREATED).body(obtenerTeoriaDto(actividad));
+    }
+
+    @GetMapping("/{id}/alumno")
+    public ResponseEntity<TeoriaDTO> encontrarActTeoriaPorId(@PathVariable Long id) {
         
+        Actividad actividad = actividadService.encontrarActTeoriaPorId(id);
+        return ResponseEntity.ok(obtenerTeoriaDto(actividad));
+       
+    }
+
+    @GetMapping("/{id}/maestro")
+    public ResponseEntity<TeoriaDTO> encontrarActTeoriaMaestroPorId(@PathVariable Long id) {
+       
+        Actividad actividad = actividadService.encontrarActTeoriaMaestroPorId(id);
+        return ResponseEntity.ok(obtenerTeoriaDto(actividad));
+       
     }
 
     @PutMapping("/teoria/{id}")
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<TeoriaDTO> updateActividadTeoria(
+    public ResponseEntity<TeoriaDTO> actualizarActTeoria(
             @PathVariable Long id,
-            @RequestBody @Valid CrearActividadTeoriaRequest request) {
-            Actividad actividad = actividadService.updateActividadTeoria(
+            @RequestBody @Valid CrearActTeoriaRequest request) {
+            Actividad actividad = actividadService.actualizarActTeoria(
                 id,
                 request.getTitulo(),
                 request.getDescripcion(),
                 request.getImagen()
             );
-            return ResponseEntity.ok(toTeoriaDto(actividad));
+            return ResponseEntity.ok(obtenerTeoriaDto(actividad));
     }
 
-    private static TeoriaDTO toTeoriaDto(Actividad actividad) {
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
+    public ResponseEntity<Void> eliminarActTeoriaPorId(@PathVariable Long id) {
+        
+        actividadService.eliminarActTeoriaPorId(id);
+        return ResponseEntity.noContent().build();
+        
+    }
+
+    private static TeoriaDTO obtenerTeoriaDto(Actividad actividad) {
         return new TeoriaDTO(
             actividad.getId(),
             actividad.getTitulo(),
@@ -95,7 +94,7 @@ public class ActividadController {
         );
     }
 
-    public static class CrearActividadTeoriaRequest {
+    public static class CrearActTeoriaRequest {
         @NotBlank
         private String titulo;
         private String descripcion;

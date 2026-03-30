@@ -74,129 +74,129 @@ class CursoServiceImplTest {
     }
 
     // -------------------------------------------------------
-    // ObtenerCursosUsuarioLogueado
+    // encontrarCursosPorUsuarioLogueado
     // -------------------------------------------------------
 
-    // Test para verificar que ObtenerCursosUsuarioLogueado retorna los cursos del maestro logueado
+    // Test para verificar que encontrarCursosPorUsuarioLogueado retorna los cursos del maestro logueado
     @Test
-    void obtenerCursosUsuarioLogueado_maestro_retornaCursosPropios() {
+    void encontrarCursosPorUsuarioLogueado_maestro_retornaCursosPropios() {
         List<Curso> cursosMaestro = List.of(curso);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(cursoRepository.findByMaestroId(1L)).thenReturn(cursosMaestro);
 
-        List<Curso> resultado = cursoService.ObtenerCursosUsuarioLogueado();
+        List<Curso> resultado = cursoService.encontrarCursosPorUsuarioLogueado();
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado).containsExactly(curso);
         verify(cursoRepository).findByMaestroId(1L);
     }
 
-    // Test para verificar que ObtenerCursosUsuarioLogueado retorna los cursos visibles del alumno logueado
+    // Test para verificar que encontrarCursosPorUsuarioLogueado retorna los cursos visibles del alumno logueado
     @Test
-    void obtenerCursosUsuarioLogueado_alumno_retornaCursosInscritos() {
+    void encontrarCursosPorUsuarioLogueado_alumno_retornaCursosInscritos() {
         List<Curso> cursosAlumno = List.of(curso);
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(cursoRepository.findByAlumnoId(2L)).thenReturn(cursosAlumno);
 
-        List<Curso> resultado = cursoService.ObtenerCursosUsuarioLogueado();
+        List<Curso> resultado = cursoService.encontrarCursosPorUsuarioLogueado();
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado).containsExactly(curso);
         verify(cursoRepository).findByAlumnoId(2L);
     }
 
-    // Test para verificar que ObtenerCursosUsuarioLogueado lanza RuntimeException cuando el usuario no es ni Maestro ni Alumno
+    // Test para verificar que encontrarCursosPorUsuarioLogueado lanza RuntimeException cuando el usuario no es ni Maestro ni Alumno
     @Test
-    void obtenerCursosUsuarioLogueado_usuarioGenerico_lanzaRuntimeException() {
+    void encontrarCursosPorUsuarioLogueado_usuarioGenerico_lanzaRuntimeException() {
         when(usuarioService.findCurrentUser()).thenReturn(usuarioGenerico);
 
-        assertThatThrownBy(() -> cursoService.ObtenerCursosUsuarioLogueado())
+        assertThatThrownBy(() -> cursoService.encontrarCursosPorUsuarioLogueado())
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("403 Forbidden");
     }
 
     // -------------------------------------------------------
-    // obtenerDetallesCurso
+    // encontrarDetallesCursoPorId
     // -------------------------------------------------------
 
-    // Test para verificar que obtenerDetallesCurso retorna titulo, descripcion, imagen y codigo para el maestro propietario
+    // Test para verificar que encontrarDetallesCursoPorId retorna titulo, descripcion, imagen y codigo para el maestro propietario
     @Test
-    void obtenerDetallesCurso_maestroPropietario_retornaDetallesConCodigo() {
+    void encontrarDetallesCursoPorId_maestroPropietario_retornaDetallesConCodigo() {
         when(cursoRepository.findByID(10L)).thenReturn(curso);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
 
-        List<String> resultado = cursoService.obtenerDetallesCurso(10L);
+        List<String> resultado = cursoService.encontrarDetallesCursoPorId(10L);
 
         assertThat(resultado).containsExactly("Matemáticas", curso.getDescripcion(), curso.getImagen(), curso.getCodigo());
     }
 
-    // Test para verificar que obtenerDetallesCurso lanza RuntimeException 403 cuando el maestro no es propietario del curso
+    // Test para verificar que encontrarDetallesCursoPorId lanza RuntimeException 403 cuando el maestro no es propietario del curso
     @Test
-    void obtenerDetallesCurso_maestroNoPropietario_lanzaForbidden() {
+    void encontrarDetallesCursoPorId_maestroNoPropietario_lanzaForbidden() {
         Maestro otroMaestro = crearMaestro(99L);
         when(cursoRepository.findByID(10L)).thenReturn(curso);
         when(usuarioService.findCurrentUser()).thenReturn(otroMaestro);
 
-        assertThatThrownBy(() -> cursoService.obtenerDetallesCurso(10L))
+        assertThatThrownBy(() -> cursoService.encontrarDetallesCursoPorId(10L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("403 Forbidden");
     }
 
-    // Test para verificar que obtenerDetallesCurso retorna titulo, descripcion e imagen para alumno inscrito en curso visible
+    // Test para verificar que encontrarDetallesCursoPorId retorna titulo, descripcion e imagen para alumno inscrito en curso visible
     @Test
-    void obtenerDetallesCurso_alumnoInscritoYVisible_retornaDetallesSinCodigo() {
+    void encontrarDetallesCursoPorId_alumnoInscritoYVisible_retornaDetallesSinCodigo() {
         when(cursoRepository.findByID(10L)).thenReturn(curso);
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(cursoRepository.findByAlumnoId(2L)).thenReturn(List.of(curso));
 
-        List<String> resultado = cursoService.obtenerDetallesCurso(10L);
+        List<String> resultado = cursoService.encontrarDetallesCursoPorId(10L);
 
         assertThat(resultado).containsExactly("Matemáticas", curso.getDescripcion(), curso.getImagen());
         assertThat(resultado).doesNotContain(curso.getCodigo());
     }
 
-    // Test para verificar que obtenerDetallesCurso lanza RuntimeException 403 cuando el alumno está inscrito pero el curso no es visible
+    // Test para verificar que encontrarDetallesCursoPorId lanza RuntimeException 403 cuando el alumno está inscrito pero el curso no es visible
     @Test
-    void obtenerDetallesCurso_alumnoInscritoYNoVisible_lanzaForbidden() {
+    void encontrarDetallesCursoPorId_alumnoInscritoYNoVisible_lanzaForbidden() {
         curso.setVisibilidad(false);
         when(cursoRepository.findByID(10L)).thenReturn(curso);
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(cursoRepository.findByAlumnoId(2L)).thenReturn(List.of(curso));
 
-        assertThatThrownBy(() -> cursoService.obtenerDetallesCurso(10L))
+        assertThatThrownBy(() -> cursoService.encontrarDetallesCursoPorId(10L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("403 Forbidden");
     }
 
-    // Test para verificar que obtenerDetallesCurso lanza RuntimeException 403 cuando el alumno no está inscrito en el curso
+    // Test para verificar que encontrarDetallesCursoPorId lanza RuntimeException 403 cuando el alumno no está inscrito en el curso
     @Test
-    void obtenerDetallesCurso_alumnoNoInscrito_lanzaForbidden() {
+    void encontrarDetallesCursoPorId_alumnoNoInscrito_lanzaForbidden() {
         when(cursoRepository.findByID(10L)).thenReturn(curso);
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(cursoRepository.findByAlumnoId(2L)).thenReturn(List.of());
 
-        assertThatThrownBy(() -> cursoService.obtenerDetallesCurso(10L))
+        assertThatThrownBy(() -> cursoService.encontrarDetallesCursoPorId(10L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("403 Forbidden");
     }
 
-    // Test para verificar que obtenerDetallesCurso lanza RuntimeException 404 cuando el curso no existe
+    // Test para verificar que encontrarDetallesCursoPorId lanza RuntimeException 404 cuando el curso no existe
     @Test
-    void obtenerDetallesCurso_cursoNoExiste_lanzaNotFound() {
+    void encontrarDetallesCursoPorId_cursoNoExiste_lanzaNotFound() {
         when(cursoRepository.findByID(99L)).thenReturn(null);
 
-        assertThatThrownBy(() -> cursoService.obtenerDetallesCurso(99L))
+        assertThatThrownBy(() -> cursoService.encontrarDetallesCursoPorId(99L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("404 Not Found");
     }
 
-    // Test para verificar que obtenerDetallesCurso lanza RuntimeException 403 cuando el usuario no es ni Maestro ni Alumno
+    // Test para verificar que encontrarDetallesCursoPorId lanza RuntimeException 403 cuando el usuario no es ni Maestro ni Alumno
     @Test
-    void obtenerDetallesCurso_usuarioGenerico_lanzaForbidden() {
+    void encontrarDetallesCursoPorId_usuarioGenerico_lanzaForbidden() {
         when(cursoRepository.findByID(10L)).thenReturn(curso);
         when(usuarioService.findCurrentUser()).thenReturn(usuarioGenerico);
 
-        assertThatThrownBy(() -> cursoService.obtenerDetallesCurso(10L))
+        assertThatThrownBy(() -> cursoService.encontrarDetallesCursoPorId(10L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("403 Forbidden");
     }
@@ -392,38 +392,38 @@ class CursoServiceImplTest {
     }
 
     // -------------------------------------------------------
-    // getProgreso
+    // encontrarProgresoPorCursoId
     // -------------------------------------------------------
 
-    // Test para verificar que getProgreso retorna SIN_EMPEZAR cuando el curso no tiene actividades
+    // Test para verificar que encontrarProgresoPorCursoId retorna SIN_EMPEZAR cuando el curso no tiene actividades
     @Test
-    void getProgreso_cursoSinActividades_retornaSinEmpezar() {
+    void encontrarProgresoPorCursoId_cursoSinActividades_retornaSinEmpezar() {
         when(cursoRepository.findByID(10L)).thenReturn(curso);
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadRepository.countByCursoId(10L)).thenReturn(0L);
 
-        ProgresoDTO resultado = cursoService.getProgreso(10L);
+        ProgresoDTO resultado = cursoService.encontrarProgresoPorCursoId(10L);
 
         assertThat(resultado.getEstado()).isEqualTo("SIN_EMPEZAR");
     }
 
-    // Test para verificar que getProgreso retorna SIN_EMPEZAR cuando el alumno no tiene registros de actividad
+    // Test para verificar que encontrarProgresoPorCursoId retorna SIN_EMPEZAR cuando el alumno no tiene registros de actividad
     @Test
-    void getProgreso_alumnoSinRegistros_retornaSinEmpezar() {
+    void encontrarProgresoPorCursoId_alumnoSinRegistros_retornaSinEmpezar() {
         when(cursoRepository.findByID(10L)).thenReturn(curso);
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadRepository.countByCursoId(10L)).thenReturn(3L);
         when(actividadAlumnoRepository.findProgresoByAlumnoAndCursoId(alumno, 10L)).thenReturn(List.of());
 
-        ProgresoDTO resultado = cursoService.getProgreso(10L);
+        ProgresoDTO resultado = cursoService.encontrarProgresoPorCursoId(10L);
 
         assertThat(resultado.getEstado()).isEqualTo("SIN_EMPEZAR");
     }
 
-    // Test para verificar que getProgreso retorna TERMINADA cuando todas las actividades están acabadas
+    // Test para verificar que encontrarProgresoPorCursoId retorna TERMINADA cuando todas las actividades están acabadas
     // ActividadAlumnoProgreso es una interfaz: se implementa con clase anónima inline
     @Test
-    void getProgreso_todasActividadesAcabadas_retornaTerminada() {
+    void encontrarProgresoPorCursoId_todasActividadesAcabadas_retornaTerminada() {
         LocalDateTime ahora = LocalDateTime.now();
         ActividadAlumnoProgreso progreso = crearProgreso(ahora, ahora);
 
@@ -432,14 +432,14 @@ class CursoServiceImplTest {
         when(actividadRepository.countByCursoId(10L)).thenReturn(1L);
         when(actividadAlumnoRepository.findProgresoByAlumnoAndCursoId(alumno, 10L)).thenReturn(List.of(progreso));
 
-        ProgresoDTO resultado = cursoService.getProgreso(10L);
+        ProgresoDTO resultado = cursoService.encontrarProgresoPorCursoId(10L);
 
         assertThat(resultado.getEstado()).isEqualTo("TERMINADA");
     }
 
-    // Test para verificar que getProgreso retorna EMPEZADA cuando hay actividades con inicio pero sin acabar todas
+    // Test para verificar que encontrarProgresoPorCursoId retorna EMPEZADA cuando hay actividades con inicio pero sin acabar todas
     @Test
-    void getProgreso_algunaActividadConInicio_retornaEmpezada() {
+    void encontrarProgresoPorCursoId_algunaActividadConInicio_retornaEmpezada() {
         ActividadAlumnoProgreso progreso = crearProgreso(LocalDateTime.now(), null);
 
         when(cursoRepository.findByID(10L)).thenReturn(curso);
@@ -447,14 +447,14 @@ class CursoServiceImplTest {
         when(actividadRepository.countByCursoId(10L)).thenReturn(2L);
         when(actividadAlumnoRepository.findProgresoByAlumnoAndCursoId(alumno, 10L)).thenReturn(List.of(progreso));
 
-        ProgresoDTO resultado = cursoService.getProgreso(10L);
+        ProgresoDTO resultado = cursoService.encontrarProgresoPorCursoId(10L);
 
         assertThat(resultado.getEstado()).isEqualTo("EMPEZADA");
     }
 
-    // Test para verificar que getProgreso retorna SIN_EMPEZAR cuando hay registros pero ninguno con inicio ni fin
+    // Test para verificar que encontrarProgresoPorCursoId retorna SIN_EMPEZAR cuando hay registros pero ninguno con inicio ni fin
     @Test
-    void getProgreso_registrosSinInicioNiFin_retornaSinEmpezar() {
+    void encontrarProgresoPorCursoId_registrosSinInicioNiFin_retornaSinEmpezar() {
         ActividadAlumnoProgreso progreso = crearProgreso(null, null);
 
         when(cursoRepository.findByID(10L)).thenReturn(curso);
@@ -462,28 +462,28 @@ class CursoServiceImplTest {
         when(actividadRepository.countByCursoId(10L)).thenReturn(2L);
         when(actividadAlumnoRepository.findProgresoByAlumnoAndCursoId(alumno, 10L)).thenReturn(List.of(progreso));
 
-        ProgresoDTO resultado = cursoService.getProgreso(10L);
+        ProgresoDTO resultado = cursoService.encontrarProgresoPorCursoId(10L);
 
         assertThat(resultado.getEstado()).isEqualTo("SIN_EMPEZAR");
     }
 
-    // Test para verificar que getProgreso lanza RuntimeException 404 cuando el curso no existe
+    // Test para verificar que encontrarProgresoPorCursoId lanza RuntimeException 404 cuando el curso no existe
     @Test
-    void getProgreso_cursoNoExiste_lanzaNotFound() {
+    void encontrarProgresoPorCursoId_cursoNoExiste_lanzaNotFound() {
         when(cursoRepository.findByID(99L)).thenReturn(null);
 
-        assertThatThrownBy(() -> cursoService.getProgreso(99L))
+        assertThatThrownBy(() -> cursoService.encontrarProgresoPorCursoId(99L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("404 Not Found");
     }
 
-    // Test para verificar que getProgreso lanza RuntimeException 403 cuando el usuario no es Alumno
+    // Test para verificar que encontrarProgresoPorCursoId lanza RuntimeException 403 cuando el usuario no es Alumno
     @Test
-    void getProgreso_usuarioNoAlumno_lanzaForbidden() {
+    void encontrarProgresoPorCursoId_usuarioNoAlumno_lanzaForbidden() {
         when(cursoRepository.findByID(10L)).thenReturn(curso);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
 
-        assertThatThrownBy(() -> cursoService.getProgreso(10L))
+        assertThatThrownBy(() -> cursoService.encontrarProgresoPorCursoId(10L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("403 Forbidden");
     }

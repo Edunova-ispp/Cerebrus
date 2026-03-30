@@ -1,7 +1,6 @@
 package com.cerebrus.pregunta.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 public class PreguntaRequest {
 

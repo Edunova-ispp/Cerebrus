@@ -115,7 +115,7 @@ class TemaControllerTest {
     }
 
     @Test
-    void obtenerTemaPorId_existente_retorna200ConTemaDTOYActividades() {
+    void encontrarTemaPorId_existente_retorna200ConTemaDTOYActividades() {
         Actividad actividad = new Actividad() {};
         actividad.setId(5L);
         actividad.setTitulo("Actividad 1");
@@ -123,10 +123,10 @@ class TemaControllerTest {
         actividad.setPuntuacion(10);
         actividad.setPosicion(1);
 
-        when(temaService.obtenerTemaPorId(100L)).thenReturn(tema);
-        when(actividadService.ObtenerActividadesPorTema(100L)).thenReturn(List.of(actividad));
+        when(temaService.encontrarTemaPorId(100L)).thenReturn(tema);
+        when(actividadService.encontrarActividadesPorTema(100L)).thenReturn(List.of(actividad));
 
-        ResponseEntity<TemaDTO> respuesta = temaController.obtenerTemaPorId(100L);
+        ResponseEntity<TemaDTO> respuesta = temaController.encontrarTemaPorId(100L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).isNotNull();
@@ -136,25 +136,25 @@ class TemaControllerTest {
     }
 
     @Test
-    void obtenerTemaPorId_noExiste_retorna404() {
-        when(temaService.obtenerTemaPorId(999L)).thenThrow(new IllegalArgumentException("Tema no encontrado"));
+    void encontrarTemaPorId_noExiste_retorna404() {
+        when(temaService.encontrarTemaPorId(999L)).thenThrow(new IllegalArgumentException("Tema no encontrado"));
 
-        assertThatThrownBy(() -> temaController.obtenerTemaPorId(999L))
+        assertThatThrownBy(() -> temaController.encontrarTemaPorId(999L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Tema no encontrado");
 
     }
 
     @Test
-    void obtenerTemasPorCursoAlumno_retorna200ConListaTemasDTO() {
+    void encontrarTemasPorCursoAlumnoId_retorna200ConListaTemasDTO() {
         Tema tema2 = new Tema("Geometria", curso);
         tema2.setId(101L);
 
-        when(temaService.ObtenerTemasPorCursoAlumno(10L)).thenReturn(List.of(tema, tema2));
-        when(actividadService.ObtenerActividadesPorTema(100L)).thenReturn(new ArrayList<>());
-        when(actividadService.ObtenerActividadesPorTema(101L)).thenReturn(new ArrayList<>());
+        when(temaService.encontrarTemasPorCursoAlumnoId(10L)).thenReturn(List.of(tema, tema2));
+        when(actividadService.encontrarActividadesPorTema(100L)).thenReturn(new ArrayList<>());
+        when(actividadService.encontrarActividadesPorTema(101L)).thenReturn(new ArrayList<>());
 
-        ResponseEntity<List<TemaDTO>> respuesta = temaController.ObtenerTemasPorCursoAlumno(10L);
+        ResponseEntity<List<TemaDTO>> respuesta = temaController.encontrarTemasPorCursoAlumnoId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).hasSize(2);
@@ -163,11 +163,11 @@ class TemaControllerTest {
     }
 
     @Test
-    void obtenerTemasPorCursoMaestro_retorna200ConListaTemasDTO() {
-        when(temaService.ObtenerTemasPorCursoMaestro(10L)).thenReturn(List.of(tema));
-        when(actividadService.ObtenerActividadesPorTema(100L)).thenReturn(new ArrayList<>());
+    void encontrarTemasPorCursoMaestroId_retorna200ConListaTemasDTO() {
+        when(temaService.encontrarTemasPorCursoMaestroId(10L)).thenReturn(List.of(tema));
+        when(actividadService.encontrarActividadesPorTema(100L)).thenReturn(new ArrayList<>());
 
-        ResponseEntity<List<TemaDTO>> respuesta = temaController.ObtenerTemasPorCursoMaestro(10L);
+        ResponseEntity<List<TemaDTO>> respuesta = temaController.encontrarTemasPorCursoMaestroId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).hasSize(1);
@@ -175,19 +175,19 @@ class TemaControllerTest {
     }
 
     @Test
-    void eliminarTema_existente_retorna204() {
-        ResponseEntity<Void> respuesta = temaController.eliminarTema(100L);
+    void eliminarTemaPorId_existente_retorna204() {
+        ResponseEntity<Void> respuesta = temaController.eliminarTemaPorId(100L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(respuesta.getBody()).isNull();
-        verify(temaService).eliminarTema(100L);
+        verify(temaService).eliminarTemaPorId(100L);
     }
 
     @Test
-    void eliminarTema_errorPermisos_retorna400() {
-        doThrow(new AccessDeniedException("El usuario no tiene permiso para eliminar este tema.")).when(temaService).eliminarTema(100L);
+    void eliminarTemaPorId_errorPermisos_retorna400() {
+        doThrow(new AccessDeniedException("El usuario no tiene permiso para eliminar este tema.")).when(temaService).eliminarTemaPorId(100L);
 
-        assertThatThrownBy(() -> temaController.eliminarTema(100L))
+        assertThatThrownBy(() -> temaController.eliminarTemaPorId(100L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("El usuario no tiene permiso para eliminar este tema.");
     }

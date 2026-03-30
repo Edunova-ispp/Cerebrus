@@ -63,7 +63,7 @@ public class TableroServiceImpl implements TableroService {
 
     @Override
     @Transactional
-    public TableroDTO crearActividadTablero(TableroRequest actividad)  {
+    public TableroDTO crearActTablero(TableroRequest actividad)  {
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede crear actividades de tablero");
@@ -112,7 +112,7 @@ public class TableroServiceImpl implements TableroService {
 
     @Override
     @Transactional(readOnly = true)
-    public TableroDTO getTablero(Long tableroId) {
+    public TableroDTO encontrarActTableroPorId(Long tableroId) {
         Tablero tablero = tableroRepository.findById(tableroId).orElseThrow(() -> new ResourceNotFoundException("Tablero no encontrado"));
         Usuario current = usuarioService.findCurrentUser();
         if (current instanceof Maestro) {
@@ -138,23 +138,7 @@ public class TableroServiceImpl implements TableroService {
 
     @Override
     @Transactional
-    public void eliminarTablero(Long tableroId) {
-        Tablero tablero = tableroRepository.findById(tableroId).orElseThrow(() -> new ResourceNotFoundException("Tablero no encontrado"));
-        Usuario u = usuarioService.findCurrentUser();
-        if (u instanceof Maestro) {
-            Maestro maestro = (Maestro) u;
-            if (!tablero.getTema().getCurso().getMaestro().getId().equals(maestro.getId())) {
-                throw new AccessDeniedException("No tienes permiso para eliminar este tablero porque no eres el maestro del curso");
-            }
-        } else {
-            throw new AccessDeniedException("Solo un maestro puede eliminar actividades de tablero");
-        }
-        tableroRepository.delete(tablero);
-    }
-
-    @Override
-    @Transactional
-    public TableroDTO actualizarTablero(Long id, TableroRequest tablero) {
+    public TableroDTO actualizarActTablero(Long id, TableroRequest tablero) {
         Tablero tableroExistente = tableroRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Tablero no encontrado"));
         Usuario u = usuarioService.findCurrentUser();
         if (u instanceof Maestro) {
@@ -199,7 +183,23 @@ public class TableroServiceImpl implements TableroService {
 
     @Override
     @Transactional
-    public String crearRespuestaAPreguntaTablero(String respuesta, Long tableroId, Long preguntaId) {
+    public void eliminarActTableroPorId(Long tableroId) {
+        Tablero tablero = tableroRepository.findById(tableroId).orElseThrow(() -> new ResourceNotFoundException("Tablero no encontrado"));
+        Usuario u = usuarioService.findCurrentUser();
+        if (u instanceof Maestro) {
+            Maestro maestro = (Maestro) u;
+            if (!tablero.getTema().getCurso().getMaestro().getId().equals(maestro.getId())) {
+                throw new AccessDeniedException("No tienes permiso para eliminar este tablero porque no eres el maestro del curso");
+            }
+        } else {
+            throw new AccessDeniedException("Solo un maestro puede eliminar actividades de tablero");
+        }
+        tableroRepository.delete(tablero);
+    }
+
+    @Override
+    @Transactional
+    public String crearRespuestaAPreguntaEnActTablero(String respuesta, Long tableroId, Long preguntaId) {
         Tablero tablero = tableroRepository.findById(tableroId).orElseThrow(() -> new ResourceNotFoundException("Tablero no encontrado"));
         Pregunta pregunta = preguntaRepository.findById(preguntaId).orElseThrow(() -> new ResourceNotFoundException("Pregunta no encontrada"));
         Usuario u = usuarioService.findCurrentUser();
@@ -224,7 +224,7 @@ public class TableroServiceImpl implements TableroService {
             
             Boolean correcta = pregunta.getRespuestasMaestro().get(0).getRespuesta().toLowerCase().strip().equals(cleanedRespuesta.toLowerCase().strip());
             
-            ActividadAlumno actividadAlumno = actividadAlumnoService.crearActividadAlumno(0, LocalDateTime.now(), null, 0, 0, alumno.getId(), tablero.getId());
+            ActividadAlumno actividadAlumno = actividadAlumnoService.crearActAlumno(0, LocalDateTime.now(), null, 0, 0, alumno.getId(), tablero.getId());
             
             RespAlumnoGeneral respuestaAlumno = new RespAlumnoGeneral(correcta, actividadAlumno, respuesta, pregunta);
             actividadAlumno.getRespuestasAlumno().add(respuestaAlumno);

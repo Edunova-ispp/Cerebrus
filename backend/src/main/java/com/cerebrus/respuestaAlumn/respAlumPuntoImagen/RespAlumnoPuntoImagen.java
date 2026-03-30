@@ -1,7 +1,7 @@
 package com.cerebrus.respuestaAlumn.respAlumPuntoImagen;
 
 import com.cerebrus.actividadAlumn.ActividadAlumno;
-import com.cerebrus.puntoImage.PuntoImagen;
+import com.cerebrus.puntoImagen.PuntoImagen;
 import com.cerebrus.respuestaAlumn.RespuestaAlumno;
 
 import jakarta.persistence.Column;

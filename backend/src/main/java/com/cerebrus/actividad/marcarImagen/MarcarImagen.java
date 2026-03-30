@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cerebrus.actividad.Actividad;
-import com.cerebrus.puntoImage.PuntoImagen;
+import com.cerebrus.puntoImagen.PuntoImagen;
 import com.cerebrus.tema.Tema;
 
 import jakarta.persistence.CascadeType;

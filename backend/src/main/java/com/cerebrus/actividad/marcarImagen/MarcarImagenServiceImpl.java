@@ -12,9 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.actividad.marcarImagen.dto.MarcarImagenDTO;
 import com.cerebrus.exceptions.ResourceNotFoundException;
-import com.cerebrus.puntoImage.PuntoImagen;
-import com.cerebrus.puntoImage.PuntoImagenService;
-import com.cerebrus.puntoImage.dto.PuntoImagenDTO;
+import com.cerebrus.puntoImagen.PuntoImagen;
+import com.cerebrus.puntoImagen.PuntoImagenService;
+import com.cerebrus.puntoImagen.dto.PuntoImagenDTO;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaService;
 import com.cerebrus.usuario.Usuario;
@@ -42,7 +42,7 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
 
     @Override
     @Transactional
-    public MarcarImagen crearMarcarImagen(MarcarImagenDTO marcarImagenDTO) {
+    public MarcarImagen crearActMarcarImagen(MarcarImagenDTO marcarImagenDTO) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -50,7 +50,7 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
         }
 
         MarcarImagen marcarImagen = new MarcarImagen();
-        Tema tema = temaService.obtenerTemaPorId(marcarImagenDTO.getTemaId());
+        Tema tema = temaService.encontrarTemaPorId(marcarImagenDTO.getTemaId());
 
         if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
             throw new AccessDeniedException("Solo el maestro del curso puede crear actividades en ese tema");
@@ -91,7 +91,7 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
 
     @Override
     @Transactional(readOnly = true)
-    public MarcarImagen obtenerMarcarImagenPorId(Long id) {
+    public MarcarImagen encontrarActMarcarImagenPorId(Long id) {
         Usuario current = usuarioService.findCurrentUser();
         if (!(current instanceof Maestro) && !(current instanceof Alumno)) {
             throw new AccessDeniedException("Solo un usuario logueado como alumno o maestro puede obtener una actividad de marcar imagen");
@@ -116,19 +116,19 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
 
     @Override
     @Transactional
-    public MarcarImagen actualizarMarcarImagen(Long id, MarcarImagenDTO marcarImagenDTO) {
+    public MarcarImagen actualizarActMarcarImagen(Long id, MarcarImagenDTO marcarImagenDTO) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede actualizar actividades de marcar imagenes");
         }
 
-        Tema tema = temaService.obtenerTemaPorId(marcarImagenDTO.getTemaId());
+        Tema tema = temaService.encontrarTemaPorId(marcarImagenDTO.getTemaId());
         if (!tema.getCurso().getMaestro().getId().equals(u.getId())) {
             throw new AccessDeniedException("Solo el maestro del curso puede actualizar actividades en ese tema");
         }
 
-        MarcarImagen marcarImagenAActualizar = obtenerMarcarImagenPorId(id);
+        MarcarImagen marcarImagenAActualizar = encontrarActMarcarImagenPorId(id);
         List<PuntoImagen> puntosImagen = new ArrayList<>(marcarImagenDTO.getPuntosImagen().stream()
             .map(puntoDTO -> {
                 if (puntoDTO.getId() != null) {
@@ -163,14 +163,14 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
     
     @Override
     @Transactional
-    public void eliminarMarcarImagen(Long id) {
+    public void eliminarActMarcarImagenPorId(Long id) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede eliminar actividades de marcar imagenes");
         }
         
-        MarcarImagen marcarImagen = obtenerMarcarImagenPorId(id);
+        MarcarImagen marcarImagen = encontrarActMarcarImagenPorId(id);
 
         if (!marcarImagen.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
             throw new AccessDeniedException("Solo el maestro del curso puede eliminar esta actividad");
