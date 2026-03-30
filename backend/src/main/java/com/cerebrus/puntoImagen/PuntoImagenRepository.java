@@ -1,4 +1,4 @@
-package com.cerebrus.puntoImage;
+package com.cerebrus.puntoImagen;
 
 import java.util.Optional;
 

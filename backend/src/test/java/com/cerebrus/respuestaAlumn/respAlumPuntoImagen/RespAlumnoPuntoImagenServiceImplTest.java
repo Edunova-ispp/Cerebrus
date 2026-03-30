@@ -19,8 +19,8 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.exceptions.ResourceNotFoundException;
-import com.cerebrus.puntoImage.PuntoImagen;
-import com.cerebrus.puntoImage.PuntoImagenService;
+import com.cerebrus.puntoImagen.PuntoImagen;
+import com.cerebrus.puntoImagen.PuntoImagenService;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
@@ -67,7 +67,7 @@ class RespAlumnoPuntoImagenServiceImplTest {
     @Test
     void crearRespuestaAlumnoPuntoImagen_alumnoValido_guardaYRetornaEntidad() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
-        when(puntoImagenService.obtenerPuntoImagenPorId(5L)).thenReturn(puntoImagen);
+        when(puntoImagenService.encontrarPuntoImagenPorId(5L)).thenReturn(puntoImagen);
         when(respAlumnoPuntoImagenRepository.encontrarActividadAlumnoPorId(10L)).thenReturn(actividadAlumno);
         when(respAlumnoPuntoImagenRepository.save(any(RespAlumnoPuntoImagen.class)))
                 .thenAnswer(inv -> {
@@ -91,7 +91,7 @@ class RespAlumnoPuntoImagenServiceImplTest {
     @Test
     void crearRespuestaAlumnoPuntoImagen_respuestaVacia_seGuardaConCadenaVacia() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
-        when(puntoImagenService.obtenerPuntoImagenPorId(5L)).thenReturn(puntoImagen);
+        when(puntoImagenService.encontrarPuntoImagenPorId(5L)).thenReturn(puntoImagen);
         when(respAlumnoPuntoImagenRepository.encontrarActividadAlumnoPorId(10L)).thenReturn(actividadAlumno);
         when(respAlumnoPuntoImagenRepository.save(any(RespAlumnoPuntoImagen.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
@@ -112,13 +112,13 @@ class RespAlumnoPuntoImagenServiceImplTest {
                 .hasMessage("Solo un alumno puede crear respuestas para puntos de imagen");
 
         verify(respAlumnoPuntoImagenRepository, never()).save(any());
-        verify(puntoImagenService, never()).obtenerPuntoImagenPorId(any());
+        verify(puntoImagenService, never()).encontrarPuntoImagenPorId(any());
     }
 
     @Test
     void crearRespuestaAlumnoPuntoImagen_puntoImagenNoExiste_propagaExcepcion() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
-        when(puntoImagenService.obtenerPuntoImagenPorId(99L))
+        when(puntoImagenService.encontrarPuntoImagenPorId(99L))
                 .thenThrow(new ResourceNotFoundException("PuntoImagen", "id", 99L));
 
         assertThatThrownBy(() ->

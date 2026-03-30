@@ -29,16 +29,16 @@ public class RespAlumnoPuntoImagenController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<RespAlumnoPuntoImagenDTO> crearRespAlumnoPuntoImagen(@RequestBody @Valid RespAlumnoPuntoImagenDTO respAlumnoPuntoImagenDTO) {
+    public ResponseEntity<RespAlumnoPuntoImagenDTO> crearRespuestaAlumnoPuntoImagen(@RequestBody @Valid RespAlumnoPuntoImagenDTO respAlumnoPuntoImagenDTO) {
         RespAlumnoPuntoImagen respAlumnoPuntoImagen = respAlumnoPuntoImagenService.crearRespuestaAlumnoPuntoImagen(
             respAlumnoPuntoImagenDTO.getRespuesta(),
             respAlumnoPuntoImagenDTO.getPuntoImagenId(),
             respAlumnoPuntoImagenDTO.getActividadAlumnoId()
         );
-        return new ResponseEntity<>(toDto(respAlumnoPuntoImagen), HttpStatus.CREATED);
+        return new ResponseEntity<>(obtenerRespuestaAlumnoPuntoImagenDto(respAlumnoPuntoImagen), HttpStatus.CREATED);
     }
 
-    private static RespAlumnoPuntoImagenDTO toDto(RespAlumnoPuntoImagen respAlumnoPuntoImagen) {
+    private static RespAlumnoPuntoImagenDTO obtenerRespuestaAlumnoPuntoImagenDto(RespAlumnoPuntoImagen respAlumnoPuntoImagen) {
         return new RespAlumnoPuntoImagenDTO(
             respAlumnoPuntoImagen.getId(),
             respAlumnoPuntoImagen.getRespuesta(),

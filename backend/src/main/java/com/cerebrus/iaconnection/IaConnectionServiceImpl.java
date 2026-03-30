@@ -153,6 +153,7 @@ public class IaConnectionServiceImpl implements IaConnectionService {
             default -> throw new IllegalArgumentException("Tipo de actividad no soportado: " + tipoActividad);
         };
     }
+
     public String crearPromt(TipoAct tipoActividad, String prompt) {
         return switch (tipoActividad) {
             case TEORIA -> "Genera una actividad teórica sobre el siguiente tema: " + prompt
@@ -177,7 +178,7 @@ public class IaConnectionServiceImpl implements IaConnectionService {
         };
     }
     
-     @Override
+    @Override
     public String generarActividad(TipoAct tipoActividad, String prompt) {
         String apikeyActual;
         Integer PeticionesMaximasDiariasPorKey = 20;

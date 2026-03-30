@@ -35,56 +35,52 @@ public class TableroController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<TableroDTO> crearActividadTablero(@RequestBody @Valid TableroRequest actividad) {
+    public ResponseEntity<TableroDTO> crearActTablero(@RequestBody @Valid TableroRequest actividad) {
         
         if ((actividad.getPreguntasYRespuestas().size() != 8 && actividad.getPreguntasYRespuestas().size() != 15) || (actividad.getTamano() && actividad.getPreguntasYRespuestas().size() != 8) || (!actividad.getTamano() && actividad.getPreguntasYRespuestas().size() != 15)) {
             return ResponseEntity.badRequest().build();
         }
 
-        TableroDTO creada = tableroService.crearActividadTablero(actividad);
+        TableroDTO creada = tableroService.crearActTablero(actividad);
         return new ResponseEntity<>(creada, HttpStatus.CREATED);
          
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TableroDTO> getTablero(@PathVariable Long id) {
+    public ResponseEntity<TableroDTO> encontrarActTableroPorId(@PathVariable Long id) {
      
-            TableroDTO tablero = tableroService.getTablero(id);
+            TableroDTO tablero = tableroService.encontrarActTableroPorId(id);
             return ResponseEntity.ok(tablero);
-        
-    }
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<Void> eliminarTablero(@PathVariable Long id) {
-       
-            tableroService.eliminarTablero(id);
-            return ResponseEntity.noContent().build();
         
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<TableroDTO> actualizarTablero(@PathVariable Long id, @RequestBody @Valid TableroRequest tablero) {
+    public ResponseEntity<TableroDTO> actualizarActTablero(@PathVariable Long id, @RequestBody @Valid TableroRequest tablero) {
 
             if ((tablero.getPreguntasYRespuestas().size() != 8 && tablero.getPreguntasYRespuestas().size() != 15) || (tablero.getTamano() && tablero.getPreguntasYRespuestas().size() != 8) || (!tablero.getTamano() && tablero.getPreguntasYRespuestas().size() != 15)) {
                 return ResponseEntity.badRequest().build();
             }
 
-            TableroDTO actualizado = tableroService.actualizarTablero(id, tablero);
+            TableroDTO actualizado = tableroService.actualizarActTablero(id, tablero);
             return ResponseEntity.ok(actualizado);
         
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('MAESTRO')")
+    public ResponseEntity<Void> eliminarActTableroPorId(@PathVariable Long id) {
+       
+            tableroService.eliminarActTableroPorId(id);
+            return ResponseEntity.noContent().build();
         
     }
 
     @PostMapping("/{tableroId}/{preguntaId}")
-    public ResponseEntity<String> crearRespuestaAPreguntaTablero(@RequestBody String respuesta, @PathVariable Long tableroId, @PathVariable Long preguntaId) {
+    public ResponseEntity<String> crearRespuestaAPreguntaEnActTablero(@RequestBody String respuesta, @PathVariable Long tableroId, @PathVariable Long preguntaId) {
     
-            String mensaje = tableroService.crearRespuestaAPreguntaTablero(respuesta, tableroId, preguntaId);
+            String mensaje = tableroService.crearRespuestaAPreguntaEnActTablero(respuesta, tableroId, preguntaId);
             return ResponseEntity.ok(mensaje);
-        
-        
-        
         
     }
     

@@ -39,7 +39,7 @@ public class RespAlumnoOrdenacionServiceImpl implements RespAlumnoOrdenacionServ
 
     @Override
     @Transactional
-    public RespAlumnoOrdenacionCreateResponse crearRespAlumnoOrdenacion(Long actAlumnoId, List<String> valoresAlum, Long actOrdId) {
+    public RespAlumnoOrdenacionCreateResponse crearRespuestaAlumnoOrdenacion(Long actAlumnoId, List<String> valoresAlum, Long actOrdId) {
         
         Usuario current = usuarioService.findCurrentUser();
         if (!(current instanceof Alumno)) {
@@ -91,10 +91,9 @@ public class RespAlumnoOrdenacionServiceImpl implements RespAlumnoOrdenacionServ
 
     @Override
     @Transactional(readOnly = true)
-    public RespAlumnoOrdenacion readRespAlumnoOrdenacion(Long id) {
+    public RespAlumnoOrdenacion encontrarRespuestaAlumnoOrdenacionPorId(Long id) {
         RespAlumnoOrdenacion respAlumnoOrdenacion = respAlumnoOrdenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La respuesta del alumno a la actividad de ordenación no existe"));
         return respAlumnoOrdenacion;
-        
     }
 
     @Override

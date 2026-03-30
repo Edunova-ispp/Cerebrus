@@ -178,83 +178,83 @@ class OrdenacionServiceImplTest {
     }
 
     // -------------------------------------------------------
-    // readOrdenacion
+    // encontrarActOrdenacionPorId
     // -------------------------------------------------------
 
-    // Test para verificar que readOrdenacion retorna la ordenación con sus valores (posiblemente reordenados por shuffle)
+    // Test para verificar que encontrarActOrdenacionPorId retorna la ordenación con sus valores (posiblemente reordenados por shuffle)
     @Test
-    void readOrdenacion_existente_retornaOrdenacionConValores() {
+    void encontrarActOrdenacionPorId_existente_retornaOrdenacionConValores() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
         when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
 
-        Ordenacion resultado = ordenacionService.readOrdenacion(10L);
+        Ordenacion resultado = ordenacionService.encontrarActOrdenacionPorId(10L);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.getValores()).containsExactlyInAnyOrder("Primero", "Segundo", "Tercero");
     }
 
-    // Test para verificar que readOrdenacion retorna la ordenación con lista de valores vacía cuando no tiene valores
+    // Test para verificar que encontrarActOrdenacionPorId retorna la ordenación con lista de valores vacía cuando no tiene valores
     @Test
-    void readOrdenacion_sinValores_retornaListaVacia() {
+    void encontrarActOrdenacionPorId_sinValores_retornaListaVacia() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
         ordenacion.setValores(new ArrayList<>());
         when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
 
-        Ordenacion resultado = ordenacionService.readOrdenacion(10L);
+        Ordenacion resultado = ordenacionService.encontrarActOrdenacionPorId(10L);
 
         assertThat(resultado.getValores()).isEmpty();
     }
 
-    // Test para verificar que readOrdenacion retorna el único valor sin modificaciones (caso límite de shuffle)
+    // Test para verificar que encontrarActOrdenacionPorId retorna el único valor sin modificaciones (caso límite de shuffle)
     @Test
-    void readOrdenacion_unSoloValor_retornaMismoValor() {
+    void encontrarActOrdenacionPorId_unSoloValor_retornaMismoValor() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
         ordenacion.setValores(new ArrayList<>(List.of("Único")));
         when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
 
-        Ordenacion resultado = ordenacionService.readOrdenacion(10L);
+        Ordenacion resultado = ordenacionService.encontrarActOrdenacionPorId(10L);
 
         assertThat(resultado.getValores()).containsExactly("Único");
     }
 
-    // Test para verificar que readOrdenacion lanza RuntimeException cuando la ordenación no existe
+    // Test para verificar que encontrarActOrdenacionPorId lanza RuntimeException cuando la ordenación no existe
     @Test
-    void readOrdenacion_noExiste_lanzaRuntimeException() {
+    void encontrarActOrdenacionPorId_noExiste_lanzaRuntimeException() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(ordenacionRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> ordenacionService.readOrdenacion(99L))
+        assertThatThrownBy(() -> ordenacionService.encontrarActOrdenacionPorId(99L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La actividad de ordenación no existe");
     }
 
     @Test
-    void readOrdenacion_cursoOculto_lanzaAccessDeniedException() {
+    void encontrarActOrdenacionPorId_cursoOculto_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         tema.getCurso().setVisibilidad(false);
         when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
 
-        assertThatThrownBy(() -> ordenacionService.readOrdenacion(10L))
+        assertThatThrownBy(() -> ordenacionService.encontrarActOrdenacionPorId(10L))
             .isInstanceOf(AccessDeniedException.class)
             .hasMessageContaining("curso oculto");
     }
 
     // -------------------------------------------------------
-    // updateActOrdenacion
+    // actualizarActOrdenacion
     // -------------------------------------------------------
 
-    // Test para verificar que updateActOrdenacion actualiza todos los campos correctamente cuando el usuario es Maestro
+    // Test para verificar que actualizarActOrdenacion actualiza todos los campos correctamente cuando el usuario es Maestro
     @Test
-    void updateActOrdenacion_maestro_actualizaCamposCorrectamente() {
+    void actualizarActOrdenacion_maestro_actualizaCamposCorrectamente() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
         when(ordenacionRepository.save(any(Ordenacion.class))).thenAnswer(inv -> inv.getArgument(0));
 
         List<String> nuevosValores = List.of("A", "B", "C");
-        Ordenacion resultado = ordenacionService.updateActOrdenacion(
+        Ordenacion resultado = ordenacionService.actualizarActOrdenacion(
                 10L, "Nuevo título", "Nueva desc", 200, "nueva.png",
                 1L, false, null, 2, nuevosValores);
 
@@ -268,54 +268,54 @@ class OrdenacionServiceImplTest {
         verify(ordenacionRepository).save(ordenacion);
     }
 
-    // Test para verificar que updateActOrdenacion incrementa la versión en 1 en cada actualización
+    // Test para verificar que actualizarActOrdenacion incrementa la versión en 1 en cada actualización
     @Test
-    void updateActOrdenacion_maestro_incrementaVersionEnUno() {
+    void actualizarActOrdenacion_maestro_incrementaVersionEnUno() {
         ordenacion.setVersion(3);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
         when(ordenacionRepository.save(any(Ordenacion.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Ordenacion resultado = ordenacionService.updateActOrdenacion(
+        Ordenacion resultado = ordenacionService.actualizarActOrdenacion(
                 10L, "T", "D", 50, null, 1L, false, null, 1, valores);
 
         assertThat(resultado.getVersion()).isEqualTo(4);
     }
 
-    // Test para verificar que updateActOrdenacion asigna comentariosRespVisible cuando respVisible es true
+    // Test para verificar que actualizarActOrdenacion asigna comentariosRespVisible cuando respVisible es true
     @Test
-    void updateActOrdenacion_respVisible_asignaComentarios() {
+    void actualizarActOrdenacion_respVisible_asignaComentarios() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
         when(ordenacionRepository.save(any(Ordenacion.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Ordenacion resultado = ordenacionService.updateActOrdenacion(
+        Ordenacion resultado = ordenacionService.actualizarActOrdenacion(
                 10L, "T", "D", 50, null, 1L, true, "Nuevo comentario", 1, valores);
 
         assertThat(resultado.getRespVisible()).isTrue();
         assertThat(resultado.getComentariosRespVisible()).isEqualTo("Nuevo comentario");
     }
 
-    // Test para verificar que updateActOrdenacion pone comentariosRespVisible a null cuando respVisible es false
+    // Test para verificar que actualizarActOrdenacion pone comentariosRespVisible a null cuando respVisible es false
     @Test
-    void updateActOrdenacion_respNoVisible_comentariosNull() {
+    void actualizarActOrdenacion_respNoVisible_comentariosNull() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
         when(ordenacionRepository.save(any(Ordenacion.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Ordenacion resultado = ordenacionService.updateActOrdenacion(
+        Ordenacion resultado = ordenacionService.actualizarActOrdenacion(
                 10L, "T", "D", 50, null, 1L, false, "ignorado", 1, valores);
 
         assertThat(resultado.getRespVisible()).isFalse();
         assertThat(resultado.getComentariosRespVisible()).isNull();
     }
 
-    // Test para verificar que updateActOrdenacion lanza AccessDeniedException cuando el usuario no es Maestro
+    // Test para verificar que actualizarActOrdenacion lanza AccessDeniedException cuando el usuario no es Maestro
     @Test
-    void updateActOrdenacion_usuarioNoMaestro_lanzaAccessDeniedException() {
+    void actualizarActOrdenacion_usuarioNoMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(usuarioNoMaestro);
 
-        assertThatThrownBy(() -> ordenacionService.updateActOrdenacion(
+        assertThatThrownBy(() -> ordenacionService.actualizarActOrdenacion(
                 10L, "T", "D", 50, null, 1L, false, null, 1, valores))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede actualizar actividades de ordenación");
@@ -324,13 +324,13 @@ class OrdenacionServiceImplTest {
         verify(ordenacionRepository, never()).findById(any());
     }
 
-    // Test para verificar que updateActOrdenacion lanza RuntimeException cuando la ordenación no existe
+    // Test para verificar que actualizarActOrdenacion lanza RuntimeException cuando la ordenación no existe
     @Test
-    void updateActOrdenacion_noExiste_lanzaRuntimeException() {
+    void actualizarActOrdenacion_noExiste_lanzaRuntimeException() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(ordenacionRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> ordenacionService.updateActOrdenacion(
+        assertThatThrownBy(() -> ordenacionService.actualizarActOrdenacion(
                 99L, "T", "D", 50, null, 1L, false, null, 1, valores))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La actividad de ordenación no existe");
@@ -339,26 +339,26 @@ class OrdenacionServiceImplTest {
     }
 
     // -------------------------------------------------------
-    // deleteActOrdenacion
+    // eliminarActOrdenacionPorId
     // -------------------------------------------------------
 
-    // Test para verificar que deleteActOrdenacion elimina correctamente cuando el usuario es Maestro
+    // Test para verificar que eliminarActOrdenacionPorId elimina correctamente cuando el usuario es Maestro
     @Test
-    void deleteActOrdenacion_maestro_eliminaCorrectamente() {
+    void eliminarActOrdenacionPorId_maestro_eliminaCorrectamente() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(ordenacionRepository.findById(10L)).thenReturn(Optional.of(ordenacion));
 
-        ordenacionService.deleteActOrdenacion(10L);
+        ordenacionService.eliminarActOrdenacionPorId(10L);
 
         verify(ordenacionRepository).deleteById(10L);
     }
 
-    // Test para verificar que deleteActOrdenacion lanza AccessDeniedException cuando el usuario no es Maestro
+    // Test para verificar que eliminarActOrdenacionPorId lanza AccessDeniedException cuando el usuario no es Maestro
     @Test
-    void deleteActOrdenacion_usuarioNoMaestro_lanzaAccessDeniedException() {
+    void eliminarActOrdenacionPorId_usuarioNoMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(usuarioNoMaestro);
 
-        assertThatThrownBy(() -> ordenacionService.deleteActOrdenacion(10L))
+        assertThatThrownBy(() -> ordenacionService.eliminarActOrdenacionPorId(10L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede eliminar actividades de ordenación");
 
