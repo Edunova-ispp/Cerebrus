@@ -521,7 +521,7 @@ class GeneralServiceImplTest {
         when(preguntaRepository.findAllById(ids)).thenReturn(List.of(p1));
         when(generalRepository.save(any(General.class))).thenAnswer(i -> i.getArgument(0));
 
-        General resultado = generalService.crearTipoCarta("Carta", "Desc", 10, 1L, true, "ok", ids);
+        General resultado = generalService.crearActCarta("Carta", "Desc", 10, 1L, true, "ok", ids);
 
         assertThat(resultado.getTipo()).isEqualTo(TipoActGeneral.CARTA);
         verify(generalRepository).save(any());
@@ -538,7 +538,7 @@ class GeneralServiceImplTest {
         List<Long> ids = List.of(100L);
         when(preguntaRepository.findAllById(ids)).thenReturn(List.of(p1));
 
-        assertThatThrownBy(() -> generalService.crearTipoCarta("T", "D", 10, 1L, true, "c", ids))
+        assertThatThrownBy(() -> generalService.crearActCarta("T", "D", 10, 1L, true, "c", ids))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("no tiene exactamente una respuesta");
     }
@@ -567,7 +567,7 @@ class GeneralServiceImplTest {
         when(preguntaRepository.findAllById(any())).thenReturn(new ArrayList<>());
         when(generalRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        var resultado = generalService.updateTipoCarta(1L, "T", "D", 10, true, "c", List.of(), 1, 1, temaIdConstante, null);
+        var resultado = generalService.actualizarActCarta(1L, "T", "D", 10, true, "c", List.of(), 1, 1, temaIdConstante, null);
 
         assertThat(resultado.getImagen()).isNull(); 
     }
@@ -599,7 +599,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
         // El método devuelve GeneralClasificacionMaestroDTO, no General
-        var resultado = generalService.updateTipoClasificacion(1L, "T", "D", 10, true, "c", List.of(100L), 2, 2, 1L);
+        var resultado = generalService.actualizarActClasificacion(1L, "T", "D", 10, true, "c", List.of(100L), 2, 2, 1L);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.getTitulo()).isEqualTo("T");
@@ -624,7 +624,7 @@ class GeneralServiceImplTest {
         
         when(preguntaRepository.findAllById(any())).thenReturn(List.of(p1));
 
-        assertThatThrownBy(() -> generalService.updateTipoClasificacion(1L, "T", "D", 10, true, "c", List.of(100L), 2, 2, 1L))
+        assertThatThrownBy(() -> generalService.actualizarActClasificacion(1L, "T", "D", 10, true, "c", List.of(100L), 2, 2, 1L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("no pueden tener respuestas incorrectas");
     }
@@ -653,7 +653,7 @@ class GeneralServiceImplTest {
         pYyR.put("¿2+2?", "4");
         req.setPreguntasYRespuestas(pYyR);
 
-        CrucigramaDTO dto = generalService.crearTipoCrucigrama(req);
+        CrucigramaDTO dto = generalService.crearActCrucigrama(req);
 
         assertThat(dto).isNotNull();
         verify(preguntaRepository, atLeastOnce()).save(any(Pregunta.class));
@@ -673,7 +673,7 @@ class GeneralServiceImplTest {
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
-        assertThatThrownBy(() -> generalService.readActividad(1L))
+        assertThatThrownBy(() -> generalService.encontrarActGeneralPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("La actividad que buscas pertenece a un curso al que no estás inscrito");
     }
@@ -683,7 +683,7 @@ class GeneralServiceImplTest {
     @Test
     void readTipoAbiertaMaestro_usuarioNoEsMaestro_lanzaAccessDenied() {
         when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
-        assertThatThrownBy(() -> generalService.readTipoAbiertaMaestro(1L))
+        assertThatThrownBy(() -> generalService.encontrarActAbiertaMaestroPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessageContaining("Solo un maestro puede leer");
     }
@@ -697,7 +697,7 @@ class GeneralServiceImplTest {
         
         List<Long> preguntasIds = List.of(1L, 2L, 3L, 4L, 5L, 6L);
 
-        assertThatThrownBy(() -> generalService.crearTipoAbierta("T", "D", 10, 1L, true, "ok", preguntasIds, null))
+        assertThatThrownBy(() -> generalService.crearActAbierta("T", "D", 10, 1L, true, "ok", preguntasIds, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("no pueden tener más de 5 preguntas");
     }
@@ -713,7 +713,7 @@ class GeneralServiceImplTest {
         when(respuestaMaestroRepository.findRespuestaByPreguntaId(100L))
                 .thenReturn(List.of(new RespuestaMaestro(), new RespuestaMaestro()));
 
-        assertThatThrownBy(() -> generalService.crearTipoAbierta("T", "D", 10, 1L, true, "ok", List.of(100L), null))
+        assertThatThrownBy(() -> generalService.crearActAbierta("T", "D", 10, 1L, true, "ok", List.of(100L), null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("solo se permite una respuesta por pregunta");
     }
@@ -725,7 +725,7 @@ class GeneralServiceImplTest {
         when(generalRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         // RAMA: preguntasId == null (para cubrir el primer if del método)
-        General res = generalService.crearTipoAbierta("T", "D", 10, 1L, true, "ok", null, "img.png");
+        General res = generalService.crearActAbierta("T", "D", 10, 1L, true, "ok", null, "img.png");
         
         assertThat(res.getTipo()).isEqualTo(TipoActGeneral.ABIERTA);
         verify(generalRepository).save(any());
@@ -771,7 +771,7 @@ class GeneralServiceImplTest {
         nuevasPreguntas.put("¿2+2?", "4");
         request.setPreguntasYRespuestas(nuevasPreguntas);
 
-        CrucigramaDTO resultado = generalService.updateTipoCrucigrama(1L, request);
+        CrucigramaDTO resultado = generalService.actualizarActCrucigrama(1L, request);
 
         assertThat(resultado).isNotNull();
         assertThat(crucigramaExistente.getVersion()).isEqualTo(2);
@@ -790,7 +790,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findById(1L)).thenReturn(Optional.of(actErronea));
         when(temaRepository.findById(1L)).thenReturn(Optional.of(actErronea.getTema()));
 
-        assertThatThrownBy(() -> generalService.updateTipoAbierta(1L, "T", "D", 1, true, "C", List.of(), 1, 1, 1L, null))
+        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", List.of(), 1, 1, 1L, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("La actividad no es de tipo abierta");
     }
@@ -811,7 +811,7 @@ class GeneralServiceImplTest {
 
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
-        assertThatThrownBy(() -> generalService.readTipoAbierta(1L))
+        assertThatThrownBy(() -> generalService.encontrarActAbiertaPorId(1L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("La actividad no es de tipo abierta");
     }
@@ -848,7 +848,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(10L)).thenReturn(Optional.of(act));
 
         // 2. Ejecución
-        GeneralCartaMaestroDTO dto = generalService.readTipoCartaMaestro(10L);
+        GeneralCartaMaestroDTO dto = generalService.encontrarActCartaMaestroPorId(10L);
 
         // 3. Verificaciones
         assertThat(dto).isNotNull();
@@ -863,7 +863,7 @@ class GeneralServiceImplTest {
     void readTipoCartaMaestro_usuarioNoMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
 
-        assertThatThrownBy(() -> generalService.readTipoCartaMaestro(1L))
+        assertThatThrownBy(() -> generalService.encontrarActCartaMaestroPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede leer actividades tipo cartas para edición");
     }
@@ -873,7 +873,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
         when(generalRepository.findByIdWithPreguntas(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> generalService.readTipoCartaMaestro(99L))
+        assertThatThrownBy(() -> generalService.encontrarActCartaMaestroPorId(99L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Actividad tipo carta no encontrada");
     }
@@ -887,7 +887,7 @@ class GeneralServiceImplTest {
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(actTest));
 
-        assertThatThrownBy(() -> generalService.readTipoCartaMaestro(1L))
+        assertThatThrownBy(() -> generalService.encontrarActCartaMaestroPorId(1L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("La actividad no es de tipo carta");
     }
@@ -906,7 +906,7 @@ class GeneralServiceImplTest {
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
-        assertThatThrownBy(() -> generalService.readTipoCartaMaestro(1L))
+        assertThatThrownBy(() -> generalService.encontrarActCartaMaestroPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo el maestro del curso puede acceder a esta actividad");
     }
@@ -923,15 +923,15 @@ class GeneralServiceImplTest {
 
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
-        GeneralCartaMaestroDTO dto = generalService.readTipoCartaMaestro(1L);
+        GeneralCartaMaestroDTO dto = generalService.encontrarActCartaMaestroPorId(1L);
         
         assertThat(dto.getTemaId()).isNull();
     }
 
-    // --- TESTS PARA readTipoTestMaestro ---
+    // --- TESTS PARA encontrarActTestMaestro ---
 
     @Test
-    void readTipoTestMaestro_ok_mapeaCorrectamenteADTO() {
+    void encontrarActTestMaestro_ok_mapeaCorrectamenteADTO() {
         // Setup del maestro y seguridad
         Maestro maestro = crearMaestro(); // ID 1L por defecto en tu método auxiliar
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
@@ -960,7 +960,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(20L)).thenReturn(Optional.of(act));
 
         // Ejecución
-        GeneralTestMaestroDTO dto = generalService.readTipoTestMaestro(20L);
+        GeneralTestMaestroDTO dto = generalService.encontrarActTipoTestMaestroPorId(20L);
 
         // Verificaciones
         assertThat(dto).isNotNull();
@@ -972,27 +972,27 @@ class GeneralServiceImplTest {
     }
 
     @Test
-    void readTipoTestMaestro_usuarioNoMaestro_lanzaAccessDeniedException() {
+    void encontrarActTestMaestro_usuarioNoMaestro_lanzaAccessDeniedException() {
         // Simular que el usuario es un Alumno
         when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
 
-        assertThatThrownBy(() -> generalService.readTipoTestMaestro(1L))
+        assertThatThrownBy(() -> generalService.encontrarActTipoTestMaestroPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede leer actividades tipo test para edición");
     }
 
     @Test
-    void readTipoTestMaestro_noExiste_lanzaResourceNotFoundException() {
+    void encontrarActTestMaestro_noExiste_lanzaResourceNotFoundException() {
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
         when(generalRepository.findByIdWithPreguntas(anyLong())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> generalService.readTipoTestMaestro(999L))
+        assertThatThrownBy(() -> generalService.encontrarActTipoTestMaestroPorId(999L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Actividad tipo test no encontrada");
     }
 
     @Test
-    void readTipoTestMaestro_tipoIncorrecto_lanzaResourceNotFoundException() {
+    void encontrarActTestMaestro_tipoIncorrecto_lanzaResourceNotFoundException() {
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
         
         General actErronea = new General();
@@ -1000,13 +1000,13 @@ class GeneralServiceImplTest {
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(actErronea));
 
-        assertThatThrownBy(() -> generalService.readTipoTestMaestro(1L))
+        assertThatThrownBy(() -> generalService.encontrarActTipoTestMaestroPorId(1L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("La actividad no es de tipo test");
     }
 
     @Test
-    void readTipoTestMaestro_maestroNoDuenio_lanzaAccessDeniedException() {
+    void encontrarActTestMaestro_maestroNoDuenio_lanzaAccessDeniedException() {
         // Usuario logueado (ID 2)
         Maestro maestroIntruso = new Maestro();
         maestroIntruso.setId(2L);
@@ -1019,13 +1019,13 @@ class GeneralServiceImplTest {
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
-        assertThatThrownBy(() -> generalService.readTipoTestMaestro(1L))
+        assertThatThrownBy(() -> generalService.encontrarActTipoTestMaestroPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo el maestro del curso puede acceder a esta actividad");
     }
 
     @Test
-    void readTipoTestMaestro_conTemaNull_mapeaIdNull() {
+    void encontrarActTestMaestro_conTemaNull_mapeaIdNull() {
         // Para cubrir la rama del operador ternario: general.getTema() == null ? null : ...
         Maestro maestro = crearMaestro();
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
@@ -1037,7 +1037,7 @@ class GeneralServiceImplTest {
 
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
-        GeneralTestMaestroDTO resultado = generalService.readTipoTestMaestro(1L);
+        GeneralTestMaestroDTO resultado = generalService.encontrarActTipoTestMaestroPorId(1L);
 
         assertThat(resultado.getTemaId()).isNull();
         verify(generalRepository).findByIdWithPreguntas(1L);
@@ -1073,7 +1073,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
         // 3. Ejecución
-        GeneralCartaDTO resultado = generalService.readTipoCarta(1L);
+        GeneralCartaDTO resultado = generalService.encontrarActCartaPorId(1L);
 
         // 4. Verificación
         assertThat(resultado).isNotNull();
@@ -1086,7 +1086,7 @@ class GeneralServiceImplTest {
         // Un Maestro intentando entrar por la ruta de Alumno
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 
-        assertThatThrownBy(() -> generalService.readTipoCarta(1L))
+        assertThatThrownBy(() -> generalService.encontrarActCartaPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("No tienes permiso para acceder a esta actividad");
     }
@@ -1101,7 +1101,7 @@ class GeneralServiceImplTest {
 
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(actErronea));
 
-        assertThatThrownBy(() -> generalService.readTipoCarta(1L))
+        assertThatThrownBy(() -> generalService.encontrarActCartaPorId(1L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("La actividad no es de tipo carta");
     }
@@ -1122,7 +1122,7 @@ class GeneralServiceImplTest {
 
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
-        assertThatThrownBy(() -> generalService.readTipoCarta(1L))
+        assertThatThrownBy(() -> generalService.encontrarActCartaPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("La actividad que buscas pertenece a un curso al que no estás inscrito");
     }
@@ -1142,11 +1142,11 @@ class GeneralServiceImplTest {
 
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
-        assertThatThrownBy(() -> generalService.readTipoCarta(1L))
+        assertThatThrownBy(() -> generalService.encontrarActCartaPorId(1L))
                 .isInstanceOf(NullPointerException.class);
     }
 
-    // --- TESTS PARA readTipoTest (Vista Alumno) ---
+    // --- TESTS PARA encontrarActTipoTest (Vista Alumno) ---
 
     @Test
     void readTipoTest_ok_mapeaPreguntasYValidaInscripcion() {
@@ -1187,7 +1187,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
         // 5. Ejecución
-        GeneralTestDTO resultado = generalService.readTipoTest(1L);
+        GeneralTestDTO resultado = generalService.encontrarActTipoTestPorId(1L);
 
         // 6. Verificaciones de Cobertura
         assertThat(resultado).isNotNull();
@@ -1198,7 +1198,7 @@ class GeneralServiceImplTest {
     }
 
     @Test
-    void readTipoTest_mapeoCorrecto_cuandoTemaEsNull() {
+    void encontrarActTipoTest_mapeoCorrecto_cuandoTemaEsNull() {
         // Prueba la rama: general.getTema() == null ? null : general.getTema().getId()
         Alumno alumno = new Alumno();
         alumno.setId(10L);
@@ -1214,12 +1214,12 @@ class GeneralServiceImplTest {
         // Nota: Este test lanzará NullPointerException en el servicio al llegar a 
         // general.getTema().getCurso().getInscripciones() si no hay null-check.
         // Es útil para detectar errores de diseño.
-        assertThatThrownBy(() -> generalService.readTipoTest(1L))
+        assertThatThrownBy(() -> generalService.encontrarActTipoTestPorId(1L))
                 .isInstanceOf(NullPointerException.class);
     }
 
     @Test
-    void readTipoTest_alumnoNoEncontradoEnInscripciones_lanzaAccessDenied() {
+    void encontrarActTipoTest_alumnoNoEncontradoEnInscripciones_lanzaAccessDenied() {
         // Setup alumno
         Alumno alumnoLogueado = new Alumno();
         alumnoLogueado.setId(10L);
@@ -1244,12 +1244,12 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
         // Verificamos que recorre el bucle, no encuentra el ID y lanza la excepción final
-        assertThatThrownBy(() -> generalService.readTipoTest(1L))
+        assertThatThrownBy(() -> generalService.encontrarActTipoTestPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("La actividad que buscas pertenece a un curso al que no estás inscrito");
     }
 
-    // --- TESTS PARA readActividad (Flujos de Maestro y otros roles) ---
+    // --- TESTS PARA encontrarActActividad (Flujos de Maestro y otros roles) ---
 
     @Test
     void readActividad_maestroDuenio_devuelveActividad() {
@@ -1265,7 +1265,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(100L)).thenReturn(Optional.of(act));
 
         // 3. Ejecución
-        General resultado = generalService.readActividad(100L);
+        General resultado = generalService.encontrarActGeneralPorId(100L);
 
         // 4. Verificación
         assertThat(resultado).isSameAs(act);
@@ -1286,7 +1286,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
         // 3. Verificación de la rama: !maestro.getId().equals(current.getId())
-        assertThatThrownBy(() -> generalService.readActividad(1L))
+        assertThatThrownBy(() -> generalService.encontrarActGeneralPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo el maestro del curso puede acceder a esta actividad");
     }
@@ -1314,7 +1314,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
         // 3. Ejecución
-        General resultado = generalService.readActividad(1L);
+        General resultado = generalService.encontrarActGeneralPorId(1L);
         
         // 4. Verificación
         assertThat(resultado).isNotNull();
@@ -1332,7 +1332,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
         // 2. Verificación de la rama final 'else'
-        assertThatThrownBy(() -> generalService.readActividad(1L))
+        assertThatThrownBy(() -> generalService.encontrarActGeneralPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("No puedes obtener una actividad si no eres un alumno o un maestro");
     }
@@ -1356,7 +1356,7 @@ class GeneralServiceImplTest {
         when(actividadRepository.findMaxPosicionByTemaId(1L)).thenReturn(0);
 
         // 2. Ejecución
-        General resultado = generalService.crearGeneralClasificacion(
+        General resultado = generalService.crearActClasificacion(
                 "Título Clasif", "Desc", 10, 1L, true, "comentarios");
 
         // 3. Verificaciones
@@ -1373,7 +1373,7 @@ class GeneralServiceImplTest {
         // Simular un Alumno
         when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
 
-        assertThatThrownBy(() -> generalService.crearGeneralClasificacion("T", "D", 1, 1L, false, null))
+        assertThatThrownBy(() -> generalService.crearActClasificacion("T", "D", 1, 1L, false, null))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede crear actividades");
         
@@ -1385,7 +1385,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
         when(temaRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> generalService.crearGeneralClasificacion("T", "D", 1, 99L, false, null))
+        assertThatThrownBy(() -> generalService.crearActClasificacion("T", "D", 1, 99L, false, null))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("El tema de la actividad no existe");
     }
@@ -1401,7 +1401,7 @@ class GeneralServiceImplTest {
         Tema temaAjeno = crearTema(1L);
         when(temaRepository.findById(1L)).thenReturn(Optional.of(temaAjeno));
 
-        assertThatThrownBy(() -> generalService.crearGeneralClasificacion("T", "D", 1, 1L, false, null))
+        assertThatThrownBy(() -> generalService.crearActClasificacion("T", "D", 1, 1L, false, null))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo el maestro del curso puede crear actividades en ese tema");
         
@@ -1448,7 +1448,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
         // 4. Ejecución
-        GeneralClasificacionDTO resultado = generalService.readTipoClasificacion(1L);
+        GeneralClasificacionDTO resultado = generalService.encontrarActClasificacionPorId(1L);
 
         // 5. Verificaciones de la lógica matemática
         assertThat(resultado).isNotNull();
@@ -1470,7 +1470,7 @@ class GeneralServiceImplTest {
         // Un Maestro no puede usar la ruta de lectura de Alumno
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 
-        assertThatThrownBy(() -> generalService.readTipoClasificacion(1L))
+        assertThatThrownBy(() -> generalService.encontrarActClasificacionPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un alumno puede leer actividades tipo clasificación");
     }
@@ -1480,7 +1480,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
         when(generalRepository.findByIdWithPreguntas(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> generalService.readTipoClasificacion(99L))
+        assertThatThrownBy(() -> generalService.encontrarActClasificacionPorId(99L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Actividad tipo clasificación no encontrada");
     }
@@ -1494,7 +1494,7 @@ class GeneralServiceImplTest {
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(actErronea));
 
-        assertThatThrownBy(() -> generalService.readTipoClasificacion(1L))
+        assertThatThrownBy(() -> generalService.encontrarActClasificacionPorId(1L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("La actividad no es de tipo clasificación");
     }
@@ -1514,7 +1514,7 @@ class GeneralServiceImplTest {
 
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
-        assertThatThrownBy(() -> generalService.readTipoClasificacion(1L))
+        assertThatThrownBy(() -> generalService.encontrarActClasificacionPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("La actividad que buscas pertenece a un curso al que no estás inscrito");
     }
@@ -1549,7 +1549,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(10L)).thenReturn(Optional.of(act));
 
         // Ejecución
-        GeneralAbiertaMaestroDTO resultado = generalService.readTipoAbiertaMaestro(10L);
+        GeneralAbiertaMaestroDTO resultado = generalService.encontrarActAbiertaMaestroPorId(10L);
 
         // Verificaciones
         assertThat(resultado).isNotNull();
@@ -1564,7 +1564,7 @@ class GeneralServiceImplTest {
         // Simulamos un Alumno intentando entrar en la vista de edición de maestro
         when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
 
-        assertThatThrownBy(() -> generalService.readTipoAbiertaMaestro(1L))
+        assertThatThrownBy(() -> generalService.encontrarActAbiertaMaestroPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede leer actividades tipo abierta para edición");
     }
@@ -1583,7 +1583,7 @@ class GeneralServiceImplTest {
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
-        assertThatThrownBy(() -> generalService.readTipoAbiertaMaestro(1L))
+        assertThatThrownBy(() -> generalService.encontrarActAbiertaMaestroPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo el maestro del curso puede acceder a esta actividad");
     }
@@ -1597,7 +1597,7 @@ class GeneralServiceImplTest {
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(actTest));
 
-        assertThatThrownBy(() -> generalService.readTipoAbiertaMaestro(1L))
+        assertThatThrownBy(() -> generalService.encontrarActAbiertaMaestroPorId(1L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("La actividad no es de tipo abierta");
     }
@@ -1607,7 +1607,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
         when(generalRepository.findByIdWithPreguntas(anyLong())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> generalService.readTipoAbiertaMaestro(99L))
+        assertThatThrownBy(() -> generalService.encontrarActAbiertaMaestroPorId(99L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Actividad tipo abierta no encontrada");
     }
@@ -1648,7 +1648,7 @@ class GeneralServiceImplTest {
         when(preguntaRepository.findAllById(preguntasId)).thenReturn(List.of(p1));
 
         // 6. Ejecución
-        General resultado = generalService.updateTipoAbierta(
+        General resultado = generalService.actualizarActAbierta(
             1L, "Título", "Desc", 10, true, "Comentario", 
             preguntasId, 1, 1, 1L, "imagen.png"
         );
@@ -1671,7 +1671,7 @@ class GeneralServiceImplTest {
 
         when(generalRepository.findById(1L)).thenReturn(Optional.of(act));
 
-        assertThatThrownBy(() -> generalService.updateTipoAbierta(1L, "T", "D", 1, true, "C", List.of(), 1, 1, 1L, null))
+        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", List.of(), 1, 1, 1L, null))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo el maestro del curso puede actualizar esta actividad");
     }
@@ -1695,7 +1695,7 @@ class GeneralServiceImplTest {
 
         // 4. Ejecución y Verificación
         // Ahora sí llegará a la validación del null porque el tema "existe" para el servicio
-        assertThatThrownBy(() -> generalService.updateTipoAbierta(1L, "T", "D", 1, true, "C", null, 1, 1, 1L, null))
+        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", null, 1, 1, 1L, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("La lista de preguntas no puede ser null");
     }
@@ -1724,7 +1724,7 @@ class GeneralServiceImplTest {
 
         // 4. Ejecución y Verificación
         // Ahora sí pasará el filtro del tema y llegará a la validación de tamaño de lista de preguntas
-        assertThatThrownBy(() -> generalService.updateTipoAbierta(1L, "T", "D", 1, true, "C", ids, 1, 1, 1L, null))
+        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", ids, 1, 1, 1L, null))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Alguna de las preguntas no existe");
     }
@@ -1756,7 +1756,7 @@ class GeneralServiceImplTest {
 
         // 4. Ejecución y Verificación
         // Ahora el flujo llegará hasta el bucle for(Pregunta pregunta : preguntas)
-        assertThatThrownBy(() -> generalService.updateTipoAbierta(1L, "T", "D", 1, true, "C", ids, 1, 1, 1L, null))
+        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", ids, 1, 1, 1L, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("no tiene exactamente una respuesta");
     }
@@ -1795,7 +1795,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
         // 5. Ejecución
-        GeneralAbiertaAlumnoDTO resultado = generalService.readTipoAbierta(1L);
+        GeneralAbiertaAlumnoDTO resultado = generalService.encontrarActAbiertaPorId(1L);
 
         // 6. Verificaciones
         assertThat(resultado).isNotNull();
@@ -1829,7 +1829,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
         // Verificamos la rama del !anyMatch
-        assertThatThrownBy(() -> generalService.readTipoAbierta(1L))
+        assertThatThrownBy(() -> generalService.encontrarActAbiertaPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("No tienes permiso para acceder a esta actividad");
     }
@@ -1839,7 +1839,7 @@ class GeneralServiceImplTest {
         // Si un Maestro intenta entrar por aquí
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 
-        assertThatThrownBy(() -> generalService.readTipoAbierta(1L))
+        assertThatThrownBy(() -> generalService.encontrarActAbiertaPorId(1L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un alumno puede leer actividades tipo abierta");
     }
@@ -1853,7 +1853,7 @@ class GeneralServiceImplTest {
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(actErronea));
 
-        assertThatThrownBy(() -> generalService.readTipoAbierta(1L))
+        assertThatThrownBy(() -> generalService.encontrarActAbiertaPorId(1L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("La actividad no es de tipo abierta");
     }

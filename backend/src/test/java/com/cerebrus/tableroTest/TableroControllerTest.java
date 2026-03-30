@@ -52,7 +52,7 @@ public class TableroControllerTest {
 		TableroDTO dto = new TableroDTO(
 			1L, "titulo", "descripcion", true, 1, 100, true, 1L, new java.util.ArrayList<>()
 		);
-		when(tableroService.crearActividadTablero(any())).thenReturn(dto);
+		when(tableroService.crearActTablero(any())).thenReturn(dto);
 		mockMvc.perform(post("/api/tableros")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(req)))
@@ -65,7 +65,7 @@ public class TableroControllerTest {
 		TableroDTO dto = new TableroDTO(
 			2L, "titulo", "descripcion", false, 2, 200, false, 2L, new java.util.ArrayList<>()
 		);
-		when(tableroService.crearActividadTablero(any())).thenReturn(dto);
+		when(tableroService.crearActTablero(any())).thenReturn(dto);
 		mockMvc.perform(post("/api/tableros")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(req)))
@@ -94,14 +94,14 @@ public class TableroControllerTest {
 			3L,
 			new java.util.ArrayList<>()
 		);
-		when(tableroService.getTablero(1L)).thenReturn(dto);
+		when(tableroService.encontrarActTableroPorId(1L)).thenReturn(dto);
 		mockMvc.perform(get("/api/tableros/1"))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	void eliminarTablero_ok() throws Exception {
-		doNothing().when(tableroService).eliminarTablero(1L);
+		doNothing().when(tableroService).eliminarActTableroPorId(1L);
 		mockMvc.perform(delete("/api/tableros/1"))
 				.andExpect(status().isNoContent());
 	}
@@ -112,7 +112,7 @@ public class TableroControllerTest {
 		TableroDTO dto = new TableroDTO(
 			4L, "titulo", "descripcion", true, 4, 400, true, 4L, new java.util.ArrayList<>()
 		);
-		when(tableroService.actualizarTablero(eq(1L), any())).thenReturn(dto);
+		when(tableroService.actualizarActTablero(eq(1L), any())).thenReturn(dto);
 		mockMvc.perform(put("/api/tableros/1")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(req)))
@@ -130,7 +130,7 @@ public class TableroControllerTest {
 
 	@Test
 	void crearRespuestaAPreguntaTablero_ok() throws Exception {
-		when(tableroService.crearRespuestaAPreguntaTablero(anyString(), eq(1L), eq(2L))).thenReturn("Respuesta correcta");
+		when(tableroService.crearRespuestaAPreguntaEnActTablero(anyString(), eq(1L), eq(2L))).thenReturn("Respuesta correcta");
 		mockMvc.perform(post("/api/tableros/1/2")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("\"respuesta\""))

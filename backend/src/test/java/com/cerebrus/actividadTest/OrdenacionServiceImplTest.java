@@ -376,7 +376,7 @@ class OrdenacionServiceImplTest {
         // 2. Mock del repositorio usando el método específico con valores
         when(ordenacionRepository.findWithValoresById(10L)).thenReturn(Optional.of(ordenacion));
 
-        Ordenacion resultado = ordenacionService.readOrdenacionMaestro(10L);
+        Ordenacion resultado = ordenacionService.encontrarActOrdenacionMaestroPorId(10L);
 
         // 3. Verificaciones
         assertThat(resultado).isNotNull();
@@ -389,7 +389,7 @@ class OrdenacionServiceImplTest {
         // 1. Mock de usuario alumno (no es instancia de Maestro)
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
-        assertThatThrownBy(() -> ordenacionService.readOrdenacionMaestro(10L))
+        assertThatThrownBy(() -> ordenacionService.encontrarActOrdenacionMaestroPorId(10L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessageContaining("Solo un maestro puede leer");
     }
@@ -404,7 +404,7 @@ class OrdenacionServiceImplTest {
         // 2. La ordenación existe, pero su tema/curso pertenece al maestro original (ID 2L)
         when(ordenacionRepository.findWithValoresById(10L)).thenReturn(Optional.of(ordenacion));
 
-        assertThatThrownBy(() -> ordenacionService.readOrdenacionMaestro(10L))
+        assertThatThrownBy(() -> ordenacionService.encontrarActOrdenacionMaestroPorId(10L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessageContaining("No puedes leer actividades de cursos que no son tuyos");
     }
@@ -414,7 +414,7 @@ class OrdenacionServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(ordenacionRepository.findWithValoresById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> ordenacionService.readOrdenacionMaestro(99L))
+        assertThatThrownBy(() -> ordenacionService.encontrarActOrdenacionMaestroPorId(99L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La actividad de ordenación no existe");
     }

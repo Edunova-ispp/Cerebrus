@@ -314,7 +314,7 @@ class GeneralControllerTest {
         // Respuesta con números o caracteres especiales no permitidos por el regex ^[\p{L}]+$
         request.setPreguntasYRespuestas(Map.of("Pregunta 1", "Respuesta123")); 
 
-        ResponseEntity<CrucigramaDTO> response = generalController.crearTipoCrucigrama(request);
+        ResponseEntity<CrucigramaDTO> response = generalController.crearActCrucigrama(request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoInteractions(generalService);
@@ -327,7 +327,7 @@ class GeneralControllerTest {
         for (int i = 0; i < 6; i++) { muchasPreguntas.put("P" + i, "R" + i); }
         request.setPreguntasYRespuestas(muchasPreguntas);
 
-        ResponseEntity<CrucigramaDTO> response = generalController.crearTipoCrucigrama(request);
+        ResponseEntity<CrucigramaDTO> response = generalController.crearActCrucigrama(request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
@@ -341,9 +341,9 @@ class GeneralControllerTest {
 		CrucigramaDTO dtoMock = mock(CrucigramaDTO.class);
 		when(dtoMock.getId()).thenReturn(1L);
 
-		when(generalService.crearTipoCrucigrama(any(CrucigramaRequest.class))).thenReturn(dtoMock);
+		when(generalService.crearActCrucigrama(any(CrucigramaRequest.class))).thenReturn(dtoMock);
 
-		ResponseEntity<CrucigramaDTO> response = generalController.crearTipoCrucigrama(request);
+		ResponseEntity<CrucigramaDTO> response = generalController.crearActCrucigrama(request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK); // Tu controlador devuelve .ok()
 		assertThat(response.getBody().getId()).isEqualTo(1L);
@@ -364,15 +364,15 @@ class GeneralControllerTest {
         General creada = new General();
         creada.setId(100L);
 
-        when(generalService.crearTipoAbierta(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(generalService.crearActAbierta(any(), any(), any(), any(), any(), any(), any(), any()))
             .thenReturn(creada);
 
-        ResponseEntity<Long> response = generalController.crearTipoAbierta(request);
+        ResponseEntity<Long> response = generalController.crearActAbierta(request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isEqualTo(100L);
         
-        verify(generalService).crearTipoAbierta(
+        verify(generalService).crearActAbierta(
             eq("Abierta"), any(), any(), eq(5L), any(), any(), preguntasIdCaptor.capture(), any()
         );
         assertThat(preguntasIdCaptor.getValue()).containsExactly(10L);
@@ -390,9 +390,9 @@ class GeneralControllerTest {
 		GeneralAbiertaMaestroDTO dtoMaestroMock = mock(GeneralAbiertaMaestroDTO.class);
 		
 		// El controlador en el PUT llama primero al update y luego al readTipoAbiertaMaestro
-		when(generalService.readTipoAbiertaMaestro(1L)).thenReturn(dtoMaestroMock);
+		when(generalService.encontrarActAbiertaMaestroPorId(1L)).thenReturn(dtoMaestroMock);
 
-		ResponseEntity<GeneralAbiertaMaestroDTO> response = generalController.updateTipoAbierta(1L, request);
+		ResponseEntity<GeneralAbiertaMaestroDTO> response = generalController.actualizarActAbierta(1L, request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).isSameAs(dtoMaestroMock);
@@ -411,11 +411,11 @@ class GeneralControllerTest {
 		// 2. Mockeamos el DTO de retorno
 		GeneralClasificacionMaestroDTO dtoMock = mock(GeneralClasificacionMaestroDTO.class);
 		
-		when(generalService.updateTipoClasificacion(eq(1L), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+		when(generalService.actualizarActClasificacion(eq(1L), any(), any(), any(), any(), any(), any(), any(), any(), any()))
 			.thenReturn(dtoMock);
 
 		// 3. Ejecución
-		ResponseEntity<GeneralClasificacionMaestroDTO> response = generalController.updateTipoClasificacion(1L, request);
+		ResponseEntity<GeneralClasificacionMaestroDTO> response = generalController.actualizarActClasificacion(1L, request);
 
 		// 4. Verificación
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -428,30 +428,30 @@ class GeneralControllerTest {
     void readTipoTest_devuelveStatusOkYDTOCorrecto() {
         // 1. Setup
         GeneralTestDTO dtoMock = mock(GeneralTestDTO.class);
-        when(generalService.readTipoTest(1L)).thenReturn(dtoMock);
+        when(generalService.encontrarActTipoTestPorId(1L)).thenReturn(dtoMock);
 
         // 2. Ejecución
-        ResponseEntity<GeneralTestDTO> response = generalController.readTipoTest(1L);
+        ResponseEntity<GeneralTestDTO> response = generalController.encontrarActTipoTestPorId(1L);
 
         // 3. Verificaciones
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(dtoMock);
-        verify(generalService).readTipoTest(1L);
+        verify(generalService).encontrarActTipoTestPorId(1L);
     }
 
     @Test
     void readTipoTestMaestro_devuelveStatusOkYDTOCorrecto() {
         // 1. Setup
         GeneralTestMaestroDTO dtoMock = mock(GeneralTestMaestroDTO.class);
-        when(generalService.readTipoTestMaestro(1L)).thenReturn(dtoMock);
+        when(generalService.encontrarActTipoTestMaestroPorId(1L)).thenReturn(dtoMock);
 
         // 2. Ejecución
-        ResponseEntity<GeneralTestMaestroDTO> response = generalController.readTipoTestMaestro(1L);
+        ResponseEntity<GeneralTestMaestroDTO> response = generalController.encontrarActTipoTestMaestroPorId(1L);
 
         // 3. Verificaciones
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(dtoMock);
-        verify(generalService).readTipoTestMaestro(1L);
+        verify(generalService).encontrarActTipoTestMaestroPorId(1L);
     }
 
     // --- TESTS PARA readTipoCarta (Alumno y Maestro) ---
@@ -460,30 +460,30 @@ class GeneralControllerTest {
     void readTipoCarta_devuelveStatusOkYDTOCorrecto() {
         // 1. Setup
         GeneralCartaDTO dtoMock = mock(GeneralCartaDTO.class);
-        when(generalService.readTipoCarta(1L)).thenReturn(dtoMock);
+        when(generalService.encontrarActCartaPorId(1L)).thenReturn(dtoMock);
 
         // 2. Ejecución
-        ResponseEntity<GeneralCartaDTO> response = generalController.readTipoCarta(1L);
+        ResponseEntity<GeneralCartaDTO> response = generalController.encontrarActCartaPorId(1L);
 
         // 3. Verificaciones
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(dtoMock);
-        verify(generalService).readTipoCarta(1L);
+        verify(generalService).encontrarActCartaPorId(1L);
     }
 
     @Test
     void readTipoCartaMaestro_devuelveStatusOkYDTOCorrecto() {
         // 1. Setup
         GeneralCartaMaestroDTO dtoMock = mock(GeneralCartaMaestroDTO.class);
-        when(generalService.readTipoCartaMaestro(1L)).thenReturn(dtoMock);
+        when(generalService.encontrarActCartaMaestroPorId(1L)).thenReturn(dtoMock);
 
         // 2. Ejecución
-        ResponseEntity<GeneralCartaMaestroDTO> response = generalController.readTipoCartaMaestro(1L);
+        ResponseEntity<GeneralCartaMaestroDTO> response = generalController.encontrarActCartaMaestroPorId(1L);
 
         // 3. Verificaciones
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(dtoMock);
-        verify(generalService).readTipoCartaMaestro(1L);
+        verify(generalService).encontrarActCartaMaestroPorId(1L);
     }
 
 	@Test
@@ -512,7 +512,7 @@ class GeneralControllerTest {
 
         // Configuramos el comportamiento del mock del servicio
         // Usamos eq() para los valores fijos y any() o la lista específica para el resto
-        when(generalService.crearTipoCarta(
+        when(generalService.crearActCarta(
                 eq("Test Cartas"), 
                 eq("Desc"), 
                 eq(10), 
@@ -523,14 +523,14 @@ class GeneralControllerTest {
         )).thenReturn(generalCreada);
 
         // 3. Ejecución
-        ResponseEntity<Long> response = generalController.crearTipoCarta(request);
+        ResponseEntity<Long> response = generalController.crearActCarta(request);
 
         // 4. Verificaciones
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isEqualTo(999L);
         
         // Verificamos que se extrajeron los IDs correctamente (100 y 101)
-        verify(generalService).crearTipoCarta(
+        verify(generalService).crearActCarta(
                 any(), any(), any(), any(), any(), any(), 
                 eq(List.of(100L, 101L))
         );
@@ -562,17 +562,17 @@ class GeneralControllerTest {
         GeneralCartaDTO dtoMock = mock(GeneralCartaDTO.class);
         
         // El controlador hace un update (void o ignorado) y luego un read
-        when(generalService.readTipoCarta(1L)).thenReturn(dtoMock);
+        when(generalService.encontrarActCartaPorId(1L)).thenReturn(dtoMock);
 
         // 3. Ejecución
-        ResponseEntity<GeneralCartaDTO> response = generalController.updateTipoCarta(1L, request);
+        ResponseEntity<GeneralCartaDTO> response = generalController.actualizarActCarta(1L, request);
 
         // 4. Verificaciones
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(dtoMock);
 
         // Verificamos que se llamó al update con los datos del objeto 'request'
-        verify(generalService).updateTipoCarta(
+        verify(generalService).actualizarActCarta(
                 eq(1L),
                 eq("Cartas Actualizado"),
                 eq("Nueva Desc"),
@@ -587,7 +587,7 @@ class GeneralControllerTest {
         );
 
         // Verificamos que se llamó al read para obtener la respuesta final
-        verify(generalService).readTipoCarta(1L);
+        verify(generalService).encontrarActCartaPorId(1L);
     }
 
 	@Test
@@ -608,7 +608,7 @@ class GeneralControllerTest {
         General generalCreada = new General();
         generalCreada.setId(500L); // El ID que esperamos recibir en la respuesta
 
-        when(generalService.crearGeneralClasificacion(
+        when(generalService.crearActClasificacion(
                 eq("Nueva Clasificación"),
                 eq("Descripción de prueba"),
                 eq(15),
@@ -618,14 +618,14 @@ class GeneralControllerTest {
         )).thenReturn(generalCreada);
 
         // 3. Ejecución
-        ResponseEntity<Long> response = generalController.crearTipoClasificacion(request);
+        ResponseEntity<Long> response = generalController.crearActClasificacion(request);
 
         // 4. Verificaciones
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isEqualTo(500L);
 
         // Verificamos que se llamó al servicio exactamente con los datos del request
-        verify(generalService).crearGeneralClasificacion(
+        verify(generalService).crearActClasificacion(
                 any(), any(), any(), any(), any(), any()
         );
     }
@@ -641,15 +641,15 @@ class GeneralControllerTest {
         request.setPreguntasYRespuestas(preguntasYRespuestas);
 
         CrucigramaDTO dtoMock = mock(CrucigramaDTO.class);
-        when(generalService.updateTipoCrucigrama(eq(1L), any(CrucigramaRequest.class))).thenReturn(dtoMock);
+        when(generalService.actualizarActCrucigrama(eq(1L), any(CrucigramaRequest.class))).thenReturn(dtoMock);
 
         // 2. Ejecución
-        ResponseEntity<CrucigramaDTO> response = generalController.updateTipoCrucigrama(1L, request);
+        ResponseEntity<CrucigramaDTO> response = generalController.actualizarActCrucigrama(1L, request);
 
         // 3. Verificación
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(dtoMock);
-        verify(generalService).updateTipoCrucigrama(eq(1L), any());
+        verify(generalService).actualizarActCrucigrama(eq(1L), any());
     }
 
     @Test
@@ -658,14 +658,14 @@ class GeneralControllerTest {
         CrucigramaRequest requestNull = new CrucigramaRequest();
         requestNull.setPreguntasYRespuestas(null);
 
-        ResponseEntity<CrucigramaDTO> responseNull = generalController.updateTipoCrucigrama(1L, requestNull);
+        ResponseEntity<CrucigramaDTO> responseNull = generalController.actualizarActCrucigrama(1L, requestNull);
         assertThat(responseNull.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 
         // Caso: Mapa vacío
         CrucigramaRequest requestVacio = new CrucigramaRequest();
         requestVacio.setPreguntasYRespuestas(new HashMap<>());
 
-        ResponseEntity<CrucigramaDTO> responseVacio = generalController.updateTipoCrucigrama(1L, requestVacio);
+        ResponseEntity<CrucigramaDTO> responseVacio = generalController.actualizarActCrucigrama(1L, requestVacio);
         assertThat(responseVacio.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         
         verifyNoInteractions(generalService);
@@ -679,7 +679,7 @@ class GeneralControllerTest {
         mapaInvalido.put("Pregunta 1", "Respuesta123"); // Contiene números
         requestInvalido.setPreguntasYRespuestas(mapaInvalido);
 
-        ResponseEntity<CrucigramaDTO> response = generalController.updateTipoCrucigrama(1L, requestInvalido);
+        ResponseEntity<CrucigramaDTO> response = generalController.actualizarActCrucigrama(1L, requestInvalido);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         verifyNoInteractions(generalService);
@@ -692,7 +692,7 @@ class GeneralControllerTest {
         mapa.put("Pregunta", null); 
         request.setPreguntasYRespuestas(mapa);
 
-        ResponseEntity<CrucigramaDTO> response = generalController.updateTipoCrucigrama(1L, request);
+        ResponseEntity<CrucigramaDTO> response = generalController.actualizarActCrucigrama(1L, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }

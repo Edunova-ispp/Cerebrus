@@ -104,7 +104,7 @@ public class TableroServiceImplTest {
 		when(request.getPreguntasYRespuestas()).thenReturn(preguntas);
 		when(tableroRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-		TableroDTO dto = tableroService.crearActividadTablero(request);
+		TableroDTO dto = tableroService.crearActTablero(request);
 		assertThat(dto).isNotNull();
 		assertThat(dto.getTitulo()).isEqualTo("T");
 	}
@@ -113,7 +113,7 @@ public class TableroServiceImplTest {
 	void crearActividadTablero_falla_noMaestro() {
 		Usuario user = mock(Usuario.class);
 		when(usuarioService.findCurrentUser()).thenReturn(user);
-		assertThatThrownBy(() -> tableroService.crearActividadTablero(request))
+		assertThatThrownBy(() -> tableroService.crearActTablero(request))
 			.isInstanceOf(AccessDeniedException.class);
 	}
 
@@ -122,23 +122,44 @@ public class TableroServiceImplTest {
 		when(usuarioService.findCurrentUser()).thenReturn(maestro);
 		when(request.getTemaId()).thenReturn(1L);
 		when(temaRepository.findById(1L)).thenReturn(Optional.empty());
-		assertThatThrownBy(() -> tableroService.crearActividadTablero(request))
+		assertThatThrownBy(() -> tableroService.crearActTablero(request))
 			.isInstanceOf(ResourceNotFoundException.class);
 	}
 
 	@Test
 	void crearActividadTablero_falla_maestroNoPropietario() {
+		// 1. Configuración de Usuarios (Maestro actual con ID 2)
 		when(usuarioService.findCurrentUser()).thenReturn(maestro);
-		when(request.getTemaId()).thenReturn(1L);
-		when(temaRepository.findById(1L)).thenReturn(Optional.of(tema));
-		Curso curso = mock(Curso.class);
-		Maestro otroMaestro = mock(Maestro.class);
-		when(tema.getCurso()).thenReturn(curso);
-		when(curso.getMaestro()).thenReturn(otroMaestro);
 		when(maestro.getId()).thenReturn(2L);
+		
+		// 2. Configuración del Maestro Propietario (ID 3, diferente para forzar el fallo)
+		Maestro otroMaestro = mock(Maestro.class);
 		when(otroMaestro.getId()).thenReturn(3L);
-		assertThatThrownBy(() -> tableroService.crearActividadTablero(request))
+
+		// 3. Configuración del Curso vinculado al "Otro Maestro"
+		Curso cursoMock = mock(Curso.class);
+		when(cursoMock.getMaestro()).thenReturn(otroMaestro);
+
+		// 4. Configuración del Tema vinculado al Curso
+		// Usamos lenient() porque si la excepción salta muy pronto, 
+		// Mockito podría quejarse de que no se llegó a usar este stub.
+		lenient().when(tema.getCurso()).thenReturn(cursoMock);
+		lenient().when(temaRepository.findById(1L)).thenReturn(Optional.of(tema));
+
+		// 5. Configuración del Tablero (Para evitar ResourceNotFoundException)
+		// El tablero debe estar vinculado al tema para que el Service pueda navegar:
+		// tablero -> tema -> curso -> maestro
+		Tablero tableroFake = new Tablero();
+		tableroFake.setTema(tema); 
+		when(tableroRepository.findById(10L)).thenReturn(Optional.of(tableroFake));
+
+		// 6. Ejecución y Verificación
+		// Al ser IDs 2 y 3, debe lanzar AccessDeniedException
+		assertThatThrownBy(() -> tableroService.encontrarActTableroPorId(10L))
 			.isInstanceOf(AccessDeniedException.class);
+		
+		// Verificamos que NUNCA se llegó a guardar nada por el fallo de seguridad
+		verify(tableroRepository, never()).save(any());
 	}
 
 	@Test
@@ -154,14 +175,14 @@ public class TableroServiceImplTest {
 		when(maestro.getId()).thenReturn(2L);
 		when(curso.getMaestro().getId()).thenReturn(2L);
 		when(tablero.getPreguntas()).thenReturn(new ArrayList<>());
-		TableroDTO dto = tableroService.getTablero(1L);
+		TableroDTO dto = tableroService.encontrarActTableroPorId(1L);
 		assertThat(dto).isNotNull();
 	}
 
 	@Test
 	void getTablero_falla_noExiste() {
 		when(tableroRepository.findById(1L)).thenReturn(Optional.empty());
-		assertThatThrownBy(() -> tableroService.getTablero(1L))
+		assertThatThrownBy(() -> tableroService.encontrarActTableroPorId(1L))
 			.isInstanceOf(ResourceNotFoundException.class);
 	}
 
@@ -178,14 +199,14 @@ public class TableroServiceImplTest {
 		when(maestro.getId()).thenReturn(2L);
 		when(curso.getMaestro().getId()).thenReturn(2L);
 		doNothing().when(tableroRepository).delete(tablero);
-		tableroService.eliminarTablero(1L);
+		tableroService.eliminarActTableroPorId(1L);
 		verify(tableroRepository).delete(tablero);
 	}
 
 	@Test
 	void eliminarTablero_falla_noExiste() {
 		when(tableroRepository.findById(1L)).thenReturn(Optional.empty());
-		assertThatThrownBy(() -> tableroService.eliminarTablero(1L))
+		assertThatThrownBy(() -> tableroService.eliminarActTableroPorId(1L))
 			.isInstanceOf(ResourceNotFoundException.class);
 	}
 
@@ -195,7 +216,7 @@ public class TableroServiceImplTest {
 		when(tableroRepository.findById(1L)).thenReturn(Optional.of(tablero));
 		Usuario user = mock(Usuario.class);
 		when(usuarioService.findCurrentUser()).thenReturn(user);
-		assertThatThrownBy(() -> tableroService.eliminarTablero(1L))
+		assertThatThrownBy(() -> tableroService.eliminarActTableroPorId(1L))
 			.isInstanceOf(AccessDeniedException.class);
 	}
 
@@ -224,7 +245,7 @@ public class TableroServiceImplTest {
 			preguntas.put("P1", "R1");
 			when(req.getPreguntasYRespuestas()).thenReturn(preguntas);
 			when(tableroRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-			TableroDTO dto = tableroService.actualizarTablero(1L, req);
+			TableroDTO dto = tableroService.actualizarActTablero(1L, req);
 			assertThat(dto).isNotNull();
 			assertThat(dto.getTitulo()).isEqualTo("T");
 		}
@@ -233,7 +254,7 @@ public class TableroServiceImplTest {
 	void actualizarTablero_falla_noExiste() {
 		TableroRequest req = mock(TableroRequest.class);
 		when(tableroRepository.findById(1L)).thenReturn(Optional.empty());
-		assertThatThrownBy(() -> tableroService.actualizarTablero(1L, req))
+		assertThatThrownBy(() -> tableroService.actualizarActTablero(1L, req))
 			.isInstanceOf(ResourceNotFoundException.class);
 	}
 
@@ -244,7 +265,7 @@ public class TableroServiceImplTest {
 		Usuario user = mock(Usuario.class);
 		when(usuarioService.findCurrentUser()).thenReturn(user);
 		TableroRequest req = mock(TableroRequest.class);
-		assertThatThrownBy(() -> tableroService.actualizarTablero(1L, req))
+		assertThatThrownBy(() -> tableroService.actualizarActTablero(1L, req))
 			.isInstanceOf(AccessDeniedException.class);
 	}
 
@@ -262,7 +283,7 @@ public class TableroServiceImplTest {
 		when(maestro.getId()).thenReturn(2L);
 		when(otroMaestro.getId()).thenReturn(3L);
 		TableroRequest req = mock(TableroRequest.class);
-		assertThatThrownBy(() -> tableroService.actualizarTablero(1L, req))
+		assertThatThrownBy(() -> tableroService.actualizarActTablero(1L, req))
 			.isInstanceOf(AccessDeniedException.class);
 	}
 
@@ -278,15 +299,15 @@ public class TableroServiceImplTest {
 		ActividadAlumno actividadAlumno = mock(ActividadAlumno.class);
 		List<RespuestaAlumno> respuestasAlumno = new ArrayList<>();
 		when(actividadAlumno.getRespuestasAlumno()).thenReturn(respuestasAlumno);
-		when(actividadAlumnoService.crearActividadAlumno(anyInt(), any(), any(), anyInt(), anyInt(), anyLong(), anyLong())).thenReturn(actividadAlumno);
-		String result = tableroService.crearRespuestaAPreguntaTablero("respuesta", 1L, 2L);
+		when(actividadAlumnoService.crearActAlumno(anyInt(), any(), any(), anyInt(), anyInt(), anyLong(), anyLong())).thenReturn(actividadAlumno);
+		String result = tableroService.crearRespuestaAPreguntaEnActTablero("respuesta", 1L, 2L);
 		assertThat(result).contains("Respuesta correcta");
 	}
 
 	@Test
 	void crearRespuestaAPreguntaTablero_falla_noTablero() {
 		when(tableroRepository.findById(1L)).thenReturn(Optional.empty());
-		assertThatThrownBy(() -> tableroService.crearRespuestaAPreguntaTablero("r", 1L, 2L))
+		assertThatThrownBy(() -> tableroService.crearRespuestaAPreguntaEnActTablero("r", 1L, 2L))
 			.isInstanceOf(ResourceNotFoundException.class);
 	}
 
@@ -295,7 +316,7 @@ public class TableroServiceImplTest {
 		Tablero tablero = mock(Tablero.class);
 		when(tableroRepository.findById(1L)).thenReturn(Optional.of(tablero));
 		when(preguntaRepository.findById(2L)).thenReturn(Optional.empty());
-		assertThatThrownBy(() -> tableroService.crearRespuestaAPreguntaTablero("r", 1L, 2L))
+		assertThatThrownBy(() -> tableroService.crearRespuestaAPreguntaEnActTablero("r", 1L, 2L))
 			.isInstanceOf(ResourceNotFoundException.class);
 	}
 
@@ -307,7 +328,7 @@ public class TableroServiceImplTest {
 		when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
 		Usuario user = mock(Usuario.class);
 		when(usuarioService.findCurrentUser()).thenReturn(user);
-		assertThatThrownBy(() -> tableroService.crearRespuestaAPreguntaTablero("r", 1L, 2L))
+		assertThatThrownBy(() -> tableroService.crearRespuestaAPreguntaEnActTablero("r", 1L, 2L))
 			.isInstanceOf(AccessDeniedException.class);
 	}
 
@@ -325,7 +346,7 @@ public class TableroServiceImplTest {
 		when(curso.getMaestro()).thenReturn(otroMaestro);
 		when(maestro.getId()).thenReturn(2L);
 		when(otroMaestro.getId()).thenReturn(3L);
-		assertThatThrownBy(() -> tableroService.getTablero(1L))
+		assertThatThrownBy(() -> tableroService.encontrarActTableroPorId(1L))
 			.isInstanceOf(AccessDeniedException.class)
 			.hasMessageContaining("No tienes permiso para acceder a este tablero");
 	}
@@ -341,7 +362,7 @@ public class TableroServiceImplTest {
 		when(tablero.getTema()).thenReturn(tema);
 		when(tema.getCurso()).thenReturn(curso);
 		when(curso.getVisibilidad()).thenReturn(false);
-		assertThatThrownBy(() -> tableroService.getTablero(1L))
+		assertThatThrownBy(() -> tableroService.encontrarActTableroPorId(1L))
 			.isInstanceOf(AccessDeniedException.class)
 			.hasMessageContaining("curso oculto");
 	}
@@ -358,7 +379,7 @@ public class TableroServiceImplTest {
 		when(tema.getCurso()).thenReturn(curso);
 		when(curso.getVisibilidad()).thenReturn(true);
 		when(curso.getInscripciones()).thenReturn(Collections.emptyList());
-		assertThatThrownBy(() -> tableroService.getTablero(1L))
+		assertThatThrownBy(() -> tableroService.encontrarActTableroPorId(1L))
 			.isInstanceOf(AccessDeniedException.class)
 			.hasMessageContaining("no estás inscrito");
 	}
@@ -377,7 +398,7 @@ public class TableroServiceImplTest {
 		when(curso.getMaestro()).thenReturn(otroMaestro);
 		when(maestro.getId()).thenReturn(2L);
 		when(otroMaestro.getId()).thenReturn(3L);
-		assertThatThrownBy(() -> tableroService.eliminarTablero(1L))
+		assertThatThrownBy(() -> tableroService.eliminarActTableroPorId(1L))
 			.isInstanceOf(AccessDeniedException.class)
 			.hasMessageContaining("no eres el maestro del curso");
 	}
@@ -410,7 +431,7 @@ public class TableroServiceImplTest {
 		when(req.getPreguntasYRespuestas()).thenReturn(preguntasMap);
 		when(tableroRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 		when(pregunta.getRespuestasMaestro()).thenReturn(new ArrayList<>());
-		TableroDTO dto = tableroService.actualizarTablero(1L, req);
+		TableroDTO dto = tableroService.actualizarActTablero(1L, req);
 		verify(respuestaMaestroRepository).deleteAll(any());
 		verify(preguntaRepository).delete(pregunta);
 		assertThat(dto).isNotNull();
@@ -424,7 +445,7 @@ public class TableroServiceImplTest {
 		when(tableroRepository.findById(1L)).thenReturn(Optional.of(tablero));
 		when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
 		when(usuarioService.findCurrentUser()).thenReturn(alumno);
-		assertThatThrownBy(() -> tableroService.crearRespuestaAPreguntaTablero("r", 1L, 2L))
+		assertThatThrownBy(() -> tableroService.crearRespuestaAPreguntaEnActTablero("r", 1L, 2L))
 			.isInstanceOf(AccessDeniedException.class)
 			.hasMessageContaining("curso oculto");
 	}
@@ -437,7 +458,7 @@ public class TableroServiceImplTest {
 		when(tableroRepository.findById(1L)).thenReturn(Optional.of(tablero));
 		when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
 		when(usuarioService.findCurrentUser()).thenReturn(alumno);
-		assertThatThrownBy(() -> tableroService.crearRespuestaAPreguntaTablero("r", 1L, 2L))
+		assertThatThrownBy(() -> tableroService.crearRespuestaAPreguntaEnActTablero("r", 1L, 2L))
 			.isInstanceOf(AccessDeniedException.class)
 			.hasMessageContaining("no esta inscrito");
 	}
@@ -450,7 +471,7 @@ public class TableroServiceImplTest {
 		when(tableroRepository.findById(1L)).thenReturn(Optional.of(tablero));
 		when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
 		when(usuarioService.findCurrentUser()).thenReturn(alumno);
-		assertThatThrownBy(() -> tableroService.crearRespuestaAPreguntaTablero("r", 1L, 2L))
+		assertThatThrownBy(() -> tableroService.crearRespuestaAPreguntaEnActTablero("r", 1L, 2L))
 			.isInstanceOf(AccessDeniedException.class)
 			.hasMessageContaining("no pertenece a este tablero");
 	}
@@ -467,8 +488,8 @@ public class TableroServiceImplTest {
 		ActividadAlumno actividadAlumno = mock(ActividadAlumno.class);
 		List<RespuestaAlumno> respuestasAlumno = new ArrayList<>();
 		when(actividadAlumno.getRespuestasAlumno()).thenReturn(respuestasAlumno);
-		when(actividadAlumnoService.crearActividadAlumno(anyInt(), any(), any(), anyInt(), anyInt(), anyLong(), anyLong())).thenReturn(actividadAlumno);
-		String result = tableroService.crearRespuestaAPreguntaTablero("\"respuesta\"", 1L, 2L);
+		when(actividadAlumnoService.crearActAlumno(anyInt(), any(), any(), anyInt(), anyInt(), anyLong(), anyLong())).thenReturn(actividadAlumno);
+		String result = tableroService.crearRespuestaAPreguntaEnActTablero("\"respuesta\"", 1L, 2L);
 		assertThat(result).contains("Respuesta correcta");
 	}
 
@@ -493,8 +514,8 @@ public class TableroServiceImplTest {
 		when(respIncorrecta.getCorrecta()).thenReturn(false);
 		respuestasAlumno.add(respIncorrecta);
 		when(actividadAlumno.getRespuestasAlumno()).thenReturn(respuestasAlumno);
-		when(actividadAlumnoService.crearActividadAlumno(anyInt(), any(), any(), anyInt(), anyInt(), anyLong(), anyLong())).thenReturn(actividadAlumno);
-		String result = tableroService.crearRespuestaAPreguntaTablero("respuesta", 1L, 2L);
+		when(actividadAlumnoService.crearActAlumno(anyInt(), any(), any(), anyInt(), anyInt(), anyLong(), anyLong())).thenReturn(actividadAlumno);
+		String result = tableroService.crearRespuestaAPreguntaEnActTablero("respuesta", 1L, 2L);
 		verify(actividadAlumno).setNota(10); // The service sets the nota to the tablero's puntuacion (10)
 		verify(actividadAlumno).setPuntuacion(1);
 		assertThat(result).contains("Respuesta correcta");
@@ -512,10 +533,10 @@ public class TableroServiceImplTest {
 		ActividadAlumno actividadAlumno = mock(ActividadAlumno.class);
 		List<RespuestaAlumno> respuestasAlumno = new ArrayList<>();
 		when(actividadAlumno.getRespuestasAlumno()).thenReturn(respuestasAlumno);
-		when(actividadAlumnoService.crearActividadAlumno(anyInt(), any(), any(), anyInt(), anyInt(), anyLong(), anyLong())).thenReturn(actividadAlumno);
-		String result = tableroService.crearRespuestaAPreguntaTablero("respuesta", 1L, 2L);
+		when(actividadAlumnoService.crearActAlumno(anyInt(), any(), any(), anyInt(), anyInt(), anyLong(), anyLong())).thenReturn(actividadAlumno);
+		String result = tableroService.crearRespuestaAPreguntaEnActTablero("respuesta", 1L, 2L);
 		assertThat(result).isEqualTo("Respuesta correcta");
-		String result2 = tableroService.crearRespuestaAPreguntaTablero("incorrecta", 1L, 2L);
+		String result2 = tableroService.crearRespuestaAPreguntaEnActTablero("incorrecta", 1L, 2L);
 		assertThat(result2).isEqualTo("Respuesta incorrecta");
 	}
 
