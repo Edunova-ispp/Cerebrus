@@ -1,87 +1,129 @@
 # Review Grupo 1
 
-**Grupo Evaluador:** Grupo 2
-**Fecha de revisión:** 10/03/2026
-**Aplicación revisada:** https://rooma-sprint1.vercel.app/
-**Tiempo empleado en la revisión:** 3 horas.
+**Grupo evaluador:** Grupo 2
+**Fecha de revisión:** 06/04/2026
+**Aplicación revisada:** https://rooma-sprint-2.vercel.app/ 
+**Tiempo empleado en la revisión:** 1h30min
 
 ---
 
-## Índice
+## Control de Versiones
 
-1. [Introducción y Datos de Acceso](#1-introducción-y-datos-de-acceso)
-2. [Revisión de Casos de Uso](#2-revisión-de-casos-de-uso)
-   - [2.1 Descubrimiento de viviendas](#21-descubrimiento-de-viviendas)
-   - [2.2 Evaluación de Candidatos y Match](#22-evaluación-de-candidatos-y-match)
-   - [2.3 Gestión de inmuebles](#23-gestión-de-inmuebles)
-   - [2.4 Gestión de Facturas y Pagos](#24-gestión-de-facturas-y-pagos)
-   - [2.5 Reseñas y Valoración de la Convivencia](#25-reseñas-y-valoración-de-la-convivencia)
-3. [Hallazgos Generales y Feedback UI/UX](#3-hallazgos-generales-y-feedback-uiux)
+| Versión | Fecha | Autor/es | Descripción de los Cambios |
+| :---: | :---: | :--- | :--- |
+| 1.0 | 06/04/2026 | Rafael Segura | Inicialización de documento |
 
 ---
 
-## 1. Introducción y Datos de Acceso
+## Tabla de Contenido
 
-Documento de revisión de los entregables y el software desarrollado por el Grupo 1. Las pruebas se han realizado utilizando los perfiles de prueba proporcionados en su guía:
-
-**Inquilinos (Contraseña general: 123456):**
-* `tenant1@test.com`
-* `tenant2@test.com`
-* `tenant3@test.com`
-
-**Caseros (Contraseña general: 123456):**
-* `landlord1@test.com`
-* `landlord2@test.com`
-* `landlord3@test.com`
-
-*(Sin comentarios extras)*
+1. [Introducción](#1-introducción)
+2. [Contexto y Objetivos](#2-contexto-y-objetivos)
+3. [Desarrollo](#3-desarrollo)
+     - [3.1 CU-03: Chat post Match](#31-cu-03-chat-post-match)
+     - [3.2 CU-05: Sistema de Favoritos](#32-cu-05-sistema-de-favoritos)
+     - [3.3 CU-06: Gestión de Inmuebles](#33-cu-06-gestión-de-inmuebles)
+     - [3.4 CU-07: Gestión de Cuentas y Perfil](#34-cu-07-gestión-de-cuentas-y-perfil)
+     - [3.5 CU-10: Gestión de Incidencias en la Vivienda](#35-cu-10-gestión-de-incidencias-en-la-vivienda)
+4. [Conclusiones](#4-conclusiones)
 
 ---
 
-## 2. Revisión de Casos de Uso
+## 1. Introducción
+Documento de validación funcional de la plataforma Rooma para el Grupo 1, basado en los casos de uso definidos para la revisión de Sprint 2.
+
+## 2. Contexto y Objetivos
+El objetivo de esta revisión es comprobar el estado funcional de los casos de uso priorizados, identificar errores y documentar observaciones de calidad funcional y experiencia de usuario.
+
+**Escala de validación:**
+* **✅ Funciona correctamente**
+* **🟨 Funciona parcialmente / con incidencias**
+* **❌ No funciona / no implementado**
+
+## 3. Desarrollo
+
+### 3.1 CU-03: Chat post Match
+* **Actor:** Buscadores y Anunciante
+* **Objetivo:** Coordinar un encuentro o contacto para avanzar en el alquiler.
+* **Flujo principal esperado:**
+    1. Los usuarios con Match acceden a la bandeja de mensajes. ✅
+    2. Intercambian mensajes de texto, fotos o documentos en tiempo real. ❌
+    3. Concretan mediante el chat la forma y medio para tener una quedada o visita formal.✅
+* **Resultado esperado:** Acuerdo de visita o contacto registrado en el sistema.
+* **¿Funciona?:** El chat funciona, sí. No así adjuntar imágenes o documentos, he probado, he esperado un rato, he recargado... Nada, no funciona.  
+* **Comentario:** No sé si es cuestión del despliegue o no, pero la funcionalidad no funciona. O elimináis esa funcionalidad junto con el botón para adjuntar o miráis a ver qué sucede, ahora mismo es algo que está que no hace nada.
 
 
-### 2.1 Descubrimiento de viviendas
-* **Funcionalidad a probar:** Explorar y expresar interés en viviendas compatibles.
-* **¿Funciona?:** 🟨
-* **Comentarios y errores encontrados:**
-    * No es posible eliminar una solicitud en estado “Pendiente”, aunque el botón para hacerlo sigue apareciendo en la interfaz. Al pulsarlo, la vivienda vuelve a mostrarse, por lo que la acción no se completa correctamente. Se recomienda corregir el funcionamiento del botón. Como medida temporal, podría ocultarse mientras no esté implementada correctamente la funcionalidad, evitando así que el usuario intente realizar una acción que realmente no está disponible. En cualquier caso, si una opción se muestra en la interfaz, debería funcionar correctamente.
-
-### 2.2 Evaluación de Candidatos y Match
-* **Funcionalidad a probar:** Evaluar a los interesados y filtrar quiénes pueden acceder al contacto directo o a la reserva de visita.
-* **¿Funciona?:** ✅
-* **Comentarios y errores encontrados:**
-    * Como casero, es posible decidir si los pisos se muestran públicamente o no, así como gestionar las solicitudes de los inquilinos, incluyendo la opción de rechazarlas. Ambas funcionalidades funcionan correctamente.
+### 3.2 CU-05: Sistema de Favoritos
+* **Actor:** Buscadores
+* **Objetivo:** Guardar viviendas de interés para revisarlas más tarde sin perderlas en el deck.
+* **Flujo principal esperado:**
+    1. El usuario marca una vivienda como Favorito desde la tarjeta o el detalle.✅
+    2. El sistema lo añade a la lista de favoritos del usuario (Elemento Guardado).✅
+    3. El usuario accede a la sección Favoritos, revisa y decide realizar Like o Dislike.❌
+* **Resultado esperado:** Elemento guardado en favoritos y accesible para revisión.
+* **¿Funciona?:** Se puede añadir a favoritos, pero solamente al que te sale en el top de la pila, para ver más viviendas hay que deslizar, lo cual me hace pensarme que para qué lo he guardado en favoritos para verlo más tarde si ya he tenido que decidir para poder seguir viendo viviendas. Desde favoritos no se puede dar like o dislike a un piso, o no me sale la opción.
 
 
-### 2.3 Gestión de inmuebles
-* **Funcionalidad a probar:** Dar de alta y mantener la oferta de inmuebles actualizada en la plataforma.
-* **¿Funciona?:** 🟨
-* **Comentarios y errores encontrados:**
-    * Al crear un piso, el sistema permite completar la creación correctamente. Sin embargo, debido a la lentitud de carga (entendible al tratarse de un despliegue gratuito), he pulsado el botón de creación en varias ocasiones (cuatro o cinco veces), sin tener claro si el problema se debía al navegador, al backend o a otro motivo. Posteriormente, al revisar mi lista de pisos, comprobé que el mismo inmueble se había creado varias veces.
-Entiendo que puede tratarse de una funcionalidad aún no cerrada del todo, pero sería recomendable valorar la incorporación de algún aviso visual, indicador de carga o confirmación de creación, ya que actualmente resulta difícil distinguir si el sistema está procesando la solicitud, si existe un error o si simplemente está tardando más de lo habitual.
-    * La opción de pausar el anuncio para que deje de ser visible para el resto de usuarios funciona correctamente. En este punto no he detectado ningún problema.
-    * Por otro lado, en el formulario se permite introducir cualquier fecha en el campo “Fecha disponible”, lo cual no parece tener demasiado sentido desde el punto de vista funcional. Por ejemplo, actualmente es posible seleccionar una fecha como 1901, algo que debería estar restringido mediante una validación adecuada.
-    * Además, el botón de editar el inmueble no funciona. Al pulsarlo, no permite editarlo.
+### 3.3 CU-06: Gestión de Inmuebles
+* **Actor:** Anunciante
+* **Objetivo:** Dar de alta, editar y mantener la oferta de viviendas actualizada.
+* **Flujo principal esperado:**
+    1. El Anunciante completa o edita el formulario guiado (ubicación, precio, fotos, reglas). ✅
+    2. El Anunciante define o actualiza el perfil de compañero ideal para el algoritmo.❌
+    3. El sistema valida los datos, guarda los cambios y hace visible el anuncio en el deck.✅
+* **Resultado esperado:** Inmueble publicado o actualizado y visible para buscadores.
+* **¿Funciona?:** Lo del compañero ideal no, según la propia web:
+```code
+Reglas y matching inteligente
+La configuración de reglas de convivencia y el algoritmo de matching inteligente estarán disponibles pronto.
+```
+Funcionalidad no implementada.
 
-### 2.4 Gestión de Facturas y Pagos
-* **Funcionalidad a probar:** Automatizar la notificación, el reparto y el seguimiento de los pagos de suministros y renta del inmueble.
-* **¿Funciona?:** 🟨
-* **Comentarios y errores encontrados:**
-    * En el apartado de Facturas dentro de mi perfil, aparece el icono de una campana (se entiende que relacionado con notificaciones),  marcado como si hubiese una pendiente. Sin embargo, al hacer clic sobre él no ocurre ninguna acción. No se abre ninguna ventana, no redirige a ningún apartado ni muestra información adicional.
-    * El proceso de pago funciona correctamente. Aunque todavía falta implementar una pasarela de pago real, la versión actualmente mockeada responde sin incidencias y cumple su función de manera adecuada.
+### 3.4 CU-07: Gestión de Cuentas y Perfil
+* **Actor:** Todos los usuarios
+* **Objetivo:** Administrar perfil, preferencias y estado de la cuenta.
+* **Flujo principal esperado:**
+    1. El usuario registra o edita datos personales, laborales y etiquetas de estilo de vida.✅
+    2. El usuario configura sus preferencias de búsqueda y notificaciones.❌
+    3. El usuario gestiona su suscripción Premium o métodos de acceso (OAuth, 2FA).❌
+* **Resultado esperado:** Perfil optimizado y estado de cuenta actualizado.
+* **¿Funciona?:** Ni se pueden configurar las búsquedas, ni las notificaciones, ni el OAuth ni el 2FA, solamente se puede cambiar la contraseña. Cambiaría el estilo de los desplegables, les pondría algún fondo porque se ve del mismo color que lo de detrás y se mezcla el texto, se hace lioso.
 
-### 2.5 Reseñas y Valoración de la Convivencia
-* **Funcionalidad a probar:** Generar un sistema de confianza basado en la experiencia real de convivencia o gestión.
-* **¿Funciona?:** ❌
-* **Comentarios y errores encontrados:**
-    * La funcionalidad no está implementada. Tras contactar con un miembro del equipo, este ha podido comentar que faltaba modificar un archivo. 
 
----
+### 3.5 CU-10: Gestión de Incidencias en la Vivienda
+* **Actor:** Inquilinos y Anunciante
+* **Objetivo:** Reportar y dar seguimiento a averías de mantenimiento de forma organizada.
+* **Flujo principal esperado:**
+    1. El Inquilino crea un reporte detallando el problema y adjunta evidencia fotográfica.✅
+    2. El Anunciante recibe la notificación y actualiza el estado (En proceso, Resuelta). 🟨
+    3. Ambas partes comentan y adjuntan presupuestos hasta que se marca como Cerrada.🟨
+* **Resultado esperado:** Historial de mantenimiento documentado y resolución eficiente.
+* **¿Funciona?:** No tenemos cuenta de anunciante, y he probado a cambiar de piso con otras cuentas, a un piso nuevo, y no he conseguido hacerlo, así que no lo he podido probar desde la parte del anunciante o "landlord".
 
-**Comentarios y errores encontrados:**
 
--   El inicio de sesión no persiste al recargar la página, por lo que la sesión se pierde. Sería conveniente valorar la implementación de un mecanismo de persistencia, como un token JWT o similar, almacenado en la caché o en el almacenamiento del navegador, al menos hasta el cierre de este. No parece un problema encuadrable dentro de las _Team failure conditions_, pero sí supone una incomodidad desde el punto de vista de la experiencia de usuario.
-    
--   Al iniciar sesión con el perfil de **landlord**, la redirección no lleva a **Inicio**, sino a **Mis inmuebles**. Dado que posteriormente existe una pestaña específica de **Inicio**, convendría revisar esa lógica de redirección para que la navegación resulte más coherente.
+## 4. Conclusiones
+Sigue sin persistir la sesión al recargar la página, es un poco incómodo usarla por eso, en cuanto se atasca o parece que se atasca por lo lento del despliegue (lógico, al ser una capa gratuita), en cuanto recargas para ver qué pasa te saca de la sesión y a volver a empezar por donde ibas.
+Sigue sucediendo también lo que os comentamos la última vez: el despliegue va lento y, si al crear piso, le das varias veces (nada te lo impide) se crea el piso varias veces.
+
+La idea es buena pero le falta pulido, funcionalidades explicadas muy bonitas pero no son reales, no quiero pensar que el documento ha sido hecho con IA y os ha metido funcionalidades que no tenéis por la cara y no lo habéis revisado, pero parece un poco eso, porque no entiendo el sentido de implementar OAuth aquí, por ejemplo. 
+
+Como consejo meted algunas personas a testing manual serio, que apunten todo bien apuntado, y dedicarle tiempo a refactorizar y arreglar funcionalidades, la base está pero falta pulirlo y que funcione bien.
+
+
+### Credenciales de Prueba usadas
+
+**Inquilinos:**
+| Email | Contraseña |
+| :--- | :--- |
+| tenant1@test.com | 123456 |
+| tenant2@test.com | 123456 |
+| tenant3@test.com | 123456 |
+
+**Caseros:**
+| Email | Contraseña |
+| :--- | :--- |
+| landlord1@test.com | 123456 |
+| landlord2@test.com | 123456 |
+| landlord3@test.com | 123456 |
 
