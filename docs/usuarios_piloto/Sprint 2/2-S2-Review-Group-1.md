@@ -106,7 +106,7 @@ Funcionalidad no implementada.
 Sigue sin persistir la sesión al recargar la página, es un poco incómodo usarla por eso, en cuanto se atasca o parece que se atasca por lo lento del despliegue (lógico, al ser una capa gratuita), en cuanto recargas para ver qué pasa te saca de la sesión y a volver a empezar por donde ibas.
 Sigue sucediendo también lo que os comentamos la última vez: el despliegue va lento y, si al crear piso, le das varias veces (nada te lo impide) se crea el piso varias veces.
 
-La idea es buena pero le falta pulido, funcionalidades explicadas muy bonitas pero no son reales, no quiero pensar que el documento ha sido hecho con IA y os ha metido funcionalidades que no tenéis por la cara y no lo habéis revisado, pero parece un poco eso, porque no entiendo el sentido de implementar OAuth aquí, por ejemplo. 
+La idea es buena pero le falta pulido, funcionalidades explicadas muy bonitas pero no son reales, revisad bien qué funcionalidades meteis en la guía de casos de uso, quizás falta comunicación entre el equipo de desarrollo, el Product Owner en caso de tenerlo y el equipo de documentación, hay cosas que me chirrian y no entiendo, como el sentido de implementar OAuth en esta webapp, por ejemplo. 
 
 Como consejo meted algunas personas a testing manual serio, que apunten todo bien apuntado, y dedicarle tiempo a refactorizar y arreglar funcionalidades, la base está pero falta pulirlo y que funcione bien.
 
