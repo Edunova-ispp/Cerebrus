@@ -30,6 +30,12 @@ public class Organizacion extends Usuario {
     @Column(nullable = false)
     private String nombreCentro;
 
+    @Column(nullable = false)
+    private Boolean emailConfirmado = false;
+
+    @Column(nullable = false)
+    private Integer codigoVerificacion;
+
     // Relaciones
 
     @OneToMany(mappedBy = "organizacion", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
@@ -88,6 +94,20 @@ public class Organizacion extends Usuario {
 
     public void setSuscripciones(List<Suscripcion> suscripciones) {
         this.suscripciones = suscripciones;
+    }
+
+    public Boolean getEmailConfirmado() {
+        return emailConfirmado;
+    }
+
+    public Integer getCodigoVerificacion() {
+        return codigoVerificacion;
+    }
+    public void setEmailConfirmado(Boolean emailConfirmado) {
+        this.emailConfirmado = emailConfirmado;
+    }
+    public void setCodigoVerificacion(Integer codigoVerificacion) {
+        this.codigoVerificacion = codigoVerificacion;
     }
 
     // Atributo derivado que se obtiene a partir de la fecha de fin de la última suscripción activa
