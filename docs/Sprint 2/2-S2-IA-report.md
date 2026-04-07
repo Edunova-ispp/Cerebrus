@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="images/cerebrus.png" alt="Logo de CerebrUS" width="300">
+<img src="../images/cerebrus.png" alt="Logo de CerebrUS" width="300">
 
 </div>
 
