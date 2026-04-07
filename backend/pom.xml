@@ -121,6 +121,12 @@
       <version>4.27.0</version>
       <scope>test</scope>
     </dependency>
+<!-- BRevo api email -->
+    <dependency>
+    <groupId>com.sendinblue</groupId>
+    <artifactId>sib-api-v3-sdk</artifactId>
+    <version>7.0.0</version>
+</dependency>
 
 
   </dependencies>

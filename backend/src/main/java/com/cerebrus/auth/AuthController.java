@@ -85,4 +85,22 @@ public class AuthController {
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(new MessageResponse("Sesión cerrada. El cliente debe eliminar el token."));
     }
+    @PutMapping("/confirm-email/{codigoVerificacion}")
+    public ResponseEntity<?> confirmarEmail(@PathVariable Integer codigoVerificacion) {
+        try {
+            authService.confirmarEmail(codigoVerificacion);
+            return ResponseEntity.ok(new MessageResponse("Email confirmado exitosamente."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/email-confirmed/{userId}")
+    public ResponseEntity<Boolean> verificarEmailConfirmado(@PathVariable long userId) {
+        
+            boolean confirmado = authService.usuarioVerificado(userId);
+            
+                return ResponseEntity.ok(confirmado);
+            
+        }
 }

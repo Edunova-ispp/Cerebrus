@@ -6,4 +6,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OrganizacionRepository extends JpaRepository<Organizacion, Long> {
 
+    boolean existsByNombreCentro(String nombreCentro);
+
+    boolean existsByCodigoVerificacion(Integer codigoVerificacion);
+
+    java.util.Optional<Organizacion> findByCodigoVerificacion(Integer codigoVerificacion);
+
 }

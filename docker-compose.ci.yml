@@ -14,6 +14,9 @@ services:
       GOOGLE_API_KEY_3: ${GEMINI_API_KEY_3}
       GOOGLE_API_KEY_4: ${GEMINI_API_KEY_4}
       GOOGLE_API_KEY_5: ${GEMINI_API_KEY_5}
+      brevo.api.key: ${brevo.api.key}
+      brevo.sender.email: ${brevo.sender.email}
+      brevo.sender.name: ${brevo.sender.name}
       # si tu app usa estas vars en perfil docker, también las dejamos:
       DB_URL: jdbc:mariadb://db:3306/cerebrus
       DB_USER: cerebrus
