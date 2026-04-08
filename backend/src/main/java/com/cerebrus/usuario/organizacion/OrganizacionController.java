@@ -19,6 +19,7 @@ import com.cerebrus.usuario.organizacion.dto.UsuarioActualizarDTO;
 
 import jakarta.validation.Valid;
 
+
 @RestController
 @RequestMapping("/api/organizaciones")
 @CrossOrigin(origins = "*")

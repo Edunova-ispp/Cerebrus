@@ -105,6 +105,12 @@ public class Suscripcion {
         this.fechaFin = fechaFin;
     }
 
+    public boolean isActiva() {
+    LocalDate hoy = LocalDate.now();
+    return (hoy.isAfter(fechaInicio) || hoy.isEqual(fechaInicio)) 
+            && (hoy.isBefore(fechaFin) || hoy.isEqual(fechaFin));
+    }
+
     public Organizacion getOrganizacion() {
         return organizacion;
     }
