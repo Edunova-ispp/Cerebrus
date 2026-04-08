@@ -15,4 +15,5 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     public OrganizacionServiceImpl(OrganizacionRepository organizacionRepository) {
         this.organizacionRepository = organizacionRepository;
     }
+
 }

@@ -1,6 +1,5 @@
 package com.cerebrus.usuario.organizacion;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,13 +109,13 @@ public class Organizacion extends Usuario {
         this.codigoVerificacion = codigoVerificacion;
     }
 
-    // Atributo derivado que se obtiene a partir de la fecha de fin de la última suscripción activa
+    // Atributo derivado. Indica si la organización tiene una suscripción activa.
     public Boolean getActivo() {
         if (suscripciones == null || suscripciones.isEmpty()) {
             return false;
         }
         Suscripcion ultimaSuscripcion = suscripciones.get(suscripciones.size() - 1);
-        return ultimaSuscripcion.getFechaFin() == null || ultimaSuscripcion.getFechaFin().isAfter(LocalDate.now());
+        return ultimaSuscripcion.isActiva();
     }
 
     @Override

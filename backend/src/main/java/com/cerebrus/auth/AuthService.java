@@ -3,8 +3,6 @@ package com.cerebrus.auth;
 import com.cerebrus.auth.payload.request.SignupRequest;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioRepository;
-import com.cerebrus.usuario.alumno.Alumno;
-import com.cerebrus.usuario.maestro.Maestro;
 import com.cerebrus.usuario.organizacion.Organizacion;
 import com.cerebrus.usuario.organizacion.OrganizacionRepository;
 
@@ -58,7 +56,7 @@ public class AuthService {
     public boolean existsByEmail(String email) {
         return usuarioRepository.existsByCorreoElectronico(email);
     }
-
+    
     public void registrarUsuario(SignupRequest request) {
         Usuario nuevoUsuario = null;
 
