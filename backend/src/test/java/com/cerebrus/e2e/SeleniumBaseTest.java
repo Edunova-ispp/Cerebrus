@@ -1,8 +1,12 @@
 package com.cerebrus.e2e;
 
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.TestInstance;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -25,6 +29,7 @@ import java.net.Socket;
  *       -Dselenium.headless=false                  (default: true en CI)
  */
 @Tag("e2e")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class SeleniumBaseTest {
 
     /** URL base de la aplicación frontend contra la que corren los tests. */
@@ -33,7 +38,7 @@ public abstract class SeleniumBaseTest {
 
     protected WebDriver driver;
 
-    @BeforeEach
+    @BeforeAll
     void initDriver() {
         ensureFrontendIsReachable();
 
@@ -51,7 +56,19 @@ public abstract class SeleniumBaseTest {
         driver.manage().window().maximize();
     }
 
-    @AfterEach
+    @BeforeEach
+    void resetBrowserState() {
+        if (driver instanceof JavascriptExecutor js) {
+            try {
+                js.executeScript("window.localStorage.clear(); window.sessionStorage.clear();");
+            } catch (WebDriverException ignored) {
+                // Some Chrome sessions start on a data: URL where Storage APIs are disabled.
+            }
+        }
+        driver.manage().deleteAllCookies();
+    }
+
+    @AfterAll
     void tearDownDriver() {
         if (driver != null) {
             driver.quit();
