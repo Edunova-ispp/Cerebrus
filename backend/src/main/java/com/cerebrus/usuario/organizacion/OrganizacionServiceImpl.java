@@ -14,25 +14,32 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.exceptions.ResourceNotFoundException;
+
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioRepository;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
-import com.cerebrus.usuario.organizacion.DTO.UsuarioActualizarDTO;
-
+import com.cerebrus.usuario.organizacion.dto.UsuarioActualizarDTO;
+import com.cerebrus.usuario.organizacion.dto.CreateUserRequest;
 
 @Service
 @Transactional
 public class OrganizacionServiceImpl implements OrganizacionService {
 
+
     private final OrganizacionRepository organizacionRepository;
     private final UsuarioService usuarioService;
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public OrganizacionServiceImpl(OrganizacionRepository organizacionRepository, UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
+    public OrganizacionServiceImpl(OrganizacionRepository organizacionRepository, PasswordEncoder passwordEncoder, UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
         this.organizacionRepository = organizacionRepository;
+        this.passwordEncoder = passwordEncoder;
         this.usuarioService = usuarioService;
         this.usuarioRepository = usuarioRepository;
     }
@@ -172,6 +179,68 @@ public class OrganizacionServiceImpl implements OrganizacionService {
             return toSafeAlumno(alumno);
         }
         return usuario;
+    }
+
+    @Override
+    public void crearUsuario(CreateUserRequest request) {
+        Usuario usuarioActual = usuarioService.findCurrentUser();
+        
+        if (!(usuarioActual instanceof Organizacion)) {
+            throw new AccessDeniedException("Solo usuarios con rol ORGANIZACIÓN pueden crear nuevos usuarios.");
+        }
+        
+        Organizacion organizacion = (Organizacion) usuarioActual;
+                 
+
+        String rolUpper = request.getRol().toUpperCase();
+        if ("ORGANIZACION".equals(rolUpper)) {
+            throw new IllegalArgumentException("No se puede crear usuarios con rol ORGANIZACIÓN.");
+        }
+
+        
+        if (usuarioRepository.existsByNombreUsuario(request.getUsername())) {
+            throw new IllegalArgumentException("El username ' " + request.getUsername() + "' ya está registrado.");
+        }
+
+
+        if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
+            if (usuarioRepository.existsByCorreoElectronico(request.getEmail())) {
+                throw new IllegalArgumentException("El email ' " + request.getEmail() + "' ya está registrado.");
+            }
+        }
+
+        
+        Usuario nuevoUsuario = null;
+        
+        if ("MAESTRO".equals(rolUpper)) {
+            nuevoUsuario = new Maestro(
+                request.getNombre(),
+                request.getPrimerApellido(),
+                request.getSegundoApellido(),
+                request.getUsername(),
+                request.getEmail() != null ? request.getEmail() : "",
+                passwordEncoder.encode(request.getPassword()),
+                organizacion
+            );
+            
+        } else if ("ALUMNO".equals(rolUpper)) {
+            nuevoUsuario = new Alumno(
+                request.getNombre(),
+                request.getPrimerApellido(),
+                request.getSegundoApellido(),
+                request.getUsername(),
+                request.getEmail() != null ? request.getEmail() : "",
+                passwordEncoder.encode(request.getPassword()),
+                0,
+                organizacion
+            );
+            
+        } else {
+            throw new IllegalArgumentException("Rol inválido. Use: MAESTRO o ALUMNO.");
+        }
+
+        usuarioRepository.save(nuevoUsuario);
+        
     }
 
     private Maestro toSafeMaestro(Maestro original) {

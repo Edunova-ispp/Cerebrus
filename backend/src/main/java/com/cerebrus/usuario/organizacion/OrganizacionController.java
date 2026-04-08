@@ -2,15 +2,20 @@ package com.cerebrus.usuario.organizacion;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
-import com.cerebrus.usuario.organizacion.DTO.UsuarioActualizarDTO;
+import com.cerebrus.usuario.organizacion.dto.CreateUserRequest;
+import com.cerebrus.usuario.organizacion.dto.UsuarioActualizarDTO;
 
 import jakarta.validation.Valid;
 
@@ -55,4 +60,14 @@ public class OrganizacionController {
         return organizacionService.actualizarUsuario(organizacionId, usuarioId, usuarioActualizado);
     }
 
+    @PostMapping("/usuarios")
+    public ResponseEntity<String> crearUsuario(@Valid @RequestBody CreateUserRequest request) {
+    
+            organizacionService.crearUsuario(request);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body("Usuario creado correctamente");
+        
+    }
 }
+

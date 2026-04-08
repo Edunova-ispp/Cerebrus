@@ -1,11 +1,11 @@
 package com.cerebrus.usuario.organizacion;
 
-
 import org.springframework.data.domain.Page;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
-import com.cerebrus.usuario.organizacion.DTO.UsuarioActualizarDTO;
+import com.cerebrus.usuario.organizacion.dto.CreateUserRequest;
+import com.cerebrus.usuario.organizacion.dto.UsuarioActualizarDTO;
 
 public interface OrganizacionService {
 
@@ -14,5 +14,6 @@ public interface OrganizacionService {
     Usuario buscarUsuario(Long organizacionId, Long usuarioId);
     void eliminarUsuario(Long organizacionId, Long usuarioId);
     Usuario actualizarUsuario(Long organizacionId, Long usuarioId, UsuarioActualizarDTO usuarioActualizado);
+    void crearUsuario(CreateUserRequest request);
 
 }
