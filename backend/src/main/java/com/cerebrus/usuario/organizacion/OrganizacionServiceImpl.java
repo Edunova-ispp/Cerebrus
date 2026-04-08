@@ -19,6 +19,7 @@ import com.cerebrus.usuario.UsuarioRepository;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.organizacion.DTO.UsuarioActualizarDTO;
 
 
 @Service
@@ -94,6 +95,24 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         usuarioRepository.deleteById(usuarioAEliminar.getId());
     }
 
+    @Override
+    @Transactional
+    public Usuario actualizarUsuario(Long organizacionId, Long usuarioId, UsuarioActualizarDTO usuarioActualizado) {
+        Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "actualizar usuarios");
+        Usuario usuarioExistente = buscarUsuario(organizacionId, usuarioId);
+        validarNombreUsuarioUnicoEnOrganizacion(organizacion, usuarioExistente.getId(), usuarioActualizado.getNombreUsuario());
+        // Solo se permiten actualizar ciertos campos
+        usuarioExistente.setNombre(usuarioActualizado.getNombre());
+        usuarioExistente.setPrimerApellido(usuarioActualizado.getPrimerApellido());
+        usuarioExistente.setSegundoApellido(usuarioActualizado.getSegundoApellido());
+        usuarioExistente.setNombreUsuario(usuarioActualizado.getNombreUsuario());
+        usuarioExistente.setCorreoElectronico(usuarioActualizado.getCorreoElectronico());
+        if (usuarioActualizado.getContrasena() != null && !usuarioActualizado.getContrasena().isBlank()) {
+            usuarioExistente.setContrasena(usuarioActualizado.getContrasena());
+        }
+        return toSafeUsuario(usuarioRepository.save(usuarioExistente));
+    }
+
     private Organizacion validarYObtenerOrganizacionPropietaria(Long organizacionId, String accion) {
         Usuario u = usuarioService.findCurrentUser();
         if (!u.getId().equals(organizacionId)) {
@@ -120,6 +139,29 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         }
         int fin = Math.min(inicio + pageable.getPageSize(), elementos.size());
         return new PageImpl<>(elementos.subList(inicio, fin), pageable, elementos.size());
+    }
+
+    private void validarNombreUsuarioUnicoEnOrganizacion(Organizacion organizacion, Long usuarioIdActual, String nombreUsuarioNuevo) {
+        if (nombreUsuarioNuevo == null || nombreUsuarioNuevo.isBlank()) {
+            return;
+        }
+        Hibernate.initialize(organizacion.getMaestros());
+        // Devolver copias planas para evitar serialización de relaciones lazy
+        List<Maestro> maestros = organizacion.getMaestros().stream()
+                .map(this::toSafeMaestro)
+                .toList();
+        boolean existeEnMaestros = maestros.stream()
+                .filter(m -> !m.getId().equals(usuarioIdActual)).anyMatch(m -> m.getNombreUsuario().equals(nombreUsuarioNuevo));
+        Hibernate.initialize(organizacion.getAlumnos());
+        // Devolver copias planas para evitar serialización de relaciones lazy
+        List<Alumno> alumnos = organizacion.getAlumnos().stream()
+                .map(this::toSafeAlumno)
+                .toList();
+        boolean existeEnAlumnos = alumnos.stream()
+                .filter(a -> !a.getId().equals(usuarioIdActual)).anyMatch(a -> a.getNombreUsuario().equals(nombreUsuarioNuevo));
+        if (existeEnMaestros || existeEnAlumnos) {
+            throw new IllegalArgumentException("El nombre de usuario ya está en uso");
+        }
     }
 
     private Usuario toSafeUsuario(Usuario usuario) {

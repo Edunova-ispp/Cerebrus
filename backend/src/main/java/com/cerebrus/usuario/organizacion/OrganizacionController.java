@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.organizacion.DTO.UsuarioActualizarDTO;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/organizaciones")
@@ -45,6 +48,11 @@ public class OrganizacionController {
     @RequestMapping("/{organizacionId}/usuarios/{usuarioId}/eliminar")
     public void eliminarUsuario(@PathVariable Long organizacionId, @PathVariable Long usuarioId) {
         organizacionService.eliminarUsuario(organizacionId, usuarioId);
+    }
+
+    @RequestMapping("/{organizacionId}/usuarios/{usuarioId}/actualizar")
+    public Usuario actualizarUsuario(@PathVariable Long organizacionId, @PathVariable Long usuarioId, @Valid UsuarioActualizarDTO usuarioActualizado) {
+        return organizacionService.actualizarUsuario(organizacionId, usuarioId, usuarioActualizado);
     }
 
 }
