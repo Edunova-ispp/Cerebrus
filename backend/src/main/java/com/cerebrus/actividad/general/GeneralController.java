@@ -255,7 +255,7 @@ public class GeneralController {
     
     @PutMapping("/test/update/{id}")
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<GeneralTestDTO> actualizarActTipoTest(@PathVariable Long id, @RequestBody @Valid General general){
+    public ResponseEntity<GeneralTestMaestroDTO> actualizarActTipoTest(@PathVariable Long id, @RequestBody @Valid General general){
         generalService.actualizarActTipoTest(
             id,
             general.getTitulo(),
@@ -274,13 +274,12 @@ public class GeneralController {
             general.getEncontrarRespuestaAlumno()
         );
 
-        // Return a DTO to avoid lazy-loading serialization issues
-        return ResponseEntity.ok(generalService.encontrarActTipoTestPorId(id));
+        return ResponseEntity.ok(generalService.encontrarActTipoTestMaestroPorId(id));
     }
 
     @PutMapping("/cartas/update/{id}")
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<GeneralCartaDTO> actualizarActCarta(@PathVariable Long id, @RequestBody @Valid General general) {
+    public ResponseEntity<GeneralCartaMaestroDTO> actualizarActCarta(@PathVariable Long id, @RequestBody @Valid General general) {
 
         generalService.actualizarActCarta(
         id,
@@ -300,7 +299,7 @@ public class GeneralController {
         general.getEncontrarRespuestaAlumno()
         );
 
-        return ResponseEntity.ok(generalService.encontrarActCartaPorId(id));
+        return ResponseEntity.ok(generalService.encontrarActCartaMaestroPorId(id));
     }
 
     @PutMapping("/clasificacion/update/{id}")

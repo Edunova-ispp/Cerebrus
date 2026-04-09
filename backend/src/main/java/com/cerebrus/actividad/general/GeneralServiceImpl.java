@@ -932,6 +932,9 @@ public class GeneralServiceImpl implements GeneralService {
             throw new AccessDeniedException("Solo un maestro puede eliminar actividades");
         }
         General general = generalRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
+        if (!general.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede eliminar esta actividad");
+        }
         List<Pregunta> preguntas = general.getPreguntas();
         preguntaRepository.deleteAll(preguntas);
         generalRepository.delete(general);
