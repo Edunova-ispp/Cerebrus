@@ -45,12 +45,8 @@ public class Ordenacion extends Actividad {
     public Ordenacion(String titulo, String descripcion, Integer puntuacion, String imagen,
                       Boolean respVisible, Integer posicion, Integer version, Tema tema, List<String> valores,
                       Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
-        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema     );
+        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema, mostrarPuntuacion, permitirReintento, encontrarRespuestaMaestro, encontrarRespuestaAlumno);
         this.valores = valores;
-        this.mostrarPuntuacion = mostrarPuntuacion;
-        this.permitirReintento = permitirReintento;
-        this.encontrarRespuestaMaestro = encontrarRespuestaMaestro;
-        this.encontrarRespuestaAlumno = encontrarRespuestaAlumno;
        }
 
     // Getters y Setters
@@ -68,38 +64,6 @@ public class Ordenacion extends Actividad {
 
     public void setRespuestasAlumnoOrdenacion(List<RespAlumnoOrdenacion> respuestasAlumnoOrdenacion) {
         this.respuestasAlumnoOrdenacion = respuestasAlumnoOrdenacion;
-    }
-
-    public Boolean getMostrarPuntuacion() {
-        return mostrarPuntuacion;
-    }
-
-    public void setMostrarPuntuacion(Boolean mostrarPuntuacion) {
-        this.mostrarPuntuacion = mostrarPuntuacion;
-    }
-
-    public Boolean getPermitirReintento() {
-        return permitirReintento;
-    }
-
-    public void setPermitirReintento(Boolean permitirReintento) {
-        this.permitirReintento = permitirReintento;
-    }
-
-    public Boolean getEncontrarRespuestaMaestro() {
-        return encontrarRespuestaMaestro;
-    }
-
-    public void setEncontrarRespuestaMaestro(Boolean encontrarRespuestaMaestro) {
-        this.encontrarRespuestaMaestro = encontrarRespuestaMaestro;
-    }
-
-    public Boolean getEncontrarRespuestaAlumno() {
-        return encontrarRespuestaAlumno;
-    }
-
-    public void setEncontrarRespuestaAlumno(Boolean encontrarRespuestaAlumno) {
-        this.encontrarRespuestaAlumno = encontrarRespuestaAlumno;
     }
 
     @Override

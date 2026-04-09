@@ -25,11 +25,6 @@ public class Tablero extends Actividad {
     @Column(nullable = false)
     private TamanoTablero tamano;
 
-    private Boolean mostrarPuntuacion = false;
-    private Boolean permitirReintento = false;
-    private Boolean encontrarRespuestaMaestro = false;
-    private Boolean encontrarRespuestaAlumno = false;
-
     //Relaciones
     @OneToMany(mappedBy = "actividad", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Pregunta> preguntas = new ArrayList<>();
@@ -42,53 +37,13 @@ public class Tablero extends Actividad {
     public Tablero(String titulo, String descripcion, Integer puntuacion, String imagen,
                    Boolean respVisible, Integer posicion, Integer version, Tema tema, TamanoTablero tamano,
                    Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
-        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema);
+        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema, mostrarPuntuacion, permitirReintento, encontrarRespuestaMaestro, encontrarRespuestaAlumno);
         this.tamano = tamano;
-        this.mostrarPuntuacion = mostrarPuntuacion;
-        this.permitirReintento = permitirReintento;
-        this.encontrarRespuestaMaestro = encontrarRespuestaMaestro;
-        this.encontrarRespuestaAlumno = encontrarRespuestaAlumno;
     }
 
     // Getters y Setters
     public TamanoTablero getTamano() {
         return tamano;
-    }
-
-    public void setTamano(TamanoTablero tamano) {
-        this.tamano = tamano;
-    }
-
-    public Boolean getMostrarPuntuacion() {
-        return mostrarPuntuacion;
-    }
-
-    public void setMostrarPuntuacion(Boolean mostrarPuntuacion) {
-        this.mostrarPuntuacion = mostrarPuntuacion != null ? mostrarPuntuacion : false;
-    }
-
-    public Boolean getPermitirReintento() {
-        return permitirReintento;
-    }
-
-    public void setPermitirReintento(Boolean permitirReintento) {
-        this.permitirReintento = permitirReintento != null ? permitirReintento : false;
-    }
-
-    public Boolean getEncontrarRespuestaMaestro() {
-        return encontrarRespuestaMaestro;
-    }
-
-    public void setEncontrarRespuestaMaestro(Boolean encontrarRespuestaMaestro) {
-        this.encontrarRespuestaMaestro = encontrarRespuestaMaestro != null ? encontrarRespuestaMaestro : false;
-    }
-
-    public Boolean getEncontrarRespuestaAlumno() {
-        return encontrarRespuestaAlumno;
-    }
-
-    public void setEncontrarRespuestaAlumno(Boolean encontrarRespuestaAlumno) {
-        this.encontrarRespuestaAlumno = encontrarRespuestaAlumno != null ? encontrarRespuestaAlumno : false;
     }
 
     public List<Pregunta> getPreguntas() {
