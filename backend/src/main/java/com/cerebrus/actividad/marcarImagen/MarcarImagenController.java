@@ -85,7 +85,11 @@ public class MarcarImagenController {
                     punto.getPixelX(),
                     punto.getPixelY()
                 ))
-                .toList()
+                .toList(),
+            marcarImagen.getMostrarPuntuacion(),
+            marcarImagen.getPermitirReintento(),
+            marcarImagen.getEncontrarRespuestaMaestro(),
+            marcarImagen.getEncontrarRespuestaAlumno()
         );
     }
 }
