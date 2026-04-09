@@ -39,7 +39,8 @@ public class OrdenacionServiceImpl implements OrdenacionService {
     @Transactional
     public Ordenacion crearActOrdenacion(String titulo, String descripcion, 
         Integer puntuacion, String imagen, Long temaId, Boolean respVisible, 
-        String comentariosRespVisible, Integer posicion, List<String> valores) {
+        String comentariosRespVisible, Integer posicion, List<String> valores,
+        Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -68,6 +69,10 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         ordenacion.setVersion(1);
         ordenacion.setPosicion(tema.getActividades().size());
         ordenacion.setValores(valores);
+        ordenacion.setMostrarPuntuacion(mostrarPuntuacion != null ? mostrarPuntuacion : false);
+        ordenacion.setPermitirReintento(permitirReintento != null ? permitirReintento : false);
+        ordenacion.setEncontrarRespuestaMaestro(encontrarRespuestaMaestro != null ? encontrarRespuestaMaestro : false);
+        ordenacion.setEncontrarRespuestaAlumno(encontrarRespuestaAlumno != null ? encontrarRespuestaAlumno : false);
         return ordenacionRepository.save(ordenacion);
     }
 
@@ -124,7 +129,8 @@ public class OrdenacionServiceImpl implements OrdenacionService {
     @Override
     public Ordenacion actualizarActOrdenacion(Long id, String titulo, String descripcion, 
         Integer puntuacion, String imagen, Long temaId, Boolean respVisible, 
-        String comentariosRespVisible, Integer posicion, List<String> valores) {
+        String comentariosRespVisible, Integer posicion, List<String> valores,
+        Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -151,6 +157,10 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         ordenacion.setPosicion(posicion);
         ordenacion.setValores(valores);
         ordenacion.setVersion(ordenacion.getVersion() + 1);
+        ordenacion.setMostrarPuntuacion(mostrarPuntuacion != null ? mostrarPuntuacion : false);
+        ordenacion.setPermitirReintento(permitirReintento != null ? permitirReintento : false);
+        ordenacion.setEncontrarRespuestaMaestro(encontrarRespuestaMaestro != null ? encontrarRespuestaMaestro : false);
+        ordenacion.setEncontrarRespuestaAlumno(encontrarRespuestaAlumno != null ? encontrarRespuestaAlumno : false);
         return ordenacionRepository.save(ordenacion);
     }
 
