@@ -55,7 +55,11 @@ public class GeneralController {
             general.getPuntuacion(),
             general.getTema().getId(),
             general.getRespVisible(),
-            general.getComentariosRespVisible()
+            general.getComentariosRespVisible(),
+            general.getMostrarPuntuacion(),
+            general.getPermitirReintento(),
+            general.getEncontrarRespuestaMaestro(),
+            general.getEncontrarRespuestaAlumno()
         );
 
         return new ResponseEntity<>(generalCreada, HttpStatus.CREATED);
@@ -77,7 +81,11 @@ public class GeneralController {
             general.getTema().getId(),
             general.getRespVisible(),
             general.getComentariosRespVisible(),
-            preguntasId
+            preguntasId,
+            general.getMostrarPuntuacion(),
+            general.getPermitirReintento(),
+            general.getEncontrarRespuestaMaestro(),
+            general.getEncontrarRespuestaAlumno()
         );
 
         return new ResponseEntity<>(generalCreada.getId(), HttpStatus.CREATED);
@@ -99,7 +107,11 @@ public class GeneralController {
             general.getTema().getId(),
             general.getRespVisible(),
             general.getComentariosRespVisible(),
-            preguntasId
+            preguntasId,
+            general.getMostrarPuntuacion(),
+            general.getPermitirReintento(),
+            general.getEncontrarRespuestaMaestro(),
+            general.getEncontrarRespuestaAlumno()
         );
 
         return new ResponseEntity<>(generalCreada.getId(), HttpStatus.CREATED);
@@ -116,7 +128,11 @@ public class GeneralController {
             general.getPuntuacion(),
             general.getTema().getId(),
             general.getRespVisible(),
-            general.getComentariosRespVisible()
+            general.getComentariosRespVisible(),
+            general.getMostrarPuntuacion(),
+            general.getPermitirReintento(),
+            general.getEncontrarRespuestaMaestro(),
+            general.getEncontrarRespuestaAlumno()
         );
 
         return new ResponseEntity<>(generalCreada.getId(), HttpStatus.CREATED);
@@ -154,7 +170,11 @@ public class GeneralController {
             general.getRespVisible(),
             general.getComentariosRespVisible(),
             preguntasId,
-            general.getImagen()
+            general.getImagen(),
+            general.getMostrarPuntuacion(),
+            general.getPermitirReintento(),
+            general.getEncontrarRespuestaMaestro(),
+            general.getEncontrarRespuestaAlumno()
         );
 
         return new ResponseEntity<>(generalCreada.getId(), HttpStatus.CREATED);
@@ -224,7 +244,11 @@ public class GeneralController {
             general.getPosicion(),
             general.getVersion(),
             general.getTema().getId(),
-            general.getImagen()
+            general.getImagen(),
+            general.getMostrarPuntuacion(),
+            general.getPermitirReintento(),
+            general.getEncontrarRespuestaMaestro(),
+            general.getEncontrarRespuestaAlumno()
         );
         return ResponseEntity.noContent().build();
     }
@@ -243,7 +267,11 @@ public class GeneralController {
             general.getPosicion(),
             general.getVersion(),
             general.getTema().getId(),
-            general.getImagen()
+            general.getImagen(),
+            general.getMostrarPuntuacion(),
+            general.getPermitirReintento(),
+            general.getEncontrarRespuestaMaestro(),
+            general.getEncontrarRespuestaAlumno()
         );
 
         // Return a DTO to avoid lazy-loading serialization issues
@@ -265,7 +293,11 @@ public class GeneralController {
         general.getPosicion(),
         general.getVersion(),
         general.getTema().getId(),
-        general.getImagen()
+        general.getImagen(),
+        general.getMostrarPuntuacion(),
+        general.getPermitirReintento(),
+        general.getEncontrarRespuestaMaestro(),
+        general.getEncontrarRespuestaAlumno()
         );
 
         return ResponseEntity.ok(generalService.encontrarActCartaPorId(id));
@@ -284,7 +316,11 @@ public class GeneralController {
             general.getPreguntas().stream().map(Pregunta::getId).toList(),
             general.getPosicion(),
             general.getVersion(),
-            general.getTema().getId()
+            general.getTema().getId(),
+            general.getMostrarPuntuacion(),
+            general.getPermitirReintento(),
+            general.getEncontrarRespuestaMaestro(),
+            general.getEncontrarRespuestaAlumno()
         );
         return ResponseEntity.ok(actualizado);
     }
@@ -314,7 +350,11 @@ public class GeneralController {
         general.getPosicion(),
         general.getVersion(),
         general.getTema().getId(),
-        general.getImagen()
+        general.getImagen(),
+        general.getMostrarPuntuacion(),
+        general.getPermitirReintento(),
+        general.getEncontrarRespuestaMaestro(),
+        general.getEncontrarRespuestaAlumno()
         );
 
         return ResponseEntity.ok(generalService.encontrarActAbiertaMaestroPorId(id));

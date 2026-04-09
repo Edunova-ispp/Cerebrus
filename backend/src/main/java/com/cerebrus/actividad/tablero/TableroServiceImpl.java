@@ -86,7 +86,11 @@ public class TableroServiceImpl implements TableroService {
             actividadRepository.findMaxPosicionByTemaId(actividad.getTemaId()) + 1,
             1,
             tema,
-            actividad.getTamano() ? TamanoTablero.TRES_X_TRES : TamanoTablero.CUATRO_X_CUATRO
+            actividad.getTamano() ? TamanoTablero.TRES_X_TRES : TamanoTablero.CUATRO_X_CUATRO,
+            actividad.getMostrarPuntuacion() != null ? actividad.getMostrarPuntuacion() : false,
+            actividad.getPermitirReintento() != null ? actividad.getPermitirReintento() : false,
+            actividad.getEncontrarRespuestaMaestro() != null ? actividad.getEncontrarRespuestaMaestro() : false,
+            actividad.getEncontrarRespuestaAlumno() != null ? actividad.getEncontrarRespuestaAlumno() : false
         );
 
         for (Map.Entry<String, String> preguntaRespuesta : actividad.getPreguntasYRespuestas().entrySet()) {
@@ -155,6 +159,10 @@ public class TableroServiceImpl implements TableroService {
         tableroExistente.setPuntuacion(tablero.getPuntuacion());
         tableroExistente.setRespVisible(tablero.getRespVisible());
         tableroExistente.setTamano(tablero.getTamano() ? TamanoTablero.TRES_X_TRES : TamanoTablero.CUATRO_X_CUATRO);
+        tableroExistente.setMostrarPuntuacion(tablero.getMostrarPuntuacion() != null ? tablero.getMostrarPuntuacion() : false);
+        tableroExistente.setPermitirReintento(tablero.getPermitirReintento() != null ? tablero.getPermitirReintento() : false);
+        tableroExistente.setEncontrarRespuestaMaestro(tablero.getEncontrarRespuestaMaestro() != null ? tablero.getEncontrarRespuestaMaestro() : false);
+        tableroExistente.setEncontrarRespuestaAlumno(tablero.getEncontrarRespuestaAlumno() != null ? tablero.getEncontrarRespuestaAlumno() : false);
         tableroExistente.setVersion(tableroExistente.getVersion()+1);
 
         for (Pregunta pregunta : tableroExistente.getPreguntas()) {
