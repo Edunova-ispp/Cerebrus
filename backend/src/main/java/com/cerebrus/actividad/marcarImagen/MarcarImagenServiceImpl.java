@@ -77,6 +77,10 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
         marcarImagen.setPosicion(tema.getActividades().size());
         marcarImagen.setTema(tema);
         marcarImagen.setImagenAMarcar(marcarImagenDTO.getImagenAMarcar());
+        marcarImagen.setMostrarPuntuacion(marcarImagenDTO.getMostrarPuntuacion() != null ? marcarImagenDTO.getMostrarPuntuacion() : false);
+        marcarImagen.setPermitirReintento(marcarImagenDTO.getPermitirReintento() != null ? marcarImagenDTO.getPermitirReintento() : false);
+        marcarImagen.setEncontrarRespuestaMaestro(marcarImagenDTO.getEncontrarRespuestaMaestro() != null ? marcarImagenDTO.getEncontrarRespuestaMaestro() : false);
+        marcarImagen.setEncontrarRespuestaAlumno(marcarImagenDTO.getEncontrarRespuestaAlumno() != null ? marcarImagenDTO.getEncontrarRespuestaAlumno() : false);
         marcarImagen.setPuntosImagen(puntosImagen);
 
         marcarImagenRepository.save(marcarImagen);
@@ -155,6 +159,10 @@ public class MarcarImagenServiceImpl implements MarcarImagenService {
         }
         marcarImagenAActualizar.setVersion(marcarImagenAActualizar.getVersion() + 1);
         marcarImagenAActualizar.setImagenAMarcar(marcarImagenDTO.getImagenAMarcar());
+        marcarImagenAActualizar.setMostrarPuntuacion(marcarImagenDTO.getMostrarPuntuacion() != null ? marcarImagenDTO.getMostrarPuntuacion() : false);
+        marcarImagenAActualizar.setPermitirReintento(marcarImagenDTO.getPermitirReintento() != null ? marcarImagenDTO.getPermitirReintento() : false);
+        marcarImagenAActualizar.setEncontrarRespuestaMaestro(marcarImagenDTO.getEncontrarRespuestaMaestro() != null ? marcarImagenDTO.getEncontrarRespuestaMaestro() : false);
+        marcarImagenAActualizar.setEncontrarRespuestaAlumno(marcarImagenDTO.getEncontrarRespuestaAlumno() != null ? marcarImagenDTO.getEncontrarRespuestaAlumno() : false);
         marcarImagenAActualizar.getPuntosImagen().clear();
         marcarImagenAActualizar.getPuntosImagen().addAll(puntosImagen);
 

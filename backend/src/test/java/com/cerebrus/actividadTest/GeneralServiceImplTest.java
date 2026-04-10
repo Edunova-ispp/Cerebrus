@@ -89,7 +89,7 @@ class GeneralServiceImplTest {
 		Usuario usuarioNoMaestro = new Usuario() {};
 		when(usuarioService.findCurrentUser()).thenReturn(usuarioNoMaestro);
 
-		assertThatThrownBy(() -> generalService.crearActGeneral("T", "D", 10, 1L, false, null))
+		assertThatThrownBy(() -> generalService.crearActGeneral("T", "D", 10, 1L, false, null, false, false, false, false))
 				.isInstanceOf(AccessDeniedException.class)
 				.hasMessage("Solo un maestro puede crear actividades");
 
@@ -103,7 +103,7 @@ class GeneralServiceImplTest {
 		when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 		when(temaRepository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThatThrownBy(() -> generalService.crearActGeneral("T", "D", 10, 99L, false, null))
+		assertThatThrownBy(() -> generalService.crearActGeneral("T", "D", 10, 99L, false, null, false, false, false, false))
 				.isInstanceOf(ResourceNotFoundException.class)
 				.hasMessage("El tema de la actividad no existe");
 
@@ -120,7 +120,7 @@ class GeneralServiceImplTest {
 		when(temaRepository.findById(1L)).thenReturn(Optional.of(tema));
 		when(actividadRepository.findMaxPosicionByTemaId(1L)).thenReturn(3);
 
-		General general = generalService.crearActGeneral("Título", "Desc", 20, 1L, true, "ok");
+        General general = generalService.crearActGeneral("Título", "Desc", 20, 1L, true, "ok", false, false, false, false);
 
 		assertThat(general).isNotNull();
 		assertThat(general.getTitulo()).isEqualTo("Título");
@@ -140,20 +140,22 @@ class GeneralServiceImplTest {
 		when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 		when(temaRepository.findById(1L)).thenReturn(Optional.of(crearTema(1L)));
 
-		General general = generalService.crearActGeneral("T", "D", 1, 1L, false, "coment");
+		General general = generalService.crearActGeneral("T", "D", 1, 1L, false, "coment", false, false, false, false);
 
 		assertThat(general.getRespVisible()).isFalse();
 		assertThat(general.getComentariosRespVisible()).isNull();
 	}
 
-    // Tests para verificar que se lanza NullPointerException si respVisible es null, y no se llama al repositorio
+    // Tests para verificar que si respVisible es null, la actividad se crea con visibilidad por defecto
 	@Test
 	void crearActGeneral_respVisibleNull_lanzaNullPointerException() {
 		when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 		when(temaRepository.findById(1L)).thenReturn(Optional.of(crearTema(1L)));
 
-		assertThatThrownBy(() -> generalService.crearActGeneral("T", "D", 1, 1L, null, null))
-				.isInstanceOf(NullPointerException.class);
+        General general = generalService.crearActGeneral("T", "D", 1, 1L, null, null, false, false, false, false);
+
+        assertThat(general.getRespVisible()).isFalse();
+        assertThat(general.getComentariosRespVisible()).isNull();
 	}
 
     // Tests para verificar que se crea correctamente una actividad tipo test, se asignan las preguntas y se guarda
@@ -171,7 +173,7 @@ class GeneralServiceImplTest {
 		when(generalRepository.save(any(General.class))).thenAnswer(inv -> inv.getArgument(0));
 
 		General guardada = generalService.crearActTipoTest(
-				"T", "D", 5, 10L, true, "c", preguntasId);
+				"T", "D", 5, 10L, true, "c", preguntasId, false, false, false, false);
 
 		assertThat(guardada.getTipo()).isEqualTo(TipoActGeneral.TEST);
 		assertThat(guardada.getPreguntas()).containsExactly(p1, p2);
@@ -187,7 +189,7 @@ class GeneralServiceImplTest {
 		when(temaRepository.findById(99L)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> generalService.crearActTipoTest(
-				"T", "D", 1, 99L, false, null, List.of(1L)))
+				"T", "D", 1, 99L, false, null, List.of(1L), false, false, false, false))
 				.isInstanceOf(ResourceNotFoundException.class)
 				.hasMessage("El tema de la actividad no existe");
 
@@ -204,7 +206,7 @@ class GeneralServiceImplTest {
 		when(preguntaRepository.findAllById(any())).thenThrow(new IllegalArgumentException("preguntasId requerido"));
 
 		assertThatThrownBy(() -> generalService.crearActTipoTest(
-				"T", "D", 1, 1L, false, null, null))
+				"T", "D", 1, 1L, false, null, null, false, false, false, false))
 				.isInstanceOf(IllegalArgumentException.class);
 
 		verify(generalRepository, never()).save(any());
@@ -231,6 +233,7 @@ class GeneralServiceImplTest {
 		tema.setCurso(curso);
 
 		General general = new General();
+		general.setVersion(1);
 		general.setId(5L);
 		general.setTema(tema);
 		when(generalRepository.findByIdWithPreguntas(5L)).thenReturn(Optional.of(general));
@@ -257,6 +260,7 @@ class GeneralServiceImplTest {
 		tema.setCurso(curso);
 
 		General general = new General();
+		general.setVersion(1);
 		general.setId(6L);
 		general.setTema(tema);
 		when(generalRepository.findByIdWithPreguntas(6L)).thenReturn(Optional.of(general));
@@ -282,10 +286,9 @@ class GeneralServiceImplTest {
 	@Test
 	void actualizarActGeneral_usuarioNoMaestro_lanzaAccessDeniedException() {
 		when(usuarioService.findCurrentUser()).thenReturn(new Usuario() {});
-		String extraArg = "valorExtra";
 
 		assertThatThrownBy(() -> generalService.actualizarActGeneral(
-				1L, "T", "D", 1, false, "", 1, 1, 1L, null))
+				1L, "T", "D", 1, false, "", 1, 1, 1L, null, false, false, false, false))
 				.isInstanceOf(AccessDeniedException.class)
 				.hasMessage("Solo un maestro puede actualizar actividades");
 
@@ -298,10 +301,9 @@ class GeneralServiceImplTest {
 	void actualizarActGeneral_actividadNoExiste_lanzaResourceNotFoundException() {
 		when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 		when(generalRepository.findById(99L)).thenReturn(Optional.empty());
-		String extraArg = "valorExtra";
 
 		assertThatThrownBy(() -> generalService.actualizarActGeneral(
-				99L, "T", "D", 1, false, "", 1, 1, 1L, null))
+				99L, "T", "D", 1, false, "", 1, 1, 1L, null, false, false, false, false))
 				.isInstanceOf(ResourceNotFoundException.class)
 				.hasMessage("Actividad no encontrada");
 	}
@@ -312,15 +314,15 @@ class GeneralServiceImplTest {
 	void actualizarActGeneral_temaNoExiste_lanzaResourceNotFoundException() {
 		when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 		General general = new General();
+		general.setVersion(1);
 		general.setId(1L);
 		Tema tema = crearTema(2L);
 		general.setTema(tema);
 		when(generalRepository.findById(1L)).thenReturn(Optional.of(general));
 		when(temaRepository.findById(123L)).thenReturn(Optional.empty());
-		String extraArg = "valorExtra";
 
 		assertThatThrownBy(() -> generalService.actualizarActGeneral(
-				1L, "T", "D", 1, false, "", 2, 3, 123L, null))
+				1L, "T", "D", 1, false, "", 2, 3, 123L, null, false, false, false, false))
 				.isInstanceOf(ResourceNotFoundException.class)
 				.hasMessage("El tema de la actividad no existe");
 	}
@@ -331,25 +333,26 @@ class GeneralServiceImplTest {
 	void actualizarActGeneral_respVisibleFalse_yComentariosBlank_dejaComentariosNull_incrementaVersion_yActualizaTema() {
 		when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 		General general = new General();
+		general.setVersion(1);
 		general.setId(1L);
 		general.setRespVisible(true);
 		general.setComentariosRespVisible("prev");
+        general.setPosicion(2);
 		when(generalRepository.findById(1L)).thenReturn(Optional.of(general));
 		Tema tema = crearTema(50L);
 		general.setTema(tema);
 		when(temaRepository.findById(50L)).thenReturn(Optional.of(tema));
-		String extraArg = "valorExtra";
 
 		General actualizada = generalService.actualizarActGeneral(
-				1L, "Nuevo", "NuevaD", 7, false, "", 3, 10, 50L, null);
+				1L, "Nuevo", "NuevaD", 7, false, "", 3, 10, 50L, null, false, false, false, false);
 
 		assertThat(actualizada.getTitulo()).isEqualTo("Nuevo");
 		assertThat(actualizada.getDescripcion()).isEqualTo("NuevaD");
 		assertThat(actualizada.getPuntuacion()).isEqualTo(7);
 		assertThat(actualizada.getRespVisible()).isFalse();
 		assertThat(actualizada.getComentariosRespVisible()).isNull();
-		assertThat(actualizada.getPosicion()).isEqualTo(3);
-		assertThat(actualizada.getVersion()).isEqualTo(11);
+        assertThat(actualizada.getPosicion()).isEqualTo(2);
+        assertThat(actualizada.getVersion()).isEqualTo(2);
 		assertThat(actualizada.getTema()).isSameAs(tema);
 
 		verify(generalRepository, never()).save(any());
@@ -361,16 +364,16 @@ class GeneralServiceImplTest {
 	void actualizarActGeneral_respVisibleTrue_noCambiaVisible_yComentariosNoBlank_seGuardaComentarios() {
 		when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 		General general = new General();
+		general.setVersion(1);
 		general.setId(1L);
 		general.setRespVisible(false);
 		Tema tema = crearTema(50L);
 		general.setTema(tema);
 		when(generalRepository.findById(1L)).thenReturn(Optional.of(general));
 		when(temaRepository.findById(1L)).thenReturn(Optional.of(crearTema(1L)));
-		String extraArg = "valorExtra";
 
 		General actualizada = generalService.actualizarActGeneral(
-				1L, "T", "D", 1, true, "coment", 1, 1, 1L, null);
+				1L, "T", "D", 1, true, "coment", 1, 1, 1L, null, false, false, false, false);
 
 		assertThat(actualizada.getRespVisible()).isTrue();
 		assertThat(actualizada.getComentariosRespVisible()).isEqualTo("coment");
@@ -383,10 +386,9 @@ class GeneralServiceImplTest {
 	@Test
 	void actualizarActTipoTest_usuarioNoMaestro_lanzaAccessDeniedException() {
 		when(usuarioService.findCurrentUser()).thenReturn(new Usuario() {});
-		String extraArg = "valorExtra";
 
 		assertThatThrownBy(() -> generalService.actualizarActTipoTest(
-				1L, "T", "D", 1, false, "", List.of(1L), 1, 1, 1L, null))
+				1L, "T", "D", 1, false, "", List.of(1L), 1, 1, 1L, null, false, false, false, false))
 				.isInstanceOf(AccessDeniedException.class)
 				.hasMessage("Solo un maestro puede actualizar actividades tipo test");
 	}
@@ -397,17 +399,17 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 
         General general = new General();
+        general.setVersion(1);
         general.setId(1L);
         general.setPreguntas(new ArrayList<>(List.of(new Pregunta())));
 		Tema tema = crearTema(2L);
 		general.setTema(tema);
-		String extraArg = "valorExtra";
 
         when(generalRepository.findById(1L)).thenReturn(Optional.of(general));
         when(temaRepository.findById(1L)).thenReturn(Optional.of(crearTema(1L)));
 
         assertThatThrownBy(() -> generalService.actualizarActTipoTest(
-                1L, "T", "D", 1, false, "", null, 2, 3, 1L, null))
+                1L, "T", "D", 1, false, "", null, 2, 3, 1L, null, false, false, false, false))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("La lista de preguntas no puede ser null");
 
@@ -424,12 +426,12 @@ class GeneralServiceImplTest {
 		Pregunta antigua = new Pregunta();
 		antigua.setId(99L);
 		General general = new General();
+		general.setVersion(1);
 		general.setId(1L);
 		general.setTipo(TipoActGeneral.TEST);
 		general.setPreguntas(new ArrayList<>(List.of(antigua)));
 		Tema tema = crearTema(2L);
 		general.setTema(tema);
-		String extraArg = "valorExtra";
 
 		when(generalRepository.findById(1L)).thenReturn(Optional.of(general));
 		when(temaRepository.findById(1L)).thenReturn(Optional.of(crearTema(1L)));
@@ -443,7 +445,7 @@ class GeneralServiceImplTest {
 		when(generalRepository.save(any(General.class))).thenAnswer(inv -> inv.getArgument(0));
 
 		General resultado = generalService.actualizarActTipoTest(
-				1L, "T", "D", 1, false, "", preguntasId, 2, 3, 1L, null);
+				1L, "T", "D", 1, false, "", preguntasId, 2, 3, 1L, null, false, false, false, false);
 
 		assertThat(resultado.getPreguntas()).containsExactly(nueva1, nueva2);
 		verify(preguntaRepository).findAllById(preguntasId);
@@ -482,7 +484,9 @@ class GeneralServiceImplTest {
 	void eliminarActGeneralPorId_existente_eliminaCorrectamente() {
 		when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
 		General general = new General();
+		general.setVersion(1);
 		general.setId(1L);
+        general.setTema(crearTema(1L));
 		when(generalRepository.findById(1L)).thenReturn(Optional.of(general));
 
 		generalService.eliminarActGeneralPorId(1L);
@@ -501,7 +505,7 @@ class GeneralServiceImplTest {
         Tema tema = crearTema(1L); 
         when(temaRepository.findById(1L)).thenReturn(Optional.of(tema));
 
-        assertThatThrownBy(() -> generalService.crearActGeneral("T", "D", 10, 1L, true, "ok"))
+        assertThatThrownBy(() -> generalService.crearActGeneral("T", "D", 10, 1L, true, "ok", false, false, false, false))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo el maestro del curso puede crear actividades en ese tema");
     }
@@ -521,7 +525,7 @@ class GeneralServiceImplTest {
         when(preguntaRepository.findAllById(ids)).thenReturn(List.of(p1));
         when(generalRepository.save(any(General.class))).thenAnswer(i -> i.getArgument(0));
 
-        General resultado = generalService.crearActCarta("Carta", "Desc", 10, 1L, true, "ok", ids);
+        General resultado = generalService.crearActCarta("Carta", "Desc", 10, 1L, true, "ok", ids, false, false, false, false);
 
         assertThat(resultado.getTipo()).isEqualTo(TipoActGeneral.CARTA);
         verify(generalRepository).save(any());
@@ -538,7 +542,7 @@ class GeneralServiceImplTest {
         List<Long> ids = List.of(100L);
         when(preguntaRepository.findAllById(ids)).thenReturn(List.of(p1));
 
-        assertThatThrownBy(() -> generalService.crearActCarta("T", "D", 10, 1L, true, "c", ids))
+        assertThatThrownBy(() -> generalService.crearActCarta("T", "D", 10, 1L, true, "c", ids, false, false, false, false))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("no tiene exactamente una respuesta");
     }
@@ -567,7 +571,7 @@ class GeneralServiceImplTest {
         when(preguntaRepository.findAllById(any())).thenReturn(new ArrayList<>());
         when(generalRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        var resultado = generalService.actualizarActCarta(1L, "T", "D", 10, true, "c", List.of(), 1, 1, temaIdConstante, null);
+        var resultado = generalService.actualizarActCarta(1L, "T", "D", 10, true, "c", List.of(), 1, 1, temaIdConstante, null, false, false, false, false);
 
         assertThat(resultado.getImagen()).isNull(); 
     }
@@ -599,7 +603,7 @@ class GeneralServiceImplTest {
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
         // El método devuelve GeneralClasificacionMaestroDTO, no General
-        var resultado = generalService.actualizarActClasificacion(1L, "T", "D", 10, true, "c", List.of(100L), 2, 2, 1L);
+        var resultado = generalService.actualizarActClasificacion(1L, "T", "D", 10, true, "c", List.of(100L), 2, 2, 1L, false, false, false, false);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.getTitulo()).isEqualTo("T");
@@ -610,6 +614,7 @@ class GeneralServiceImplTest {
     void updateTipoClasificacion_error_cuandoHayRespuestaIncorrecta() {
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
         General act = new General();
+        act.setVersion(1);
         act.setTipo(TipoActGeneral.CLASIFICACION);
         act.setTema(crearTema(1L));
         
@@ -624,7 +629,7 @@ class GeneralServiceImplTest {
         
         when(preguntaRepository.findAllById(any())).thenReturn(List.of(p1));
 
-        assertThatThrownBy(() -> generalService.actualizarActClasificacion(1L, "T", "D", 10, true, "c", List.of(100L), 2, 2, 1L))
+        assertThatThrownBy(() -> generalService.actualizarActClasificacion(1L, "T", "D", 10, true, "c", List.of(100L), 2, 2, 1L, false, false, false, false))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("no pueden tener respuestas incorrectas");
     }
@@ -668,6 +673,8 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
         General act = new General();
+
+        act.setVersion(1);
         act.setTema(crearTema(1L));
         act.getTema().getCurso().setInscripciones(new ArrayList<>()); 
         
@@ -697,7 +704,7 @@ class GeneralServiceImplTest {
         
         List<Long> preguntasIds = List.of(1L, 2L, 3L, 4L, 5L, 6L);
 
-        assertThatThrownBy(() -> generalService.crearActAbierta("T", "D", 10, 1L, true, "ok", preguntasIds, null))
+        assertThatThrownBy(() -> generalService.crearActAbierta("T", "D", 10, 1L, true, "ok", preguntasIds, null, false, false, false, false))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("no pueden tener más de 5 preguntas");
     }
@@ -713,7 +720,7 @@ class GeneralServiceImplTest {
         when(respuestaMaestroRepository.findRespuestaByPreguntaId(100L))
                 .thenReturn(List.of(new RespuestaMaestro(), new RespuestaMaestro()));
 
-        assertThatThrownBy(() -> generalService.crearActAbierta("T", "D", 10, 1L, true, "ok", List.of(100L), null))
+        assertThatThrownBy(() -> generalService.crearActAbierta("T", "D", 10, 1L, true, "ok", List.of(100L), null, false, false, false, false))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("solo se permite una respuesta por pregunta");
     }
@@ -725,7 +732,7 @@ class GeneralServiceImplTest {
         when(generalRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         // RAMA: preguntasId == null (para cubrir el primer if del método)
-        General res = generalService.crearActAbierta("T", "D", 10, 1L, true, "ok", null, "img.png");
+        General res = generalService.crearActAbierta("T", "D", 10, 1L, true, "ok", null, "img.png", false, false, false, false);
         
         assertThat(res.getTipo()).isEqualTo(TipoActGeneral.ABIERTA);
         verify(generalRepository).save(any());
@@ -754,7 +761,7 @@ class GeneralServiceImplTest {
 
         when(generalRepository.findById(1L)).thenReturn(Optional.of(crucigramaExistente));
         when(temaRepository.findById(anyLong())).thenReturn(Optional.of(crucigramaExistente.getTema()));
-        when(actividadRepository.findMaxPosicionByTemaId(anyLong())).thenReturn(5);
+        lenient().when(actividadRepository.findMaxPosicionByTemaId(anyLong())).thenReturn(5);
 
         when(generalRepository.save(any(General.class))).thenAnswer(i -> i.getArgument(0));
         when(preguntaRepository.save(any(Pregunta.class))).thenAnswer(i -> i.getArgument(0));
@@ -784,13 +791,14 @@ class GeneralServiceImplTest {
     void updateTipoAbierta_actividadNoEsAbierta_lanzaIllegalArgumentException() {
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
         General actErronea = new General();
+        actErronea.setVersion(1);
         actErronea.setTipo(TipoActGeneral.TEST); 
         actErronea.setTema(crearTema(1L));
         
         when(generalRepository.findById(1L)).thenReturn(Optional.of(actErronea));
         when(temaRepository.findById(1L)).thenReturn(Optional.of(actErronea.getTema()));
 
-        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", List.of(), 1, 1, 1L, null))
+        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", List.of(), 1, 1, 1L, null, false, false, false, false))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("La actividad no es de tipo abierta");
     }
@@ -802,6 +810,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
         General act = new General();
+        act.setVersion(1);
         act.setTipo(TipoActGeneral.TEST); // Tipo equivocado
         Tema tema = crearTema(1L);
         Inscripcion ins = new Inscripcion();
@@ -883,6 +892,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
         
         General actTest = new General();
+        actTest.setVersion(1);
         actTest.setTipo(TipoActGeneral.TEST); // No es CARTA
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(actTest));
@@ -901,6 +911,7 @@ class GeneralServiceImplTest {
 
         // Actividad que pertenece al Maestro ID 1 (por el método crearTema)
         General act = new General();
+        act.setVersion(1);
         act.setTipo(TipoActGeneral.CARTA);
         act.setTema(crearTema(1L)); 
         
@@ -917,6 +928,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
 
         General act = new General();
+        act.setVersion(1);
         act.setTipo(TipoActGeneral.CARTA);
         act.setTema(null); // Caso rama general.getTema() == null
         act.setPreguntas(new ArrayList<>());
@@ -996,6 +1008,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
         
         General actErronea = new General();
+        actErronea.setVersion(1);
         actErronea.setTipo(TipoActGeneral.ABIERTA); // Es tipo ABIERTA, no TEST
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(actErronea));
@@ -1014,6 +1027,7 @@ class GeneralServiceImplTest {
 
         // Actividad que pertenece al Maestro ID 1
         General act = new General();
+        act.setVersion(1);
         act.setTipo(TipoActGeneral.TEST);
         act.setTema(crearTema(1L)); // El helper crea un curso para Maestro ID 1
         
@@ -1031,6 +1045,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
 
         General act = new General();
+        act.setVersion(1);
         act.setTipo(TipoActGeneral.TEST);
         act.setTema(null); // TEMA NULO
         act.setPreguntas(new ArrayList<>());
@@ -1057,6 +1072,7 @@ class GeneralServiceImplTest {
 
         // 2. Setup Actividad y Curso
         General act = new General();
+        act.setVersion(1);
         act.setId(1L);
         act.setTipo(TipoActGeneral.CARTA);
         Tema tema = crearTema(5L);
@@ -1097,6 +1113,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
         General actErronea = new General();
+        actErronea.setVersion(1);
         actErronea.setTipo(TipoActGeneral.TEST); // Tipo incorrecto
 
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(actErronea));
@@ -1113,6 +1130,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
         General act = new General();
+        act.setVersion(1);
         act.setTipo(TipoActGeneral.CARTA);
         Tema tema = crearTema(1L);
         tema.getCurso().setVisibilidad(true);
@@ -1136,6 +1154,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
         General act = new General();
+        act.setVersion(1);
         act.setTipo(TipoActGeneral.CARTA);
         act.setTema(null); // Esto causará un NullPointerException en general.getTema()... 
                            // a menos que el servicio lo maneje, lo cual es buena cobertura.
@@ -1157,6 +1176,7 @@ class GeneralServiceImplTest {
 
         // 2. Setup de la Actividad (Tipo TEST)
         General act = new General();
+        act.setVersion(1);
         act.setId(1L);
         act.setTipo(TipoActGeneral.TEST);
         act.setTitulo("Test de Cobertura");
@@ -1205,6 +1225,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
         General act = new General();
+        act.setVersion(1);
         act.setTipo(TipoActGeneral.TEST);
         act.setTema(null); // Caso límite
         act.setPreguntas(new ArrayList<>());
@@ -1227,6 +1248,7 @@ class GeneralServiceImplTest {
 
         // Setup actividad con inscripción de OTRO alumno
         General act = new General();
+        act.setVersion(1);
         act.setTipo(TipoActGeneral.TEST);
         act.setPreguntas(new ArrayList<>());
         
@@ -1259,6 +1281,7 @@ class GeneralServiceImplTest {
 
         // 2. Setup Actividad vinculada a ese Maestro
         General act = new General();
+        act.setVersion(1);
         act.setId(100L);
         act.setTema(crearTema(1L)); // crearTema vincula al Maestro ID 1L por defecto
         
@@ -1281,6 +1304,7 @@ class GeneralServiceImplTest {
 
         // 2. Actividad de otro maestro (ID 1)
         General act = new General();
+        act.setVersion(1);
         act.setTema(crearTema(1L)); 
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
@@ -1300,6 +1324,7 @@ class GeneralServiceImplTest {
         // 2. Setup Actividad: Necesitamos que tenga Tema y Curso para evitar el NPE 
         // en la línea de 'inscripciones', pero probaremos la rama del 'else' del Maestro
         General act = new General();
+        act.setVersion(1);
         act.setId(1L);
         
         // Creamos una estructura mínima para que no explote la línea de inscripciones
@@ -1328,6 +1353,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(usuarioRaro);
 
         General act = new General();
+        act.setVersion(1);
         act.setTema(crearTema(1L));
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(act));
 
@@ -1357,7 +1383,7 @@ class GeneralServiceImplTest {
 
         // 2. Ejecución
         General resultado = generalService.crearActClasificacion(
-                "Título Clasif", "Desc", 10, 1L, true, "comentarios");
+                "Título Clasif", "Desc", 10, 1L, true, "comentarios", false, false, false, false);
 
         // 3. Verificaciones
         assertThat(resultado).isNotNull();
@@ -1373,7 +1399,7 @@ class GeneralServiceImplTest {
         // Simular un Alumno
         when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
 
-        assertThatThrownBy(() -> generalService.crearActClasificacion("T", "D", 1, 1L, false, null))
+        assertThatThrownBy(() -> generalService.crearActClasificacion("T", "D", 1, 1L, false, null, false, false, false, false))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede crear actividades");
         
@@ -1385,7 +1411,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
         when(temaRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> generalService.crearActClasificacion("T", "D", 1, 99L, false, null))
+        assertThatThrownBy(() -> generalService.crearActClasificacion("T", "D", 1, 99L, false, null, false, false, false, false))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("El tema de la actividad no existe");
     }
@@ -1401,7 +1427,7 @@ class GeneralServiceImplTest {
         Tema temaAjeno = crearTema(1L);
         when(temaRepository.findById(1L)).thenReturn(Optional.of(temaAjeno));
 
-        assertThatThrownBy(() -> generalService.crearActClasificacion("T", "D", 1, 1L, false, null))
+        assertThatThrownBy(() -> generalService.crearActClasificacion("T", "D", 1, 1L, false, null, false, false, false, false))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo el maestro del curso puede crear actividades en ese tema");
         
@@ -1422,6 +1448,7 @@ class GeneralServiceImplTest {
 
         // 2. Setup Actividad y Curso
         General act = new General();
+        act.setVersion(1);
         act.setId(1L);
         act.setTipo(TipoActGeneral.CLASIFICACION);
         Tema tema = crearTema(5L);
@@ -1490,6 +1517,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
         
         General actErronea = new General();
+        actErronea.setVersion(1);
         actErronea.setTipo(TipoActGeneral.ABIERTA); // No es CLASIFICACION
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(actErronea));
@@ -1506,6 +1534,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
         General act = new General();
+        act.setVersion(1);
         act.setTipo(TipoActGeneral.CLASIFICACION);
         Tema tema = crearTema(1L);
         tema.getCurso().setVisibilidad(true);
@@ -1578,6 +1607,7 @@ class GeneralServiceImplTest {
 
         // Actividad que pertenece al Maestro ID 1 (crearTema usa crearMaestro() que devuelve ID 1L)
         General act = new General();
+        act.setVersion(1);
         act.setTipo(TipoActGeneral.ABIERTA);
         act.setTema(crearTema(1L)); 
         
@@ -1593,6 +1623,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(crearMaestro());
         
         General actTest = new General();
+        actTest.setVersion(1);
         actTest.setTipo(TipoActGeneral.TEST); // No es ABIERTA
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(actTest));
@@ -1628,6 +1659,7 @@ class GeneralServiceImplTest {
 
         // 3. Setup Actividad Existente
         General act = new General();
+        act.setVersion(1);
         act.setId(1L);
         act.setTipo(TipoActGeneral.ABIERTA);
         act.setTema(tema);
@@ -1650,7 +1682,7 @@ class GeneralServiceImplTest {
         // 6. Ejecución
         General resultado = generalService.actualizarActAbierta(
             1L, "Título", "Desc", 10, true, "Comentario", 
-            preguntasId, 1, 1, 1L, "imagen.png"
+            preguntasId, 1, 1, 1L, "imagen.png", false, false, false, false
         );
 
         // 7. Verificaciones
@@ -1667,11 +1699,12 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestroLogueado);
 
         General act = new General();
+        act.setVersion(1);
         act.setTema(crearTema(1L)); // El tema pertenece al Maestro ID 1L
 
         when(generalRepository.findById(1L)).thenReturn(Optional.of(act));
 
-        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", List.of(), 1, 1, 1L, null))
+        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", List.of(), 1, 1, 1L, null, false, false, false, false))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo el maestro del curso puede actualizar esta actividad");
     }
@@ -1689,13 +1722,14 @@ class GeneralServiceImplTest {
 
         // 3. Setup Actividad
         General act = new General();
+        act.setVersion(1);
         act.setId(1L);
         act.setTema(tema);
         when(generalRepository.findById(1L)).thenReturn(Optional.of(act));
 
         // 4. Ejecución y Verificación
         // Ahora sí llegará a la validación del null porque el tema "existe" para el servicio
-        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", null, 1, 1, 1L, null))
+        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", null, 1, 1, 1L, null, false, false, false, false))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("La lista de preguntas no puede ser null");
     }
@@ -1714,6 +1748,7 @@ class GeneralServiceImplTest {
 
         // 2. Setup Actividad
         General act = new General();
+        act.setVersion(1);
         act.setId(1L);
         act.setTema(tema);
         when(generalRepository.findById(1L)).thenReturn(Optional.of(act));
@@ -1724,7 +1759,7 @@ class GeneralServiceImplTest {
 
         // 4. Ejecución y Verificación
         // Ahora sí pasará el filtro del tema y llegará a la validación de tamaño de lista de preguntas
-        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", ids, 1, 1, 1L, null))
+        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", ids, 1, 1, 1L, null, false, false, false, false))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Alguna de las preguntas no existe");
     }
@@ -1743,6 +1778,7 @@ class GeneralServiceImplTest {
 
         // 2. Setup Actividad existente
         General act = new General();
+        act.setVersion(1);
         act.setId(1L);
         act.setTema(tema);
         when(generalRepository.findById(1L)).thenReturn(Optional.of(act));
@@ -1756,7 +1792,7 @@ class GeneralServiceImplTest {
 
         // 4. Ejecución y Verificación
         // Ahora el flujo llegará hasta el bucle for(Pregunta pregunta : preguntas)
-        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", ids, 1, 1, 1L, null))
+        assertThatThrownBy(() -> generalService.actualizarActAbierta(1L, "T", "D", 1, true, "C", ids, 1, 1, 1L, null, false, false, false, false))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("no tiene exactamente una respuesta");
     }
@@ -1772,6 +1808,7 @@ class GeneralServiceImplTest {
 
         // 2. Setup Actividad Tipo Abierta
         General act = new General();
+        act.setVersion(1);
         act.setId(1L);
         act.setTipo(TipoActGeneral.ABIERTA);
         act.setTitulo("Abierta Alumno");
@@ -1813,6 +1850,7 @@ class GeneralServiceImplTest {
 
         // Actividad con inscripción de OTRO alumno (ID 99)
         General act = new General();
+        act.setVersion(1);
         act.setTipo(TipoActGeneral.ABIERTA);
         Tema tema = crearTema(1L);
         tema.getCurso().setVisibilidad(true);
@@ -1849,6 +1887,7 @@ class GeneralServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(new Alumno());
         
         General actErronea = new General();
+        actErronea.setVersion(1);
         actErronea.setTipo(TipoActGeneral.CARTA); // No es ABIERTA
         
         when(generalRepository.findByIdWithPreguntas(1L)).thenReturn(Optional.of(actErronea));
@@ -1882,3 +1921,7 @@ class GeneralServiceImplTest {
 		return curso;
 	}
 }
+
+
+
+

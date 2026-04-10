@@ -14,6 +14,10 @@ public class OrdenacionDTO {
     private final Integer posicion;
     private final Long temaId;
     private final List<String> valores;
+    private final Boolean mostrarPuntuacion;
+    private final Boolean permitirReintento;
+    private final Boolean encontrarRespuestaMaestro;
+    private final Boolean encontrarRespuestaAlumno;
 
     public OrdenacionDTO(
         Long id,
@@ -25,7 +29,11 @@ public class OrdenacionDTO {
         String comentariosRespVisible,
         Integer posicion,
         Long temaId,
-        List<String> valores
+        List<String> valores,
+        Boolean mostrarPuntuacion,
+        Boolean permitirReintento,
+        Boolean encontrarRespuestaMaestro,
+        Boolean encontrarRespuestaAlumno
     ) {
         this.id = id;
         this.titulo = titulo;
@@ -37,6 +45,10 @@ public class OrdenacionDTO {
         this.posicion = posicion;
         this.temaId = temaId;
         this.valores = valores;
+        this.mostrarPuntuacion = mostrarPuntuacion;
+        this.permitirReintento = permitirReintento;
+        this.encontrarRespuestaMaestro = encontrarRespuestaMaestro;
+        this.encontrarRespuestaAlumno = encontrarRespuestaAlumno;
     }
 
     public Long getId() {
@@ -78,4 +90,21 @@ public class OrdenacionDTO {
     public List<String> getValores() {
         return valores;
     }
+
+    public Boolean getMostrarPuntuacion() {
+        return mostrarPuntuacion;
+    }
+
+    public Boolean getPermitirReintento() {
+        return permitirReintento;
+    }
+
+    public Boolean getEncontrarRespuestaMaestro() {
+        return encontrarRespuestaMaestro;
+    }
+
+    public Boolean getEncontrarRespuestaAlumno() {
+        return encontrarRespuestaAlumno;
+    }
+
 }

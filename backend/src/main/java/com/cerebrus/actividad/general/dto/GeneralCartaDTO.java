@@ -17,6 +17,10 @@ public class GeneralCartaDTO {
     private final Integer version;
     private final Long temaId;
     private final List<PreguntaDTO> preguntas;
+    private final Boolean mostrarPuntuacion;
+    private final Boolean permitirReintento;
+    private final Boolean encontrarRespuestaMaestro;
+    private final Boolean encontrarRespuestaAlumno;
 
     public GeneralCartaDTO(
             Long id,
@@ -29,7 +33,11 @@ public class GeneralCartaDTO {
             Integer posicion,
             Integer version,
             Long temaId,
-            List<PreguntaDTO> preguntas) {
+            List<PreguntaDTO> preguntas,
+            Boolean mostrarPuntuacion,
+            Boolean permitirReintento,
+            Boolean encontrarRespuestaMaestro,
+            Boolean encontrarRespuestaAlumno) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
@@ -41,6 +49,10 @@ public class GeneralCartaDTO {
         this.version = version;
         this.temaId = temaId;
         this.preguntas = preguntas;
+        this.mostrarPuntuacion = mostrarPuntuacion;
+        this.permitirReintento = permitirReintento;
+        this.encontrarRespuestaMaestro = encontrarRespuestaMaestro;
+        this.encontrarRespuestaAlumno = encontrarRespuestaAlumno;
     }
 
     public Long getId() { return id; }
@@ -54,4 +66,8 @@ public class GeneralCartaDTO {
     public Integer getVersion() { return version; }
     public Long getTemaId() { return temaId; }
     public List<PreguntaDTO> getPreguntas() { return preguntas; }
+    public Boolean getMostrarPuntuacion() { return mostrarPuntuacion; }
+    public Boolean getPermitirReintento() { return permitirReintento; }
+    public Boolean getEncontrarRespuestaMaestro() { return encontrarRespuestaMaestro; }
+    public Boolean getEncontrarRespuestaAlumno() { return encontrarRespuestaAlumno; }
 }

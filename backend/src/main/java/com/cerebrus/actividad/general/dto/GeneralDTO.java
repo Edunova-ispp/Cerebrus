@@ -15,6 +15,10 @@ public class GeneralDTO {
     private final Integer version;
     private final Long temaId;
     private final TipoActGeneral tipo;
+    private final Boolean mostrarPuntuacion;
+    private final Boolean permitirReintento;
+    private final Boolean encontrarRespuestaMaestro;
+    private final Boolean encontrarRespuestaAlumno;
 
     public GeneralDTO(
             Long id,
@@ -27,7 +31,11 @@ public class GeneralDTO {
             Integer posicion,
             Integer version,
             Long temaId,
-            TipoActGeneral tipo) {
+            TipoActGeneral tipo,
+            Boolean mostrarPuntuacion,
+            Boolean permitirReintento,
+            Boolean encontrarRespuestaMaestro,
+            Boolean encontrarRespuestaAlumno) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
@@ -39,6 +47,10 @@ public class GeneralDTO {
         this.version = version;
         this.temaId = temaId;
         this.tipo = tipo;
+        this.mostrarPuntuacion = mostrarPuntuacion;
+        this.permitirReintento = permitirReintento;
+        this.encontrarRespuestaMaestro = encontrarRespuestaMaestro;
+        this.encontrarRespuestaAlumno = encontrarRespuestaAlumno;
     }
 
     public Long getId() {

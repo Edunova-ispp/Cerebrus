@@ -68,7 +68,7 @@ public class GeneralServiceImpl implements GeneralService {
 
     @Override
     public General crearActGeneral(String titulo, String descripcion, Integer puntuacion, Long temaId, 
-        Boolean respVisible, String comentariosRespVisible) {
+        Boolean respVisible, String comentariosRespVisible, Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -85,7 +85,7 @@ public class GeneralServiceImpl implements GeneralService {
         actividad.setTitulo(titulo);
         actividad.setDescripcion(descripcion);
         actividad.setPuntuacion(puntuacion);
-        if(respVisible.equals(Boolean.TRUE)){
+        if(respVisible != null && respVisible.equals(Boolean.TRUE)){
             actividad.setRespVisible(true);
             actividad.setComentariosRespVisible(comentariosRespVisible);
         }
@@ -93,14 +93,18 @@ public class GeneralServiceImpl implements GeneralService {
         Integer maxPosicion = actividadRepository.findMaxPosicionByTemaId(temaId);
         actividad.setPosicion((maxPosicion != null ? maxPosicion : 0) + 1);
         actividad.setTema(tema);
+        actividad.setMostrarPuntuacion(mostrarPuntuacion != null ? mostrarPuntuacion : false);
+        actividad.setPermitirReintento(permitirReintento != null ? permitirReintento : false);
+        actividad.setEncontrarRespuestaMaestro(encontrarRespuestaMaestro != null ? encontrarRespuestaMaestro : false);
+        actividad.setEncontrarRespuestaAlumno(encontrarRespuestaAlumno != null ? encontrarRespuestaAlumno : false);
         return actividad;
     }
 
     @Override
     @Transactional
     public General crearActTipoTest(String titulo, String descripcion, Integer puntuacion, Long temaId, 
-        Boolean respVisible, String comentariosRespVisible,
-            List<Long> preguntasId) {
+        Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId,
+        Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -113,7 +117,7 @@ public class GeneralServiceImpl implements GeneralService {
             throw new AccessDeniedException("Solo el maestro del curso puede crear actividades en ese tema");
         }
 
-        General tipoTest = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
+        General tipoTest = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible, mostrarPuntuacion, permitirReintento, encontrarRespuestaMaestro, encontrarRespuestaAlumno);
 
         List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
         if(preguntas.size() != preguntasId.size()){
@@ -127,7 +131,8 @@ public class GeneralServiceImpl implements GeneralService {
     @Override
     @Transactional
     public General crearActCarta(String titulo, String descripcion, Integer puntuacion, Long temaId, 
-        Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId) {
+        Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId,
+        Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
         Usuario usuario = usuarioService.findCurrentUser();
         if(!(usuario instanceof Maestro)){
             throw new AccessDeniedException("Solo un maestro puede crear actividades");
@@ -138,7 +143,7 @@ public class GeneralServiceImpl implements GeneralService {
             throw new AccessDeniedException("Solo el maestro del curso puede crear actividades en ese tema");
         }
 
-        General tipoCarta = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
+        General tipoCarta = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible, mostrarPuntuacion, permitirReintento, encontrarRespuestaMaestro, encontrarRespuestaAlumno);
         List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
         if(preguntas.size() != preguntasId.size()){
             throw new ResourceNotFoundException("Alguna de las preguntas no existe");
@@ -158,7 +163,7 @@ public class GeneralServiceImpl implements GeneralService {
     @Override
     @Transactional
     public General crearActClasificacion(String titulo, String descripcion, Integer puntuacion, Long temaId, 
-        Boolean respVisible, String comentariosRespVisible) {
+        Boolean respVisible, String comentariosRespVisible, Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
         
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -170,7 +175,7 @@ public class GeneralServiceImpl implements GeneralService {
             throw new AccessDeniedException("Solo el maestro del curso puede crear actividades en ese tema");
         }
 
-        General clasificacion = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
+        General clasificacion = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible, mostrarPuntuacion, permitirReintento, encontrarRespuestaMaestro, encontrarRespuestaAlumno);
         clasificacion.setTipo(TipoActGeneral.CLASIFICACION);
        
 
@@ -194,7 +199,7 @@ public class GeneralServiceImpl implements GeneralService {
         }
 
         General tipoCrucigrama = crearActGeneral(crucigrama.getTitulo(), crucigrama.getDescripcion(), crucigrama.getPuntuacion(),
-            crucigrama.getTemaId(), crucigrama.getRespVisible(), "");
+            crucigrama.getTemaId(), crucigrama.getRespVisible(), "", crucigrama.getMostrarPuntuacion(), crucigrama.getPermitirReintento(), crucigrama.getEncontrarRespuestaMaestro(), crucigrama.getEncontrarRespuestaAlumno());
         
         tipoCrucigrama.setTipo(TipoActGeneral.CRUCIGRAMA);
         tipoCrucigrama.setPosicion(actividadRepository.findMaxPosicionByTemaId(crucigrama.getTemaId()) + 1);
@@ -216,7 +221,8 @@ public class GeneralServiceImpl implements GeneralService {
     @Override
     @Transactional
     public General crearActAbierta(String titulo, String descripcion, Integer puntuacion, Long temaId, 
-        Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, String imagen) {
+        Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, String imagen,
+        Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
         
         Usuario usuario = usuarioService.findCurrentUser();
         if(!(usuario instanceof Maestro)){
@@ -227,7 +233,7 @@ public class GeneralServiceImpl implements GeneralService {
             throw new AccessDeniedException("Solo el maestro del curso puede crear actividades en ese tema");
         }
         
-        General tipoAbierta = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible);
+        General tipoAbierta = crearActGeneral(titulo, descripcion, puntuacion, temaId, respVisible, comentariosRespVisible, mostrarPuntuacion, permitirReintento, encontrarRespuestaMaestro, encontrarRespuestaAlumno);
         tipoAbierta.setImagen(imagen);
 
         if (preguntasId != null && !preguntasId.isEmpty()) {
@@ -326,7 +332,11 @@ public class GeneralServiceImpl implements GeneralService {
                         general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
                         general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
                         general.getTema() == null ? null : general.getTema().getId(),
-                        preguntasDTO
+                        preguntasDTO,
+                        general.getMostrarPuntuacion(),
+                        general.getPermitirReintento(),
+                        general.getEncontrarRespuestaMaestro(),
+                        general.getEncontrarRespuestaAlumno()
                     );
             }
         }
@@ -366,7 +376,11 @@ public class GeneralServiceImpl implements GeneralService {
             general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
             general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
             general.getTema() == null ? null : general.getTema().getId(),
-            preguntasDTO
+            preguntasDTO,
+            general.getMostrarPuntuacion(),
+            general.getPermitirReintento(),
+            general.getEncontrarRespuestaMaestro(),
+            general.getEncontrarRespuestaAlumno()
         );
     }
 
@@ -404,7 +418,11 @@ public class GeneralServiceImpl implements GeneralService {
                     general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
                     general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
                     general.getTema() == null ? null : general.getTema().getId(),
-                    preguntasDTO
+                    preguntasDTO,
+                    general.getMostrarPuntuacion(),
+                    general.getPermitirReintento(),
+                    general.getEncontrarRespuestaMaestro(),
+                    general.getEncontrarRespuestaAlumno()
                 );
             }
         }
@@ -444,7 +462,11 @@ public class GeneralServiceImpl implements GeneralService {
             general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
             general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
             general.getTema() == null ? null : general.getTema().getId(),
-            preguntasDTO
+            preguntasDTO,
+            general.getMostrarPuntuacion(),
+            general.getPermitirReintento(),
+            general.getEncontrarRespuestaMaestro(),
+            general.getEncontrarRespuestaAlumno()
         );
     }
 
@@ -499,7 +521,11 @@ public class GeneralServiceImpl implements GeneralService {
                     general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
                     general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
                     general.getTema() == null ? null : general.getTema().getId(),
-                    preguntasDTO
+                    preguntasDTO,
+                    general.getMostrarPuntuacion(),
+                    general.getPermitirReintento(),
+                    general.getEncontrarRespuestaMaestro(),
+                    general.getEncontrarRespuestaAlumno()
                 );
             }
         }
@@ -539,7 +565,11 @@ public class GeneralServiceImpl implements GeneralService {
             general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
             general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
             general.getTema() == null ? null : general.getTema().getId(),
-            preguntasDTO
+            preguntasDTO,
+            general.getMostrarPuntuacion(),
+            general.getPermitirReintento(),
+            general.getEncontrarRespuestaMaestro(),
+            general.getEncontrarRespuestaAlumno()
         );
     }
 
@@ -636,12 +666,17 @@ public class GeneralServiceImpl implements GeneralService {
             general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
             general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
             general.getTema() == null ? null : general.getTema().getId(),
-            preguntasDTO
+            preguntasDTO,
+            general.getMostrarPuntuacion(),
+            general.getPermitirReintento(),
+            general.getEncontrarRespuestaMaestro(),
+            general.getEncontrarRespuestaAlumno()
         );
     }
 
     public General actualizarActGeneral(Long id, String titulo, String descripcion, Integer puntuacion, 
-    Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Long temaId, String imagen) {
+    Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Long temaId, String imagen,
+    Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
     
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -669,12 +704,15 @@ public class GeneralServiceImpl implements GeneralService {
             actividad.setComentariosRespVisible(comentariosRespVisible.trim());
         }
 
-        actividad.setVersion(version + 1);
-        actividad.setPosicion(posicion);
+        actividad.setVersion(actividad.getVersion() + 1);
 
         Tema tema = temaRepository.findById(temaId)
             .orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
         actividad.setTema(tema);
+        actividad.setMostrarPuntuacion(mostrarPuntuacion != null ? mostrarPuntuacion : false);
+        actividad.setPermitirReintento(permitirReintento != null ? permitirReintento : false);
+        actividad.setEncontrarRespuestaMaestro(encontrarRespuestaMaestro != null ? encontrarRespuestaMaestro : false);
+        actividad.setEncontrarRespuestaAlumno(encontrarRespuestaAlumno != null ? encontrarRespuestaAlumno : false);
         
         return actividad;
     }
@@ -682,7 +720,8 @@ public class GeneralServiceImpl implements GeneralService {
     @Override
     @Transactional
     public General actualizarActTipoTest(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
-        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen) {
+        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen, 
+        Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
      
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -696,7 +735,7 @@ public class GeneralServiceImpl implements GeneralService {
         }
 
         General tipoTest = actualizarActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
-            posicion, version, temaId, imagen);
+            posicion, version, temaId, imagen, mostrarPuntuacion, permitirReintento, encontrarRespuestaMaestro, encontrarRespuestaAlumno);
 
         if(preguntasId != null){
             List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
@@ -719,7 +758,8 @@ public class GeneralServiceImpl implements GeneralService {
     @Override
     @Transactional
     public General actualizarActCarta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
-        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen) {
+        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen,
+        Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
      
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -733,7 +773,7 @@ public class GeneralServiceImpl implements GeneralService {
         }
 
         General tipoCarta = actualizarActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
-            posicion, version, temaId, imagen);
+            posicion, version, temaId, imagen, mostrarPuntuacion, permitirReintento, encontrarRespuestaMaestro, encontrarRespuestaAlumno);
         if(preguntasId != null){
             List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
             if(preguntas.size() != preguntasId.size()){
@@ -760,22 +800,20 @@ public class GeneralServiceImpl implements GeneralService {
     @Override
     @Transactional
     public GeneralClasificacionMaestroDTO actualizarActClasificacion(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
-        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId) {
+        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId,
+        Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
     
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede actualizar actividades tipo clasificación");
         }
-        System.out.println("Actualizando tipo clasificación: " + id);
-
         General general = generalRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
         if (!general.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
             throw new AccessDeniedException("Solo el maestro del curso puede actualizar esta actividad");
         }
         General tipoClasificacion = actualizarActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
-            posicion, version, temaId, null);
-            System.out.println("Actividad base actualizada, procesando preguntas...");
+            posicion, version, temaId, null, mostrarPuntuacion, permitirReintento, encontrarRespuestaMaestro, encontrarRespuestaAlumno);
         if(preguntasId != null){
             List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
                 for(Pregunta p : preguntas){
@@ -789,10 +827,7 @@ public class GeneralServiceImpl implements GeneralService {
             tipoClasificacion.getPreguntas().clear();
             tipoClasificacion.getPreguntas().addAll(preguntas);
         }
-        System.out.println("Preguntas actualizadas, guardando actividad...");
         General actualizado = generalRepository.save(tipoClasificacion);
-        System.out.println("Actividad guardada: " + actualizado.getTitulo());
-
         return encontrarActClasificacionMaestroPorId(actualizado.getId());
     }
 
@@ -813,9 +848,12 @@ public class GeneralServiceImpl implements GeneralService {
         tipoCrucigrama.setDescripcion(crucigrama.getDescripcion());
         tipoCrucigrama.setPuntuacion(crucigrama.getPuntuacion());
         tipoCrucigrama.setRespVisible(crucigrama.getRespVisible());
+        tipoCrucigrama.setMostrarPuntuacion(crucigrama.getMostrarPuntuacion() != null ? crucigrama.getMostrarPuntuacion() : false);
+        tipoCrucigrama.setPermitirReintento(crucigrama.getPermitirReintento() != null ? crucigrama.getPermitirReintento() : false);
+        tipoCrucigrama.setEncontrarRespuestaMaestro(crucigrama.getEncontrarRespuestaMaestro() != null ? crucigrama.getEncontrarRespuestaMaestro() : false);
+        tipoCrucigrama.setEncontrarRespuestaAlumno(crucigrama.getEncontrarRespuestaAlumno() != null ? crucigrama.getEncontrarRespuestaAlumno() : false);
         tipoCrucigrama.setVersion(tipoCrucigrama.getVersion() + 1);
         tipoCrucigrama.setTema(temaRepository.findById(crucigrama.getTemaId()).orElseThrow(() -> new ResourceNotFoundException("Tema no encontrado")));
-        tipoCrucigrama.setPosicion(actividadRepository.findMaxPosicionByTemaId(crucigrama.getTemaId()) + 1);
 
 
         for (Pregunta p : tipoCrucigrama.getPreguntas()) {
@@ -841,7 +879,8 @@ public class GeneralServiceImpl implements GeneralService {
     @Override
     @Transactional
     public General actualizarActAbierta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
-        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen) {
+        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen,
+        Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
      
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -855,7 +894,7 @@ public class GeneralServiceImpl implements GeneralService {
         }
         
         General tipoAbierta = actualizarActGeneral(id, titulo, descripcion, puntuacion, respVisible, comentariosRespVisible,
-            posicion, version, temaId, imagen);
+            posicion, version, temaId, imagen, mostrarPuntuacion, permitirReintento, encontrarRespuestaMaestro, encontrarRespuestaAlumno);
         
         if(preguntasId != null){
             List<Pregunta> preguntas = preguntaRepository.findAllById(preguntasId);
@@ -893,6 +932,9 @@ public class GeneralServiceImpl implements GeneralService {
             throw new AccessDeniedException("Solo un maestro puede eliminar actividades");
         }
         General general = generalRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Actividad no encontrada"));
+        if (!general.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
+            throw new AccessDeniedException("Solo el maestro del curso puede eliminar esta actividad");
+        }
         List<Pregunta> preguntas = general.getPreguntas();
         preguntaRepository.deleteAll(preguntas);
         generalRepository.delete(general);

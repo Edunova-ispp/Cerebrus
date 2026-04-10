@@ -29,18 +29,18 @@ class InscripcionControllerTest {
 
     @Test
     void inscribirAlumno_codigoValido_retorna200ConMensajeExito() {
-        when(inscripcionService.CrearInscripcion("ABC123")).thenReturn(new Inscripcion());
+        when(inscripcionService.crearInscripcion("ABC123")).thenReturn(new Inscripcion());
 
         ResponseEntity<String> respuesta = controller.inscribirAlumno("ABC123");
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).isEqualTo("¡Alumno inscrito correctamente en el curso!");
-        verify(inscripcionService).CrearInscripcion("ABC123");
+        verify(inscripcionService).crearInscripcion("ABC123");
     }
 
     @Test
     void inscribirAlumno_cursoNoExiste_retorna404ConMensaje() {
-        when(inscripcionService.CrearInscripcion("NOPE")).thenThrow(new RuntimeException("404 Not Found"));
+        when(inscripcionService.crearInscripcion("NOPE")).thenThrow(new RuntimeException("404 Not Found"));
 
         ResponseEntity<String> respuesta = controller.inscribirAlumno("NOPE");
 
@@ -50,7 +50,7 @@ class InscripcionControllerTest {
 
     @Test
     void inscribirAlumno_alumnoYaInscrito_retorna400ConMensaje() {
-        when(inscripcionService.CrearInscripcion("ABC123")).thenThrow(new RuntimeException("400 Bad Request"));
+        when(inscripcionService.crearInscripcion("ABC123")).thenThrow(new RuntimeException("400 Bad Request"));
 
         ResponseEntity<String> respuesta = controller.inscribirAlumno("ABC123");
 
@@ -60,7 +60,7 @@ class InscripcionControllerTest {
 
     @Test
     void inscribirAlumno_cursoNoVisible_retorna403ConMensaje() {
-        when(inscripcionService.CrearInscripcion("ABC123")).thenThrow(new RuntimeException("403 Forbidden"));
+        when(inscripcionService.crearInscripcion("ABC123")).thenThrow(new RuntimeException("403 Forbidden"));
 
         ResponseEntity<String> respuesta = controller.inscribirAlumno("ABC123");
 
@@ -70,7 +70,7 @@ class InscripcionControllerTest {
 
     @Test
     void inscribirAlumno_usuarioNoAutorizado_retorna401ConMensaje() {
-        when(inscripcionService.CrearInscripcion("ABC123")).thenThrow(new RuntimeException("401 Unauthorized"));
+        when(inscripcionService.crearInscripcion("ABC123")).thenThrow(new RuntimeException("401 Unauthorized"));
 
         ResponseEntity<String> respuesta = controller.inscribirAlumno("ABC123");
 
@@ -80,7 +80,7 @@ class InscripcionControllerTest {
 
     @Test
     void inscribirAlumno_errorInesperado_retorna500ConMensaje() {
-        when(inscripcionService.CrearInscripcion("ABC123")).thenThrow(new RuntimeException("error desconocido"));
+        when(inscripcionService.crearInscripcion("ABC123")).thenThrow(new RuntimeException("error desconocido"));
 
         ResponseEntity<String> respuesta = controller.inscribirAlumno("ABC123");
 

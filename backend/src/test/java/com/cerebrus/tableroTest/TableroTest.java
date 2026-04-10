@@ -17,7 +17,7 @@ class TableroTest {
         assertThat(t1.getTamano()).isNull();
 
         Tema tema = new Tema();
-        Tablero t2 = new Tablero("titulo", "desc", 10, "img", true, 1, 2, tema, TamanoTablero.TRES_X_TRES);
+        Tablero t2 = new Tablero("titulo", "desc", 10, "img", true, 1, 2, tema, TamanoTablero.TRES_X_TRES, false, false, false, false);
         assertThat(t2.getTitulo()).isEqualTo("titulo");
         assertThat(t2.getDescripcion()).isEqualTo("desc");
         assertThat(t2.getPuntuacion()).isEqualTo(10);

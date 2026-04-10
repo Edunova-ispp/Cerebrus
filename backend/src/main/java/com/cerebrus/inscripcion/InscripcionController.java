@@ -25,7 +25,7 @@ public class InscripcionController {
     @PostMapping("/inscribe")
     public ResponseEntity<String> inscribirAlumno(@RequestParam String codigoCurso) {
         try {
-            inscripcionService.CrearInscripcion(codigoCurso);
+            inscripcionService.crearInscripcion(codigoCurso);
             
             return ResponseEntity.ok("¡Alumno inscrito correctamente en el curso!");
             
