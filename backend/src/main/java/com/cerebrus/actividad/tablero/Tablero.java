@@ -46,6 +46,10 @@ public class Tablero extends Actividad {
         return tamano;
     }
 
+    public void setTamano(TamanoTablero tamano) {
+        this.tamano = tamano;
+    }
+
     public List<Pregunta> getPreguntas() {
         return preguntas;
     }

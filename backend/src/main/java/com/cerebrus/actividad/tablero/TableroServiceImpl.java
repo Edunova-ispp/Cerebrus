@@ -45,11 +45,13 @@ public class TableroServiceImpl implements TableroService {
     private final RespuestaMaestroRepository respuestaMaestroRepository;
     private final UsuarioService usuarioService;
     private final ActividadAlumnoService actividadAlumnoService;
-    private final RespAlumnoGeneralRepository respuestaAlumnoRepository;
     private final ActividadAlumnoRepository actividadAlumnoRepository;
 
     @Autowired
-    public TableroServiceImpl(TableroRepository tableroRepository, ActividadRepository actividadRepository, TemaRepository temaRepository, PreguntaRepository preguntaRepository, RespuestaMaestroRepository respuestaRepository, UsuarioService usuarioService, ActividadAlumnoService actividadAlumnoService, RespAlumnoGeneralRepository respuestaAlumnoRepository, ActividadAlumnoRepository actividadAlumnoRepository) {
+    public TableroServiceImpl(TableroRepository tableroRepository, ActividadRepository actividadRepository, 
+        TemaRepository temaRepository, PreguntaRepository preguntaRepository, 
+        RespuestaMaestroRepository respuestaRepository, UsuarioService usuarioService, 
+        ActividadAlumnoService actividadAlumnoService, ActividadAlumnoRepository actividadAlumnoRepository) {
         this.actividadRepository = actividadRepository;
         this.tableroRepository = tableroRepository;
         this.temaRepository = temaRepository;
@@ -57,7 +59,6 @@ public class TableroServiceImpl implements TableroService {
         this.respuestaMaestroRepository = respuestaRepository;
         this.usuarioService = usuarioService;
         this.actividadAlumnoService = actividadAlumnoService;
-        this.respuestaAlumnoRepository = respuestaAlumnoRepository;
         this.actividadAlumnoRepository = actividadAlumnoRepository;
     }
 

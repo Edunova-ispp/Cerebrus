@@ -69,14 +69,14 @@ class GeneralControllerTest {
 		General creada = new General();
 		creada.setId(99L);
 
-		when(generalService.crearActGeneral("Titulo", "Desc", 10, 5L, false, "coment"))
+                when(generalService.crearActGeneral("Titulo", "Desc", 10, 5L, false, "coment", false, false, false, false))
 				.thenReturn(creada);
 
 		ResponseEntity<General> response = generalController.crearActGeneral(request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(response.getBody()).isSameAs(creada);
-		verify(generalService).crearActGeneral("Titulo", "Desc", 10, 5L, false, "coment");
+        verify(generalService).crearActGeneral("Titulo", "Desc", 10, 5L, false, "coment", false, false, false, false);
 	}
 
     // Tests para verificar que se devuelve 201 con la actividad creada si el request es válido al crear una 
@@ -96,7 +96,7 @@ class GeneralControllerTest {
 
 		General creada = new General();
 
-		when(generalService.crearActGeneral("Titulo", null, 10, 5L, true, null))
+                when(generalService.crearActGeneral("Titulo", null, 10, 5L, true, null, false, false, false, false))
 				.thenReturn(creada);
 
 		ResponseEntity<General> response = generalController.crearActGeneral(request);
@@ -157,7 +157,7 @@ class GeneralControllerTest {
 		General creada = new General();
 		creada.setId(99L);
 
-		when(generalService.crearActTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(true), eq("c"), any()))
+        when(generalService.crearActTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(true), eq("c"), any(), any(), any(), any(), any()))
 				.thenReturn(creada);
 
 		ResponseEntity<Long> response = generalController.crearActTipoTest(request);
@@ -165,8 +165,8 @@ class GeneralControllerTest {
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(response.getBody()).isEqualTo(99L);
 
-		verify(generalService).crearActTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(true), eq("c"),
-				preguntasIdCaptor.capture());
+        verify(generalService).crearActTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(true), eq("c"),
+                preguntasIdCaptor.capture(), any(), any(), any(), any());
 		assertThat(preguntasIdCaptor.getValue()).containsExactly(1L, 2L);
 	}
 
@@ -186,13 +186,13 @@ class GeneralControllerTest {
 		request.setComentariosRespVisible(null);
 		request.setPreguntas(List.of());
 
-		when(generalService.crearActTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(false), eq(null), any()))
+        when(generalService.crearActTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(false), eq(null), any(), any(), any(), any(), any()))
 				.thenReturn(new General());
 
 		generalController.crearActTipoTest(request);
 
-		verify(generalService).crearActTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(false), eq(null),
-				preguntasIdCaptor.capture());
+        verify(generalService).crearActTipoTest(eq("T"), eq("D"), eq(5), eq(10L), eq(false), eq(null),
+                preguntasIdCaptor.capture(), any(), any(), any(), any());
 		assertThat(preguntasIdCaptor.getValue()).isEmpty();
 	}
 
@@ -215,7 +215,7 @@ class GeneralControllerTest {
 		assertThatThrownBy(() -> generalController.crearActTipoTest(request))
 				.isInstanceOf(NullPointerException.class);
 
-		verify(generalService, never()).crearActTipoTest(any(), any(), any(), any(), any(), any(), any());
+        verify(generalService, never()).crearActTipoTest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
 	}
 
     // Tests para verificar que se devuelve 200 con la actividad actualizada si el request es válido al actualizar una 
@@ -254,7 +254,7 @@ class GeneralControllerTest {
 		ResponseEntity<Void> response = generalController.actualizarActGeneral(12L, request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-		verify(generalService).actualizarActGeneral(12L, "Nuevo", "Desc", Integer.valueOf(10), false, "c", Integer.valueOf(3), Integer.valueOf(4), 5L, null);
+        verify(generalService).actualizarActGeneral(12L, "Nuevo", "Desc", Integer.valueOf(10), false, "c", Integer.valueOf(3), Integer.valueOf(4), 5L, null, false, false, false, false);
 	}
 
     // Tests para verificar que se actualiza una actividad tipo test con un request válido, y que se llama al servicio 
@@ -278,22 +278,21 @@ class GeneralControllerTest {
 		request.setVersion(4);
 		request.setTema(tema);
 
-		GeneralTestDTO esperado = new GeneralTestDTO(
-				12L, "Nuevo", "Desc", 10, null, true, "c", 3, 4, 5L, List.of());
+        GeneralTestMaestroDTO esperado = mock(GeneralTestMaestroDTO.class);
 
-		when(generalService.actualizarActTipoTest(eq(12L), eq("Nuevo"), eq("Desc"), eq(10), eq(true), eq("c"), any(), eq(3), eq(4), eq(5L), eq(null)))
+                when(generalService.actualizarActTipoTest(eq(12L), eq("Nuevo"), eq("Desc"), eq(10), eq(true), eq("c"), any(), eq(3), eq(4), eq(5L), eq(null), eq(false), eq(false), eq(false), eq(false)))
 				.thenReturn(new General());
-		when(generalService.encontrarActTipoTestPorId(12L)).thenReturn(esperado);
+        when(generalService.encontrarActTipoTestMaestroPorId(12L)).thenReturn(esperado);
 
-		ResponseEntity<GeneralTestDTO> response = generalController.actualizarActTipoTest(12L, request);
+        ResponseEntity<GeneralTestMaestroDTO> response = generalController.actualizarActTipoTest(12L, request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).isSameAs(esperado);
 
-		verify(generalService).actualizarActTipoTest(eq(12L), eq("Nuevo"), eq("Desc"), eq(10), eq(true), eq("c"),
-				preguntasIdCaptor.capture(), eq(3), eq(4), eq(5L), eq(null));
+        verify(generalService).actualizarActTipoTest(eq(12L), eq("Nuevo"), eq("Desc"), eq(10), eq(true), eq("c"),
+            preguntasIdCaptor.capture(), eq(3), eq(4), eq(5L), eq(null), eq(false), eq(false), eq(false), eq(false));
 		assertThat(preguntasIdCaptor.getValue()).containsExactly(1L);
-		verify(generalService).encontrarActTipoTestPorId(12L);
+        verify(generalService).encontrarActTipoTestMaestroPorId(12L);
 	}
 
     // Tests para verificar que al borrar una actividad tipo test, se devuelve 204 y se llama al servicio con el id 
@@ -364,7 +363,7 @@ class GeneralControllerTest {
         General creada = new General();
         creada.setId(100L);
 
-        when(generalService.crearActAbierta(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(generalService.crearActAbierta(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
             .thenReturn(creada);
 
         ResponseEntity<Long> response = generalController.crearActAbierta(request);
@@ -373,7 +372,7 @@ class GeneralControllerTest {
         assertThat(response.getBody()).isEqualTo(100L);
         
         verify(generalService).crearActAbierta(
-            eq("Abierta"), any(), any(), eq(5L), any(), any(), preguntasIdCaptor.capture(), any()
+            eq("Abierta"), any(), any(), eq(5L), any(), any(), preguntasIdCaptor.capture(), any(), any(), any(), any(), any()
         );
         assertThat(preguntasIdCaptor.getValue()).containsExactly(10L);
     }
@@ -411,7 +410,7 @@ class GeneralControllerTest {
 		// 2. Mockeamos el DTO de retorno
 		GeneralClasificacionMaestroDTO dtoMock = mock(GeneralClasificacionMaestroDTO.class);
 		
-		when(generalService.actualizarActClasificacion(eq(1L), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(generalService.actualizarActClasificacion(eq(1L), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
 			.thenReturn(dtoMock);
 
 		// 3. Ejecución
@@ -519,7 +518,11 @@ class GeneralControllerTest {
                 eq(5L), 
                 eq(true), 
                 eq("Comentarios"), 
-                any() // La lista de IDs [100, 101]
+                any(), // La lista de IDs [100, 101]
+                any(),
+                any(),
+                any(),
+                any()
         )).thenReturn(generalCreada);
 
         // 3. Ejecución
@@ -532,7 +535,7 @@ class GeneralControllerTest {
         // Verificamos que se extrajeron los IDs correctamente (100 y 101)
         verify(generalService).crearActCarta(
                 any(), any(), any(), any(), any(), any(), 
-                eq(List.of(100L, 101L))
+                eq(List.of(100L, 101L)), any(), any(), any(), any()
         );
     }
 
@@ -559,13 +562,13 @@ class GeneralControllerTest {
         request.setPreguntas(List.of(p));
 
         // 2. Mockear el DTO que devuelve el segundo método del servicio
-        GeneralCartaDTO dtoMock = mock(GeneralCartaDTO.class);
+        GeneralCartaMaestroDTO dtoMock = mock(GeneralCartaMaestroDTO.class);
         
         // El controlador hace un update (void o ignorado) y luego un read
-        when(generalService.encontrarActCartaPorId(1L)).thenReturn(dtoMock);
+        when(generalService.encontrarActCartaMaestroPorId(1L)).thenReturn(dtoMock);
 
         // 3. Ejecución
-        ResponseEntity<GeneralCartaDTO> response = generalController.actualizarActCarta(1L, request);
+        ResponseEntity<GeneralCartaMaestroDTO> response = generalController.actualizarActCarta(1L, request);
 
         // 4. Verificaciones
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -583,11 +586,15 @@ class GeneralControllerTest {
                 eq(2),
                 eq(1),
                 eq(10L),
-                eq("imagen.png")
+                eq("imagen.png"),
+                eq(false),
+                eq(false),
+                eq(false),
+                eq(false)
         );
 
         // Verificamos que se llamó al read para obtener la respuesta final
-        verify(generalService).encontrarActCartaPorId(1L);
+        verify(generalService).encontrarActCartaMaestroPorId(1L);
     }
 
 	@Test
@@ -614,7 +621,11 @@ class GeneralControllerTest {
                 eq(15),
                 eq(7L),
                 eq(true),
-                eq("Comentario Clasificación")
+                eq("Comentario Clasificación"),
+                any(),
+                any(),
+                any(),
+                any()
         )).thenReturn(generalCreada);
 
         // 3. Ejecución
@@ -626,7 +637,7 @@ class GeneralControllerTest {
 
         // Verificamos que se llamó al servicio exactamente con los datos del request
         verify(generalService).crearActClasificacion(
-                any(), any(), any(), any(), any(), any()
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
         );
     }
 
