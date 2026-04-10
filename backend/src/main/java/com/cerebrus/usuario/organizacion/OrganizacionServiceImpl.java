@@ -363,6 +363,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     }
 
     @Override
+    @Transactional
     public List<String> leerArchivoImportacionUsuarios(MultipartFile archivo) throws ServletException, IOException {
         List<String> errores = new ArrayList<>();
         InputStream inputStream = archivo.getInputStream();
