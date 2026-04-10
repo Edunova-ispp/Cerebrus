@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,7 @@ import com.cerebrus.usuario.maestro.Maestro;
 import com.cerebrus.usuario.organizacion.DTO.CreateUserRequest;
 import com.cerebrus.usuario.organizacion.DTO.UsuarioActualizarDTO;
 
+import jakarta.servlet.ServletException;
 import jakarta.validation.Valid;
 
 
@@ -84,8 +86,12 @@ public class OrganizacionController {
             } else {
                 return ResponseEntity.ok("Archivo importado correctamente");
             }
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (ServletException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al importar el archivo: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: " + e.getMessage());
         }
     }
 }
