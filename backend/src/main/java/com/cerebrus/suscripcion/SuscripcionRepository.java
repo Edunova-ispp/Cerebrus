@@ -17,6 +17,9 @@ public interface SuscripcionRepository extends JpaRepository<Suscripcion, Long> 
     List<Suscripcion> findByOrganizacionId(Long organizacionId);
 
     @Query("SELECT s FROM Suscripcion s WHERE s.organizacion.id = :organizacionId " +
+       "AND s.estadoPago = com.cerebrus.comun.enumerados.EstadoPagoSuscripcion.PAGADA " +
        "AND CURRENT_DATE BETWEEN s.fechaInicio AND s.fechaFin")
     Optional<Suscripcion> findByOrganizacionIdSuscripcionActiva(@Param("organizacionId") Long organizacionId);
+
+    Optional<Suscripcion> findByTransaccionId(String transaccionId);
 }

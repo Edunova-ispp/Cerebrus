@@ -1,5 +1,6 @@
 package com.cerebrus.suscripcion;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -8,10 +9,15 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cerebrus.comun.enumerados.EstadoPagoSuscripcion;
 import com.cerebrus.suscripcion.dto.PlanPreciosDTO;
 import com.cerebrus.suscripcion.dto.SuscripcionDTO;
 import com.cerebrus.suscripcion.dto.SuscripcionRequest;
 import com.cerebrus.suscripcion.mapper.SuscripcionMapper;
+import com.cerebrus.suscripcion.pago.MockPagoService;
+import com.cerebrus.suscripcion.pago.dto.PagoResponseDTO;
+import com.cerebrus.suscripcion.pago.dto.ResumenCompraDTO;
+import com.cerebrus.suscripcion.pago.dto.SesionPagoDTO;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.organizacion.Organizacion;
@@ -25,12 +31,14 @@ public class SuscripcionServiceImpl implements SuscripcionService {
     private final SuscripcionRepository suscripcionRepository;
     private final OrganizacionRepository organizacionRepository;
     private final UsuarioService usuarioService;
+    private final MockPagoService mockPagoService;
 
     @Autowired
-    public SuscripcionServiceImpl(SuscripcionRepository suscripcionRepository, OrganizacionRepository organizacionRepository, UsuarioService usuarioService) {
+    public SuscripcionServiceImpl(SuscripcionRepository suscripcionRepository, OrganizacionRepository organizacionRepository, UsuarioService usuarioService, MockPagoService mockPagoService) {
         this.suscripcionRepository = suscripcionRepository;
         this.organizacionRepository = organizacionRepository;
         this.usuarioService = usuarioService;
+        this.mockPagoService = mockPagoService;
     }
 
     private static final Map<String, Integer> limitesBase = Map.of(
@@ -44,6 +52,7 @@ public class SuscripcionServiceImpl implements SuscripcionService {
         "profesor_extra", 7.0,
         "alumno_extra", 3.0
     );
+
 
 
     @Override
@@ -68,6 +77,7 @@ public class SuscripcionServiceImpl implements SuscripcionService {
         }
     }
 
+
     @Override
     public SuscripcionDTO obtenerSuscripcionOrganizacion(Long organizacionId, Long suscripcionId) {
         Usuario u = usuarioService.findCurrentUser();
@@ -84,6 +94,7 @@ public class SuscripcionServiceImpl implements SuscripcionService {
             }
         }
     }
+
 
     @Override
     public SuscripcionDTO obtenerSuscripcionActivaOrganizacion(Long organizacionId) {
@@ -109,6 +120,7 @@ public class SuscripcionServiceImpl implements SuscripcionService {
         }
     }
 
+
     @Override
     public PlanPreciosDTO obtenerPlanPrecios() {
         Usuario u = usuarioService.findCurrentUser();
@@ -119,38 +131,96 @@ public class SuscripcionServiceImpl implements SuscripcionService {
         } 
     }
 
+
     @Override
-    public Suscripcion crearSuscripcion(Long organizacionId, SuscripcionRequest request) {
+    public ResumenCompraDTO resumirSuscripcionAComprar(Long organizacionId, SuscripcionRequest request) {
+        Integer numMaestros = request.getNumMaestros();
+        Integer numAlumnos = request.getNumAlumnos();
+        Integer numMeses = request.getNumMeses();
+
+        Usuario u = usuarioService.findCurrentUser();
+
+        if (!(u instanceof Organizacion)) {
+            throw new AccessDeniedException("Solo una organización puede crear una suscripción");
+        } 
+        
+        if (!u.getId().equals(organizacionId)) {
+            throw new AccessDeniedException("No se puede crear una suscripción para una organización diferente a la del usuario logueado");
+        }
+
+        Organizacion organizacion = organizacionRepository.findById(organizacionId)
+            .orElseThrow(() -> new IllegalArgumentException("Organización no encontrada"));
+
+        validarParametros(organizacion, numMaestros, numAlumnos, numMeses);
+        Double costoSuscripcion = calcularPrecioSuscripcion(numMaestros, numAlumnos, numMeses);
+
+        LocalDate hoy = LocalDate.now();
+        LocalDate fechaFin = hoy.plusMonths(numMeses);
+
+        return new ResumenCompraDTO(
+            organizacion.getNombreUsuario(),              
+            organizacion.getNombreCentro(),   
+            organizacion.getCorreoElectronico(),
+            organizacion.getNombre(),
+            organizacion.getPrimerApellido(),
+            organizacion.getSegundoApellido(),
+            numMaestros,
+            numAlumnos,
+            numMeses,
+            hoy,
+            fechaFin,
+            costoSuscripcion
+        );
+    }
+
+
+    @Override
+    @Transactional
+    public PagoResponseDTO crearSuscripcion(Long organizacionId, SuscripcionRequest request) {
         Integer numMaestros = request.getNumMaestros();
         Integer numAlumnos =request.getNumAlumnos();
         Integer numMeses = request.getNumMeses();
 
         Usuario u = usuarioService.findCurrentUser();
-        if (!(u instanceof Organizacion)) {
-            throw new AccessDeniedException("Solo una organización puede crear una suscripción");
-        }else{
-            Organizacion organizacion = organizacionRepository.findById(organizacionId)
-                .orElseThrow(() -> new IllegalArgumentException("La organización para la que intenta crear la suscripción no fue encontrada"));
 
-            validarParametros(organizacion, numMaestros, numAlumnos, numMeses);
+        if (!(u instanceof Organizacion)) {
+            throw new AccessDeniedException("Solo una organización puede realizar una suscripción");
+        } else{
 
             if(!u.getId().equals(organizacionId)) {
-                throw new AccessDeniedException("No se puede crear una suscripción para una organización diferente a la del usuario logueado");
-            } else if (organizacion.getActivo()) {
-                throw new IllegalArgumentException("La organización ya tiene una suscripción activa");
-            } else{
-    
-                Double costoSuscripcion = calcularPrecioSuscripcion(numMaestros, numAlumnos, numMeses).doubleValue();
-
-                Suscripcion nuevaSuscripcion = new Suscripcion(numMaestros, numAlumnos, costoSuscripcion, 
-                                        java.time.LocalDate.now(), java.time.LocalDate.now().plusMonths(numMeses), organizacion);
-
-                return suscripcionRepository.save(nuevaSuscripcion);
-
-                // Añadir función para gestionar el pago de la suscripción (simulado por ahora)
+                throw new AccessDeniedException("No se puede acceder a una suscripción de una organización diferente a la del usuario logueado");
             }
+            if (suscripcionRepository.findByOrganizacionIdSuscripcionActiva(organizacionId).isPresent()) {
+                throw new IllegalArgumentException("La organización ya tiene una suscripción activa.");
+            }
+
+            Organizacion organizacion = organizacionRepository.findById(organizacionId)
+                .orElseThrow(() -> new IllegalArgumentException("Organización no encontrada"));
+
+            validarParametros(organizacion, numMaestros, numAlumnos, numMeses);
+            Double costoSuscripcion = calcularPrecioSuscripcion(numMaestros, numAlumnos, numMeses);
+
+            Suscripcion pendiente = new Suscripcion();
+            LocalDate hoy = LocalDate.now();
+            pendiente.setNumMaestros(request.getNumMaestros());
+            pendiente.setNumAlumnos(request.getNumAlumnos());
+            pendiente.setPrecio(costoSuscripcion);
+            pendiente.setOrganizacion(organizacion);
+            pendiente.setEstadoPagoSuscripcion(EstadoPagoSuscripcion.PENDIENTE);
+            pendiente.setFechaInicio(hoy);
+            pendiente.setFechaFin(hoy.plusMonths(numMeses)); 
+
+            pendiente = suscripcionRepository.save(pendiente);
+
+            SesionPagoDTO sesionPago = mockPagoService.crearSesionDePago(pendiente.getId(), costoSuscripcion);
+            
+            pendiente.setTransaccionId(sesionPago.getTransaccionId());
+            suscripcionRepository.save(pendiente);
+
+            return new PagoResponseDTO(sesionPago.getTransaccionId(), sesionPago.getUrlPago());
         }
     }
+
 
     private Double calcularPrecioSuscripcion(Integer numMaestros, Integer numAlumnos, Integer numMeses) {
         Double costoProfesores = numMaestros <= limitesBase.get("profesor") ? 
@@ -167,6 +237,7 @@ public class SuscripcionServiceImpl implements SuscripcionService {
 
         return (costoProfesores + costoAlumnos) * numMeses;
     }
+
 
     private void validarParametros(Organizacion organizacion, Integer numMaestros, Integer numAlumnos, Integer numMeses) {
         if (numMaestros == null || numAlumnos == null || numMeses == null) {
@@ -191,6 +262,21 @@ public class SuscripcionServiceImpl implements SuscripcionService {
                 "No puedes contratar una suscripción para %d alumnos porque la organización ya tiene %d registrados.", 
                 numAlumnos, numAlumnosActuales));
         }
+    }
+    
+
+    @Override
+    @Transactional
+    public void confirmarPagoExitoso(String transaccionId) {
+        Suscripcion suscripcion = suscripcionRepository.findByTransaccionId(transaccionId)
+                .orElseThrow(() -> new IllegalArgumentException("Transacción no encontrada"));
+
+        if ((suscripcion.getEstadoPagoSuscripcion() == EstadoPagoSuscripcion.PAGADA)) {
+            throw new IllegalArgumentException("Esta suscripción ya ha sido pagada");
+                }
+
+        suscripcion.setEstadoPagoSuscripcion(EstadoPagoSuscripcion.PAGADA);
+        suscripcionRepository.save(suscripcion);
     }
 
 }
