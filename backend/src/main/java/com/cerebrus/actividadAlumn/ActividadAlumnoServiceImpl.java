@@ -85,8 +85,11 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         }
         
         Actividad actividad = actividadRepository.findById(actId).orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
+        if(actividad.getPermitirReintento() == false && existeActAlumnoPorActIdYCurrentUserId(actId)!=0){
+            throw new AccessDeniedException("No se permite el reintento para esta actividad");
+        }
         Alumno alumno = alumnoRepository.findById(alumnoId).orElseThrow(() -> new ResourceNotFoundException("El alumno no existe"));
-
+        
         AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(actividad, alumno.getId());
 
         ActividadAlumno actividadAlumno = new ActividadAlumno(puntuacion, 
