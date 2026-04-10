@@ -29,7 +29,7 @@ public class InscripcionServiceImpl implements InscripcionService {
     }
 
     @Override
-    public Inscripcion CrearInscripcion(String codigoCurso) {
+    public Inscripcion crearInscripcion(String codigoCurso) {
         Usuario current = usuarioService.findCurrentUser();
         if (current instanceof Alumno) {
             Alumno alumno = (Alumno) current;

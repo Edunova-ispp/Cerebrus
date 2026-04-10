@@ -11,13 +11,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.suscripcion.dto.PlanPreciosDTO;
 import com.cerebrus.suscripcion.dto.SuscripcionDTO;
 import com.cerebrus.suscripcion.dto.SuscripcionRequest;
-import com.cerebrus.suscripcion.mapper.SuscripcionMapper;
+import com.cerebrus.suscripcion.pago.dto.PagoResponseDTO;
+import com.cerebrus.suscripcion.pago.dto.ResumenCompraDTO;
 
 
 @RestController
@@ -56,12 +58,25 @@ public class SuscripcionController {
         return new ResponseEntity<>(suscripcionService.obtenerPlanPrecios(), HttpStatus.OK);
     }
 
-    @PostMapping("/crear/{organizacionId}")
+    @PostMapping("/organizacion/{organizacionId}/resumir-suscripcion-a-comprar")
+    public ResponseEntity<ResumenCompraDTO> resumirSuscripcionAComprar(@PathVariable Long organizacionId, @RequestBody SuscripcionRequest request) {
+        return new ResponseEntity<>(suscripcionService.resumirSuscripcionAComprar(organizacionId, request), HttpStatus.OK);
+    }
+
+    @PostMapping("/crear-suscripcion/{organizacionId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<SuscripcionDTO> crearSuscripcion(@PathVariable Long organizacionId, @RequestBody SuscripcionRequest request) {
-            
-        Suscripcion nuevaSuscripcion = suscripcionService.crearSuscripcion(organizacionId, request);
-        return new ResponseEntity<>(SuscripcionMapper.toSuscripcionDTO(nuevaSuscripcion), HttpStatus.CREATED);
+    public ResponseEntity<PagoResponseDTO> crearSuscripcion(@PathVariable Long organizacionId, @RequestBody SuscripcionRequest request) {
+        return new ResponseEntity<>(suscripcionService.crearSuscripcion(organizacionId, request), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/confirmar-pago")
+    public ResponseEntity<String> confirmarPago(@RequestParam String transaccionId) {
+        try {
+            suscripcionService.confirmarPagoExitoso(transaccionId);
+            return ResponseEntity.ok("Pago confirmado y suscripción activada.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al confirmar el pago: " + e.getMessage());
+        }
     }
 
 

@@ -67,7 +67,7 @@ class InscripcionServiceImplTest {
         when(inscripcionRepository.findByAlumnoIdAndCursoId(1L, 10L)).thenReturn(null);
         when(inscripcionRepository.save(any(Inscripcion.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Inscripcion resultado = inscripcionService.CrearInscripcion("ABC123");
+        Inscripcion resultado = inscripcionService.crearInscripcion("ABC123");
 
         assertThat(resultado).isNotNull();
         assertThat(resultado.getAlumno()).isEqualTo(alumno);
@@ -82,7 +82,7 @@ class InscripcionServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(cursoRepository.existsByCodigo("NOPE")).thenReturn(false);
 
-        assertThatThrownBy(() -> inscripcionService.CrearInscripcion("NOPE"))
+        assertThatThrownBy(() -> inscripcionService.crearInscripcion("NOPE"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("404 Not Found");
 
@@ -96,7 +96,7 @@ class InscripcionServiceImplTest {
         when(cursoRepository.existsByCodigo("ABC123")).thenReturn(true);
         when(cursoRepository.findByCodigo("ABC123")).thenReturn(curso);
 
-        assertThatThrownBy(() -> inscripcionService.CrearInscripcion("ABC123"))
+        assertThatThrownBy(() -> inscripcionService.crearInscripcion("ABC123"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("403 Forbidden");
 
@@ -113,7 +113,7 @@ class InscripcionServiceImplTest {
         when(cursoRepository.findByCodigo("ABC123")).thenReturn(curso);
         when(inscripcionRepository.findByAlumnoIdAndCursoId(1L, 10L)).thenReturn(inscripcionExistente);
 
-        assertThatThrownBy(() -> inscripcionService.CrearInscripcion("ABC123"))
+        assertThatThrownBy(() -> inscripcionService.crearInscripcion("ABC123"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("400 Bad Request");
 
@@ -124,7 +124,7 @@ class InscripcionServiceImplTest {
     void crearInscripcion_usuarioNoEsAlumno_lanzaRuntimeException401() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
 
-        assertThatThrownBy(() -> inscripcionService.CrearInscripcion("ABC123"))
+        assertThatThrownBy(() -> inscripcionService.crearInscripcion("ABC123"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("Solo un alumno puede inscribirse en un curso");
 
@@ -139,7 +139,7 @@ class InscripcionServiceImplTest {
         when(cursoRepository.existsByCodigo("ABC123")).thenReturn(true);
         when(cursoRepository.findByCodigo("ABC123")).thenReturn(curso);
 
-        assertThatThrownBy(() -> inscripcionService.CrearInscripcion("ABC123"))
+        assertThatThrownBy(() -> inscripcionService.crearInscripcion("ABC123"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("403 Forbidden");
 
@@ -154,7 +154,7 @@ class InscripcionServiceImplTest {
         when(inscripcionRepository.findByAlumnoIdAndCursoId(1L, 10L)).thenReturn(null);
         when(inscripcionRepository.save(any(Inscripcion.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Inscripcion resultado = inscripcionService.CrearInscripcion("ABC123");
+        Inscripcion resultado = inscripcionService.crearInscripcion("ABC123");
 
         assertThat(resultado.getPuntos()).isEqualTo(0);
         assertThat(resultado.getFechaInscripcion()).isEqualTo(java.time.LocalDate.now());
