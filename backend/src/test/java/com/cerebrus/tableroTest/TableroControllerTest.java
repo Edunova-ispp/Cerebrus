@@ -50,7 +50,7 @@ public class TableroControllerTest {
 	void crearActividadTablero_ok_8_preguntas() throws Exception {
 		TableroRequest req = buildTableroRequest(8, true);
 		TableroDTO dto = new TableroDTO(
-			1L, "titulo", "descripcion", true, 1, 100, true, 1L, new java.util.ArrayList<>()
+			1L, "titulo", "descripcion", true, 1, 100, true, 1L, new java.util.ArrayList<>(), false, false, false, false
 		);
 		when(tableroService.crearActTablero(any())).thenReturn(dto);
 		mockMvc.perform(post("/api/tableros")
@@ -63,7 +63,7 @@ public class TableroControllerTest {
 	void crearActividadTablero_ok_15_preguntas() throws Exception {
 		TableroRequest req = buildTableroRequest(15, false);
 		TableroDTO dto = new TableroDTO(
-			2L, "titulo", "descripcion", false, 2, 200, false, 2L, new java.util.ArrayList<>()
+			2L, "titulo", "descripcion", false, 2, 200, false, 2L, new java.util.ArrayList<>(), false, false, false, false
 		);
 		when(tableroService.crearActTablero(any())).thenReturn(dto);
 		mockMvc.perform(post("/api/tableros")
@@ -92,7 +92,11 @@ public class TableroControllerTest {
 			300,
 			true,
 			3L,
-			new java.util.ArrayList<>()
+			new java.util.ArrayList<>(),
+			false,
+			false,
+			false,
+			false
 		);
 		when(tableroService.encontrarActTableroPorId(1L)).thenReturn(dto);
 		mockMvc.perform(get("/api/tableros/1"))
@@ -110,7 +114,7 @@ public class TableroControllerTest {
 	void actualizarTablero_ok_8_preguntas() throws Exception {
 		TableroRequest req = buildTableroRequest(8, true);
 		TableroDTO dto = new TableroDTO(
-			4L, "titulo", "descripcion", true, 4, 400, true, 4L, new java.util.ArrayList<>()
+			4L, "titulo", "descripcion", true, 4, 400, true, 4L, new java.util.ArrayList<>(), false, false, false, false
 		);
 		when(tableroService.actualizarActTablero(eq(1L), any())).thenReturn(dto);
 		mockMvc.perform(put("/api/tableros/1")

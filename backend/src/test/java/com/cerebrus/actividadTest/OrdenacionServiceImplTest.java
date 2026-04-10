@@ -114,7 +114,7 @@ class OrdenacionServiceImplTest {
 
         Ordenacion resultado = ordenacionService.crearActOrdenacion(
                 "Ordena los planetas", "Desc", 100, "img.png", 1L,
-                false, null, 1, valores);
+            false, null, 1, valores, false, false, false, false);
 
         assertThat(resultado.getTitulo()).isEqualTo("Ordena los planetas");
         assertThat(resultado.getPuntuacion()).isEqualTo(100);
@@ -133,7 +133,7 @@ class OrdenacionServiceImplTest {
 
         Ordenacion resultado = ordenacionService.crearActOrdenacion(
                 "Ordena los planetas", "Desc", 100, "img.png", 1L,
-                true, "Comentario de ejemplo", 1, valores);
+            true, "Comentario de ejemplo", 1, valores, false, false, false, false);
 
         assertThat(resultado.getRespVisible()).isTrue();
         assertThat(resultado.getComentariosRespVisible()).isEqualTo("Comentario de ejemplo");
@@ -145,7 +145,7 @@ class OrdenacionServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(usuarioNoMaestro);
 
         assertThatThrownBy(() -> ordenacionService.crearActOrdenacion(
-                "Título", "Desc", 50, null, 1L, false, null, 1, valores))
+            "Título", "Desc", 50, null, 1L, false, null, 1, valores, false, false, false, false))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede crear actividades de ordenación");
 
@@ -159,7 +159,7 @@ class OrdenacionServiceImplTest {
         when(ordenacionRepository.save(any(Ordenacion.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Ordenacion resultado = ordenacionService.crearActOrdenacion(
-                "Título", "Desc", 50, null, 1L, false, null, 1, List.of("Único"));
+            "Título", "Desc", 50, null, 1L, false, null, 1, List.of("Único"), false, false, false, false);
 
         assertThat(resultado.getValores()).hasSize(1);
     }
@@ -171,7 +171,7 @@ class OrdenacionServiceImplTest {
         when(ordenacionRepository.save(any(Ordenacion.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Ordenacion resultado = ordenacionService.crearActOrdenacion(
-                "Título", null, 50, null, 1L, false, null, 1, valores);
+            "Título", null, 50, null, 1L, false, null, 1, valores, false, false, false, false);
 
         assertThat(resultado.getDescripcion()).isNull();
         assertThat(resultado.getImagen()).isNull();
@@ -256,7 +256,7 @@ class OrdenacionServiceImplTest {
         List<String> nuevosValores = List.of("A", "B", "C");
         Ordenacion resultado = ordenacionService.actualizarActOrdenacion(
                 10L, "Nuevo título", "Nueva desc", 200, "nueva.png",
-                1L, false, null, 2, nuevosValores);
+            1L, false, null, 2, nuevosValores, false, false, false, false);
 
         assertThat(resultado.getTitulo()).isEqualTo("Nuevo título");
         assertThat(resultado.getDescripcion()).isEqualTo("Nueva desc");
@@ -277,7 +277,7 @@ class OrdenacionServiceImplTest {
         when(ordenacionRepository.save(any(Ordenacion.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Ordenacion resultado = ordenacionService.actualizarActOrdenacion(
-                10L, "T", "D", 50, null, 1L, false, null, 1, valores);
+            10L, "T", "D", 50, null, 1L, false, null, 1, valores, false, false, false, false);
 
         assertThat(resultado.getVersion()).isEqualTo(4);
     }
@@ -290,7 +290,7 @@ class OrdenacionServiceImplTest {
         when(ordenacionRepository.save(any(Ordenacion.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Ordenacion resultado = ordenacionService.actualizarActOrdenacion(
-                10L, "T", "D", 50, null, 1L, true, "Nuevo comentario", 1, valores);
+            10L, "T", "D", 50, null, 1L, true, "Nuevo comentario", 1, valores, false, false, false, false);
 
         assertThat(resultado.getRespVisible()).isTrue();
         assertThat(resultado.getComentariosRespVisible()).isEqualTo("Nuevo comentario");
@@ -304,7 +304,7 @@ class OrdenacionServiceImplTest {
         when(ordenacionRepository.save(any(Ordenacion.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Ordenacion resultado = ordenacionService.actualizarActOrdenacion(
-                10L, "T", "D", 50, null, 1L, false, "ignorado", 1, valores);
+            10L, "T", "D", 50, null, 1L, false, "ignorado", 1, valores, false, false, false, false);
 
         assertThat(resultado.getRespVisible()).isFalse();
         assertThat(resultado.getComentariosRespVisible()).isNull();
@@ -316,7 +316,7 @@ class OrdenacionServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(usuarioNoMaestro);
 
         assertThatThrownBy(() -> ordenacionService.actualizarActOrdenacion(
-                10L, "T", "D", 50, null, 1L, false, null, 1, valores))
+            10L, "T", "D", 50, null, 1L, false, null, 1, valores, false, false, false, false))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede actualizar actividades de ordenación");
 
@@ -331,7 +331,7 @@ class OrdenacionServiceImplTest {
         when(ordenacionRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> ordenacionService.actualizarActOrdenacion(
-                99L, "T", "D", 50, null, 1L, false, null, 1, valores))
+            99L, "T", "D", 50, null, 1L, false, null, 1, valores, false, false, false, false))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La actividad de ordenación no existe");
 

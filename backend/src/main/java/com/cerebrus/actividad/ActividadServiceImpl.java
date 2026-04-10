@@ -52,8 +52,9 @@ public class ActividadServiceImpl implements ActividadService {
         Integer nuevaPosicion = (maxPosicion != null) ? maxPosicion + 1 : 1;
 
         // Las actividades de teoría no aportan puntuación, pero el campo requiere mínimo 1 por validación
-        Actividad actividad = new General(titulo, descripcion, 1, imagen, 
-        false, nuevaPosicion, 1, tema, TipoActGeneral.TEORIA);
+        Actividad actividad = new General(titulo, descripcion, Integer.valueOf(1), imagen,
+            Boolean.FALSE, "", nuevaPosicion, Integer.valueOf(1), tema, TipoActGeneral.TEORIA,
+            Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
 
         return actividadRepository.save(actividad);
     }

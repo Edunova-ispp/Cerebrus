@@ -46,7 +46,11 @@ public class OrdenacionController {
             ordenacion.getRespVisible(),
             ordenacion.getComentariosRespVisible(),
             ordenacion.getPosicion(),
-            ordenacion.getValores()
+            ordenacion.getValores(),
+            ordenacion.getMostrarPuntuacion(),
+            ordenacion.getPermitirReintento(),
+            ordenacion.getEncontrarRespuestaMaestro(),
+            ordenacion.getEncontrarRespuestaAlumno()
         );
 
         return new ResponseEntity<>(ordenacionCreada.getId(), HttpStatus.CREATED);
@@ -78,7 +82,11 @@ public class OrdenacionController {
             ordenacion.getRespVisible(),
             ordenacion.getComentariosRespVisible(),
             ordenacion.getPosicion(),
-            ordenacion.getValores()
+            ordenacion.getValores(),
+                ordenacion.getMostrarPuntuacion(),
+                ordenacion.getPermitirReintento(),
+                ordenacion.getEncontrarRespuestaMaestro(),
+                ordenacion.getEncontrarRespuestaAlumno()
         );
         return new ResponseEntity<>(ordenacionActualizada.getId(), HttpStatus.OK);
     }
@@ -102,7 +110,11 @@ public class OrdenacionController {
             ordenacion.getComentariosRespVisible(),
             ordenacion.getPosicion(),
             ordenacion.getTema() == null ? null : ordenacion.getTema().getId(),
-            ordenacion.getValores()
+            ordenacion.getValores(),
+            ordenacion.getMostrarPuntuacion(),
+            ordenacion.getPermitirReintento(),
+            ordenacion.getEncontrarRespuestaMaestro(),
+            ordenacion.getEncontrarRespuestaAlumno()
         );
     }
 }

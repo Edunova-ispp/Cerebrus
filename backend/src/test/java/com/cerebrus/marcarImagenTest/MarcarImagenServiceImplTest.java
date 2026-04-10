@@ -85,7 +85,7 @@ class MarcarImagenServiceImplTest {
     void crearActMarcarImagen_puntuacionLimiteInferior() {
         Maestro maestro = crearMaestro(1L);
         Tema tema = crearTema(10L, maestro);
-        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "T", "D", 0, "img.png", true, "c", 10L, "img", List.of());
+        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "T", "D", 0, "img.png", true, "c", 10L, "img", List.of(), false, false, false, false);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(temaService.encontrarTemaPorId(10L)).thenReturn(tema);
         MarcarImagen guardar = new MarcarImagen();
@@ -98,7 +98,7 @@ class MarcarImagenServiceImplTest {
     void crearActMarcarImagen_puntuacionLimiteSuperior() {
         Maestro maestro = crearMaestro(1L);
         Tema tema = crearTema(10L, maestro);
-        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "T", "D", Integer.MAX_VALUE, "img.png", true, "c", 10L, "img", List.of());
+        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "T", "D", Integer.MAX_VALUE, "img.png", true, "c", 10L, "img", List.of(), false, false, false, false);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(temaService.encontrarTemaPorId(10L)).thenReturn(tema);
         MarcarImagen guardar = new MarcarImagen();
@@ -111,7 +111,7 @@ class MarcarImagenServiceImplTest {
     void crearActMarcarImagen_tituloVacio_lanzaExcepcion() {
         Maestro maestro = crearMaestro(1L);
         Tema tema = crearTema(10L, maestro);
-        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "", "desc", 1, "img.png", true, "c", 10L, "img", List.of());
+        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "", "desc", 1, "img.png", true, "c", 10L, "img", List.of(), false, false, false, false);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(temaService.encontrarTemaPorId(10L)).thenReturn(tema);
         // Simula que el repositorio lanza excepción por título vacío
@@ -157,7 +157,11 @@ class MarcarImagenServiceImplTest {
             "comentario",
             temaId,
             "imgAMarcar.png",
-            puntos
+            puntos,
+            false,
+            false,
+            false,
+            false
         );
     }
 
@@ -306,7 +310,7 @@ class MarcarImagenServiceImplTest {
     void crearActMarcarImagen_respVisibleFalse_seteaCamposCorrectos() {
         Maestro maestro = crearMaestro(1L);
         Tema tema = crearTema(10L, maestro);
-        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "T", "D", 1, "img.png", false, "comentario", 10L, "img", List.of());
+        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "T", "D", 1, "img.png", false, "comentario", 10L, "img", List.of(), false, false, false, false);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(temaService.encontrarTemaPorId(10L)).thenReturn(tema);
         MarcarImagen guardar = new MarcarImagen();
@@ -324,7 +328,7 @@ class MarcarImagenServiceImplTest {
     void crearActMarcarImagen_comentariosRespVisibleVacio_seteaNull() {
         Maestro maestro = crearMaestro(1L);
         Tema tema = crearTema(10L, maestro);
-        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "T", "D", 1, "img.png", true, "   ", 10L, "img", List.of());
+        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "T", "D", 1, "img.png", true, "   ", 10L, "img", List.of(), false, false, false, false);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(temaService.encontrarTemaPorId(10L)).thenReturn(tema);
         MarcarImagen guardar = new MarcarImagen();
@@ -351,7 +355,7 @@ class MarcarImagenServiceImplTest {
         puntoNuevo.setId(2L);
         // DTO con un punto existente (debe actualizar) y uno nuevo (debe crear)
         PuntoImagenDTO puntoExistenteDTO = new PuntoImagenDTO(1L, "resp", 10, 20);
-        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "Nuevo Título", "Nueva Desc", 7, "img2.png", true, "comentario", 10L, "img2.png", List.of(puntoExistenteDTO, puntoNuevoDTO));
+        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "Nuevo Título", "Nueva Desc", 7, "img2.png", true, "comentario", 10L, "img2.png", List.of(puntoExistenteDTO, puntoNuevoDTO), false, false, false, false);
         MarcarImagen existente = new MarcarImagen();
         existente.setId(10L);
         existente.setTema(tema);
@@ -383,7 +387,7 @@ class MarcarImagenServiceImplTest {
         PuntoImagenDTO puntoDTO = new PuntoImagenDTO(2L, "resp", 10, 20);
         PuntoImagen puntoNuevo = new PuntoImagen();
         puntoNuevo.setId(2L);
-        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "T", "D", 5, "img.png", true, "comentario", 10L, "img.png", List.of(puntoDTO));
+        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "T", "D", 5, "img.png", true, "comentario", 10L, "img.png", List.of(puntoDTO), false, false, false, false);
         MarcarImagen existente = new MarcarImagen();
         existente.setId(10L);
         existente.setTema(tema);
@@ -405,7 +409,7 @@ class MarcarImagenServiceImplTest {
     void actualizarActMarcarImagen_respVisibleFalse_seteaCamposCorrectos() {
         Maestro maestro = crearMaestro(1L);
         Tema tema = crearTema(10L, maestro);
-        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "T", "D", 5, "img.png", false, "comentario", 10L, "img.png", List.of());
+        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "T", "D", 5, "img.png", false, "comentario", 10L, "img.png", List.of(), false, false, false, false);
         MarcarImagen existente = new MarcarImagen();
         existente.setId(10L);
         existente.setTema(tema);
@@ -424,7 +428,7 @@ class MarcarImagenServiceImplTest {
     void actualizarActMarcarImagen_comentariosRespVisibleNoVacio_seteaCorrecto() {
         Maestro maestro = crearMaestro(1L);
         Tema tema = crearTema(10L, maestro);
-        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "T", "D", 5, "img.png", true, "comentario visible", 10L, "img.png", List.of());
+        MarcarImagenDTO dto = new MarcarImagenDTO(10L, "T", "D", 5, "img.png", true, "comentario visible", 10L, "img.png", List.of(), false, false, false, false);
         MarcarImagen existente = new MarcarImagen();
         existente.setId(10L);
         existente.setTema(tema);

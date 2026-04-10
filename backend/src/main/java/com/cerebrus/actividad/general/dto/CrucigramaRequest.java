@@ -30,6 +30,11 @@ public class CrucigramaRequest {
     @NotNull
     private  Map<String,String> preguntasYRespuestas;
 
+    private Boolean mostrarPuntuacion;
+    private Boolean permitirReintento;
+    private Boolean encontrarRespuestaMaestro;
+    private Boolean encontrarRespuestaAlumno;
+
 
     public CrucigramaRequest() {}
 
