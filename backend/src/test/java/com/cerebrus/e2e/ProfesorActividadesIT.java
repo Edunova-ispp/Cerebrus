@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,6 +63,7 @@ class ProfesorActividadesIT extends SeleniumBaseTest {
         assertThat(teoriaCreadaId).isNotNull();
 
         navigateTo("/cursos/" + CURSO_ID + "/temas/" + TEMA_ID + "/actividades/" + teoriaCreadaId + "/editar");
+        abrirFormularioTeoriaEnEdicion();
         waitUntilFieldValue(By.id("teoria-titulo"), tituloCreado);
 
         String tituloEditado = "E2E Teoría Temporal Editada";
@@ -128,6 +130,22 @@ class ProfesorActividadesIT extends SeleniumBaseTest {
     private void guardarFormularioTeoria() {
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[normalize-space()='Guardar']"))).click();
+    }
+
+    private void abrirFormularioTeoriaEnEdicion() {
+        WebDriverWait wait = new WebDriverWait(driver, WAIT);
+
+        List<WebElement> theoryInputs = driver.findElements(By.id("teoria-titulo"));
+        if (!theoryInputs.isEmpty() && theoryInputs.get(0).isDisplayed()) {
+            return;
+        }
+
+        List<WebElement> teoriaButtons = driver.findElements(By.xpath("//button[normalize-space()='Teoría']"));
+        if (!teoriaButtons.isEmpty() && teoriaButtons.get(0).isDisplayed()) {
+            wait.until(ExpectedConditions.elementToBeClickable(teoriaButtons.get(0))).click();
+        }
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("teoria-titulo")));
     }
 
     private Long leerIdDeTeoriaCreada() {
@@ -218,23 +236,44 @@ class ProfesorActividadesIT extends SeleniumBaseTest {
             const done = arguments[arguments.length - 1];
             const token = localStorage.getItem('token') || '';
 
-            fetch('/api/actividades/delete/' + teoriaId, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            };
+
+            const tryDelete = async (url) => {
+                try {
+                    const response = await fetch(url, { method: 'DELETE', headers });
+                    const body = await response.text().catch(() => '');
+                    return { ok: response.ok, status: response.status, url, body };
+                } catch (e) {
+                    return { ok: false, status: 0, url, error: String(e) };
                 }
-            })
-                .then(async (response) => {
-                    if (!response.ok) {
-                        throw new Error('HTTP ' + response.status);
-                    }
-                    done(true);
-                })
-                .catch(() => done(false));
+            };
+
+            (async () => {
+                const primary = await tryDelete('/api/actividades/delete/' + teoriaId);
+                if (primary.ok) {
+                    done(primary);
+                    return;
+                }
+
+                // Fallback defensivo por si la actividad quedó tipada en otro controlador.
+                const secondary = await tryDelete('/api/generales/delete/' + teoriaId);
+                if (secondary.ok) {
+                    done(secondary);
+                    return;
+                }
+
+                done({ ok: false, primary, secondary });
+            })();
             """, teoriaId);
 
-        assertThat(result).isEqualTo(Boolean.TRUE);
+        assertThat(result).isInstanceOf(Map.class);
+        Map<?, ?> resultMap = (Map<?, ?>) result;
+        assertThat(resultMap.get("ok"))
+                .withFailMessage("No se pudo borrar la teoría creada. Detalle: %s", resultMap)
+                .isEqualTo(Boolean.TRUE);
     }
 
     private void waitUntilUrlContains(String fragment) {
@@ -250,7 +289,13 @@ class ProfesorActividadesIT extends SeleniumBaseTest {
 
     private void waitUntilFieldValue(By locator, String expectedValue) {
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
-        wait.until(d -> expectedValue.equals(d.findElement(locator).getAttribute("value")));
+        wait.until(d -> {
+            List<WebElement> elements = d.findElements(locator);
+            if (elements.isEmpty()) {
+                return false;
+            }
+            return expectedValue.equals(elements.get(0).getAttribute("value"));
+        });
         assertThat(driver.findElement(locator).getAttribute("value")).isEqualTo(expectedValue);
     }
 }
