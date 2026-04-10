@@ -81,7 +81,7 @@ class OrdenacionControllerTest {
     void crearActOrdenacion_requestValido_retorna201ConOrdenacion() {
         when(ordenacionService.crearActOrdenacion(
                 eq("Ordena los planetas"), eq("Descripción"), eq(100), eq("img.png"),
-                eq(1L), eq(false), eq(null), eq(1), any()))
+                eq(1L), eq(false), eq(null), eq(1), any(), any(), any(), any(), any()))
                 .thenReturn(ordenacionGuardada);
 
         ResponseEntity<Long> respuesta = ordenacionController.crearActOrdenacion(ordenacionRequest);
@@ -91,13 +91,13 @@ class OrdenacionControllerTest {
         assertThat(respuesta.getBody()).isEqualTo(10L);
         verify(ordenacionService).crearActOrdenacion(
                 eq("Ordena los planetas"), eq("Descripción"), eq(100), eq("img.png"),
-                eq(1L), eq(false), eq(null), eq(1), any());
+                eq(1L), eq(false), eq(null), eq(1), any(), any(), any(), any(), any());
     }
 
     // Test para verificar que crearActOrdenacion propaga AccessDeniedException cuando el service la lanza
     @Test
     void crearActOrdenacion_accesoNoPermitido_propagaAccessDeniedException() {
-        when(ordenacionService.crearActOrdenacion(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(ordenacionService.crearActOrdenacion(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new AccessDeniedException("Solo un maestro puede crear actividades de ordenación"));
 
         assertThatThrownBy(() -> ordenacionController.crearActOrdenacion(ordenacionRequest))
@@ -160,7 +160,7 @@ class OrdenacionControllerTest {
         actualizada.setValores(List.of("X", "Y", "Z"));
 
         when(ordenacionService.actualizarActOrdenacion(
-                eq(10L), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                eq(10L), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(actualizada);
 
         ordenacionRequest.setTitulo("Nuevo título");
@@ -173,7 +173,7 @@ class OrdenacionControllerTest {
     // Test para verificar que actualizarActOrdenacion propaga AccessDeniedException cuando el service la lanza
     @Test
     void actualizarActOrdenacion_accesoNoPermitido_propagaAccessDeniedException() {
-        when(ordenacionService.actualizarActOrdenacion(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(ordenacionService.actualizarActOrdenacion(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new AccessDeniedException("Solo un maestro puede actualizar actividades de ordenación"));
 
         assertThatThrownBy(() -> ordenacionController.actualizarActOrdenacion(10L, ordenacionRequest))
@@ -184,7 +184,7 @@ class OrdenacionControllerTest {
     // Test para verificar que actualizarActOrdenacion propaga RuntimeException cuando la ordenación no existe
     @Test
     void actualizarActOrdenacion_noExiste_propagaRuntimeException() {
-        when(ordenacionService.actualizarActOrdenacion(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(ordenacionService.actualizarActOrdenacion(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new RuntimeException("La actividad de ordenación no existe"));
 
         assertThatThrownBy(() -> ordenacionController.actualizarActOrdenacion(99L, ordenacionRequest))

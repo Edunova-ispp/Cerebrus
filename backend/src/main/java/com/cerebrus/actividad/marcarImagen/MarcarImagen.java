@@ -31,8 +31,9 @@ public class MarcarImagen extends Actividad {
     }
 
     public MarcarImagen(String titulo, String descripcion, Integer puntuacion, String imagen,
-                        Boolean respVisible, Integer posicion, Integer version, Tema tema, String imagenAMarcar) {
-        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema);
+                        Boolean respVisible, Integer posicion, Integer version, Tema tema, String imagenAMarcar,
+                        Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
+        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema, mostrarPuntuacion, permitirReintento, encontrarRespuestaMaestro, encontrarRespuestaAlumno);
         this.imagenAMarcar = imagenAMarcar;
     }
 

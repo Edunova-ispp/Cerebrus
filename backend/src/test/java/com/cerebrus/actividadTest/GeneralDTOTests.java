@@ -79,7 +79,11 @@ public class GeneralDTOTests {
             2, 
             1, 
             10L, 
-            preguntas
+            preguntas,
+            false,
+            false,
+            false,
+            false
         );
 
         // 3. Verificaciones (Cubre todos los getters)
@@ -116,7 +120,11 @@ public class GeneralDTOTests {
             3, 
             2, 
             15L, 
-            preguntas
+            preguntas,
+            false,
+            false,
+            false,
+            false
         );
 
         // 3. Verificaciones de todos los Getters
@@ -152,7 +160,11 @@ public class GeneralDTOTests {
             4, 
             1, 
             20L, 
-            preguntas
+            preguntas,
+            false,
+            false,
+            false,
+            false
         );
 
         // 3. Verificaciones (Cubre todos los getters)
@@ -188,7 +200,11 @@ public class GeneralDTOTests {
             5, 
             1, 
             25L, 
-            preguntas
+            preguntas,
+            false,
+            false,
+            false,
+            false
         );
 
         // 3. Verificaciones (Cubre todos los getters)
@@ -224,7 +240,11 @@ public class GeneralDTOTests {
             6, 
             1, 
             30L, 
-            preguntas
+            preguntas,
+            false,
+            false,
+            false,
+            false
         );
 
         // 3. Verificaciones de todos los Getters
@@ -260,7 +280,11 @@ public class GeneralDTOTests {
             7, 
             1, 
             40L, 
-            tipoMock
+            tipoMock,
+            false,
+            false,
+            false,
+            false
         );
 
         // 3. Verificaciones de Getters
@@ -301,7 +325,11 @@ public class GeneralDTOTests {
             8, 
             1, 
             50L, 
-            preguntas
+            preguntas,
+            false,
+            false,
+            false,
+            false
         );
 
         // 3. Verificaciones (Cubre todos los getters)
@@ -337,7 +365,11 @@ public class GeneralDTOTests {
             9, 
             1, 
             60L, 
-            preguntas
+            preguntas,
+            false,
+            false,
+            false,
+            false
         );
 
         // 3. Verificaciones de todos los Getters
@@ -381,7 +413,8 @@ public class GeneralDTOTests {
         List<String> valores = List.of("A", "B", "C");
         OrdenacionDTO dto = new OrdenacionDTO(
             11L, "Título Orden", "Desc", 10, "img.png", 
-            true, "Comentario", 1, 100L, valores
+            true, "Comentario", 1, 100L, valores,
+            false, false, false, false
         );
 
         assertThat(dto.getId()).isEqualTo(11L);
@@ -407,7 +440,8 @@ public class GeneralDTOTests {
         Tema temaMock = mock(Tema.class); // Necesitas importar Tema
         
         Ordenacion ordenacion = new Ordenacion(
-            "Título", "Desc", 100, "img.png", true, 1, 1, temaMock, valores
+            "Título", "Desc", 100, "img.png", true, 1, 1, temaMock, valores,
+            false, false, false, false
         );
 
         // 3. Probar Setters y Getters (cubren el resto de la clase)

@@ -46,6 +46,11 @@ public abstract class Actividad {
 
     private String imagen;
 
+    private Boolean mostrarPuntuacion = false;
+    private Boolean permitirReintento = false;
+    private Boolean encontrarRespuestaMaestro = false;
+    private Boolean encontrarRespuestaAlumno = false;
+
     @NotNull
     @Column(nullable = false)
     private Boolean respVisible = false;
@@ -73,7 +78,8 @@ public abstract class Actividad {
     }
 
     public Actividad(String titulo, String descripcion, Integer puntuacion, String imagen,
-                     Boolean respVisible, Integer posicion, Integer version, Tema tema) {
+                     Boolean respVisible, Integer posicion, Integer version, Tema tema,
+                     Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.puntuacion = puntuacion;
@@ -82,6 +88,10 @@ public abstract class Actividad {
         this.posicion = posicion;
         this.version = version;
         this.tema = tema;
+        this.mostrarPuntuacion = mostrarPuntuacion;
+        this.permitirReintento = permitirReintento;
+        this.encontrarRespuestaMaestro = encontrarRespuestaMaestro;
+        this.encontrarRespuestaAlumno = encontrarRespuestaAlumno;
     }
 
     // Getters y Setters
@@ -177,6 +187,38 @@ public abstract class Actividad {
         return actividadesAlumno == null ? 0 : actividadesAlumno.stream().mapToInt(ActividadAlumno::getNumRepeticiones).sum();
     }
 
+    public Boolean getMostrarPuntuacion() {
+        return mostrarPuntuacion;
+    }   
+
+    public void setMostrarPuntuacion(Boolean mostrarPuntuacion) {
+        this.mostrarPuntuacion = mostrarPuntuacion;
+    }
+
+    public Boolean getPermitirReintento() {
+        return permitirReintento;
+    }
+
+    public void setPermitirReintento(Boolean permitirReintento) {
+        this.permitirReintento = permitirReintento;
+    }
+
+    public Boolean getEncontrarRespuestaMaestro() {
+        return encontrarRespuestaMaestro;
+    }
+
+    public void setEncontrarRespuestaMaestro(Boolean encontrarRespuestaMaestro) {
+        this.encontrarRespuestaMaestro = encontrarRespuestaMaestro;
+    }
+
+    public Boolean getEncontrarRespuestaAlumno() {
+        return encontrarRespuestaAlumno;
+    }
+
+    public void setEncontrarRespuestaAlumno(Boolean encontrarRespuestaAlumno) {
+        this.encontrarRespuestaAlumno = encontrarRespuestaAlumno;
+    }
+    
     @Override
     public String toString() {
         return "Actividad{" +

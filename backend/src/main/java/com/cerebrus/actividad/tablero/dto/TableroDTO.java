@@ -19,7 +19,14 @@ public class TableroDTO {
     private final Long temaId;
     private final Boolean respVisible;
     private final List<PreguntaDTO> preguntas;
-    public TableroDTO(Long id, String titulo, String descripcion, Boolean tamano, Integer posicion, Integer puntuacion, Boolean respVisible, Long temaId, List<PreguntaDTO> preguntas) {
+    private final Boolean mostrarPuntuacion;
+    private final Boolean permitirReintento;
+    private final Boolean encontrarRespuestaMaestro;
+    private final Boolean encontrarRespuestaAlumno;
+
+    public TableroDTO(Long id, String titulo, String descripcion, Boolean tamano, Integer posicion, Integer puntuacion, Boolean respVisible, Long temaId, List<PreguntaDTO> preguntas,
+        Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno
+    ) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
@@ -29,6 +36,10 @@ public class TableroDTO {
         this.temaId = temaId;
         this.respVisible = respVisible;
         this.preguntas = preguntas;
+        this.mostrarPuntuacion = mostrarPuntuacion;
+        this.permitirReintento = permitirReintento;
+        this.encontrarRespuestaMaestro = encontrarRespuestaMaestro;
+        this.encontrarRespuestaAlumno = encontrarRespuestaAlumno;
     }
     public static TableroDTO fromEntity(Tablero creada) {
         List<PreguntaDTO> preguntasDTO = creada.getPreguntas().stream()
@@ -44,7 +55,11 @@ public class TableroDTO {
             creada.getPuntuacion(),
             creada.getRespVisible(),
             creada.getTema().getId(),
-            preguntasDTO
+            preguntasDTO,
+            creada.getMostrarPuntuacion(),
+            creada.getPermitirReintento(),
+            creada.getEncontrarRespuestaMaestro(),
+            creada.getEncontrarRespuestaAlumno()
         );
     }
 

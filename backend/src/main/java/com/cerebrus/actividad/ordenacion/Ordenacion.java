@@ -22,6 +22,11 @@ import jakarta.persistence.Table;
 @Table(name = "ordenacion")
 public class Ordenacion extends Actividad {
 
+    private Boolean mostrarPuntuacion = false;
+    private Boolean permitirReintento = false;
+    private Boolean encontrarRespuestaMaestro = false;
+    private Boolean encontrarRespuestaAlumno = false;
+
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "ordenacion_valores", joinColumns = @JoinColumn(name = "ordenacion_id"))
     @Column(name = "valor")
@@ -38,10 +43,11 @@ public class Ordenacion extends Actividad {
     }
 
     public Ordenacion(String titulo, String descripcion, Integer puntuacion, String imagen,
-                      Boolean respVisible, Integer posicion, Integer version, Tema tema, List<String> valores) {
-        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema);
+                      Boolean respVisible, Integer posicion, Integer version, Tema tema, List<String> valores,
+                      Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
+        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema, mostrarPuntuacion, permitirReintento, encontrarRespuestaMaestro, encontrarRespuestaAlumno);
         this.valores = valores;
-    }
+       }
 
     // Getters y Setters
     public List<String> getValores() {

@@ -14,13 +14,13 @@ import com.cerebrus.actividad.general.dto.GeneralTestDTO;
 import com.cerebrus.actividad.general.dto.GeneralTestMaestroDTO;
 
 public interface GeneralService {
-	General crearActGeneral(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible);
-	General crearActTipoTest(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId);
-	General crearActCarta(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId);
+	General crearActGeneral(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible, Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno);
+	General crearActTipoTest(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno);
+	General crearActCarta(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno);
 	General crearActClasificacion(String titulo, String descripcion, Integer puntuacion, Long temaId, 
-        Boolean respVisible, String comentariosRespVisible);
+        Boolean respVisible, String comentariosRespVisible, Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno);
 	CrucigramaDTO crearActCrucigrama(CrucigramaRequest crucigrama);
-	General crearActAbierta(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, String imagen);
+	General crearActAbierta(String titulo, String descripcion, Integer puntuacion, Long temaId, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, String imagen, Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno);
 	General encontrarActGeneralPorId(Long id);
 	GeneralTestDTO encontrarActTipoTestPorId(Long id);
 	GeneralTestMaestroDTO encontrarActTipoTestMaestroPorId(Long id);
@@ -31,12 +31,12 @@ public interface GeneralService {
 	CrucigramaDTO encontrarActCrucigramaPorId(Long id);
 	GeneralAbiertaAlumnoDTO encontrarActAbiertaPorId(Long id);
 	GeneralAbiertaMaestroDTO encontrarActAbiertaMaestroPorId(Long id);
-	General actualizarActGeneral(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Long temaId, String imagen);
-	General actualizarActTipoTest(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen);
-	General actualizarActCarta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen);
+	General actualizarActGeneral(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Long temaId, String imagen, Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno);
+	General actualizarActTipoTest(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen, Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno);
+	General actualizarActCarta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen, Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno);
 	GeneralClasificacionMaestroDTO actualizarActClasificacion(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, 
-        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId) ;
+        String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno);
 	CrucigramaDTO actualizarActCrucigrama(Long id, CrucigramaRequest crucigrama);
-    General actualizarActAbierta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen);
+    General actualizarActAbierta(Long id, String titulo, String descripcion, Integer puntuacion, Boolean respVisible, String comentariosRespVisible, List<Long> preguntasId, Integer posicion, Integer version, Long temaId, String imagen, Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno);
 	void eliminarActGeneralPorId(Long id);
 }

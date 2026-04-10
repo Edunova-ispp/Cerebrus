@@ -129,7 +129,7 @@ class MarcarImagenControllerTest {
 	// Casos límite y condicionalidad
 	@Test
 	void crearActMarcarImagen_tituloVacio_devuelveError() {
-		MarcarImagenDTO requestVacio = new MarcarImagenDTO(1L, "", "desc", 1, "img.png", true, "c", 10L, "img", List.of());
+		MarcarImagenDTO requestVacio = new MarcarImagenDTO(1L, "", "desc", 1, "img.png", true, "c", 10L, "img", List.of(), false, false, false, false);
 		when(marcarImagenService.crearActMarcarImagen(requestVacio)).thenThrow(new IllegalArgumentException("Título vacío"));
 		assertThatThrownBy(() -> marcarImagenController.crearActMarcarImagen(requestVacio))
 			.isInstanceOf(IllegalArgumentException.class)
@@ -138,7 +138,7 @@ class MarcarImagenControllerTest {
 
 	@Test
 	void crearActMarcarImagen_puntuacionLimiteInferior() {
-		MarcarImagenDTO request = new MarcarImagenDTO(1L, "T", "D", 0, "img.png", true, "c", 10L, "img", List.of());
+		MarcarImagenDTO request = new MarcarImagenDTO(1L, "T", "D", 0, "img.png", true, "c", 10L, "img", List.of(), false, false, false, false);
 		MarcarImagen marcarImagen = new MarcarImagen();
 		marcarImagen.setId(1L);
 		Tema tema = new Tema();
@@ -151,7 +151,7 @@ class MarcarImagenControllerTest {
 
 	@Test
 	void crearActMarcarImagen_puntuacionLimiteSuperior() {
-		MarcarImagenDTO request = new MarcarImagenDTO(1L, "T", "D", Integer.MAX_VALUE, "img.png", true, "c", 10L, "img", List.of());
+		MarcarImagenDTO request = new MarcarImagenDTO(1L, "T", "D", Integer.MAX_VALUE, "img.png", true, "c", 10L, "img", List.of(), false, false, false, false);
 		MarcarImagen marcarImagen = new MarcarImagen();
 		marcarImagen.setId(1L);
 		Tema tema = new Tema();
@@ -174,7 +174,11 @@ class MarcarImagenControllerTest {
 			"comentario",
 			temaId,
 			"imgAMarcar.png",
-			puntos
+			puntos,
+			false,
+			false,
+			false,
+			false
 		);
 	}
 }
