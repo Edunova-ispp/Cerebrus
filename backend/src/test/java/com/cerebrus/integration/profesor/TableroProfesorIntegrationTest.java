@@ -52,7 +52,7 @@ class TableroProfesorIntegrationTest {
 
     @Test
     void crearTablero_ok_devuelve201() throws Exception {
-        TableroDTO dto = new TableroDTO(1L, "Tablero", "desc", true, 1, 10, true, 1L, java.util.List.of());
+                TableroDTO dto = new TableroDTO(1L, "Tablero", "desc", true, 1, 10, true, 1L, java.util.List.of(), true, false, true, false);
         when(tableroService.crearActTablero(any())).thenReturn(dto);
 
         Map<String, Object> body = Map.of(

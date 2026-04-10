@@ -29,9 +29,9 @@ import com.cerebrus.actividad.general.GeneralController;
 import com.cerebrus.actividad.general.GeneralService;
 import com.cerebrus.actividad.general.dto.CrucigramaDTO;
 import com.cerebrus.actividad.general.dto.GeneralAbiertaMaestroDTO;
-import com.cerebrus.actividad.general.dto.GeneralCartaDTO;
+import com.cerebrus.actividad.general.dto.GeneralCartaMaestroDTO;
 import com.cerebrus.actividad.general.dto.GeneralClasificacionMaestroDTO;
-import com.cerebrus.actividad.general.dto.GeneralTestDTO;
+import com.cerebrus.actividad.general.dto.GeneralTestMaestroDTO;
 import com.cerebrus.exceptions.GlobalExceptionHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -60,7 +60,7 @@ class GeneralProfesorIntegrationTest {
         General creada = new General();
         creada.setId(101L);
 
-        when(generalService.crearActTipoTest(any(), any(), any(), any(), any(), any(), any()))
+        when(generalService.crearActTipoTest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(creada);
 
         Map<String, Object> body = Map.of(
@@ -84,7 +84,7 @@ class GeneralProfesorIntegrationTest {
     void crearTipoCarta_ok_devuelve201ConId() throws Exception {
         General creada = new General();
         creada.setId(102L);
-        when(generalService.crearActCarta(any(), any(), any(), any(), any(), any(), any())).thenReturn(creada);
+        when(generalService.crearActCarta(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(creada);
 
         Map<String, Object> body = Map.of(
                 "titulo", "Carta de Geografia",
@@ -107,7 +107,8 @@ class GeneralProfesorIntegrationTest {
     void crearTipoClasificacion_ok_devuelve201ConId() throws Exception {
         General creada = new General();
         creada.setId(103L);
-        when(generalService.crearActClasificacion(any(), any(), any(), any(), any(), any())).thenReturn(creada);
+        when(generalService.crearActClasificacion(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(creada);
 
         Map<String, Object> body = Map.of(
                 "titulo", "Clasificacion",
@@ -129,7 +130,8 @@ class GeneralProfesorIntegrationTest {
     void crearTipoAbierta_ok_devuelve201ConId() throws Exception {
         General creada = new General();
         creada.setId(104L);
-        when(generalService.crearActAbierta(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(creada);
+        when(generalService.crearActAbierta(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(creada);
 
         Map<String, Object> body = Map.of(
                 "titulo", "Abierta",
@@ -234,7 +236,7 @@ class GeneralProfesorIntegrationTest {
     void actualizarGeneral_noPropietario_devuelve403() throws Exception {
         doThrow(new AccessDeniedException("Solo el maestro del curso puede actualizar esta actividad"))
                 .when(generalService)
-                .actualizarActGeneral(eq(77L), any(), any(), any(), any(), any(), any(), any(), any(), any());
+                .actualizarActGeneral(eq(77L), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
 
         Map<String, Object> body = Map.of(
                 "titulo", "Edit",
@@ -256,20 +258,23 @@ class GeneralProfesorIntegrationTest {
 
     @Test
     void actualizarTipoTest_ok_devuelve200() throws Exception {
-        GeneralTestDTO dto = org.mockito.Mockito.mock(GeneralTestDTO.class);
-        when(generalService.encontrarActTipoTestPorId(12L)).thenReturn(dto);
+                GeneralTestMaestroDTO dto = org.mockito.Mockito.mock(GeneralTestMaestroDTO.class);
+                when(generalService.encontrarActTipoTestMaestroPorId(12L)).thenReturn(dto);
 
-        Map<String, Object> body = Map.of(
-                "titulo", "Edit test",
-                "descripcion", "desc",
-                "puntuacion", 9,
-                "respVisible", true,
-                "comentariosRespVisible", "ok",
-                "posicion", 1,
-                "version", 1,
-                "tema", Map.of("id", 1L),
-                "preguntas", List.of(Map.of("id", 11L))
-        );
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("titulo", "Edit test");
+        body.put("descripcion", "desc");
+        body.put("puntuacion", 9);
+        body.put("respVisible", true);
+        body.put("comentariosRespVisible", "ok");
+        body.put("posicion", 1);
+        body.put("version", 1);
+        body.put("tema", Map.of("id", 1L));
+        body.put("preguntas", List.of(Map.of("id", 11L)));
+        body.put("mostrarPuntuacion", true);
+        body.put("permitirReintento", false);
+        body.put("encontrarRespuestaMaestro", true);
+        body.put("encontrarRespuestaAlumno", false);
 
         mockMvc.perform(put("/api/generales/test/update/12")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -279,20 +284,23 @@ class GeneralProfesorIntegrationTest {
 
     @Test
     void actualizarTipoCarta_ok_devuelve200() throws Exception {
-        GeneralCartaDTO dto = org.mockito.Mockito.mock(GeneralCartaDTO.class);
-        when(generalService.encontrarActCartaPorId(13L)).thenReturn(dto);
+                GeneralCartaMaestroDTO dto = org.mockito.Mockito.mock(GeneralCartaMaestroDTO.class);
+                when(generalService.encontrarActCartaMaestroPorId(13L)).thenReturn(dto);
 
-        Map<String, Object> body = Map.of(
-                "titulo", "Edit carta",
-                "descripcion", "desc",
-                "puntuacion", 9,
-                "respVisible", true,
-                "comentariosRespVisible", "ok",
-                "posicion", 1,
-                "version", 1,
-                "tema", Map.of("id", 1L),
-                "preguntas", List.of(Map.of("id", 21L))
-        );
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("titulo", "Edit carta");
+        body.put("descripcion", "desc");
+        body.put("puntuacion", 9);
+        body.put("respVisible", true);
+        body.put("comentariosRespVisible", "ok");
+        body.put("posicion", 1);
+        body.put("version", 1);
+        body.put("tema", Map.of("id", 1L));
+        body.put("preguntas", List.of(Map.of("id", 21L)));
+        body.put("mostrarPuntuacion", true);
+        body.put("permitirReintento", false);
+        body.put("encontrarRespuestaMaestro", true);
+        body.put("encontrarRespuestaAlumno", false);
 
         mockMvc.perform(put("/api/generales/cartas/update/13")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -303,7 +311,7 @@ class GeneralProfesorIntegrationTest {
     @Test
     void actualizarTipoClasificacion_ok_devuelve200() throws Exception {
         GeneralClasificacionMaestroDTO dto = org.mockito.Mockito.mock(GeneralClasificacionMaestroDTO.class);
-        when(generalService.actualizarActClasificacion(eq(14L), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                when(generalService.actualizarActClasificacion(eq(14L), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(dto);
 
         Map<String, Object> body = Map.of(

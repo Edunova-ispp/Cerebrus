@@ -72,7 +72,11 @@ class MarcarImagenProfesorIntegrationTest {
                 "coment",
                 1L,
                 "mapa.png",
-                List.of(new PuntoImagenDTO(null, "A", 10, 20))
+                List.of(new PuntoImagenDTO(null, "A", 10, 20)),
+                true,
+                false,
+                true,
+                false
         );
 
         when(marcarImagenService.crearActMarcarImagen(any())).thenReturn(created);
@@ -96,7 +100,11 @@ class MarcarImagenProfesorIntegrationTest {
                 "coment",
                 1L,
                 "mapa.png",
-                List.of(new PuntoImagenDTO(1L, "A", 10, 20))
+                List.of(new PuntoImagenDTO(1L, "A", 10, 20)),
+                true,
+                false,
+                true,
+                false
         );
 
         doThrow(new AccessDeniedException("Solo el maestro del curso puede actualizar actividades en ese tema"))

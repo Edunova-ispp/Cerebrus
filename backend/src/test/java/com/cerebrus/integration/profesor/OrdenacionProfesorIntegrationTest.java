@@ -56,20 +56,23 @@ class OrdenacionProfesorIntegrationTest {
         Ordenacion ordenacion = new Ordenacion();
         ordenacion.setId(66L);
 
-        when(ordenacionService.crearActOrdenacion(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(ordenacionService.crearActOrdenacion(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(ordenacion);
 
-        Map<String, Object> body = Map.of(
-                "titulo", "Ordenar planetas",
-                "descripcion", "desc",
-                "puntuacion", 10,
-                "imagen", "img.png",
-                "respVisible", true,
-                "comentariosRespVisible", "coment",
-                "posicion", 1,
-                "tema", Map.of("id", 1L),
-                "valores", List.of("Mercurio", "Venus", "Tierra")
-        );
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("titulo", "Ordenar planetas");
+        body.put("descripcion", "desc");
+        body.put("puntuacion", 10);
+        body.put("imagen", "img.png");
+        body.put("respVisible", true);
+        body.put("comentariosRespVisible", "coment");
+        body.put("posicion", 1);
+        body.put("tema", Map.of("id", 1L));
+        body.put("valores", List.of("Mercurio", "Venus", "Tierra"));
+        body.put("mostrarPuntuacion", true);
+        body.put("permitirReintento", false);
+        body.put("encontrarRespuestaMaestro", true);
+        body.put("encontrarRespuestaAlumno", false);
 
         mockMvc.perform(post("/api/ordenaciones")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -82,19 +85,22 @@ class OrdenacionProfesorIntegrationTest {
     void actualizarOrdenacion_noPropietario_devuelve403() throws Exception {
         doThrow(new AccessDeniedException("Solo el maestro del curso puede actualizar esta actividad"))
                 .when(ordenacionService)
-                .actualizarActOrdenacion(eq(7L), any(), any(), any(), any(), any(), any(), any(), any(), any());
+                .actualizarActOrdenacion(eq(7L), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
 
-        Map<String, Object> body = Map.of(
-                "titulo", "Ordenar edit",
-                "descripcion", "desc",
-                "puntuacion", 8,
-                "imagen", "img2.png",
-                "respVisible", false,
-                "comentariosRespVisible", "coment",
-                "posicion", 1,
-                "tema", Map.of("id", 1L),
-                "valores", List.of("A", "B")
-        );
+        Map<String, Object> body = new java.util.HashMap<>();
+        body.put("titulo", "Ordenar edit");
+        body.put("descripcion", "desc");
+        body.put("puntuacion", 8);
+        body.put("imagen", "img2.png");
+        body.put("respVisible", false);
+        body.put("comentariosRespVisible", "coment");
+        body.put("posicion", 1);
+        body.put("tema", Map.of("id", 1L));
+        body.put("valores", List.of("A", "B"));
+        body.put("mostrarPuntuacion", true);
+        body.put("permitirReintento", false);
+        body.put("encontrarRespuestaMaestro", true);
+        body.put("encontrarRespuestaAlumno", false);
 
         mockMvc.perform(put("/api/ordenaciones/update/7")
                         .contentType(MediaType.APPLICATION_JSON)
