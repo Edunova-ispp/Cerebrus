@@ -264,32 +264,32 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                  
         String rolUpper = request.getRol().toUpperCase();
         if ("ORGANIZACION".equals(rolUpper)) {
-            errores.add("No se puede crear usuarios con rol ORGANIZACIÓN. Error en fila " + fila + "del archivo.");
+            errores.add("No se puede crear usuarios con rol ORGANIZACIÓN. Error en fila " + fila + " del archivo.");
         }
 
         if(request.getNombre() == null || request.getNombre().trim().isEmpty()) {
-            errores.add("El nombre es obligatorio. Error en fila " + fila + "del archivo.");
+            errores.add("El nombre es obligatorio. Error en fila " + fila + " del archivo.");
         }
 
         if(request.getPrimerApellido() == null || request.getPrimerApellido().trim().isEmpty()) {
-            errores.add("El primer apellido es obligatorio. Error en fila " + fila + "del archivo.");
+            errores.add("El primer apellido es obligatorio. Error en fila " + fila + " del archivo.");
         }
 
         if(request.getUsername() == null || request.getUsername().trim().isEmpty()) {
-            errores.add("El username es obligatorio. Error en fila " + fila + "del archivo.");
+            errores.add("El username es obligatorio. Error en fila " + fila + " del archivo.");
         } else if (usuarioRepository.existsByNombreUsuario(request.getUsername())) {
-            errores.add("El username ' " + request.getUsername() + "' ya está registrado. Error en fila " + fila + "del archivo.");
+            errores.add("El username ' " + request.getUsername() + "' ya está registrado. Error en fila " + fila + " del archivo.");
         }
 
         if(request.getPassword() == null || request.getPassword().trim().isEmpty()) {
-            errores.add("La contraseña es obligatoria. Error en fila " + fila + "del archivo.");
+            errores.add("La contraseña es obligatoria. Error en fila " + fila + " del archivo.");
         }
 
         if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
             if (usuarioRepository.existsByCorreoElectronico(request.getEmail())) {
-                errores.add("El email ' " + request.getEmail() + "' ya está registrado. Error en fila " + fila + "del archivo.");
+                errores.add("El email ' " + request.getEmail() + "' ya está registrado. Error en fila " + fila + " del archivo.");
             } else if(!request.getEmail().contains("@")) {
-                errores.add("El email ' " + request.getEmail() + "' no es válido. Error en fila " + fila + "del archivo.");
+                errores.add("El email ' " + request.getEmail() + "' no es válido. Error en fila " + fila + " del archivo.");
             }
         }
 
@@ -320,7 +320,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
             );
             
         } else {
-            errores.add("Rol inválido. Use: MAESTRO o ALUMNO. Error en fila " + fila + "del archivo.");
+            errores.add("Rol inválido. Use: MAESTRO o ALUMNO. Error en fila " + fila + " del archivo.");
         }
 
         if(!errores.isEmpty()) {
@@ -375,6 +375,10 @@ public class OrganizacionServiceImpl implements OrganizacionService {
             } else {
                 throw new IllegalArgumentException("Archivo no soportado. Solo se permiten archivos .csv, .xlsx o .xls");
             }
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedException(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(e.getMessage());
         } catch (Exception e) {
             throw new ServletException("Error al procesar el archivo de importación: " + e.getMessage(), e);
         }

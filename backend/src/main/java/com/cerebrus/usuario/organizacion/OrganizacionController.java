@@ -82,7 +82,7 @@ public class OrganizacionController {
         try {
             List<String> errores = organizacionService.leerArchivoImportacionUsuarios(archivo);
             if (!errores.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Errores encontrados en el archivo: " + String.join(", ", errores));
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Errores encontrados en el archivo, se han podido introducir los usuarios cuya fila en el archivo no haya tenido un error. Los errores son:: " + String.join(", ", errores));
             } else {
                 return ResponseEntity.ok("Archivo importado correctamente");
             }
@@ -90,6 +90,8 @@ public class OrganizacionController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (ServletException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error inesperado: " + e.getMessage());
         }
