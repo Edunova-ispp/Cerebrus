@@ -103,6 +103,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/respuestas-alumno-general/abierta").hasAuthority(ALUMNO)
                         .requestMatchers(HttpMethod.PUT, "/api/respuestas-alumno-general/update/{id}").hasAuthority(ALUMNO)
                         .requestMatchers(HttpMethod.DELETE, "/api/respuestas-alumno-general/delete/{id}").hasAuthority(ALUMNO)
+                        .requestMatchers(HttpMethod.GET, "/api/respuestas-alumno/mis-respuestas/{actividadId}").hasAuthority(ALUMNO)
                         .requestMatchers(HttpMethod.POST, "/api/inscripciones/inscribe").hasAuthority(ALUMNO)
                         .requestMatchers(HttpMethod.GET, "/api/ordenaciones/{id}").hasAuthority(ALUMNO)
                         .requestMatchers(HttpMethod.GET, "/api/generales/cartas/{id}").hasAuthority(ALUMNO)
