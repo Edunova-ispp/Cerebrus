@@ -258,15 +258,10 @@ public class OrganizacionServiceImpl implements OrganizacionService {
 
     private List<String> crearUsuarioImportacionMasiva(CreateUserRequest request, Integer fila) {
         List<String> errores = new ArrayList<>();
+        
         Usuario usuarioActual = usuarioService.findCurrentUser();
-        
-        if (!(usuarioActual instanceof Organizacion)) {
-            errores.add("Solo usuarios con rol ORGANIZACIÓN pueden crear nuevos usuarios. Error en fila " + fila + "del archivo.");
-        }
-        
         Organizacion organizacion = (Organizacion) usuarioActual;
                  
-
         String rolUpper = request.getRol().toUpperCase();
         if ("ORGANIZACION".equals(rolUpper)) {
             errores.add("No se puede crear usuarios con rol ORGANIZACIÓN. Error en fila " + fila + "del archivo.");
@@ -367,6 +362,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     public List<String> leerArchivoImportacionUsuarios(MultipartFile archivo) throws ServletException, IOException {
         List<String> errores = new ArrayList<>();
         InputStream inputStream = archivo.getInputStream();
+        Usuario usuarioActual = usuarioService.findCurrentUser();
+        
+        if (!(usuarioActual instanceof Organizacion)) {
+            throw new AccessDeniedException("Solo usuarios con rol ORGANIZACIÓN pueden crear nuevos usuarios.");
+        }
         try (inputStream) {
             if(archivo.getOriginalFilename().toLowerCase().endsWith(".csv")) {
                 errores = leerArchivoCSV(inputStream);
@@ -399,7 +399,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                         !campos.get(4).toLowerCase().replace(" ", "").equals("nombredeusuario") ||
                         !campos.get(5).toLowerCase().equals("contrasena") ||
                         !campos.get(6).toLowerCase().equals("rol"))) {
-                            throw new IllegalArgumentException("El archivo CSV no tiene el formato correcto. La primera fila debe contener los encabezados: Nombre, Primer Apellido, Segundo Apellido, Correo Electrónico, Nombre de Usuario, Contraseña, Rol");
+                            throw new IllegalArgumentException("El archivo CSV no tiene el formato correcto. La primera fila debe contener los encabezados: Nombre, Primer Apellido, Segundo Apellido, Correo Electronico, Nombre de Usuario, Contrasena, Rol");
                     } else if(numFila.equals(1)) {
                         continue; // Saltar la fila del encabezado
                     }
