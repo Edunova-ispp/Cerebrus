@@ -36,9 +36,9 @@ services:
       GOOGLE_API_KEY_3: ${GEMINI_API_KEY_3}
       GOOGLE_API_KEY_4: ${GEMINI_API_KEY_4}
       GOOGLE_API_KEY_5: ${GEMINI_API_KEY_5}
-      BREVO_API_KEY: ${BREVO_API_KEY}
-      BREVO_SENDER_EMAIL: ${BREVO_SENDER_EMAIL}
-      BREVO_SENDER_NAME: ${BREVO_SENDER_NAME}
+      brevo.api.key: $${brevo.api.key}
+      brevo.sender.email: $${brevo.sender.email}
+      brevo.sender.name: $${brevo.sender.name}
     depends_on:
       db:
         condition: service_healthy
