@@ -2,8 +2,15 @@ package com.cerebrus.usuario.organizacion;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Stream;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.cerebrus.exceptions.ResourceNotFoundException;
 
@@ -23,8 +31,13 @@ import com.cerebrus.usuario.UsuarioRepository;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
-import com.cerebrus.usuario.organizacion.dto.UsuarioActualizarDTO;
-import com.cerebrus.usuario.organizacion.dto.CreateUserRequest;
+import com.cerebrus.usuario.organizacion.DTO.UsuarioActualizarDTO;
+
+import jakarta.servlet.ServletException;
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.cerebrus.usuario.organizacion.DTO.CreateUserRequest;
 
 @Service
 @Transactional
@@ -243,6 +256,87 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         
     }
 
+    private List<String> crearUsuarioImportacionMasiva(CreateUserRequest request, Integer fila) {
+        List<String> errores = new ArrayList<>();
+        Usuario usuarioActual = usuarioService.findCurrentUser();
+        
+        if (!(usuarioActual instanceof Organizacion)) {
+            errores.add("Solo usuarios con rol ORGANIZACIÓN pueden crear nuevos usuarios. Error en fila " + fila + "del archivo.");
+        }
+        
+        Organizacion organizacion = (Organizacion) usuarioActual;
+                 
+
+        String rolUpper = request.getRol().toUpperCase();
+        if ("ORGANIZACION".equals(rolUpper)) {
+            errores.add("No se puede crear usuarios con rol ORGANIZACIÓN. Error en fila " + fila + "del archivo.");
+        }
+
+        if(request.getNombre() == null || request.getNombre().trim().isEmpty()) {
+            errores.add("El nombre es obligatorio. Error en fila " + fila + "del archivo.");
+        }
+
+        if(request.getPrimerApellido() == null || request.getPrimerApellido().trim().isEmpty()) {
+            errores.add("El primer apellido es obligatorio. Error en fila " + fila + "del archivo.");
+        }
+
+        if(request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+            errores.add("El username es obligatorio. Error en fila " + fila + "del archivo.");
+        } else if (usuarioRepository.existsByNombreUsuario(request.getUsername())) {
+            errores.add("El username ' " + request.getUsername() + "' ya está registrado. Error en fila " + fila + "del archivo.");
+        }
+
+        if(request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+            errores.add("La contraseña es obligatoria. Error en fila " + fila + "del archivo.");
+        }
+
+        if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
+            if (usuarioRepository.existsByCorreoElectronico(request.getEmail())) {
+                errores.add("El email ' " + request.getEmail() + "' ya está registrado. Error en fila " + fila + "del archivo.");
+            } else if(!request.getEmail().contains("@")) {
+                errores.add("El email ' " + request.getEmail() + "' no es válido. Error en fila " + fila + "del archivo.");
+            }
+        }
+
+        
+        Usuario nuevoUsuario = null;
+        
+        if ("MAESTRO".equals(rolUpper)) {
+            nuevoUsuario = new Maestro(
+                request.getNombre(),
+                request.getPrimerApellido(),
+                request.getSegundoApellido(),
+                request.getUsername(),
+                request.getEmail() != null ? request.getEmail() : "",
+                passwordEncoder.encode(request.getPassword()),
+                organizacion
+            );
+            
+        } else if ("ALUMNO".equals(rolUpper)) {
+            nuevoUsuario = new Alumno(
+                request.getNombre(),
+                request.getPrimerApellido(),
+                request.getSegundoApellido(),
+                request.getUsername(),
+                request.getEmail() != null ? request.getEmail() : "",
+                passwordEncoder.encode(request.getPassword()),
+                0,
+                organizacion
+            );
+            
+        } else {
+            errores.add("Rol inválido. Use: MAESTRO o ALUMNO. Error en fila " + fila + "del archivo.");
+        }
+
+        if(!errores.isEmpty()) {
+            return errores;
+        } else {
+            usuarioRepository.save(nuevoUsuario);
+            return errores;
+        }
+        
+    }
+
     private Maestro toSafeMaestro(Maestro original) {
         Maestro maestro = new Maestro();
         maestro.setId(original.getId());
@@ -266,6 +360,158 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         alumno.setContrasena(original.getContrasena());
         alumno.setPuntos(original.getPuntos());
         return alumno;
+    }
+
+    @Override
+    public List<String> leerArchivoImportacionUsuarios(MultipartFile archivo) throws ServletException, IOException {
+        List<String> errores = new ArrayList<>();
+        InputStream inputStream = archivo.getInputStream();
+        try (inputStream) {
+            if(archivo.getOriginalFilename().toLowerCase().endsWith(".csv")) {
+                errores = leerArchivoCSV(inputStream);
+            } else if (archivo.getOriginalFilename().toLowerCase().endsWith(".xlsx") || archivo.getOriginalFilename().toLowerCase().endsWith(".xls")) {
+                errores = leerArchivoExcel(inputStream, archivo.getOriginalFilename());
+            } else {
+                throw new IllegalArgumentException("Archivo no soportado. Solo se permiten archivos .csv, .xlsx o .xls");
+            }
+        } catch (Exception e) {
+            throw new ServletException("Error al procesar el archivo de importación: " + e.getMessage(), e);
+        }
+        return errores;
+    }
+
+    private List<String> leerArchivoCSV(InputStream inputStream) {
+        List<String> errores = new ArrayList<>();
+        Integer numFila = 0;
+        try (Scanner scanner = new Scanner(inputStream, "UTF-8")) {
+            while(scanner.hasNextLine()) {
+                if(numFila <= 600) {
+                    String linea = scanner.nextLine();
+                    numFila++;
+                    List<String> campos = Stream.of(linea.split(","))
+                            .map(String::trim)
+                            .toList();
+                    if (numFila.equals(1) && (!campos.get(0).toLowerCase().equals("nombre") || 
+                        !campos.get(1).toLowerCase().replace(" ", "").equals("primerapellido") || 
+                        !campos.get(2).toLowerCase().replace(" ", "").equals("segundoapellido") || 
+                        !campos.get(3).toLowerCase().replace(" ", "").equals("correoelectronico") || 
+                        !campos.get(4).toLowerCase().replace(" ", "").equals("nombredeusuario") ||
+                        !campos.get(5).toLowerCase().equals("contrasena") ||
+                        !campos.get(6).toLowerCase().equals("rol"))) {
+                            throw new IllegalArgumentException("El archivo CSV no tiene el formato correcto. La primera fila debe contener los encabezados: Nombre, Primer Apellido, Segundo Apellido, Correo Electrónico, Nombre de Usuario, Contraseña, Rol");
+                    } else if(numFila.equals(1)) {
+                        continue; // Saltar la fila del encabezado
+                    }
+                    String nombre = campos.get(0);
+                    String primerApellido = campos.get(1);
+                    String segundoApellido = campos.get(2);
+                    String correoElectronico = campos.get(3);
+                    String nombreUsuario = campos.get(4);
+                    String contrasena = campos.get(5);
+                    String rol = campos.get(6);
+                    CreateUserRequest request = new CreateUserRequest();
+                    request.setNombre(nombre);
+                    request.setPrimerApellido(primerApellido);
+                    request.setSegundoApellido(segundoApellido);
+                    request.setEmail(correoElectronico);
+                    request.setUsername(nombreUsuario);
+                    request.setPassword(contrasena);
+                    request.setRol(rol);
+                    errores.addAll(crearUsuarioImportacionMasiva(request, numFila));
+                } else {
+                    errores.add("El archivo CSV excede el límite de 600 filas. Se han procesado las primeras 600 filas.");
+                    break;
+                }
+            }
+        }
+        return errores;
+    }
+
+    private List<String> leerArchivoExcel(InputStream inputStream, String nombreArchivo) throws IOException{
+        List<String> errores = new ArrayList<>();
+        Workbook workbook = null;
+        try {
+            if (nombreArchivo.toLowerCase().endsWith(".xls")) {
+                workbook = new HSSFWorkbook(inputStream);  // Excel antiguo
+            } else if (nombreArchivo.toLowerCase().endsWith(".xlsx")) {
+                workbook = new XSSFWorkbook(inputStream);  // Excel moderno
+            } else {
+                throw new IllegalArgumentException("Formato de archivo no soportado: " + nombreArchivo);
+            }
+            Sheet sheet = workbook.getSheetAt(0); // Primera hoja
+            boolean esPrimeraFila = true;
+
+            for (Row row : sheet) {
+                if((row.getRowNum()+1) <= 600) {
+                    List<String> campos = new ArrayList<>();
+                    for (int i = 0; i <= 6; i++) { // Esperamos 7 columnas (0 a 6)
+                        Cell cell = row.getCell(i, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                        campos.add(obtenerCeldaComoTexto(cell).trim());
+                    }
+    
+                    // Validar encabezado en la primera fila
+                    if (esPrimeraFila) {
+                        boolean hayEncabezado = !campos.stream().anyMatch(c -> c.toLowerCase().equals("profesor") || c.toLowerCase().equals("alumno"));
+                        if (hayEncabezado) {
+                            if (!campos.get(0).equalsIgnoreCase("nombre") ||
+                                !campos.get(1).replace(" ", "").equalsIgnoreCase("primerapellido") ||
+                                !campos.get(2).replace(" ", "").equalsIgnoreCase("segundoapellido") ||
+                                !campos.get(3).replace(" ", "").equalsIgnoreCase("correoelectronico") ||
+                                !campos.get(4).replace(" ", "").equalsIgnoreCase("nombredeusuario") ||
+                                !campos.get(5).equalsIgnoreCase("contrasena") ||
+                                !campos.get(6).equalsIgnoreCase("rol")) {
+                                throw new IllegalArgumentException("El archivo Excel no tiene el formato correcto. La primera fila debe contener los encabezados: Nombre, Primer Apellido, Segundo Apellido, Correo Electrónico, Nombre de Usuario, Contraseña, Rol");
+                            }
+                            esPrimeraFila = false;
+                            continue; // Saltar fila encabezado
+                        } else {
+                            throw new IllegalArgumentException("El archivo Excel no tiene el formato correcto. La primera fila debe contener los encabezados: Nombre, Primer Apellido, Segundo Apellido, Correo Electrónico, Nombre de Usuario, Contraseña, Rol");
+                        }
+                    } else {
+                        // Procesar filas de datos
+                        String nombre = campos.get(0);
+                        String primerApellido = campos.get(1);
+                        String segundoApellido = campos.get(2);
+                        String correoElectronico = campos.get(3);
+                        String nombreUsuario = campos.get(4);
+                        String contrasena = campos.get(5);
+                        String rol = campos.get(6);
+    
+                        CreateUserRequest request = new CreateUserRequest();
+                        request.setNombre(nombre);
+                        request.setPrimerApellido(primerApellido);
+                        request.setSegundoApellido(segundoApellido);
+                        request.setEmail(correoElectronico);
+                        request.setUsername(nombreUsuario);
+                        request.setPassword(contrasena);
+                        request.setRol(rol);
+    
+                        errores.addAll(crearUsuarioImportacionMasiva(request, row.getRowNum() + 1));
+                    }
+                } else {
+                    errores.add("El archivo Excel excede el límite de 600 filas. Se han procesado las primeras 600 filas.");
+                    break;
+                }
+            }
+        } finally {
+            if (workbook != null) {
+                workbook.close();  // Cerrar para liberar recursos
+            }
+        }
+        return errores;
+    }
+
+    // Método auxiliar para obtener el valor de una celda como String
+    private String obtenerCeldaComoTexto(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+        return switch (cell.getCellType()) {
+            case STRING -> cell.getStringCellValue();
+            case NUMERIC -> String.valueOf(cell.getNumericCellValue());
+            case BLANK -> "";
+            default -> "";
+        };
     }
 }
 

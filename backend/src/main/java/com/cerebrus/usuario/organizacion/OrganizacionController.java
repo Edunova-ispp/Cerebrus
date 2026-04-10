@@ -1,5 +1,7 @@
 package com.cerebrus.usuario.organizacion;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -11,11 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
-import com.cerebrus.usuario.organizacion.dto.CreateUserRequest;
-import com.cerebrus.usuario.organizacion.dto.UsuarioActualizarDTO;
+import com.cerebrus.usuario.organizacion.DTO.CreateUserRequest;
+import com.cerebrus.usuario.organizacion.DTO.UsuarioActualizarDTO;
 
 import jakarta.validation.Valid;
 
@@ -69,6 +73,20 @@ public class OrganizacionController {
                     .status(HttpStatus.CREATED)
                     .body("Usuario creado correctamente");
         
+    }
+
+    @PostMapping("/importar-usuarios")
+    public ResponseEntity<String> importarUsuarios(@RequestParam("archivo") MultipartFile archivo) {
+        try {
+            List<String> errores = organizacionService.leerArchivoImportacionUsuarios(archivo);
+            if (!errores.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Errores encontrados en el archivo: " + String.join(", ", errores));
+            } else {
+                return ResponseEntity.ok("Archivo importado correctamente");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al importar el archivo: " + e.getMessage());
+        }
     }
 }
 

@@ -121,14 +121,25 @@
       <version>4.27.0</version>
       <scope>test</scope>
     </dependency>
-<!-- BRevo api email -->
+
+    <!-- BRevo api email -->
     <dependency>
     <groupId>com.sendinblue</groupId>
     <artifactId>sib-api-v3-sdk</artifactId>
     <version>7.0.0</version>
-</dependency>
+    </dependency>
 
-
+    <!-- Apache POI para manejo de archivos Excel -->
+    <dependency>
+        <groupId>org.apache.poi</groupId>
+        <artifactId>poi</artifactId>
+        <version>5.2.3</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.poi</groupId>
+        <artifactId>poi-ooxml</artifactId>
+        <version>5.2.3</version>
+    </dependency>
   </dependencies>
 
   <build>

@@ -1,4 +1,4 @@
-package com.cerebrus.usuario.organizacion.dto;
+package com.cerebrus.usuario.organizacion.DTO;
 
 public class UsuarioActualizarDTO {
 
