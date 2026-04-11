@@ -25,37 +25,46 @@ public class UserDetailsImpl implements UserDetails {
 
     @JsonIgnore
     private String password;
+    
+    private boolean enabled;
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(Long id, String username, String password,
-            Collection<? extends GrantedAuthority> authorities) {
+    public UserDetailsImpl(Long id, String username, String password, 
+        boolean enabled, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.authorities = authorities;
+        this.enabled = enabled;
     }
 
     public static UserDetailsImpl build(Usuario user) {
-        
-        String nombreRol = "USUARIO"; 
+        String nombreRol = "USUARIO";
+        boolean verificado = true;
 
-        if (user instanceof Alumno) {
+        if (user instanceof Organizacion) {
+            nombreRol = "ORGANIZACION";
+            verificado = ((Organizacion) user).getEmailConfirmado();
+        } else if (user instanceof Alumno) {
             nombreRol = "ALUMNO";
         } else if (user instanceof Maestro) {
             nombreRol = "MAESTRO";
-        } else if (user instanceof Organizacion) {
-            nombreRol = "ORGANIZACION";
         }
-
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(nombreRol));
 
         return new UserDetailsImpl(
-                user.getId(), 
+                user.getId(),
                 user.getNombreUsuario(),
                 user.getContrasena(),
-                authorities
+                verificado,
+                List.of(new SimpleGrantedAuthority(nombreRol))
         );
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.enabled; // Ya no es 'true' fijo, es lo que extrajimos del usuario
     }
 
     @Override
@@ -89,11 +98,6 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
         return true;
     }
 
