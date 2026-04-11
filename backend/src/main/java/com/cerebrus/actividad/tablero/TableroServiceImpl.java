@@ -234,7 +234,7 @@ public class TableroServiceImpl implements TableroService {
             Boolean correcta = pregunta.getRespuestasMaestro().get(0).getRespuesta().toLowerCase().strip().equals(cleanedRespuesta.toLowerCase().strip());
             
             ActividadAlumno actividadAlumno = actividadAlumnoService.crearActAlumno(0, LocalDateTime.now(), null, 0, 0, alumno.getId(), tablero.getId());
-            if(actividadAlumno.getRespuestasAlumno().stream().filter(a -> a.getCorrecta()).count()%8  == 0) {
+            if((tablero.getTamano().equals(TamanoTablero.TRES_X_TRES) && actividadAlumno.getRespuestasAlumno().stream().filter(a -> a.getCorrecta()).count()%8  == 0) || ((tablero.getTamano().equals(TamanoTablero.CUATRO_X_CUATRO) && actividadAlumno.getRespuestasAlumno().stream().filter(a -> a.getCorrecta()).count()%15  == 0))) {
                 actividadAlumno.getRespuestasAlumno().clear();
             }
             

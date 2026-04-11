@@ -1,12 +1,14 @@
 package com.cerebrus.tableroTest;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +19,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.cerebrus.actividad.ActividadRepository;
-import com.cerebrus.actividad.tablero.*;
+import com.cerebrus.actividad.tablero.Tablero;
+import com.cerebrus.actividad.tablero.TableroRepository;
+import com.cerebrus.actividad.tablero.TableroServiceImpl;
 import com.cerebrus.actividad.tablero.dto.TableroDTO;
 import com.cerebrus.actividad.tablero.dto.TableroRequest;
 import com.cerebrus.actividadAlumn.ActividadAlumno;
@@ -496,28 +500,40 @@ public class TableroServiceImplTest {
 	@Test
 	void crearRespuestaAPreguntaTablero_notaPuntuacionMinima() {
 		Alumno alumno = mock(Alumno.class);
+		// 4 preguntas: p1, p2, p3, pregunta
+		Pregunta p1 = buildPreguntaWithRespuestaMaestro(3L, "resp1");
+		Pregunta p2 = buildPreguntaWithRespuestaMaestro(4L, "resp2");
+		Pregunta p3 = buildPreguntaWithRespuestaMaestro(5L, "resp3");
 		Pregunta pregunta = buildPreguntaWithRespuestaMaestro(2L, "respuesta");
-		// 4 preguntas, last is 'pregunta'
-		Pregunta p1 = mock(Pregunta.class);
-		Pregunta p2 = mock(Pregunta.class);
-		Pregunta p3 = mock(Pregunta.class);
 		List<Pregunta> preguntas = new ArrayList<>(List.of(p1, p2, p3, pregunta));
+		
 		Tablero tablero = buildTableroWithAlumno(alumno, pregunta, true, true, true, 1, true);
 		when(tablero.getPreguntas()).thenReturn(preguntas);
 		when(tableroRepository.findById(1L)).thenReturn(Optional.of(tablero));
 		when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
+		when(preguntaRepository.findById(3L)).thenReturn(Optional.of(p1));
+		when(preguntaRepository.findById(4L)).thenReturn(Optional.of(p2));
+		when(preguntaRepository.findById(5L)).thenReturn(Optional.of(p3));
 		when(usuarioService.findCurrentUser()).thenReturn(alumno);
 		when(pregunta.getActividad()).thenReturn(tablero);
+		when(p1.getActividad()).thenReturn(tablero);
+		when(p2.getActividad()).thenReturn(tablero);
+		when(p3.getActividad()).thenReturn(tablero);
+		
 		ActividadAlumno actividadAlumno = mock(ActividadAlumno.class);
 		List<RespuestaAlumno> respuestasAlumno = new ArrayList<>();
-		RespuestaAlumno respIncorrecta = mock(RespuestaAlumno.class);
-		when(respIncorrecta.getCorrecta()).thenReturn(false);
-		respuestasAlumno.add(respIncorrecta);
 		when(actividadAlumno.getRespuestasAlumno()).thenReturn(respuestasAlumno);
 		when(actividadAlumnoService.crearActAlumno(anyInt(), any(), any(), anyInt(), anyInt(), anyLong(), anyLong())).thenReturn(actividadAlumno);
+		
+		// Responder correctamente a las 3 primeras preguntas
+		tableroService.crearRespuestaAPreguntaEnActTablero("resp1", 1L, 3L);
+		tableroService.crearRespuestaAPreguntaEnActTablero("resp2", 1L, 4L);
+		tableroService.crearRespuestaAPreguntaEnActTablero("resp3", 1L, 5L);
+		
+		// La 4ª respuesta completa el tablero, se debe llamar setNota()
 		String result = tableroService.crearRespuestaAPreguntaEnActTablero("respuesta", 1L, 2L);
-		verify(actividadAlumno).setNota(10); // The service sets the nota to the tablero's puntuacion (10)
-		verify(actividadAlumno).setPuntuacion(1);
+		verify(actividadAlumno).setNota(10); // 10 - (0 errores * descuento) = 10
+		verify(actividadAlumno).setPuntuacion(1); // 1 - (0 errores * descuento) = 1
 		assertThat(result).contains("Respuesta correcta");
 	}
 
@@ -563,6 +579,7 @@ public class TableroServiceImplTest {
 		}
 		lenient().when(tablero.getRespVisible()).thenReturn(respVisible);
 		lenient().when(tablero.getPuntuacion()).thenReturn(puntuacion);
+		lenient().when(tablero.getTamano()).thenReturn(TamanoTablero.TRES_X_TRES);
 		return tablero;
 	}
 
