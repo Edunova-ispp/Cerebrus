@@ -40,9 +40,7 @@
   letter-spacing: 1px;
 }
 
-/* ══════════════════════════════════════════════════════════
-   LAYOUT: precios  +  formulario  (dos columnas)
-   ══════════════════════════════════════════════════════════ */
+/* ── Layout dos columnas (precios + form) ───────────────── */
 
 .sub-layout {
   display: grid;
@@ -53,9 +51,7 @@
 }
 
 @media (max-width: 640px) {
-  .sub-layout {
-    grid-template-columns: 1fr;
-  }
+  .sub-layout { grid-template-columns: 1fr; }
 }
 
 /* ── Precios sidebar ────────────────────────────────────── */
@@ -102,7 +98,7 @@
 .sub-precios__tier-price span {
   color: #000638;
   font-weight: normal;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .sub-precios__disclaimer {
@@ -113,7 +109,7 @@
   padding-top: 8px;
 }
 
-/* ── Card base (shared between activa & formulario) ─────── */
+/* ── Card base ──────────────────────────────────────────── */
 
 .sub-card {
   background: #fff8c9;
@@ -136,6 +132,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .sub-active__badge {
@@ -213,7 +210,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════
-   ESCENARIO B – Formulario (sin suscripción)
+   ESCENARIO B – Formulario
    ══════════════════════════════════════════════════════════ */
 
 .sub-form__title {
@@ -228,8 +225,6 @@
   color: #555;
   margin: 0;
 }
-
-/* ── Form fields ────────────────────────────────────────── */
 
 .sub-form {
   display: flex;
@@ -276,215 +271,6 @@
   transform: translate(2px, 2px);
 }
 
-/* ── Calcular precio button ─────────────────────────────── */
-
-.sub-form__btn-calcular {
-  background: #FFF394;
-  color: #000;
-  border: 2px solid #000;
-  border-radius: 12px;
-  padding: 12px 20px;
-  font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.3rem;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 4px 4px 0 #D6BD00;
-  transition: background 0.12s, transform 0.1s, box-shadow 0.1s;
-  margin-top: 4px;
-  width: 100%;
-}
-
-.sub-form__btn-calcular:hover:not(:disabled) {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 #D6BD00;
-}
-
-.sub-form__btn-calcular:disabled {
-  opacity: 0.45;
-  cursor: default;
-  box-shadow: none;
-  transform: none;
-}
-
-/* ── Resumen / precio calculado ─────────────────────────── */
-
-.sub-resumen {
-  background: #e9ffe6;
-  border: 2px solid #000;
-  border-radius: 12px;
-  padding: 16px 18px;
-  box-shadow: 4px 4px 0 #000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.sub-resumen__title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #000638;
-  margin: 0;
-  border-bottom: 2px dashed #000;
-  padding-bottom: 6px;
-}
-
-.sub-resumen__row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 1rem;
-  color: #000638;
-}
-
-.sub-resumen__row strong {
-  font-weight: bold;
-}
-
-.sub-resumen__divider {
-  border: none;
-  border-top: 2px solid #000;
-  margin: 4px 0;
-}
-
-.sub-resumen__price-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.sub-resumen__price-label {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #000638;
-}
-
-.sub-resumen__price-amount {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #D10057;
-  text-shadow: 3px 3px 0 rgba(209,0,87,0.15);
-}
-
-.sub-resumen__price-period {
-  font-size: 0.85rem;
-  color: #555;
-  font-weight: normal;
-}
-
-/* ── Proceder al pago button ────────────────────────────── */
-
-.sub-btn-pago {
-  background: #D10057;
-  color: #fff;
-  border: 2px solid #000;
-  border-radius: 12px;
-  padding: 13px 20px;
-  font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.3rem;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 4px 4px 0 #000;
-  transition: background 0.12s, transform 0.1s, box-shadow 0.1s;
-  width: 100%;
-  text-align: center;
-  -webkit-text-stroke: 0.5px #000;
-}
-
-.sub-btn-pago:hover {
-  background: #a8003f;
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 #000;
-}
-
-/* ── Ir a pasarela (alias for the golden variant) ───────── */
-
-.sub-btn-pasarela {
-  background: #FFF394;
-  color: #000;
-  border: 2px solid #000;
-  border-radius: 12px;
-  padding: 13px 20px;
-  font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.3rem;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 4px 4px 0 #D6BD00;
-  transition: background 0.12s, transform 0.1s, box-shadow 0.1s;
-  width: 100%;
-  text-align: center;
-}
-
-.sub-btn-pasarela:hover {
-  background: #ffe62b;
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 #D6BD00;
-}
-
-/* ── Prueba gratuita CTA ────────────────────────────────── */
-
-.sub-cta-free {
-  background: #FFF394;
-  border: 3px solid #000;
-  border-radius: 16px;
-  padding: 18px 24px;
-  box-shadow: 6px 6px 0 #000;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  width: 100%;
-  transition: transform 0.1s, box-shadow 0.1s;
-}
-
-.sub-cta-free:hover {
-  transform: translate(3px, 3px);
-  box-shadow: 2px 2px 0 #000;
-}
-
-.sub-cta-free__text {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #000638;
-  margin: 0;
-  line-height: 1.3;
-}
-
-.sub-cta-free__emoji {
-  font-size: 2rem;
-  flex-shrink: 0;
-}
-
-/* ── Loading / error states ─────────────────────────────── */
-
-.sub-loading {
-  font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.4rem;
-  color: #000638;
-  text-align: center;
-  padding: 3rem;
-  animation: sub-pulse 1.2s ease-in-out infinite;
-}
-
-@keyframes sub-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.45; }
-}
-
-.sub-error {
-  font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.1rem;
-  color: #c0392b;
-  background: #fff0f0;
-  border: 2px solid #c0392b;
-  border-radius: 10px;
-  padding: 16px 20px;
-  text-align: center;
-  box-shadow: 3px 3px 0 #c0392b;
-}
-
-/* ── Validation error styles ────────────────────────────── */
-
 .sub-form__input--error {
   border-color: #D10057;
   background: #fff0f5;
@@ -508,6 +294,110 @@
   box-shadow: 2px 2px 0 #D10057;
 }
 
+.sub-form__btn-calcular {
+  background: #FFF394;
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #D6BD00;
+  transition: background 0.12s, transform 0.1s, box-shadow 0.1s;
+  margin-top: 4px;
+  width: 100%;
+}
+
+.sub-form__btn-calcular:hover:not(:disabled) {
+  background: #ffe62b;
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #D6BD00;
+}
+
+.sub-form__btn-calcular:disabled {
+  opacity: 0.45;
+  cursor: default;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ══════════════════════════════════════════════════════════
+   PANTALLA 2 – Resumen suscripción
+   ══════════════════════════════════════════════════════════ */
+
+.rsm-card {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.rsm-org-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #D10057;
+  margin: 0;
+  text-align: center;
+  border-bottom: 2px dashed #D10057;
+  padding-bottom: 10px;
+}
+
+.rsm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 24px;
+}
+
+@media (max-width: 480px) {
+  .rsm-grid { grid-template-columns: 1fr; }
+}
+
+.rsm-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rsm-item__label {
+  font-size: 0.78rem;
+  font-weight: bold;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rsm-item__value {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #000638;
+}
+
+.rsm-precio-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.rsm-precio-total__label {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #000638;
+}
+
+.rsm-precio-total__amount {
+  font-size: 2.6rem;
+  font-weight: bold;
+  color: #D10057;
+  text-shadow: 3px 3px 0 rgba(209,0,87,0.15);
+}
+
+.rsm-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .sub-resumen__mensaje {
   font-size: 0.9rem;
   color: #555;
@@ -515,5 +405,93 @@
   border: 1.5px dashed #bbb;
   border-radius: 8px;
   padding: 8px 12px;
+  margin: 0;
+}
+
+/* ── Botones compartidos ─────────────────────────────────── */
+
+.sub-btn-pago {
+  flex: 1;
+  background: #D10057;
+  color: #fff;
+  border: 2px solid #000;
+  border-radius: 12px;
+  padding: 13px 20px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #000;
+  transition: background 0.12s, transform 0.1s, box-shadow 0.1s;
+  text-align: center;
+}
+
+.sub-btn-pago:hover:not(:disabled) {
+  background: #a8003f;
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+.sub-btn-pago:disabled {
+  opacity: 0.45;
+  cursor: default;
+  box-shadow: none;
+  transform: none;
+}
+
+.sub-btn-secondary {
+  flex: 0 0 auto;
+  background: #fff8c9;
+  color: #000638;
+  border: 2px solid #000;
+  border-radius: 12px;
+  padding: 13px 18px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #000;
+  transition: background 0.12s, transform 0.1s, box-shadow 0.1s;
+}
+
+.sub-btn-secondary:hover:not(:disabled) {
+  background: #FFF394;
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+.sub-btn-secondary:disabled {
+  opacity: 0.45;
+  cursor: default;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ── Loading / error ────────────────────────────────────── */
+
+.sub-loading {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.4rem;
+  color: #000638;
+  text-align: center;
+  padding: 3rem;
+  animation: sub-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes sub-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+.sub-error {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1rem;
+  color: #c0392b;
+  background: #fff0f0;
+  border: 2px solid #c0392b;
+  border-radius: 10px;
+  padding: 12px 16px;
+  text-align: center;
+  box-shadow: 3px 3px 0 #c0392b;
   margin: 0;
 }
