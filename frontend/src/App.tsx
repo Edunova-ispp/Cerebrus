@@ -98,16 +98,6 @@ function App() {
       <Route path="/infoAlumnos"   element={<InfoPage userType="alumno" />} />
       <Route path="/infoProfesores" element={<InfoPage userType="profesor" />} />
       <Route path="/infoDueños"    element={<InfoPage userType="dueno" />} />
-        {/* Rutas públicas */}
-        <Route path="/terminos" element={<TermsPage />} />
-        <Route path="/deploy_testing" element={<DeployTesting />} />
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/auth/login"     element={<LoginPage />} />
-        <Route path="/auth/register"  element={<RegisterPage />} />
-        <Route path="/auth/logout"    element={<LogoutPage />} />
-        <Route path="/infoAlumnos"    element={<InfoPage userType="alumno" />} />
-        <Route path="/infoProfesores" element={<InfoPage userType="profesor" />} />
-        <Route path="/infoDueños"     element={<InfoPage userType="dueno" />} />
 
         {/* Rutas comunes (varios roles) */}
         <Route path="/misCursos" element={
@@ -117,7 +107,7 @@ function App() {
           <ProtectedRoute allowedRoles={['ALUMNO', 'MAESTRO', 'DUENO']}><DetalleCurso /></ProtectedRoute>
         } />
         <Route path="/perfil" element={
-          <ProtectedRoute allowedRoles={['ALUMNO', 'MAESTRO', 'DUENO']}><Perfil /></ProtectedRoute>
+          <ProtectedRoute allowedRoles={['ALUMNO', 'MAESTRO', 'DUENO', 'ORGANIZACION']}><Perfil /></ProtectedRoute>
         } />
 
         {/* Rutas alumnos */}
@@ -200,11 +190,11 @@ function App() {
         } />
 
         {/* Rutas organización (solo DUENO) */}
-        <Route path="/organizacion/subscripcion" element={
-          <ProtectedRoute allowedRoles={['DUENO']}><Subscripcion /></ProtectedRoute>
+        <Route path="suscripcion" element={
+          <ProtectedRoute allowedRoles={['DUENO', 'ORGANIZACION']}><Subscripcion /></ProtectedRoute>
         } />
         <Route path="/resumen-suscripcion" element={
-          <ProtectedRoute allowedRoles={['DUENO']}><ResumenSuscripcion /></ProtectedRoute>
+          <ProtectedRoute allowedRoles={['DUENO', 'ORGANIZACION']}><ResumenSuscripcion /></ProtectedRoute>
         } />
 
       </Routes>
