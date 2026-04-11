@@ -34,6 +34,7 @@ import EstadisticasTema from "./pages/estadisticasCurso/EstadisticasTema.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import PreguntaAbiertaAlumno from "./pages/preguntaAbiertaAlumno/PreguntaAbiertaAlumno.tsx";
 import TermsPage from "./pages/legal/TermsPage.tsx";
+import EdunovaPage from "./pages/edunova/EdunovaPage.tsx";
 
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
 class WatchbugErrorBoundary extends Component<
@@ -89,6 +90,7 @@ function App() {
       <Route path="/terminos" element={<TermsPage />} />
       <Route path="/deploy_testing" element={<DeployTesting />} />
       <Route path="/" element={<LandingPage />} />
+      <Route path="/edunova" element={<EdunovaPage />} />
       <Route path="/auth/login"    element={<LoginPage />} />
       <Route path="/auth/register"    element={<RegisterPage />} />
       <Route path="/auth/logout"    element={<LogoutPage />} />

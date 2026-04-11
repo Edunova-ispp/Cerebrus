@@ -1,20 +1,24 @@
 package com.cerebrus.exceptions;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import jakarta.validation.ConstraintViolationException;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+
+import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -228,6 +232,51 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(body);
     }
+
+            /**
+             * Maneja parámetros de request obligatorios ausentes
+             * Retorna 400 Bad Request
+             */
+            @ExceptionHandler(MissingServletRequestParameterException.class)
+            public ResponseEntity<?> handleMissingServletRequestParameter(
+                MissingServletRequestParameterException ex,
+                WebRequest request) {
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("status", HttpStatus.BAD_REQUEST.value());
+            body.put("mensaje", "Faltan parámetros obligatorios en la petición");
+
+            Map<String, String> errores = new HashMap<>();
+            errores.put(ex.getParameterName(), "Parámetro obligatorio ausente");
+            body.put("errores", errores);
+
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(body);
+            }
+
+            /**
+             * Maneja parámetros con tipo inválido (ej: maestroId=abc)
+             * Retorna 400 Bad Request
+             */
+            @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+            public ResponseEntity<?> handleMethodArgumentTypeMismatch(
+                MethodArgumentTypeMismatchException ex,
+                WebRequest request) {
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("status", HttpStatus.BAD_REQUEST.value());
+            body.put("mensaje", "Formato de parámetro inválido");
+
+            Map<String, String> errores = new HashMap<>();
+            String targetType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "tipo esperado";
+            errores.put(ex.getName(), "Valor inválido. Se esperaba: " + targetType);
+            body.put("errores", errores);
+
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(body);
+            }
 
     /**
      * Maneja excepciones generales
