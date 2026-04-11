@@ -119,9 +119,6 @@ class IaConnectionControllerTest {
         request.setTipoActividad("TIPO_INVALIDO");
         request.setPrompt("Prompt");
 
-        when(iaConnectionService.generarMockActividad(any(), any()))
-                .thenThrow(new IllegalArgumentException("Tipo de actividad no soportado"));
-
         // Act
         ResponseEntity<String> response = iaConnectionController.generarMockActividad(request);
 
@@ -309,11 +306,7 @@ class IaConnectionControllerTest {
             ResponseEntity<String> response = iaConnectionController.generarMockActividad(request);
 
             // Assert
-            if (tipo.equals("IMAGEN")) {
-                assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-            } else {
-                assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-            }
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         }
     }
 
@@ -379,7 +372,7 @@ class IaConnectionControllerTest {
     void generarActividad_respuestaCompleja_preservaFormato() {
         // Arrange
         IaConnectionController.GenerarActividadRequest request = new IaConnectionController.GenerarActividadRequest();
-        request.setTipoActividad("ORDER");
+        request.setTipoActividad("ORDEN");
         request.setPrompt("Generar órden");
 
         String json = "{\"tipo\": \"ORDEN\", \"titulo\": \"Título\", \"descripcion\": \"Desc\", \"valores\": [{\"texto\": \"Elemento\", \"orden\": 1}]}";
@@ -432,10 +425,12 @@ class IaConnectionControllerTest {
 
     @Test
     void generarMockActividad_requestNull_lanzaException() {
-        // Act & Assert
-        assertThatThrownBy(() -> iaConnectionController.generarMockActividad(null))
-                .isInstanceOf(NullPointerException.class);
+        // Act
+        ResponseEntity<String> response = iaConnectionController.generarMockActividad(null);
 
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNull();
         verifyNoInteractions(iaConnectionService);
     }
 
