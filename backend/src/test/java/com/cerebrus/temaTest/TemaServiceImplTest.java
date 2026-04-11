@@ -1,21 +1,20 @@
 package com.cerebrus.temaTest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -29,6 +28,7 @@ import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.tema.TemaServiceImpl;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
 import com.cerebrus.usuario.maestro.MaestroRepository;
 
@@ -223,6 +223,45 @@ class TemaServiceImplTest {
         assertThatThrownBy(() -> temaService.encontrarTemaPorId(999L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Tema no encontrado con ID: 999");
+    }
+
+    @Test
+    void encontrarTemaPorId_usuarioNoAlumnoNiMaestro_lanzaAccessDeniedException() {
+        when(usuarioService.findCurrentUser()).thenReturn(usuarioNoMaestro);
+        when(temaRepository.findById(100L)).thenReturn(Optional.of(tema));
+
+        assertThatThrownBy(() -> temaService.encontrarTemaPorId(100L))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Solo un usuario logueado como alumno o maestro puede obtener un tema");
+    }
+
+    @Test
+    void encontrarTemaPorId_alumnoNoInscrito_lanzaAccessDeniedException() {
+        Alumno alumnoNoInscrito = new Alumno();
+        alumnoNoInscrito.setId(4L);
+        curso.setInscripciones(new ArrayList<>());
+
+        when(usuarioService.findCurrentUser()).thenReturn(alumnoNoInscrito);
+        when(temaRepository.findById(100L)).thenReturn(Optional.of(tema));
+
+        assertThatThrownBy(() -> temaService.encontrarTemaPorId(100L))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Solo alguien perteneciente al curso puede acceder a este tema");
+    }
+
+    @Test
+    void encontrarTemasPorCursoMaestroId_maestroNoPropietario_lanzaAccessDeniedException() {
+        Curso cursoDeOtroMaestro = new Curso();
+        cursoDeOtroMaestro.setId(10L);
+        cursoDeOtroMaestro.setMaestro(otroMaestro);
+
+        when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        when(temaRepository.findByCursoId(10L)).thenReturn(List.of(tema));
+        when(cursoService.encontrarCursoPorId(10L)).thenReturn(cursoDeOtroMaestro);
+
+        assertThatThrownBy(() -> temaService.encontrarTemasPorCursoMaestroId(10L))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("El maestro no es propietario del curso.");
     }
 
     @Test
