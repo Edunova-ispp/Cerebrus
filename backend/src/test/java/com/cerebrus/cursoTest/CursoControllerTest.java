@@ -3,6 +3,8 @@ package com.cerebrus.cursoTest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -350,16 +352,93 @@ class CursoControllerTest {
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
-    // Test para verificar que actualizarCurso retorna 500 cuando el service lanza una RuntimeException inesperada
+    // -------------------------------------------------------
+    // DELETE /{id} - eliminarCursoPorId
+    // -------------------------------------------------------
+
+    // Test para verificar que eliminarCursoPorId retorna 204 NO CONTENT cuando el maestro es propietario
     @Test
-    void actualizarCurso_errorInesperado_retorna500() {
-        when(cursoService.actualizarCurso(anyLong(), any(), any(), any()))
-                .thenThrow(new RuntimeException("Error interno"));
+    void eliminarCursoPorId_maestroPropietario_retorna204() {
+        doNothing().when(cursoService).eliminarCursoPorId(10L);
 
-        CursoController.ActualizarCursoRequest request = new CursoController.ActualizarCursoRequest();
-        request.setTitulo("Título");
+        ResponseEntity<Void> respuesta = cursoController.eliminarCursoPorId(10L);
 
-        ResponseEntity<Curso> respuesta = cursoController.actualizarCurso(10L, request);
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        verify(cursoService).eliminarCursoPorId(10L);
+    }
+
+    // Test para verificar que eliminarCursoPorId retorna 403 cuando el service lanza AccessDeniedException
+    @Test
+    void eliminarCursoPorId_accesoNoPermitido_retorna403() {
+        doThrow(new AccessDeniedException("Solo un maestro puede eliminar cursos")).when(cursoService).eliminarCursoPorId(10L);
+
+        ResponseEntity<Void> respuesta = cursoController.eliminarCursoPorId(10L);
+
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    // Test para verificar que eliminarCursoPorId retorna 404 cuando el service lanza RuntimeException con mensaje 404
+    @Test
+    void eliminarCursoPorId_cursoNoExiste_retorna404() {
+        doThrow(new RuntimeException("404 Not Found")).when(cursoService).eliminarCursoPorId(99L);
+
+        ResponseEntity<Void> respuesta = cursoController.eliminarCursoPorId(99L);
+
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    // Test para verificar que eliminarCursoPorId retorna 500 cuando el service lanza una RuntimeException inesperada
+    @Test
+    void eliminarCursoPorId_errorInesperado_retorna500() {
+        doThrow(new RuntimeException("Error interno")).when(cursoService).eliminarCursoPorId(10L);
+
+        ResponseEntity<Void> respuesta = cursoController.eliminarCursoPorId(10L);
+
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // -------------------------------------------------------
+    // GET /{id}/NotasMedias - obtenerNotaMediaPorActividadPorCursoId
+    // -------------------------------------------------------
+
+    // Test para verificar que obtenerNotaMediaPorActividadPorCursoId retorna 200 OK con la lista de notas medias
+    @Test
+    void obtenerNotaMediaPorActividadPorCursoId_maestroPropietario_retorna200ConNotas() {
+        List<Integer> notas = List.of(8, 7, 9);
+        when(cursoService.obtenerNotaMediaPorActividadPorCursoId(10L)).thenReturn(notas);
+
+        ResponseEntity<List<Integer>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
+
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(respuesta.getBody()).containsExactly(8, 7, 9);
+    }
+
+    // Test para verificar que obtenerNotaMediaPorActividadPorCursoId retorna 403 cuando el service lanza RuntimeException con mensaje 403
+    @Test
+    void obtenerNotaMediaPorActividadPorCursoId_accesoNoPermitido_retorna403() {
+        when(cursoService.obtenerNotaMediaPorActividadPorCursoId(10L)).thenThrow(new RuntimeException("403 Forbidden"));
+
+        ResponseEntity<List<Integer>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
+
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    // Test para verificar que obtenerNotaMediaPorActividadPorCursoId retorna 404 cuando el service lanza RuntimeException con mensaje 404
+    @Test
+    void obtenerNotaMediaPorActividadPorCursoId_cursoNoExiste_retorna404() {
+        when(cursoService.obtenerNotaMediaPorActividadPorCursoId(99L)).thenThrow(new RuntimeException("404 Not Found"));
+
+        ResponseEntity<List<Integer>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(99L);
+
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    // Test para verificar que obtenerNotaMediaPorActividadPorCursoId retorna 500 cuando el service lanza una RuntimeException inesperada
+    @Test
+    void obtenerNotaMediaPorActividadPorCursoId_errorInesperado_retorna500() {
+        when(cursoService.obtenerNotaMediaPorActividadPorCursoId(10L)).thenThrow(new RuntimeException("Error interno"));
+
+        ResponseEntity<List<Integer>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
