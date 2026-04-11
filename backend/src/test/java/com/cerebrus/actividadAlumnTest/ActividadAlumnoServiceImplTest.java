@@ -514,6 +514,32 @@ class ActividadAlumnoServiceImplTest {
     }
 
     @Test
+    void corregirActAlumnoAutomaticamente_tipoTest_multiplesCorrectas_conSeleccionParcial_noPuntuaCompleta() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        General actividadGeneral = crearActividadGeneral(TipoActGeneral.TEST, 100, 1);
+        actividadAlumno.setActividad(actividadGeneral);
+
+        Pregunta pregunta1 = actividadGeneral.getPreguntas().get(0);
+        pregunta1.setRespuestasMaestro(List.of(
+            crearRespuestaMaestro("opcion_a", true),
+            crearRespuestaMaestro("opcion_b", true),
+            crearRespuestaMaestro("opcion_c", false)
+        ));
+
+        // El alumno selecciona solo una de las dos correctas.
+        RespAlumnoGeneral resp1 = crearRespAlumnoGeneral(101L, pregunta1, "opcion_a");
+
+        when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
+        when(respuestaAlumnoService.encontrarRespuestaAlumnoPorId(101L)).thenReturn(resp1);
+        when(actividadAlumnoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ActividadAlumno resultado = service.corregirActAlumnoAutomaticamente(10L, List.of(101L));
+
+        assertThat(resultado.getPuntuacion()).isEqualTo(0);
+        assertThat(resultado.getNota()).isEqualTo(0);
+    }
+
+    @Test
     void corregirActAlumnoAutomaticamente_tipoTeoria_notaMaximaYPuntuacionBase() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         General actividadGeneral = crearActividadGeneral(TipoActGeneral.TEORIA, 100, 1);

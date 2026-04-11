@@ -306,21 +306,28 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         }
 
         for (Pregunta pregunta : actividadGeneral.getPreguntas()) {
-            Set<String> correctasEsperadas = pregunta.getRespuestasMaestro().stream()
+            List<String> correctasEsperadas = pregunta.getRespuestasMaestro().stream()
                 .filter(r -> Boolean.TRUE.equals(r.getCorrecta()))
                 .map(r -> r.getRespuesta() == null ? "" : r.getRespuesta().strip().toLowerCase())
-                .collect(java.util.stream.Collectors.toSet());
+                .toList();
 
-            Set<String> seleccionadasAlumno = respuestasPorPregunta
+            List<String> seleccionadasAlumno = respuestasPorPregunta
                 .getOrDefault(pregunta.getId(), List.of())
                 .stream()
                 .map(r -> r.getRespuesta() == null ? "" : r.getRespuesta().strip().toLowerCase())
-                .collect(java.util.stream.Collectors.toSet());
+                .toList();
+
+            Map<String, Long> conteoCorrectasEsperadas = correctasEsperadas.stream()
+                .collect(java.util.stream.Collectors.groupingBy(s -> s, java.util.stream.Collectors.counting()));
+
+            Map<String, Long> conteoSeleccionadasAlumno = seleccionadasAlumno.stream()
+                .collect(java.util.stream.Collectors.groupingBy(s -> s, java.util.stream.Collectors.counting()));
 
             boolean preguntaCorrecta =
                 !seleccionadasAlumno.isEmpty()
                 && !correctasEsperadas.isEmpty()
-                && seleccionadasAlumno.equals(correctasEsperadas);
+                && seleccionadasAlumno.size() == correctasEsperadas.size()
+                && conteoSeleccionadasAlumno.equals(conteoCorrectasEsperadas);
 
             if (preguntaCorrecta) {
                 puntuacionAcumulada += valorPuntoPorPregunta;
