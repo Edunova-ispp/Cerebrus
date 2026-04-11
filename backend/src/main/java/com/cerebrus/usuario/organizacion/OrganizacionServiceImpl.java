@@ -61,6 +61,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional(readOnly = true)
     public Page<Maestro> listarMaestros(Long organizacionId, int page, int size) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "listar maestros");
+        // Comprobar suscripciones activas antes de listar maestros
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede listar maestros.");
+        }
         // Forzar carga de maestros dentro de la transación
         Hibernate.initialize(organizacion.getMaestros());
         // Devolver copias planas para evitar serialización de relaciones lazy
@@ -74,6 +79,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional(readOnly = true)
     public Page<Alumno> listarAlumnos(Long organizacionId, int page, int size) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "listar alumnos");
+        // Comprobar suscripciones activas antes de listar alumnos
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede listar alumnos.");
+        }
         // Forzar carga de alumnos dentro de la transación
         Hibernate.initialize(organizacion.getAlumnos());
         // Devolver copias planas para evitar serialización de relaciones lazy
@@ -87,6 +97,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional(readOnly = true)
     public Usuario buscarUsuario(Long organizacionId, Long usuarioId) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "buscar usuarios");
+        // Comprobar suscripciones activas antes de buscar usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede buscar usuarios.");
+        }
         // Forzar carga de ambas colecciones dentro de la transacción
         Hibernate.initialize(organizacion.getMaestros());
         Hibernate.initialize(organizacion.getAlumnos());
@@ -106,6 +121,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional
     public void eliminarUsuario(Long organizacionId, Long usuarioId) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "eliminar usuarios");
+        // Comprobar suscripciones activas antes de eliminar usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede eliminar usuarios.");
+        }
         Usuario usuarioAEliminar = buscarUsuario(organizacionId, usuarioId);
         if (usuarioAEliminar instanceof Maestro) {
             organizacion.getMaestros().remove(usuarioAEliminar);
@@ -119,6 +139,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional
     public Usuario actualizarUsuario(Long organizacionId, Long usuarioId, UsuarioActualizarDTO usuarioActualizado) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "actualizar usuarios");
+        // Comprobar suscripciones activas antes de actualizar usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede actualizar usuarios.");
+        }
         Usuario usuarioExistente = buscarUsuario(organizacionId, usuarioId);
         validarNombreUsuarioUnicoEnOrganizacion(organizacion, usuarioExistente.getId(), usuarioActualizado.getNombreUsuario());
         // Solo se permiten actualizar ciertos campos
@@ -203,6 +228,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         }
         
         Organizacion organizacion = (Organizacion) usuarioActual;
+        // Comprobar suscripciones activas antes de crear usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede crear usuarios.");
+        }
                  
 
         String rolUpper = request.getRol().toUpperCase();
@@ -363,6 +393,13 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         List<String> errores = new ArrayList<>();
         InputStream inputStream = archivo.getInputStream();
         Usuario usuarioActual = usuarioService.findCurrentUser();
+        Organizacion organizacion = (Organizacion) usuarioActual;
+
+        // Comprobar suscripciones activas antes de importar usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede importar usuarios.");
+        }
         
         if (!(usuarioActual instanceof Organizacion)) {
             throw new AccessDeniedException("Solo usuarios con rol ORGANIZACIÓN pueden crear nuevos usuarios.");
