@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
-import type { ResumenCompraDTO } from './Subscripcion';
-import './Subscripcion.css';
+import type { ResumenCompraDTO } from './Suscripcion';
+import './Suscripcion.css';
 
 interface LocationState {
   resumen: ResumenCompraDTO;

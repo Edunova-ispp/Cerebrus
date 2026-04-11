@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
-import './Subscripcion.css';
+import './Suscripcion.css';
 
 export interface SuscripcionDTO {
   id: number;
@@ -73,7 +73,7 @@ function validateForm(
   return errors;
 }
 
-export default function Subscripcion() {
+export default function Suscripcion() {
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
   const navigate = useNavigate();
 

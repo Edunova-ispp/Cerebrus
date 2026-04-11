@@ -36,8 +36,8 @@ import PreguntaAbiertaAlumno from "./pages/preguntaAbiertaAlumno/PreguntaAbierta
 import TermsPage from "./pages/legal/TermsPage.tsx";
 import EdunovaPage from "./pages/edunova/EdunovaPage.tsx";
 
-import Subscripcion from "./pages/subscripcion/Subscripcion.tsx";
-import ResumenSuscripcion from "./pages/subscripcion/ResumenSuscripcion.tsx";
+import Suscripcion from "./pages/suscripcion/Suscripcion.tsx";
+import ResumenSuscripcion from "./pages/suscripcion/ResumenSuscripcion.tsx";
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
 class WatchbugErrorBoundary extends Component<
   { children: React.ReactNode },
@@ -191,7 +191,7 @@ function App() {
 
         {/* Rutas organización (solo DUENO) */}
         <Route path="suscripcion" element={
-          <ProtectedRoute allowedRoles={['DUENO', 'ORGANIZACION']}><Subscripcion /></ProtectedRoute>
+          <ProtectedRoute allowedRoles={['DUENO', 'ORGANIZACION']}><Suscripcion /></ProtectedRoute>
         } />
         <Route path="/resumen-suscripcion" element={
           <ProtectedRoute allowedRoles={['DUENO', 'ORGANIZACION']}><ResumenSuscripcion /></ProtectedRoute>
