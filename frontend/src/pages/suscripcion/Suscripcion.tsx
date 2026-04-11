@@ -254,26 +254,33 @@ export default function Suscripcion() {
 
           ) : (
             <div className="sub-layout">
+              
+              {/* ── BARRA DE PRECIOS ACTUALIZADA ── */}
               <aside className="sub-precios">
                 <p className="sub-precios__title">Precios</p>
+                
+                {/* Bloque Profesores */}
                 <div className="sub-precios__tier">
-                  <span className="sub-precios__tier-label">Hasta 10 profes</span>
-                  <span className="sub-precios__tier-price">
-                    9,90 € <span>/ prof / mes</span>
-                  </span>
+                  <span className="sub-precios__tier-label">Profesor</span>
+                  <span className="sub-precios__tier-price">10 € <span>/ mes</span></span>
+                  
+                  <div className="sub-precios__tier-extra">
+                    Si tienes <strong>+20</strong> profesores:<br />
+                    <span>7 € / mes</span> por profesor extra
+                  </div>
                 </div>
+
+                {/* Bloque Alumnos */}
                 <div className="sub-precios__tier">
-                  <span className="sub-precios__tier-label">Entre 10 y 30 profes</span>
-                  <span className="sub-precios__tier-price">
-                    7,50 € <span>/ prof / mes</span>
-                  </span>
+                  <span className="sub-precios__tier-label">Alumno</span>
+                  <span className="sub-precios__tier-price">5 € <span>/ mes</span></span>
+                  
+                  <div className="sub-precios__tier-extra">
+                    Si tienes <strong>+50</strong> alumnos:<br />
+                    <span>3 € / mes</span> por alumno extra
+                  </div>
                 </div>
-                <div className="sub-precios__tier">
-                  <span className="sub-precios__tier-label">Más de 30 profes</span>
-                  <span className="sub-precios__tier-price">
-                    6,00 € <span>/ prof / mes</span>
-                  </span>
-                </div>
+
                 <p className="sub-precios__disclaimer">
                   *Precios ilustrativos sin validez comercial
                 </p>
