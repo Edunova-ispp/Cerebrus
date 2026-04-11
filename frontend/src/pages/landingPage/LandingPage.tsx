@@ -113,6 +113,7 @@ function LandingPage() {
     {/* FOOTER LEGAL */}
       <footer className="landing-footer">
         <Link to="/terminos">Política de Privacidad y Términos de Servicio</Link>
+        <Link className="landing-edunova-link" to="/edunova">Made with ❤ by EduNova</Link>
       </footer>
     </div> 
   );
