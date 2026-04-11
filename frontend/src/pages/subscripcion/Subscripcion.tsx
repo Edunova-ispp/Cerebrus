@@ -27,7 +27,6 @@ export interface ResumenCompraDTO {
   mensaje?: string;
 }
 
-// ── Validación ────────────────────────────────────────────
 interface FormErrors {
   numMaestros?: string;
   numAlumnos?: string;
@@ -74,12 +73,10 @@ function validateForm(
   return errors;
 }
 
-// ── Componente principal ──────────────────────────────────
 export default function Subscripcion() {
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
   const navigate = useNavigate();
 
-  // ── Guard de rol ───────────────────────────────────────
   const userInfo = getCurrentUserInfo() as any;
   const rol: string | undefined =
     userInfo?.rol ?? userInfo?.role ?? userInfo?.authorities?.[0];
@@ -88,50 +85,42 @@ export default function Subscripcion() {
   useEffect(() => {
     if (!userInfo || !rol) { navigate('/'); return; }
     const rolNorm = rol.toUpperCase().replace('ROLE_', '');
-    if (rolNorm !== 'ORGANIZACION' && rolNorm !== 'ORGANIZACION_ADMIN') {
+    if (rolNorm !== 'ORGANIZACION' && rolNorm !== 'DUENO') {
       navigate('/');
     }
   }, []);
 
-  // ── Estados principales ────────────────────────────────
   const [suscripcion, setSuscripcion] = useState<SuscripcionDTO | null>(null);
-  const [loading, setLoading]         = useState(true);
-  const [error, setError]             = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // ── Estados formulario ─────────────────────────────────
   const [numMaestros, setNumMaestros] = useState<number | ''>('');
-  const [numAlumnos, setNumAlumnos]   = useState<number | ''>('');
-  const [numMeses, setNumMeses]       = useState<number | ''>('');
-  const [formErrors, setFormErrors]   = useState<FormErrors>({});
-  const [touched, setTouched]         = useState({
+  const [numAlumnos, setNumAlumnos] = useState<number | ''>('');
+  const [numMeses, setNumMeses] = useState<number | ''>('');
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState({
     numMaestros: false,
     numAlumnos: false,
     numMeses: false,
   });
   const [calculando, setCalculando] = useState(false);
 
-  // ── Cargar suscripción activa ──────────────────────────
   useEffect(() => {
-    if (!organizacionId) {
-      setError('No se pudo identificar la organización. Vuelve a iniciar sesión.');
-      setLoading(false);
-      return;
-    }
+    if (!organizacionId) return;
+
     const fetchSuscripcion = async () => {
       try {
         setLoading(true);
-        const res = await apiFetch(
-          `${apiBase}/api/suscripciones/activa/${organizacionId}`
-        );
+        const res = await apiFetch(`${apiBase}/api/suscripciones/activa/${organizacionId}`);
+        
         if (res.status === 200) {
           setSuscripcion(await res.json());
-        } else if (res.status === 204 || res.status === 404) {
-          setSuscripcion(null);
         } else {
-          throw new Error();
+          setSuscripcion(null);
         }
-      } catch {
-        setError('Ocurrió un error al cargar los datos de tu suscripción.');
+      } catch (err) {
+        setSuscripcion(null); 
       } finally {
         setLoading(false);
       }
@@ -139,28 +128,26 @@ export default function Subscripcion() {
     fetchSuscripcion();
   }, [organizacionId, apiBase]);
 
-  // ── Validación en tiempo real ──────────────────────────
   useEffect(() => {
     if (touched.numMaestros || touched.numAlumnos || touched.numMeses) {
       setFormErrors(
         validateForm(
           numMaestros === '' ? NaN : numMaestros,
-          numAlumnos  === '' ? NaN : numAlumnos,
-          numMeses    === '' ? NaN : numMeses
+          numAlumnos === '' ? NaN : numAlumnos,
+          numMeses === '' ? NaN : numMeses
         )
       );
     }
   }, [numMaestros, numAlumnos, numMeses, touched]);
 
-  // ── Submit: calcular resumen y navegar ─────────────────
   const handleCalcular = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched({ numMaestros: true, numAlumnos: true, numMeses: true });
 
     const errors = validateForm(
       numMaestros === '' ? NaN : numMaestros,
-      numAlumnos  === '' ? NaN : numAlumnos,
-      numMeses    === '' ? NaN : numMeses
+      numAlumnos === '' ? NaN : numAlumnos,
+      numMeses === '' ? NaN : numMeses
     );
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) return;
@@ -179,7 +166,6 @@ export default function Subscripcion() {
       if (!res.ok) throw new Error();
       const resumen: ResumenCompraDTO = await res.json();
 
-      // Pasamos el resumen completo a la siguiente pantalla
       navigate('/resumen-suscripcion', { state: { resumen, organizacionId } });
     } catch {
       setFormErrors(prev => ({
@@ -191,6 +177,7 @@ export default function Subscripcion() {
     }
   };
 
+
   const handleBlur = (field: keyof typeof touched) =>
     setTouched(prev => ({ ...prev, [field]: true }));
 
@@ -201,7 +188,6 @@ export default function Subscripcion() {
       setter(raw === '' ? '' : parseInt(raw, 10) || '');
     };
 
-  // ── Renders de estado ──────────────────────────────────
   if (loading) return (
     <div className="sub-page">
       <NavbarMisCursos />
@@ -227,11 +213,10 @@ export default function Subscripcion() {
         <div className="sub-wrapper">
           <h1 className="sub-title">Mi Suscripción</h1>
 
-          {/* ── ESCENARIO A: ACTIVA ─────────────────────── */}
           {suscripcion ? (
             <div className="sub-card">
               <div className="sub-active__header">
-                <span className="sub-active__badge">✅ Activa</span>
+                <span className="sub-active__badge">Activa</span>
                 <h2 className="sub-active__title">Tu suscripción está vigente</h2>
               </div>
               <div className="sub-active__grid">
@@ -268,9 +253,7 @@ export default function Subscripcion() {
             </div>
 
           ) : (
-          /* ── ESCENARIO B: FORMULARIO ────────────────── */
             <div className="sub-layout">
-              {/* Sidebar precios */}
               <aside className="sub-precios">
                 <p className="sub-precios__title">Precios</p>
                 <div className="sub-precios__tier">
@@ -296,7 +279,6 @@ export default function Subscripcion() {
                 </p>
               </aside>
 
-              {/* Formulario */}
               <div className="sub-card">
                 <h2 className="sub-form__title">Configura tu plan</h2>
                 <p className="sub-form__subtitle">
@@ -304,7 +286,6 @@ export default function Subscripcion() {
                 </p>
 
                 <form className="sub-form" onSubmit={handleCalcular} noValidate>
-                  {/* Nº Profesores */}
                   <div className="sub-form__field">
                     <label className="sub-form__label" htmlFor="numMaestros">
                       Número de Profesores
@@ -327,7 +308,6 @@ export default function Subscripcion() {
                     )}
                   </div>
 
-                  {/* Nº Alumnos */}
                   <div className="sub-form__field">
                     <label className="sub-form__label" htmlFor="numAlumnos">
                       Número de Alumnos
@@ -350,7 +330,6 @@ export default function Subscripcion() {
                     )}
                   </div>
 
-                  {/* Nº Meses */}
                   <div className="sub-form__field">
                     <label className="sub-form__label" htmlFor="numMeses">
                       Número de Meses

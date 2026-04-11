@@ -16,6 +16,13 @@ interface CrearSuscripcionResponseDTO {
   transaccionId: string;
 }
 
+const calcularMeses = (fechaInicio: string, fechaFin: string) => {
+  if (!fechaInicio || !fechaFin) return 1; 
+  const inicio = new Date(fechaInicio);
+  const fin = new Date(fechaFin);
+  return (fin.getFullYear() - inicio.getFullYear()) * 12 + (fin.getMonth() - inicio.getMonth());
+};
+
 export default function ResumenSuscripcion() {
   const navigate  = useNavigate();
   const location  = useLocation();
@@ -26,7 +33,6 @@ export default function ResumenSuscripcion() {
 
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
-  // Si alguien entra a esta ruta directamente sin state, lo mandamos atrás
   if (!state?.resumen || !state?.organizacionId) {
     return (
       <div className="sub-page">
@@ -45,7 +51,8 @@ export default function ResumenSuscripcion() {
 
   const { resumen, organizacionId } = state;
 
-  // ── Crear suscripción PENDIENTE y redirigir a pasarela ──
+  const mesesSeguros = resumen.numMeses || calcularMeses(resumen.fechaInicio, resumen.fechaFin);
+
   const handleIrAPagar = async () => {
     try {
       setCargandoPago(true);
@@ -59,7 +66,7 @@ export default function ResumenSuscripcion() {
           body: JSON.stringify({
             numMaestros: resumen.numMaestros,
             numAlumnos:  resumen.numAlumnos,
-            numMeses:    resumen.numMeses,
+            numMeses:    mesesSeguros, 
           }),
         }
       );
@@ -68,7 +75,6 @@ export default function ResumenSuscripcion() {
 
       const data: CrearSuscripcionResponseDTO = await res.json();
 
-      // Salimos de la app hacia la pasarela (o simulador)
       window.location.href = data.urlPago;
     } catch (err) {
       console.error(err);
@@ -88,12 +94,10 @@ export default function ResumenSuscripcion() {
 
           <div className="sub-card rsm-card">
 
-            {/* Cabecera */}
             {resumen.nombreOrganizacion && (
               <p className="rsm-org-name">{resumen.nombreOrganizacion}</p>
             )}
 
-            {/* Detalle del plan */}
             <div className="rsm-grid">
               <div className="rsm-item">
                 <span className="rsm-item__label">Profesores</span>
@@ -105,7 +109,7 @@ export default function ResumenSuscripcion() {
               </div>
               <div className="rsm-item">
                 <span className="rsm-item__label">Duración</span>
-                <span className="rsm-item__value">{resumen.numMeses} mes{resumen.numMeses !== 1 ? 'es' : ''}</span>
+                <span className="rsm-item__value">{mesesSeguros} mes{mesesSeguros !== 1 ? 'es' : ''}</span>
               </div>
               <div className="rsm-item">
                 <span className="rsm-item__label">Inicio</span>
@@ -123,7 +127,6 @@ export default function ResumenSuscripcion() {
 
             <hr className="sub-active__divider" />
 
-            {/* Precio total */}
             <div className="rsm-precio-total">
               <span className="rsm-precio-total__label">Total a pagar</span>
               <span className="rsm-precio-total__amount">{resumen.precioTotal} €</span>
@@ -137,7 +140,6 @@ export default function ResumenSuscripcion() {
               <p className="sub-error" style={{ marginTop: 0 }}>{errorPago}</p>
             )}
 
-            {/* Acciones */}
             <div className="rsm-actions">
               <button
                 className="sub-btn-secondary"
