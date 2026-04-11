@@ -234,11 +234,13 @@ public class TableroServiceImpl implements TableroService {
             Boolean correcta = pregunta.getRespuestasMaestro().get(0).getRespuesta().toLowerCase().strip().equals(cleanedRespuesta.toLowerCase().strip());
             
             ActividadAlumno actividadAlumno = actividadAlumnoService.crearActAlumno(0, LocalDateTime.now(), null, 0, 0, alumno.getId(), tablero.getId());
+            if(actividadAlumno.getRespuestasAlumno().stream().filter(a -> a.getCorrecta()).count()%8  == 0) {
+                actividadAlumno.getRespuestasAlumno().clear();
+            }
             
             RespAlumnoGeneral respuestaAlumno = new RespAlumnoGeneral(correcta, actividadAlumno, respuesta, pregunta);
             actividadAlumno.getRespuestasAlumno().add(respuestaAlumno);
-            
-            if(correcta  && tablero.getPreguntas().get(tablero.getPreguntas().size()-1).getId().equals(pregunta.getId())) {
+            if(correcta  && actividadAlumno.getRespuestasAlumno().stream().filter(a -> a.getCorrecta()).count() == tablero.getPreguntas().size()) {
                 actividadAlumno.setFechaFin(LocalDateTime.now());
                 int numErrores = 0;
                 for(RespuestaAlumno resp : actividadAlumno.getRespuestasAlumno()) {
