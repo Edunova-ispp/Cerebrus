@@ -11,7 +11,7 @@ const Login = () => {
   
   // Estados para la activación de cuenta
   const [searchParams] = useSearchParams();
-  const [manualCode, setManualCode] = useState(''); // Para escribir el código a mano
+  const [manualCode, setManualCode] = useState(''); 
   const [mensajeActivacion, setMensajeActivacion] = useState<{ texto: string, tipo: 'ok' | 'err' } | null>(null);
   const [loadingCode, setLoadingCode] = useState(false);
   
@@ -26,9 +26,10 @@ const Login = () => {
     }
   }, [searchParams]);
 
-  // Función genérica para activar (sirve para el link y para el botón manual)
+  // Función para activar cuenta (usada por link o por botón manual)
   const activarCuenta = async (codigo: string) => {
     setLoadingCode(true);
+    setMensajeActivacion(null);
     try {
       const response = await fetch(`${apiBase}/auth/confirm-email/${codigo}`, {
         method: 'PUT',
@@ -39,7 +40,8 @@ const Login = () => {
 
       if (response.ok) {
         setMensajeActivacion({ texto: "✅ ¡Cuenta activada! Ya puedes iniciar sesión.", tipo: 'ok' });
-        setManualCode(''); // Limpiamos el input si lo usó
+        setManualCode(''); 
+        setError(''); // Limpiamos errores de login previos
       } else {
         setMensajeActivacion({ texto: `❌ ${data.message || 'Código inválido'}`, tipo: 'err' });
       }
@@ -77,9 +79,15 @@ const Login = () => {
           navigate('/');
         }
       } else {
-        setError(data.message || 'Credenciales incorrectas o cuenta no activada.');
+        if (response.status === 403 && data.message === "CUENTA_NO_VERIFICADA") {
+          setError('⚠️ Cuenta no activada. Introduce el código enviado a tu email aquí abajo.');
+          
+          document.querySelector('.pixel-divider')?.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          setError(data.message || 'Credenciales incorrectas.');
+        }
       }
-    } catch {
+    } catch (err) {
       setError('No se pudo conectar con el servidor.');
     }
   };
@@ -88,7 +96,6 @@ const Login = () => {
     <div className="login-page-container">
       <div className="login-box">
         
-        {/* SECCIÓN DE ACTIVACIÓN (BANNER) */}
         {mensajeActivacion && (
           <div className={`login-activation-banner ${mensajeActivacion.tipo}`}>
             {mensajeActivacion.texto}
@@ -96,20 +103,20 @@ const Login = () => {
         )}
 
         <div className="login-header">
-          <img src={logo} alt="Cerebrus Mascot" className="login-logo" />
+          <img src={logo} alt="Cerebrus Logo" className="login-logo" />
           <h2 className="login-title">Iniciar Sesión</h2>
         </div>
         
-        {/* FORMULARIO DE LOGIN NORMAL */}
         <form onSubmit={handleLogin} className="login-form">
           <div className="pixel-input-wrapper">
-            <label htmlFor="identificador">Correo electrónico:</label>
+            <label htmlFor="identificador">Correo electrónico o Usuario:</label>
             <input 
               id="identificador"
               type="text" 
               value={identificador} 
               onChange={(e) => setIdentificador(e.target.value)} 
               required 
+              autoComplete="username"
             />
           </div>
 
@@ -122,45 +129,52 @@ const Login = () => {
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
                 required 
+                autoComplete="current-password"
               />
-              <button type="button" className="login-pw-toggle" onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? '🙈' : '👁'}
+              <button 
+                type="button" 
+                className="login-pw-toggle" 
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                {showPassword ? '🙈' : '👁️'}
               </button>
             </div>
           </div>
 
           {error && <div className="login-error-msg">{error}</div>}
 
-          <button type="submit" className="pixel-btn-submit">Entrar</button>
+          <button type="submit" className="pixel-btn-submit">ENTRAR</button>
         </form>
 
         <div className="pixel-divider">
           <span className="activation-subtitle">O ACTIVA TU CUENTA</span>
         </div>
 
+        {/* SECCIÓN MANUAL DE VERIFICACIÓN */}
         <div className="manual-verify-section">
+          <p className="activation-help-text">¿Recibiste un código? Introdúcelo aquí:</p>
           <div className="pixel-input-wrapper">
-            <label>Código:</label>
             <input 
               type="text" 
-              placeholder="Ej: 12345678" 
+              placeholder="Código de 8 dígitos" 
               value={manualCode}
-              onChange={(e) => setManualCode(e.target.value)}
+              onChange={(e) => setManualCode(e.target.value.replace(/\D/g, ''))} // Solo números
+              maxLength={8}
             />
           </div>
 
-          <button 
-            type="button"
+          <button type="submit" 
             onClick={() => activarCuenta(manualCode)} 
             disabled={loadingCode || manualCode.length < 4}
             className="pixel-btn-submit"
           >
-            {loadingCode ? "..." : "ACTIVAR"}
+            {loadingCode ? "Procesando..." : "ACTIVAR CUENTA"}
           </button>
         </div>
 
         <p className="login-register-text">
-          ¿No tienes cuenta? <span onClick={() => navigate('/auth/register')}>Regístrate</span>
+          ¿No tienes cuenta? <span onClick={() => navigate('/auth/register')}>Regístrate aquí</span>
         </p>
       </div>
     </div>
