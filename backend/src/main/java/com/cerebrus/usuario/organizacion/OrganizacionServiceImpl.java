@@ -31,13 +31,13 @@ import com.cerebrus.usuario.UsuarioRepository;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
-import com.cerebrus.usuario.organizacion.dto.UsuarioActualizarDTO;
+import com.cerebrus.usuario.organizacion.DTO.UsuarioActualizarDTO;
 
 import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.cerebrus.usuario.organizacion.dto.CreateUserRequest;
+import com.cerebrus.usuario.organizacion.DTO.CreateUserRequest;
 
 @Service
 @Transactional

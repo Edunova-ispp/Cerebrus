@@ -19,8 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
-import com.cerebrus.usuario.organizacion.dto.CreateUserRequest;
-import com.cerebrus.usuario.organizacion.dto.UsuarioActualizarDTO;
+import com.cerebrus.usuario.organizacion.DTO.CreateUserRequest;
+import com.cerebrus.usuario.organizacion.DTO.UsuarioActualizarDTO;
 
 import jakarta.servlet.ServletException;
 import jakarta.validation.Valid;
