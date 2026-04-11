@@ -91,6 +91,7 @@ class CursoServiceImplTest {
         verify(cursoRepository).findByMaestroId(1L);
     }
 
+
     // Test para verificar que encontrarCursosPorUsuarioLogueado retorna los cursos visibles del alumno logueado
     @Test
     void encontrarCursosPorUsuarioLogueado_alumno_retornaCursosInscritos() {
@@ -377,18 +378,18 @@ class CursoServiceImplTest {
         verify(cursoRepository, never()).save(any());
     }
 
-    // Test para verificar que actualizarCurso lanza AccessDeniedException cuando el maestro no es propietario del curso
+    // Test para verificar que actualizarCurso actualiza correctamente cuando descripcion e imagen son null
     @Test
-    void actualizarCurso_maestroNoPropietario_lanzaAccessDeniedException() {
-        Maestro otroMaestro = crearMaestro(99L);
+    void actualizarCurso_descripcionEImagenNull_actualizaCorrectamente() {
         when(cursoRepository.findByID(10L)).thenReturn(curso);
-        when(usuarioService.findCurrentUser()).thenReturn(otroMaestro);
+        when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        when(cursoRepository.save(curso)).thenReturn(curso);
 
-        assertThatThrownBy(() -> cursoService.actualizarCurso(10L, "T", "D", null))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("Solo el propietario del curso puede actualizarlo");
+        Curso resultado = cursoService.actualizarCurso(10L, "Nuevo título", null, null);
 
-        verify(cursoRepository, never()).save(any());
+        assertThat(resultado.getTitulo()).isEqualTo("Nuevo título");
+        assertThat(resultado.getDescripcion()).isNull();
+        assertThat(resultado.getImagen()).isNull();
     }
 
     // -------------------------------------------------------
@@ -420,21 +421,32 @@ class CursoServiceImplTest {
         assertThat(resultado.getEstado()).isEqualTo("SIN_EMPEZAR");
     }
 
-    // Test para verificar que encontrarProgresoPorCursoId retorna TERMINADA cuando todas las actividades están acabadas
-    // ActividadAlumnoProgreso es una interfaz: se implementa con clase anónima inline
+    // Test para verificar que encontrarProgresoPorCursoId retorna TERMINADA con puntos totales cuando todas las actividades están acabadas
     @Test
-    void encontrarProgresoPorCursoId_todasActividadesAcabadas_retornaTerminada() {
+    void encontrarProgresoPorCursoId_todasActividadesAcabadas_conPuntos_retornaTerminadaConPuntos() {
         LocalDateTime ahora = LocalDateTime.now();
-        ActividadAlumnoProgreso progreso = crearProgreso(ahora, ahora);
+        ActividadAlumnoProgreso progreso1 = new ActividadAlumnoProgreso() {
+            @Override public Long getActividadId() { return 1L; }
+            @Override public LocalDateTime getInicio() { return ahora; }
+            @Override public LocalDateTime getAcabada() { return ahora; }
+            @Override public Integer getPuntuacion() { return 10; }
+        };
+        ActividadAlumnoProgreso progreso2 = new ActividadAlumnoProgreso() {
+            @Override public Long getActividadId() { return 2L; }
+            @Override public LocalDateTime getInicio() { return ahora; }
+            @Override public LocalDateTime getAcabada() { return ahora; }
+            @Override public Integer getPuntuacion() { return 20; }
+        };
 
         when(cursoRepository.findByID(10L)).thenReturn(curso);
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
-        when(actividadRepository.countByCursoId(10L)).thenReturn(1L);
-        when(actividadAlumnoRepository.findProgresoByAlumnoAndCursoId(alumno, 10L)).thenReturn(List.of(progreso));
+        when(actividadRepository.countByCursoId(10L)).thenReturn(2L);
+        when(actividadAlumnoRepository.findProgresoByAlumnoAndCursoId(alumno, 10L)).thenReturn(List.of(progreso1, progreso2));
 
         ProgresoDTO resultado = cursoService.encontrarProgresoPorCursoId(10L);
 
         assertThat(resultado.getEstado()).isEqualTo("TERMINADA");
+        assertThat(resultado.getPuntos()).isEqualTo(30); // 10 + 20
     }
 
     // Test para verificar que encontrarProgresoPorCursoId retorna EMPEZADA cuando hay actividades con inicio pero sin acabar todas
@@ -492,6 +504,191 @@ class CursoServiceImplTest {
     // Métodos auxiliares
     // -------------------------------------------------------
 
+    // Crea una Actividad abstracta de prueba con la puntuación proporcionada
+    private static Actividad crearActividad(int puntuacion) {
+        Actividad a = new Actividad() {};
+        a.setPuntuacion(puntuacion);
+        a.setActividadesAlumno(new ArrayList<>());
+        return a;
+    }
+
+    // Crea un ActividadAlumno con estado TERMINADA para un alumno dado.
+    // getEstadoActividad() es calculado: requiere al menos una RespuestaAlumno con correcta=true como última respuesta.
+    private static ActividadAlumno crearActividadAlumnoTerminada(Alumno alumno) {
+        RespuestaAlumno respuestaCorrecta = new RespuestaAlumno() {};
+        respuestaCorrecta.setCorrecta(true);
+
+        ActividadAlumno aa = new ActividadAlumno();
+        aa.setAlumno(alumno);
+        aa.setPuntuacion(0);
+        aa.setNota(10);
+        aa.setFechaInicio(LocalDateTime.now());
+        aa.setFechaFin(LocalDateTime.now());
+        aa.setNumAbandonos(0);
+        aa.setRespuestasAlumno(new ArrayList<>(List.of(respuestaCorrecta)));
+        return aa;
+    }
+
+    // -------------------------------------------------------
+    // encontrarCursoPorId
+    // -------------------------------------------------------
+
+    // Test para verificar que encontrarCursoPorId retorna el curso cuando existe
+    @Test
+    void encontrarCursoPorId_cursoExiste_retornaCurso() {
+        when(cursoRepository.findByID(10L)).thenReturn(curso);
+
+        Curso resultado = cursoService.encontrarCursoPorId(10L);
+
+        assertThat(resultado).isEqualTo(curso);
+    }
+
+    // Test para verificar que encontrarCursoPorId retorna null cuando el curso no existe
+    @Test
+    void encontrarCursoPorId_cursoNoExiste_retornaNull() {
+        when(cursoRepository.findByID(99L)).thenReturn(null);
+
+        Curso resultado = cursoService.encontrarCursoPorId(99L);
+
+        assertThat(resultado).isNull();
+    }
+
+    // -------------------------------------------------------
+    // eliminarCursoPorId
+    // -------------------------------------------------------
+
+    // Test para verificar que eliminarCursoPorId elimina el curso correctamente cuando el maestro es propietario
+    @Test
+    void eliminarCursoPorId_maestroPropietario_eliminaCurso() {
+        when(cursoRepository.findByID(10L)).thenReturn(curso);
+        when(usuarioService.findCurrentUser()).thenReturn(maestro);
+
+        cursoService.eliminarCursoPorId(10L);
+
+        verify(cursoRepository).delete(curso);
+    }
+
+    // Test para verificar que eliminarCursoPorId lanza RuntimeException 404 cuando el curso no existe
+    @Test
+    void eliminarCursoPorId_cursoNoExiste_lanzaNotFound() {
+        when(cursoRepository.findByID(99L)).thenReturn(null);
+
+        assertThatThrownBy(() -> cursoService.eliminarCursoPorId(99L))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("404 Not Found");
+
+        verify(cursoRepository, never()).delete(any());
+    }
+
+    // Test para verificar que eliminarCursoPorId lanza AccessDeniedException cuando el usuario no es Maestro
+    @Test
+    void eliminarCursoPorId_usuarioNoMaestro_lanzaAccessDeniedException() {
+        when(cursoRepository.findByID(10L)).thenReturn(curso);
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
+        assertThatThrownBy(() -> cursoService.eliminarCursoPorId(10L))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Solo un maestro puede eliminar cursos");
+
+        verify(cursoRepository, never()).delete(any());
+    }
+
+    // Test para verificar que eliminarCursoPorId lanza AccessDeniedException cuando el maestro no es propietario del curso
+    @Test
+    void eliminarCursoPorId_maestroNoPropietario_lanzaAccessDeniedException() {
+        Maestro otroMaestro = crearMaestro(99L);
+        when(cursoRepository.findByID(10L)).thenReturn(curso);
+        when(usuarioService.findCurrentUser()).thenReturn(otroMaestro);
+
+        assertThatThrownBy(() -> cursoService.eliminarCursoPorId(10L))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Solo el propietario puede eliminar este curso");
+
+        verify(cursoRepository, never()).delete(any());
+    }
+
+    // -------------------------------------------------------
+    // obtenerNotaMediaPorActividadPorCursoId
+    // -------------------------------------------------------
+
+    // Test para verificar que obtenerNotaMediaPorActividadPorCursoId calcula correctamente las notas medias cuando el maestro es propietario
+    @Test
+    void obtenerNotaMediaPorActividadPorCursoId_maestroPropietario_retornaNotasMedias() {
+        Actividad actividad1 = crearActividad(10);
+        actividad1.setId(100L);
+        Actividad actividad2 = crearActividad(20);
+        actividad2.setId(101L);
+
+        ActividadAlumno aa1 = crearActividadAlumnoTerminada(alumno);
+        aa1.setActividad(actividad1);
+        aa1.setNota(8);
+
+        ActividadAlumno aa2 = crearActividadAlumnoTerminada(alumno);
+        aa2.setActividad(actividad1);
+        aa2.setNota(10);
+
+        ActividadAlumno aa3 = crearActividadAlumnoTerminada(alumno);
+        aa3.setActividad(actividad2);
+        aa3.setNota(7);
+
+        List<ActividadAlumno> actividades = List.of(aa1, aa2, aa3);
+
+        when(cursoRepository.findByID(10L)).thenReturn(curso);
+        when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        when(actividadAlumnoRepository.findByCursoID(10L)).thenReturn(actividades);
+
+        List<Integer> resultado = cursoService.obtenerNotaMediaPorActividadPorCursoId(10L);
+
+        assertThat(resultado).containsExactly(9, 7); // (8+10)/2 = 9, 7/1 = 7
+    }
+
+    // Test para verificar que obtenerNotaMediaPorActividadPorCursoId retorna lista vacía cuando no hay actividades
+    @Test
+    void obtenerNotaMediaPorActividadPorCursoId_sinActividades_retornaListaVacia() {
+        when(cursoRepository.findByID(10L)).thenReturn(curso);
+        when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        when(actividadAlumnoRepository.findByCursoID(10L)).thenReturn(List.of());
+
+        List<Integer> resultado = cursoService.obtenerNotaMediaPorActividadPorCursoId(10L);
+
+        assertThat(resultado).isEmpty();
+    }
+
+    // Test para verificar que obtenerNotaMediaPorActividadPorCursoId lanza RuntimeException 404 cuando el curso no existe
+    @Test
+    void obtenerNotaMediaPorActividadPorCursoId_cursoNoExiste_lanzaNotFound() {
+        when(cursoRepository.findByID(99L)).thenReturn(null);
+
+        assertThatThrownBy(() -> cursoService.obtenerNotaMediaPorActividadPorCursoId(99L))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("404 Not Found");
+    }
+
+    // Test para verificar que obtenerNotaMediaPorActividadPorCursoId retorna 0 cuando hay actividades pero sin notas
+    @Test
+    void obtenerNotaMediaPorActividadPorCursoId_actividadesSinNotas_retornaCero() {
+        Actividad actividad1 = crearActividad(10);
+        actividad1.setId(100L);
+
+        ActividadAlumno aa1 = crearActividadAlumnoTerminada(alumno);
+        aa1.setActividad(actividad1);
+        aa1.setNota(null); // Sin nota
+
+        List<ActividadAlumno> actividades = List.of(aa1);
+
+        when(cursoRepository.findByID(10L)).thenReturn(curso);
+        when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        when(actividadAlumnoRepository.findByCursoID(10L)).thenReturn(actividades);
+
+        List<Integer> resultado = cursoService.obtenerNotaMediaPorActividadPorCursoId(10L);
+
+        assertThat(resultado).containsExactly(0);
+    }
+
+    // -------------------------------------------------------
+    // Métodos auxiliares
+    // -------------------------------------------------------
+
     // Crea un Maestro de prueba con el id proporcionado
     private static Maestro crearMaestro(Long id) {
         Maestro m = new Maestro();
@@ -522,36 +719,11 @@ class CursoServiceImplTest {
         return c;
     }
 
-    // Crea una Actividad abstracta de prueba con la puntuación proporcionada
-    private static Actividad crearActividad(int puntuacion) {
-        Actividad a = new Actividad() {};
-        a.setPuntuacion(puntuacion);
-        a.setActividadesAlumno(new ArrayList<>());
-        return a;
-    }
-
-    // Crea un ActividadAlumno con estado TERMINADA para un alumno dado.
-    // getEstadoActividad() es calculado: requiere al menos una RespuestaAlumno con correcta=true como última respuesta.
-    private static ActividadAlumno crearActividadAlumnoTerminada(Alumno alumno) {
-        RespuestaAlumno respuestaCorrecta = new RespuestaAlumno() {};
-        respuestaCorrecta.setCorrecta(true);
-
-        ActividadAlumno aa = new ActividadAlumno();
-        aa.setAlumno(alumno);
-        aa.setPuntuacion(0);
-        aa.setNota(10);
-        aa.setFechaInicio(LocalDateTime.now());
-        aa.setFechaFin(LocalDateTime.now());
-        aa.setNumAbandonos(0);
-        aa.setRespuestasAlumno(new ArrayList<>(List.of(respuestaCorrecta)));
-        return aa;
-    }
-
     // Crea un ActividadAlumnoProgreso (interfaz) con las fechas de inicio y fin proporcionadas usando clase anónima
     private static ActividadAlumnoProgreso crearProgreso(LocalDateTime inicio, LocalDateTime acabada) {
         return new ActividadAlumnoProgreso() {
             @Override
-            public Long getActividadId() { return null; }
+            public Long getActividadId() { return 1L; }
             @Override
             public LocalDateTime getInicio() { return inicio; }
             @Override
