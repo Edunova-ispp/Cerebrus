@@ -1,38 +1,37 @@
 package com.cerebrus.actividadAlumnTest;
 
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.cerebrus.actividadAlumn.ActividadAlumno;
-import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
-import com.cerebrus.actividadAlumn.ActividadAlumnoServiceImpl;
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.general.General;
-import com.cerebrus.actividad.ordenacion.Ordenacion;
-import com.cerebrus.actividad.ordenacion.OrdenacionService;
 import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 import com.cerebrus.actividad.marcarImagen.MarcarImagenService;
+import com.cerebrus.actividad.ordenacion.Ordenacion;
+import com.cerebrus.actividad.ordenacion.OrdenacionService;
+import com.cerebrus.actividadAlumn.ActividadAlumno;
+import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
+import com.cerebrus.actividadAlumn.ActividadAlumnoServiceImpl;
 import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.exceptions.ResourceNotFoundException;
@@ -425,9 +424,23 @@ class ActividadAlumnoServiceImplTest {
         General actividadGeneral = crearActividadGeneral(TipoActGeneral.TEST, 100, 2);
         actividadAlumno.setActividad(actividadGeneral);
 
+        Pregunta pregunta1 = actividadGeneral.getPreguntas().get(0);
+        Pregunta pregunta2 = actividadGeneral.getPreguntas().get(1);
+        pregunta1.setRespuestasMaestro(List.of(
+            crearRespuestaMaestro("p1_ok", true),
+            crearRespuestaMaestro("p1_bad", false)
+        ));
+        pregunta2.setRespuestasMaestro(List.of(
+            crearRespuestaMaestro("p2_ok", true),
+            crearRespuestaMaestro("p2_bad", false)
+        ));
+
+        RespAlumnoGeneral resp1 = crearRespAlumnoGeneral(101L, pregunta1, "p1_ok");
+        RespAlumnoGeneral resp2 = crearRespAlumnoGeneral(102L, pregunta2, "p2_ok");
+
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
-        when(respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(101L)).thenReturn(true);
-        when(respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(102L)).thenReturn(true);
+        when(respuestaAlumnoService.encontrarRespuestaAlumnoPorId(101L)).thenReturn(resp1);
+        when(respuestaAlumnoService.encontrarRespuestaAlumnoPorId(102L)).thenReturn(resp2);
         when(actividadAlumnoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         ActividadAlumno resultado = service.corregirActAlumnoAutomaticamente(10L, List.of(101L, 102L));
@@ -443,9 +456,23 @@ class ActividadAlumnoServiceImplTest {
         General actividadGeneral = crearActividadGeneral(TipoActGeneral.TEST, 100, 2);
         actividadAlumno.setActividad(actividadGeneral);
 
+        Pregunta pregunta1 = actividadGeneral.getPreguntas().get(0);
+        Pregunta pregunta2 = actividadGeneral.getPreguntas().get(1);
+        pregunta1.setRespuestasMaestro(List.of(
+            crearRespuestaMaestro("p1_ok", true),
+            crearRespuestaMaestro("p1_bad", false)
+        ));
+        pregunta2.setRespuestasMaestro(List.of(
+            crearRespuestaMaestro("p2_ok", true),
+            crearRespuestaMaestro("p2_bad", false)
+        ));
+
+        RespAlumnoGeneral resp1 = crearRespAlumnoGeneral(101L, pregunta1, "p1_bad");
+        RespAlumnoGeneral resp2 = crearRespAlumnoGeneral(102L, pregunta2, "p2_bad");
+
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
-        when(respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(101L)).thenReturn(false);
-        when(respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(102L)).thenReturn(false);
+        when(respuestaAlumnoService.encontrarRespuestaAlumnoPorId(101L)).thenReturn(resp1);
+        when(respuestaAlumnoService.encontrarRespuestaAlumnoPorId(102L)).thenReturn(resp2);
         when(actividadAlumnoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         ActividadAlumno resultado = service.corregirActAlumnoAutomaticamente(10L, List.of(101L, 102L));
@@ -460,9 +487,23 @@ class ActividadAlumnoServiceImplTest {
         General actividadGeneral = crearActividadGeneral(TipoActGeneral.TEST, 100, 2);
         actividadAlumno.setActividad(actividadGeneral);
 
+        Pregunta pregunta1 = actividadGeneral.getPreguntas().get(0);
+        Pregunta pregunta2 = actividadGeneral.getPreguntas().get(1);
+        pregunta1.setRespuestasMaestro(List.of(
+            crearRespuestaMaestro("p1_ok", true),
+            crearRespuestaMaestro("p1_bad", false)
+        ));
+        pregunta2.setRespuestasMaestro(List.of(
+            crearRespuestaMaestro("p2_ok", true),
+            crearRespuestaMaestro("p2_bad", false)
+        ));
+
+        RespAlumnoGeneral resp1 = crearRespAlumnoGeneral(101L, pregunta1, "p1_ok");
+        RespAlumnoGeneral resp2 = crearRespAlumnoGeneral(102L, pregunta2, "p2_bad");
+
         when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
-        when(respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(101L)).thenReturn(true);
-        when(respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(102L)).thenReturn(false);
+        when(respuestaAlumnoService.encontrarRespuestaAlumnoPorId(101L)).thenReturn(resp1);
+        when(respuestaAlumnoService.encontrarRespuestaAlumnoPorId(102L)).thenReturn(resp2);
         when(actividadAlumnoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         ActividadAlumno resultado = service.corregirActAlumnoAutomaticamente(10L, List.of(101L, 102L));
@@ -856,10 +897,26 @@ class ActividadAlumnoServiceImplTest {
         return g;
     }
 
+    private RespAlumnoGeneral crearRespAlumnoGeneral(Long id, Pregunta pregunta, String respuesta) {
+        RespAlumnoGeneral resp = new RespAlumnoGeneral();
+        resp.setId(id);
+        resp.setActividadAlumno(actividadAlumno);
+        resp.setPregunta(pregunta);
+        resp.setRespuesta(respuesta);
+        return resp;
+    }
+
     private com.cerebrus.respuestaMaestro.RespuestaMaestro crearRespuestaMaestro(boolean correcta) {
         com.cerebrus.respuestaMaestro.RespuestaMaestro rm = new com.cerebrus.respuestaMaestro.RespuestaMaestro();
         rm.setCorrecta(correcta);
         rm.setRespuesta("opcion");
+        return rm;
+    }
+
+    private com.cerebrus.respuestaMaestro.RespuestaMaestro crearRespuestaMaestro(String respuesta, boolean correcta) {
+        com.cerebrus.respuestaMaestro.RespuestaMaestro rm = new com.cerebrus.respuestaMaestro.RespuestaMaestro();
+        rm.setCorrecta(correcta);
+        rm.setRespuesta(respuesta);
         return rm;
     }
 }

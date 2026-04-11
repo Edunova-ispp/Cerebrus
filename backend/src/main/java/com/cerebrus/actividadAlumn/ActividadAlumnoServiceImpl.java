@@ -1,17 +1,19 @@
 package com.cerebrus.actividadAlumn;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cerebrus.comun.enumerados.*;
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.general.General;
@@ -19,8 +21,11 @@ import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 import com.cerebrus.actividad.marcarImagen.MarcarImagenService;
 import com.cerebrus.actividad.ordenacion.Ordenacion;
 import com.cerebrus.actividad.ordenacion.OrdenacionService;
+import com.cerebrus.comun.enumerados.EstadoActividad;
+import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.respuestaAlumn.RespuestaAlumno;
 import com.cerebrus.respuestaAlumn.RespuestaAlumnoService;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneral;
@@ -254,10 +259,8 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     }
 
     private void corregirActAlumnoAutomaticamenteGeneral(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
-        // 1. Obtenemos el número REAL de preguntas que tiene el test
-        // Usamos la colección de la entidad actividad
         General actividadGeneral = (General) actividad;
-        int numPreguntasTotales = actividadGeneral.getPreguntas().size();    
+        int numPreguntasTotales = actividadGeneral.getPreguntas().size();
         if (numPreguntasTotales == 0) {
             actividadAlumno.setPuntuacion(0);
             actividadAlumno.setNota(0);
@@ -266,32 +269,68 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
         int puntuacionMaximaActividad = (actividad.getPuntuacion() != null) ? actividad.getPuntuacion() : 0;
         double notaMaxima = 10.0;
-        
-        // 2. Calculamos el valor de CADA pregunta basándonos en el TOTAL del test
+
         double valorPuntoPorPregunta = (double) puntuacionMaximaActividad / numPreguntasTotales;
         double valorNotaPorPregunta = notaMaxima / numPreguntasTotales;
 
         double puntuacionAcumulada = 0;
         double notaAcumulada = 0;
 
+        Map<Long, List<RespAlumnoGeneral>> respuestasPorPregunta = new HashMap<>();
+
         if (respuestasIds != null) {
             for (Long respuestaId : respuestasIds) {
-                // Este método DEBE comparar la respuesta del alumno con la correcta en la DB
-                boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneral(respuestaId);
-                
-                if (esCorrecta) {
-                    puntuacionAcumulada += valorPuntoPorPregunta;
-                    notaAcumulada += valorNotaPorPregunta;
+                RespuestaAlumno respuestaAlumno = respuestaAlumnoService.encontrarRespuestaAlumnoPorId(respuestaId);
+                if (respuestaAlumno == null) {
+                    throw new ResourceNotFoundException("RespuestaAlumno", "id", respuestaId);
                 }
-                else {
-                    puntuacionAcumulada -= valorPuntoPorPregunta / 2;
-                    notaAcumulada -= valorNotaPorPregunta / 2;
-                    
+                if (!(respuestaAlumno instanceof RespAlumnoGeneral respGeneral)) {
+                    throw new IllegalArgumentException("La respuesta con id " + respuestaId + " no es de tipo test");
                 }
+                if (!respGeneral.getActividadAlumno().getId().equals(actividadAlumno.getId())) {
+                    throw new IllegalArgumentException(
+                        "La respuesta con id " + respuestaId + " no pertenece a la actividad del alumno con id " + actividadAlumno.getId()
+                    );
+                }
+                if (respGeneral.getPregunta() == null || respGeneral.getPregunta().getId() == null) {
+                    throw new IllegalArgumentException("La respuesta con id " + respuestaId + " no tiene pregunta asociada");
+                }
+                if (!actividadGeneral.getPreguntas().stream().anyMatch(p -> p.getId().equals(respGeneral.getPregunta().getId()))) {
+                    throw new IllegalArgumentException("La respuesta con id " + respuestaId + " no pertenece a una pregunta de este test");
+                }
+
+                respuestasPorPregunta
+                    .computeIfAbsent(respGeneral.getPregunta().getId(), ignored -> new ArrayList<>())
+                    .add(respGeneral);
             }
         }
 
-        // 3. Guardar y redondear
+        for (Pregunta pregunta : actividadGeneral.getPreguntas()) {
+            Set<String> correctasEsperadas = pregunta.getRespuestasMaestro().stream()
+                .filter(r -> Boolean.TRUE.equals(r.getCorrecta()))
+                .map(r -> r.getRespuesta() == null ? "" : r.getRespuesta().strip().toLowerCase())
+                .collect(java.util.stream.Collectors.toSet());
+
+            Set<String> seleccionadasAlumno = respuestasPorPregunta
+                .getOrDefault(pregunta.getId(), List.of())
+                .stream()
+                .map(r -> r.getRespuesta() == null ? "" : r.getRespuesta().strip().toLowerCase())
+                .collect(java.util.stream.Collectors.toSet());
+
+            boolean preguntaCorrecta =
+                !seleccionadasAlumno.isEmpty()
+                && !correctasEsperadas.isEmpty()
+                && seleccionadasAlumno.equals(correctasEsperadas);
+
+            if (preguntaCorrecta) {
+                puntuacionAcumulada += valorPuntoPorPregunta;
+                notaAcumulada += valorNotaPorPregunta;
+            } else {
+                puntuacionAcumulada -= valorPuntoPorPregunta / 2;
+                notaAcumulada -= valorNotaPorPregunta / 2;
+            }
+        }
+
         if(puntuacionAcumulada < 0) {
             puntuacionAcumulada = 0;
         }

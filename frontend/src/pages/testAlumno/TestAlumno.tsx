@@ -22,6 +22,7 @@ type PreguntaDTO = {
   readonly pregunta: string;
   readonly imagen: string | null;
   readonly respuestas: RespuestaDTO[];
+  readonly numRespuestasCorrectas?: number | null;
 };
 
 type GeneralTestDTO = {
@@ -46,7 +47,8 @@ type RespAlumnoGeneralCreateResponse = {
 type QuestionResult = {
   readonly correcta: boolean;
   readonly comentario: string;
-  readonly selectedText: string;
+  readonly selectedIds: number[];
+  readonly selectedCorrectById: Map<number, boolean>;
 };
 
 type ActividadAlumnoDTO = { readonly id: number };
@@ -77,8 +79,8 @@ export default function TestAlumno() {
 
   const [test, setTest] = useState<GeneralTestDTO | null>(null);
   const [actividadAlumnoId, setActividadAlumnoId] = useState<number | null>(null);
-  // preguntaId → selected respuesta ID (not text, to avoid duplicate-text false-matches)
-  const [selections, setSelections] = useState<Map<number, number>>(new Map());
+  // preguntaId -> set of selected respuesta IDs
+  const [selections, setSelections] = useState<Map<number, Set<number>>>(new Map());
   const [results, setResults] = useState<Map<number, QuestionResult>>(new Map());
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -178,7 +180,10 @@ export default function TestAlumno() {
 
   const allAnswered = useMemo(() => {
     if (!test) return false;
-    return test.preguntas.every((p) => selections.has(p.id));
+    return test.preguntas.every((p) => {
+      const selected = selections.get(p.id);
+      return selected != null && selected.size > 0;
+    });
   }, [test, selections]);
 
   const totalPreguntas = test?.preguntas.length ?? 0;
@@ -192,7 +197,17 @@ export default function TestAlumno() {
 
   const handleSelect = (preguntaId: number, respuestaId: number) => {
     if (submitted) return;
-    setSelections((prev) => new Map(prev).set(preguntaId, respuestaId));
+    setSelections((prev) => {
+      const next = new Map(prev);
+      const current = new Set(next.get(preguntaId) ?? []);
+      if (current.has(respuestaId)) {
+        current.delete(respuestaId);
+      } else {
+        current.add(respuestaId);
+      }
+      next.set(preguntaId, current);
+      return next;
+    });
   };
 
   const handleNext = () => {
@@ -212,27 +227,52 @@ export default function TestAlumno() {
       const respuestasIds: number[] = [];
       const resultEntries = await Promise.all(
         test.preguntas.map(async (p) => {
-          const selectedId = selections.get(p.id)!;
+          const selectedIds = Array.from(selections.get(p.id) ?? []);
 
-          const res = await apiFetch(`${apiBase}/api/respuestas-alumno-general`, {
-            method: 'POST',
-            body: JSON.stringify({
-              actividadAlumnoId,
-              preguntaId: p.id,
-              respuestaId: selectedId,
+          const optionResponses = await Promise.all(
+            selectedIds.map(async (selectedId) => {
+              const res = await apiFetch(`${apiBase}/api/respuestas-alumno-general`, {
+                method: 'POST',
+                body: JSON.stringify({
+                  actividadAlumnoId,
+                  preguntaId: p.id,
+                  respuestaId: selectedId,
+                }),
+              });
+              const data = (await res.json()) as RespAlumnoGeneralCreateResponse;
+              return { selectedId, data };
             }),
-          });
-          const data = (await res.json()) as RespAlumnoGeneralCreateResponse;
-          if (data.id) {
-      respuestasIds.push(data.id);
-    }
-         return [p.id, {
-      correcta: Boolean(data?.correcta),
-      comentario: data?.comentario || '',
-      selectedText: p.respuestas.find((r) => r.id === selectedId)?.respuesta ?? '',
-    }] as [number, QuestionResult];
-  })
-);
+          );
+
+          const selectedCorrectById = new Map<number, boolean>();
+          let comentario = '';
+          let selectedCorrectCount = 0;
+
+          for (const { selectedId, data } of optionResponses) {
+            if (data.id) respuestasIds.push(data.id);
+            const optionCorrect = Boolean(data?.correcta);
+            selectedCorrectById.set(selectedId, optionCorrect);
+            if (optionCorrect) selectedCorrectCount++;
+            if (!comentario && data?.comentario) comentario = data.comentario;
+          }
+
+          const numCorrectasEsperadas = Math.max(1, Number(p.numRespuestasCorrectas ?? 1));
+          const correctaPregunta =
+            selectedIds.length > 0 &&
+            selectedCorrectCount === selectedIds.length &&
+            selectedIds.length === numCorrectasEsperadas;
+
+          return [
+            p.id,
+            {
+              correcta: correctaPregunta,
+              comentario,
+              selectedIds,
+              selectedCorrectById,
+            },
+          ] as [number, QuestionResult];
+        }),
+      );
 
       if (respuestasIds.length > 0) {
     await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
@@ -311,7 +351,7 @@ export default function TestAlumno() {
   }
 
   let answeredBadgeText: string | null = null;
-  if (currentPregunta && selections.has(currentPregunta.id)) {
+  if (currentPregunta && (selections.get(currentPregunta.id)?.size ?? 0) > 0) {
     if (submitted) {
       answeredBadgeText = results.get(currentPregunta.id)?.correcta ? '✓ Correcta' : '✗ Incorrecta';
     } else {
@@ -380,7 +420,7 @@ export default function TestAlumno() {
               <span className="ta-question-counter-text">
                 Pregunta {currentIndex + 1} de {totalPreguntas}
               </span>
-              {selections.has(currentPregunta.id) && (
+              {(selections.get(currentPregunta.id)?.size ?? 0) > 0 && (
                 <span className="ta-answered-badge">
                   {answeredBadgeText}
                 </span>
@@ -401,8 +441,8 @@ export default function TestAlumno() {
 
               <div className="ta-options">
                 {currentPregunta.respuestas.map((r, oi) => {
-                  const selectedId = selections.get(currentPregunta.id);
-                  const isSelected = selectedId === r.id;
+                  const selectedIds = selections.get(currentPregunta.id) ?? new Set<number>();
+                  const isSelected = selectedIds.has(r.id);
                   const result = results.get(currentPregunta.id);
 
                   let optClass = 'ta-option';
@@ -425,7 +465,7 @@ export default function TestAlumno() {
                       <span className="ta-option-letter">{String.fromCharCode(65 + oi)}.</span>
                       <span className="ta-option-text">{r.respuesta}</span>
                       {submitted && isSelected && (
-                        <span className="ta-option-icon">{result?.correcta ? '✓' : '✗'}</span>
+                        <span className="ta-option-icon">{result?.selectedCorrectById.get(r.id) ? '✓' : '✗'}</span>
                       )}
                     </button>
                   );
