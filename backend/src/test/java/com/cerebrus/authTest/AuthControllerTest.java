@@ -148,7 +148,7 @@ class AuthControllerTest {
 
 		Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
 		UserDetailsImpl principal = new UserDetailsImpl(7L, "alumno1", "pass",
-				List.of(new SimpleGrantedAuthority("ALUMNO")));
+				true, List.of(new SimpleGrantedAuthority("ALUMNO")));
 
 		Long organizacionId = 100L;
 		Organizacion mockOrg = new Organizacion();

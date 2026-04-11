@@ -69,9 +69,9 @@ class UserDetailsImplTest {
     // Verificar que equals y hashCode se basan solo en el id
     @Test
     void equals_yHashCode_seBasenEnId() {
-        UserDetailsImpl a = new UserDetailsImpl(10L, "u1", "p1", List.of());
-        UserDetailsImpl b = new UserDetailsImpl(10L, "u2", "p2", List.of());
-        UserDetailsImpl c = new UserDetailsImpl(11L, "u1", "p1", List.of());
+        UserDetailsImpl a = new UserDetailsImpl(10L, "u1", "p1", true, List.of());
+        UserDetailsImpl b = new UserDetailsImpl(10L, "u2", "p2", true, List.of());
+        UserDetailsImpl c = new UserDetailsImpl(11L, "u1", "p1", true, List.of());
 
         assertThat(a).isEqualTo(b);
         assertThat(a.hashCode()).isEqualTo(b.hashCode());
@@ -81,7 +81,7 @@ class UserDetailsImplTest {
     // Test para verificar que cuando el user es null o de distinta clase, el método equals devuelve false
     @Test
     void equals_cuandoEsNullODistintaClase_devuelveFalse() {
-        UserDetailsImpl a = new UserDetailsImpl(10L, "u1", "p1", List.of());
+        UserDetailsImpl a = new UserDetailsImpl(10L, "u1", "p1", true, List.of());
         assertThat(a.equals(null)).isFalse();
         assertThat(a.equals("otro")).isFalse();
     }
@@ -89,7 +89,7 @@ class UserDetailsImplTest {
     // Test para verificar que los métodos de flags de cuenta devuelven true
     @Test
     void flagsDeCuenta_sonTrue() {
-        UserDetailsImpl a = new UserDetailsImpl(10L, "u1", "p1", List.of());
+        UserDetailsImpl a = new UserDetailsImpl(10L, "u1", "p1", true, List.of());
         assertThat(a.isAccountNonExpired()).isTrue();
         assertThat(a.isAccountNonLocked()).isTrue();
         assertThat(a.isCredentialsNonExpired()).isTrue();

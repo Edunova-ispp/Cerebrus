@@ -34,6 +34,8 @@ import EstadisticasTema from "./pages/estadisticasCurso/EstadisticasTema.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import PreguntaAbiertaAlumno from "./pages/preguntaAbiertaAlumno/PreguntaAbiertaAlumno.tsx";
 import TermsPage from "./pages/legal/TermsPage.tsx";
+import EdunovaPage from "./pages/edunova/EdunovaPage.tsx";
+
 import Subscripcion from "./pages/subscripcion/Subscripcion.tsx";
 import ResumenSuscripcion from "./pages/subscripcion/ResumenSuscripcion.tsx";
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
@@ -85,6 +87,17 @@ function App() {
   return (
     <WatchbugErrorBoundary>
       <Routes>
+      {/* Rutas públicas */}
+      <Route path="/terminos" element={<TermsPage />} />
+      <Route path="/deploy_testing" element={<DeployTesting />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/edunova" element={<EdunovaPage />} />
+      <Route path="/auth/login"    element={<LoginPage />} />
+      <Route path="/auth/register"    element={<RegisterPage />} />
+      <Route path="/auth/logout"    element={<LogoutPage />} />
+      <Route path="/infoAlumnos"   element={<InfoPage userType="alumno" />} />
+      <Route path="/infoProfesores" element={<InfoPage userType="profesor" />} />
+      <Route path="/infoDueños"    element={<InfoPage userType="dueno" />} />
         {/* Rutas públicas */}
         <Route path="/terminos" element={<TermsPage />} />
         <Route path="/deploy_testing" element={<DeployTesting />} />

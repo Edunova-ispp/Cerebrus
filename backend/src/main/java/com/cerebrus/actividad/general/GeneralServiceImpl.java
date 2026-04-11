@@ -320,7 +320,16 @@ public class GeneralServiceImpl implements GeneralService {
                 .stream()
                 .map(r -> new RespuestaDTO(r.getId(), r.getRespuesta()))
                 .toList();
-            return new PreguntaDTO(pregunta.getId(), pregunta.getPregunta(), pregunta.getImagen(), respuestasDTO);
+            int numRespuestasCorrectas = (int) pregunta.getRespuestasMaestro().stream()
+                .filter(r -> Boolean.TRUE.equals(r.getCorrecta()))
+                .count();
+            return new PreguntaDTO(
+                pregunta.getId(),
+                pregunta.getPregunta(),
+                pregunta.getImagen(),
+                respuestasDTO,
+                numRespuestasCorrectas
+            );
         }).toList();
 
         List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();

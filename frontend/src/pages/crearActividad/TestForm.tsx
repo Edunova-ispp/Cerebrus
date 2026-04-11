@@ -145,11 +145,16 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
       ),
     );
 
-  const setCorrect = (qi: number, oi: number) =>
+  const toggleCorrect = (qi: number, oi: number) =>
     setQuestions((prev) =>
       prev.map((q, i) =>
         i === qi
-          ? { ...q, options: q.options.map((opt, j) => ({ ...opt, correcta: j === oi })) }
+          ? {
+              ...q,
+              options: q.options.map((opt, j) =>
+                j === oi ? { ...opt, correcta: !opt.correcta } : opt,
+              ),
+            }
           : q,
       ),
     );
@@ -179,7 +184,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
           return `La opción ${oi + 1} de la pregunta ${qi + 1} está vacía`;
       }
       if (!q.options.some((o) => o.correcta))
-        return `Una de las respuestas debe ser marcada como correcta`;
+        return `Marca al menos una respuesta correcta en la pregunta ${qi + 1}`;
     }
 
     if (mode === 'edit' && !generalId) return 'Falta el id de la actividad a editar';
@@ -477,7 +482,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
 
       <div className="tf-questions">
           <p className="tf-help">
-            Añade las preguntas y opciones. Marca cuál es la correcta con <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
+            Añade las preguntas y opciones. Marca todas las correctas con <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
           </p>
 
           {questions.map((q, qi) => (
@@ -521,8 +526,8 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
                     <button
                       type="button"
                       className={`tf-btn-correct${opt.correcta ? ' tf-btn-correct--active' : ''}`}
-                      onClick={() => setCorrect(qi, oi)}
-                      title={opt.correcta ? 'Respuesta correcta' : 'Marcar como correcta'}
+                      onClick={() => toggleCorrect(qi, oi)}
+                      title={opt.correcta ? 'Respuesta correcta (clic para desmarcar)' : 'Marcar como correcta'}
                     >
                       ✓
                     </button>
