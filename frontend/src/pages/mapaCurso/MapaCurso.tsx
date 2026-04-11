@@ -5,17 +5,24 @@ import { getCurrentUserInfo } from '../../types/curso';
 import { apiFetch, fetchProgresoAlumno } from '../../utils/api';
 import './MapaCurso.css';
 
-import inicialMapIcon from '../../assets/props/mapa/act_mapa_inicial.svg';
+// --- ICONOS DE ACTIVIDADES ---
 import abiertaMapIcon from '../../assets/props/mapa/act_mapa_abierta.svg';
 import cartaMapIcon from '../../assets/props/mapa/act_mapa_carta.svg';
 import clasificacionMapIcon from '../../assets/props/mapa/act_mapa_clasificacion.svg';
 import crucigramaMapIcon from '../../assets/props/mapa/act_mapa_crucigrama.svg';
 import imagenMapIcon from '../../assets/props/mapa/act_mapa_imagen.svg';
+import inicialMapIcon from '../../assets/props/mapa/act_mapa_inicial.svg';
+import ordenMapIcon from '../../assets/props/mapa/act_mapa_orden.svg';
 import tableroMapIcon from '../../assets/props/mapa/act_mapa_tablero.svg';
 import teoriaMapIcon from '../../assets/props/mapa/act_mapa_teoria.svg';
 import testMapIcon from '../../assets/props/mapa/act_mapa_test.svg';
-import ordenMapIcon from '../../assets/props/mapa/act_mapa_orden.svg';
-import mascotaMapIcon from '../../assets/props/mapa/mapa_mascota.svg';
+
+import niv3 from '../../assets/props/Cerbero_despierto_niv3.png';
+import niv2 from '../../assets/props/Guardian_de_la_primera_cabeza_niv2.png';
+import niv1 from '../../assets/props/perritoCerberito.png';
+import niv5 from '../../assets/props/Rey_de_cerebrus_niv5.png';
+import niv4 from '../../assets/props/Vigia_de_las_tres_mentes_niv4.png';
+
 
 type ActividadDTO = {
   readonly id: number;
@@ -38,6 +45,7 @@ type TemaDTO = {
   readonly actividades: ActividadDTO[];
 };
 
+// Determina el icono según el tipo de actividad
 function getActivityIconSrc(tipo: string, posicion: number): string {
   const tipoUpper = (tipo ?? '').toUpperCase();
   if (tipoUpper.includes('TEORIA')) return teoriaMapIcon;
@@ -49,16 +57,22 @@ function getActivityIconSrc(tipo: string, posicion: number): string {
   if (tipoUpper.includes('IMAGEN')) return imagenMapIcon;
   if (tipoUpper.includes('CARTA')) return cartaMapIcon;
   if (tipoUpper.includes('ABIERTA')) return abiertaMapIcon;
-  if (tipoUpper.includes('CRUCIGRAMA')) return clasificacionMapIcon;
   if (posicion === 0) return inicialMapIcon;
-  return abiertaMapIcon; // Icono por defecto si no se reconoce el tipo
+  return abiertaMapIcon;
+}
+
+function getMascotaEvolucionada(puntos: number): string {
+  if (puntos <= 100) return niv1;
+  if (puntos <= 300) return niv2;
+  if (puntos <= 600) return niv3;
+  if (puntos <= 1000) return niv4;
+  return niv5;
 }
 
 function getNodeBgColor(index: number): string {
   return index % 2 === 0 ? '#D10057' : '#7C4DFF';
 }
 
-// Helper para el ID del alumno
 function getCurrentUserIdFromJwt(): number | null {
   const info = getCurrentUserInfo();
   if (!info) return null;
@@ -74,101 +88,93 @@ export default function MapaCurso() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [puntosAlumno, setPuntosAlumno] = useState(0); // <-- NUEVO ESTADO PARA LOS PUNTOS
+
   const mapContainerRef = useRef<HTMLOListElement | null>(null);
   const [mapRowSize, setMapRowSize] = useState(6);
-
   const [completionMap, setCompletionMap] = useState<Map<number, CompletionInfo>>(new Map());
   const [loadingCompletion, setLoadingCompletion] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Responsividad del mapa
   useEffect(() => {
     const el = mapContainerRef.current;
     if (!el) return;
-
-    const win = globalThis as unknown as Window;
-
     const compute = () => {
       const width = el.getBoundingClientRect().width;
       const nextSize = width >= 980 ? 6 : width >= 820 ? 5 : width >= 640 ? 4 : 3;
-      setMapRowSize((prev) => (prev === nextSize ? prev : nextSize));
+      setMapRowSize(nextSize);
     };
-
     compute();
-
-    const ResizeObserverCtor = (globalThis as any).ResizeObserver as (typeof ResizeObserver) | undefined;
-    if (typeof ResizeObserverCtor !== 'undefined') {
-      const ro = new ResizeObserverCtor(() => compute());
-      ro.observe(el);
-      return () => ro.disconnect();
-    }
-
-    win.addEventListener('resize', compute);
-    return () => win.removeEventListener('resize', compute);
+    const ro = new ResizeObserver(() => compute());
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
-useEffect(() => {
+  // Carga de datos iniciales (Temas + Puntos del Alumno)
+  useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     if (!cursoId) return;
 
-    const cargarTemas = async () => {
+    const cargarTodo = async () => {
+      setLoading(true);
       setError('');
-      console.log('[MapaCurso] Cargando temas/actividades', { cursoId });
+      const alumnoId = getCurrentUserIdFromJwt();
+      const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
-      // Comprobar si el curso está completado → redirigir a misCursos
+      // 1. Intentar traer puntos (bloque independiente)
+      if (alumnoId) {
+        try {
+          const resAl = await apiFetch(`${apiBase}/api/alumnos/mi-puntuacion-total`);
+          console.log('[MapaCurso] Respuesta de puntos:', resAl);
+          if (resAl.ok) {
+            const dataAl = await resAl.json();
+            // Asegúrate de que el backend devuelve un objeto con la propiedad 'puntos'
+            setPuntosAlumno(dataAl || 0);
+          }
+        } catch (e) {
+          // Si falla, solo avisamos por consola pero seguimos adelante
+          console.warn('[MapaCurso] No se pudo cargar la evolución, usando nivel inicial.', e);
+          setPuntosAlumno(0);
+        }
+      }
+
+      // 2. Cargar el resto del mapa (temas y progreso)
       try {
         const prog = await fetchProgresoAlumno(Number(cursoId));
         if (prog.estado === 'TERMINADA') {
           navigate('/misCursos', { replace: true });
           return;
         }
+
+        const resTemas = await apiFetch(`${apiBase}/api/temas/curso/${cursoId}/alumno`);
+        const dataTemas = await resTemas.json();
+        setTemas(Array.isArray(dataTemas) ? dataTemas : []);
+        setSelectedIndex(0);
+
       } catch (e) {
-        console.error('[MapaCurso] Error comprobando progreso', e);
+        console.error('[MapaCurso] Error cargando datos del mapa', e);
+        setError('No se pudo cargar la información del curso.');
+      } finally {
+        setLoading(false);
       }
-      
-      apiFetch(`${apiBase}/api/temas/curso/${cursoId}/alumno`)
-        .then(async (r) => {
-          const data = await r.json();
-          console.log('[MapaCurso] Temas recibidos', data);
-          return data;
-        })
-        .then((data: TemaDTO[]) => {
-          setTemas(Array.isArray(data) ? data : []);
-          setSelectedIndex(0);
-        })
-        .catch((e) => {
-          console.error('[MapaCurso] Error cargando temas/actividades', e);
-          setTemas([]);
-          setSelectedIndex(0);
-          setError(e instanceof Error ? e.message : String(e));
-        })
-        .finally(() => setLoading(false));
     };
 
-    cargarTemas();
+    cargarTodo();
   }, [cursoId, navigate]);
 
+  // Lógica de carga de completitud de actividades (checks)
   useEffect(() => {
     const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     const tema = temas[selectedIndex];
-    if (!tema || tema.actividades.length === 0) {
-      setLoadingCompletion(false);
-      return;
-    }
-
-    const unchecked = tema.actividades;
-    if (unchecked.length === 0) {
-      setLoadingCompletion(false);
-      return;
-    }
-
     const alumnoId = getCurrentUserIdFromJwt();
-    if (!alumnoId) {
+
+    if (!tema || tema.actividades.length === 0 || !alumnoId) {
       setLoadingCompletion(false);
       return;
     }
 
     setLoadingCompletion(true);
-
     Promise.all(
       tema.actividades.map((act) =>
         apiFetch(`${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${act.id}`)
@@ -207,15 +213,19 @@ useEffect(() => {
 
   const handleActivityClick = (act: ActividadDTO) => {
     const tipoReal = act.tipo ? act.tipo.toUpperCase() : '';
-    if (tipoReal === 'TEORIA') navigate(`/actividades/teoria/${act.id}`);
-    else if (tipoReal === 'TEST' || tipoReal === 'GENERAL') navigate(`/generales/test/${act.id}/alumno`);
-    else if (tipoReal === 'ORDENACION') navigate(`/ordenaciones/${act.id}/alumno`);
-    else if (tipoReal === 'TABLERO') navigate(`/tableros/${act.id}/alumno`);
-    else if (tipoReal === 'CARTA') navigate(`/generales/carta/${act.id}/alumno`);
-    else if (tipoReal === 'MARCARIMAGEN') navigate(`/marcar-imagenes/${act.id}/alumno`);
-    else if (tipoReal === 'CLASIFICACION') navigate(`/clasificaciones/${act.id}/alumno`);
-    else if (tipoReal === 'CRUCIGRAMA') navigate(`/crucigrama/${act.id}/alumno`);
-    else if (tipoReal === 'ABIERTA') navigate(`/abierta/${act.id}/alumno`);
+    const rutas: Record<string, string> = {
+      'TEORIA': `/actividades/teoria/${act.id}`,
+      'TEST': `/generales/test/${act.id}/alumno`,
+      'GENERAL': `/generales/test/${act.id}/alumno`,
+      'ORDENACION': `/ordenaciones/${act.id}/alumno`,
+      'TABLERO': `/tableros/${act.id}/alumno`,
+      'CARTA': `/generales/carta/${act.id}/alumno`,
+      'MARCARIMAGEN': `/marcar-imagenes/${act.id}/alumno`,
+      'CLASIFICACION': `/clasificaciones/${act.id}/alumno`,
+      'CRUCIGRAMA': `/crucigrama/${act.id}/alumno`,
+      'ABIERTA': `/abierta/${act.id}/alumno`,
+    };
+    if (rutas[tipoReal]) navigate(rutas[tipoReal]);
   };
 
   const selectedTema = temas[selectedIndex] ?? null;
@@ -240,45 +250,28 @@ useEffect(() => {
 
     const states = sortedActividades.map((act) => {
       const info = completionMap.get(act.id);
-      const done = info?.done ?? false;
-      const terminada = info?.terminada ?? false;
-      return {
-        id: act.id,
-        state: terminada ? 'terminada' : done ? 'iniciada' : 'pendiente',
-      } as const;
+      return info?.terminada ? 'terminada' : (info?.done ? 'iniciada' : 'pendiente');
     });
 
-    states.forEach((s) => {
-      if (s.state === 'terminada') ids.add(s.id);
-    });
-
-    const firstNotCompletedIndex = states.findIndex((s) => s.state !== 'terminada');
+    const firstNotCompletedIndex = states.findIndex((s) => s !== 'terminada');
     if (firstNotCompletedIndex === -1) {
-      // Todo completado: deja todo desbloqueado.
-      states.forEach((s) => ids.add(s.id));
+      sortedActividades.forEach(a => ids.add(a.id));
       return ids;
     }
-
-    for (let i = 0; i <= firstNotCompletedIndex; i++) ids.add(states[i]!.id);
+    for (let i = 0; i <= firstNotCompletedIndex; i++) ids.add(sortedActividades[i].id);
     return ids;
   }, [sortedActividades, completionMap]);
 
   const mascotaActivityId = useMemo(() => {
     if (sortedActividades.length === 0) return null;
-
     const states = sortedActividades.map((act) => {
       const info = completionMap.get(act.id);
-      const done = info?.done ?? false;
-      const terminada = info?.terminada ?? false;
-      return {
-        id: act.id,
-        state: terminada ? 'terminada' : done ? 'iniciada' : 'pendiente',
-      } as const;
+      return info?.terminada ? 'terminada' : 'pendiente';
     });
-
-    const firstNotCompletedIndex = states.findIndex((s) => s.state !== 'terminada');
-    if (firstNotCompletedIndex === -1) return states[states.length - 1]!.id; // todo terminado -> última actividad
-    return states[firstNotCompletedIndex]!.id;
+    const firstNotCompletedIndex = states.findIndex((s) => s !== 'terminada');
+    return firstNotCompletedIndex === -1 
+      ? sortedActividades[sortedActividades.length - 1].id 
+      : sortedActividades[firstNotCompletedIndex].id;
   }, [sortedActividades, completionMap]);
 
   return (
@@ -301,102 +294,62 @@ useEffect(() => {
           </aside>
 
           <section className="mapa-activities">
-            {(loading || loadingCompletion) && (
-              <p className="mapa-feedback">Cargando actividades...</p>
-            )}
-
+            {(loading || loadingCompletion) && <p className="mapa-feedback">Cargando actividades...</p>}
+            
             {!loading && !loadingCompletion && error && (
-              <p className="mapa-feedback mapa-feedback--error">
-                No se pudieron cargar los temas/actividades ({error}).
-              </p>
-            )}
-
-            {!loading && !loadingCompletion && !error && temas.length === 0 && (
-              <p className="mapa-feedback">
-                Este curso todavía no tiene temas o no tienes acceso.
-              </p>
+              <p className="mapa-feedback mapa-feedback--error">{error}</p>
             )}
 
             {selectedTema && !loading && !loadingCompletion && !error && (
               <>
                 <h2 className="mapa-activities-title">{selectedTema.titulo}</h2>
-
-                {selectedTema.actividades.length === 0 && (
-                  <p className="mapa-feedback">
-                    Este tema no tiene actividades todavía.
-                  </p>
-                )}
-
                 <ol className="mapa-activities-map" ref={mapContainerRef}>
                   {actividadRows.map((row, rowIndex) => {
                     const reverse = rowIndex % 2 === 1;
                     const rowActs = reverse ? [...row].reverse() : row;
-
                     const firstInRowLinearIndex = rowIndex * mapRowSize;
-                    const renderedRow = (
-                      <li key={`row-${row[0]?.id ?? 'empty'}-${row[row.length - 1]?.id ?? 'empty'}`} className="mapa-map-row-item">
+
+                    return (
+                      <li key={`row-${rowIndex}`} className="mapa-map-row-item">
                         <div className={`mapa-map-row${reverse ? ' mapa-map-row--reverse' : ''}`}>
                           {rowActs.map((act, localIndex) => {
                             const linearIndex = firstInRowLinearIndex + (reverse ? row.length - 1 - localIndex : localIndex);
-
                             const info = completionMap.get(act.id);
-                            const done = info?.done ?? false;
-                            const terminada = info?.terminada ?? false;
-                            const state = terminada ? 'terminada' : done ? 'iniciada' : 'pendiente';
-                            const isUnlocked = unlockedActivityIds.has(act.id);
-                            const locked = !isUnlocked;
-
-                            const tipo = (act.tipo ?? '').toUpperCase();
-                            const navigableType = ['TEST', 'GENERAL', 'ORDENACION', 'TEORIA', 'CLASIFICACION', 'MARCARIMAGEN', 'TABLERO', 'CARTA', 'CRUCIGRAMA', 'ABIERTA' ].includes(tipo);
-
-                            const iconSrc = getActivityIconSrc(tipo, act.posicion);
+                            const state = info?.terminada ? 'terminada' : (info?.done ? 'iniciada' : 'pendiente');
+                            const locked = !unlockedActivityIds.has(act.id);
                             const nodeBg = getNodeBgColor(linearIndex);
-
-                            const isLastInRow = localIndex === rowActs.length - 1;
-                            const nextAct = !isLastInRow ? rowActs[localIndex + 1] : null;
-                            const connectorLocked = nextAct
-                              ? !unlockedActivityIds.has(nextAct.id) || mascotaActivityId === nextAct.id
-                              : false;
+                            const iconSrc = getActivityIconSrc(act.tipo, act.posicion);
 
                             return (
                               <div key={act.id} className="mapa-map-node">
                                 <div className="mapa-map-node-anchor">
                                   <button
                                     type="button"
-                                    className={`mapa-map-node-btn${navigableType ? '' : ' mapa-map-node-btn--disabled'}`}
-                                    aria-disabled={!navigableType || locked}
+                                    className="mapa-map-node-btn"
+                                    aria-disabled={locked}
                                     data-state={state}
-                                    data-locked={locked ? 'true' : 'false'}
+                                    data-locked={locked}
                                     style={{ ['--node-bg' as any]: nodeBg }}
-                                    onClick={() => navigableType && !locked && handleActivityClick(act)}
+                                    onClick={() => !locked && handleActivityClick(act)}
                                   >
-                                    <img
-                                      className="mapa-map-node-icon"
-                                      src={iconSrc}
-                                      alt=""
-                                      aria-hidden="true"
-                                    />
+                                    <img className="mapa-map-node-icon" src={iconSrc} alt="" />
                                   </button>
 
                                   {mascotaActivityId === act.id && (
                                     <img
                                       className="mapa-map-mascota"
-                                      src={mascotaMapIcon}
-                                      alt=""
+                                      src={getMascotaEvolucionada(puntosAlumno)}
+                                      alt="Cerbero"
                                       aria-hidden="true"
                                     />
                                   )}
                                 </div>
-
-                                <span className="mapa-map-tooltip" role="tooltip">
-                                  {act.titulo}
-                                </span>
-
-                                {!isLastInRow && (
+                                <span className="mapa-map-tooltip">{act.titulo}</span>
+                                
+                                {localIndex < rowActs.length - 1 && (
                                   <span
                                     className="mapa-map-connector"
-                                    aria-hidden="true"
-                                    data-locked={connectorLocked ? 'true' : 'false'}
+                                    data-locked={!unlockedActivityIds.has(rowActs[localIndex + 1]?.id)} 
                                     style={{ ['--conn-color' as any]: nodeBg }}
                                   />
                                 )}
@@ -404,28 +357,16 @@ useEffect(() => {
                             );
                           })}
                         </div>
-
-                        {rowIndex < actividadRows.length - 1 && rowActs.length > 0 && (
-                          (() => {
-                            const nextRowFirst = sortedActividades[(rowIndex + 1) * mapRowSize];
-                            const turnLocked = nextRowFirst
-                              ? !unlockedActivityIds.has(nextRowFirst.id) || mascotaActivityId === nextRowFirst.id
-                              : false;
-
-                            return (
+                        {/* Conector de giro entre filas */}
+                        {rowIndex < actividadRows.length - 1 && (
                           <div
                             className={`mapa-map-turn${reverse ? ' mapa-map-turn--left' : ' mapa-map-turn--right'}`}
-                            aria-hidden="true"
-                            data-locked={turnLocked ? 'true' : 'false'}
+                            data-locked={!unlockedActivityIds.has(sortedActividades[(rowIndex + 1) * mapRowSize]?.id)}
                             style={{ ['--conn-color' as any]: getNodeBgColor(firstInRowLinearIndex + row.length - 1) }}
                           />
-                            );
-                          })()
                         )}
                       </li>
                     );
-
-                    return renderedRow;
                   })}
                 </ol>
               </>
