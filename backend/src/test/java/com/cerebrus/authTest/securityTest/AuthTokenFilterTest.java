@@ -95,6 +95,7 @@ class AuthTokenFilterTest {
 				7L,
 				"alumno1",
 				"pass",
+				true,
 				List.of(new SimpleGrantedAuthority("ALUMNO")));
 		when(userDetailsService.loadUserByUsername("alumno1")).thenReturn(userDetails);
 
