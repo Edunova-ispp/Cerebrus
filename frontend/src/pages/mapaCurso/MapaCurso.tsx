@@ -126,7 +126,6 @@ export default function MapaCurso() {
       if (alumnoId) {
         try {
           const resAl = await apiFetch(`${apiBase}/api/alumnos/mi-puntuacion-total`);
-          console.log('[MapaCurso] Respuesta de puntos:', resAl);
           if (resAl.ok) {
             const dataAl = await resAl.json();
             // Asegúrate de que el backend devuelve un objeto con la propiedad 'puntos'
