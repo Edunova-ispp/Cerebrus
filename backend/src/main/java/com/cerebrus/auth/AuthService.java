@@ -41,9 +41,8 @@ public class AuthService {
     @Value("${brevo.sender.name:}")
     private String brevoSenderName;
 
-    public AuthService(UsuarioRepository usuarioRepository, 
-                       PasswordEncoder passwordEncoder, 
-                       OrganizacionRepository organizacionRepository) {
+    public AuthService(UsuarioRepository usuarioRepository,
+        PasswordEncoder passwordEncoder, OrganizacionRepository organizacionRepository) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.organizacionRepository = organizacionRepository;

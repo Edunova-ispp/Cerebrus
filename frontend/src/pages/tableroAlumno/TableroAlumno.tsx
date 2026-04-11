@@ -304,7 +304,7 @@ export default function TableroAlumno() {
 
   // Variables de finalización
   const size = tablero?.tamano ? 3 : 4;
-  const completionTarget = tablero?.tamano ? 6 : 10;
+  const completionTarget = tablero?.tamano ? 8 : 15;
   const isComplete = answeredSet.size >= completionTarget;
 
   // Registrar el final de la actividad (¡Termina el tiempo!)

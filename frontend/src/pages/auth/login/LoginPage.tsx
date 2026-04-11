@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import logo from "../../../assets/logo.png";
 import "./LoginPage.css";
-
-export type UserType = "alumno" | "profesor" | "dueno";
 
 const Login = () => {
   const [identificador, setIdentificador] = useState('');
@@ -11,50 +9,86 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   
+  // Estados para la activación de cuenta
+  const [searchParams] = useSearchParams();
+  const [manualCode, setManualCode] = useState(''); 
+  const [mensajeActivacion, setMensajeActivacion] = useState<{ texto: string, tipo: 'ok' | 'err' } | null>(null);
+  const [loadingCode, setLoadingCode] = useState(false);
+  
   const navigate = useNavigate();
+  const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  // 1. LÓGICA AUTOMÁTICA: Detecta el código si viene en la URL (?confirmCode=12345678)
+  useEffect(() => {
+    const codeFromUrl = searchParams.get('confirmCode');
+    if (codeFromUrl) {
+      activarCuenta(codeFromUrl);
+    }
+  }, [searchParams]);
+
+  // Función para activar cuenta (usada por link o por botón manual)
+  const activarCuenta = async (codigo: string) => {
+    setLoadingCode(true);
+    setMensajeActivacion(null);
+    try {
+      const response = await fetch(`${apiBase}/auth/confirm-email/${codigo}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMensajeActivacion({ texto: "✅ ¡Cuenta activada! Ya puedes iniciar sesión.", tipo: 'ok' });
+        setManualCode(''); 
+        setError(''); // Limpiamos errores de login previos
+      } else {
+        setMensajeActivacion({ texto: `❌ ${data.message || 'Código inválido'}`, tipo: 'err' });
+      }
+    } catch (err) {
+      setMensajeActivacion({ texto: "❌ Error de conexión al activar.", tipo: 'err' });
+    } finally {
+      setLoadingCode(false);
+    }
+  };
+
+  const handleLogin = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
     try {
-      const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
       const response = await fetch(`${apiBase}/auth/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identificador, password }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
-        
         localStorage.setItem('token', data.token);
         localStorage.setItem('username', data.username);
-        localStorage.setItem('role', data.roles[0]);
+        localStorage.setItem('role', data.roles);
 
-        const rolUsuario = String(data.roles[0]).toUpperCase();
-
-        if (rolUsuario.includes("ALUMNO")) {
+        const rolUsuario = String(data.roles).toUpperCase();
+        if (rolUsuario.includes("ALUMNO") || rolUsuario.includes("MAESTRO")) {
           navigate('/miscursos');
-        } 
-        else if (rolUsuario.includes("PROFESOR") || rolUsuario.includes("MAESTRO")) {
-          navigate('/miscursos');
-        } 
-        else if (rolUsuario.includes("DUEÑO") || rolUsuario.includes("DUENO") || rolUsuario.includes("DIRECTOR")) {
+        } else if (rolUsuario.includes("ORGANIZACION") || rolUsuario.includes("DUENO")) {
           navigate('/infoDueños');
-        } 
-        else {
+        } else {
           navigate('/');
         }
-
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        setError(errorData.message || 'Credenciales incorrectas. Inténtalo de nuevo.');
+        if (response.status === 403 && data.message === "CUENTA_NO_VERIFICADA") {
+          setError('⚠️ Cuenta no activada. Introduce el código enviado a tu email aquí abajo.');
+          
+          document.querySelector('.pixel-divider')?.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          setError(data.message || 'Credenciales incorrectas.');
+        }
       }
-    } catch {
-      setError('No se pudo conectar con el servidor. Verifica que el backend esté activo.');
+    } catch (err) {
+      setError('No se pudo conectar con el servidor.');
     }
   };
 
@@ -62,70 +96,86 @@ const Login = () => {
     <div className="login-page-container">
       <div className="login-box">
         
-        {/* LOGO + TITLE */}
+        {mensajeActivacion && (
+          <div className={`login-activation-banner ${mensajeActivacion.tipo}`}>
+            {mensajeActivacion.texto}
+          </div>
+        )}
+
         <div className="login-header">
-          <img src={logo} alt="Cerebrus Mascot" className="login-logo" />
+          <img src={logo} alt="Cerebrus Logo" className="login-logo" />
           <h2 className="login-title">Iniciar Sesión</h2>
         </div>
         
-        <form onSubmit={handleSubmit} className="login-form">
-          
-          {/* INPUT USUARIO */}
+        <form onSubmit={handleLogin} className="login-form">
           <div className="pixel-input-wrapper">
-            <label htmlFor="identificador">Usuario:</label>
+            <label htmlFor="identificador">Correo electrónico o Usuario:</label>
             <input 
               id="identificador"
               type="text" 
               value={identificador} 
               onChange={(e) => setIdentificador(e.target.value)} 
               required 
+              autoComplete="username"
             />
           </div>
 
-          {/* INPUT CONTRASEÑA */}
           <div className="pixel-input-wrapper">
             <label htmlFor="password">Contraseña:</label>
-            <input 
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
-            />
-            <button
-              type="button"
-              className="login-pw-toggle"
-              onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-            >
-              {showPassword ? '🙈' : '👁'}
-            </button>
-          </div>
-
-          {/* MENSAJE DE ERROR */}
-          {error && (
-            <div className="login-error-msg">
-              {error}
+            <div className="password-input-container">
+              <input 
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                required 
+                autoComplete="current-password"
+              />
+              <button 
+                type="button" 
+                className="login-pw-toggle" 
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
             </div>
-          )}
-
-          {/* BOTÓN Y REGISTRO */}
-          <div className="login-actions">
-            <button type="submit" className="pixel-btn-submit">
-              Iniciar sesión
-            </button>
-            <p className="login-register-text">
-              ¿No tienes cuenta?{' '}
-              <span
-                role="button"
-                tabIndex={0}
-                onClick={() => navigate('/auth/register')}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate('/auth/register'); }}
-              >Regístrate</span>
-            </p>
           </div>
 
+          {error && <div className="login-error-msg">{error}</div>}
+
+          <button type="submit" className="pixel-btn-submit">ENTRAR</button>
         </form>
+
+        <div className="pixel-divider">
+          <span className="activation-subtitle">O ACTIVA TU CUENTA</span>
+        </div>
+
+        {/* SECCIÓN MANUAL DE VERIFICACIÓN */}
+        <div className="manual-verify-section">
+          <p className="activation-help-text">¿Recibiste un código? Introdúcelo aquí:</p>
+          <div className="pixel-input-wrapper">
+            <input 
+              type="text" 
+              placeholder="Código de 8 dígitos" 
+              value={manualCode}
+              onChange={(e) => setManualCode(e.target.value.replace(/\D/g, ''))} // Solo números
+              maxLength={8}
+            />
+          </div>
+
+          <button type="submit" 
+            onClick={() => activarCuenta(manualCode)} 
+            disabled={loadingCode || manualCode.length < 4}
+            className="pixel-btn-submit"
+          >
+            {loadingCode ? "Procesando..." : "ACTIVAR CUENTA"}
+          </button>
+        </div>
+
+        <p className="login-register-text">
+          ¿No tienes cuenta? <span onClick={() => navigate('/auth/register')}>Regístrate aquí</span>
+        </p>
       </div>
     </div>
   );

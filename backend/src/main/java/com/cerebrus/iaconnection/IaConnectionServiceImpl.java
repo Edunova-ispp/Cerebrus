@@ -1,11 +1,5 @@
 package com.cerebrus.iaconnection;
 
-import com.cerebrus.comun.enumerados.TipoAct;
-import com.cerebrus.exceptions.QuotaExceededException;
-import com.cerebrus.usuario.Usuario;
-import com.cerebrus.usuario.UsuarioService;
-import com.cerebrus.usuario.maestro.Maestro;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +16,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+
+import com.cerebrus.comun.enumerados.TipoAct;
+import com.cerebrus.exceptions.QuotaExceededException;
+import com.cerebrus.usuario.Usuario;
+import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.maestro.Maestro;
 
 
 @Service
@@ -162,7 +162,7 @@ public class IaConnectionServiceImpl implements IaConnectionService {
             + "Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"TEORIA\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\"}";
             case TEST -> "Genera una actividad de tipo test con preguntas de opción múltiple sobre el siguiente tema: " + prompt
             + "Devuelve exclusivamente un JSON con el siguiente formato: {\"tipo\": \"TEST\", \"titulo\": \"Título de la actividad\", \"descripcion\": \"Descripción de la actividad\", \"preguntas\": [{\"enunciado\": \"Enunciado de la pregunta\", \"opciones\": [{\"texto\": \"Texto de la opción\", \"correcta\": true/false}]}]}"
-            + "Genera al menos 2 preguntas. Cada pregunta solo puede tener una opcion correcta"
+            + "Genera al menos 2 preguntas. Cada pregunta puede tener una o varias opciones correctas (no hay límite superior)."
             + "El texto de las opciones debe ser una palabra o una frase, no más"
             + "Las preguntas deben estar orientadas a alumnos de primaria y tener como consecuencia un nivel que se adapte a ello";
             case ORDEN -> "Genera una actividad de ordenación con los siguientes elementos: " + prompt
