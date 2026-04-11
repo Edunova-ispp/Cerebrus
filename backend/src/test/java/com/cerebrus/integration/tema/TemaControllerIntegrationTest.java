@@ -1,4 +1,4 @@
-package com.cerebrus.temaTest;
+package com.cerebrus.integration.tema;
 
 import java.util.List;
 
