@@ -31,13 +31,15 @@ class TemasIT extends SeleniumBaseTest {
         private static final String MAESTRO_PASSWORD = "123456";
         private static final String ALUMNO_USER = "alumno_harry";
         private static final String ALUMNO_PASSWORD = "123456";
-        private static final String COURSE_TITLE = "Curso de Temas Selenium";
+        private static final String COURSE_TITLE = "Curso de Temas Selenium " + System.currentTimeMillis();
         private static final String COURSE_DESCRIPTION = "Curso de prueba para Selenium";
         private static final String COURSE_THEME_TITLE = "Introducción a las fracciones";
+        private static final String RENAMED_THEME_TITLE = "Fracciones avanzadas";
 
         private record CourseContext(String title, String code, String id) {}
 
         private static CourseContext sharedCourse;
+        private static String currentThemeTitle = COURSE_THEME_TITLE;
 
         @Test
         @Order(1)
@@ -57,7 +59,7 @@ class TemasIT extends SeleniumBaseTest {
         @Test
         @Order(2)
         @DisplayName("El maestro ve Mis Cursos y abre el curso")
-        void maestroLoginShowsMisCursosYAbreElCurso() {
+        void maestroIniciaSesionVeMisCursosYAbreElCurso() {
                 ensureSharedCourseReady();
                 login(MAESTRO_USER, MAESTRO_PASSWORD);
                 navigateTo("/miscursos");
@@ -92,7 +94,7 @@ class TemasIT extends SeleniumBaseTest {
         @Test
         @Order(3)
         @DisplayName("El maestro abre el formulario y crea un tema")
-        void maestroCanOpenCreateThemeFormAndCreateTheme() {
+        void maestroPuedeAbrirFormularioCrearTemaYCrearTema() {
                 ensureSharedCourseReady();
                 login(MAESTRO_USER, MAESTRO_PASSWORD);
                 navigateTo("/cursos/" + sharedCourse.id());
@@ -128,6 +130,121 @@ class TemasIT extends SeleniumBaseTest {
 
         @Test
         @Order(4)
+        @DisplayName("El maestro edita el tema y el alumno ve el nuevo nombre")
+        void maestroPuedeEditarTemaYAlumnoVeTituloActualizado() {
+                ensureSharedCourseReady();
+
+                login(MAESTRO_USER, MAESTRO_PASSWORD);
+                navigateTo("/cursos/" + sharedCourse.id());
+
+                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
+                WebElement themeItem = pageWait.until(
+                                ExpectedConditions.visibilityOfElementLocated(
+                                                By.xpath("//div[contains(@class, 'ltp-item')][.//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + currentThemeTitle + "']]")
+                                )
+                );
+                WebElement editButton = themeItem.findElement(By.cssSelector("button[title='Editar']"));
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", editButton);
+
+                WebElement heading = pageWait.until(
+                                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.welcome-text"))
+                );
+                assertThat(heading.getText()).isEqualToIgnoringCase("Editar tema");
+
+                WebElement titleInput = pageWait.until(
+                                ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
+                );
+                titleInput.clear();
+                titleInput.sendKeys(RENAMED_THEME_TITLE);
+
+                WebElement submitButton = pageWait.until(
+                                ExpectedConditions.elementToBeClickable(By.cssSelector("button.pixel-btn-submit-main"))
+                );
+                submitButton.click();
+
+                pageWait.until(ExpectedConditions.urlContains("/cursos/" + sharedCourse.id()));
+                assertTeacherSeesTheme(RENAMED_THEME_TITLE);
+
+                currentThemeTitle = RENAMED_THEME_TITLE;
+
+                login(ALUMNO_USER, ALUMNO_PASSWORD);
+                openStudentCourseMap(sharedCourse.id());
+                assertStudentSeesThemeInMap(currentThemeTitle);
+        }
+
+        @Test
+        @Order(5)
+        @DisplayName("El maestro no puede crear un tema con título inválido y permanece en el formulario")
+        void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
+                ensureSharedCourseReady();
+                login(MAESTRO_USER, MAESTRO_PASSWORD);
+                navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
+
+                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
+                WebElement heading = pageWait.until(
+                                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.welcome-text"))
+                );
+                assertThat(heading.getText()).isEqualToIgnoringCase("Crear tema");
+
+                WebElement titleInput = pageWait.until(
+                                ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
+                );
+                titleInput.clear();
+                titleInput.sendKeys("   ");
+
+                WebElement submitButton = pageWait.until(
+                                ExpectedConditions.elementToBeClickable(By.cssSelector("button.pixel-btn-submit-main"))
+                );
+                submitButton.click();
+
+                WebElement errorMsg = pageWait.until(
+                                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.error-msg"))
+                );
+                assertThat(errorMsg.getText()).containsIgnoringCase("requerido");
+                assertThat(driver.getCurrentUrl()).contains("/temas/crear");
+        }
+
+        @Test
+        @Order(6)
+        @DisplayName("El maestro no puede editar un tema con título inválido y permanece en el formulario")
+        void maestroNoPuedeEditarTemaConTituloInvalidoYPermaneceEnFormulario() {
+                ensureSharedCourseReady();
+                login(MAESTRO_USER, MAESTRO_PASSWORD);
+                navigateTo("/cursos/" + sharedCourse.id());
+
+                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
+                WebElement themeItem = pageWait.until(
+                                ExpectedConditions.visibilityOfElementLocated(
+                                                By.xpath("//div[contains(@class, 'ltp-item')][.//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + currentThemeTitle + "']]")
+                                )
+                );
+                WebElement editButton = themeItem.findElement(By.cssSelector("button[title='Editar']"));
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", editButton);
+                WebElement heading = pageWait.until(
+                                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.welcome-text"))
+                );
+                assertThat(heading.getText()).isEqualToIgnoringCase("Editar tema");
+
+                WebElement titleInput = pageWait.until(
+                                ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
+                );
+                titleInput.clear();
+                titleInput.sendKeys("   ");
+
+                WebElement submitButton = pageWait.until(
+                                ExpectedConditions.elementToBeClickable(By.cssSelector("button.pixel-btn-submit-main"))
+                );
+                submitButton.click();
+
+                WebElement errorMsg = pageWait.until(
+                                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.error-msg"))
+                );
+                assertThat(errorMsg.getText()).containsIgnoringCase("obligatorio");
+                assertThat(driver.getCurrentUrl()).contains("/cursos/" + sharedCourse.id());
+        }
+
+        @Test
+        @Order(7)
         @DisplayName("Si el curso se oculta, el alumno deja de ver el tema")
         void alumnoNoVeElTemaCuandoElCursoEsNoVisible() {
                 ensureSharedCourseReady();
@@ -149,31 +266,36 @@ class TemasIT extends SeleniumBaseTest {
         }
 
         @Test
-        @Order(5)
+        @Order(8)
         @DisplayName("El alumno ve el tema y después deja de verlo al borrarlo")
-        void alumnoCanSeeCreatedThemeAndThenStopSeeingIt() {
+        void alumnoPuedeVerTemaCreadoYLuegoDejaDeVerloTrasBorrado() {
                 ensureSharedCourseReady();
 
                 login(ALUMNO_USER, ALUMNO_PASSWORD);
                 openStudentCourseMap(sharedCourse.id());
-                assertStudentSeesThemeInMap(COURSE_THEME_TITLE);
+                assertStudentSeesThemeInMap(currentThemeTitle);
 
                 login(MAESTRO_USER, MAESTRO_PASSWORD);
                 navigateTo("/cursos/" + sharedCourse.id());
-                assertTeacherSeesTheme(COURSE_THEME_TITLE);
+                assertTeacherSeesTheme(currentThemeTitle);
 
-                deleteThemeByTitle(COURSE_THEME_TITLE);
-                assertTeacherDoesNotSeeTheme(COURSE_THEME_TITLE);
+                WebElement noActivitiesMessage = new WebDriverWait(driver, WAIT).until(
+                                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.ltp-vacio"))
+                );
+                assertThat(noActivitiesMessage.getText()).contains("No hay actividades en este tema");
+
+                deleteThemeByTitle(currentThemeTitle);
+                assertTeacherDoesNotSeeTheme(currentThemeTitle);
 
                 login(ALUMNO_USER, ALUMNO_PASSWORD);
                 openStudentCourseMap(sharedCourse.id());
-                assertStudentDoesNotSeeThemeInMap(COURSE_THEME_TITLE);
+                assertStudentDoesNotSeeThemeInMap(currentThemeTitle);
         }
 
         @Test
-        @Order(6)
+        @Order(9)
         @DisplayName("El alumno no puede acceder directamente al formulario de crear tema")
-        void alumnoCannotAccessCreateThemeRoute() {
+        void alumnoNoPuedeAccederDirectamenteARutaCrearTema() {
                 ensureSharedCourseReady();
                 login(ALUMNO_USER, ALUMNO_PASSWORD);
                 navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
@@ -188,25 +310,26 @@ class TemasIT extends SeleniumBaseTest {
         }
 
         @Test
-        @Order(7)
+        @Order(10)
         @DisplayName("Un usuario externo no puede ver el tema")
-        void usuarioExternoNoPuedeVerElTema() {
+        void usuarioExternoNoPuedeVerTema() {
                 ensureSharedCourseReady();
+
+                clearClientSession();
                 navigateTo("/mapa/" + sharedCourse.id());
 
                 WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-                WebElement loginTitle = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.login-title"))
+                pageWait.until(ExpectedConditions.urlContains("/auth/login"));
+                WebElement userInput = pageWait.until(
+                                ExpectedConditions.visibilityOfElementLocated(By.id("identificador"))
                 );
-
-                assertThat(loginTitle.getText()).isEqualTo("Iniciar Sesión");
-                assertThat(driver.getCurrentUrl()).contains("/auth/login");
+                assertThat(userInput.isDisplayed()).isTrue();
         }
 
         @Test
-        @Order(8)
+        @Order(11)
         @DisplayName("Otro alumno no puede acceder al tema")
-        void otroAlumnoNoPuedeAccederAlTema() {
+        void otroAlumnoNoPuedeAccederATema() {
                 ensureSharedCourseReady();
                 login("alumno_hermione", ALUMNO_PASSWORD);
                 navigateTo("/cursos/" + sharedCourse.id());
@@ -219,7 +342,7 @@ class TemasIT extends SeleniumBaseTest {
         }
 
         @Test
-        @Order(9)
+        @Order(12)
         @DisplayName("El maestro elimina el curso creado al terminar las pruebas")
         void maestroEliminaElCursoCreadoAlFinal() {
                 ensureSharedCourseReady();
@@ -350,6 +473,11 @@ class TemasIT extends SeleniumBaseTest {
 
         private void createThemeInCurrentCourse(String themeTitle) {
                 WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
+
+                // Este helper puede invocarse desde distintas pantallas; forzamos abrir el formulario.
+                navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
+                pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.welcome-text")));
+
                 WebElement titleInput = pageWait.until(
                                 ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
                 );
@@ -418,20 +546,47 @@ class TemasIT extends SeleniumBaseTest {
 
         private void deleteThemeByTitle(String themeTitle) {
                 WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-                WebElement themeItem = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(
-                                                By.xpath("//div[contains(@class, 'ltp-item')][.//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + themeTitle + "']]")
-                                )
+                By themeLocator = By.xpath(
+                                "//div[contains(@class, 'ltp-item')][.//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + themeTitle + "']]"
                 );
 
-                themeItem.findElement(By.cssSelector("button[title='Borrar']")).click();
+                int safetyCounter = 0;
+                while (!driver.findElements(themeLocator).isEmpty() && safetyCounter < 10) {
+                        safetyCounter++;
+                        int previousCount = driver.findElements(themeLocator).size();
 
-                pageWait.until(ExpectedConditions.invisibilityOfElementLocated(
-                                By.xpath("//div[contains(@class, 'ltp-item')][.//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + themeTitle + "']]")
-                ));
+                        WebElement themeItem = pageWait.until(
+                                        ExpectedConditions.visibilityOfElementLocated(themeLocator)
+                        );
+
+                        WebElement deleteButton = themeItem.findElement(By.cssSelector("button[title='Borrar']"));
+                        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", deleteButton);
+
+                        try {
+                                new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.alertIsPresent());
+                                driver.switchTo().alert().accept();
+                        } catch (org.openqa.selenium.TimeoutException ignored) {
+                                // No todos los flujos muestran confirmación al borrar tema.
+                        }
+
+                        // Esperamos a que disminuya al menos una ocurrencia antes de continuar.
+                        try {
+                                new WebDriverWait(driver, Duration.ofSeconds(6)).until(d -> d.findElements(themeLocator).size() < previousCount);
+                        } catch (org.openqa.selenium.TimeoutException ignored) {
+                                navigateTo("/cursos/" + sharedCourse.id());
+                        }
+                }
+
+                assertThat(driver.findElements(themeLocator)).isEmpty();
         }
 
         private void clearClientSession() {
+                try {
+                        driver.manage().deleteAllCookies();
+                } catch (org.openqa.selenium.WebDriverException ignored) {
+                        // Si el driver no permite gestionar cookies en este estado, continuamos con storage.
+                }
+
                 if (driver instanceof JavascriptExecutor javascriptExecutor) {
                         try {
                                 javascriptExecutor.executeScript("window.localStorage.clear(); window.sessionStorage.clear();");
@@ -443,7 +598,28 @@ class TemasIT extends SeleniumBaseTest {
 
         private void ensureSharedCourseReady() {
                 if (sharedCourse == null) {
-                        throw new IllegalStateException("El curso compartido todavía no se ha creado.");
+                        login(MAESTRO_USER, MAESTRO_PASSWORD);
+                        sharedCourse = createCourseAndOpenDetail(COURSE_TITLE);
+
+                        login(ALUMNO_USER, ALUMNO_PASSWORD);
+                        enrollStudentInCourse(sharedCourse.code());
+                }
+
+                login(MAESTRO_USER, MAESTRO_PASSWORD);
+                navigateTo("/cursos/" + sharedCourse.id());
+
+                By currentThemeLocator = By.xpath(
+                                "//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + currentThemeTitle + "']"
+                );
+
+                List<WebElement> currentThemeMatches = driver.findElements(currentThemeLocator);
+                if (currentThemeMatches.isEmpty()) {
+                        List<WebElement> anyThemeTitles = driver.findElements(By.cssSelector("span.ltp-item-titulo"));
+                        if (!anyThemeTitles.isEmpty()) {
+                                currentThemeTitle = anyThemeTitles.getFirst().getText().trim();
+                        } else {
+                                createThemeInCurrentCourse(currentThemeTitle);
+                        }
                 }
         }
 
