@@ -16,6 +16,7 @@ export default function CrearCurso() {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [imagen, setImagen] = useState('');
+  const [codigo, setCodigo] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [imagenError, setImagenError] = useState(false);
@@ -30,6 +31,11 @@ export default function CrearCurso() {
 
     if (!titulo.trim()) {
       setError('El título del curso es requerido');
+      return;
+    }
+
+    if (!codigo.trim()) {
+      setError('El código del curso es requerido');
       return;
     }
 
@@ -52,6 +58,8 @@ export default function CrearCurso() {
           titulo: titulo.trim(),
           descripcion: descripcion.trim() || '',
           imagen: imagen.trim() || '',
+          codigo: codigo.trim() || '',
+
         }),
       });
 
@@ -119,6 +127,20 @@ export default function CrearCurso() {
         placeholder="https://... <opcional>"
       />
     </div>
+
+      <div className="input-group">
+      <label htmlFor="codigo">Código Personalizado</label>
+      <input
+        id="codigo"
+        type="text"
+        value={codigo}
+        onChange={(e) => setCodigo(e.target.value)}
+        className="pixel-input"
+        placeholder="Código único para el curso..."
+      />
+    </div>
+
+    
   </div>
 
   {/* Columna Derecha */}

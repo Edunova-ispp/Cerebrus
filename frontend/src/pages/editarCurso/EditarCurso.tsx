@@ -21,6 +21,7 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [imagen, setImagen] = useState('');
+  const [codigo, setCodigo] = useState('');
   const [error, setError] = useState('');
   const [imagenError, setImagenError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -50,6 +51,7 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
           setTitulo(data[0] || '');
           setDescripcion(data[1] || '');
           setImagen(data[2] || '');
+          setCodigo(data[3] || '');
           setError('');
         } else {
           if (response.status === 404) {
@@ -81,6 +83,11 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
       return;
     }
 
+    if (!codigo.trim()) {
+      setError('El código del curso es requerido');
+      return;
+    }
+
     setLoadingUpdate(true);
 
     try {
@@ -94,6 +101,7 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
           titulo: titulo.trim(),
           descripcion: descripcion.trim() || '',
           imagen: imagen.trim() || '',
+          codigo: codigo.trim() || '',
         }),
       });
 
@@ -177,6 +185,18 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
                   onChange={(e) => { setImagen(e.target.value); setImagenError(false); }}
                   className="pixel-input"
                   placeholder="https://..."
+                  disabled={loadingUpdate}
+                />
+              </div>
+              <div className="input-group">
+                <label htmlFor="codigo">Código Personalizado</label>
+                <input
+                  id="codigo"
+                  type="text"
+                  value={codigo}
+                  onChange={(e) => setCodigo(e.target.value)}
+                  className="pixel-input"
+                  placeholder="Código único para el curso..."
                   disabled={loadingUpdate}
                 />
               </div>
