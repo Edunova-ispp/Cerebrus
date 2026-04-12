@@ -8,7 +8,7 @@
 }
 
 .crear-tema-page {
-  background-color: #FAF6ED;
+  background-color: var(--t-bg);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -24,9 +24,9 @@
 }
 
 
-.detalle-volver:active {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0px #000;
+.crear-tema-page .detalle-volver:active {
+  transform: translateY(1px);
+  box-shadow: none;
 }
 
 .welcome-text {
@@ -37,14 +37,14 @@
 }
 
 .crear-tema-card {
-  background: white;
-  border: 4px solid #000;
-  border-radius: 24px;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
   padding: 35px;
   width: 100%;
-  max-width: 500px; /* Tamaño ajustado */
+  max-width: 500px;
   box-sizing: border-box;
-  box-shadow: 8px 8px 0px #000;
+  box-shadow: var(--t-shadow);
 }
 
 .crear-tema-layout-simple {
@@ -62,31 +62,44 @@
 }
 
 .pixel-input {
-  background-color: var(--color-accent-light);
-  border: 4px solid #000;
-  border-radius: 12px;
+  background-color: var(--t-input-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
   padding: 12px 15px;
   font-size: 1.1rem;
   width: 100%;
   box-sizing: border-box;
   outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pixel-input:focus {
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .pixel-btn-submit-main {
-  background-color: var(--color-accent);
-  border: 4px solid #000;
-  border-radius: 12px;
+  background-color: var(--t-primary);
+  border: none;
+  border-radius: 8px;
   padding: 12px 30px;
-  font-size: 1.2rem;
-  font-weight: bold;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
   cursor: pointer;
-  box-shadow: 5px 5px 0px #000;
+  box-shadow: var(--t-shadow);
   margin-top: 10px;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.pixel-btn-submit-main:hover {
+  background-color: var(--t-primary-hover);
+  box-shadow: var(--t-shadow-md);
 }
 
 .pixel-btn-submit-main:active {
-  transform: translate(2px, 2px);
-  box-shadow: 3px 3px 0px #000;
+  transform: translateY(1px);
+  box-shadow: var(--t-shadow-sm);
 }
 
 .error-msg {

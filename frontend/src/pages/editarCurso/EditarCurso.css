@@ -6,45 +6,48 @@
   justify-content: center;
   width: 100%;
   padding: 40px 20px;
-  min-height: calc(100vh - 80px); /* Ajusta según el alto de tu Navbar */
+  min-height: calc(100vh - 80px);
   box-sizing: border-box;
+  font-family: 'Oxygen', sans-serif;
 }
 
 /* ===== BANNER SUPERIOR MORADO ===== */
 .crear-curso-welcome-banner {
-  background-color: #8C52FF;
+  background-color: var(--t-primary);
   color: white;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.8rem;
-  padding: 15px 40px;
-  border: 4px solid #000;
-  border-radius: 50px; /* Estilo píldora */
-  box-shadow: 6px 6px 0px #000;
-  margin-bottom: 30px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  padding: 12px 32px;
+  border: none;
+  border-radius: var(--t-radius);
+  box-shadow: var(--t-shadow);
+  margin-bottom: 24px;
   text-align: center;
   width: 100%;
-  max-width: 650px;
+  max-width: 500px;
   box-sizing: border-box;
 }
 
 /* ===== CAJA MAGENTA ===== */
 .crear-curso-box {
   width: 100%;
-  max-width: 450px;
-  background-color: #C3004F;
-  border: 4px solid #000;
-  border-radius: 35px;
-  padding: 30px 40px 40px;
-  box-shadow: 10px 10px 0px #000;
+  max-width: 480px;
+  background-color: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  padding: 30px 36px 36px;
+  box-shadow: var(--t-shadow-md);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .crear-curso-title {
-  font-size: 1.8rem;
-  color: #FFFFFF;
+  font-size: 1.4rem;
+  color: var(--t-text);
   font-family: 'Oxygen', sans-serif;
+  font-weight: 700;
   margin: 0 0 20px 0;
   text-align: center;
 }
@@ -59,26 +62,33 @@
 }
 
 .pixel-input-wrapper label {
-  font-size: 1.5rem;
-  color: #F8E697; /* El amarillo de la foto */
+  font-size: 1rem;
+  color: var(--t-text-secondary);
   font-family: 'Oxygen', sans-serif;
-  font-weight: bold;
-  margin-bottom: 8px; /* Espacio para que flote arriba */
-  margin-left: 10px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  margin-left: 2px;
 }
 
 /* ===== INPUTS Y TEXTAREA ===== */
 .pixel-input-wrapper input,
 .crear-curso-textarea {
-  background-color: #FCEF91;
-  border: 4px solid #000;
-  border-radius: 25px;
-  padding: 12px 20px;
+  background-color: var(--t-input-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
+  padding: 10px 16px;
   width: 100%;
   box-sizing: border-box;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1rem;
   outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pixel-input-wrapper input:focus,
+.crear-curso-textarea:focus {
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .crear-curso-textarea {
@@ -88,9 +98,9 @@
 
 /* ===== ÁREA DE IMAGEN (Estilo Drag & Drop / URL) ===== */
 .crear-curso-preview-placeholder {
-  background-color: #FFD98E; /* Color melocotón */
-  border: 3px dashed #000;
-  border-radius: 30px;
+  background-color: var(--t-primary-light);
+  border: 2px dashed var(--t-border-dark);
+  border-radius: var(--t-radius);
   width: 100%;
   height: 80px;
   display: flex;
@@ -99,6 +109,11 @@
   position: relative;
   overflow: hidden;
   cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.crear-curso-preview-placeholder:hover {
+  border-color: var(--t-primary);
 }
 
 /* Imagen dentro del preview si existe */
@@ -106,34 +121,40 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 25px;
-  border: 4px solid #000;
+  border-radius: 8px;
+  border: 1px solid var(--t-border);
   margin-top: 10px;
 }
 
 /* ===== BOTÓN SUBMIT ===== */
 .pixel-btn-submit {
-  background-color: #FCEF91;
-  border: 4px solid #000;
-  border-radius: 25px;
-  padding: 12px 48px;
+  background-color: var(--t-primary);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 40px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.4rem;
-  font-weight: bold;
-  margin-top: 25px;
-  box-shadow: 5px 5px 0 #000;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  margin-top: 20px;
+  box-shadow: var(--t-shadow);
   cursor: pointer;
   align-self: center;
-  transition: all 0.1s ease;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.pixel-btn-submit:hover {
+  background-color: var(--t-primary-hover);
+  box-shadow: var(--t-shadow-md);
 }
 
 .pixel-btn-submit:active {
-  transform: translate(3px, 3px);
-  box-shadow: 2px 2px 0 #000;
+  transform: translateY(1px);
+  box-shadow: var(--t-shadow-sm);
 }
 
 .pixel-btn-submit:disabled {
-  background-color: #ccc;
+  background-color: var(--t-border-dark);
   cursor: not-allowed;
   opacity: 0.7;
 }

@@ -2,16 +2,11 @@
    ESTADÍSTICAS — Estilos unificados
    ==================================================== */
 
-/* --- CSS Variable (fallback for --color-accent-light) --- */
-:root {
-  --color-accent-light: #FCEF91;
-}
-
 /* ===================== PAGE LAYOUT ===================== */
 
 .estadisticas-page {
   min-height: 100vh;
-  background-color: #F9F5E7;
+  background-color: var(--t-bg);
   display: flex;
   flex-direction: column;
 }
@@ -37,9 +32,9 @@
 
 .estadisticas-titulo-curso {
   font-family: 'Oxygen', sans-serif;
-  font-size: 2.4rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  color: #000;
+  color: var(--t-text);
   margin: 0 0 8px;
   text-align: center;
 }
@@ -76,32 +71,34 @@
 
 .stats-sidebar-btn {
   width: 100%;
-  background: #fff;
-  color: #000;
-  border: 2.5px solid #000;
-  border-radius: 10px;
+  background: var(--t-card);
+  color: var(--t-text);
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
   font-family: 'Oxygen', sans-serif;
   font-size: 0.93rem;
-  font-weight: 700;
+  font-weight: 600;
   padding: 11px 14px;
   cursor: pointer;
-  box-shadow: 3px 3px 0px #000;
-  transition: transform 0.1s, box-shadow 0.1s, background 0.1s;
+  box-shadow: var(--t-shadow-sm);
+  transition: all 0.15s;
   text-align: left;
   line-height: 1.3;
 }
 
 .stats-sidebar-btn:hover {
-  transform: translate(-1px, -1px);
-  background: var(--color-accent-light);
-  box-shadow: 4px 4px 0px #000;
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border-color: var(--t-primary);
+  box-shadow: var(--t-shadow);
 }
 
 .stats-sidebar-btn--active,
 .stats-sidebar-btn--active:hover {
-  background-color: var(--color-accent-light);
-  box-shadow: inset 2px 2px 0px #000;
-  transform: translate(1px, 1px);
+  background-color: var(--t-primary-light);
+  color: var(--t-primary);
+  border-color: var(--t-primary);
+  box-shadow: inset 3px 0 0 var(--t-primary);
 }
 
 .stats-sidebar-btn--refresh {
@@ -114,12 +111,12 @@
 }
 
 .stats-sidebar-back:hover {
-  background: var(--color-accent-light);
+  background: var(--t-primary-light);
 }
 
 .stats-sidebar-divider {
   border: none;
-  border-top: 2px solid #ddd;
+  border-top: 1px solid var(--t-border);
   margin: 4px 0;
 }
 
@@ -144,39 +141,39 @@
 
 .stats-sidebar-search {
   width: 100%;
-  background: #fff;
-  color: #000;
-  border: 2.5px solid #000;
-  border-radius: 10px;
+  background: var(--t-card);
+  color: var(--t-text);
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
   font-family: 'Oxygen', sans-serif;
   font-size: 0.93rem;
-  font-weight: 700;
+  font-weight: 600;
   padding: 11px 14px;
   box-sizing: border-box;
-  box-shadow: 3px 3px 0px #000;
+  box-shadow: var(--t-shadow-sm);
   outline: none;
   margin-bottom: 4px;
-  transition: transform 0.1s, box-shadow 0.1s, background 0.1s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 .stats-sidebar-search:focus {
-  background: var(--color-accent-light);
-  box-shadow: 3px 3px 0px #000;
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 /* ===================== BUTTONS ===================== */
 
 .btn-volver-pixel,
 .btn-medias-pixel {
-  background: var(--color-accent-light);
-  color: #000;
-  border: 3px solid #000;
-  border-radius: 12px;
+  background: var(--t-card);
+  color: var(--t-text);
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: 4px 4px 0px #000;
-  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: var(--t-shadow-sm);
+  transition: all 0.15s;
 }
 
 .btn-volver-pixel {
@@ -190,21 +187,24 @@
 }
 
 .btn-medias-pixel.active {
-  background: #FDD835;
-  box-shadow: inset 2px 2px 0px #000;
-  transform: translate(1px, 1px);
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border-color: var(--t-primary);
+  box-shadow: inset 3px 0 0 var(--t-primary);
 }
 
 .btn-volver-pixel:hover,
 .btn-medias-pixel:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0px #000;
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border-color: var(--t-primary);
+  box-shadow: var(--t-shadow);
 }
 
 .btn-volver-pixel:active,
 .btn-medias-pixel:active {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0px #000;
+  transform: translateY(1px);
+  box-shadow: var(--t-shadow-sm);
 }
 
 /* ===================== STAT SUMMARY CARDS ===================== */
@@ -256,9 +256,9 @@
 /* ===================== YELLOW CARD CONTAINER ===================== */
 
 .estadisticas-yellow-card {
-  background-color: #fff;
-  border: 2.5px solid #000;
-  border-radius: 10px;
+  background-color: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
   width: 100%;
   padding: 28px 32px;
   box-sizing: border-box;
@@ -266,6 +266,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   margin: 0;
+  box-shadow: var(--t-shadow-sm);
 }
 
 /* ===================== CURSO INDICADORES (DTO) ===================== */
@@ -295,25 +296,26 @@
 }
 
 .curso-indicador-value {
-  background-color: #fff;
-  color: #000;
-  border: 3px solid #000;
+  background-color: var(--t-card);
+  color: var(--t-text);
+  border: 1px solid var(--t-border);
   border-radius: 12px;
   padding: 10px 12px;
   font-family: 'Oxygen', sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   text-align: center;
-  box-shadow: 3px 3px 0px #000;
+  box-shadow: var(--t-shadow-sm);
 }
 
 /* ===================== TABLE ===================== */
 
 .table-scroll-container {
   width: 100%;
-  border-radius: 8px;
+  border-radius: var(--t-radius);
   overflow: hidden;
-  border: 2.5px solid #000;
+  border: 1px solid var(--t-border);
+  box-shadow: var(--t-shadow-sm);
 }
 
 .pixel-table {
@@ -324,10 +326,10 @@
 }
 
 .pixel-table thead tr th {
-  background: #1a1a1a;
+  background: var(--t-primary);
   color: #fff;
   padding: 13px 16px;
-  font-weight: 700;
+  font-weight: 600;
   text-align: center;
   font-size: 0.82rem;
   letter-spacing: 0.05em;
@@ -347,11 +349,11 @@
 }
 
 .pixel-table tbody tr:nth-child(even) td {
-  background: rgba(252, 239, 145, 0.22);
+  background: var(--t-primary-light);
 }
 
 .pixel-table tbody tr:hover td {
-  background: rgba(252, 239, 145, 0.55);
+  background: var(--t-input-focus);
 }
 
 .pixel-table tbody tr:last-child td {
@@ -425,9 +427,10 @@
 .item-actividad-pixel {
   padding: 12px;
   margin-bottom: 10px;
-  border: 2px solid #000;
-  background-color: #fff;
+  border: 1px solid var(--t-border);
+  background-color: var(--t-card);
   font-family: 'Oxygen', sans-serif;
+  border-radius: 8px;
 }
 
 .item-tema-pixel {
@@ -440,8 +443,9 @@
 }
 
 .item-tema-pixel.active {
-  background-color: var(--color-accent-light);
-  box-shadow: 4px 4px 0px #000;
+  background-color: var(--t-primary-light);
+  border-color: var(--t-primary);
+  box-shadow: inset 3px 0 0 var(--t-primary);
 }
 
 /* ===================== FOOTER ===================== */
@@ -512,10 +516,10 @@
   flex-direction: column;
   gap: 16px;
   width: 100%;
-  background: white;
-  border: 2.5px solid #000;
-  border-radius: 12px;
-  box-shadow: 4px 4px 0px #000;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
+  box-shadow: var(--t-shadow);
   padding: 24px 28px;
   box-sizing: border-box;
   overflow-y: auto;
@@ -529,10 +533,10 @@
 
 .graficas-embedded .panel-temas {
   width: 100%;
-  border: 2px solid #000;
-  border-radius: 10px;
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
   padding: 10px;
-  background: #FFF8EE;
+  background: var(--t-primary-light);
 }
 
 .graficas-embedded .panel-temas h3 {
@@ -615,10 +619,10 @@
 }
 
 .chart-toggle-btn--active {
-  background: var(--color-accent-light);
-  color: #000;
+  background: var(--t-primary-light);
+  color: var(--t-primary);
   font-weight: 700;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 /* ===================== CHARTS (SVG) ===================== */
@@ -663,7 +667,7 @@
 .legend-swatch {
   width: 14px;
   height: 14px;
-  border: 2px solid #000;
+  border: 1px solid var(--t-border-dark);
   border-radius: 3px;
   box-sizing: border-box;
 }
@@ -672,7 +676,7 @@
   width: 22px;
   height: 0;
   border-top-style: solid;
-  border-top-color: #000;
+  border-top-color: var(--t-text-secondary);
 }
 
 /* ===================== RESPONSIVE ===================== */
