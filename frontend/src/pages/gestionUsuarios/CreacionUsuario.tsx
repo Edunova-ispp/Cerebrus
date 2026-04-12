@@ -90,7 +90,7 @@ export default function CreacionUsuario() {
 
       // backend devuelve texto, pero tras crear redirigimos a Gestión de Usuarios
       await res.text();
-      navigate('/gestion-usuarios');
+      navigate('/gestion-usuarios', { state: { toast: 'Usuario creado con éxito' } });
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : 'Error al crear el usuario');
     } finally {

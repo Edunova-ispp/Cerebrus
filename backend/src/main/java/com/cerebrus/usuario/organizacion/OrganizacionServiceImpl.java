@@ -240,8 +240,8 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         }
 
         
-        Usuario nuevoUsuario;
-
+        Usuario nuevoUsuario = null;
+        
         if ("MAESTRO".equals(rolUpper)) {
             Maestro maestro = new Maestro(
                 request.getNombre(),
@@ -252,10 +252,9 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 passwordEncoder.encode(request.getPassword()),
                 organizacion
             );
-            // Asegurar relación con la organización (FK organizacion_id)
             maestro.setOrganizacion(organizacion);
             nuevoUsuario = maestro;
-
+            
         } else if ("ALUMNO".equals(rolUpper)) {
             Alumno alumno = new Alumno(
                 request.getNombre(),
@@ -267,10 +266,8 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 0,
                 organizacion
             );
-            // Asegurar relación con la organización (FK organizacion_id)
             alumno.setOrganizacion(organizacion);
             nuevoUsuario = alumno;
-
         } else {
             throw new IllegalArgumentException("Rol inválido. Use: MAESTRO o ALUMNO.");
         }
@@ -317,10 +314,10 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         }
 
         
-        Usuario nuevoUsuario;
-
+        Usuario nuevoUsuario = null;
+        
         if ("MAESTRO".equals(rolUpper)) {
-            Maestro maestro = new Maestro(
+            nuevoUsuario = new Maestro(
                 request.getNombre(),
                 request.getPrimerApellido(),
                 request.getSegundoApellido(),
@@ -329,11 +326,9 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 passwordEncoder.encode(request.getPassword()),
                 organizacion
             );
-            maestro.setOrganizacion(organizacion);
-            nuevoUsuario = maestro;
-
+            
         } else if ("ALUMNO".equals(rolUpper)) {
-            Alumno alumno = new Alumno(
+            nuevoUsuario = new Alumno(
                 request.getNombre(),
                 request.getPrimerApellido(),
                 request.getSegundoApellido(),
@@ -343,9 +338,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 0,
                 organizacion
             );
-            alumno.setOrganizacion(organizacion);
-            nuevoUsuario = alumno;
-
+            
         } else {
             errores.add("Rol inválido. Use: MAESTRO o ALUMNO. Error en fila " + fila + " del archivo.");
         }

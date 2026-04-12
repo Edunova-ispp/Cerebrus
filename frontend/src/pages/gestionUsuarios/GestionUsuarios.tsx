@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
@@ -37,6 +37,7 @@ type FiltroRol = 'TODOS' | 'MAESTRO' | 'ALUMNO';
 export default function GestionUsuarios() {
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
   const navigate = useNavigate();
+  const location = useLocation();
   const userInfo = getCurrentUserInfo() as Record<string, unknown> | null;
   const organizacionId = userInfo?.id as number | undefined;
 
@@ -51,6 +52,29 @@ export default function GestionUsuarios() {
   const [totalMaestros, setTotalMaestros] = useState(0);
   const [totalAlumnos, setTotalAlumnos] = useState(0);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [navbarToast, setNavbarToast] = useState<string | null>(null);
+  const consumedToastKeyRef = useRef<string | null>(null);
+
+  // ── Toast from navigation state (e.g., create-user success) ──
+  useEffect(() => {
+    if (consumedToastKeyRef.current === location.key) return;
+
+    const toast = (location.state as { toast?: string } | null)?.toast;
+    if (!toast) return;
+
+    consumedToastKeyRef.current = location.key;
+    setNavbarToast(toast);
+
+    // Limpiar state para que no reaparezca al refrescar
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.key, location.pathname, location.state, navigate]);
+
+  // ── Auto-dismiss toast ──
+  useEffect(() => {
+    if (!navbarToast) return;
+    const t = window.setTimeout(() => setNavbarToast(null), 4000);
+    return () => window.clearTimeout(t);
+  }, [navbarToast]);
 
   // ── Detail / Edit modal ──
   const [selectedUser, setSelectedUser] = useState<UsuarioDetalle | null>(null);
@@ -200,6 +224,12 @@ export default function GestionUsuarios() {
   return (
     <div className="gu-page">
       <NavbarMisCursos />
+
+      {navbarToast && (
+        <div className="gu-toast gu-toast--ok gu-toast--floating" role="status" aria-live="polite">
+          {navbarToast}
+        </div>
+      )}
 
       <main className="gu-main">
         <div className="gu-wrapper">

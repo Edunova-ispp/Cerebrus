@@ -51,6 +51,17 @@
   border-color: #721c24;
 }
 
+.gu-toast--floating {
+  position: fixed;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  max-width: calc(100vw - 40px);
+  box-shadow: 6px 6px 0 #000;
+  pointer-events: none;
+}
+
 /* ── Toolbar ── */
 .gu-toolbar {
   display: flex;
