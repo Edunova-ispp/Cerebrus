@@ -126,13 +126,21 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         if (!tieneSuscripcionActiva) {
             throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede eliminar usuarios.");
         }
-        Usuario usuarioAEliminar = buscarUsuario(organizacionId, usuarioId);
-        if (usuarioAEliminar instanceof Maestro) {
-            organizacion.getMaestros().remove(usuarioAEliminar);
-        } else if (usuarioAEliminar instanceof Alumno) {
-            organizacion.getAlumnos().remove(usuarioAEliminar);
+        
+        // Inicializar las colecciones dentro de la transacción
+        Hibernate.initialize(organizacion.getMaestros());
+        Hibernate.initialize(organizacion.getAlumnos());
+        
+        boolean eliminado = organizacion.getMaestros().removeIf(maestro -> maestro.getId().equals(usuarioId));
+        if (!eliminado) {
+            eliminado = organizacion.getAlumnos().removeIf(alumno -> alumno.getId().equals(usuarioId));
         }
-        usuarioRepository.deleteById(usuarioAEliminar.getId());
+
+        if (!eliminado) {
+            throw new ResourceNotFoundException("Usuario no encontrado en la organización con ID: " + usuarioId);
+        }
+
+        usuarioRepository.deleteById(usuarioId);
     }
 
     @Override
@@ -265,6 +273,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 passwordEncoder.encode(request.getPassword()),
                 organizacion
             );
+            organizacion.getMaestros().add((Maestro) nuevoUsuario);
             
         } else if ("ALUMNO".equals(rolUpper)) {
             nuevoUsuario = new Alumno(
@@ -277,6 +286,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 0,
                 organizacion
             );
+            organizacion.getAlumnos().add((Alumno) nuevoUsuario);
             
         } else {
             throw new IllegalArgumentException("Rol inválido. Use: MAESTRO o ALUMNO.");

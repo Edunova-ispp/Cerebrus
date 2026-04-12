@@ -36,6 +36,7 @@ public class Maestro extends Usuario {
                    String nombreUsuario, String correoElectronico, String contrasena,
                    Organizacion organizacion) {
         super(nombre, primerApellido, segundoApellido, nombreUsuario, correoElectronico, contrasena, organizacion);
+        this.organizacion = organizacion;
     }
 
     // Getters y Setters
