@@ -27,7 +27,7 @@
 }
 
 /* ── Botón Volver ── */
-.detalle-volver {
+.detalle-alumno-page .detalle-volver {
   align-self: flex-start;
   background: var(--color-accent, #FFF294);
   color: #000;
@@ -42,12 +42,12 @@
   transition: transform 0.1s, box-shadow 0.1s;
 }
 
-.detalle-volver:hover {
+.detalle-alumno-page .detalle-volver:hover {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 #000;
 }
 
-.detalle-volver:active {
+.detalle-alumno-page .detalle-volver:active {
   transform: translate(4px, 4px);
   box-shadow: 0 0 0 #000;
 }

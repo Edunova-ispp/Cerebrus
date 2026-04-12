@@ -12,6 +12,7 @@ import { CartaForm, type CartaFormInitialValues } from '../crearActividad/CartaF
 import { TableroForm, type TableroFormInitialValues } from '../crearActividad/TableroForm';
 import { CrucigramaForm, type CrucigramaFormInitialValues } from '../crearActividad/CrucigramaForm';
 import { PreguntaAbiertaForm, type PreguntaAbiertaFormInitialValues } from '../crearActividad/PreguntaAbiertaForm';
+import ActivityGuideButton from '../../components/ActivityGuideButton/ActivityGuideButton';
 
 // --- TIPOS DTO ---
 
@@ -203,6 +204,18 @@ type TemaWithActividadesDTO = {
 };
 
 type ActivityKind = 'ordenacion' | 'test' | 'teoria' | 'tablero' | 'marcarImagen' | 'clasificacion' | 'carta' | 'crucigrama' | 'preguntaAbierta' | null;
+
+const GUIDE_TYPE_BY_KIND: Record<Exclude<ActivityKind, null>, string> = {
+    ordenacion: 'ordenacion',
+    test: 'test',
+    teoria: 'teoria',
+    tablero: 'tablero',
+    marcarImagen: 'marcar-imagen',
+    clasificacion: 'clasificacion',
+    carta: 'carta',
+    crucigrama: 'crucigrama',
+    preguntaAbierta: 'pregunta-abierta',
+};
 
 interface EditarActividadProps {
     readonly actividadIdProp?: string;
@@ -619,6 +632,8 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
         }
     };
 
+    const guideType = kind ? GUIDE_TYPE_BY_KIND[kind] : 'general';
+
     return (
         <div className={embedded ? 'ca-embedded' : 'ca-page'}>
             {!embedded && <NavbarMisCursos />}
@@ -631,6 +646,11 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
                     </div>
                 )}
                 <div className="ca-contenido">
+                    {!loading && !error && (
+                        <div className="ca-help-row">
+                            <ActivityGuideButton activityType={guideType} role="maestro" buttonLabel="Tutorial" />
+                        </div>
+                    )}
                     {loading && <p className="ca-text">Cargando datos de la actividad...</p>}
                     {!loading && error && <p className="ca-text" style={{ color: 'red' }}>{error}</p>}
                     {!loading && !error && renderForm()}

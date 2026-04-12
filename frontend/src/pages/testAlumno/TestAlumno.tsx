@@ -499,7 +499,7 @@ export default function TestAlumno() {
         {test && currentPregunta && (
           <>
             {/* ── Header ── */}
-            <ActivityHeader title={test.titulo} />
+            <ActivityHeader title={test.titulo} guideType="test" guideRole="alumno" />
 
             {/* ── Score banner after submit ── */}
             {submitted && score && (

@@ -5,6 +5,7 @@ import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
 import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
+import ActivityGuideButton from '../../components/ActivityGuideButton/ActivityGuideButton';
 import espadaImg from '../../assets/props/espada.png';
 import './MarcarImagenAlumno.css';
 
@@ -411,6 +412,8 @@ export default function MarcarImagenAlumno() {
               <div className="mia-title-banner">
                 <h1 className="mia-title-text">{actividad.titulo}</h1>
               </div>
+
+              <ActivityGuideButton activityType="marcar-imagen" role="alumno" />
             </div>
 
             {actividad.descripcion && <p className="mia-description">{actividad.descripcion}</p>}

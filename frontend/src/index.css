@@ -14,6 +14,31 @@ html, body {
   --color-error: #ff0040;
   --color-confirm: #5affcd;
 
+  /* ── Teacher Professional Theme ── */
+  --t-primary: #2563EB;
+  --t-primary-hover: #1D4ED8;
+  --t-primary-light: #EFF6FF;
+  --t-bg: #F8FAFC;
+  --t-card: #FFFFFF;
+  --t-text: #1E293B;
+  --t-text-secondary: #64748B;
+  --t-border: #E2E8F0;
+  --t-border-dark: #CBD5E1;
+  --t-input-bg: #F8FAFC;
+  --t-input-focus: #DBEAFE;
+  --t-shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+  --t-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1);
+  --t-shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+  --t-shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+  --t-radius: 10px;
+  --t-radius-lg: 14px;
+  --t-danger: #EF4444;
+  --t-danger-light: #FEE2E2;
+  --t-success: #10B981;
+  --t-success-light: #D1FAE5;
+  --t-warning: #F59E0B;
+  --t-warning-light: #FEF3C7;
+
   font-family: 'Oxygen', 'Pixelify Sans', 'Oxygen', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;

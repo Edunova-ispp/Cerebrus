@@ -499,7 +499,7 @@ export default function TableroAlumno() {
       <NavbarMisCursos />
       <main className="ta-main">
         <div className="ta-wrapper">
-          <ActivityHeader title={tablero.titulo} />
+          <ActivityHeader title={tablero.titulo} guideType="tablero" guideRole="alumno" />
 
           <div className="ta-progress">
             <img src={hombreMisteriosoImg} alt="Hombre misterioso" className="ta-progress-avatar" />

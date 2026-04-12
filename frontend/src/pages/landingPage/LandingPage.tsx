@@ -7,6 +7,7 @@ import dragon from "../../assets/props/dragon.png";
 import libro from "../../assets/props/libro.png";
 import dueno from "../../assets/props/dueño.png";
 import ProfileIcon from "../../assets/icons/profile.svg?react";
+import { getCurrentUserRoles } from "../../types/curso";
 
 // Alternating primary/secondary, except 'u' which uses accent
 const TITLE = [
@@ -47,6 +48,8 @@ const cards = [
 function LandingPage() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const roles = getCurrentUserRoles();
+  const isOrganizacion = roles.some((r) => r.toUpperCase().includes("ORGANIZACION"));
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -61,9 +64,14 @@ function LandingPage() {
       {/* Botones de la esquina superior derecha */}
       <div className="landing-top-buttons">
         {isLoggedIn && (
-          <button className="landing-login-btn" onClick={() => navigate("/misCursos")}>
-            Mis Cursos
-          </button>
+          <>
+            <button className="landing-login-btn" onClick={() => navigate(isOrganizacion ? "/suscripcion" : "/misCursos")}>
+              {isOrganizacion ? "Mi Organización" : "Mis Cursos"}
+            </button>
+            <button className="landing-login-btn" onClick={handleLogout}>
+              Cerrar Sesión
+            </button>
+          </>
         )}
         {!isLoggedIn && (
           <button className="landing-login-btn" onClick={() => navigate("/auth/login")}>

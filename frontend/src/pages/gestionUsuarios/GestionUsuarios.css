@@ -1,0 +1,481 @@
+/* ── Page ── */
+.gu-page {
+  min-height: 100vh;
+  background: var(--t-bg);
+  font-family: 'Oxygen', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.gu-main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 32px 20px 56px;
+}
+
+.gu-wrapper {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.gu-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--t-text);
+  text-align: center;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* ── Toast messages ── */
+.gu-toast {
+  text-align: center;
+  padding: 12px 20px;
+  border-radius: var(--t-radius);
+  font-size: 1rem;
+  font-weight: 600;
+  border: 1px solid;
+}
+.gu-toast--ok {
+  background: var(--t-success-light);
+  color: #155724;
+  border-color: var(--t-success);
+}
+.gu-toast--err {
+  background: var(--t-danger-light);
+  color: #721c24;
+  border-color: var(--t-danger);
+}
+
+.gu-toast--floating {
+  position: fixed;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  max-width: calc(100vw - 40px);
+  box-shadow: 6px 6px 0 #000;
+  pointer-events: none;
+}
+
+/* ── Toolbar ── */
+.gu-toolbar {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.gu-search {
+  flex: 1;
+  min-width: 220px;
+  padding: 12px 16px;
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
+  font-family: inherit;
+  font-size: 1rem;
+  background: var(--t-card);
+  box-shadow: var(--t-shadow-sm);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.gu-search:focus {
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.gu-filters {
+  display: flex;
+  gap: 8px;
+}
+
+.gu-filter-btn {
+  padding: 10px 18px;
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--t-card);
+  color: var(--t-text);
+  box-shadow: var(--t-shadow-sm);
+  transition: background 0.15s, color 0.15s;
+}
+.gu-filter-btn:hover {
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border-color: var(--t-primary);
+}
+.gu-filter-btn--active {
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border-color: var(--t-primary);
+}
+
+/* ── Table ── */
+.gu-loading, .gu-empty {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+  padding: 48px 0;
+}
+
+.gu-table-wrap {
+  overflow-x: auto;
+}
+
+.gu-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  overflow: hidden;
+  background: var(--t-card);
+  box-shadow: var(--t-shadow);
+}
+
+.gu-table th {
+  background: var(--t-primary);
+  color: #fff;
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gu-table td {
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  border-top: 1px solid var(--t-border);
+  color: var(--t-text);
+}
+
+.gu-table tbody tr:hover {
+  background: var(--t-primary-light);
+}
+
+/* ── Badges ── */
+.gu-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border: 1px solid var(--t-border);
+}
+.gu-badge--maestro {
+  background: #cce5ff;
+  color: #004085;
+}
+.gu-badge--alumno {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* ── Action buttons ── */
+.gu-actions-cell {
+  display: flex;
+  gap: 8px;
+}
+
+.gu-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.gu-btn:active {
+  transform: translateY(1px);
+}
+.gu-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.gu-btn--detail {
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border-color: var(--t-primary);
+}
+.gu-btn--detail:hover {
+  background: var(--t-input-focus);
+}
+
+.gu-btn--primary {
+  background: var(--t-primary);
+  color: #fff;
+  border-color: var(--t-primary);
+}
+.gu-btn--primary:hover {
+  background: var(--t-primary-hover);
+}
+
+.gu-btn--secondary {
+  background: #eee;
+  color: #333;
+}
+.gu-btn--secondary:hover {
+  background: #ddd;
+}
+
+.gu-btn--delete {
+  background: var(--t-danger-light);
+  color: var(--t-danger);
+  border-color: var(--t-danger);
+}
+.gu-btn--delete:hover {
+  background: #fecaca;
+}
+
+/* ── Pagination ── */
+.gu-pagination {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.gu-page-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+}
+
+.gu-page-label {
+  font-weight: 700;
+  color: var(--t-text);
+}
+
+.gu-page-group button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
+  background: var(--t-card);
+  font-size: 1.1rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.gu-page-group button:hover:not(:disabled) {
+  background: var(--t-primary-light);
+  border-color: var(--t-primary);
+}
+.gu-page-group button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Modal overlay ── */
+.gu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.gu-modal {
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  padding: 32px 36px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: var(--t-shadow-lg);
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.gu-modal--small {
+  max-width: 420px;
+}
+
+.gu-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  line-height: 1;
+}
+.gu-modal-close:hover {
+  color: #000;
+}
+
+.gu-modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--t-text);
+  margin: 0 0 12px;
+}
+
+/* ── Detail fields ── */
+.gu-detail-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.gu-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gu-field-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gu-field span:last-child {
+  font-size: 1.1rem;
+  color: #222;
+}
+
+/* ── Edit form ── */
+.gu-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.gu-form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--t-text);
+}
+
+.gu-form-label input {
+  padding: 10px 14px;
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
+  font-family: inherit;
+  font-size: 1rem;
+  background: var(--t-input-bg);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.gu-form-label input:focus {
+  outline: none;
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ── Modal actions ── */
+.gu-modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* ── Confirm text ── */
+.gu-confirm-text {
+  font-size: 1.1rem;
+  color: #333;
+  line-height: 1.5;
+  margin: 16px 0 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .gu-title { font-size: 2rem; }
+  .gu-toolbar { flex-direction: column; }
+  .gu-table th, .gu-table td { padding: 10px 10px; font-size: 0.9rem; }
+  .gu-modal { padding: 24px 20px; }
+}
+
+/* ── Create user page / actions ── */
+.gu-create-user-btn {
+  width: 50%;
+  align-self: center;
+}
+
+.gu-create-form {
+  align-items: center;
+}
+
+.gu-create-form .gu-form-label {
+  width: 33.333%;
+  min-width: 260px;
+}
+
+
+.gu-create-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.gu-back-btn {
+  padding: 8px 14px;
+  position: absolute;
+  left: 0;
+}
+
+.gu-role-field {
+  width: 100%;
+}
+
+.gu-role-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.gu-role-btn--maestro {
+  background: #cce5ff;
+  color: #004085;
+}
+.gu-role-btn--maestro:hover,
+.gu-role-btn--maestro.gu-role-btn--selected {
+  background: #004085;
+  color: #cce5ff;
+}
+
+.gu-role-btn--alumno {
+  background: #d4edda;
+  color: #155724;
+}
+.gu-role-btn--alumno:hover,
+.gu-role-btn--alumno.gu-role-btn--selected {
+  background: #155724;
+  color: #d4edda;
+}
+
+@media (max-width: 640px) {
+  .gu-create-form .gu-form-label {
+    width: 100%;
+    min-width: 0;
+  }
+}
