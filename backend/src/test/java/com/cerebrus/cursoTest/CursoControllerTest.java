@@ -167,28 +167,30 @@ class CursoControllerTest {
     // Test para verificar que crearCurso retorna 201 CREATED con el curso creado
     @Test
     void crearCurso_requestValido_retorna201ConCurso() {
-        when(cursoService.crearCurso("Física", "Desc", "img.png")).thenReturn(curso);
+        when(cursoService.crearCurso("Física", "Desc", "img.png", "CODIGO123")).thenReturn(curso);
 
         CursoController.CrearCursoRequest request = new CursoController.CrearCursoRequest();
         request.setTitulo("Física");
         request.setDescripcion("Desc");
         request.setImagen("img.png");
+        request.setCodigo("CODIGO123");
 
         ResponseEntity<Curso> respuesta = cursoController.crearCurso(request);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(respuesta.getBody()).isNotNull();
         assertThat(respuesta.getBody().getId()).isEqualTo(10L);
-        verify(cursoService).crearCurso("Física", "Desc", "img.png");
+        verify(cursoService).crearCurso("Física", "Desc", "img.png", "CODIGO123");
     }
 
     // Test para verificar que crearCurso retorna 201 cuando descripción e imagen son null
     @Test
     void crearCurso_sinDescripcionNiImagen_retorna201() {
-        when(cursoService.crearCurso("Historia", null, null)).thenReturn(curso);
+        when(cursoService.crearCurso("Historia", null, null, "CODIGO123")).thenReturn(curso);
 
         CursoController.CrearCursoRequest request = new CursoController.CrearCursoRequest();
         request.setTitulo("Historia");
+        request.setCodigo("CODIGO123");
 
         ResponseEntity<Curso> respuesta = cursoController.crearCurso(request);
 

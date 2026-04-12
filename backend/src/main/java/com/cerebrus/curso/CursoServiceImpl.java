@@ -43,7 +43,7 @@ public class CursoServiceImpl implements CursoService {
 
     @Transactional
     @Override
-    public Curso crearCurso(String titulo, String descripcion, String imagen){
+    public Curso crearCurso(String titulo, String descripcion, String imagen, String codigoPersonalizado) {
         Usuario usuarioActual = usuarioService.findCurrentUser();
         if (!(usuarioActual instanceof Maestro)){
             throw new AccessDeniedException("Solo un maestro puede crear cursos");
@@ -59,7 +59,7 @@ public class CursoServiceImpl implements CursoService {
         curso.setMaestro(maestro);
         String codigo;
         while(true){
-            codigo = CerebrusUtils.generateUniqueCode();
+            codigo = codigoPersonalizado;
             if(!cursoRepository.existsByCodigo(codigo)){
                 break;
             }
@@ -126,7 +126,7 @@ public class CursoServiceImpl implements CursoService {
 
     @Transactional
     @Override
-    public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen) {
+    public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen, String codigoPersonalizado) {
         Curso curso = cursoRepository.findByID(id);
         if (curso == null) {
             throw new RuntimeException("404 Not Found");
@@ -141,6 +141,7 @@ public class CursoServiceImpl implements CursoService {
         curso.setTitulo(titulo);
         curso.setDescripcion(descripcion);
         curso.setImagen(imagen);
+        curso.setCodigo(codigoPersonalizado);
         return cursoRepository.save(curso);
     }
 
