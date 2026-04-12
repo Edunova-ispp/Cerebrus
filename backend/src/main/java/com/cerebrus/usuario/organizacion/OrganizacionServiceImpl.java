@@ -102,18 +102,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         if (!tieneSuscripcionActiva) {
             throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede buscar usuarios.");
         }
-        // Forzar carga de ambas colecciones dentro de la transacción
-        Hibernate.initialize(organizacion.getMaestros());
-        Hibernate.initialize(organizacion.getAlumnos());
-        // Hacer copias de las colecciones para evitar lazy loading posterior
-        List<Usuario> usuarios = Stream.concat(
-                        new ArrayList<>(organizacion.getMaestros()).stream().map(m -> (Usuario) m),
-                        new ArrayList<>(organizacion.getAlumnos()).stream().map(a -> (Usuario) a))
-                .toList();
-        Usuario usuario = usuarios.stream()
-                .filter(u -> u.getId().equals(usuarioId))
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + usuarioId));
+        Usuario usuario = encontrarUsuarioEnOrganizacion(organizacion, usuarioId);
         return toSafeUsuario(usuario);
     }
 
@@ -152,7 +141,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         if (!tieneSuscripcionActiva) {
             throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede actualizar usuarios.");
         }
-        Usuario usuarioExistente = buscarUsuario(organizacionId, usuarioId);
+        Usuario usuarioExistente = encontrarUsuarioEnOrganizacion(organizacion, usuarioId);
         validarNombreUsuarioUnicoEnOrganizacion(organizacion, usuarioExistente.getId(), usuarioActualizado.getNombreUsuario());
         // Solo se permiten actualizar ciertos campos
         usuarioExistente.setNombre(usuarioActualizado.getNombre());
@@ -164,6 +153,18 @@ public class OrganizacionServiceImpl implements OrganizacionService {
             usuarioExistente.setContrasena(usuarioActualizado.getContrasena());
         }
         return toSafeUsuario(usuarioRepository.save(usuarioExistente));
+    }
+
+    private Usuario encontrarUsuarioEnOrganizacion(Organizacion organizacion, Long usuarioId) {
+        Hibernate.initialize(organizacion.getMaestros());
+        Hibernate.initialize(organizacion.getAlumnos());
+
+        return Stream.concat(
+                organizacion.getMaestros().stream().map(m -> (Usuario) m),
+                organizacion.getAlumnos().stream().map(a -> (Usuario) a))
+            .filter(u -> u.getId().equals(usuarioId))
+            .findFirst()
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + usuarioId));
     }
 
     private Organizacion validarYObtenerOrganizacionPropietaria(Long organizacionId, String accion) {
