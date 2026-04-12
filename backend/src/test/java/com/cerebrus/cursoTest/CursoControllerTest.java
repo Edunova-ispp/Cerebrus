@@ -186,11 +186,11 @@ class CursoControllerTest {
     // Test para verificar que crearCurso retorna 201 cuando descripción e imagen son null
     @Test
     void crearCurso_sinDescripcionNiImagen_retorna201() {
-        when(cursoService.crearCurso("Historia", null, null, "CODIGO123")).thenReturn(curso);
+        when(cursoService.crearCurso("Historia", null, null, "CODIGO2")).thenReturn(curso);
 
         CursoController.CrearCursoRequest request = new CursoController.CrearCursoRequest();
         request.setTitulo("Historia");
-        request.setCodigo("CODIGO123");
+        request.setCodigo("CODIGO2");
 
         ResponseEntity<Curso> respuesta = cursoController.crearCurso(request);
 

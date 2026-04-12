@@ -40,7 +40,11 @@ public class CursoServiceImpl implements CursoService {
         this.actividadAlumnoRepository = actividadAlumnoRepository;
         this.actividadRepository = actividadRepository;
     }
-
+    public void validarCodigoUnico(String codigo) {
+        if (cursoRepository.existsByCodigo(codigo)) {
+            throw new RuntimeException("Este código ya esta en uso, por favor elige otro");
+        }
+    }
     @Transactional
     @Override
     public Curso crearCurso(String titulo, String descripcion, String imagen, String codigoPersonalizado) {
@@ -57,13 +61,10 @@ public class CursoServiceImpl implements CursoService {
         curso.setVisibilidad(false);
         Maestro maestro = (Maestro) usuarioActual;
         curso.setMaestro(maestro);
-        String codigo = codigoPersonalizado;
         
-        if(cursoRepository.existsByCodigo(codigo)){
-               throw new RuntimeException("Este código ya esta en uso, por favor elige otro");
-         }
+        validarCodigoUnico(codigoPersonalizado);
         
-        curso.setCodigo(codigo);
+        curso.setCodigo(codigoPersonalizado);
         return cursoRepository.save(curso);
     }
 
@@ -122,7 +123,7 @@ public class CursoServiceImpl implements CursoService {
             throw new RuntimeException("403 Forbidden");
         }
     }
-
+     
     @Transactional
     @Override
     public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen, String codigo) {
@@ -137,9 +138,7 @@ public class CursoServiceImpl implements CursoService {
         if (!curso.getMaestro().getId().equals(usuario.getId())) {
             throw new AccessDeniedException("Solo el propietario del curso puede actualizarlo");
         }
-        if(cursoRepository.existsByCodigo(codigo)){
-               throw new RuntimeException("Este código ya esta en uso, por favor elige otro");
-         }
+        validarCodigoUnico(codigo);
         curso.setTitulo(titulo);
         curso.setDescripcion(descripcion);
         curso.setImagen(imagen);

@@ -283,7 +283,7 @@ class CursoServiceImplTest {
         when(cursoRepository.existsByCodigo(anyString())).thenReturn(false);
         when(cursoRepository.save(any(Curso.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Curso resultado = cursoService.crearCurso("Física", "Descripción", "img.png", "CODIGO123");
+        Curso resultado = cursoService.crearCurso("Física", "Descripción", "img.png", "CODIGO");
 
         assertThat(resultado.getTitulo()).isEqualTo("Física");
         assertThat(resultado.getDescripcion()).isEqualTo("Descripción");
@@ -314,7 +314,7 @@ class CursoServiceImplTest {
     void crearCurso_usuarioNoMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
-        assertThatThrownBy(() -> cursoService.crearCurso("Física", "Desc", null, "CODIGO123"))
+        assertThatThrownBy(() -> cursoService.crearCurso("Física", "Desc", null, "CODIGO1234"))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede crear cursos");
 
@@ -328,7 +328,7 @@ class CursoServiceImplTest {
         when(cursoRepository.existsByCodigo(anyString())).thenReturn(false);
         when(cursoRepository.save(any(Curso.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Curso resultado = cursoService.crearCurso("Historia", null, null, "CODIGO123");
+        Curso resultado = cursoService.crearCurso("Historia", null, null, "CODIGO12345");
 
         assertThat(resultado.getDescripcion()).isNull();
         assertThat(resultado.getImagen()).isNull();
