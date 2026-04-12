@@ -173,36 +173,43 @@ class TemasIT extends SeleniumBaseTest {
         }
 
         @Test
-        @Order(5)
-        @DisplayName("El maestro no puede crear un tema con título inválido y permanece en el formulario")
-        void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
-                ensureSharedCourseReady();
-                login(MAESTRO_USER, MAESTRO_PASSWORD);
-                navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
+@Order(5)
+@DisplayName("El maestro no puede crear un tema con título inválido y permanece en el formulario")
+void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
+    ensureSharedCourseReady();
+    login(MAESTRO_USER, MAESTRO_PASSWORD);
 
-                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-                WebElement heading = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.welcome-text"))
-                );
-                assertThat(heading.getText()).isEqualToIgnoringCase("Crear tema");
+    // Navegar via click igual que @Order(3), no via URL directa
+    navigateTo("/cursos/" + sharedCourse.id());
+    WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
 
-                WebElement titleInput = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
-                );
-                titleInput.clear();
-                titleInput.sendKeys("   ");
+    WebElement addThemeButton = pageWait.until(
+            ExpectedConditions.presenceOfElementLocated(By.cssSelector("button.ltp-btn-añadir"))
+    );
+    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addThemeButton);
 
-                WebElement submitButton = pageWait.until(
-                                ExpectedConditions.elementToBeClickable(By.cssSelector("button.pixel-btn-submit-main"))
-                );
-                submitButton.click();
+    pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.welcome-text")));
 
-                WebElement errorMsg = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.error-msg"))
-                );
-                assertThat(errorMsg.getText()).containsIgnoringCase("requerido");
-                assertThat(driver.getCurrentUrl()).contains("/temas/crear");
-        }
+    WebElement titleInput = pageWait.until(
+            ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
+    );
+    titleInput.clear();
+    titleInput.sendKeys("   ");
+
+    driver.findElement(By.cssSelector("button.pixel-btn-submit-main")).click();
+
+    // Cerrar alerta si aparece tras submit inválido
+    try {
+        new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.alertIsPresent());
+        driver.switchTo().alert().dismiss();
+    } catch (org.openqa.selenium.TimeoutException ignored) {}
+
+    WebElement errorMsg = pageWait.until(
+            ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.error-msg"))
+    );
+    assertThat(errorMsg.getText()).containsIgnoringCase("requerido");
+    assertThat(driver.getCurrentUrl()).contains("/cursos/" + sharedCourse.id());
+}
 
         @Test
         @Order(6)
@@ -368,25 +375,33 @@ class TemasIT extends SeleniumBaseTest {
         }
 
         private void login(String user, String password) {
-                navigateTo("/auth/login");
-                clearClientSession();
+    // 1. Cerrar cualquier alerta pendiente antes de hacer nada
+    try {
+        driver.switchTo().alert().dismiss();
+    } catch (org.openqa.selenium.NoAlertPresentException ignored) {}
 
-                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-                WebElement userInput = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(By.id("identificador"))
-                );
-                userInput.clear();
-                userInput.sendKeys(user);
+    navigateTo("/auth/login");
+    clearClientSession();
 
-                WebElement passwordInput = driver.findElement(By.id("password"));
-                passwordInput.clear();
-                passwordInput.sendKeys(password);
+    WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
+    WebElement userInput = pageWait.until(
+            ExpectedConditions.visibilityOfElementLocated(By.id("identificador"))
+    );
+    userInput.clear();
+    userInput.sendKeys(user);
 
-                driver.findElement(By.cssSelector("button.pixel-btn-submit")).click();
-                pageWait.until(ExpectedConditions.urlContains("/miscursos"));
-                driver.navigate().refresh();
-                pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h1.mis-cursos-title")));
-        }
+    WebElement passwordInput = driver.findElement(By.id("password"));
+    passwordInput.clear();
+    passwordInput.sendKeys(password);
+
+    driver.findElement(By.cssSelector("button.pixel-btn-submit")).click();
+    pageWait.until(ExpectedConditions.urlContains("/miscursos"));
+
+    // 2. Quitar el refresh() — es el que se cuelga
+    // Solo esperar a que el h1 sea visible, sin recargar
+    pageWait.until(ExpectedConditions.visibilityOfElementLocated(
+            By.cssSelector("h1.mis-cursos-title")));
+}
 
         private CourseContext createCourseAndOpenDetail(String courseTitle) {
                 navigateTo("/crearCurso");

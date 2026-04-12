@@ -1,5 +1,6 @@
 package com.cerebrus.e2e;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -21,6 +22,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SmokeIT extends SeleniumBaseTest {
 
     private static final Duration WAIT = Duration.ofSeconds(10);
+
+    @BeforeEach
+void clearData() {
+    // Primero navegar al dominio para que las cookies sean del dominio correcto
+    navigateTo("/");
+    driver.manage().deleteAllCookies();
+    ((org.openqa.selenium.JavascriptExecutor) driver)
+        .executeScript("window.localStorage.clear(); window.sessionStorage.clear();");
+    // Forzar recarga para que el frontend procese el estado vacío
+    driver.navigate().refresh();
+}
 
     @Test
     @DisplayName("La landing page carga y muestra el título CerebrUS")
