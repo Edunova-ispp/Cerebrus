@@ -3,13 +3,14 @@
   top: 0; left: 0;
   width: 100vw;
   min-height: 100vh;
-  background-color: #FAF6ED;
-  color: #000;
+  background-color: var(--t-bg);
+  color: var(--t-text);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   overflow-x: hidden;
   z-index: 10;
+  font-family: 'Oxygen', sans-serif;
 }
 
 .ca-embedded {
@@ -36,10 +37,10 @@
   flex-direction: column;
   gap: 8px;
   min-width: 180px;
-  background: #FFF8EE;
-  border: 4px solid #000;
-  border-radius: 16px;
-  box-shadow: 6px 6px 0px #000;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  box-shadow: var(--t-shadow);
   padding: 16px;
   align-self: flex-start;
 }
@@ -48,16 +49,16 @@
   background: transparent;
   border: none;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   cursor: pointer;
   text-align: left;
   padding: 8px 10px;
   border-radius: 8px;
-  color: #000;
-  transition: background 0.15s;
+  color: var(--t-text);
+  transition: background 0.15s, color 0.15s;
 }
-.ca-sidebar-btn:hover { background: var( --color-accent-light); }
-.ca-sidebar-btn--activo { font-weight: bold; background: var(--color-accent); }
+.ca-sidebar-btn:hover { background: var(--t-primary-light); color: var(--t-primary); }
+.ca-sidebar-btn--activo { font-weight: bold; background: var(--t-primary-light); color: var(--t-primary); }
 
 .ca-contenido {
   flex: 1;
@@ -65,15 +66,15 @@
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
-  background: #FFF8EE;
-  border: 4px solid #000;
-  border-radius: 16px;
-  box-shadow: 6px 6px 0px #000;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  box-shadow: var(--t-shadow);
   padding: 32px;
   overflow-y: auto;
   overflow-x: hidden;
   font-family: 'Oxygen', sans-serif;
-  color: #000;
+  color: var(--t-text);
 }
 
 .ca-contenido > form {
@@ -92,12 +93,20 @@
 
 .ca-contenido input,
 .ca-contenido textarea {
-  background: #FFF8EE;
-  border: 2px solid #000;
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
   border-radius: 8px;
   padding: 8px 10px;
   box-sizing: border-box;
-  color: #000;
+  color: var(--t-text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.ca-contenido input:focus,
+.ca-contenido textarea:focus {
+  outline: none;
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 
@@ -108,16 +117,17 @@
 }
 
 .ca-ordenacion-form button.ca-text {
-  color: #000 !important;
-  background: var(--color-accent);
-  border: 2px solid #000;
+  color: var(--t-text) !important;
+  background: var(--t-primary-light);
+  border: 1px solid var(--t-border);
   border-radius: 8px;
   padding: 6px 10px;
   cursor: pointer;
 }
 
 .ca-ordenacion-form button.ca-text:hover {
-  background: var( --color-accent-light);
+  background: var(--t-input-focus);
+  border-color: var(--t-primary);
 }
 
 .ca-ordenacion-form button.ca-text:disabled {
@@ -172,21 +182,21 @@
 }
 
 .ca-btn-guardar {
-  background: var(--color-accent);
-  color: #000;
-  border: 4px solid #000;
-  border-radius: 16px;
+  background: var(--t-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.3rem;
-  font-weight: bold;
-  padding: 12px 48px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 12px 40px;
   cursor: pointer;
-  box-shadow: 5px 5px 0px #000;
-  transition: transform 0.1s, box-shadow 0.1s, background 0.1s;
+  box-shadow: var(--t-shadow);
+  transition: background 0.15s, box-shadow 0.15s;
 }
-.ca-btn-guardar:hover { background: var(--color-accent-light); }
-.ca-btn-guardar:active { transform: translate(5px, 5px); box-shadow: 0px 0px 0px #000; }
-.ca-btn-guardar:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: 5px 5px 0px #000; }
+.ca-btn-guardar:hover { background: var(--t-primary-hover); box-shadow: var(--t-shadow-md); }
+.ca-btn-guardar:active { transform: translateY(1px); box-shadow: var(--t-shadow-sm); }
+.ca-btn-guardar:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: var(--t-shadow); }
 
 .ca-form-footer {
   display: flex;

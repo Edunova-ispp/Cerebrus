@@ -68,7 +68,7 @@ export default function NavbarMisCursos() {
   return (
     <>
       <div className={`navbar-wrap${visible ? "" : " navbar-wrap--hidden"}`}>
-        <nav className={`navbar${isMaestro ? ' navbar--maestro' : ''}`}>
+        <nav className={`navbar${isMaestro ? ' navbar--maestro' : ''}${isOrganizacion ? ' navbar--maestro' : ''}`}>
           <div className="navbar-inner">
             <button
               type="button"
