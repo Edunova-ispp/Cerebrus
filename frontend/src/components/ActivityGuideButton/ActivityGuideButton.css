@@ -1,0 +1,22 @@
+.agb-btn {
+  background: #ffd166;
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #000;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #000;
+  white-space: nowrap;
+}
+
+.agb-btn:hover {
+  background: #ffdf8a;
+}
+
+.agb-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000;
+}

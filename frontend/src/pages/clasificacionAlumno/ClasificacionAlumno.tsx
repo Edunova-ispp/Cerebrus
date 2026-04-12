@@ -10,6 +10,7 @@ import pergaminoImg from '../../assets/props/pergamino.png';
 import cristal1Img from '../../assets/props/cristal1.png';
 import cristal2Img from '../../assets/props/cristal2.png';
 import espadaImg from '../../assets/props/espada.png';
+import ActivityGuideButton from '../../components/ActivityGuideButton/ActivityGuideButton';
 
 import './ClasificacionAlumno.css';
 
@@ -343,6 +344,7 @@ export default function ClasificacionAlumno() {
               <div className="clf-title-banner">
                 <h1 className="clf-title">{clasificacion.titulo}</h1>
               </div>
+              <ActivityGuideButton activityType="clasificacion" role="alumno" />
             </div>
             <div className="ta-battle-bar" style={{ marginBottom: '16px' }}>
               <img src={varitaImg} alt="Varita" className="ta-magic-start" />

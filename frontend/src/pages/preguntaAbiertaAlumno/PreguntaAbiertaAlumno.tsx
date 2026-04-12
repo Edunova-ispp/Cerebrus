@@ -132,7 +132,7 @@ export default function PreguntaAbiertaAlumno() {
       <main className="test-alumno-main">
         {actividad && currentPregunta && (
           <>
-            <ActivityHeader title={actividad.titulo} />
+            <ActivityHeader title={actividad.titulo} guideType="pregunta-abierta" guideRole="alumno" />
             
             <div className="ta-battle-bar">
               <img src={caballeroImg} className="ta-knight-img" alt="Knight" />

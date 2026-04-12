@@ -77,6 +77,12 @@
   color: var(--t-text);
 }
 
+.ca-help-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
 .ca-contenido > form {
   flex: 0 0 auto;
 }

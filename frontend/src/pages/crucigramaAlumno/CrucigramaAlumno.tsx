@@ -557,7 +557,7 @@ export default function CrucigramaAlumno() {
 
         {crucigrama && (
           <>
-            <ActivityHeader title={crucigrama.titulo} />
+            <ActivityHeader title={crucigrama.titulo} guideType="crucigrama" guideRole="alumno" />
 
             {checked && score && (
               <div className={`cr-score-banner ${score.correct === score.total ? 'perfect' : ''}`}>
