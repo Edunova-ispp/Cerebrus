@@ -36,10 +36,7 @@ void clearData() {
         driver.manage().deleteAllCookies();
 
         List<String> rutasProtegidas = List.of(
-                "/estadisticas/4001/actividades",
-                "/estadisticas/4001/temas",
-                "/estadisticas/actividades/6001",
-                "/estadisticas/temas/5001"
+                "/cursos/10101"
         );
 
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
@@ -57,32 +54,39 @@ void clearData() {
         login(PROFESOR_OWNER, PASSWORD);
 
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
-        // Resumen de actividades
-        navigateTo("/estadisticas/4001/actividades");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(normalize-space(), 'Actividades del Curso')]")));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//th[contains(normalize-space(), 'Nota Media')]")));
 
-        // Desglose por temas
-        navigateTo("/estadisticas/4001/temas");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(normalize-space(), 'Temas del Curso')]")));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//th[contains(normalize-space(), 'Completado por todos')]")));
+        navigateTo("/cursos/10101");
 
-        // Estadística de una actividad concreta
-        navigateTo("/estadisticas/actividades/6001");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(normalize-space(), 'Estadísticas de la Actividad')]")));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//th[contains(normalize-space(), 'Tiempo Invertido')]")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Estadísticas')]"))).click();
 
-        // Estadística de un tema concreto
-        navigateTo("/estadisticas/temas/5001");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(normalize-space(), 'Estadísticas del Tema')]")));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//th[contains(normalize-space(), 'Alumno')]")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Resumen general')]"))).click();
+
+        // 4. Cambiar al desglose por temas usando el menú interno
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Puntuaciones medias')]"))).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Los Animales')]"))).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Las Plantas')]"))).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Volver')]"))).click();
+
+        // 5. Ver detalle de una actividad específica (Volviendo a Actividades y pulsando 'Ver')
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Tiempos por Actividad')]"))).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Memoriza los Animales')]"))).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Volver')]"))).click();
+
+        // 6. Ver detalle de un tema específico (Volviendo a Temas y pulsando 'Ver')
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Alumnos')]"))).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Ron')]"))).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Volver')]"))).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Desglose y Gráficas')]"))).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Actividades')]"))).click();
+
+
     }
 
     @Test
     @DisplayName("Profesor no propietario no puede cargar estadisticas del curso ajeno")
     void profesorNoPropietarioNoPuedeCargarEstadisticasCursoAjeno() {
         login(PROFESOR_NO_OWNER, PASSWORD);
-        navigateTo("/estadisticas/4001/actividades");
+        navigateTo("/cursos/10101");
         
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
         // Verificar que NO aparece el contenido esperado (acceso denegado)
