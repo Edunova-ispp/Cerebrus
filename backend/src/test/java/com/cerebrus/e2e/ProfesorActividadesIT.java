@@ -24,6 +24,15 @@ class ProfesorActividadesIT extends SeleniumBaseTest {
     private static final long CURSO_SEED_COMPLETO_ID = 10101L;
     private static final long TEMA_SEED_COMPLETO_ID = 10301L;
 
+     @org.junit.jupiter.api.BeforeEach
+void clearData() {
+    if (driver != null) {
+        navigateTo("/auth/login"); 
+        driver.manage().deleteAllCookies();
+        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("window.localStorage.clear();");
+    }
+}
+
     @Test
     @DisplayName("Sin autenticacion, rutas de crear/editar actividad redirigen a login")
     void rutasProfesorSinLoginRedirigenALogin() {
