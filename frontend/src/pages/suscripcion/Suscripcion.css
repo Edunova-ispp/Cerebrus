@@ -1,7 +1,7 @@
 .sub-page {
   min-height: 100vh;
   background: #fdf6e3;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   display: flex;
   flex-direction: column;
 }
@@ -227,7 +227,7 @@
   border: 2px solid #000;
   border-radius: 10px;
   padding: 14px 18px; 
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.4rem; 
   color: #000;
   width: 100%;
@@ -261,7 +261,7 @@
 }
 
 .sub-form__error {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 0.95rem; 
   font-weight: bold;
   color: #D10057;
@@ -278,7 +278,7 @@
   border: 2px solid #000;
   border-radius: 12px;
   padding: 16px 24px; 
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.5rem; 
   font-weight: bold;
   cursor: pointer;
@@ -390,7 +390,7 @@
   border: 2px solid #000;
   border-radius: 12px;
   padding: 16px 24px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.4rem; /* Ampliado */
   font-weight: bold;
   cursor: pointer;
@@ -419,7 +419,7 @@
   border: 2px solid #000;
   border-radius: 12px;
   padding: 16px 22px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.3rem; /* Ampliado */
   font-weight: bold;
   cursor: pointer;
@@ -442,7 +442,7 @@
 
 
 .sub-loading {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.6rem; 
   color: #000638;
   text-align: center;
@@ -456,7 +456,7 @@
 }
 
 .sub-error {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.1rem; 
   color: #c0392b;
   background: #fff0f0;

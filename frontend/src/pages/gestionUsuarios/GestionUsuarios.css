@@ -1,0 +1,395 @@
+/* ── Page ── */
+.gu-page {
+  min-height: 100vh;
+  background: #fdf6e3;
+  font-family: 'Oxygen', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.gu-main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 32px 20px 56px;
+}
+
+.gu-wrapper {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.gu-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--color-text, #000638);
+  text-align: center;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* ── Toast messages ── */
+.gu-toast {
+  text-align: center;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid #000;
+}
+.gu-toast--ok {
+  background: #d4edda;
+  color: #155724;
+  border-color: #155724;
+}
+.gu-toast--err {
+  background: #f8d7da;
+  color: #721c24;
+  border-color: #721c24;
+}
+
+/* ── Toolbar ── */
+.gu-toolbar {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.gu-search {
+  flex: 1;
+  min-width: 220px;
+  padding: 12px 16px;
+  border: 2px solid #000;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 1rem;
+  background: #fff;
+  box-shadow: 4px 4px 0 #000;
+  outline: none;
+}
+.gu-search:focus {
+  border-color: var(--color-accent-light);
+  box-shadow: 4px 4px 0 var(--color-accent-light);
+}
+
+.gu-filters {
+  display: flex;
+  gap: 8px;
+}
+
+.gu-filter-btn {
+  padding: 10px 18px;
+  border: 2px solid #000;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fff;
+  color: var(--color-text, #000638);
+  box-shadow: 3px 3px 0 #000;
+  transition: background 0.15s, color 0.15s;
+}
+.gu-filter-btn:hover {
+  background: var(--color-accent, #FFF294);
+}
+.gu-filter-btn--active {
+  background: var(--color-accent-light);
+  color: var(--color-text, #000638);
+  border-color: #000;
+}
+
+/* ── Table ── */
+.gu-loading, .gu-empty {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+  padding: 48px 0;
+}
+
+.gu-table-wrap {
+  overflow-x: auto;
+}
+
+.gu-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 2px solid #000;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 6px 6px 0 #000;
+}
+
+.gu-table th {
+  background: var(--color-text, #000638);
+  color: var(--color-accent, #FFF294);
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gu-table td {
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  border-top: 1px solid #eee;
+  color: #222;
+}
+
+.gu-table tbody tr:hover {
+  background: var(--color-accent, #FFF294);
+}
+
+/* ── Badges ── */
+.gu-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border: 2px solid #000;
+}
+.gu-badge--maestro {
+  background: #cce5ff;
+  color: #004085;
+}
+.gu-badge--alumno {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* ── Action buttons ── */
+.gu-actions-cell {
+  display: flex;
+  gap: 8px;
+}
+
+.gu-btn {
+  padding: 8px 16px;
+  border: 2px solid #000;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.gu-btn:active {
+  transform: scale(0.96);
+}
+.gu-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.gu-btn--detail {
+  background: var(--color-accent, #FFF294);
+  color: var(--color-text, #000638);
+}
+.gu-btn--detail:hover {
+  background: var(--color-accent-dark, #ffe62b);
+}
+
+.gu-btn--primary {
+  background: var(--color-text, #000638);
+  color: var(--color-accent, #FFF294);
+}
+.gu-btn--primary:hover {
+  background: #1a1f5c;
+}
+
+.gu-btn--secondary {
+  background: #eee;
+  color: #333;
+}
+.gu-btn--secondary:hover {
+  background: #ddd;
+}
+
+.gu-btn--delete {
+  background: #f8d7da;
+  color: #721c24;
+}
+.gu-btn--delete:hover {
+  background: #f1b0b7;
+}
+
+/* ── Pagination ── */
+.gu-pagination {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.gu-page-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+}
+
+.gu-page-label {
+  font-weight: 700;
+  color: var(--color-text, #000638);
+}
+
+.gu-page-group button {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #000;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.gu-page-group button:hover:not(:disabled) {
+  background: var(--color-accent, #FFF294);
+}
+.gu-page-group button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Modal overlay ── */
+.gu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.gu-modal {
+  background: #fdf6e3;
+  border: 3px solid #000;
+  border-radius: 20px;
+  padding: 32px 36px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 8px 8px 0 #000;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.gu-modal--small {
+  max-width: 420px;
+}
+
+.gu-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  line-height: 1;
+}
+.gu-modal-close:hover {
+  color: #000;
+}
+
+.gu-modal-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-text, #000638);
+  margin: 0 0 12px;
+}
+
+/* ── Detail fields ── */
+.gu-detail-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.gu-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gu-field-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gu-field span:last-child {
+  font-size: 1.1rem;
+  color: #222;
+}
+
+/* ── Edit form ── */
+.gu-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.gu-form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #000638;
+}
+
+.gu-form-label input {
+  padding: 10px 14px;
+  border: 2px solid #000;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 1rem;
+  background: #fff;
+}
+.gu-form-label input:focus {
+  outline: none;
+  border-color: var(--color-accent-light);
+  box-shadow: 0 0 0 2px var(--color-light);
+}
+
+/* ── Modal actions ── */
+.gu-modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* ── Confirm text ── */
+.gu-confirm-text {
+  font-size: 1.1rem;
+  color: #333;
+  line-height: 1.5;
+  margin: 16px 0 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .gu-title { font-size: 2rem; }
+  .gu-toolbar { flex-direction: column; }
+  .gu-table th, .gu-table td { padding: 10px 10px; font-size: 0.9rem; }
+  .gu-modal { padding: 24px 20px; }
+}

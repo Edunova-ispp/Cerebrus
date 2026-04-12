@@ -106,29 +106,46 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional
     public void eliminarUsuario(Long organizacionId, Long usuarioId) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "eliminar usuarios");
-        Usuario usuarioAEliminar = buscarUsuario(organizacionId, usuarioId);
-        if (usuarioAEliminar instanceof Maestro) {
-            organizacion.getMaestros().remove(usuarioAEliminar);
-        } else if (usuarioAEliminar instanceof Alumno) {
-            organizacion.getAlumnos().remove(usuarioAEliminar);
+        Hibernate.initialize(organizacion.getMaestros());
+        Hibernate.initialize(organizacion.getAlumnos());
+        // Buscar en la colección gestionada por Hibernate directamente
+        Maestro maestro = organizacion.getMaestros().stream()
+                .filter(m -> m.getId().equals(usuarioId))
+                .findFirst().orElse(null);
+        if (maestro != null) {
+            organizacion.getMaestros().remove(maestro);
+            organizacionRepository.save(organizacion);
+            return;
         }
-        usuarioRepository.deleteById(usuarioAEliminar.getId());
+        Alumno alumno = organizacion.getAlumnos().stream()
+                .filter(a -> a.getId().equals(usuarioId))
+                .findFirst().orElse(null);
+        if (alumno != null) {
+            organizacion.getAlumnos().remove(alumno);
+            organizacionRepository.save(organizacion);
+            return;
+        }
+        throw new ResourceNotFoundException("Usuario no encontrado con ID: " + usuarioId);
     }
 
     @Override
     @Transactional
     public Usuario actualizarUsuario(Long organizacionId, Long usuarioId, UsuarioActualizarDTO usuarioActualizado) {
-        Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "actualizar usuarios");
-        Usuario usuarioExistente = buscarUsuario(organizacionId, usuarioId);
-        validarNombreUsuarioUnicoEnOrganizacion(organizacion, usuarioExistente.getId(), usuarioActualizado.getNombreUsuario());
+        validarYObtenerOrganizacionPropietaria(organizacionId, "actualizar usuarios");
+        // Buscar la entidad gestionada directamente desde el repositorio
+        Usuario usuarioExistente = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + usuarioId));
+        validarNombreUsuarioUnicoEnOrganizacion(
+                organizacionRepository.findById(organizacionId).orElseThrow(),
+                usuarioExistente.getId(), usuarioActualizado.getNombreUsuario());
         // Solo se permiten actualizar ciertos campos
-        usuarioExistente.setNombre(usuarioActualizado.getNombre());
-        usuarioExistente.setPrimerApellido(usuarioActualizado.getPrimerApellido());
+        if (usuarioActualizado.getNombre() != null) usuarioExistente.setNombre(usuarioActualizado.getNombre());
+        if (usuarioActualizado.getPrimerApellido() != null) usuarioExistente.setPrimerApellido(usuarioActualizado.getPrimerApellido());
         usuarioExistente.setSegundoApellido(usuarioActualizado.getSegundoApellido());
-        usuarioExistente.setNombreUsuario(usuarioActualizado.getNombreUsuario());
-        usuarioExistente.setCorreoElectronico(usuarioActualizado.getCorreoElectronico());
+        if (usuarioActualizado.getNombreUsuario() != null) usuarioExistente.setNombreUsuario(usuarioActualizado.getNombreUsuario());
+        if (usuarioActualizado.getCorreoElectronico() != null) usuarioExistente.setCorreoElectronico(usuarioActualizado.getCorreoElectronico());
         if (usuarioActualizado.getContrasena() != null && !usuarioActualizado.getContrasena().isBlank()) {
-            usuarioExistente.setContrasena(usuarioActualizado.getContrasena());
+            usuarioExistente.setContrasena(passwordEncoder.encode(usuarioActualizado.getContrasena()));
         }
         return toSafeUsuario(usuarioRepository.save(usuarioExistente));
     }
