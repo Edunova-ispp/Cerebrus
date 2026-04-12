@@ -334,7 +334,7 @@ export default function CartaAlumno() {
         {carta && !loading && (
           <>
             {/* ── Header ── */}
-            <ActivityHeader title={carta.titulo} />
+            <ActivityHeader title={carta.titulo} guideType="carta" guideRole="alumno" />
 
             {/* ── Progress ── */}
             <div className="ca-al-progress">

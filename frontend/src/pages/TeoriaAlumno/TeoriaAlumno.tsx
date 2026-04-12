@@ -115,7 +115,7 @@ export default function TeoriaAlumno() {
 
         {teoria && (
           <>
-            <ActivityHeader title={teoria.titulo} />
+            <ActivityHeader title={teoria.titulo} guideType="teoria" guideRole="alumno" />
 
             <div 
               className={`ta-flashcard ${isFlipped ? 'flipped' : ''}`} 
