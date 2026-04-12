@@ -26,6 +26,8 @@ import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.estadisticas.dto.ActividadEstadisticasAlumnoDTO;
+import com.cerebrus.estadisticas.dto.IntentoActividadDetalleDTO;
+import com.cerebrus.estadisticas.dto.IntentoDetalleRespuestaDTO;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
@@ -37,6 +39,10 @@ import com.cerebrus.estadisticas.dto.TemaEstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.TiempoAlumnoDTO;
 import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
 import com.cerebrus.inscripcion.Inscripcion;
+import com.cerebrus.respuestaAlumn.RespuestaAlumno;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneral;
+import com.cerebrus.respuestaAlumn.respAlumOrdenacion.RespAlumnoOrdenacion;
+import com.cerebrus.respuestaAlumn.respAlumPuntoImagen.RespAlumnoPuntoImagen;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Usuario;
@@ -863,6 +869,105 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                 temasDTO);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public IntentoActividadDetalleDTO obtenerDetalleIntento(Long cursoId, Long alumnoId, Long actividadId, Long intentoId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+            .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        validarPropietarioCurso(maestro, curso);
+
+        Actividad actividad = actividadRepository.findById(actividadId)
+            .orElseThrow(() -> new RuntimeException("404 Not Found: La actividad con ID " + actividadId + " no existe."));
+
+        if (actividad.getTema() == null || actividad.getTema().getCurso() == null
+            || !actividad.getTema().getCurso().getId().equals(cursoId)) {
+            throw new RuntimeException("404 Not Found: La actividad no pertenece al curso indicado.");
+        }
+
+        ActividadAlumno intento = actividad.getActividadesAlumno().stream()
+            .filter(aa -> aa.getId().equals(intentoId))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("404 Not Found: El intento con ID " + intentoId + " no existe."));
+
+        if (intento.getAlumno() == null || !intento.getAlumno().getId().equals(alumnoId)) {
+            throw new RuntimeException("404 Not Found: El intento no pertenece al alumno indicado.");
+        }
+
+        List<IntentoDetalleRespuestaDTO> respuestas = intento.getRespuestasAlumno().stream()
+            .map(this::mapearRespuestaIntento)
+            .toList();
+
+        return new IntentoActividadDetalleDTO(
+            intento.getId(),
+            cursoId,
+            alumnoId,
+            actividadId,
+            actividad.getTitulo(),
+            obtenerTipoActividad(actividad),
+            obtenerImagenActividad(actividad),
+            actividad.getPuntuacion(),
+            intento.getFechaInicio(),
+            intento.getFechaFin(),
+            intento.getTiempoMinutos(),
+            intento.getPuntuacion(),
+            intento.getNota(),
+            intento.getNumAbandonos(),
+            respuestas);
+    }
+
+    @Override
+    @Transactional
+    public IntentoActividadDTO actualizarPuntuacionIntento(Long cursoId, Long alumnoId, Long actividadId, Long intentoId,
+        Integer nuevaPuntuacion) {
+        if (nuevaPuntuacion == null) {
+            throw new IllegalArgumentException("La puntuación es obligatoria.");
+        }
+
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+            .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        validarPropietarioCurso(maestro, curso);
+
+        Actividad actividad = actividadRepository.findById(actividadId)
+            .orElseThrow(() -> new RuntimeException("404 Not Found: La actividad con ID " + actividadId + " no existe."));
+
+        if (actividad.getTema() == null || actividad.getTema().getCurso() == null
+            || !actividad.getTema().getCurso().getId().equals(cursoId)) {
+            throw new RuntimeException("404 Not Found: La actividad no pertenece al curso indicado.");
+        }
+
+        ActividadAlumno intento = actividad.getActividadesAlumno().stream()
+            .filter(aa -> aa.getId().equals(intentoId))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("404 Not Found: El intento con ID " + intentoId + " no existe."));
+
+        if (intento.getAlumno() == null || !intento.getAlumno().getId().equals(alumnoId)) {
+            throw new RuntimeException("404 Not Found: El intento no pertenece al alumno indicado.");
+        }
+
+        if (actividad.getPuntuacion() != null && nuevaPuntuacion > actividad.getPuntuacion()) {
+            throw new IllegalArgumentException("La puntuacion no puede superar la puntuacion maxima de la actividad.");
+        }
+
+        int puntuacionNormalizada = Math.max(0, nuevaPuntuacion);
+        intento.setPuntuacion(puntuacionNormalizada);
+        intento.setNota(calcularNotaDesdePuntuacion(puntuacionNormalizada, actividad.getPuntuacion()));
+
+        return new IntentoActividadDTO(
+            intento.getId(),
+            intento.getFechaInicio(),
+            intento.getFechaFin(),
+            intento.getPuntuacion(),
+            intento.getNota(),
+            intento.getTiempoMinutos(),
+            intento.getNumAbandonos());
+    }
+
     // ==================== MÉTODOS AUXILIARES ====================
 
     private Maestro validarMaestro(Usuario usuario) {
@@ -1158,6 +1263,70 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
             return "MarcarImagen";
         }
         return "Otro";
+    }
+
+    private IntentoDetalleRespuestaDTO mapearRespuestaIntento(RespuestaAlumno respuestaAlumno) {
+        if (respuestaAlumno == null) {
+            return new IntentoDetalleRespuestaDTO(null, "OTRO", "Respuesta", "", null);
+        }
+
+        if (respuestaAlumno instanceof RespAlumnoGeneral rag) {
+            String enunciado = rag.getPregunta() != null ? rag.getPregunta().getPregunta() : "Pregunta";
+            return new IntentoDetalleRespuestaDTO(
+                    rag.getId(),
+                    "GENERAL",
+                    enunciado,
+                    rag.getRespuesta(),
+                    rag.getCorrecta());
+        }
+        if (respuestaAlumno instanceof RespAlumnoPuntoImagen rpi) {
+            String enunciado = "Punto imagen";
+            return new IntentoDetalleRespuestaDTO(
+                    rpi.getId(),
+                    "PUNTO_IMAGEN",
+                    enunciado,
+                    rpi.getRespuesta(),
+                    rpi.getCorrecta());
+        }
+        if (respuestaAlumno instanceof RespAlumnoOrdenacion rao) {
+            String enunciado = "Ordenacion";
+            String valor = rao.getValoresAlum() == null ? "" : String.join(" > ", rao.getValoresAlum());
+            return new IntentoDetalleRespuestaDTO(
+                    rao.getId(),
+                    "ORDENACION",
+                    enunciado,
+                    valor,
+                    rao.getCorrecta());
+        }
+
+        return new IntentoDetalleRespuestaDTO(
+                respuestaAlumno.getId(),
+                "OTRO",
+                "Respuesta",
+                "",
+                respuestaAlumno.getCorrecta());
+    }
+
+    private Integer calcularNotaDesdePuntuacion(Integer puntuacion, Integer puntuacionMaximaActividad) {
+        if (puntuacion == null || puntuacion <= 0) {
+            return 0;
+        }
+        if (puntuacionMaximaActividad == null || puntuacionMaximaActividad <= 0) {
+            return 0;
+        }
+        double proporcion = (double) puntuacion / (double) puntuacionMaximaActividad;
+        int nota = (int) Math.round(proporcion * 10.0);
+        return Math.max(0, Math.min(10, nota));
+    }
+
+    private String obtenerImagenActividad(Actividad actividad) {
+        if (actividad == null) {
+            return null;
+        }
+        if (actividad instanceof MarcarImagen marcarImagen) {
+            return marcarImagen.getImagenAMarcar();
+        }
+        return actividad.getImagen();
     }
 
 }

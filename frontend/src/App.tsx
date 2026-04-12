@@ -31,6 +31,7 @@ import CrucigramaAlumno from "./pages/crucigramaAlumno/CrucigramaAlumno";
 import EstadisticasAlumno from "./pages/estadisticasCurso/EstadisticasAlumno.tsx";
 import EstadisticasActividad from "./pages/estadisticasCurso/EstadisticasActividad.tsx";
 import EstadisticasTema from "./pages/estadisticasCurso/EstadisticasTema.tsx";
+import DetalleIntentoActividad from "./pages/estadisticasCurso/DetalleIntentoActividad.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import PreguntaAbiertaAlumno from "./pages/preguntaAbiertaAlumno/PreguntaAbiertaAlumno.tsx";
 import TermsPage from "./pages/legal/TermsPage.tsx";
@@ -187,6 +188,9 @@ function App() {
         } />
         <Route path="/estadisticas/actividades/:id" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EstadisticasActividad /></ProtectedRoute>
+        } />
+        <Route path="/estadisticas/cursos/:cursoId/alumnos/:alumnoId/actividades/:actividadId/intentos/:intentoId" element={
+          <ProtectedRoute allowedRoles={['MAESTRO']}><DetalleIntentoActividad /></ProtectedRoute>
         } />
 
         {/* Rutas organización (solo DUENO) */}

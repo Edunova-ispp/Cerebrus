@@ -275,10 +275,24 @@
   font-size: 0.82rem;
   color: #333;
   border-bottom: 1px solid #f0ebe0;
+  width: 100%;
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  text-align: left;
 }
 
 .ea-intento-row:last-child {
   border-bottom: none;
+}
+
+.ea-intento-row--clickable {
+  cursor: pointer;
+}
+
+.ea-intento-row--clickable:hover {
+  background: #f9f5ed;
 }
 
 .ea-intento-num {
