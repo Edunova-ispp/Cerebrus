@@ -312,7 +312,7 @@ class ActividadAlumnoServiceImplTest {
         LocalDateTime nuevaFechaFin = LocalDateTime.now();
 
         ActividadAlumno resultado = service.actualizarActAlumno(10L, 200,
-                LocalDateTime.now(), nuevaFechaFin, 9, 1);
+            LocalDateTime.now(), nuevaFechaFin, 9, 1, false);
 
         assertThat(resultado.getPuntuacion()).isEqualTo(200);
         assertThat(resultado.getNota()).isEqualTo(9);
@@ -325,7 +325,7 @@ class ActividadAlumnoServiceImplTest {
         when(actividadAlumnoRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.actualizarActAlumno(99L, 100,
-                LocalDateTime.now(), LocalDateTime.now(), 8, 0))
+            LocalDateTime.now(), LocalDateTime.now(), 8, 0, false))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 

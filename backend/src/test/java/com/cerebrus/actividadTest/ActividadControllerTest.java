@@ -35,6 +35,7 @@ class ActividadControllerTest {
         request.setTitulo("Titulo");
         request.setDescripcion("Desc");
         request.setImagen("img.png");
+        request.setPermitirReintento(false);
         request.setTemaId(5L);
 
         Actividad actividad = new Actividad() {};
@@ -56,6 +57,7 @@ class ActividadControllerTest {
         request.setTitulo("Titulo");
         request.setDescripcion("Desc");
         request.setImagen(null);
+        request.setPermitirReintento(false);
         request.setTemaId(5L);
 
         Actividad actividad = new Actividad() {};
@@ -143,6 +145,7 @@ class ActividadControllerTest {
         request.setTitulo("Nuevo T");
         request.setDescripcion("Nueva D");
         request.setImagen("img.png");
+        request.setPermitirReintento(false);
         Actividad actividad = new Actividad() {};
         actividad.setId(7L);
         actividad.setTitulo("Nuevo T");
