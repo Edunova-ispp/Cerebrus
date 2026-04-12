@@ -104,7 +104,7 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
           codigo: codigo.trim() || '',
         }),
       });
-
+console.log('Response status:', response);
       if (response.ok) {
         alert('¡Curso actualizado exitosamente!');
         navigate('/miscursos');
@@ -113,7 +113,11 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
           setError('El curso no existe.');
         } else if (response.status === 403) {
           setError('No tienes permiso para editar este curso.');
-      } else {
+
+      } else if(response.status === 409){
+        setError('Este código ya está en uso, por favor elige otro.');
+
+      }else {
         setError('Error al actualizar el curso.');
       }
     }

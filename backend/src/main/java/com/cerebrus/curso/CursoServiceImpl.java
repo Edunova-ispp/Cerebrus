@@ -57,13 +57,12 @@ public class CursoServiceImpl implements CursoService {
         curso.setVisibilidad(false);
         Maestro maestro = (Maestro) usuarioActual;
         curso.setMaestro(maestro);
-        String codigo;
-        while(true){
-            codigo = codigoPersonalizado;
-            if(!cursoRepository.existsByCodigo(codigo)){
-                break;
-            }
-        }
+        String codigo = codigoPersonalizado;
+        
+        if(cursoRepository.existsByCodigo(codigo)){
+               throw new RuntimeException("Este código ya esta en uso, por favor elige otro");
+         }
+        
         curso.setCodigo(codigo);
         return cursoRepository.save(curso);
     }
@@ -138,6 +137,9 @@ public class CursoServiceImpl implements CursoService {
         if (!curso.getMaestro().getId().equals(usuario.getId())) {
             throw new AccessDeniedException("Solo el propietario del curso puede actualizarlo");
         }
+        if(cursoRepository.existsByCodigo(codigoPersonalizado)){
+               throw new RuntimeException("Este código ya esta en uso, por favor elige otro");
+         }
         curso.setTitulo(titulo);
         curso.setDescripcion(descripcion);
         curso.setImagen(imagen);

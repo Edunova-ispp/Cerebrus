@@ -345,11 +345,12 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(cursoRepository.save(curso)).thenReturn(curso);
 
-        Curso resultado = cursoService.actualizarCurso(10L, "Nuevo título", "Nueva desc", "nueva.png");
+        Curso resultado = cursoService.actualizarCurso(10L, "Nuevo título", "Nueva desc", "nueva.png", "nuevo-codigo");
 
         assertThat(resultado.getTitulo()).isEqualTo("Nuevo título");
         assertThat(resultado.getDescripcion()).isEqualTo("Nueva desc");
         assertThat(resultado.getImagen()).isEqualTo("nueva.png");
+        assertThat(resultado.getCodigo()).isEqualTo("nuevo-codigo");
         verify(cursoRepository).save(curso);
     }
 
@@ -358,7 +359,7 @@ class CursoServiceImplTest {
     void actualizarCurso_cursoNoExiste_lanzaNotFound() {
         when(cursoRepository.findByID(99L)).thenReturn(null);
 
-        assertThatThrownBy(() -> cursoService.actualizarCurso(99L, "T", "D", null))
+        assertThatThrownBy(() -> cursoService.actualizarCurso(99L, "T", "D", null, "CODIGO123"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("404 Not Found");
 
@@ -371,7 +372,7 @@ class CursoServiceImplTest {
         when(cursoRepository.findByID(10L)).thenReturn(curso);
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
-        assertThatThrownBy(() -> cursoService.actualizarCurso(10L, "T", "D", null))
+        assertThatThrownBy(() -> cursoService.actualizarCurso(10L, "T", "D", null, "CODIGO123"))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede actualizar cursos");
 
@@ -385,11 +386,12 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(cursoRepository.save(curso)).thenReturn(curso);
 
-        Curso resultado = cursoService.actualizarCurso(10L, "Nuevo título", null, null);
+        Curso resultado = cursoService.actualizarCurso(10L, "Nuevo título", null, null, "nuevo-codigo");
 
         assertThat(resultado.getTitulo()).isEqualTo("Nuevo título");
         assertThat(resultado.getDescripcion()).isNull();
         assertThat(resultado.getImagen()).isNull();
+        assertThat(resultado.getCodigo()).isEqualTo("nuevo-codigo");
     }
 
     // -------------------------------------------------------

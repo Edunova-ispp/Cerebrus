@@ -302,17 +302,18 @@ class CursoControllerTest {
     // Test para verificar que actualizarCurso retorna 200 OK con el curso actualizado
     @Test
     void actualizarCurso_maestroPropietario_retorna200ConCursoActualizado() {
-        when(cursoService.actualizarCurso(10L, "Nuevo título", "Nueva desc", "nueva.png")).thenReturn(curso);
+        when(cursoService.actualizarCurso(10L, "Nuevo título", "Nueva desc", "nueva.png", "nuevo-codigo")).thenReturn(curso);
 
         CursoController.ActualizarCursoRequest request = new CursoController.ActualizarCursoRequest();
         request.setTitulo("Nuevo título");
         request.setDescripcion("Nueva desc");
         request.setImagen("nueva.png");
+        request.setCodigo("nuevo-codigo");
 
         ResponseEntity<Curso> respuesta = cursoController.actualizarCurso(10L, request);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
-        verify(cursoService).actualizarCurso(10L, "Nuevo título", "Nueva desc", "nueva.png");
+        verify(cursoService).actualizarCurso(10L, "Nuevo título", "Nueva desc", "nueva.png", "nuevo-codigo");
     }
 
     // Test para verificar que actualizarCurso retorna 400 cuando el id es 0 (caso límite)
@@ -329,7 +330,7 @@ class CursoControllerTest {
     // Test para verificar que actualizarCurso retorna 403 cuando el service lanza AccessDeniedException
     @Test
     void actualizarCurso_accesoNoPermitido_retorna403() {
-        when(cursoService.actualizarCurso(anyLong(), any(), any(), any()))
+        when(cursoService.actualizarCurso(anyLong(), any(), any(), any(),any()))
                 .thenThrow(new AccessDeniedException("Solo un maestro puede actualizar cursos"));
 
         CursoController.ActualizarCursoRequest request = new CursoController.ActualizarCursoRequest();
@@ -343,7 +344,7 @@ class CursoControllerTest {
     // Test para verificar que actualizarCurso retorna 404 cuando el service lanza RuntimeException con mensaje 404
     @Test
     void actualizarCurso_cursoNoExiste_retorna404() {
-        when(cursoService.actualizarCurso(anyLong(), any(), any(), any()))
+        when(cursoService.actualizarCurso(anyLong(), any(), any(), any(),any()))
                 .thenThrow(new RuntimeException("404 Not Found"));
 
         CursoController.ActualizarCursoRequest request = new CursoController.ActualizarCursoRequest();

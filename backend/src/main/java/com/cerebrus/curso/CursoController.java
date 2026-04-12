@@ -34,8 +34,20 @@ public class CursoController {
     @PostMapping("/curso")
     @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<Curso> crearCurso(@RequestBody @Valid CrearCursoRequest request){
-        Curso creado = cursoService.crearCurso(request.getTitulo(), request.getDescripcion(), request.getImagen(), request.getCodigo());
-        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+       
+        try {
+             Curso creado = cursoService.crearCurso(request.getTitulo(), request.getDescripcion(), request.getImagen(), request.getCodigo());
+            return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }  catch (RuntimeException e) {
+            System.out.println("Error al crear curso: " + e.getMessage());
+            if (e.getMessage().equals("Este código ya esta en uso, por favor elige otro")) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
     }
 
     @GetMapping("/{id}/detalles")
@@ -82,7 +94,9 @@ public class CursoController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             } else if (e.getMessage().equals("403 Forbidden")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            } else {
+            } else if (e.getMessage().equals("Este código ya esta en uso, por favor elige otro")) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
         }
