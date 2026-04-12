@@ -1,13 +1,18 @@
-import { useEffect, useState, useCallback, useRef, type ReactElement } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
-import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
-import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
-import { apiFetch } from '../../utils/api';
-import { getCurrentUserInfo } from '../../types/curso';
-import perritoImg from '../../assets/props/perritoCerberito.png';
 import hombreMisteriosoImg from '../../assets/props/hombreMisterioso.png';
+import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
+import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
+import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
+import { getCurrentUserInfo } from '../../types/curso';
+import { apiFetch } from '../../utils/api';
 import './TableroAlumno.css';
+
+import niv3 from '../../assets/props/Cerbero_despierto_niv3.png';
+import niv2 from '../../assets/props/Guardian_de_la_primera_cabeza_niv2.png';
+import niv1 from '../../assets/props/perritoCerberito.png';
+import niv5 from '../../assets/props/Rey_de_cerebrus_niv5.png';
+import niv4 from '../../assets/props/Vigia_de_las_tres_mentes_niv4.png';
 
 // ── Types ─────────────────────────────────────────────────
 
@@ -22,6 +27,15 @@ type TableroAlumnoDTO = {
 };
 
 // ── Helpers ───────────────────────────────────────────────
+
+function getMascotaEvolucionada(puntos: number): string {
+  if (puntos <= 100) return niv1;
+  if (puntos <= 300) return niv2;
+  if (puntos <= 600) return niv3;
+  if (puntos <= 1000) return niv4;
+  return niv5;
+}
+
 
 function getCurrentUserIdFromJwt(): number | null {
   const info = getCurrentUserInfo();
@@ -125,6 +139,7 @@ function buildGridItems(
   answeredSet: Set<number>,
   isComplete: boolean,
   onCellClick: (r: number, c: number) => void,
+  puntosAlumno: number,
 ): ReactElement[] {
   const [cr, cc] = cerberoPos;
   const hDots = is3x3 ? DOTS_3x3 : DOTS_4x4;
@@ -154,7 +169,7 @@ function buildGridItems(
           onKeyDown={(e) => e.key === 'Enter' && onCellClick(r, c)}
         >
           {isCerbero && (
-            <img src={perritoImg} className={cx('ta-char', isComplete && 'ta-char--victory')} alt="Cerbero" />
+            <img src={getMascotaEvolucionada(puntosAlumno)} className={cx('ta-char', isComplete && 'ta-char--victory')} alt="Cerbero" aria-hidden="true"/>
           )}
           {qIdx !== null && !isCerbero && (
             <span className={cx('ta-cell-label', isDark ? 'ta-cell-label--light' : 'ta-cell-label--dark')}>
@@ -207,6 +222,7 @@ export default function TableroAlumno() {
   const [inputAnswer, setInputAnswer] = useState('');
   const [feedback, setFeedback] = useState<{ correct: boolean; msg: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [puntosAlumno, setPuntosAlumno] = useState(0);
 
   // Sincronizar el ID para el cleanup del abandono
   useEffect(() => {
@@ -237,6 +253,21 @@ export default function TableroAlumno() {
 
         // Registro de la actividad del alumno (¡Empieza el tiempo!)
         const alumnoId = getCurrentUserIdFromJwt();
+        if (alumnoId) {
+                try {
+                  const resAl = await apiFetch(`${API_BASE}/api/alumnos/mi-puntuacion-total`);
+                  console.log('[MapaCurso] Respuesta de puntos:', resAl);
+                  if (resAl.ok) {
+                    const dataAl = await resAl.json();
+                    // Asegúrate de que el backend devuelve un objeto con la propiedad 'puntos'
+                    setPuntosAlumno(dataAl || 0);
+                  }
+                } catch (e) {
+                  // Si falla, solo avisamos por consola pero seguimos adelante
+                  console.warn('[MapaCurso] No se pudo cargar la evolución, usando nivel inicial.', e);
+                  setPuntosAlumno(0);
+                }
+              }
         if (alumnoId) {
           const ensureRes = await apiFetch(`${API_BASE}/api/actividades-alumno/ensure/${data.id}`);
           const exists = (await ensureRes.json()) == 1;
@@ -338,7 +369,7 @@ export default function TableroAlumno() {
   // ── Grid ──────────────────────────────────────────────
 
   const gridDim = size * 2 - 1;
-  const gridItems = buildGridItems(size, tablero.tamano, cerberoPos, answeredSet, isComplete, handleCellClick);
+  const gridItems = buildGridItems(size, tablero.tamano, cerberoPos, answeredSet, isComplete, handleCellClick, puntosAlumno);
 
   const modalQIdx = modalCell ? cellToQIndex(modalCell[0], modalCell[1], size) : null;
   const modalQuestion = modalQIdx !== null ? tablero.preguntas[modalQIdx] : null;
