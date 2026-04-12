@@ -283,7 +283,7 @@ class CursoServiceImplTest {
         when(cursoRepository.existsByCodigo(anyString())).thenReturn(false);
         when(cursoRepository.save(any(Curso.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Curso resultado = cursoService.crearCurso("Física", "Descripción", "img.png");
+        Curso resultado = cursoService.crearCurso("Física", "Descripción", "img.png", "CODIGO");
 
         assertThat(resultado.getTitulo()).isEqualTo("Física");
         assertThat(resultado.getDescripcion()).isEqualTo("Descripción");
@@ -294,27 +294,12 @@ class CursoServiceImplTest {
         verify(cursoRepository).save(any(Curso.class));
     }
 
-    // Test para verificar que crearCurso reintenta la generación de código si el primero ya existe
-    @Test
-    void crearCurso_codigoDuplicado_reintentaHastaEncontrarUnico() {
-        when(usuarioService.findCurrentUser()).thenReturn(maestro);
-        when(cursoRepository.existsByCodigo(anyString()))
-                .thenReturn(true)   // primer intento: duplicado
-                .thenReturn(false); // segundo intento: libre
-        when(cursoRepository.save(any(Curso.class))).thenAnswer(inv -> inv.getArgument(0));
-
-        Curso resultado = cursoService.crearCurso("Química", null, null);
-
-        assertThat(resultado.getCodigo()).isNotBlank();
-        verify(cursoRepository).save(any(Curso.class));
-    }
-
     // Test para verificar que crearCurso lanza AccessDeniedException cuando el usuario no es Maestro
     @Test
     void crearCurso_usuarioNoMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
-        assertThatThrownBy(() -> cursoService.crearCurso("Física", "Desc", null))
+        assertThatThrownBy(() -> cursoService.crearCurso("Física", "Desc", null, "CODIGO1234"))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede crear cursos");
 
@@ -328,7 +313,7 @@ class CursoServiceImplTest {
         when(cursoRepository.existsByCodigo(anyString())).thenReturn(false);
         when(cursoRepository.save(any(Curso.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Curso resultado = cursoService.crearCurso("Historia", null, null);
+        Curso resultado = cursoService.crearCurso("Historia", null, null, "CODIGO12345");
 
         assertThat(resultado.getDescripcion()).isNull();
         assertThat(resultado.getImagen()).isNull();
@@ -345,11 +330,12 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(cursoRepository.save(curso)).thenReturn(curso);
 
-        Curso resultado = cursoService.actualizarCurso(10L, "Nuevo título", "Nueva desc", "nueva.png");
+        Curso resultado = cursoService.actualizarCurso(10L, "Nuevo título", "Nueva desc", "nueva.png", "nuevo-codigo");
 
         assertThat(resultado.getTitulo()).isEqualTo("Nuevo título");
         assertThat(resultado.getDescripcion()).isEqualTo("Nueva desc");
         assertThat(resultado.getImagen()).isEqualTo("nueva.png");
+        assertThat(resultado.getCodigo()).isEqualTo("nuevo-codigo");
         verify(cursoRepository).save(curso);
     }
 
@@ -358,7 +344,7 @@ class CursoServiceImplTest {
     void actualizarCurso_cursoNoExiste_lanzaNotFound() {
         when(cursoRepository.findByID(99L)).thenReturn(null);
 
-        assertThatThrownBy(() -> cursoService.actualizarCurso(99L, "T", "D", null))
+        assertThatThrownBy(() -> cursoService.actualizarCurso(99L, "T", "D", null, "CODIGO123"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("404 Not Found");
 
@@ -371,7 +357,7 @@ class CursoServiceImplTest {
         when(cursoRepository.findByID(10L)).thenReturn(curso);
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
-        assertThatThrownBy(() -> cursoService.actualizarCurso(10L, "T", "D", null))
+        assertThatThrownBy(() -> cursoService.actualizarCurso(10L, "T", "D", null, "CODIGO123"))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede actualizar cursos");
 
@@ -385,11 +371,12 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(cursoRepository.save(curso)).thenReturn(curso);
 
-        Curso resultado = cursoService.actualizarCurso(10L, "Nuevo título", null, null);
+        Curso resultado = cursoService.actualizarCurso(10L, "Nuevo título", null, null, "nuevo-codigo");
 
         assertThat(resultado.getTitulo()).isEqualTo("Nuevo título");
         assertThat(resultado.getDescripcion()).isNull();
         assertThat(resultado.getImagen()).isNull();
+        assertThat(resultado.getCodigo()).isEqualTo("nuevo-codigo");
     }
 
     // -------------------------------------------------------

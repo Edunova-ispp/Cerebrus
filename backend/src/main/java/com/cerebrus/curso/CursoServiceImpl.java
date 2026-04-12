@@ -40,10 +40,14 @@ public class CursoServiceImpl implements CursoService {
         this.actividadAlumnoRepository = actividadAlumnoRepository;
         this.actividadRepository = actividadRepository;
     }
-
+    public void validarCodigoUnico(String codigo) {
+        if (cursoRepository.existsByCodigo(codigo)) {
+            throw new RuntimeException("Este código ya esta en uso, por favor elige otro");
+        }
+    }
     @Transactional
     @Override
-    public Curso crearCurso(String titulo, String descripcion, String imagen){
+    public Curso crearCurso(String titulo, String descripcion, String imagen, String codigoPersonalizado) {
         Usuario usuarioActual = usuarioService.findCurrentUser();
         if (!(usuarioActual instanceof Maestro)){
             throw new AccessDeniedException("Solo un maestro puede crear cursos");
@@ -57,14 +61,10 @@ public class CursoServiceImpl implements CursoService {
         curso.setVisibilidad(false);
         Maestro maestro = (Maestro) usuarioActual;
         curso.setMaestro(maestro);
-        String codigo;
-        while(true){
-            codigo = CerebrusUtils.generateUniqueCode();
-            if(!cursoRepository.existsByCodigo(codigo)){
-                break;
-            }
-        }
-        curso.setCodigo(codigo);
+        
+        validarCodigoUnico(codigoPersonalizado);
+        
+        curso.setCodigo(codigoPersonalizado);
         return cursoRepository.save(curso);
     }
 
@@ -123,10 +123,10 @@ public class CursoServiceImpl implements CursoService {
             throw new RuntimeException("403 Forbidden");
         }
     }
-
+     
     @Transactional
     @Override
-    public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen) {
+    public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen, String codigo) {
         Curso curso = cursoRepository.findByID(id);
         if (curso == null) {
             throw new RuntimeException("404 Not Found");
@@ -138,9 +138,11 @@ public class CursoServiceImpl implements CursoService {
         if (!curso.getMaestro().getId().equals(usuario.getId())) {
             throw new AccessDeniedException("Solo el propietario del curso puede actualizarlo");
         }
+        validarCodigoUnico(codigo);
         curso.setTitulo(titulo);
         curso.setDescripcion(descripcion);
         curso.setImagen(imagen);
+        curso.setCodigo(codigo);
         return cursoRepository.save(curso);
     }
 
