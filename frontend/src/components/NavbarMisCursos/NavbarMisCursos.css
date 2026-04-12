@@ -132,3 +132,78 @@
   object-fit: contain;
   transition: filter 0.2s ease;
 }
+/* ═══════════════════════════════════════════════════════════
+   MAESTRO (PROFESSOR) NAVBAR OVERRIDES — professional style
+   ═══════════════════════════════════════════════════════════ */
+.navbar--maestro .navbar-inner {
+  background-color: #1E293B;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  padding: 0 40px;
+}
+
+.navbar--maestro .navbar-logo {
+  height: 52px;
+  transform: none;
+}
+
+.navbar--maestro .navbar-title {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 0;
+  transform: none;
+  display: block;
+  color: #F8FAFC;
+}
+
+.navbar--maestro .navbar-char {
+  -webkit-text-stroke: 0;
+  paint-order: normal;
+  text-shadow: none;
+  color: #F8FAFC;
+  display: inline;
+}
+
+.navbar--maestro .navbar-char.primary,
+.navbar--maestro .navbar-char.secondary,
+.navbar--maestro .navbar-char.accent {
+  color: #F8FAFC;
+}
+
+.navbar--maestro .navbar-logo-btn:hover .navbar-char {
+  animation: none;
+}
+
+.navbar--maestro .navbar-links {
+  gap: 8px;
+}
+
+.navbar--maestro .navbar-link {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #CBD5E1;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.navbar--maestro .navbar-link:hover {
+  color: #F8FAFC;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.navbar--maestro .navbar-link:hover .navbar-icon {
+  filter: brightness(0) invert(1);
+}
+
+.navbar--maestro .navbar-icon {
+  height: 20px;
+  width: 20px;
+  filter: brightness(0) saturate(100%) invert(75%) sepia(10%) saturate(300%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}

@@ -1,9 +1,12 @@
-/* ── Overlay ──────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   GENERAR IA MODAL — professional style
+   ═══════════════════════════════════════════════════════════ */
 
+/* ── Overlay ──────────────────────────────────────────────── */
 .iam-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11,48 +14,50 @@
 }
 
 /* ── Modal box ───────────────────────────────────────────── */
-
 .iam-modal {
-  background: #FFF8EE;
-  border: 4px solid #000;
-  border-radius: 16px;
-  box-shadow: 8px 8px 0px #000;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   padding: 28px 32px;
   width: 90%;
   max-width: 520px;
   font-family: 'Oxygen', sans-serif;
-  color: #000;
+  color: #1E293B;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
 .iam-title {
-  font-size: 2.5rem;
-  font-weight: bold;
+  font-size: 1.6rem;
+  font-weight: 700;
   margin: 0;
   text-align: center;
+  color: #1E293B;
 }
 
 /* ── Textarea ────────────────────────────────────────────── */
-
 .iam-textarea {
   width: 100%;
   min-height: 120px;
-  background: #FAF6ED;
-  border: 2px solid #000;
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
   border-radius: 8px;
   padding: 10px 12px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.3rem;
-  color: #000;
+  font-size: 1rem;
+  color: #1E293B;
   resize: vertical;
   box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .iam-textarea:focus {
-  outline: none;
-  background: #f5efe4;
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+  background: #FFFFFF;
 }
 
 .iam-textarea:disabled {
@@ -61,18 +66,17 @@
 }
 
 /* ── Warning ─────────────────────────────────────────────── */
-
 .iam-warning {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  background: #fff3cd;
-  border: 2px solid #e0c36a;
+  background: #FFFBEB;
+  border: 1px solid #FCD34D;
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 0.88rem;
   line-height: 1.35;
-  color: #664d03;
+  color: #92400E;
 }
 
 .iam-warning-icon {
@@ -81,19 +85,17 @@
 }
 
 /* ── Error ───────────────────────────────────────────────── */
-
 .iam-error {
-  background: #f8d7da;
-  border: 2px solid #c0392b;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 0.9rem;
-  color: #721c24;
+  color: #991B1B;
   margin: 0;
 }
 
 /* ── Buttons ─────────────────────────────────────────────── */
-
 .iam-buttons {
   display: flex;
   justify-content: flex-end;
@@ -102,43 +104,43 @@
 
 .iam-btn {
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.05rem;
-  font-weight: bold;
-  padding: 10px 28px;
-  border-radius: 12px;
-  border: 3px solid #000;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.1s;
-  box-shadow: 4px 4px 0px #000;
-}
-
-.iam-btn:hover:not(:disabled) {
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0px #000;
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 .iam-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
 }
 
 .iam-btn-cancel {
-  background: var(--color-error-light, #ff6e7a);
-  color: #000;
+  background: #F1F5F9;
+  color: #475569;
+  border-color: #E2E8F0;
+}
+
+.iam-btn-cancel:hover:not(:disabled) {
+  background: #E2E8F0;
 }
 
 .iam-btn-generate {
-  background: var(--color-accent);
-  color: #000;
+  background: #2563EB;
+  color: #FFFFFF;
+  border-color: #1D4ED8;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
 }
 
 .iam-btn-generate:hover:not(:disabled) {
-  background: var( --color-accent-light);
+  background: #1D4ED8;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
 }
 
 /* ── Loading indicator ───────────────────────────────────── */
-
 .iam-loading {
   display: flex;
   flex-direction: column;
@@ -148,10 +150,10 @@
 }
 
 .iam-spinner {
-  width: 36px;
-  height: 36px;
-  border: 4px solid #e0e0e0;
-  border-top: 4px solid #000;
+  width: 32px;
+  height: 32px;
+  border: 3px solid #E2E8F0;
+  border-top: 3px solid #2563EB;
   border-radius: 50%;
   animation: iam-spin 0.8s linear infinite;
 }
@@ -162,33 +164,32 @@
 
 .iam-loading-text {
   font-size: 0.95rem;
-  color: #555;
+  color: #64748B;
 }
 
 /* ── Trigger button (placed inside forms) ────────────────── */
-
 .iam-trigger-btn {
   position: relative;
   overflow: hidden;
-  background: #FFF394;
-  color: #000;
-  border: 2px solid #dec92b;
-  border-radius: 12px;
+  background: #EFF6FF;
+  color: #1E40AF;
+  border: 1px solid #BFDBFE;
+  border-radius: 8px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.05rem;
-  font-weight: bold;
+  font-size: 0.95rem;
+  font-weight: 700;
   padding: 10px 24px;
   cursor: pointer;
-  box-shadow: 4px 4px 0 #D6BD00;
-  transition: background 0.12s, transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15);
+  transition: background 0.15s, box-shadow 0.15s;
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
 .iam-trigger-btn:hover {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 #D6BD00;
+  background: #DBEAFE;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
 /* Sparkle / shine sweep */
@@ -202,7 +203,7 @@
   background: linear-gradient(
     120deg,
     transparent 25%,
-    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0.4) 50%,
     transparent 75%
   );
   transform: skewX(-20deg);

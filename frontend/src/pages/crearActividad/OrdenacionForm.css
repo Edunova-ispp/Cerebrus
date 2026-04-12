@@ -37,9 +37,10 @@
 
 .of-label {
   display: block;
-  font-weight: bold;
+  font-weight: 700;
   font-size: 0.95rem;
   margin-bottom: 3px;
+  color: #334155;
 }
 
 .of-check-label {
@@ -48,26 +49,32 @@
   gap: 8px;
   cursor: pointer;
   font-size: 0.95rem;
+  color: #475569;
 }
 
 /* ── Inputs ────────────────────────────────────────────────── */
 
 .of-input {
   width: 100%;
-  background: var(--color-accent);
-  border: 2px solid #000;
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
   border-radius: 8px;
   padding: 8px 10px;
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
-  color: #000;
-  transition: background 0.15s;
+  color: #1E293B;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.of-input:hover,
+.of-input:hover {
+  border-color: #94A3B8;
+}
+
 .of-input:focus {
-  outline: none;
-  background: var( --color-accent-light);
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+  background: #FFFFFF;
 }
 
 .of-input-sm {
@@ -77,21 +84,26 @@
 
 .of-textarea {
   width: 100%;
-  background: var(--color-accent);
-  border: 2px solid #000;
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
   border-radius: 8px;
   padding: 8px 10px;
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
-  color: #000;
+  color: #1E293B;
   resize: vertical;
-  transition: background 0.15s;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.of-textarea:hover,
+.of-textarea:hover {
+  border-color: #94A3B8;
+}
+
 .of-textarea:focus {
-  outline: none;
-  background: var( --color-accent-light);
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+  background: #FFFFFF;
 }
 
 /* ── Row helpers ───────────────────────────────────────────── */
@@ -109,7 +121,7 @@
   font-size: 0.92rem;
   line-height: 1.4;
   margin: 0;
-  color: #555;
+  color: #64748B;
 }
 
 /* ── Kind buttons (Palabras / Imágenes) ────────────────────── */
@@ -121,24 +133,28 @@
 }
 
 .of-kind-btn {
-  background: var(--color-accent);
-  color: #000;
-  border: 2px solid #000;
+  background: #F1F5F9;
+  color: #475569;
+  border: 1px solid #E2E8F0;
   border-radius: 8px;
   padding: 6px 16px;
   font-family: 'Oxygen', sans-serif;
   font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .of-kind-btn:hover:not(:disabled) {
-  background: var( --color-accent-light);
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #1E40AF;
 }
 
 .of-kind-btn:disabled {
-  background: #000;
-  color: var(--color-accent);
+  background: #1E40AF;
+  color: #FFFFFF;
+  border-color: #1E40AF;
   cursor: default;
 }
 
@@ -165,33 +181,35 @@
   display: block;
   margin-bottom: 8px;
   border-radius: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid #E2E8F0;
 }
 
 /* ── Add button ────────────────────────────────────────────── */
 
 .of-btn-add {
-  background: var(--color-accent);
-  color: #000;
-  border: 2px solid #000;
+  background: #2563EB;
+  color: #FFFFFF;
+  border: 1px solid #1D4ED8;
   border-radius: 8px;
   padding: 8px 20px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.3rem;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  transition: background 0.15s, box-shadow 0.15s;
   align-self: center;
 }
 
 .of-btn-add:hover {
-  background: var( --color-accent-light);
+  background: #1D4ED8;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
 }
 
 /* ── Error / success ───────────────────────────────────────── */
 
 .of-error {
-  color: #c0392b !important;
+  color: #DC2626 !important;
   font-size: 0.95rem;
   margin: 0 0 12px 0;
 }

@@ -1,25 +1,30 @@
-/* ===== CONTENEDOR PRINCIPAL (CENTRADO TOTAL) ===== */
+/* ═══════════════════════════════════════════════════════════
+   EDITAR CURSO — professional style
+   ═══════════════════════════════════════════════════════════ */
+
 .crear-curso-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
   padding: 40px 20px;
-  min-height: calc(100vh - 80px); /* Ajusta según el alto de tu Navbar */
+  min-height: calc(100vh - 80px);
   box-sizing: border-box;
+  background-color: #F4F6F9;
 }
 
-/* ===== BANNER SUPERIOR MORADO ===== */
+/* ===== BANNER SUPERIOR ===== */
 .crear-curso-welcome-banner {
-  background-color: #8C52FF;
-  color: white;
+  background-color: #1E293B;
+  color: #F8FAFC;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.8rem;
-  padding: 15px 40px;
-  border: 4px solid #000;
-  border-radius: 50px; /* Estilo píldora */
-  box-shadow: 6px 6px 0px #000;
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 14px 40px;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   margin-bottom: 30px;
   text-align: center;
   width: 100%;
@@ -27,29 +32,30 @@
   box-sizing: border-box;
 }
 
-/* ===== CAJA MAGENTA ===== */
+/* ===== CAJA PRINCIPAL ===== */
 .crear-curso-box {
   width: 100%;
-  max-width: 450px;
-  background-color: #C3004F;
-  border: 4px solid #000;
-  border-radius: 35px;
+  max-width: 500px;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
   padding: 30px 40px 40px;
-  box-shadow: 10px 10px 0px #000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .crear-curso-title {
-  font-size: 1.8rem;
-  color: #FFFFFF;
+  font-size: 1.5rem;
+  color: #1E293B;
   font-family: 'Oxygen', sans-serif;
+  font-weight: 700;
   margin: 0 0 20px 0;
   text-align: center;
 }
 
-/* ===== LABELS AMARILLAS (ENCIMA DEL INPUT) ===== */
+/* ===== INPUTS ===== */
 .pixel-input-wrapper {
   display: flex;
   flex-direction: column;
@@ -59,26 +65,34 @@
 }
 
 .pixel-input-wrapper label {
-  font-size: 1.5rem;
-  color: #F8E697; /* El amarillo de la foto */
+  font-size: 1rem;
+  color: #334155;
   font-family: 'Oxygen', sans-serif;
-  font-weight: bold;
-  margin-bottom: 8px; /* Espacio para que flote arriba */
-  margin-left: 10px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  margin-left: 2px;
 }
 
-/* ===== INPUTS Y TEXTAREA ===== */
 .pixel-input-wrapper input,
 .crear-curso-textarea {
-  background-color: #FCEF91;
-  border: 4px solid #000;
-  border-radius: 25px;
-  padding: 12px 20px;
+  background-color: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  padding: 10px 14px;
   width: 100%;
   box-sizing: border-box;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
+  color: #1E293B;
   outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pixel-input-wrapper input:focus,
+.crear-curso-textarea:focus {
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+  background-color: #FFFFFF;
 }
 
 .crear-curso-textarea {
@@ -86,11 +100,11 @@
   resize: none;
 }
 
-/* ===== ÁREA DE IMAGEN (Estilo Drag & Drop / URL) ===== */
+/* ===== ÁREA DE IMAGEN ===== */
 .crear-curso-preview-placeholder {
-  background-color: #FFD98E; /* Color melocotón */
-  border: 3px dashed #000;
-  border-radius: 30px;
+  background-color: #F8FAFC;
+  border: 2px dashed #CBD5E1;
+  border-radius: 10px;
   width: 100%;
   height: 80px;
   display: flex;
@@ -99,41 +113,118 @@
   position: relative;
   overflow: hidden;
   cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
 }
 
-/* Imagen dentro del preview si existe */
+.crear-curso-preview-placeholder:hover {
+  border-color: #93C5FD;
+  background-color: #EFF6FF;
+}
+
 .crear-curso-preview img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 25px;
-  border: 4px solid #000;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
   margin-top: 10px;
 }
 
 /* ===== BOTÓN SUBMIT ===== */
 .pixel-btn-submit {
-  background-color: #FCEF91;
-  border: 4px solid #000;
-  border-radius: 25px;
+  background-color: #2563EB;
+  color: #FFFFFF;
+  border: 1px solid #1D4ED8;
+  border-radius: 8px;
   padding: 12px 48px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.4rem;
-  font-weight: bold;
+  font-size: 1.1rem;
+  font-weight: 700;
   margin-top: 25px;
-  box-shadow: 5px 5px 0 #000;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
   cursor: pointer;
   align-self: center;
-  transition: all 0.1s ease;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.pixel-btn-submit:hover {
+  background-color: #1D4ED8;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
 }
 
 .pixel-btn-submit:active {
-  transform: translate(3px, 3px);
-  box-shadow: 2px 2px 0 #000;
+  background-color: #1E40AF;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2);
 }
 
 .pixel-btn-submit:disabled {
-  background-color: #ccc;
+  background-color: #94A3B8;
+  border-color: #64748B;
   cursor: not-allowed;
   opacity: 0.7;
+  box-shadow: none;
 }
+
+/* ── Scoped detalle-volver (higher specificity than student styles) ── */
+.crear-curso-page .detalle-volver,
+.crear-curso-page .detalle-volver:is(button) {
+  align-self: flex-start;
+  background: #FFFFFF;
+  color: #1E293B;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition: background 0.15s, box-shadow 0.15s;
+  margin-bottom: 16px;
+  transform: none;
+  text-shadow: none;
+}
+.crear-curso-page .detalle-volver:hover { background: #EFF6FF; box-shadow: 0 2px 8px rgba(0,0,0,0.12); transform: none; }
+.crear-curso-page .detalle-volver:active { background: #DBEAFE; box-shadow: none; transform: none; }
+
+/* ── pixel-btn-submit (alias for pixel-btn-submit-main used by EditarCurso) ── */
+.crear-curso-page .pixel-btn-submit,
+.crear-curso-page .pixel-btn-submit:is(button) {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  border: 1px solid #1D4ED8;
+  border-radius: 8px;
+  padding: 12px 48px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 25px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  cursor: pointer;
+  align-self: center;
+  transition: background 0.15s, box-shadow 0.15s;
+  transform: none;
+  text-shadow: none;
+}
+.crear-curso-page .pixel-btn-submit:hover:not(:disabled) { background-color: #1D4ED8; box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35); transform: none; }
+.crear-curso-page .pixel-btn-submit:active:not(:disabled) { background-color: #1E40AF; box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2); transform: none; }
+.crear-curso-page .pixel-btn-submit:disabled { background-color: #94A3B8; border-color: #64748B; cursor: not-allowed; opacity: 0.7; box-shadow: none; }
+
+/* ── pixel-btn-submit-main (used by EditarCurso submit button) ── */
+.pixel-btn-submit-main {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  border: 1px solid #1D4ED8;
+  border-radius: 8px;
+  padding: 12px 48px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 25px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.pixel-btn-submit-main:hover { background-color: #1D4ED8; box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35); }
+.pixel-btn-submit-main:active { background-color: #1E40AF; box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2); }
+.pixel-btn-submit-main:disabled { background-color: #94A3B8; border-color: #64748B; cursor: not-allowed; opacity: 0.7; box-shadow: none; }

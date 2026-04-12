@@ -1,4 +1,7 @@
-/* Forzar tipografía en toda la página */
+/* ═══════════════════════════════════════════════════════════
+   CREAR TEMA — professional style
+   ═══════════════════════════════════════════════════════════ */
+
 .crear-tema-page, 
 .crear-tema-page *, 
 .crear-tema-page input, 
@@ -10,34 +13,32 @@
 .crear-tema-main {
   max-width: 1000px;
   margin: 0 auto;
-  /* Eliminamos el padding superior casi por completo */
   padding: 10px 20px; 
   display: flex;
   flex-direction: column;
-  align-items: flex-start; 
-  /* Quitamos min-height para que no empuje el contenido hacia abajo */
+  align-items: flex-start;
   min-height: auto; 
 }
 
 .welcome-text {
   text-align: left;
-  /* Eliminamos márgenes por defecto del h2 */
   margin: 0 0 20px 0; 
-  font-size: 1.8rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1E293B;
   line-height: 1;
   width: 100%;
 }
 
 .crear-tema-card {
-  background: white;
-  border: 4px solid #000;
-  border-radius: 24px;
-  /* Padding interno algo más ajustado */
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
   padding: 30px; 
   width: 100%;
   max-width: 450px; 
   box-sizing: border-box;
-  box-shadow: 8px 8px 0px #000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .input-group {
@@ -48,27 +49,73 @@
 }
 
 .input-group label {
-  font-size: 1.1rem;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 0;
+  display: block;
 }
 
 .pixel-input {
-  background-color: var(--color-accent-light);
-  border: 3px solid #000;
-  border-radius: 12px;
-  padding: 12px;
-  font-size: 1rem;
+  background-color: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
   width: 100%;
   box-sizing: border-box;
+  color: #1E293B;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pixel-input:focus {
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+  background-color: #FFFFFF;
 }
 
 .pixel-btn-submit-main {
-  background-color: var(--color-accent);
-  border: 4px solid #000;
-  border-radius: 12px;
-  padding: 10px 25px;
-  font-size: 1.1rem;
-  font-weight: bold;
+  background-color: #2563EB;
+  color: #FFFFFF;
+  border: 1px solid #1D4ED8;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 4px 4px 0px #000;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  transition: background 0.15s, box-shadow 0.15s;
 }
+
+.pixel-btn-submit-main:hover {
+  background-color: #1D4ED8;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+}
+
+.pixel-btn-submit-main:active {
+  background-color: #1E40AF;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2);
+}
+
+/* ── Scoped detalle-volver (higher specificity than student styles) ── */
+.crear-tema-page .detalle-volver,
+.crear-tema-page .detalle-volver:is(button) {
+  align-self: flex-start;
+  background: #FFFFFF;
+  color: #1E293B;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition: background 0.15s, box-shadow 0.15s;
+  margin-bottom: 16px;
+  transform: none;
+  text-shadow: none;
+}
+.crear-tema-page .detalle-volver:hover { background: #EFF6FF; box-shadow: 0 2px 8px rgba(0,0,0,0.12); transform: none; }
+.crear-tema-page .detalle-volver:active { background: #DBEAFE; box-shadow: none; transform: none; }

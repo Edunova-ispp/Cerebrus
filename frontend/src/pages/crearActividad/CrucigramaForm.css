@@ -8,14 +8,11 @@
 
 /* ── Error banner ── */
 .cf-error {
-  color: #c0392b !important;
+  color: #DC2626 !important;
   margin-top: 0;
   margin-bottom: 12px;
   font-size: 0.95rem;
 }
-
-/* ── White card ── */
-
 
 /* ── Two-column grid inside card ── */
 .cf-grid-2 {
@@ -31,10 +28,11 @@
 /* ── Label ── */
 .cf-label {
   display: block;
-  font-weight: bold;
+  font-weight: 700;
   font-size: 0.95rem;
   margin-bottom: 3px;
   margin-top: 14px;
+  color: #334155;
 }
 
 .cf-label:first-child { margin-top: 0; }
@@ -45,22 +43,26 @@
   width: 100%;
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
-  color: #000;
-  background: var(--color-accent);
-  border: 2px solid #000;
+  color: #1E293B;
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
   border-radius: 8px;
   padding: 8px 10px;
   box-sizing: border-box;
   outline: none;
-  transition: background 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .cf-input:hover,
+.cf-textarea:hover {
+  border-color: #94A3B8;
+}
+
 .cf-input:focus,
-.cf-textarea:hover,
 .cf-textarea:focus {
-  outline: none;
-  background: var(--color-accent-light);
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+  background: #FFFFFF;
 }
 
 .cf-textarea { resize: vertical; min-height: 80px; }
@@ -82,7 +84,7 @@
 .cf-checkbox-row input[type='checkbox'] {
   width: 20px;
   height: 20px;
-  accent-color: #000;
+  accent-color: #2563EB;
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -90,13 +92,14 @@
 .cf-checkbox-label {
   font-size: 0.95rem;
   cursor: pointer;
+  color: #475569;
 }
 
 /* ── Section title ── */
 .cf-section-title {
   font-size: 1.05rem;
-  font-weight: bold;
-  color: #000;
+  font-weight: 700;
+  color: #1E293B;
   margin: 0 0 16px;
   display: flex;
   align-items: center;
@@ -104,9 +107,9 @@
 }
 
 .cf-section-title span {
-  background: var(--color-accent);
-  color: #000;
-  border: 2px solid #000;
+  background: #DBEAFE;
+  color: #1E40AF;
+  border: 1px solid #BFDBFE;
   border-radius: 6px;
   padding: 2px 8px;
   font-size: 0.85rem;
@@ -126,10 +129,10 @@
 /* Remove button */
 .cf-btn-remove {
   background: transparent;
-  border: 2px solid #c0392b;
+  border: 1px solid #FECACA;
   border-radius: 6px;
   cursor: pointer;
-  color: #c0392b;
+  color: #DC2626;
   font-size: 0.85rem;
   padding: 4px 7px;
   line-height: 1;
@@ -137,7 +140,7 @@
   flex-shrink: 0;
 }
 
-.cf-btn-remove:hover { background: #fdecea; }
+.cf-btn-remove:hover { background: #FEF2F2; }
 
 /* ── Add word button ── */
 .cf-btn-add {
@@ -145,19 +148,20 @@
   align-items: center;
   gap: 6px;
   margin-top: 8px;
-  background: var(--color-accent);
-  color: #000;
-  border: 2px solid #000;
+  background: #EFF6FF;
+  color: #1E40AF;
+  border: 1px solid #BFDBFE;
   border-radius: 8px;
   padding: 8px 18px;
   font-family: 'Oxygen', sans-serif;
   font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .cf-btn-add:hover {
-  background: var(--color-accent-light);
+  background: #DBEAFE;
 }
 
 /* ── Submit button ── */
@@ -166,44 +170,45 @@
   margin: 28px auto 0;
   min-width: 260px;
   padding: 10px 24px;
-  background: var(--color-accent);
-  color: #000;
-  border: 3px solid #000;
-  border-radius: 12px;
-  box-shadow: 4px 4px 0px #000;
+  background: #2563EB;
+  color: #FFFFFF;
+  border: 1px solid #1D4ED8;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.1rem;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
-  text-align: center; /* <-- Añade esto */
-  transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+  text-align: center;
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 .cf-btn-submit:hover:not(:disabled) {
-  background: var(--color-accent-light);
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px #000;
+  background: #1D4ED8;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
 }
 
 .cf-btn-submit:active:not(:disabled) {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 #000;
+  background: #1E40AF;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2);
 }
 
 .cf-btn-submit:disabled {
   opacity: 0.5;
   cursor: default;
-  box-shadow: 2px 2px 0 #aaa;
+  background: #94A3B8;
+  border-color: #64748B;
+  box-shadow: none;
 }
 
 /* ── Word count badge ── */
 .cf-word-count {
-  background: var(--color-accent);
-  border: 2px solid #000;
+  background: #DBEAFE;
+  border: 1px solid #BFDBFE;
   border-radius: 8px;
   padding: 2px 8px;
   font-size: 0.85rem;
-  font-weight: bold;
-  color: #000;
+  font-weight: 700;
+  color: #1E40AF;
   margin-left: 6px;
 }

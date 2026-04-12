@@ -327,3 +327,115 @@
 .maestro .curso-card__delete-btn {
   font-family: 'Oxygen', sans-serif;
 }
+/* ═══════════════════════════════════════════════════════════
+   MAESTRO (PROFESSOR) CARD OVERRIDES — professional style
+   ═══════════════════════════════════════════════════════════ */
+.maestro .curso-card {
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+}
+
+.maestro .curso-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.maestro .curso-card__cover {
+  border-bottom: 1px solid #E2E8F0;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.maestro .curso-card__fallback {
+  background: #EFF6FF;
+}
+
+.maestro .curso-card__initials {
+  font-family: 'Oxygen', sans-serif;
+  color: #2563EB;
+  font-size: 2.2rem;
+}
+
+/* Override nth-child coloring for professor cards */
+.maestro .curso-card:nth-child(odd) .curso-card__footer,
+.maestro .curso-card:nth-child(even) .curso-card__footer {
+  background-color: #1E40AF;
+}
+
+.maestro .curso-card__footer {
+  background-color: #1E40AF;
+  border-radius: 0;
+}
+
+.maestro .curso-card:not(:has(.curso-card__maestro-info)) .curso-card__footer {
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.maestro .curso-card__titulo {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #F8FAFC;
+}
+
+.maestro .curso-card__maestro-info {
+  border-top: 1px solid #E2E8F0;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.maestro .curso-card__maestro-label,
+.maestro .curso-card__maestro-value {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.9rem;
+}
+
+.maestro .curso-card__expand-btn {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  box-shadow: none;
+}
+
+.maestro .curso-card__expand-btn:hover {
+  background: #DBEAFE;
+  transform: none;
+  box-shadow: none;
+}
+
+.maestro .curso-card__delete-btn {
+  font-family: 'Oxygen', sans-serif;
+  background: #DC2626;
+  border: 1px solid #991B1B;
+  box-shadow: none;
+  border-radius: 6px;
+}
+
+.maestro .curso-card__toggle-slider {
+  border: 2px solid #94A3B8;
+  box-shadow: none;
+}
+
+.maestro .curso-card__toggle input:checked + .curso-card__toggle-slider {
+  background: #2563EB;
+}
+
+.maestro .codigo-modal {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.maestro .codigo-modal__copy-btn {
+  background: #2563EB;
+  color: #FFFFFF;
+  border: 1px solid #1D4ED8;
+  box-shadow: none;
+  font-family: 'Oxygen', sans-serif;
+}
+
+.maestro .codigo-modal__copy-btn:hover {
+  background: #1D4ED8;
+  transform: none;
+  box-shadow: none;
+}

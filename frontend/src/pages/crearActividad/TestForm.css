@@ -6,7 +6,7 @@
 }
 
 .tf-error {
-  color: #c0392b !important;
+  color: #DC2626 !important;
   margin-top: 0;
   margin-bottom: 12px;
   font-size: 0.95rem;
@@ -44,9 +44,10 @@
 
 .tf-label {
   display: block;
-  font-weight: bold;
+  font-weight: 700;
   font-size: 0.95rem;
   margin-bottom: 3px;
+  color: #334155;
 }
 
 .tf-check-label {
@@ -55,24 +56,30 @@
   gap: 8px;
   cursor: pointer;
   font-size: 0.95rem;
+  color: #475569;
 }
 
 .tf-input {
   width: 100%;
-  background: var(--color-accent);
-  border: 2px solid #000;
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
   border-radius: 8px;
   padding: 8px 10px;
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
-  color: #000;
-  transition: background 0.15s;
+  color: #1E293B;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.tf-input:hover,
+.tf-input:hover {
+  border-color: #94A3B8;
+}
+
 .tf-input:focus {
-  outline: none;
-  background: var( --color-accent-light);
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+  background: #FFFFFF;
 }
 
 .tf-input-sm {
@@ -86,7 +93,7 @@
   width: 120px;
   height: 90px;
   object-fit: cover;
-  border: 2px solid #000;
+  border: 1px solid #E2E8F0;
   border-radius: 8px;
 }
 
@@ -96,7 +103,7 @@
   font-size: 0.92rem;
   line-height: 1.4;
   margin: 0 0 16px 0;
-  color: #555;
+  color: #64748B;
 }
 
 /* -- Question blocks ------------------------------------------- */
@@ -113,11 +120,11 @@
   flex-direction: column;
   gap: 10px;
   padding: 16px 0;
-  border-bottom: 2px solid #000;
+  border-bottom: 1px solid #E2E8F0;
 }
 
 .tf-question-block:first-of-type {
-  border-top: 2px solid #000;
+  border-top: 1px solid #E2E8F0;
 }
 
 .tf-question-header {
@@ -127,26 +134,32 @@
 }
 
 .tf-question-label {
-  font-weight: bold;
+  font-weight: 700;
   font-size: 1.05rem;
+  color: #1E293B;
 }
 
 .tf-question-input {
   width: 100%;
-  background: var(--color-accent);
-  border: 2px solid #000;
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
   border-radius: 8px;
   padding: 8px 10px;
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
-  color: #000;
-  transition: background 0.15s;
+  color: #1E293B;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.tf-question-input:hover,
+.tf-question-input:hover {
+  border-color: #94A3B8;
+}
+
 .tf-question-input:focus {
-  outline: none;
-  background: var( --color-accent-light);
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+  background: #FFFFFF;
 }
 
 /* -- Options --------------------------------------------------- */
@@ -167,48 +180,53 @@
 }
 
 .tf-option-letter {
-  font-weight: bold;
+  font-weight: 700;
   font-size: 0.9rem;
   min-width: 22px;
-  color: #555;
+  color: #64748B;
   text-align: center;
   flex-shrink: 0;
 }
 
 .tf-option--correct .tf-option-letter {
-  color: #000;
+  color: #1E40AF;
 }
 
 .tf-option-input {
   flex: 1;
-  background: var(--color-accent);
-  border: 2px solid #000;
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
   border-radius: 8px;
   padding: 6px 10px;
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
-  color: #000;
+  color: #1E293B;
   min-width: 0;
-  transition: background 0.15s;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.tf-option-input:hover,
+.tf-option-input:hover {
+  border-color: #94A3B8;
+}
+
 .tf-option-input:focus {
-  outline: none;
-  background: var( --color-accent-light);
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+  background: #FFFFFF;
 }
 
 .tf-option--correct .tf-option-input {
-  border-color: #000;
-  background: var( --color-accent-light);
+  border-color: #BFDBFE;
+  background: #EFF6FF;
 }
 
 /* -- Buttons --------------------------------------------------- */
 
 .tf-btn-correct {
-  background: #eee;
-  color: #555;
-  border: 2px solid #bbb;
+  background: #F1F5F9;
+  color: #475569;
+  border: 1px solid #CBD5E1;
   border-radius: 6px;
   padding: 5px 10px;
   font-size: 1rem;
@@ -219,21 +237,21 @@
 }
 
 .tf-btn-correct:hover {
-  background: var(--color-accent);
-  border-color: #000;
-  color: #000;
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #1E40AF;
 }
 
 .tf-btn-correct--active {
-  background: var( --color-accent-light);
-  color: #000;
-  border-color: #000;
+  background: #DBEAFE;
+  color: #1E40AF;
+  border-color: #BFDBFE;
 }
 
 .tf-btn-remove-option {
   background: transparent;
-  color: #c0392b;
-  border: 2px solid #c0392b;
+  color: #DC2626;
+  border: 1px solid #FECACA;
   border-radius: 6px;
   padding: 4px 7px;
   font-size: 0.85rem;
@@ -243,13 +261,13 @@
 }
 
 .tf-btn-remove-option:hover {
-  background: #fdecea;
+  background: #FEF2F2;
 }
 
 .tf-btn-remove-question {
   background: transparent;
-  color: #c0392b;
-  border: 2px solid #c0392b;
+  color: #DC2626;
+  border: 1px solid #FECACA;
   border-radius: 8px;
   padding: 4px 10px;
   font-size: 0.9rem;
@@ -258,45 +276,45 @@
 }
 
 .tf-btn-remove-question:hover {
-  background: #fdecea;
+  background: #FEF2F2;
 }
 
 .tf-btn-add-option {
   align-self: flex-start;
-  background: var(--color-accent);
-  color: #000;
-  border: 2px solid #000;
+  background: #EFF6FF;
+  color: #1E40AF;
+  border: 1px solid #BFDBFE;
   border-radius: 8px;
   padding: 4px 12px;
   font-family: 'Oxygen', sans-serif;
   font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
   margin-left: 30px;
   transition: background 0.15s;
 }
 
 .tf-btn-add-option:hover {
-  background: var( --color-accent-light);
+  background: #DBEAFE;
 }
 
 .tf-btn-add-question {
-  background: var(--color-accent);
-  color: #000;
-  border: 3px solid #000;
-  border-radius: 12px;
+  background: #2563EB;
+  color: #FFFFFF;
+  border: 1px solid #1D4ED8;
+  border-radius: 8px;
   padding: 10px 24px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.1rem;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 4px 4px 0px #000;
-  transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  transition: background 0.15s, box-shadow 0.15s;
   align-self: flex-start;
   margin-top: 16px;
 }
 
 .tf-btn-add-question:hover {
-  background: var( --color-accent-light);
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px #000;
+  background: #1D4ED8;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
 }

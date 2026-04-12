@@ -1,46 +1,66 @@
+/* ═══════════════════════════════════════════════════════════
+   CREAR CURSO — professional style
+   ═══════════════════════════════════════════════════════════ */
+
 .crear-curso-page {
   min-height: 100vh;
+  background-color: #F4F6F9;
   font-family: 'Oxygen', sans-serif;
 }
 
 .crear-curso-main {
   max-width: 1000px;
-  margin: 0 auto; /* Centra el contenedor en la pantalla, pero... */
+  margin: 0 auto;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* ...alinea todo su contenido a la izquierda */
+  align-items: flex-start;
 }
 
-.detalle-volver {
-  background: none;
-  border: none;
-  color: #000;
+.crear-curso-page .detalle-volver,
+.crear-curso-page .detalle-volver:is(button) {
+  background: #FFFFFF;
+  color: #1E293B;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0;
-  margin-bottom: 15px; /* Espacio antes del título */
+  padding: 8px 16px;
+  margin-bottom: 20px;
   display: flex;
   align-items: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition: background 0.15s, box-shadow 0.15s;
+  transform: none;
+  text-shadow: none;
+}
+
+.crear-curso-page .detalle-volver:hover {
+  background: #EFF6FF;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transform: none;
 }
 
 .welcome-text {
-  color: #000;
-  font-size: 2rem;
+  color: #1E293B;
+  font-size: 1.8rem;
+  font-weight: 700;
   margin-top: 0;
   margin-bottom: 20px;
-  text-align: left; /* Título a la izquierda */
+  text-align: left;
   width: 100%;
 }
+
 .crear-curso-card {
-  background: white;
-  border: 4px solid #000;
-  border-radius: 24px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
   padding: 30px;
-  width: 100%; /* Que ocupe el ancho disponible */
+  width: 100%;
   box-sizing: border-box;
-  box-shadow: 8px 8px 0px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .crear-curso-layout {
@@ -48,59 +68,82 @@
   grid-template-columns: 1.2fr 1fr;
   gap: 40px;
   align-items: start;
-  text-align: left; /* Fuerza texto a la izquierda dentro del form */
+  text-align: left;
 }
 
 /* Grupos de input y labels */
 .input-group, .image-preview-group {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Todo el contenido a la izquierda */
+  align-items: flex-start;
   margin-bottom: 20px;
 }
 
 .input-group label, .image-preview-group label {
-  font-size: 1.3rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-  color: #000;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #334155;
 }
 
 .pixel-input {
-  background-color: var(--color-accent-light);
-  border: 3px solid #000;
-  border-radius: 15px;
-  padding: 12px 15px;
+  background-color: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  padding: 10px 14px;
   width: 100%;
   box-sizing: border-box;
-  font-family: inherit;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.95rem;
+  color: #1E293B;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
 }
 
-/* Textarea más estilizado y menos ancho si lo deseas */
+.pixel-input:focus {
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+}
+
+/* Textarea */
 .pixel-textarea {
-  background-color: var(--color-accent-light);
-  border: 4px solid #000;
-  border-radius: 15px;
-  padding: 12px 15px;
+  background-color: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  padding: 10px 14px;
   width: 100%;
-  height: 120px; /* Altura reducida */
+  height: 120px;
   resize: none;
-  font-family: inherit;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.95rem;
+  color: #1E293B;
   box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
 }
 
+.pixel-textarea:focus {
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+}
 
 /* ZONA DE IMAGEN */
 .pixel-drop-zone {
   width: 100%;
-  height: 260px; /* Un poco más alta para que destaque */
-  background-color: #FFFDE7; /* Amarillo muy clarito de fondo */
-  border: 4px solid #000;
-  border-radius: 20px;
+  height: 260px;
+  background-color: #F8FAFC;
+  border: 2px dashed #CBD5E1;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.pixel-drop-zone:hover {
+  border-color: #93C5FD;
+  background-color: #EFF6FF;
 }
 
 .pixel-fallback-box {
@@ -109,13 +152,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-accent-light); /* Amarillo sólido acorde a la estética */
+  background-color: #EFF6FF;
 }
 
 .pixel-fallback-initials {
-  font-size: 5rem;
-  color: #000; /* Texto negro para contraste pixel puro */
-  text-shadow: 3px 3px 0px #fff;
+  font-size: 4rem;
+  color: #2563EB;
+  font-family: 'Oxygen', sans-serif;
+  font-weight: 700;
 }
 
 .pixel-preview-img {
@@ -127,25 +171,36 @@
 /* BOTÓN CREAR */
 .pixel-btn-submit-main {
   width: 100%;
-  background-color: var(--color-accent);
-  border: 4px solid #000;
-  border-radius: 18px;
-  padding: 18px;
+  background-color: #2563EB;
+  color: #FFFFFF;
+  border: 1px solid #1D4ED8;
+  border-radius: 10px;
+  padding: 14px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.8rem;
-  font-weight: bold;
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 6px 6px 0px #000;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
   margin-top: 10px;
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 .pixel-btn-submit-main:hover {
-  background-color: var( --color-accent-light);
+  background-color: #1D4ED8;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
 }
 
 .pixel-btn-submit-main:active {
-  transform: translate(3px, 3px);
-  box-shadow: 3px 3px 0px #000;
+  background-color: #1E40AF;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2);
+}
+
+.pixel-btn-submit-main:disabled {
+  background-color: #94A3B8;
+  border-color: #64748B;
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
 }
 
 @media (max-width: 850px) {

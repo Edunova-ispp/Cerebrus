@@ -1,5 +1,5 @@
-﻿/* ====================================================
-   ESTADÍSTICAS — Estilos unificados
+/* ====================================================
+   ESTADÍSTICAS — Estilos unificados (professional style)
    ==================================================== */
 
 /* --- CSS Variable (fallback for --color-accent-light) --- */
@@ -11,7 +11,7 @@
 
 .estadisticas-page {
   min-height: 100vh;
-  background-color: #F9F5E7;
+  background-color: #F4F6F9;
   display: flex;
   flex-direction: column;
 }
@@ -37,9 +37,9 @@
 
 .estadisticas-titulo-curso {
   font-family: 'Oxygen', sans-serif;
-  font-size: 2.4rem;
+  font-size: 2rem;
   font-weight: 700;
-  color: #000;
+  color: #1E293B;
   margin: 0 0 8px;
   text-align: center;
 }
@@ -59,7 +59,7 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   position: sticky;
   top: 24px;
 }
@@ -76,60 +76,62 @@
 
 .stats-sidebar-btn {
   width: 100%;
-  background: #fff;
-  color: #000;
-  border: 2.5px solid #000;
-  border-radius: 10px;
+  background: #FFFFFF;
+  color: #334155;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 0.93rem;
-  font-weight: 700;
-  padding: 11px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 10px 14px;
   cursor: pointer;
-  box-shadow: 3px 3px 0px #000;
-  transition: transform 0.1s, box-shadow 0.1s, background 0.1s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
   text-align: left;
   line-height: 1.3;
 }
 
 .stats-sidebar-btn:hover {
-  transform: translate(-1px, -1px);
-  background: var(--color-accent-light);
-  box-shadow: 4px 4px 0px #000;
+  background: #EFF6FF;
+  color: #1E40AF;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .stats-sidebar-btn--active,
 .stats-sidebar-btn--active:hover {
-  background-color: var(--color-accent-light);
-  box-shadow: inset 2px 2px 0px #000;
-  transform: translate(1px, 1px);
+  background-color: #DBEAFE;
+  color: #1E40AF;
+  border-color: #BFDBFE;
+  box-shadow: inset 0 1px 3px rgba(37, 99, 235, 0.15);
 }
 
 .stats-sidebar-btn--refresh {
-  background: #fff;
+  background: #FFFFFF;
 }
 
 .stats-sidebar-back {
-  background: #fff;
-  font-size: 0.9rem;
+  background: #FFFFFF;
+  font-size: 0.88rem;
 }
 
 .stats-sidebar-back:hover {
-  background: var(--color-accent-light);
+  background: #EFF6FF;
+  color: #1E40AF;
 }
 
 .stats-sidebar-divider {
   border: none;
-  border-top: 2px solid #ddd;
+  border-top: 1px solid #E2E8F0;
   margin: 4px 0;
 }
 
 .stats-sidebar-title {
   font-family: 'Oxygen', sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #666;
+  color: #64748B;
   margin: 6px 0 2px;
   padding-left: 4px;
 }
@@ -137,46 +139,46 @@
 .stats-sidebar-loading {
   font-family: 'Oxygen', sans-serif;
   font-style: italic;
-  color: #666;
+  color: #94A3B8;
   padding: 8px 4px;
   font-size: 0.9rem;
 }
 
 .stats-sidebar-search {
   width: 100%;
-  background: #fff;
-  color: #000;
-  border: 2.5px solid #000;
-  border-radius: 10px;
+  background: #FFFFFF;
+  color: #1E293B;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 0.93rem;
-  font-weight: 700;
-  padding: 11px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 10px 14px;
   box-sizing: border-box;
-  box-shadow: 3px 3px 0px #000;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   outline: none;
   margin-bottom: 4px;
-  transition: transform 0.1s, box-shadow 0.1s, background 0.1s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 .stats-sidebar-search:focus {
-  background: var(--color-accent-light);
-  box-shadow: 3px 3px 0px #000;
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
 }
 
 /* ===================== BUTTONS ===================== */
 
 .btn-volver-pixel,
 .btn-medias-pixel {
-  background: var(--color-accent-light);
-  color: #000;
-  border: 3px solid #000;
-  border-radius: 12px;
+  background: #FFFFFF;
+  color: #1E293B;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: 4px 4px 0px #000;
-  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 .btn-volver-pixel {
@@ -186,25 +188,27 @@
 
 .btn-medias-pixel {
   padding: 10px 24px;
-  font-size: 1.05rem;
+  font-size: 1rem;
 }
 
 .btn-medias-pixel.active {
-  background: #FDD835;
-  box-shadow: inset 2px 2px 0px #000;
-  transform: translate(1px, 1px);
+  background: #DBEAFE;
+  color: #1E40AF;
+  border-color: #BFDBFE;
+  box-shadow: inset 0 1px 3px rgba(37, 99, 235, 0.15);
 }
 
 .btn-volver-pixel:hover,
 .btn-medias-pixel:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0px #000;
+  background: #EFF6FF;
+  color: #1E40AF;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .btn-volver-pixel:active,
 .btn-medias-pixel:active {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0px #000;
+  background: #DBEAFE;
+  box-shadow: none;
 }
 
 /* ===================== STAT SUMMARY CARDS ===================== */
@@ -219,12 +223,15 @@
 .stat-card {
   flex: 1;
   min-width: 0;
-  background: #fff;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
-
 
 .stat-card__label {
   font-family: 'Oxygen', sans-serif;
@@ -232,32 +239,32 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: #535353;
+  color: #64748B;
 }
 
 .stat-card__value {
   font-family: 'Oxygen', sans-serif;
   font-size: 1.55rem;
   font-weight: 700;
-  color: #000;
+  color: #1E293B;
   line-height: 1.1;
 }
 
 .stat-card__name {
   font-family: 'Oxygen', sans-serif;
   font-size: 0.85rem;
-  color: #555;
+  color: #64748B;
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ===================== YELLOW CARD CONTAINER ===================== */
+/* ===================== CARD CONTAINER ===================== */
 
 .estadisticas-yellow-card {
-  background-color: #fff;
-  border: 2.5px solid #000;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
   border-radius: 10px;
   width: 100%;
   padding: 28px 32px;
@@ -266,6 +273,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   margin: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 /* ===================== CURSO INDICADORES (DTO) ===================== */
@@ -291,20 +299,20 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #555;
+  color: #64748B;
 }
 
 .curso-indicador-value {
-  background-color: #fff;
-  color: #000;
-  border: 3px solid #000;
-  border-radius: 12px;
+  background-color: #F8FAFC;
+  color: #1E293B;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
   padding: 10px 12px;
   font-family: 'Oxygen', sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   text-align: center;
-  box-shadow: 3px 3px 0px #000;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 /* ===================== TABLE ===================== */
@@ -313,7 +321,7 @@
   width: 100%;
   border-radius: 8px;
   overflow: hidden;
-  border: 2.5px solid #000;
+  border: 1px solid #E2E8F0;
 }
 
 .pixel-table {
@@ -324,8 +332,8 @@
 }
 
 .pixel-table thead tr th {
-  background: #1a1a1a;
-  color: #fff;
+  background: #1E293B;
+  color: #F8FAFC;
   padding: 13px 16px;
   font-weight: 700;
   text-align: center;
@@ -341,17 +349,17 @@
 
 .pixel-table tbody tr td {
   padding: 13px 16px;
-  border-bottom: 1px solid #e8e4d4;
-  color: #000;
+  border-bottom: 1px solid #F1F5F9;
+  color: #334155;
   transition: background 0.12s;
 }
 
 .pixel-table tbody tr:nth-child(even) td {
-  background: rgba(252, 239, 145, 0.22);
+  background: #F8FAFC;
 }
 
 .pixel-table tbody tr:hover td {
-  background: rgba(252, 239, 145, 0.55);
+  background: #EFF6FF;
 }
 
 .pixel-table tbody tr:last-child td {
@@ -373,14 +381,14 @@
   font-weight: 700;
   font-size: 0.85rem;
   font-family: 'Oxygen', sans-serif;
-  background: #e8e8e8;
-  color: #444;
-  border: 2px solid #bbb;
+  background: #F1F5F9;
+  color: #64748B;
+  border: 1px solid #CBD5E1;
 }
 
-.rank-badge--1 { background: #FFD700; border-color: #B8860B; color: #5a3a00; }
-.rank-badge--2 { background: #C0C0C0; border-color: #888;    color: #222;    }
-.rank-badge--3 { background: #CD7F32; border-color: #8B4513; color: #fff;    }
+.rank-badge--1 { background: #FEF3C7; border-color: #F59E0B; color: #92400E; }
+.rank-badge--2 { background: #F1F5F9; border-color: #94A3B8; color: #334155; }
+.rank-badge--3 { background: #FEF7ED; border-color: #D97706; color: #92400E; }
 
 /* ===================== TWO-PANEL LAYOUT (Actividades/Temas pages) ===================== */
 
@@ -424,24 +432,28 @@
 .item-tema-pixel,
 .item-actividad-pixel {
   padding: 12px;
-  margin-bottom: 10px;
-  border: 2px solid #000;
-  background-color: #fff;
+  margin-bottom: 8px;
+  border: 1px solid #E2E8F0;
+  background-color: #FFFFFF;
   font-family: 'Oxygen', sans-serif;
+  border-radius: 8px;
 }
 
 .item-tema-pixel {
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .item-tema-pixel:hover {
-  transform: translateX(5px);
+  background: #EFF6FF;
+  border-color: #BFDBFE;
 }
 
 .item-tema-pixel.active {
-  background-color: var(--color-accent-light);
-  box-shadow: 4px 4px 0px #000;
+  background-color: #DBEAFE;
+  border-color: #BFDBFE;
+  color: #1E40AF;
+  box-shadow: none;
 }
 
 /* ===================== FOOTER ===================== */
@@ -458,7 +470,7 @@
 
 .stats-placeholder {
   font-family: 'Oxygen', sans-serif;
-  color: #888;
+  color: #94A3B8;
   text-align: center;
   padding: 40px 20px;
   font-size: 1.05rem;
@@ -466,14 +478,14 @@
 
 .stats-info-msg {
   font-family: 'Oxygen', sans-serif;
-  color: #555;
+  color: #64748B;
   text-align: center;
   padding: 20px;
   font-size: 1rem;
 }
 
 .stats-error-msg {
-  color: #C3004F;
+  color: #DC2626;
   text-align: center;
   font-weight: 700;
   font-family: 'Oxygen', sans-serif;
@@ -482,14 +494,14 @@
 
 .msg-placeholder {
   font-family: 'Oxygen', sans-serif;
-  color: #888;
+  color: #94A3B8;
   text-align: center;
   padding: 20px;
 }
 
 .msg-vacio {
   font-family: 'Oxygen', sans-serif;
-  color: #999;
+  color: #94A3B8;
   text-align: center;
   padding: 30px;
   font-style: italic;
@@ -512,10 +524,10 @@
   flex-direction: column;
   gap: 16px;
   width: 100%;
-  background: white;
-  border: 2.5px solid #000;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
   border-radius: 12px;
-  box-shadow: 4px 4px 0px #000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   padding: 24px 28px;
   box-sizing: border-box;
   overflow-y: auto;
@@ -529,15 +541,16 @@
 
 .graficas-embedded .panel-temas {
   width: 100%;
-  border: 2px solid #000;
-  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
   padding: 10px;
-  background: #FFF8EE;
+  background: #F8FAFC;
 }
 
 .graficas-embedded .panel-temas h3 {
   margin: 0 0 8px;
   font-family: 'Oxygen', sans-serif;
+  color: #1E293B;
 }
 
 .graficas-embedded .lista-temas-scroll {
@@ -574,10 +587,10 @@
 
 .chart-main-title {
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 700;
   margin: 0;
-  color: #000;
+  color: #1E293B;
 }
 
 .chart-subtitle {
@@ -585,12 +598,12 @@
   font-size: 1rem;
   font-weight: 600;
   margin: 0;
-  color: #333;
+  color: #475569;
 }
 
 .chart-toggle {
   display: flex;
-  background: #fcfcfc;
+  background: #F1F5F9;
   border-radius: 8px;
   padding: 3px;
   gap: 2px;
@@ -606,19 +619,19 @@
   border-radius: 6px;
   cursor: pointer;
   background: transparent;
-  color: #555;
+  color: #64748B;
   transition: all 0.2s;
 }
 
 .chart-toggle-btn:hover {
-  color: #000;
+  color: #1E293B;
 }
 
 .chart-toggle-btn--active {
-  background: var(--color-accent-light);
-  color: #000;
+  background: #FFFFFF;
+  color: #1E40AF;
   font-weight: 700;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 /* ===================== CHARTS (SVG) ===================== */
@@ -663,7 +676,7 @@
 .legend-swatch {
   width: 14px;
   height: 14px;
-  border: 2px solid #000;
+  border: 1px solid rgba(0,0,0,0.15);
   border-radius: 3px;
   box-sizing: border-box;
 }
@@ -672,7 +685,7 @@
   width: 22px;
   height: 0;
   border-top-style: solid;
-  border-top-color: #000;
+  border-top-color: #94A3B8;
 }
 
 /* ===================== RESPONSIVE ===================== */

@@ -23,8 +23,9 @@
 }
 
 .tbl-label {
-  font-weight: bold;
+  font-weight: 700;
   font-size: 0.95rem;
+  color: #334155;
 }
 
 .tbl-label--check {
@@ -33,49 +34,54 @@
   gap: 8px;
   cursor: pointer;
   font-weight: normal;
+  color: #475569;
 }
 
 .tbl-input {
   width: 100%;
-  background: var(--color-accent);
-  border: 2px solid #000;
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
   border-radius: 8px;
   padding: 8px 10px;
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
-  color: #000;
-  transition: background 0.15s;
+  color: #1E293B;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .tbl-input:hover {
-  background: var( --color-accent-light);
+  border-color: #94A3B8;
 }
 
 .tbl-input:focus {
-  outline: none;
-  background: var( --color-accent-light);
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+  background: #FFFFFF;
 }
 
 .tbl-textarea {
   width: 100%;
-  background: var(--color-accent);
-  border: 2px solid #000;
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
   border-radius: 8px;
   padding: 8px 10px;
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
-  color: #000;
+  color: #1E293B;
   resize: vertical;
-  transition: background 0.15s;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .tbl-textarea:hover {
-  background: var( --color-accent-light);
+  border-color: #94A3B8;
 }
 
 .tbl-textarea:focus {
-  outline: none;
-  background: var( --color-accent-light);
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.3);
+  background: #FFFFFF;
 }
 
 /* ── Secciones ─────────────────────────────────────────────── */
@@ -85,16 +91,17 @@
 }
 
 .tbl-section-title {
-  font-weight: bold;
+  font-weight: 700;
   font-size: 1.05rem;
   margin: 0 0 14px 0;
+  color: #1E293B;
 }
 
 /* ── Selector de tamaño ────────────────────────────────────── */
 
 .tbl-tamano-selector {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
@@ -103,36 +110,35 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding: 18px 26px;
-  background: #FFF8EE;
-  border: 3px solid #000;
-  border-radius: 12px;
+  padding: 16px 24px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
   cursor: pointer;
   font-family: 'Oxygen', sans-serif;
-  transition: transform 0.12s, box-shadow 0.12s, background 0.15s;
-  box-shadow: 4px 4px 0 #000;
+  transition: background 0.15s, border-color 0.15s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .tbl-tamano-btn:hover {
-  background: var(--color-accent);
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 #000;
+  background: #EFF6FF;
+  border-color: #BFDBFE;
 }
 
 .tbl-tamano-btn--active {
-  background: var( --color-accent-light);
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 #000;
+  background: #DBEAFE;
+  border-color: #BFDBFE;
+  color: #1E40AF;
 }
 
 .tbl-tamano-label {
-  font-size: 1.4rem;
-  font-weight: bold;
+  font-size: 1.3rem;
+  font-weight: 700;
 }
 
 .tbl-tamano-sub {
   font-size: 0.82rem;
-  color: #555;
+  color: #64748B;
 }
 
 /* ── Mini tablero (preview) ────────────────────────────────── */
@@ -141,19 +147,19 @@
   display: grid;
   gap: 2px;
   padding: 3px;
-  background: #000;
+  background: #E2E8F0;
   border-radius: 4px;
 }
 
 .tbl-board-cell {
   width: 18px;
   height: 18px;
-  background: #f5f0e8;
+  background: #F8FAFC;
   border-radius: 1px;
 }
 
 .tbl-board-cell--dark {
-  background: #4a3728;
+  background: #64748B;
 }
 
 /* ── Lista de preguntas ────────────────────────────────────── */
@@ -174,51 +180,52 @@
 
 .tbl-q-row--header {
   padding-bottom: 6px;
-  border-bottom: 2px solid #000;
+  border-bottom: 1px solid #E2E8F0;
   margin-bottom: 2px;
 }
 
 .tbl-q-row:not(.tbl-q-row--header):hover {
-  background: rgba(255, 242, 148, 0.25);
+  background: #F8FAFC;
   border-radius: 6px;
 }
 
 .tbl-q-col-label {
-  font-weight: bold;
+  font-weight: 700;
   font-size: 0.9rem;
+  color: #334155;
 }
 
 .tbl-q-number {
   font-size: 0.85rem;
-  color: #666;
-  font-weight: bold;
+  color: #64748B;
+  font-weight: 700;
   text-align: center;
 }
 
 .tbl-respuesta-input {
-  background: var(--color-accent) !important;
-  border-color: #000 !important;
+  background: #EFF6FF !important;
+  border-color: #BFDBFE !important;
 }
 
 .tbl-respuesta-input:hover {
-  background: var( --color-accent-light) !important;
+  border-color: #93C5FD !important;
 }
 
 .tbl-respuesta-input:focus {
-  background: var( --color-accent-light) !important;
-  border-color: #000 !important;
+  background: #DBEAFE !important;
+  border-color: #93C5FD !important;
 }
 
 /* ── Feedback ──────────────────────────────────────────────── */
 
 .tbl-error {
-  color: #c0392b !important;
+  color: #DC2626 !important;
   margin: 8px 0;
   font-size: 0.95rem;
 }
 
 .tbl-success {
-  color: #27ae60;
+  color: #16a34a;
   margin: 8px 0;
   font-size: 0.95rem;
 }

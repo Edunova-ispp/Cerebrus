@@ -19,12 +19,12 @@
 .paf-badge {
   font-family: 'Oxygen', sans-serif;
   font-size: 0.85rem;
-  font-weight: bold;
-  background: var(--color-accent, #FFF294);
-  border: 2px solid #000;
+  font-weight: 700;
+  background: #DBEAFE;
+  border: 1px solid #BFDBFE;
   border-radius: 6px;
   padding: 2px 10px;
-  color: #000;
+  color: #1E40AF;
 }
 
 /* ── Pregunta row ────────────────────────────────────────────────── */
@@ -45,22 +45,21 @@
 
 .paf-btn-remove {
   font-family: 'Oxygen', sans-serif;
-  font-size: 1rem;
-  font-weight: bold;
-  background: #fdd;
-  color: #c0392b;
-  border: 2px solid #c0392b;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
   border-radius: 8px;
   padding: 9px 13px;
   cursor: pointer;
   line-height: 1;
-  transition: background 0.15s, transform 0.1s;
+  transition: background 0.15s;
   white-space: nowrap;
 }
 
 .paf-btn-remove:hover {
-  background: #f5b8b8;
-  transform: translate(-1px, -1px);
+  background: #FEE2E2;
 }
 
 /* ── Add button ──────────────────────────────────────────────────── */
@@ -68,28 +67,22 @@
 .paf-btn-add {
   font-family: 'Oxygen', sans-serif;
   font-size: 0.95rem;
-  font-weight: bold;
-  background: var(--color-accent, #FFF294);
-  color: #000;
-  border: 2px solid #000;
-  border-radius: 10px;
+  font-weight: 700;
+  background: #2563EB;
+  color: #FFFFFF;
+  border: 1px solid #1D4ED8;
+  border-radius: 8px;
   margin-top: 1rem;
   padding: 8px 18px;
   cursor: pointer;
   align-self: flex-start;
-  box-shadow: 3px 3px 0 #000;
-  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 .paf-btn-add:hover {
-  background: var(--color-accent-light, #FCEF91);
-  transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0 #000;
-}
-
-.paf-btn-add:active {
-  transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 #000;
+  background: #1D4ED8;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
 }
 
 /* ── Responsive ──────────────────────────────────────────────────── */
