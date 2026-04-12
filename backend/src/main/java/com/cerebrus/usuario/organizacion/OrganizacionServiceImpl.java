@@ -61,6 +61,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional(readOnly = true)
     public Page<Maestro> listarMaestros(Long organizacionId, int page, int size) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "listar maestros");
+        // Comprobar suscripciones activas antes de listar maestros
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede listar maestros.");
+        }
         // Forzar carga de maestros dentro de la transación
         Hibernate.initialize(organizacion.getMaestros());
         // Devolver copias planas para evitar serialización de relaciones lazy
@@ -74,6 +79,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional(readOnly = true)
     public Page<Alumno> listarAlumnos(Long organizacionId, int page, int size) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "listar alumnos");
+        // Comprobar suscripciones activas antes de listar alumnos
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede listar alumnos.");
+        }
         // Forzar carga de alumnos dentro de la transación
         Hibernate.initialize(organizacion.getAlumnos());
         // Devolver copias planas para evitar serialización de relaciones lazy
@@ -87,6 +97,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional(readOnly = true)
     public Usuario buscarUsuario(Long organizacionId, Long usuarioId) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "buscar usuarios");
+        // Comprobar suscripciones activas antes de buscar usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede buscar usuarios.");
+        }
         // Forzar carga de ambas colecciones dentro de la transacción
         Hibernate.initialize(organizacion.getMaestros());
         Hibernate.initialize(organizacion.getAlumnos());
@@ -106,46 +121,47 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional
     public void eliminarUsuario(Long organizacionId, Long usuarioId) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "eliminar usuarios");
+        // Comprobar suscripciones activas antes de eliminar usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede eliminar usuarios.");
+        }
+        
+        // Inicializar las colecciones dentro de la transacción
         Hibernate.initialize(organizacion.getMaestros());
         Hibernate.initialize(organizacion.getAlumnos());
-        // Buscar en la colección gestionada por Hibernate directamente
-        Maestro maestro = organizacion.getMaestros().stream()
-                .filter(m -> m.getId().equals(usuarioId))
-                .findFirst().orElse(null);
-        if (maestro != null) {
-            organizacion.getMaestros().remove(maestro);
-            organizacionRepository.save(organizacion);
-            return;
+        
+        boolean eliminado = organizacion.getMaestros().removeIf(maestro -> maestro.getId().equals(usuarioId));
+        if (!eliminado) {
+            eliminado = organizacion.getAlumnos().removeIf(alumno -> alumno.getId().equals(usuarioId));
         }
-        Alumno alumno = organizacion.getAlumnos().stream()
-                .filter(a -> a.getId().equals(usuarioId))
-                .findFirst().orElse(null);
-        if (alumno != null) {
-            organizacion.getAlumnos().remove(alumno);
-            organizacionRepository.save(organizacion);
-            return;
+
+        if (!eliminado) {
+            throw new ResourceNotFoundException("Usuario no encontrado en la organización con ID: " + usuarioId);
         }
-        throw new ResourceNotFoundException("Usuario no encontrado con ID: " + usuarioId);
+
+        usuarioRepository.deleteById(usuarioId);
     }
 
     @Override
     @Transactional
     public Usuario actualizarUsuario(Long organizacionId, Long usuarioId, UsuarioActualizarDTO usuarioActualizado) {
-        validarYObtenerOrganizacionPropietaria(organizacionId, "actualizar usuarios");
-        // Buscar la entidad gestionada directamente desde el repositorio
-        Usuario usuarioExistente = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + usuarioId));
-        validarNombreUsuarioUnicoEnOrganizacion(
-                organizacionRepository.findById(organizacionId).orElseThrow(),
-                usuarioExistente.getId(), usuarioActualizado.getNombreUsuario());
+        Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "actualizar usuarios");
+        // Comprobar suscripciones activas antes de actualizar usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede actualizar usuarios.");
+        }
+        Usuario usuarioExistente = buscarUsuario(organizacionId, usuarioId);
+        validarNombreUsuarioUnicoEnOrganizacion(organizacion, usuarioExistente.getId(), usuarioActualizado.getNombreUsuario());
         // Solo se permiten actualizar ciertos campos
-        if (usuarioActualizado.getNombre() != null) usuarioExistente.setNombre(usuarioActualizado.getNombre());
-        if (usuarioActualizado.getPrimerApellido() != null) usuarioExistente.setPrimerApellido(usuarioActualizado.getPrimerApellido());
+        usuarioExistente.setNombre(usuarioActualizado.getNombre());
+        usuarioExistente.setPrimerApellido(usuarioActualizado.getPrimerApellido());
         usuarioExistente.setSegundoApellido(usuarioActualizado.getSegundoApellido());
-        if (usuarioActualizado.getNombreUsuario() != null) usuarioExistente.setNombreUsuario(usuarioActualizado.getNombreUsuario());
-        if (usuarioActualizado.getCorreoElectronico() != null) usuarioExistente.setCorreoElectronico(usuarioActualizado.getCorreoElectronico());
+        usuarioExistente.setNombreUsuario(usuarioActualizado.getNombreUsuario());
+        usuarioExistente.setCorreoElectronico(usuarioActualizado.getCorreoElectronico());
         if (usuarioActualizado.getContrasena() != null && !usuarioActualizado.getContrasena().isBlank()) {
-            usuarioExistente.setContrasena(passwordEncoder.encode(usuarioActualizado.getContrasena()));
+            usuarioExistente.setContrasena(usuarioActualizado.getContrasena());
         }
         return toSafeUsuario(usuarioRepository.save(usuarioExistente));
     }
@@ -220,6 +236,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         }
         
         Organizacion organizacion = (Organizacion) usuarioActual;
+        // Comprobar suscripciones activas antes de crear usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede crear usuarios.");
+        }
                  
 
         String rolUpper = request.getRol().toUpperCase();
@@ -253,8 +274,8 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 organizacion
             );
             maestro.setOrganizacion(organizacion);
+            organizacion.getMaestros().add(maestro);
             nuevoUsuario = maestro;
-            
         } else if ("ALUMNO".equals(rolUpper)) {
             Alumno alumno = new Alumno(
                 request.getNombre(),
@@ -267,7 +288,9 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 organizacion
             );
             alumno.setOrganizacion(organizacion);
+            organizacion.getAlumnos().add(alumno);
             nuevoUsuario = alumno;
+            
         } else {
             throw new IllegalArgumentException("Rol inválido. Use: MAESTRO o ALUMNO.");
         }
@@ -383,6 +406,13 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         List<String> errores = new ArrayList<>();
         InputStream inputStream = archivo.getInputStream();
         Usuario usuarioActual = usuarioService.findCurrentUser();
+        Organizacion organizacion = (Organizacion) usuarioActual;
+
+        // Comprobar suscripciones activas antes de importar usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede importar usuarios.");
+        }
         
         if (!(usuarioActual instanceof Organizacion)) {
             throw new AccessDeniedException("Solo usuarios con rol ORGANIZACIÓN pueden crear nuevos usuarios.");
@@ -539,4 +569,3 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         };
     }
 }
-
