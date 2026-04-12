@@ -224,6 +224,24 @@ export default function TestAlumno() {
     setSubmitting(true);
 
     try {
+      const alumnoId = getCurrentUserIdFromJwt();
+      if (!alumnoId) {
+        throw new TypeError('No se pudo identificar al alumno. Inicia sesión de nuevo.');
+      }
+
+      // Reasegura el intento activo justo antes de enviar para evitar usar
+      // un intento antiguo/terminado en escenarios de reintento.
+      const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
+        method: 'POST',
+        body: JSON.stringify({ alumnoId, actividadId: test.id }),
+      });
+      const ensuredAA = (await createAA.json()) as ActividadAlumnoDTO;
+      if (typeof ensuredAA?.id !== 'number' || !Number.isFinite(ensuredAA.id)) {
+        throw new TypeError('No se pudo preparar el intento de la actividad.');
+      }
+      const actividadAlumnoIdActual = ensuredAA.id;
+      setActividadAlumnoId(actividadAlumnoIdActual);
+
       const respuestasIds: number[] = [];
       const resultEntries = await Promise.all(
         test.preguntas.map(async (p) => {
@@ -234,7 +252,7 @@ export default function TestAlumno() {
               const res = await apiFetch(`${apiBase}/api/respuestas-alumno-general`, {
                 method: 'POST',
                 body: JSON.stringify({
-                  actividadAlumnoId,
+                  actividadAlumnoId: actividadAlumnoIdActual,
                   preguntaId: p.id,
                   respuestaId: selectedId,
                 }),
@@ -275,7 +293,7 @@ export default function TestAlumno() {
       );
 
       if (respuestasIds.length > 0) {
-    await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
+    await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoIdActual}`, {
       method: 'PUT',
       body: JSON.stringify(respuestasIds),
     });

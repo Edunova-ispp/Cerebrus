@@ -20,6 +20,7 @@ export interface ClasificacionFormInitialValues {
   readonly descripcion: string | null;
   readonly puntuacion: number;
   readonly respVisible: boolean;
+  readonly permitirReintento?: boolean;
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly version: number;
@@ -66,6 +67,7 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
   const [respVisible, setRespVisible] = useState(false);
+  const [permitirReintento, setPermitirReintento] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
   const [preguntas, setPreguntas] = useState<Pregunta[]>([makeEmptyPregunta()]);
   const [error, setError] = useState('');
@@ -84,6 +86,7 @@ const [showIAModal, setShowIAModal] = useState(false);
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
     setRespVisible(Boolean(initialValues.respVisible));
+    setPermitirReintento(Boolean(initialValues.permitirReintento));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
 
     if (initialValues.preguntas && initialValues.preguntas.length > 0) {
@@ -195,6 +198,7 @@ const [showIAModal, setShowIAModal] = useState(false);
         puntuacion: pNum,
         tema: { id: tIdNum },
         respVisible: Boolean(respVisible),
+        permitirReintento: Boolean(permitirReintento),
         comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
         imagen: null,
       };
@@ -368,6 +372,10 @@ const handleIAResult = (data: any) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
             <input type="checkbox" id="respVisible" checked={respVisible} onChange={(e) => setRespVisible(e.target.checked)} />
             <label className="ca-text" htmlFor="respVisible">Corregir automáticamente</label>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
+            <input type="checkbox" id="permitirReintento" checked={permitirReintento} onChange={(e) => setPermitirReintento(e.target.checked)} />
+            <label className="ca-text" htmlFor="permitirReintento">Permitir reintentos</label>
           </div>
           {respVisible && (
             <div style={{ marginTop: 10 }}>

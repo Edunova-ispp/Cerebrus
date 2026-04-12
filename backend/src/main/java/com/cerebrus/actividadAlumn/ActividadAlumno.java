@@ -156,9 +156,6 @@ public class ActividadAlumno {
         if (fechaFin != null && !fechaFin.equals(epoch) && fechaFin.getYear() > 1970) {
             return EstadoActividad.TERMINADA;
         }
-        if (getNumRepeticiones() > 0 && respuestasAlumno.get(respuestasAlumno.size()-1).getCorrecta().equals(Boolean.TRUE)) {
-            return EstadoActividad.TERMINADA;
-        }
         if (fechaInicio != null && !fechaInicio.equals(epoch)) {
             return EstadoActividad.EMPEZADA;
         }

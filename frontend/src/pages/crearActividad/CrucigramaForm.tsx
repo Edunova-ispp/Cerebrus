@@ -16,6 +16,7 @@ export interface CrucigramaFormInitialValues {
     readonly descripcion: string;
     readonly puntuacion: number;
     readonly respVisible: boolean;
+    readonly permitirReintento?: boolean;
     readonly temaId?: number;
     readonly preguntas?: CrucigramaFormInitialPregunta[];
     readonly preguntasYRespuestas?: Record<string, string>;
@@ -47,6 +48,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
     const [descripcion, setDescripcion] = useState('');
     const [puntuacion, setPuntuacion] = useState('');
     const [respVisible, setRespVisible] = useState(true);
+    const [permitirReintento, setPermitirReintento] = useState(false);
     const [preguntas, setPreguntas] = useState<PreguntaLocal[]>([{ pregunta: '', respuesta: '' }]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -63,6 +65,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
         setDescripcion(initialValues.descripcion || '');
         setPuntuacion(String(initialValues.puntuacion) || '');
         setRespVisible(initialValues.respVisible !== undefined ? initialValues.respVisible : true);
+        setPermitirReintento(Boolean(initialValues.permitirReintento));
 
         if (initialValues.preguntasYRespuestas && Object.keys(initialValues.preguntasYRespuestas).length > 0) {
             setPreguntas(
@@ -122,7 +125,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                 throw new Error('Debes completar al menos una pregunta y su respuesta.');
             }
 
-            if (puntuacion <= 0) {
+            if (Number(puntuacion) <= 0) {
                 throw new Error('La puntuación debe ser un número mayor a 0');
             }
 
@@ -134,6 +137,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                 temaId: Number(temaId) || initialValues?.temaId,
                 puntuacion: Number(puntuacion),
                 respVisible: Boolean(respVisible),
+                permitirReintento: Boolean(permitirReintento),
                 preguntasYRespuestas: mapaPreguntas,
             };
 
@@ -220,6 +224,18 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                                 onChange={e => setRespVisible(e.target.checked)}
                             />
                             <span className="cf-checkbox-label">Mostrar solución al finalizar</span>
+                        </label>
+                        <label
+                            className="cf-checkbox-row"
+                            htmlFor="cf-reintento"
+                        >
+                            <input
+                                id="cf-reintento"
+                                type="checkbox"
+                                checked={permitirReintento}
+                                onChange={e => setPermitirReintento(e.target.checked)}
+                            />
+                            <span className="cf-checkbox-label">Permitir reintentos</span>
                         </label>
                     </div>
                 </div>

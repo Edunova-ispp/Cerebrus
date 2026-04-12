@@ -9,6 +9,7 @@ export interface PreguntaAbiertaFormInitialValues {
   puntuacion: number;
   imagen?: string | null;
   respVisible: boolean;
+  permitirReintento?: boolean;
   comentariosRespVisible?: string | null;
   version?: number;
   posicion?: number;
@@ -50,6 +51,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
   // NUEVO ESTADO PARA CONTROLAR ERRORES DE IMAGEN
   const [imagenError, setImagenError] = useState(false); 
   const [respVisible, setRespVisible] = useState(false);
+  const [permitirReintento, setPermitirReintento] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
   const [preguntas, setPreguntas] = useState<{ id?: number; pregunta: string; respuesta: string; respuestaId?: number }[]>(
     [{ pregunta: '', respuesta: '' }]
@@ -72,6 +74,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
     setImagenError(false);
     
     setRespVisible(Boolean(initialValues.respVisible));
+    setPermitirReintento(Boolean(initialValues.permitirReintento));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
     
     if (initialValues.preguntas && initialValues.preguntas.length > 0) {
@@ -124,6 +127,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
             puntuacion: Number(puntos),
             imagen: imagen.trim() || null,
             respVisible,
+            permitirReintento,
             comentariosRespVisible: comentariosRespVisible.trim() || null,
             tema: { id: tId },
             tipo: 'ABIERTA',
@@ -187,6 +191,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
           puntuacion: Number(puntos),
           imagen: imagen.trim() || null,
           respVisible,
+          permitirReintento,
           comentariosRespVisible: comentariosRespVisible.trim() || null,
           tipo: 'ABIERTA',
           tema: { id: tId },
@@ -266,6 +271,11 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
           <label className="tf-check-label">
             <input type="checkbox" checked={respVisible} onChange={e => setRespVisible(e.target.checked)} />
             <span>Mostrar correcciones al alumno</span>
+          </label>
+
+          <label className="tf-check-label">
+            <input type="checkbox" checked={permitirReintento} onChange={e => setPermitirReintento(e.target.checked)} />
+            <span>Permitir reintentos</span>
           </label>
 
           {respVisible && (

@@ -16,6 +16,7 @@ export interface MarcarImagenFormInitialValues {
   readonly descripcion: string | null;
   readonly puntuacion: number;
   readonly respVisible: boolean;
+  readonly permitirReintento?: boolean;
   readonly comentariosRespVisible: string | null;
   readonly temaId?: number;
   readonly imagenAMarcar: string;
@@ -43,6 +44,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
   const [respVisible, setRespVisible] = useState(false);
+  const [permitirReintento, setPermitirReintento] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
   const [imagenAMarcar, setImagenAMarcar] = useState('');
   const [puntos, setPuntos] = useState<Point[]>([]);
@@ -64,6 +66,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
     setRespVisible(Boolean(initialValues.respVisible));
+    setPermitirReintento(Boolean(initialValues.permitirReintento));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
     setImagenAMarcar(initialValues.imagenAMarcar ?? '');
 
@@ -163,6 +166,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
           descripcion: descripcion.trim() || '',
           puntuacion: puntuacionNum,
           respVisible,
+          permitirReintento,
           comentariosRespVisible: respVisible ? comentariosRespVisible.trim() || null : null,
           temaId: temaIdNum,
           imagenAMarcar: imagenAMarcar.trim(),
@@ -256,6 +260,18 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
             />
             <label className="ca-text" htmlFor="mi-resp-visible">
               Correcciones visibles
+            </label>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              id="mi-permitir-reintento"
+              checked={permitirReintento}
+              onChange={(e) => setPermitirReintento(e.target.checked)}
+            />
+            <label className="ca-text" htmlFor="mi-permitir-reintento">
+              Permitir reintentos
             </label>
           </div>
 

@@ -83,16 +83,20 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
             throw new AccessDeniedException("No puedes crear una ActividadAlumno para otro alumno");
         }
 
-        // Idempotente: si ya existe la pareja (alumno, actividad), devolvemos la existente.
         Optional<ActividadAlumno> existing = actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumnoId, actId);
         if (existing.isPresent()) {
-            return existing.get();
+            ActividadAlumno ultimaInstancia = existing.get();
+            if (ultimaInstancia.getEstadoActividad() != EstadoActividad.TERMINADA) {
+                return ultimaInstancia;
+            }
         }
-        
+
         Actividad actividad = actividadRepository.findById(actId).orElseThrow(() -> new ResourceNotFoundException("La actividad no existe"));
-        if(actividad.getPermitirReintento() == false && existeActAlumnoPorActIdYCurrentUserId(actId)!=0){
+        if (existing.isPresent() && existing.get().getEstadoActividad() == EstadoActividad.TERMINADA
+                && !Boolean.TRUE.equals(actividad.getPermitirReintento())) {
             throw new AccessDeniedException("No se permite el reintento para esta actividad");
         }
+
         Alumno alumno = alumnoRepository.findById(alumnoId).orElseThrow(() -> new ResourceNotFoundException("El alumno no existe"));
         
         AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(actividad, alumno.getId());
@@ -157,7 +161,16 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
                 return 0;
             }
             Long alumnoId = current.getId();
-            return actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumnoId, actividadId).isPresent() ? 1 : 0;
+            Optional<ActividadAlumno> ultimoIntento = actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumnoId, actividadId);
+            if (ultimoIntento.isEmpty()) {
+                return 0;
+            }
+
+            if (ultimoIntento.get().getEstadoActividad() != EstadoActividad.TERMINADA) {
+                return 1;
+            }
+
+            return 0;
         } catch (Exception e) {
             return 0;
         }

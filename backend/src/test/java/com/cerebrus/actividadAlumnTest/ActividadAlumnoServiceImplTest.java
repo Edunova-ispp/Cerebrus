@@ -123,8 +123,9 @@ class ActividadAlumnoServiceImplTest {
     }
 
     @Test
-        void crearActAlumno_parejaYaExiste_retornaExistenteSinGuardar() {
+    void crearActAlumno_intentoEnCurso_retornaExistenteSinGuardar() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        actividadAlumno.setFechaFin(LocalDateTime.of(1970, 1, 1, 0, 0));
         when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L))
             .thenReturn(Optional.of(actividadAlumno));
 
@@ -134,6 +135,41 @@ class ActividadAlumnoServiceImplTest {
         assertThat(resultado.getId()).isEqualTo(10L);
         verify(actividadAlumnoRepository, never()).save(any());
         verify(actividadRepository, never()).findById(any());
+    }
+
+    @Test
+    void crearActAlumno_reintentoPermitido_creaNuevaInstancia() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        actividad.setPermitirReintento(true);
+        actividadAlumno.setFechaFin(LocalDateTime.now().minusMinutes(5));
+        when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L))
+            .thenReturn(Optional.of(actividadAlumno));
+        when(actividadRepository.findById(50L)).thenReturn(Optional.of(actividad));
+        when(alumnoRepository.findById(1L)).thenReturn(Optional.of(alumno));
+        when(actividadAlumnoRepository.save(any(ActividadAlumno.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ActividadAlumno resultado = service.crearActAlumno(100, LocalDateTime.now(),
+            LocalDateTime.now(), 8, 0, 1L, 50L);
+
+        assertThat(resultado).isNotSameAs(actividadAlumno);
+        verify(actividadAlumnoRepository).save(any(ActividadAlumno.class));
+    }
+
+    @Test
+    void crearActAlumno_terminadaSinReintento_lanzaAccessDenied() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        actividad.setPermitirReintento(false);
+        actividadAlumno.setFechaFin(LocalDateTime.now().minusMinutes(5));
+        when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L))
+            .thenReturn(Optional.of(actividadAlumno));
+        when(actividadRepository.findById(50L)).thenReturn(Optional.of(actividad));
+
+        assertThatThrownBy(() -> service.crearActAlumno(100, LocalDateTime.now(),
+            LocalDateTime.now(), 8, 0, 1L, 50L))
+            .isInstanceOf(AccessDeniedException.class)
+            .hasMessage("No se permite el reintento para esta actividad");
+
+        verify(actividadAlumnoRepository, never()).save(any());
     }
 
     @Test
@@ -221,6 +257,30 @@ class ActividadAlumnoServiceImplTest {
         Integer resultado = service.existeActAlumnoPorActIdYCurrentUserId(50L);
 
         assertThat(resultado).isEqualTo(1);
+    }
+
+    @Test
+    void existeActAlumnoPorActIdYCurrentUserId_terminada_retorna0() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        actividadAlumno.setFechaFin(LocalDateTime.now().minusMinutes(1));
+        when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L))
+                .thenReturn(Optional.of(actividadAlumno));
+
+        Integer resultado = service.existeActAlumnoPorActIdYCurrentUserId(50L);
+
+        assertThat(resultado).isEqualTo(0);
+    }
+
+    @Test
+    void existeActAlumnoPorActIdYCurrentUserId_terminadaSinReintento_tambienRetorna0() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        actividadAlumno.setFechaFin(LocalDateTime.now().minusMinutes(1));
+        when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L))
+                .thenReturn(Optional.of(actividadAlumno));
+
+        Integer resultado = service.existeActAlumnoPorActIdYCurrentUserId(50L);
+
+        assertThat(resultado).isEqualTo(0);
     }
 
     @Test

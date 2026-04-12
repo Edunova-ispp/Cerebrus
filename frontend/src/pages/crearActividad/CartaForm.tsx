@@ -23,6 +23,7 @@ export interface CartaFormInitialValues {
   readonly puntuacion: number;
   readonly imagen: string | null;
   readonly respVisible: boolean;
+  readonly permitirReintento?: boolean;
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly version: number;
@@ -62,6 +63,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
   const [puntuacion, setPuntuacion] = useState('');
   const [imagen, setImagen] = useState('');
   const [respVisible, setRespVisible] = useState(false);
+  const [permitirReintento, setPermitirReintento] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
   const [cards, setCards] = useState<Card[]>([makeEmptyCard()]);
   const [error, setError] = useState('');
@@ -83,6 +85,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
     setPuntuacion(String(initialValues.puntuacion ?? ''));
     setImagen(initialValues.imagen ?? '');
     setRespVisible(Boolean(initialValues.respVisible));
+    setPermitirReintento(Boolean(initialValues.permitirReintento));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
 
     if (initialValues.preguntas && initialValues.preguntas.length > 0) {
@@ -210,6 +213,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             imagen: imagen.trim() || null,
             tema: { id: temaIdNum },
             respVisible,
+            permitirReintento,
             comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
             preguntas: [],
           }),
@@ -247,6 +251,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             imagen: imagen.trim() || null,
             tema: { id: temaIdNum },
             respVisible,
+            permitirReintento,
             comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || '') : '',
             posicion: initialValues?.posicion ?? 0,
             version: initialValues?.version ?? 1,
@@ -406,6 +411,15 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
                 onChange={(e) => setRespVisible(e.target.checked)}
               />
               <span>Mostrar correcciones al alumno</span>
+            </label>
+
+            <label className="cf-check-label">
+              <input
+                type="checkbox"
+                checked={permitirReintento}
+                onChange={(e) => setPermitirReintento(e.target.checked)}
+              />
+              <span>Permitir reintentos</span>
             </label>
 
             {respVisible && (

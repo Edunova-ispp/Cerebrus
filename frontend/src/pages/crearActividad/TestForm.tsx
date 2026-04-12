@@ -22,6 +22,7 @@ export interface TestFormInitialValues {
   readonly puntuacion: number;
   readonly imagen: string | null;
   readonly respVisible: boolean;
+  readonly permitirReintento?: boolean;
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly version: number;
@@ -70,6 +71,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
   const [puntuacion, setPuntuacion] = useState('');
   const [imagen, setImagen] = useState('');
   const [respVisible, setRespVisible] = useState(false);
+  const [permitirReintento, setPermitirReintento] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
   const [questions, setQuestions] = useState<Question[]>([makeEmptyQuestion()]);
   const [error, setError] = useState('');
@@ -91,6 +93,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
     setPuntuacion(String(initialValues.puntuacion ?? ''));
     setImagen(initialValues.imagen ?? '');
     setRespVisible(Boolean(initialValues.respVisible));
+    setPermitirReintento(Boolean(initialValues.permitirReintento));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
 
     if (initialValues.preguntas && initialValues.preguntas.length > 0) {
@@ -221,6 +224,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
             imagen: imagen.trim() || null,
             tema: { id: temaIdNum },
             respVisible,
+            permitirReintento,
             comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
             preguntas: [],
           }),
@@ -265,6 +269,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
             imagen: imagen.trim() || null,
             tema: { id: temaIdNum },
             respVisible,
+            permitirReintento,
             comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || '') : '',
             posicion: initialValues?.posicion ?? 0,
             version: initialValues?.version ?? 1,
@@ -463,6 +468,15 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
               onChange={(e) => setRespVisible(e.target.checked)}
             />
             <span>Mostrar correcciones al alumno</span>
+          </label>
+
+          <label className="tf-check-label">
+            <input
+              type="checkbox"
+              checked={permitirReintento}
+              onChange={(e) => setPermitirReintento(e.target.checked)}
+            />
+            <span>Permitir reintentos</span>
           </label>
 
           {respVisible && (

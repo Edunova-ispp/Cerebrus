@@ -12,6 +12,7 @@ export interface OrdenacionFormInitialValues {
   readonly puntuacion: number;
   readonly imagen: string | null;
   readonly respVisible: boolean;
+  readonly permitirReintento?: boolean;
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly temaId?: number;
@@ -36,6 +37,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
   const [respVisible, setRespVisible] = useState(false);
+  const [permitirReintento, setPermitirReintento] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
   const [ordenItems, setOrdenItems] = useState<string[]>(['']);
   const [ordenItemKeys, setOrdenItemKeys] = useState<string[]>([makeLocalKey()]);
@@ -62,6 +64,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
     setRespVisible(Boolean(initialValues.respVisible));
+    setPermitirReintento(Boolean(initialValues.permitirReintento));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
     const initialItems = initialValues.valores?.length ? [...initialValues.valores] : [''];
     setOrdenItems(initialItems);
@@ -146,6 +149,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
           imagen: '',
           tema: { id: temaIdNum },
           respVisible,
+          permitirReintento,
           comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
           ...(mode === 'edit' ? { posicion: posicionOriginal } : {}),
           valores,
@@ -183,7 +187,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
         onResult={handleIAResult}
       />
 
-      {/* ── Metadata ── */
+      {/* ── Metadata ── */}
       <div className="of-meta-section">
         <div className="of-col">
           <div>
@@ -232,6 +236,16 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
               onChange={(e) => setRespVisible(e.target.checked)}
             />
             Correcciones visibles
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={permitirReintento}
+              onChange={(e) => setPermitirReintento(e.target.checked)}
+            />
+            Permitir reintentos
+          </div>
+
           {respVisible && (
             <div>
               <label className="of-label" htmlFor="of-comentarios">Comentarios</label>
@@ -246,9 +260,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
           )}
         </div>
       </div>
-      </div>
 
-    }
       <div className="of-items-section">
         <p className="of-help">
           Actividad de ordenación. El alumno debe organizar los valores siguiendo un criterio

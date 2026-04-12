@@ -10,6 +10,7 @@ export interface TeoriaFormInitialValues {
   readonly titulo: string;
   readonly descripcion: string;
   readonly imagen: string;
+  readonly permitirReintento?: boolean;
   readonly posicion: number;
   readonly temaId?: number;
 }
@@ -27,6 +28,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [imagen, setImagen] = useState('');
+  const [permitirReintento, setPermitirReintento] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [iaModalOpen, setIaModalOpen] = useState(false);
@@ -43,6 +45,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setImagen(initialValues.imagen ?? '');
+    setPermitirReintento(Boolean(initialValues.permitirReintento));
   }, [initialValues]);
 
   const validate = (): string | null => {
@@ -79,6 +82,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
             imagen: imagen.trim(),
+            permitirReintento,
             temaId: temaId ? Number.parseInt(temaId, 10) : null,
           }),
         });
@@ -93,6 +97,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
             imagen: imagen.trim(),
+            permitirReintento,
             temaId: temaIdNum,
           }),
         });
@@ -167,6 +172,15 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
                 onLoad={(e) => { (e.target as HTMLImageElement).style.display = 'block'; }}
               />
             )}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              id="teoria-reintento"
+              checked={permitirReintento}
+              onChange={(e) => setPermitirReintento(e.target.checked)}
+            />
+            <label className="cf-label" htmlFor="teoria-reintento">Permitir reintentos</label>
           </div>
       </div>
 

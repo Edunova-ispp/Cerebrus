@@ -801,12 +801,11 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                     }
                 }
 
-                // Build intentos list
+                // Build full history of attempts for this activity.
                 List<IntentoActividadDTO> intentos = instanciasAlumno.stream()
-                        .filter(aa -> aa.getEstadoActividad() == EstadoActividad.TERMINADA)
                         .sorted((a, b) -> {
-                            LocalDateTime fa = a.getFechaFin() != null ? a.getFechaFin() : a.getFechaInicio();
-                            LocalDateTime fb = b.getFechaFin() != null ? b.getFechaFin() : b.getFechaInicio();
+                            LocalDateTime fa = fechaEfectivaIntento(a);
+                            LocalDateTime fb = fechaEfectivaIntento(b);
                             if (fa == null && fb == null) return 0;
                             if (fa == null) return -1;
                             if (fb == null) return 1;
@@ -900,8 +899,8 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
     }
 
     private boolean esMasReciente(ActividadAlumno candidata, ActividadAlumno actual) {
-        LocalDateTime fechaCandidata = candidata.getFechaFin() != null ? candidata.getFechaFin() : candidata.getFechaInicio();
-        LocalDateTime fechaActual = actual.getFechaFin() != null ? actual.getFechaFin() : actual.getFechaInicio();
+        LocalDateTime fechaCandidata = fechaEfectivaIntento(candidata);
+        LocalDateTime fechaActual = fechaEfectivaIntento(actual);
 
         if (fechaCandidata == null && fechaActual == null) {
             return candidata.getId() != null && actual.getId() != null && candidata.getId() > actual.getId();
@@ -914,6 +913,20 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         }
 
         return fechaCandidata.isAfter(fechaActual);
+    }
+
+    private LocalDateTime fechaEfectivaIntento(ActividadAlumno actividadAlumno) {
+        LocalDateTime fechaFin = actividadAlumno.getFechaFin();
+        LocalDateTime fechaInicio = actividadAlumno.getFechaInicio();
+        LocalDateTime epoch = LocalDateTime.of(1970, 1, 1, 0, 0);
+
+        if (fechaFin != null && !fechaFin.equals(epoch)) {
+            return fechaFin;
+        }
+        if (fechaInicio != null && !fechaInicio.equals(epoch)) {
+            return fechaInicio;
+        }
+        return null;
     }
 
     private Boolean actividadCompletadaPorTodos(Curso curso, Actividad actividad) {

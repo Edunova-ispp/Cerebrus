@@ -187,17 +187,13 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         Integer puntuacion = 0;
         Integer puntuacionASumar = actividadRepository.findById(crucigramaId).orElseThrow(() -> new ResourceNotFoundException("El crucigrama no existe")).getPuntuacion() / respuestas.size();
         List<RespAlumnoGeneral> respuestasAlumno = new java.util.ArrayList<>();
-        // Buscar si ya existe ActividadAlumno para este alumno y actividad
-        // Si NO existe, crear UNA NUEVA
-        // Si existe, reutilizar la misma y actualizar datos
         ActividadAlumno actividadAlumno;
         var existente = actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumno.getId(), crucigramaId);
-        if (existente.isPresent()) {
-            // Ya existe: usar la misma
+        if (existente.isPresent() && existente.get().getEstadoActividad() != com.cerebrus.comun.enumerados.EstadoActividad.TERMINADA) {
             actividadAlumno = existente.get();
         } else {
-            // NO existe: crear una nueva
-            actividadAlumno = actividadAlumnoRepository.save(new ActividadAlumno(0, LocalDateTime.now(), null, 0, 0, alumno, actividadRepository.findByID(crucigramaId)));
+            com.cerebrus.actividad.Actividad actividad = actividadRepository.findByID(crucigramaId);
+            actividadAlumno = actividadAlumnoRepository.save(new ActividadAlumno(0, LocalDateTime.now(), null, 0, 0, alumno, actividad));
         }
 
         HashMap<Long, String> resultado = new HashMap<>();
