@@ -1,4 +1,4 @@
-package com.cerebrus.usuario.organizacion.DTO;
+package com.cerebrus.usuario.organizacion.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
