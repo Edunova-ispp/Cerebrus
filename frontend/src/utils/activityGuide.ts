@@ -28,9 +28,15 @@ function parseGuides(markdown: string): GuideMap {
   let currentRole: ActivityGuideRole | null = null;
 
   for (const line of lines) {
-    const activityMatch = line.match(/^##\s+(.+)$/);
-    if (activityMatch) {
-      currentType = normalizeKey(activityMatch[1]);
+    if (line.startsWith('## ')) {
+      const activityName = normalizeKey(line.slice(3));
+      if (!activityName) {
+        currentType = null;
+        currentRole = null;
+        continue;
+      }
+
+      currentType = activityName;
       if (!guides[currentType]) {
         guides[currentType] = {};
       }
@@ -38,9 +44,14 @@ function parseGuides(markdown: string): GuideMap {
       continue;
     }
 
-    const roleMatch = line.match(/^###\s+(maestro|alumno)\s*$/i);
-    if (roleMatch) {
-      currentRole = normalizeKey(roleMatch[1]) as ActivityGuideRole;
+    if (line.startsWith('### ')) {
+      const rawRole = normalizeKey(line.slice(4));
+      if (rawRole !== 'maestro' && rawRole !== 'alumno') {
+        currentRole = null;
+        continue;
+      }
+
+      currentRole = rawRole;
       const previous = guides[currentType ?? 'general']?.[currentRole] ?? '';
       if (!guides[currentType ?? 'general']) {
         guides[currentType ?? 'general'] = {};
