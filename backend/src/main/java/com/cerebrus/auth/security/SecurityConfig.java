@@ -66,6 +66,7 @@ public class SecurityConfig {
                 "https://cerebrus-ylzn.onrender.com",
                 "https://*.koyeb.app",
                 "http://*.koyeb.app",
+                "https://cerebrus-sprint3.onrender.com/",
                 "https://cerebrus.koyeb.app"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Origin", "Accept", "X-Requested-With"));
