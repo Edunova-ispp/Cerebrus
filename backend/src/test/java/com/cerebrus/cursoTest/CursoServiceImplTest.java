@@ -294,21 +294,6 @@ class CursoServiceImplTest {
         verify(cursoRepository).save(any(Curso.class));
     }
 
-    // Test para verificar que crearCurso reintenta la generación de código si el primero ya existe
-    // @Test
-    // void crearCurso_codigoDuplicado_reintentaHastaEncontrarUnico() {
-    //     when(usuarioService.findCurrentUser()).thenReturn(maestro);
-    //     when(cursoRepository.existsByCodigo(anyString()))
-    //             .thenReturn(true)   // primer intento: duplicado
-    //             .thenReturn(false); // segundo intento: libre
-    //     when(cursoRepository.save(any(Curso.class))).thenAnswer(inv -> inv.getArgument(0));
-
-    //     Curso resultado = cursoService.crearCurso("Química", null, null, "CODIGO123");
-
-    //     assertThat(resultado.getCodigo()).isNotBlank();
-    //     verify(cursoRepository).save(any(Curso.class));
-    // }
-
     // Test para verificar que crearCurso lanza AccessDeniedException cuando el usuario no es Maestro
     @Test
     void crearCurso_usuarioNoMaestro_lanzaAccessDeniedException() {
