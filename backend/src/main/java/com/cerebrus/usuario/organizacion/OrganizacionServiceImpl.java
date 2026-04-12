@@ -102,18 +102,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         if (!tieneSuscripcionActiva) {
             throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede buscar usuarios.");
         }
-        // Forzar carga de ambas colecciones dentro de la transacción
-        Hibernate.initialize(organizacion.getMaestros());
-        Hibernate.initialize(organizacion.getAlumnos());
-        // Hacer copias de las colecciones para evitar lazy loading posterior
-        List<Usuario> usuarios = Stream.concat(
-                        new ArrayList<>(organizacion.getMaestros()).stream().map(m -> (Usuario) m),
-                        new ArrayList<>(organizacion.getAlumnos()).stream().map(a -> (Usuario) a))
-                .toList();
-        Usuario usuario = usuarios.stream()
-                .filter(u -> u.getId().equals(usuarioId))
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + usuarioId));
+        Usuario usuario = encontrarUsuarioEnOrganizacion(organizacion, usuarioId);
         return toSafeUsuario(usuario);
     }
 
@@ -121,48 +110,61 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional
     public void eliminarUsuario(Long organizacionId, Long usuarioId) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "eliminar usuarios");
+        // Comprobar suscripciones activas antes de eliminar usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede eliminar usuarios.");
+        }
+        
+        // Inicializar las colecciones dentro de la transacción
         Hibernate.initialize(organizacion.getMaestros());
         Hibernate.initialize(organizacion.getAlumnos());
-        // Buscar en la colección gestionada por Hibernate directamente
-        Maestro maestro = organizacion.getMaestros().stream()
-                .filter(m -> m.getId().equals(usuarioId))
-                .findFirst().orElse(null);
-        if (maestro != null) {
-            organizacion.getMaestros().remove(maestro);
-            organizacionRepository.save(organizacion);
-            return;
+        
+        boolean eliminado = organizacion.getMaestros().removeIf(maestro -> maestro.getId().equals(usuarioId));
+        if (!eliminado) {
+            eliminado = organizacion.getAlumnos().removeIf(alumno -> alumno.getId().equals(usuarioId));
         }
-        Alumno alumno = organizacion.getAlumnos().stream()
-                .filter(a -> a.getId().equals(usuarioId))
-                .findFirst().orElse(null);
-        if (alumno != null) {
-            organizacion.getAlumnos().remove(alumno);
-            organizacionRepository.save(organizacion);
-            return;
+
+        if (!eliminado) {
+            throw new ResourceNotFoundException("Usuario no encontrado en la organización con ID: " + usuarioId);
         }
-        throw new ResourceNotFoundException("Usuario no encontrado con ID: " + usuarioId);
+
+        usuarioRepository.deleteById(usuarioId);
     }
 
     @Override
     @Transactional
     public Usuario actualizarUsuario(Long organizacionId, Long usuarioId, UsuarioActualizarDTO usuarioActualizado) {
-        validarYObtenerOrganizacionPropietaria(organizacionId, "actualizar usuarios");
-        // Buscar la entidad gestionada directamente desde el repositorio
-        Usuario usuarioExistente = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + usuarioId));
-        validarNombreUsuarioUnicoEnOrganizacion(
-                organizacionRepository.findById(organizacionId).orElseThrow(),
-                usuarioExistente.getId(), usuarioActualizado.getNombreUsuario());
+        Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "actualizar usuarios");
+        // Comprobar suscripciones activas antes de actualizar usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede actualizar usuarios.");
+        }
+        Usuario usuarioExistente = encontrarUsuarioEnOrganizacion(organizacion, usuarioId);
+        validarNombreUsuarioUnicoEnOrganizacion(organizacion, usuarioExistente.getId(), usuarioActualizado.getNombreUsuario());
         // Solo se permiten actualizar ciertos campos
-        if (usuarioActualizado.getNombre() != null) usuarioExistente.setNombre(usuarioActualizado.getNombre());
-        if (usuarioActualizado.getPrimerApellido() != null) usuarioExistente.setPrimerApellido(usuarioActualizado.getPrimerApellido());
+        usuarioExistente.setNombre(usuarioActualizado.getNombre());
+        usuarioExistente.setPrimerApellido(usuarioActualizado.getPrimerApellido());
         usuarioExistente.setSegundoApellido(usuarioActualizado.getSegundoApellido());
-        if (usuarioActualizado.getNombreUsuario() != null) usuarioExistente.setNombreUsuario(usuarioActualizado.getNombreUsuario());
-        if (usuarioActualizado.getCorreoElectronico() != null) usuarioExistente.setCorreoElectronico(usuarioActualizado.getCorreoElectronico());
+        usuarioExistente.setNombreUsuario(usuarioActualizado.getNombreUsuario());
+        usuarioExistente.setCorreoElectronico(usuarioActualizado.getCorreoElectronico());
         if (usuarioActualizado.getContrasena() != null && !usuarioActualizado.getContrasena().isBlank()) {
-            usuarioExistente.setContrasena(passwordEncoder.encode(usuarioActualizado.getContrasena()));
+            usuarioExistente.setContrasena(usuarioActualizado.getContrasena());
         }
         return toSafeUsuario(usuarioRepository.save(usuarioExistente));
+    }
+
+    private Usuario encontrarUsuarioEnOrganizacion(Organizacion organizacion, Long usuarioId) {
+        Hibernate.initialize(organizacion.getMaestros());
+        Hibernate.initialize(organizacion.getAlumnos());
+
+        return Stream.concat(
+                organizacion.getMaestros().stream().map(m -> (Usuario) m),
+                organizacion.getAlumnos().stream().map(a -> (Usuario) a))
+            .filter(u -> u.getId().equals(usuarioId))
+            .findFirst()
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + usuarioId));
     }
 
     private Organizacion validarYObtenerOrganizacionPropietaria(Long organizacionId, String accion) {
@@ -263,7 +265,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         Usuario nuevoUsuario = null;
         
         if ("MAESTRO".equals(rolUpper)) {
-            nuevoUsuario = new Maestro(
+            Maestro maestro = new Maestro(
                 request.getNombre(),
                 request.getPrimerApellido(),
                 request.getSegundoApellido(),
@@ -272,10 +274,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 passwordEncoder.encode(request.getPassword()),
                 organizacion
             );
-            organizacion.getMaestros().add((Maestro) nuevoUsuario);
-            
+            maestro.setOrganizacion(organizacion);
+            organizacion.getMaestros().add(maestro);
+            nuevoUsuario = maestro;
         } else if ("ALUMNO".equals(rolUpper)) {
-            nuevoUsuario = new Alumno(
+            Alumno alumno = new Alumno(
                 request.getNombre(),
                 request.getPrimerApellido(),
                 request.getSegundoApellido(),
@@ -285,7 +288,9 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 0,
                 organizacion
             );
-            organizacion.getAlumnos().add((Alumno) nuevoUsuario);
+            alumno.setOrganizacion(organizacion);
+            organizacion.getAlumnos().add(alumno);
+            nuevoUsuario = alumno;
             
         } else {
             throw new IllegalArgumentException("Rol inválido. Use: MAESTRO o ALUMNO.");
@@ -565,4 +570,3 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         };
     }
 }
-
