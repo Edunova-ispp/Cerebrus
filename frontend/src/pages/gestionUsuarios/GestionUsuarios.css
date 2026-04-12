@@ -393,3 +393,70 @@
   .gu-table th, .gu-table td { padding: 10px 10px; font-size: 0.9rem; }
   .gu-modal { padding: 24px 20px; }
 }
+
+/* ── Create user page / actions ── */
+.gu-create-user-btn {
+  width: 50%;
+  align-self: center;
+}
+
+.gu-create-form {
+  align-items: center;
+}
+
+.gu-create-form .gu-form-label {
+  width: 33.333%;
+  min-width: 260px;
+}
+
+
+.gu-create-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.gu-back-btn {
+  padding: 8px 14px;
+  position: absolute;
+  left: 0;
+}
+
+.gu-role-field {
+  width: 100%;
+}
+
+.gu-role-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.gu-role-btn--maestro {
+  background: #cce5ff;
+  color: #004085;
+}
+.gu-role-btn--maestro:hover,
+.gu-role-btn--maestro.gu-role-btn--selected {
+  background: #004085;
+  color: #cce5ff;
+}
+
+.gu-role-btn--alumno {
+  background: #d4edda;
+  color: #155724;
+}
+.gu-role-btn--alumno:hover,
+.gu-role-btn--alumno.gu-role-btn--selected {
+  background: #155724;
+  color: #d4edda;
+}
+
+@media (max-width: 640px) {
+  .gu-create-form .gu-form-label {
+    width: 100%;
+    min-width: 0;
+  }
+}
