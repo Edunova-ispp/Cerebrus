@@ -41,7 +41,7 @@ public class CursoController {
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }  catch (RuntimeException e) {
-            System.out.println("Error al crear curso: " + e.getMessage());
+           
             if (e.getMessage().equals("Este código ya esta en uso, por favor elige otro")) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
             } else {

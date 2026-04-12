@@ -125,7 +125,7 @@ public class CursoServiceImpl implements CursoService {
 
     @Transactional
     @Override
-    public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen, String codigoPersonalizado) {
+    public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen, String codigo) {
         Curso curso = cursoRepository.findByID(id);
         if (curso == null) {
             throw new RuntimeException("404 Not Found");
@@ -137,13 +137,13 @@ public class CursoServiceImpl implements CursoService {
         if (!curso.getMaestro().getId().equals(usuario.getId())) {
             throw new AccessDeniedException("Solo el propietario del curso puede actualizarlo");
         }
-        if(cursoRepository.existsByCodigo(codigoPersonalizado)){
+        if(cursoRepository.existsByCodigo(codigo)){
                throw new RuntimeException("Este código ya esta en uso, por favor elige otro");
          }
         curso.setTitulo(titulo);
         curso.setDescripcion(descripcion);
         curso.setImagen(imagen);
-        curso.setCodigo(codigoPersonalizado);
+        curso.setCodigo(codigo);
         return cursoRepository.save(curso);
     }
 

@@ -200,7 +200,6 @@ console.log('Response status:', response);
                   value={codigo}
                   onChange={(e) => setCodigo(e.target.value)}
                   className="pixel-input"
-                  placeholder="Código único para el curso..."
                   disabled={loadingUpdate}
                 />
               </div>
