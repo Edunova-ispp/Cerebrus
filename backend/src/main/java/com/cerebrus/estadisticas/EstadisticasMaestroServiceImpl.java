@@ -43,6 +43,8 @@ import com.cerebrus.respuestaAlumn.RespuestaAlumno;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneral;
 import com.cerebrus.respuestaAlumn.respAlumOrdenacion.RespAlumnoOrdenacion;
 import com.cerebrus.respuestaAlumn.respAlumPuntoImagen.RespAlumnoPuntoImagen;
+import com.cerebrus.respuestaMaestro.RespuestaMaestro;
+import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Usuario;
@@ -60,14 +62,16 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
     private final ActividadRepository actividadRepository;
     private final CursoRepository cursoRepository;
     private final TemaRepository temaRepository;
+        private final RespuestaMaestroRepository respuestaMaestroRepository;
 
     @Autowired
-    public EstadisticasMaestroServiceImpl(EstadisticasMaestroRepository estadisticasRepository, UsuarioService usuarioService, ActividadRepository actividadRepository, CursoRepository cursoRepository, TemaRepository temaRepository) {
+        public EstadisticasMaestroServiceImpl(EstadisticasMaestroRepository estadisticasRepository, UsuarioService usuarioService, ActividadRepository actividadRepository, CursoRepository cursoRepository, TemaRepository temaRepository, RespuestaMaestroRepository respuestaMaestroRepository) {
          this.estadisticasRepository = estadisticasRepository;
          this.usuarioService = usuarioService;
          this.actividadRepository = actividadRepository;
          this.cursoRepository = cursoRepository;
          this.temaRepository = temaRepository;
+            this.respuestaMaestroRepository = respuestaMaestroRepository;
     }
 
     @Transactional(readOnly = true)
@@ -1272,15 +1276,32 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
 
         if (respuestaAlumno instanceof RespAlumnoGeneral rag) {
             String enunciado = rag.getPregunta() != null ? rag.getPregunta().getPregunta() : "Pregunta";
+            Boolean correcta = rag.getCorrecta();
+
+            if (rag.getPregunta() != null && rag.getPregunta().getActividad() instanceof General general
+                && general.getTipo() == com.cerebrus.comun.enumerados.TipoActGeneral.CLASIFICACION
+                && rag.getRespuesta() != null) {
+                correcta = respuestaMaestroRepository.findByRespuesta(rag.getRespuesta())
+                    .map(RespuestaMaestro::getPregunta)
+                    .filter(preguntaMaestra -> preguntaMaestra != null && preguntaMaestra.getId() != null)
+                    .map(preguntaMaestra -> preguntaMaestra.getId().equals(rag.getPregunta().getId()))
+                    .orElse(Boolean.FALSE);
+            }
+
             return new IntentoDetalleRespuestaDTO(
                     rag.getId(),
                     "GENERAL",
                     enunciado,
                     rag.getRespuesta(),
-                    rag.getCorrecta());
+                    correcta);
         }
         if (respuestaAlumno instanceof RespAlumnoPuntoImagen rpi) {
-            String enunciado = "Punto imagen";
+            String respuestaCorrecta = (rpi.getPuntoImagen() != null && rpi.getPuntoImagen().getRespuesta() != null)
+                ? rpi.getPuntoImagen().getRespuesta()
+                : "";
+            String enunciado = respuestaCorrecta.isBlank()
+                ? "Punto imagen"
+                : "Punto imagen: " + respuestaCorrecta;
             return new IntentoDetalleRespuestaDTO(
                     rpi.getId(),
                     "PUNTO_IMAGEN",

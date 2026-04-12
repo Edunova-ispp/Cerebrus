@@ -26,6 +26,9 @@ export interface ClasificacionFormInitialValues {
   readonly version: number;
   readonly temaId?: number;
   readonly preguntas?: readonly ClasificacionFormInitialPregunta[];
+  readonly mostrarPuntuacion?: boolean;
+  readonly encontrarRespuestaMaestro?: boolean;
+  readonly encontrarRespuestaAlumno?: boolean;
 }
 
 interface RespuestaOption {
@@ -69,6 +72,9 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
   const [respVisible, setRespVisible] = useState(false);
   const [permitirReintento, setPermitirReintento] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
+  const [mostrarPuntuacion, setMostrarPuntuacion] = useState(false);
+  const [encontrarRespuestaMaestro, setEncontrarRespuestaMaestro] = useState(false);
+  const [encontrarRespuestaAlumno, setEncontrarRespuestaAlumno] = useState(false);
   const [preguntas, setPreguntas] = useState<Pregunta[]>([makeEmptyPregunta()]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -88,6 +94,9 @@ const [showIAModal, setShowIAModal] = useState(false);
     setRespVisible(Boolean(initialValues.respVisible));
     setPermitirReintento(Boolean(initialValues.permitirReintento));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
+    setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion));
+    setEncontrarRespuestaMaestro(Boolean(initialValues.encontrarRespuestaMaestro));
+    setEncontrarRespuestaAlumno(Boolean(initialValues.encontrarRespuestaAlumno));
 
     if (initialValues.preguntas && initialValues.preguntas.length > 0) {
       originalPreguntasRef.current = JSON.parse(JSON.stringify(initialValues.preguntas));
@@ -199,6 +208,9 @@ const [showIAModal, setShowIAModal] = useState(false);
         tema: { id: tIdNum },
         respVisible: Boolean(respVisible),
         permitirReintento: Boolean(permitirReintento),
+        mostrarPuntuacion: Boolean(mostrarPuntuacion),
+        encontrarRespuestaMaestro: Boolean(encontrarRespuestaMaestro),
+        encontrarRespuestaAlumno: Boolean(encontrarRespuestaAlumno),
         comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
         imagen: null,
       };
@@ -376,6 +388,21 @@ const handleIAResult = (data: any) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
             <input type="checkbox" id="permitirReintento" checked={permitirReintento} onChange={(e) => setPermitirReintento(e.target.checked)} />
             <label className="ca-text" htmlFor="permitirReintento">Permitir reintentos</label>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
+            <input type="checkbox" id="clasificacion-mostrar-puntuacion" checked={mostrarPuntuacion} onChange={(e) => setMostrarPuntuacion(e.target.checked)} />
+            <label className="ca-text" htmlFor="clasificacion-mostrar-puntuacion">Mostrar puntuación</label>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
+            <input type="checkbox" id="clasificacion-mostrar-resp-maest" checked={encontrarRespuestaMaestro} onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)} />
+            <label className="ca-text" htmlFor="clasificacion-mostrar-resp-maest">Mostrar respuesta correcta</label>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
+            <input type="checkbox" id="clasificacion-mostrar-resp-alumn" checked={encontrarRespuestaAlumno} onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)} />
+            <label className="ca-text" htmlFor="clasificacion-mostrar-resp-alumn">Mostrar mi respuesta</label>
           </div>
           {respVisible && (
             <div style={{ marginTop: 10 }}>

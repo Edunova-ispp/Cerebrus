@@ -17,6 +17,9 @@ export interface MarcarImagenFormInitialValues {
   readonly puntuacion: number;
   readonly respVisible: boolean;
   readonly permitirReintento?: boolean;
+  readonly mostrarPuntuacion?: boolean;
+  readonly encontrarRespuestaMaestro?: boolean;
+  readonly encontrarRespuestaAlumno?: boolean;
   readonly comentariosRespVisible: string | null;
   readonly temaId?: number;
   readonly imagenAMarcar: string;
@@ -45,6 +48,9 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
   const [puntuacion, setPuntuacion] = useState('');
   const [respVisible, setRespVisible] = useState(false);
   const [permitirReintento, setPermitirReintento] = useState(false);
+  const [mostrarPuntuacion, setMostrarPuntuacion] = useState(false);
+  const [encontrarRespuestaMaestro, setEncontrarRespuestaMaestro] = useState(false);
+  const [encontrarRespuestaAlumno, setEncontrarRespuestaAlumno] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
   const [imagenAMarcar, setImagenAMarcar] = useState('');
   const [puntos, setPuntos] = useState<Point[]>([]);
@@ -67,6 +73,9 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
     setPuntuacion(String(initialValues.puntuacion ?? ''));
     setRespVisible(Boolean(initialValues.respVisible));
     setPermitirReintento(Boolean(initialValues.permitirReintento));
+    setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion));
+    setEncontrarRespuestaMaestro(Boolean(initialValues.encontrarRespuestaMaestro));
+    setEncontrarRespuestaAlumno(Boolean(initialValues.encontrarRespuestaAlumno));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
     setImagenAMarcar(initialValues.imagenAMarcar ?? '');
 
@@ -167,6 +176,9 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
           puntuacion: puntuacionNum,
           respVisible,
           permitirReintento,
+          mostrarPuntuacion,
+          encontrarRespuestaMaestro,
+          encontrarRespuestaAlumno,
           comentariosRespVisible: respVisible ? comentariosRespVisible.trim() || null : null,
           temaId: temaIdNum,
           imagenAMarcar: imagenAMarcar.trim(),
@@ -272,6 +284,42 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
             />
             <label className="ca-text" htmlFor="mi-permitir-reintento">
               Permitir reintentos
+            </label>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              id="mi-mostrar-puntuacion"
+              checked={mostrarPuntuacion}
+              onChange={(e) => setMostrarPuntuacion(e.target.checked)}
+            />
+            <label className="ca-text" htmlFor="mi-mostrar-puntuacion">
+              Mostrar puntuación
+            </label>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              id="mi-mostrar-respuesta-correcta"
+              checked={encontrarRespuestaMaestro}
+              onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
+            />
+            <label className="ca-text" htmlFor="mi-mostrar-respuesta-correcta">
+              Mostrar respuesta correcta
+            </label>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              id="mi-mostrar-respuesta-alumno"
+              checked={encontrarRespuestaAlumno}
+              onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
+            />
+            <label className="ca-text" htmlFor="mi-mostrar-respuesta-alumno">
+              Mostrar mi respuesta
             </label>
           </div>
 

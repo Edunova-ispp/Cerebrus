@@ -122,13 +122,16 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
     @Override
     @Transactional
     public ActividadAlumno actualizarActAlumno(Long id, Integer puntuacion,
-         LocalDateTime fechaInicio, LocalDateTime fechaFin, Integer nota, Integer numAbandonos) {
+         LocalDateTime fechaInicio, LocalDateTime fechaFin, Integer nota, Integer numAbandonos, Boolean solucionUsada) {
         ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("La actividad del alumno no existe"));
         actividadAlumno.setPuntuacion(puntuacion);
         actividadAlumno.setFechaInicio(fechaInicio);
         actividadAlumno.setFechaFin(fechaFin);
         actividadAlumno.setNota(nota);
         actividadAlumno.setNumAbandonos(numAbandonos);
+        if (solucionUsada != null) {
+            actividadAlumno.setSolucionUsada(solucionUsada);
+        }
         return actividadAlumnoRepository.save(actividadAlumno);
     }
 
@@ -439,13 +442,9 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
     private void corregirActAlumnoAutomaticamenteTipoOrdenacion(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
         Ordenacion actividadOrdenacion = ordenacionService.encontrarActOrdenacionPorId(actividad.getId());
-        Integer puntuacionTotal = actividad.getPuntuacion();
-        Integer notaTotal = 10;
-        Integer puntuacionFinal = 0;
-        Integer notaFinal = 0;
-        Integer numValores = actividadOrdenacion.getValores().size();
-        Integer puntuacionPorRespuesta = numValores > 0 ? puntuacionTotal / numValores : 0;
-        Integer notaPorRespuesta = numValores > 0 ? notaTotal / numValores : 0;
+        int puntuacionTotal = actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 0;
+        int notaTotal = 10;
+        int numValores = actividadOrdenacion.getValores().size();
 
         if(respuestasIds.size() > 1) {
             throw new IllegalArgumentException("Para actividades de ordenación solo se permite una respuesta del alumno con la secuencia ordenada");
@@ -457,31 +456,40 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
             throw new IllegalArgumentException("La respuesta con id " + respuestasIds.get(0) + " no pertenece a la actividad del alumno con id " + actividadAlumno.getId());
         }
         respAlumnoOrdenacionService.corregirRespuestaAlumnoOrdenacion(respuestasIds.get(0));
-        Integer numPosicionesCorrectas = respAlumnoOrdenacionService.obtenerNumPosicionesCorrectas(respuestasIds.get(0));
-        puntuacionFinal = puntuacionPorRespuesta * numPosicionesCorrectas;
-        notaFinal = notaPorRespuesta * numPosicionesCorrectas;
-        Integer numErrores = numValores - numPosicionesCorrectas;
-        puntuacionFinal -= (puntuacionPorRespuesta / 3) * numErrores;
-        notaFinal -= (notaPorRespuesta / 3) * numErrores;
-        if (puntuacionFinal < 0) {
-            puntuacionFinal = 0;
+        int numPosicionesCorrectas = respAlumnoOrdenacionService.obtenerNumPosicionesCorrectas(respuestasIds.get(0));
+
+        if (numValores <= 0) {
+            actividadAlumno.setPuntuacion(0);
+            actividadAlumno.setNota(0);
+            return;
         }
-        if (notaFinal < 0) {
-            notaFinal = 0;
+
+        int numErrores = Math.max(0, numValores - numPosicionesCorrectas);
+        double proporcionAciertos = (double) numPosicionesCorrectas / numValores;
+        double penalizacionErrores = (double) numErrores / (3.0 * numValores);
+        double proporcionFinal = Math.max(0.0, proporcionAciertos - penalizacionErrores);
+
+        // Penaliza comprobaciones fallidas previas dentro del mismo intento.
+        // Si el alumno falla varias veces y luego acierta, no debe conservar 10/10.
+        int numFallosPrevios = actividadAlumno.getNumFallos() == null ? 0 : actividadAlumno.getNumFallos();
+        if (numFallosPrevios > 0) {
+            double penalizacionIntentos = Math.min(0.9, numFallosPrevios * 0.1);
+            proporcionFinal = Math.max(0.0, proporcionFinal * (1.0 - penalizacionIntentos));
         }
-        actividadAlumno.setPuntuacion(puntuacionFinal);
-        actividadAlumno.setNota(notaFinal);
+
+        int puntuacionFinal = (int) Math.round(puntuacionTotal * proporcionFinal);
+        int notaFinal = (int) Math.round(notaTotal * proporcionFinal);
+
+        actividadAlumno.setPuntuacion(Math.max(puntuacionFinal, 0));
+        actividadAlumno.setNota(Math.max(notaFinal, 0));
     }
 
     private void corregirActAlumnoAutomaticamenteTipoMarcarImagen(ActividadAlumno actividadAlumno, List<Long> respuestasIds, Actividad actividad) {
         MarcarImagen actividadMarcarImagen = marcarImagenService.encontrarActMarcarImagenPorId(actividad.getId());
-        Integer puntuacionTotal = actividadMarcarImagen.getPuntuacion();
-        Integer notaTotal = 10;
-        Integer puntuacionFinal = 0;
-        Integer notaFinal = 0;
-        Integer numPuntos = actividadMarcarImagen.getPuntosImagen().size();
-        Integer puntuacionPorRespuesta = numPuntos > 0 ? puntuacionTotal / numPuntos : 0;
-        Integer notaPorRespuesta = numPuntos > 0 ? notaTotal / numPuntos : 0;
+        int puntuacionTotal = actividadMarcarImagen.getPuntuacion() != null ? actividadMarcarImagen.getPuntuacion() : 0;
+        int notaTotal = 10;
+        int numPuntos = actividadMarcarImagen.getPuntosImagen().size();
+        int numCorrectas = 0;
 
         for (Long respuestaId : respuestasIds) {
             RespAlumnoPuntoImagen respuestaAlumno = respAlumnoPuntoImagenService.encontrarRespuestaAlumnoPuntoImagenPorId(respuestaId);
@@ -493,20 +501,20 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
             }
             boolean esCorrecta = respAlumnoPuntoImagenService.corregirRespuestaAlumnoPuntoImagen(respuestaId);
             if (esCorrecta) {
-                puntuacionFinal += puntuacionPorRespuesta;
-                notaFinal += notaPorRespuesta;
+                numCorrectas++;
             }
-                else {
-                    puntuacionFinal -= puntuacionPorRespuesta / 2;
-                    notaFinal -= notaPorRespuesta / 2;
-                }
         }
-        if (puntuacionFinal <0) {
-            puntuacionFinal = 0;
+
+        if (numPuntos <= 0) {
+            actividadAlumno.setPuntuacion(0);
+            actividadAlumno.setNota(0);
+            return;
         }
-        if (notaFinal <0) {
-            notaFinal = 0;
-        }
+
+        double proporcionCorrectas = (double) numCorrectas / numPuntos;
+        int puntuacionFinal = (int) Math.round(puntuacionTotal * proporcionCorrectas);
+        int notaFinal = (int) Math.round(notaTotal * proporcionCorrectas);
+
         actividadAlumno.setPuntuacion(puntuacionFinal);
         actividadAlumno.setNota(notaFinal);
     }
@@ -525,12 +533,16 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
         }
 
         // Time-based scoring: ideal 30s per word, max 120s per word
+        boolean penalizacionPorSolucion = Boolean.TRUE.equals(actividadAlumno.getSolucionUsada());
         long tiempoSegundos = 0;
         if (actividadAlumno.getFechaInicio() != null && actividadAlumno.getFechaFin() != null) {
             tiempoSegundos = java.time.Duration.between(actividadAlumno.getFechaInicio(), actividadAlumno.getFechaFin()).toSeconds();
         }
 
-        if (tiempoSegundos <= 0) {
+        if (penalizacionPorSolucion) {
+            actividadAlumno.setPuntuacion(Math.max((int) Math.round(puntuacionMaxima * 0.1), 1));
+            actividadAlumno.setNota(1);
+        } else if (tiempoSegundos <= 0) {
             actividadAlumno.setPuntuacion(puntuacionMaxima);
             actividadAlumno.setNota(10);
         } else {
@@ -598,25 +610,13 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
             for (Long respuestaId : respuestasIds) {
                 
                 boolean esCorrecta = respAlumnoGeneralService.corregirRespuestaAlumnoGeneralClasificacion(respuestaId);
-                System.out.println("Respuesta ID " + respuestaId + " es correcta? " + esCorrecta);
                 if (esCorrecta) {
                     puntuacionAcumulada += valorPuntoPorPregunta;
                     notaAcumulada += valorNotaPorPregunta;
                 }
-                else {
-                    puntuacionAcumulada -= valorPuntoPorPregunta / 2;
-                    notaAcumulada -= valorNotaPorPregunta / 2;
-                }
             }
         }
-        
 
-        if (puntuacionAcumulada <0) {
-            puntuacionAcumulada = 0;
-        }
-        if (notaAcumulada <0) {
-            notaAcumulada = 0;
-        }
         actividadAlumno.setPuntuacion((int) Math.round(puntuacionAcumulada));
         actividadAlumno.setNota((int) Math.round(notaAcumulada));
         actividadAlumno.setFechaFin(LocalDateTime.now());

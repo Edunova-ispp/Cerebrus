@@ -17,6 +17,10 @@ public class GeneralAbiertaAlumnoDTO {
     private final Integer version;
     private final Long temaId;
     private final List<PreguntaAlumnoDTO> preguntas;
+    private final Boolean mostrarPuntuacion;
+    private final Boolean permitirReintento;
+    private final Boolean encontrarRespuestaMaestro;
+    private final Boolean encontrarRespuestaAlumno;
 
     public GeneralAbiertaAlumnoDTO(
             Long id,
@@ -29,7 +33,11 @@ public class GeneralAbiertaAlumnoDTO {
             Integer posicion,
             Integer version,
             Long temaId,
-            List<PreguntaAlumnoDTO> preguntas) {
+            List<PreguntaAlumnoDTO> preguntas,
+            Boolean mostrarPuntuacion,
+            Boolean permitirReintento,
+            Boolean encontrarRespuestaMaestro,
+            Boolean encontrarRespuestaAlumno) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
@@ -41,6 +49,10 @@ public class GeneralAbiertaAlumnoDTO {
         this.version = version;
         this.temaId = temaId;
         this.preguntas = preguntas;
+        this.mostrarPuntuacion = mostrarPuntuacion;
+        this.permitirReintento = permitirReintento;
+        this.encontrarRespuestaMaestro = encontrarRespuestaMaestro;
+        this.encontrarRespuestaAlumno = encontrarRespuestaAlumno;
     }
 
     public Long getId() { return id; }
@@ -54,4 +66,8 @@ public class GeneralAbiertaAlumnoDTO {
     public Integer getVersion() { return version; }
     public Long getTemaId() { return temaId; }
     public List<PreguntaAlumnoDTO> getPreguntas() { return preguntas; }
+    public Boolean getMostrarPuntuacion() { return mostrarPuntuacion; }
+    public Boolean getPermitirReintento() { return permitirReintento; }
+    public Boolean getEncontrarRespuestaMaestro() { return encontrarRespuestaMaestro; }
+    public Boolean getEncontrarRespuestaAlumno() { return encontrarRespuestaAlumno; }
 }

@@ -20,6 +20,8 @@ export interface CrucigramaFormInitialValues {
     readonly temaId?: number;
     readonly preguntas?: CrucigramaFormInitialPregunta[];
     readonly preguntasYRespuestas?: Record<string, string>;
+    readonly mostrarPuntuacion?: boolean;
+    readonly encontrarRespuestaMaestro?: boolean;
 }
 
 interface Props {
@@ -49,6 +51,8 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
     const [puntuacion, setPuntuacion] = useState('');
     const [respVisible, setRespVisible] = useState(true);
     const [permitirReintento, setPermitirReintento] = useState(false);
+    const [mostrarPuntuacion, setMostrarPuntuacion] = useState(false);
+    const [encontrarRespuestaMaestro, setEncontrarRespuestaMaestro] = useState(false);
     const [preguntas, setPreguntas] = useState<PreguntaLocal[]>([{ pregunta: '', respuesta: '' }]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -57,6 +61,17 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
     const params = useParams<{ id: string; temaId: string }>();
     const cursoId = cursoIdProp ?? params.id;
     const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
+
+    const readErrorMessage = (value: unknown): string => {
+        if (typeof value === 'object' && value !== null && 'message' in value) {
+            const message = (value as { message?: unknown }).message;
+            if (typeof message === 'string' && message.trim()) {
+                return message;
+            }
+        }
+
+        return 'Error del servidor al guardar';
+    };
 
     // ── Load initial values ───────────────────────────────────────────────
     useEffect(() => {
@@ -138,6 +153,9 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                 puntuacion: Number(puntuacion),
                 respVisible: Boolean(respVisible),
                 permitirReintento: Boolean(permitirReintento),
+                mostrarPuntuacion: Boolean(mostrarPuntuacion),
+                encontrarRespuestaMaestro: Boolean(encontrarRespuestaMaestro),
+                encontrarRespuestaAlumno: false,
                 preguntasYRespuestas: mapaPreguntas,
             };
 
@@ -152,13 +170,17 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error((errorData as any).message || 'Error del servidor al guardar');
+                const errorData: unknown = await response.json().catch(() => null);
+                throw new Error(readErrorMessage(errorData));
             }
 
             if (onDone) onDone(); else navigate(`/cursos/${cursoId}/temas`);
-        } catch (err: any) {
-            setError(err.message || 'No se pudo conectar con el servidor.');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message || 'No se pudo conectar con el servidor.');
+            } else {
+                setError('No se pudo conectar con el servidor.');
+            }
         } finally {
             setLoading(false);
         }
@@ -236,6 +258,30 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                                 onChange={e => setPermitirReintento(e.target.checked)}
                             />
                             <span className="cf-checkbox-label">Permitir reintentos</span>
+                        </label>
+                        <label
+                            className="cf-checkbox-row"
+                            htmlFor="cf-mostrar-puntuacion"
+                        >
+                            <input
+                                id="cf-mostrar-puntuacion"
+                                type="checkbox"
+                                checked={mostrarPuntuacion}
+                                onChange={e => setMostrarPuntuacion(e.target.checked)}
+                            />
+                            <span className="cf-checkbox-label">Mostrar puntuación</span>
+                        </label>
+                        <label
+                            className="cf-checkbox-row"
+                            htmlFor="cf-mostrar-resp-maest"
+                        >
+                            <input
+                                id="cf-mostrar-resp-maest"
+                                type="checkbox"
+                                checked={encontrarRespuestaMaestro}
+                                onChange={e => setEncontrarRespuestaMaestro(e.target.checked)}
+                            />
+                            <span className="cf-checkbox-label">Mostrar respuesta correcta</span>
                         </label>
                     </div>
                 </div>

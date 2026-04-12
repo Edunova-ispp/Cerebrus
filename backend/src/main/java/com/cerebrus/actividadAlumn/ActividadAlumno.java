@@ -44,6 +44,9 @@ public class ActividadAlumno {
     @Column(nullable = false)
     private Integer numAbandonos = 0;
 
+    @Column(nullable = false)
+    private Boolean solucionUsada = false;
+
     @Column (nullable = false)
     @Min(0)
     @Max(10)
@@ -115,6 +118,14 @@ public class ActividadAlumno {
 
     public void setNumAbandonos(Integer numAbandonos){
         this.numAbandonos = numAbandonos;
+    }
+
+    public Boolean getSolucionUsada() {
+        return solucionUsada;
+    }
+
+    public void setSolucionUsada(Boolean solucionUsada) {
+        this.solucionUsada = solucionUsada;
     }
 
     public Integer getNota(){
@@ -196,6 +207,7 @@ public class ActividadAlumno {
                 ", fecha_fin=" + fechaFin +
                 ", nota=" + nota +
                 ", num_abandonos=" + numAbandonos +
+                ", solucion_usada=" + solucionUsada +
                 ", num_repeticiones=" + getNumRepeticiones() +
                 ", num_fallos=" + getNumFallos() +
                 ", estado=" + getEstadoActividad() +

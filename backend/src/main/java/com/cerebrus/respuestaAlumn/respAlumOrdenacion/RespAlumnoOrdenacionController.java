@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.respuestaAlumn.respAlumOrdenacion.dto.RespAlumnoOrdenacionCreateResponse;
+import com.cerebrus.respuestaAlumn.respAlumOrdenacion.dto.RespAlumnoOrdenacionDetalleDTO;
 import com.cerebrus.respuestaAlumn.respAlumOrdenacion.dto.RespAlumnoOrdenacionDTO;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
@@ -59,6 +60,13 @@ public class RespAlumnoOrdenacionController {
     public ResponseEntity<RespAlumnoOrdenacionDTO> encontrarRespuestaAlumnoOrdenacionPorId(@PathVariable Long id) {
         RespAlumnoOrdenacion respAlumnoOrdenacion = respAlumnoOrdenacionService.encontrarRespuestaAlumnoOrdenacionPorId(id);
         RespAlumnoOrdenacionDTO dto = new RespAlumnoOrdenacionDTO(respAlumnoOrdenacion.getId(), respAlumnoOrdenacion.getCorrecta());
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    @GetMapping("/actividad-alumno/{actividadAlumnoId}/ultima")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<RespAlumnoOrdenacionDetalleDTO> encontrarUltimaRespuestaPorActividadAlumno(@PathVariable Long actividadAlumnoId) {
+        RespAlumnoOrdenacionDetalleDTO dto = respAlumnoOrdenacionService.encontrarUltimaRespuestaPorActividadAlumno(actividadAlumnoId);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 }

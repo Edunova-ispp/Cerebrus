@@ -23,6 +23,9 @@ export interface TestFormInitialValues {
   readonly imagen: string | null;
   readonly respVisible: boolean;
   readonly permitirReintento?: boolean;
+  readonly mostrarPuntuacion?: boolean;
+  readonly encontrarRespuestaMaestro?: boolean;
+  readonly encontrarRespuestaAlumno?: boolean;
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly version: number;
@@ -72,6 +75,9 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
   const [imagen, setImagen] = useState('');
   const [respVisible, setRespVisible] = useState(false);
   const [permitirReintento, setPermitirReintento] = useState(false);
+  const [mostrarPuntuacion, setMostrarPuntuacion] = useState(false);
+  const [encontrarRespuestaMaestro, setEncontrarRespuestaMaestro] = useState(false);
+  const [encontrarRespuestaAlumno, setEncontrarRespuestaAlumno] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
   const [questions, setQuestions] = useState<Question[]>([makeEmptyQuestion()]);
   const [error, setError] = useState('');
@@ -94,6 +100,9 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
     setImagen(initialValues.imagen ?? '');
     setRespVisible(Boolean(initialValues.respVisible));
     setPermitirReintento(Boolean(initialValues.permitirReintento));
+    setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion ?? false));
+    setEncontrarRespuestaMaestro(Boolean(initialValues.encontrarRespuestaMaestro ?? false));
+    setEncontrarRespuestaAlumno(Boolean(initialValues.encontrarRespuestaAlumno ?? false));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
 
     if (initialValues.preguntas && initialValues.preguntas.length > 0) {
@@ -225,6 +234,9 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
             tema: { id: temaIdNum },
             respVisible,
             permitirReintento,
+            mostrarPuntuacion,
+            encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno,
             comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
             preguntas: [],
           }),
@@ -270,6 +282,9 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
             tema: { id: temaIdNum },
             respVisible,
             permitirReintento,
+            mostrarPuntuacion,
+            encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno,
             comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || '') : '',
             posicion: initialValues?.posicion ?? 0,
             version: initialValues?.version ?? 1,
@@ -477,6 +492,33 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
               onChange={(e) => setPermitirReintento(e.target.checked)}
             />
             <span>Permitir reintentos</span>
+          </label>
+
+          <label className="tf-check-label">
+            <input
+              type="checkbox"
+              checked={mostrarPuntuacion}
+              onChange={(e) => setMostrarPuntuacion(e.target.checked)}
+            />
+            <span>Mostrar puntuación</span>
+          </label>
+
+          <label className="tf-check-label">
+            <input
+              type="checkbox"
+              checked={encontrarRespuestaMaestro}
+              onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
+            />
+            <span>Mostrar respuesta correcta</span>
+          </label>
+
+          <label className="tf-check-label">
+            <input
+              type="checkbox"
+              checked={encontrarRespuestaAlumno}
+              onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
+            />
+            <span>Mostrar mi respuesta</span>
           </label>
 
           {respVisible && (

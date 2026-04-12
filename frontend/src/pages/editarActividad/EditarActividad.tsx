@@ -23,6 +23,9 @@ type OrdenacionDTO = {
     imagen: string | null;
     respVisible: boolean;
     permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     comentariosRespVisible: string | null;
     posicion: number;
     temaId: number;
@@ -35,6 +38,9 @@ type TeoriaDTO = {
     descripcion: string;
     imagen: string;
     permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     posicion: number;
     temaId: number;
 };
@@ -47,6 +53,9 @@ type GeneralTestMaestroDTO = {
     imagen: string | null;
     respVisible: boolean;
     permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     comentariosRespVisible: string | null;
     posicion: number;
     version: number;
@@ -65,6 +74,9 @@ type CrucigramaMaestroDTO = {
     puntuacion: number;
     respVisible: boolean;
     permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     temaId: number;
     preguntas: {
         id: number;
@@ -82,6 +94,9 @@ type PreguntaAbiertaMaestroDTO = {
     imagen: string | null;
     respVisible: boolean;
     permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     comentariosRespVisible: string | null;
     posicion: number;
     version: number;
@@ -108,6 +123,9 @@ type MarcarImagenDTO = {
     imagenActividad: string | null;
     respVisible: boolean;
     permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     comentariosRespVisible: string | null;
     temaId: number;
     imagenAMarcar: string;
@@ -124,6 +142,9 @@ type TableroDTO = {
     temaId: number;
     respVisible: boolean;
     permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     preguntas: {
         id: number;
         pregunta: string;
@@ -139,6 +160,9 @@ type ClasificacionMaestroDTO = {
     imagen: string | null;
     respVisible: boolean;
     permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     comentariosRespVisible: string | null;
     posicion: number;
     version: number;
@@ -154,6 +178,9 @@ type GeneralCartaMaestroDTO = {
     imagen: string | null;
     respVisible: boolean;
     permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     comentariosRespVisible: string | null;
     posicion: number;
     version: number;
@@ -413,6 +440,9 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             imagen: preguntaAbierta.imagen,
             respVisible: preguntaAbierta.respVisible,
             permitirReintento: preguntaAbierta.permitirReintento,
+            mostrarPuntuacion: preguntaAbierta.mostrarPuntuacion,
+            encontrarRespuestaMaestro: preguntaAbierta.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: preguntaAbierta.encontrarRespuestaAlumno,
             comentariosRespVisible: preguntaAbierta.comentariosRespVisible,
             posicion: preguntaAbierta.posicion,
             version: preguntaAbierta.version,
@@ -432,6 +462,9 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             puntuacion: tablero.puntuacion,
             respVisible: tablero.respVisible,
             permitirReintento: tablero.permitirReintento,
+            mostrarPuntuacion: tablero.mostrarPuntuacion,
+            encontrarRespuestaMaestro: tablero.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: tablero.encontrarRespuestaAlumno,
             tamano: tablero.tamano,
             temaId: tablero.temaId,
             preguntas: tablero.preguntas.map((p) => ({
@@ -448,6 +481,9 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             imagen: generalTest.imagen,
             respVisible: generalTest.respVisible,
             permitirReintento: generalTest.permitirReintento,
+            mostrarPuntuacion: generalTest.mostrarPuntuacion,
+            encontrarRespuestaMaestro: generalTest.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: generalTest.encontrarRespuestaAlumno,
             comentariosRespVisible: generalTest.comentariosRespVisible,
             posicion: generalTest.posicion,
             version: generalTest.version,
@@ -462,6 +498,9 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             puntuacion: crucigrama.puntuacion,
             respVisible: crucigrama.respVisible,
             permitirReintento: crucigrama.permitirReintento,
+            mostrarPuntuacion: crucigrama.mostrarPuntuacion,
+            encontrarRespuestaMaestro: crucigrama.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: crucigrama.encontrarRespuestaAlumno,
             temaId: crucigrama.temaId,
             preguntasYRespuestas: crucigrama.preguntasYRespuestas,
         } : undefined;
@@ -473,6 +512,10 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             puntuacion: ordenacion.puntuacion,
             imagen: ordenacion.imagen,
             respVisible: ordenacion.respVisible,
+            permitirReintento: ordenacion.permitirReintento,
+            mostrarPuntuacion: ordenacion.mostrarPuntuacion,
+            encontrarRespuestaMaestro: ordenacion.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: ordenacion.encontrarRespuestaAlumno,
             comentariosRespVisible: ordenacion.comentariosRespVisible,
             posicion: ordenacion.posicion,
             temaId: ordenacion.temaId,
@@ -485,6 +528,9 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             descripcion: teoria.descripcion,
             imagen: teoria.imagen,
             permitirReintento: teoria.permitirReintento,
+            mostrarPuntuacion: teoria.mostrarPuntuacion,
+            encontrarRespuestaMaestro: teoria.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: teoria.encontrarRespuestaAlumno,
             posicion: teoria.posicion,
             temaId: teoria.temaId,
         } : undefined;
@@ -497,6 +543,9 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             imagen: generalCarta.imagen,
             respVisible: generalCarta.respVisible,
             permitirReintento: generalCarta.permitirReintento,
+            mostrarPuntuacion: generalCarta.mostrarPuntuacion,
+            encontrarRespuestaMaestro: generalCarta.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: generalCarta.encontrarRespuestaAlumno,
             comentariosRespVisible: generalCarta.comentariosRespVisible,
             posicion: generalCarta.posicion,
             version: generalCarta.version,
@@ -511,6 +560,9 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             puntuacion: marcarImagen.puntuacion,
             respVisible: marcarImagen.respVisible,
             permitirReintento: marcarImagen.permitirReintento,
+            mostrarPuntuacion: marcarImagen.mostrarPuntuacion,
+            encontrarRespuestaMaestro: marcarImagen.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: marcarImagen.encontrarRespuestaAlumno,
             comentariosRespVisible: marcarImagen.comentariosRespVisible,
             temaId: marcarImagen.temaId,
             imagenAMarcar: marcarImagen.imagenAMarcar,
@@ -529,6 +581,9 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             puntuacion: clasificacion.puntuacion,
             respVisible: clasificacion.respVisible,
             permitirReintento: clasificacion.permitirReintento,
+            mostrarPuntuacion: clasificacion.mostrarPuntuacion,
+            encontrarRespuestaMaestro: clasificacion.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: clasificacion.encontrarRespuestaAlumno,
             comentariosRespVisible: clasificacion.comentariosRespVisible,
             posicion: clasificacion.posicion,
             version: clasificacion.version,

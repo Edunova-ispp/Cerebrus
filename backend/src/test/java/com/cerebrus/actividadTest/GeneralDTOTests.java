@@ -396,7 +396,8 @@ public class GeneralDTOTests {
             "Contenido de la lección", 
             "teoria.png", 
             1, 
-            100L
+            100L,
+            false
         );
 
         // 2. Verificaciones (Cubre todos los getters)
@@ -406,6 +407,7 @@ public class GeneralDTOTests {
         assertThat(dto.getImagen()).isEqualTo("teoria.png");
         assertThat(dto.getPosicion()).isEqualTo(1);
         assertThat(dto.getTemaId()).isEqualTo(100L);
+        assertThat(dto.getPermitirReintento()).isFalse();
     }
 
     @Test

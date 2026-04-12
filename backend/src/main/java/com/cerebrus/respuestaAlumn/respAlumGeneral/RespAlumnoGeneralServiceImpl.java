@@ -26,6 +26,7 @@ import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiert
 import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiertaResponse;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoAbiertaResponse;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralCreateResponse;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralResumenDTO;
 import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
 import com.cerebrus.respuestaMaestro.RespuestaMaestroService;
@@ -172,6 +173,41 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         }
         
         return esCorrecta;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RespAlumnoGeneralResumenDTO> listarRespuestasPorActividadAlumno(Long actividadAlumnoId) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede consultar sus respuestas");
+        }
+
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actividadAlumnoId)
+            .orElseThrow(() -> new ResourceNotFoundException("ActividadAlumno", "id", actividadAlumnoId));
+
+        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
+            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes consultar respuestas de una ActividadAlumno que no es tuya");
+        }
+
+        return respAlumnoGeneralRepository.findByActividadAlumnoIdOrderByIdAsc(actividadAlumnoId)
+            .stream()
+            .map(r -> {
+                String respuestaCorrecta = null;
+                if (r.getPregunta() != null && r.getPregunta().getRespuestasMaestro() != null) {
+                    respuestaCorrecta = r.getPregunta().getRespuestasMaestro().stream()
+                        .filter(rm -> Boolean.TRUE.equals(rm.getCorrecta()))
+                        .map(RespuestaMaestro::getRespuesta)
+                        .collect(java.util.stream.Collectors.joining(", "));
+                }
+                return new RespAlumnoGeneralResumenDTO(
+                    r.getPregunta() != null ? r.getPregunta().getId() : null,
+                    r.getRespuesta(),
+                    r.getCorrecta(),
+                    respuestaCorrecta);
+            })
+            .toList();
     }
 
     @Override

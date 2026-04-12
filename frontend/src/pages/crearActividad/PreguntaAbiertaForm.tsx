@@ -19,6 +19,9 @@ export interface PreguntaAbiertaFormInitialValues {
     respuesta: string;
     respuestaId?: number; 
   }[];
+  mostrarPuntuacion?: boolean;
+  encontrarRespuestaMaestro?: boolean;
+  encontrarRespuestaAlumno?: boolean;
 }
 
 interface PreguntaAbiertaFormProps {
@@ -52,6 +55,9 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
   const [imagenError, setImagenError] = useState(false); 
   const [respVisible, setRespVisible] = useState(false);
   const [permitirReintento, setPermitirReintento] = useState(false);
+  const [mostrarPuntuacion, setMostrarPuntuacion] = useState(false);
+  const [encontrarRespuestaMaestro, setEncontrarRespuestaMaestro] = useState(false);
+  const [encontrarRespuestaAlumno, setEncontrarRespuestaAlumno] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
   const [preguntas, setPreguntas] = useState<{ id?: number; pregunta: string; respuesta: string; respuestaId?: number }[]>(
     [{ pregunta: '', respuesta: '' }]
@@ -75,6 +81,9 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
     
     setRespVisible(Boolean(initialValues.respVisible));
     setPermitirReintento(Boolean(initialValues.permitirReintento));
+    setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion));
+    setEncontrarRespuestaMaestro(Boolean(initialValues.encontrarRespuestaMaestro));
+    setEncontrarRespuestaAlumno(Boolean(initialValues.encontrarRespuestaAlumno));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
     
     if (initialValues.preguntas && initialValues.preguntas.length > 0) {
@@ -128,6 +137,9 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
             imagen: imagen.trim() || null,
             respVisible,
             permitirReintento,
+            mostrarPuntuacion,
+            encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno,
             comentariosRespVisible: comentariosRespVisible.trim() || null,
             tema: { id: tId },
             tipo: 'ABIERTA',
@@ -192,6 +204,9 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
           imagen: imagen.trim() || null,
           respVisible,
           permitirReintento,
+          mostrarPuntuacion,
+          encontrarRespuestaMaestro,
+          encontrarRespuestaAlumno,
           comentariosRespVisible: comentariosRespVisible.trim() || null,
           tipo: 'ABIERTA',
           tema: { id: tId },
@@ -276,6 +291,21 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
           <label className="tf-check-label">
             <input type="checkbox" checked={permitirReintento} onChange={e => setPermitirReintento(e.target.checked)} />
             <span>Permitir reintentos</span>
+          </label>
+
+          <label className="tf-check-label">
+            <input type="checkbox" checked={mostrarPuntuacion} onChange={e => setMostrarPuntuacion(e.target.checked)} />
+            <span>Mostrar puntuación</span>
+          </label>
+
+          <label className="tf-check-label">
+            <input type="checkbox" checked={encontrarRespuestaMaestro} onChange={e => setEncontrarRespuestaMaestro(e.target.checked)} />
+            <span>Mostrar respuesta correcta</span>
+          </label>
+
+          <label className="tf-check-label">
+            <input type="checkbox" checked={encontrarRespuestaAlumno} onChange={e => setEncontrarRespuestaAlumno(e.target.checked)} />
+            <span>Mostrar mi respuesta</span>
           </label>
 
           {respVisible && (

@@ -17,6 +17,9 @@ export interface OrdenacionFormInitialValues {
   readonly posicion: number;
   readonly temaId?: number;
   readonly valores: string[];
+  readonly mostrarPuntuacion?: boolean;
+  readonly encontrarRespuestaMaestro?: boolean;
+  readonly encontrarRespuestaAlumno?: boolean;
 }
 
 interface Props {
@@ -39,6 +42,9 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
   const [respVisible, setRespVisible] = useState(false);
   const [permitirReintento, setPermitirReintento] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
+  const [mostrarPuntuacion, setMostrarPuntuacion] = useState(false);
+  const [encontrarRespuestaMaestro, setEncontrarRespuestaMaestro] = useState(false);
+  const [encontrarRespuestaAlumno, setEncontrarRespuestaAlumno] = useState(false);
   const [ordenItems, setOrdenItems] = useState<string[]>(['']);
   const [ordenItemKeys, setOrdenItemKeys] = useState<string[]>([makeLocalKey()]);
   const [ordenItemsKind, setOrdenItemsKind] = useState<'words' | 'images'>('words');
@@ -66,6 +72,9 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
     setRespVisible(Boolean(initialValues.respVisible));
     setPermitirReintento(Boolean(initialValues.permitirReintento));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
+    setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion));
+    setEncontrarRespuestaMaestro(Boolean(initialValues.encontrarRespuestaMaestro));
+    setEncontrarRespuestaAlumno(Boolean(initialValues.encontrarRespuestaAlumno));
     const initialItems = initialValues.valores?.length ? [...initialValues.valores] : [''];
     setOrdenItems(initialItems);
     setOrdenItemKeys(initialItems.map(() => makeLocalKey()));
@@ -151,6 +160,9 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
           respVisible,
           permitirReintento,
           comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
+          mostrarPuntuacion,
+          encontrarRespuestaMaestro,
+          encontrarRespuestaAlumno,
           ...(mode === 'edit' ? { posicion: posicionOriginal } : {}),
           valores,
         }),
@@ -244,6 +256,33 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
               onChange={(e) => setPermitirReintento(e.target.checked)}
             />
             Permitir reintentos
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={mostrarPuntuacion}
+              onChange={(e) => setMostrarPuntuacion(e.target.checked)}
+            />
+            Mostrar puntuación
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={encontrarRespuestaMaestro}
+              onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
+            />
+            Mostrar respuesta correcta
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={encontrarRespuestaAlumno}
+              onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
+            />
+            Mostrar mi respuesta
           </div>
 
           {respVisible && (
