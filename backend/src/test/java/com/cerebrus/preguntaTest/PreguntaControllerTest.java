@@ -107,15 +107,15 @@ class PreguntaControllerTest {
                 .hasMessage("La actividad de la pregunta no existe");
     }
 
-    // Test para verificar que readPregunta retorna 200 OK con la pregunta y sus respuestas
+    // Test para verificar que encontrarPreguntaPorId retorna 200 OK con la pregunta y sus respuestas
     @Test
-    void readPregunta_existente_retorna200ConPregunta() {
+    void encontrarPreguntaPorId_existente_retorna200ConPregunta() {
         RespuestaMaestro r1 = new RespuestaMaestro("4", null, true, preguntaGuardada);
         RespuestaMaestro r2 = new RespuestaMaestro("5", null, false, preguntaGuardada);
         preguntaGuardada.setRespuestasMaestro(new ArrayList<>(List.of(r1, r2)));
-        when(preguntaService.readPregunta(10L)).thenReturn(preguntaGuardada);
+        when(preguntaService.encontrarPreguntaPorId(10L)).thenReturn(preguntaGuardada);
 
-        ResponseEntity<Pregunta> respuesta = preguntaController.readPregunta(10L);
+        ResponseEntity<Pregunta> respuesta = preguntaController.encontrarPreguntaPorId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).isNotNull();
@@ -123,103 +123,103 @@ class PreguntaControllerTest {
         assertThat(respuesta.getBody().getRespuestasMaestro()).hasSize(2);
     }
 
-    // Test para verificar que readPregunta retorna 200 OK con lista de respuestas vacía cuando la pregunta no tiene respuestas
+    // Test para verificar que encontrarPreguntaPorId retorna 200 OK con lista de respuestas vacía cuando la pregunta no tiene respuestas
     @Test
-    void readPregunta_sinRespuestas_retorna200ConListaVacia() {
+    void encontrarPreguntaPorId_sinRespuestas_retorna200ConListaVacia() {
         preguntaGuardada.setRespuestasMaestro(new ArrayList<>());
-        when(preguntaService.readPregunta(10L)).thenReturn(preguntaGuardada);
+        when(preguntaService.encontrarPreguntaPorId(10L)).thenReturn(preguntaGuardada);
 
-        ResponseEntity<Pregunta> respuesta = preguntaController.readPregunta(10L);
+        ResponseEntity<Pregunta> respuesta = preguntaController.encontrarPreguntaPorId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody().getRespuestasMaestro()).isEmpty();
     }
 
-    // Test para verificar que readPregunta propaga ResourceNotFoundException cuando la pregunta no existe
+    // Test para verificar que encontrarPreguntaPorId propaga ResourceNotFoundException cuando la pregunta no existe
     @Test
-    void readPregunta_noExiste_propagaResourceNotFoundException() {
-        when(preguntaService.readPregunta(99L))
+    void encontrarPreguntaPorId_noExiste_propagaResourceNotFoundException() {
+        when(preguntaService.encontrarPreguntaPorId(99L))
                 .thenThrow(new ResourceNotFoundException("La pregunta no existe"));
 
-        assertThatThrownBy(() -> preguntaController.readPregunta(99L))
+        assertThatThrownBy(() -> preguntaController.encontrarPreguntaPorId(99L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("La pregunta no existe");
     }
 
-    // Test para verificar que updatePregunta retorna 204 NO CONTENT cuando la actualización es exitosa
+    // Test para verificar que actualizarPregunta retorna 204 NO CONTENT cuando la actualización es exitosa
     @Test
-    void updatePregunta_existente_retorna200ConPreguntaActualizada() {
+    void actualizarPregunta_existente_retorna200ConPreguntaActualizada() {
         Pregunta bodyRequest = new Pregunta("¿Nueva?", "nueva.png", actividad);
 
-        ResponseEntity<Void> respuesta = preguntaController.updatePregunta(10L, bodyRequest);
+        ResponseEntity<Void> respuesta = preguntaController.actualizarPregunta(10L, bodyRequest);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(respuesta.getBody()).isNull();
-        verify(preguntaService).updatePregunta(10L, "¿Nueva?", "nueva.png");
+        verify(preguntaService).actualizarPregunta(10L, "¿Nueva?", "nueva.png");
     }
 
-    // Test para verificar que updatePregunta retorna 204 NO CONTENT cuando la imagen es null
+    // Test para verificar que actualizarPregunta retorna 204 NO CONTENT cuando la imagen es null
     @Test
-    void updatePregunta_imagenNull_retorna200() {
+    void actualizarPregunta_imagenNull_retorna200() {
         Pregunta bodyRequest = new Pregunta("Texto nuevo", null, actividad);
 
-        ResponseEntity<Void> respuesta = preguntaController.updatePregunta(10L, bodyRequest);
+        ResponseEntity<Void> respuesta = preguntaController.actualizarPregunta(10L, bodyRequest);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(respuesta.getBody()).isNull();
-        verify(preguntaService).updatePregunta(10L, "Texto nuevo", null);
+        verify(preguntaService).actualizarPregunta(10L, "Texto nuevo", null);
     }
 
-    // Test para verificar que updatePregunta propaga AccessDeniedException cuando el service la lanza
+    // Test para verificar que actualizarPregunta propaga AccessDeniedException cuando el service la lanza
     @Test
-    void updatePregunta_accesoNoPermitido_propagaAccessDeniedException() {
-        when(preguntaService.updatePregunta(any(), any(), any()))
+    void actualizarPregunta_accesoNoPermitido_propagaAccessDeniedException() {
+        when(preguntaService.actualizarPregunta(any(), any(), any()))
                 .thenThrow(new AccessDeniedException("Solo un maestro puede actualizar preguntas"));
 
-assertThatThrownBy(() -> preguntaController.updatePregunta(10L, preguntaGuardada))
+        assertThatThrownBy(() -> preguntaController.actualizarPregunta(10L, preguntaGuardada))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede actualizar preguntas");
     }
 
-    // Test para verificar que updatePregunta propaga ResourceNotFoundException cuando la pregunta no existe
+    // Test para verificar que actualizarPregunta propaga ResourceNotFoundException cuando la pregunta no existe
     @Test
-    void updatePregunta_noExiste_propagaResourceNotFoundException() {
-        when(preguntaService.updatePregunta(any(), any(), any()))
+    void actualizarPregunta_noExiste_propagaResourceNotFoundException() {
+        when(preguntaService.actualizarPregunta(any(), any(), any()))
                 .thenThrow(new ResourceNotFoundException("La pregunta no existe"));
 
-assertThatThrownBy(() -> preguntaController.updatePregunta(99L, preguntaGuardada))
+        assertThatThrownBy(() -> preguntaController.actualizarPregunta(99L, preguntaGuardada))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("La pregunta no existe");
     }
 
-    // Test para verificar que deletePregunta retorna 204 NO CONTENT sin cuerpo cuando la eliminación es exitosa
+    // Test para verificar que eliminarPreguntaPorId retorna 204 NO CONTENT sin cuerpo cuando la eliminación es exitosa
     @Test
-    void deletePregunta_existente_retorna204SinCuerpo() {
-        ResponseEntity<Void> respuesta = preguntaController.deletePregunta(10L);
+    void eliminarPreguntaPorId_existente_retorna204SinCuerpo() {
+        ResponseEntity<Void> respuesta = preguntaController.eliminarPreguntaPorId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(respuesta.getBody()).isNull();
-        verify(preguntaService).deletePregunta(10L);
+        verify(preguntaService).eliminarPreguntaPorId(10L);
     }
 
-    // Test para verificar que deletePregunta propaga AccessDeniedException cuando el service la lanza
+    // Test para verificar que eliminarPreguntaPorId propaga AccessDeniedException cuando el service la lanza
     @Test
-    void deletePregunta_accesoNoPermitido_propagaAccessDeniedException() {
+    void eliminarPreguntaPorId_accesoNoPermitido_propagaAccessDeniedException() {
         doThrow(new AccessDeniedException("Solo un maestro puede eliminar preguntas"))
-                .when(preguntaService).deletePregunta(10L);
+                .when(preguntaService).eliminarPreguntaPorId(10L);
 
-        assertThatThrownBy(() -> preguntaController.deletePregunta(10L))
+        assertThatThrownBy(() -> preguntaController.eliminarPreguntaPorId(10L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede eliminar preguntas");
     }
 
-    // Test para verificar que deletePregunta propaga ResourceNotFoundException cuando la pregunta no existe
+    // Test para verificar que eliminarPreguntaPorId propaga ResourceNotFoundException cuando la pregunta no existe
     @Test
-    void deletePregunta_noExiste_propagaResourceNotFoundException() {
+    void eliminarPreguntaPorId_noExiste_propagaResourceNotFoundException() {
         doThrow(new ResourceNotFoundException("La pregunta no existe"))
-                .when(preguntaService).deletePregunta(99L);
+                .when(preguntaService).eliminarPreguntaPorId(99L);
 
-        assertThatThrownBy(() -> preguntaController.deletePregunta(99L))
+        assertThatThrownBy(() -> preguntaController.eliminarPreguntaPorId(99L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("La pregunta no existe");
     }

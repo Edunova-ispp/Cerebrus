@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,11 @@ import com.cerebrus.auth.payload.request.SignupRequest;
 import com.cerebrus.auth.payload.response.JwtResponse;
 import com.cerebrus.auth.payload.response.MessageResponse;
 import com.cerebrus.auth.security.JwtUtils;
+import com.cerebrus.suscripcion.Suscripcion;
+import com.cerebrus.suscripcion.SuscripcionRepository;
+import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.alumno.AlumnoRepository;
+import com.cerebrus.usuario.organizacion.Organizacion;
 
 @ExtendWith(MockitoExtension.class)
 class AuthControllerTest {
@@ -43,6 +49,12 @@ class AuthControllerTest {
 
 	@Mock
 	private AuthService authService;
+
+	@Mock
+	private AlumnoRepository alumnoRepository;
+
+	@Mock
+	private SuscripcionRepository suscripcionRepository;
 
 	@Mock
 	private JwtUtils jwtUtils;
@@ -136,12 +148,26 @@ class AuthControllerTest {
 
 		Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
 		UserDetailsImpl principal = new UserDetailsImpl(7L, "alumno1", "pass",
-				List.of(new SimpleGrantedAuthority("ALUMNO")));
+				true, List.of(new SimpleGrantedAuthority("ALUMNO")));
+
+		Long organizacionId = 100L;
+		Organizacion mockOrg = new Organizacion();
+		mockOrg.setId(organizacionId);
+
+		Alumno mockAlumno = new Alumno();
+		mockAlumno.setId(7L);
+		mockAlumno.setOrganizacion(mockOrg);
+
+		Suscripcion mockSuscripcion = new Suscripcion();
 
 		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
 				.thenReturn(authentication);
 		when(authentication.getPrincipal()).thenReturn(principal);
 		when(jwtUtils.generateJwtToken(authentication)).thenReturn("jwt-token");
+		
+		when(alumnoRepository.findById(7L)).thenReturn(Optional.of(mockAlumno));
+		when(suscripcionRepository.findByOrganizacionIdSuscripcionActiva(organizacionId))
+        .thenReturn(Optional.of(mockSuscripcion));
 
 		ResponseEntity<?> response = authController.authenticateUser(request);
 

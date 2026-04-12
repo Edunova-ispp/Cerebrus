@@ -1,5 +1,6 @@
 package com.cerebrus.actividad.ordenacion;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,8 @@ public class OrdenacionServiceImpl implements OrdenacionService {
     @Transactional
     public Ordenacion crearActOrdenacion(String titulo, String descripcion, 
         Integer puntuacion, String imagen, Long temaId, Boolean respVisible, 
-        String comentariosRespVisible, Integer posicion, List<String> valores) {
+        String comentariosRespVisible, Integer posicion, List<String> valores,
+        Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -68,18 +70,23 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         ordenacion.setVersion(1);
         ordenacion.setPosicion(tema.getActividades().size());
         ordenacion.setValores(valores);
+        ordenacion.setMostrarPuntuacion(Boolean.TRUE.equals(mostrarPuntuacion));
+        ordenacion.setPermitirReintento(Boolean.TRUE.equals(permitirReintento));
+        ordenacion.setEncontrarRespuestaMaestro(Boolean.TRUE.equals(encontrarRespuestaMaestro));
+        ordenacion.setEncontrarRespuestaAlumno(Boolean.TRUE.equals(encontrarRespuestaAlumno));
         return ordenacionRepository.save(ordenacion);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Ordenacion readOrdenacion(Long id) {
+    public Ordenacion encontrarActOrdenacionPorId(Long id) {
         Usuario current = usuarioService.findCurrentUser();
         if (!(current instanceof Alumno)) {
             throw new AccessDeniedException("No tienes permiso para acceder a esta actividad");
         }
         
-        Ordenacion ordenacion = ordenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
+        Ordenacion ordenacion = ordenacionRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("La actividad de ordenación no existe"));
         if (!Boolean.TRUE.equals(ordenacion.getTema().getCurso().getVisibilidad())) {
             throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
         }
@@ -98,7 +105,7 @@ public class OrdenacionServiceImpl implements OrdenacionService {
 
     @Override
     @Transactional(readOnly = true)
-    public Ordenacion readOrdenacionMaestro(Long id) {
+    public Ordenacion encontrarActOrdenacionMaestroPorId(Long id) {
 
         Usuario current = usuarioService.findCurrentUser();
         if (!(current instanceof Maestro)) {
@@ -106,14 +113,14 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         }
 
         Ordenacion ordenacion = ordenacionRepository.findWithValoresById(id)
-            .orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
+            .orElseThrow(() -> new ResourceNotFoundException("La actividad de ordenación no existe"));
 
         if (ordenacion.getTema() != null && !ordenacion.getTema().getCurso().getMaestro().getId().equals(current.getId())) {
             throw new AccessDeniedException("No puedes leer actividades de cursos que no son tuyos");
         }
 
         // Fuerza la inicialización dentro de la transacción (por si el provider ignora el EntityGraph)
-        ordenacion.getValores().size();
+        ordenacion.setValores(new ArrayList<>(ordenacion.getValores()));
         if (ordenacion.getTema() != null) {
             ordenacion.getTema().getId();
         }
@@ -122,9 +129,10 @@ public class OrdenacionServiceImpl implements OrdenacionService {
     }
 
     @Override
-    public Ordenacion updateActOrdenacion(Long id, String titulo, String descripcion, 
+    public Ordenacion actualizarActOrdenacion(Long id, String titulo, String descripcion, 
         Integer puntuacion, String imagen, Long temaId, Boolean respVisible, 
-        String comentariosRespVisible, Integer posicion, List<String> valores) {
+        String comentariosRespVisible, Integer posicion, List<String> valores,
+        Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -133,7 +141,8 @@ public class OrdenacionServiceImpl implements OrdenacionService {
 
         Tema tema = temaRepository.findById(temaId).orElseThrow(() -> new ResourceNotFoundException("El tema de la actividad no existe"));
 
-        Ordenacion ordenacion = ordenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
+        Ordenacion ordenacion = ordenacionRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("La actividad de ordenación no existe"));
         if (!ordenacion.getTema().getCurso().getMaestro().getId().equals(u.getId())) {
             throw new AccessDeniedException("Solo el maestro del curso puede actualizar esta actividad");
         }
@@ -151,11 +160,15 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         ordenacion.setPosicion(posicion);
         ordenacion.setValores(valores);
         ordenacion.setVersion(ordenacion.getVersion() + 1);
+        ordenacion.setMostrarPuntuacion(Boolean.TRUE.equals(mostrarPuntuacion));
+        ordenacion.setPermitirReintento(Boolean.TRUE.equals(permitirReintento));
+        ordenacion.setEncontrarRespuestaMaestro(Boolean.TRUE.equals(encontrarRespuestaMaestro));
+        ordenacion.setEncontrarRespuestaAlumno(Boolean.TRUE.equals(encontrarRespuestaAlumno));
         return ordenacionRepository.save(ordenacion);
     }
 
     @Override
-    public void deleteActOrdenacion(Long id) {
+    public void eliminarActOrdenacionPorId(Long id) {
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede eliminar actividades de ordenación");
@@ -167,10 +180,5 @@ public class OrdenacionServiceImpl implements OrdenacionService {
         }
         
         ordenacionRepository.deleteById(id);
-    }
-
-    @Override 
-    public Ordenacion encontrarOrdenacionPorId(Long id) {
-        return ordenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La actividad de ordenación no existe"));
     }
 }

@@ -2,7 +2,7 @@ package com.cerebrus.actividad.marcarImagen.dto;
 
 import java.util.List;
 
-import com.cerebrus.puntoImage.dto.PuntoImagenDTO;
+import com.cerebrus.puntoImagen.dto.PuntoImagenDTO;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -31,6 +31,10 @@ public class MarcarImagenDTO {
     private final String imagenAMarcar;
     @NotNull
     private final List<PuntoImagenDTO> puntosImagen;
+    private final Boolean mostrarPuntuacion;
+    private final Boolean permitirReintento;
+    private final Boolean encontrarRespuestaMaestro;
+    private final Boolean encontrarRespuestaAlumno;
 
     public MarcarImagenDTO(
         Long id,
@@ -42,7 +46,11 @@ public class MarcarImagenDTO {
         String comentariosRespVisible,
         Long temaId,
         String imagenAMarcar,
-        List<PuntoImagenDTO> puntosImagen
+        List<PuntoImagenDTO> puntosImagen,
+        Boolean mostrarPuntuacion,
+        Boolean permitirReintento,
+        Boolean encontrarRespuestaMaestro,
+        Boolean encontrarRespuestaAlumno
     ) {
         this.id = id;
         this.titulo = titulo;
@@ -54,5 +62,9 @@ public class MarcarImagenDTO {
         this.temaId = temaId;
         this.imagenAMarcar = imagenAMarcar;
         this.puntosImagen = puntosImagen;
+        this.mostrarPuntuacion = mostrarPuntuacion;
+        this.permitirReintento = permitirReintento;
+        this.encontrarRespuestaMaestro = encontrarRespuestaMaestro;
+        this.encontrarRespuestaAlumno = encontrarRespuestaAlumno;
     }
 }

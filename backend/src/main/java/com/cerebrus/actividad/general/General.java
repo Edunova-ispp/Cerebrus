@@ -35,14 +35,20 @@ public class General extends Actividad {
     }
 
     public General(String titulo, String descripcion, Integer puntuacion, String imagen,
-                   Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Tema tema, TipoActGeneral tipo) {
-        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema);
+                   Boolean respVisible, String comentariosRespVisible, Integer posicion, Integer version, Tema tema, TipoActGeneral tipo,
+                    Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
+        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema,
+            mostrarPuntuacion, permitirReintento, encontrarRespuestaMaestro, encontrarRespuestaAlumno
+        );
         this.tipo = tipo;
     }
 
     public General(String titulo, String descripcion, Integer puntuacion, String imagen,
-                   Boolean respVisible, Integer posicion, Integer version, Tema tema, TipoActGeneral tipo) {
-        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema);
+                   Boolean respVisible, Integer posicion, Integer version, Tema tema, TipoActGeneral tipo,
+                    Boolean mostrarPuntuacion, Boolean permitirReintento, Boolean encontrarRespuestaMaestro, Boolean encontrarRespuestaAlumno) {
+        super(titulo, descripcion, puntuacion, imagen, respVisible, posicion, version, tema,
+            mostrarPuntuacion, permitirReintento, encontrarRespuestaMaestro, encontrarRespuestaAlumno
+        );
         this.tipo = tipo;
     }
 

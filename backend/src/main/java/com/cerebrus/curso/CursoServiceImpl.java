@@ -40,30 +40,41 @@ public class CursoServiceImpl implements CursoService {
         this.actividadAlumnoRepository = actividadAlumnoRepository;
         this.actividadRepository = actividadRepository;
     }
-
+    public void validarCodigoUnico(String codigo) {
+        if (cursoRepository.existsByCodigo(codigo)) {
+            throw new RuntimeException("Este código ya esta en uso, por favor elige otro");
+        }
+    }
+    @Transactional
     @Override
-    public List<Curso> ObtenerCursosUsuarioLogueado() {
-        //Esta funcion devuleve una lista con todos los cursos del usuario logueado, 
-        // si el usuario es un maestro devuelve los cursos que ha creado, 
-        // si el usuario es un alumno devuelve los cursos a los que se ha inscrito 
-        // y que son visibles.
-
-
-        
-        Usuario usuario = usuarioService.findCurrentUser(); 
-        if (usuario instanceof Maestro) {
-             return cursoRepository.findByMaestroId(usuario.getId());
-        } else if (usuario instanceof Alumno) {
-             return cursoRepository.findByAlumnoId(usuario.getId());
-        }else{
-            throw new RuntimeException("403 Forbidden");
+    public Curso crearCurso(String titulo, String descripcion, String imagen, String codigoPersonalizado) {
+        Usuario usuarioActual = usuarioService.findCurrentUser();
+        if (!(usuarioActual instanceof Maestro)){
+            throw new AccessDeniedException("Solo un maestro puede crear cursos");
         }
 
-       
+
+        Curso curso = new Curso();
+        curso.setTitulo(titulo);
+        curso.setDescripcion(descripcion);
+        curso.setImagen(imagen);
+        curso.setVisibilidad(false);
+        Maestro maestro = (Maestro) usuarioActual;
+        curso.setMaestro(maestro);
+        
+        validarCodigoUnico(codigoPersonalizado);
+        
+        curso.setCodigo(codigoPersonalizado);
+        return cursoRepository.save(curso);
     }
 
     @Override
-     public List<String> obtenerDetallesCurso(Long id) {
+    public Curso encontrarCursoPorId(Long id) {
+        return cursoRepository.findByID(id);
+    }
+
+    @Override
+    public List<String> encontrarDetallesCursoPorId(Long id) {
         //Esta funcion devuelve una lista de strings con los detalles(titulo, descripcion, imagen y/o codigo) 
         // de un curso específico, 
         // pero solo si el usuario logueado tiene permiso para verlo.
@@ -93,8 +104,136 @@ public class CursoServiceImpl implements CursoService {
                 }
         }else{
             throw new RuntimeException("403 Forbidden");
-}
-     }
+        }       
+    }
+
+    @Override
+    public List<Curso> encontrarCursosPorUsuarioLogueado() {
+        //Esta funcion devuleve una lista con todos los cursos del usuario logueado, 
+        // si el usuario es un maestro devuelve los cursos que ha creado, 
+        // si el usuario es un alumno devuelve los cursos a los que se ha inscrito 
+        // y que son visibles.
+        
+        Usuario usuario = usuarioService.findCurrentUser(); 
+        if (usuario instanceof Maestro) {
+             return cursoRepository.findByMaestroId(usuario.getId());
+        } else if (usuario instanceof Alumno) {
+             return cursoRepository.findByAlumnoId(usuario.getId());
+        }else{
+            throw new RuntimeException("403 Forbidden");
+        }
+    }
+     
+    @Transactional
+    @Override
+    public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen, String codigo) {
+        Curso curso = cursoRepository.findByID(id);
+        if (curso == null) {
+            throw new RuntimeException("404 Not Found");
+        }
+        Usuario usuario = usuarioService.findCurrentUser();
+        if (!(usuario instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede actualizar cursos");
+        }
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("Solo el propietario del curso puede actualizarlo");
+        }
+        validarCodigoUnico(codigo);
+        curso.setTitulo(titulo);
+        curso.setDescripcion(descripcion);
+        curso.setImagen(imagen);
+        curso.setCodigo(codigo);
+        return cursoRepository.save(curso);
+    }
+
+    @Transactional
+    @Override
+    public void eliminarCursoPorId(Long id) {
+        Curso curso = cursoRepository.findByID(id);
+        if (curso == null) {
+            throw new RuntimeException("404 Not Found");
+        }
+        Usuario usuario = usuarioService.findCurrentUser();
+        if (!(usuario instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede eliminar cursos");
+        }
+        if (!curso.getMaestro().getId().equals(usuario.getId())) {
+            throw new AccessDeniedException("Solo el propietario puede eliminar este curso");
+        }
+        cursoRepository.delete(curso);
+    }
+
+    public ProgresoDTO encontrarProgresoPorCursoId(Long cursoId) {
+        Curso curso = cursoRepository.findByID(cursoId);
+        if (curso == null) {
+            throw new RuntimeException("404 Not Found");
+        }
+
+        Usuario usuario = usuarioService.findCurrentUser();
+        if (!(usuario instanceof Alumno alumno)) {
+            throw new RuntimeException("403 Forbidden");
+        }
+
+        long totalActividades = actividadRepository.countByCursoId(cursoId);
+        if (totalActividades == 0) {
+            return new ProgresoDTO("SIN_EMPEZAR", 0);
+        }
+
+        List<ActividadAlumnoProgreso> registros = actividadAlumnoRepository.findProgresoByAlumnoAndCursoId(alumno, cursoId);
+
+        if (registros.isEmpty()) {
+            return new ProgresoDTO("SIN_EMPEZAR", 0);
+        }
+
+        // Para cada actividad, quedarse solo con el intento más reciente (igual que las stats del maestro)
+        Map<Long, ActividadAlumnoProgreso> ultimoPorActividad = new HashMap<>();
+        for (ActividadAlumnoProgreso r : registros) {
+            Long actId = r.getActividadId();
+            ActividadAlumnoProgreso actual = ultimoPorActividad.get(actId);
+            if (actual == null || esProgresoMasReciente(r, actual)) {
+                ultimoPorActividad.put(actId, r);
+            }
+        }
+        List<ActividadAlumnoProgreso> ultimos = new ArrayList<>(ultimoPorActividad.values());
+
+        // 1. CALCULAMOS LA SUMA TOTAL DE PUNTOS
+        // Sumamos el campo 'puntuacion' de todas las actividades que tengan valor
+        int puntosTotales = ultimos.stream()
+                .filter(aa -> aa.getPuntuacion() != null)
+                .mapToInt(aa -> aa.getPuntuacion())
+                .sum();
+
+        // 2. CALCULAMOS EL ESTADO
+        // Ignoramos fechas epoch (1970-01-01) que se almacenan como "sin finish" en algunas actividades
+        long acabadas = ultimos.stream()
+                .filter(aa -> aa.getAcabada() != null && aa.getAcabada().getYear() > 1970)
+                .count();
+
+        if (acabadas == totalActividades) {
+            // Pasamos la suma real de puntos en lugar de 0
+            return new ProgresoDTO("TERMINADA", puntosTotales);
+        }
+
+        long conInicio = ultimos.stream()
+                .filter(aa -> aa.getInicio() != null)
+                .count();
+
+        if (conInicio > 0) {
+            // Pasamos la suma real de puntos en lugar de 0
+            return new ProgresoDTO("EMPEZADA", puntosTotales);
+        }
+
+        return new ProgresoDTO("SIN_EMPEZAR", puntosTotales);
+    }
+
+    private boolean esProgresoMasReciente(ActividadAlumnoProgreso candidata, ActividadAlumnoProgreso actual) {
+        LocalDateTime fechaCandidato = candidata.getAcabada() != null ? candidata.getAcabada() : candidata.getInicio();
+        LocalDateTime fechaActual    = actual.getAcabada()    != null ? actual.getAcabada()    : actual.getInicio();
+        if (fechaCandidato == null && fechaActual == null) return false;
+        if (fechaCandidato == null) return false;
+        if (fechaActual    == null) return true;
+        return fechaCandidato.isAfter(fechaActual);
+    }
 
     @Transactional
     @Override
@@ -114,149 +253,8 @@ public class CursoServiceImpl implements CursoService {
         return cursoRepository.save(curso);
     }
 
-    @Transactional
     @Override
-    public Curso crearCurso(String titulo, String descripcion, String imagen){
-        Usuario usuarioActual = usuarioService.findCurrentUser();
-        if (!(usuarioActual instanceof Maestro)){
-            throw new AccessDeniedException("Solo un maestro puede crear cursos");
-        }
-
-
-        Curso curso = new Curso();
-        curso.setTitulo(titulo);
-        curso.setDescripcion(descripcion);
-        curso.setImagen(imagen);
-        curso.setVisibilidad(false);
-        Maestro maestro = (Maestro) usuarioActual;
-        curso.setMaestro(maestro);
-        String codigo;
-        while(true){
-            codigo = CerebrusUtils.generateUniqueCode();
-            if(!cursoRepository.existsByCodigo(codigo)){
-                break;
-            }
-        }
-        curso.setCodigo(codigo);
-        return cursoRepository.save(curso);
-    }
-
-    @Override
-    public Curso getCursoById(Long id) {
-        return cursoRepository.findByID(id);
-    }
-
-    @Transactional
-    @Override
-    public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen) {
-        Curso curso = cursoRepository.findByID(id);
-        if (curso == null) {
-            throw new RuntimeException("404 Not Found");
-        }
-        Usuario usuario = usuarioService.findCurrentUser();
-        if (!(usuario instanceof Maestro)) {
-            throw new AccessDeniedException("Solo un maestro puede actualizar cursos");
-        }
-        if (!curso.getMaestro().getId().equals(usuario.getId())) {
-            throw new AccessDeniedException("Solo el propietario del curso puede actualizarlo");
-        }
-        curso.setTitulo(titulo);
-        curso.setDescripcion(descripcion);
-        curso.setImagen(imagen);
-        return cursoRepository.save(curso);
-    }
-
-    public ProgresoDTO getProgreso(Long cursoId) {
-    Curso curso = cursoRepository.findByID(cursoId);
-    if (curso == null) {
-        throw new RuntimeException("404 Not Found");
-    }
-
-    Usuario usuario = usuarioService.findCurrentUser();
-    if (!(usuario instanceof Alumno alumno)) {
-        throw new RuntimeException("403 Forbidden");
-    }
-
-    long totalActividades = actividadRepository.countByCursoId(cursoId);
-    if (totalActividades == 0) {
-        return new ProgresoDTO("SIN_EMPEZAR", 0);
-    }
-
-    List<ActividadAlumnoProgreso> registros = actividadAlumnoRepository.findProgresoByAlumnoAndCursoId(alumno, cursoId);
-
-    if (registros.isEmpty()) {
-        return new ProgresoDTO("SIN_EMPEZAR", 0);
-    }
-
-    // Para cada actividad, quedarse solo con el intento más reciente (igual que las stats del maestro)
-    Map<Long, ActividadAlumnoProgreso> ultimoPorActividad = new HashMap<>();
-    for (ActividadAlumnoProgreso r : registros) {
-        Long actId = r.getActividadId();
-        ActividadAlumnoProgreso actual = ultimoPorActividad.get(actId);
-        if (actual == null || esProgresoMasReciente(r, actual)) {
-            ultimoPorActividad.put(actId, r);
-        }
-    }
-    List<ActividadAlumnoProgreso> ultimos = new ArrayList<>(ultimoPorActividad.values());
-
-    // 1. CALCULAMOS LA SUMA TOTAL DE PUNTOS
-    // Sumamos el campo 'puntuacion' de todas las actividades que tengan valor
-    int puntosTotales = ultimos.stream()
-            .filter(aa -> aa.getPuntuacion() != null)
-            .mapToInt(aa -> aa.getPuntuacion())
-            .sum();
-
-    // 2. CALCULAMOS EL ESTADO
-    // Ignoramos fechas epoch (1970-01-01) que se almacenan como "sin finish" en algunas actividades
-    long acabadas = ultimos.stream()
-            .filter(aa -> aa.getAcabada() != null && aa.getAcabada().getYear() > 1970)
-            .count();
-
-    if (acabadas == totalActividades) {
-        // Pasamos la suma real de puntos en lugar de 0
-        return new ProgresoDTO("TERMINADA", puntosTotales);
-    }
-
-    long conInicio = ultimos.stream()
-            .filter(aa -> aa.getInicio() != null)
-            .count();
-
-    if (conInicio > 0) {
-        // Pasamos la suma real de puntos en lugar de 0
-        return new ProgresoDTO("EMPEZADA", puntosTotales);
-    }
-
-    return new ProgresoDTO("SIN_EMPEZAR", puntosTotales);
-}
-
-private boolean esProgresoMasReciente(ActividadAlumnoProgreso candidata, ActividadAlumnoProgreso actual) {
-    LocalDateTime fechaCandidato = candidata.getAcabada() != null ? candidata.getAcabada() : candidata.getInicio();
-    LocalDateTime fechaActual    = actual.getAcabada()    != null ? actual.getAcabada()    : actual.getInicio();
-    if (fechaCandidato == null && fechaActual == null) return false;
-    if (fechaCandidato == null) return false;
-    if (fechaActual    == null) return true;
-    return fechaCandidato.isAfter(fechaActual);
-}
-
-    @Transactional
-@Override
-public void eliminarCurso(Long id) {
-    Curso curso = cursoRepository.findByID(id);
-    if (curso == null) {
-        throw new RuntimeException("404 Not Found");
-    }
-    Usuario usuario = usuarioService.findCurrentUser();
-    if (!(usuario instanceof Maestro)) {
-        throw new AccessDeniedException("Solo un maestro puede eliminar cursos");
-    }
-    if (!curso.getMaestro().getId().equals(usuario.getId())) {
-        throw new AccessDeniedException("Solo el propietario puede eliminar este curso");
-    }
-    cursoRepository.delete(curso);
-}
-
-    @Override
-    public List<Integer> getNotaMediaPorActividad(Long cursoId) {
+    public List<Integer> obtenerNotaMediaPorActividadPorCursoId(Long cursoId) {
         Curso curso = cursoRepository.findByID(cursoId);
         if (curso == null) {
             throw new RuntimeException("404 Not Found");
@@ -292,7 +290,7 @@ public void eliminarCurso(Long id) {
 
         return notasMedias;
         
-            }
+    }
 
 }
 

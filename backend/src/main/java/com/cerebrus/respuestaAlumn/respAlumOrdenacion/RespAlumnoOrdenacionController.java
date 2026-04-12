@@ -39,14 +39,14 @@ public class RespAlumnoOrdenacionController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<RespAlumnoOrdenacionCreateResponse> crearRespAlumnoOrdenacion(@RequestBody @Valid RespAlumnoOrdenacion respAlumnoOrdenacion) {
+    public ResponseEntity<RespAlumnoOrdenacionCreateResponse> crearRespuestaAlumnoOrdenacion(@RequestBody @Valid RespAlumnoOrdenacion respAlumnoOrdenacion) {
         
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Alumno)) {
             throw new AccessDeniedException("Solo un alumno puede crear respuestas de alumno");
         }
         
-        RespAlumnoOrdenacionCreateResponse respAlumnoOrdenacionCreada = respAlumnoOrdenacionService.crearRespAlumnoOrdenacion(
+        RespAlumnoOrdenacionCreateResponse respAlumnoOrdenacionCreada = respAlumnoOrdenacionService.crearRespuestaAlumnoOrdenacion(
             respAlumnoOrdenacion.getActividadAlumno().getId(),
             respAlumnoOrdenacion.getValoresAlum(),
             respAlumnoOrdenacion.getOrdenacion().getId()
@@ -56,8 +56,8 @@ public class RespAlumnoOrdenacionController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<RespAlumnoOrdenacionDTO> readRespAlumnoOrdenacion(@PathVariable Long id) {
-        RespAlumnoOrdenacion respAlumnoOrdenacion = respAlumnoOrdenacionService.readRespAlumnoOrdenacion(id);
+    public ResponseEntity<RespAlumnoOrdenacionDTO> encontrarRespuestaAlumnoOrdenacionPorId(@PathVariable Long id) {
+        RespAlumnoOrdenacion respAlumnoOrdenacion = respAlumnoOrdenacionService.encontrarRespuestaAlumnoOrdenacionPorId(id);
         RespAlumnoOrdenacionDTO dto = new RespAlumnoOrdenacionDTO(respAlumnoOrdenacion.getId(), respAlumnoOrdenacion.getCorrecta());
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }

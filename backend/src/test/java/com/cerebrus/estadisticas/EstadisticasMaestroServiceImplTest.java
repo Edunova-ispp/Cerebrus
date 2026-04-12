@@ -23,7 +23,6 @@ import org.springframework.security.access.AccessDeniedException;
 import com.cerebrus.actividad.Actividad;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividadAlumn.ActividadAlumno;
-import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;

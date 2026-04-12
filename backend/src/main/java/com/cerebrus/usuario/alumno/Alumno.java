@@ -44,6 +44,7 @@ public class Alumno extends Usuario {
                   String nombreUsuario, String correoElectronico, String contrasena, Integer puntos, Organizacion organizacion) {
         super(nombre, primerApellido, segundoApellido, nombreUsuario, correoElectronico, contrasena, organizacion);
         this.puntos = puntos;
+        this.organizacion = organizacion;
     }
 
     // Getters y Setters

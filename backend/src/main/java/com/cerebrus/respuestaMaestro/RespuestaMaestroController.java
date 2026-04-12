@@ -33,8 +33,8 @@ public class RespuestaMaestroController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<Long> crearRespuesta(@RequestBody @Valid RespuestaMaestro respuesta) {
-        RespuestaMaestro respuestaCreada = respuestaService.crearRespuesta(
+    public ResponseEntity<Long> crearRespuestaMaestro(@RequestBody @Valid RespuestaMaestro respuesta) {
+        RespuestaMaestro respuestaCreada = respuestaService.crearRespuestaMaestro(
             respuesta.getRespuesta(),
             respuesta.getImagen(),
             respuesta.getCorrecta(),
@@ -45,16 +45,16 @@ public class RespuestaMaestroController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<RespuestaMaestro> readRespuesta(@PathVariable Long id) {
-        RespuestaMaestro respuesta = respuestaService.readRespuesta(id);
+    public ResponseEntity<RespuestaMaestro> encontrarRespuestaMaestroPorId(@PathVariable Long id) {
+        RespuestaMaestro respuesta = respuestaService.encontrarRespuestaMaestroPorId(id);
         return new ResponseEntity<>(respuesta, HttpStatus.OK);
     }
 
     @PutMapping("/update/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<Void> updateRespuesta(@PathVariable Long id, @RequestBody @Valid RespuestaMaestro respuesta) {
-        respuestaService.updateRespuesta(
+    public ResponseEntity<Void> actualizarRespuestaMaestro(@PathVariable Long id, @RequestBody @Valid RespuestaMaestro respuesta) {
+        respuestaService.actualizarRespuestaMaestro(
             id,
             respuesta.getRespuesta(),
             respuesta.getImagen(),
@@ -66,8 +66,8 @@ public class RespuestaMaestroController {
     @DeleteMapping("/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<Void> deleteRespuesta(@PathVariable Long id) {
-        respuestaService.deleteRespuesta(id);
+    public ResponseEntity<Void> eliminarRespuestaMaestroPorId(@PathVariable Long id) {
+        respuestaService.eliminarRespuestaMaestroPorId(id);
         return ResponseEntity.noContent().build();
     }
 }

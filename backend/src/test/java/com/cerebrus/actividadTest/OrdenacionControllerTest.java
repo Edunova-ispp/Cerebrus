@@ -81,7 +81,7 @@ class OrdenacionControllerTest {
     void crearActOrdenacion_requestValido_retorna201ConOrdenacion() {
         when(ordenacionService.crearActOrdenacion(
                 eq("Ordena los planetas"), eq("Descripción"), eq(100), eq("img.png"),
-                eq(1L), eq(false), eq(null), eq(1), any()))
+                eq(1L), eq(false), eq(null), eq(1), any(), any(), any(), any(), any()))
                 .thenReturn(ordenacionGuardada);
 
         ResponseEntity<Long> respuesta = ordenacionController.crearActOrdenacion(ordenacionRequest);
@@ -91,13 +91,13 @@ class OrdenacionControllerTest {
         assertThat(respuesta.getBody()).isEqualTo(10L);
         verify(ordenacionService).crearActOrdenacion(
                 eq("Ordena los planetas"), eq("Descripción"), eq(100), eq("img.png"),
-                eq(1L), eq(false), eq(null), eq(1), any());
+                eq(1L), eq(false), eq(null), eq(1), any(), any(), any(), any(), any());
     }
 
     // Test para verificar que crearActOrdenacion propaga AccessDeniedException cuando el service la lanza
     @Test
     void crearActOrdenacion_accesoNoPermitido_propagaAccessDeniedException() {
-        when(ordenacionService.crearActOrdenacion(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(ordenacionService.crearActOrdenacion(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new AccessDeniedException("Solo un maestro puede crear actividades de ordenación"));
 
         assertThatThrownBy(() -> ordenacionController.crearActOrdenacion(ordenacionRequest))
@@ -106,15 +106,15 @@ class OrdenacionControllerTest {
     }
 
     // -------------------------------------------------------
-    // GET /api/ordenaciones/{id} - readOrdenacion
+    // GET /api/ordenaciones/{id} - encontrarActOrdenacionPorId
     // -------------------------------------------------------
 
-    // Test para verificar que readOrdenacion retorna 200 OK con la ordenación y sus valores
+    // Test para verificar que encontrarActOrdenacionPorId retorna 200 OK con la ordenación y sus valores
     @Test
-    void readOrdenacion_existente_retorna200ConOrdenacion() {
-        when(ordenacionService.readOrdenacion(10L)).thenReturn(ordenacionGuardada);
+    void encontrarActOrdenacionPorId_existente_retorna200ConOrdenacion() {
+        when(ordenacionService.encontrarActOrdenacionPorId(10L)).thenReturn(ordenacionGuardada);
 
-                ResponseEntity<OrdenacionDTO> respuesta = ordenacionController.readOrdenacion(10L);
+                ResponseEntity<OrdenacionDTO> respuesta = ordenacionController.encontrarActOrdenacionPorId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).isNotNull();
@@ -122,36 +122,36 @@ class OrdenacionControllerTest {
         assertThat(respuesta.getBody().getValores()).hasSize(3);
     }
 
-    // Test para verificar que readOrdenacion retorna 200 OK con lista de valores vacía cuando la ordenación no tiene valores
+    // Test para verificar que encontrarActOrdenacionPorId retorna 200 OK con lista de valores vacía cuando la ordenación no tiene valores
     @Test
-    void readOrdenacion_sinValores_retorna200ConListaVacia() {
+    void encontrarActOrdenacionPorId_sinValores_retorna200ConListaVacia() {
         ordenacionGuardada.setValores(new ArrayList<>());
-        when(ordenacionService.readOrdenacion(10L)).thenReturn(ordenacionGuardada);
+        when(ordenacionService.encontrarActOrdenacionPorId(10L)).thenReturn(ordenacionGuardada);
 
-                ResponseEntity<OrdenacionDTO> respuesta = ordenacionController.readOrdenacion(10L);
+                ResponseEntity<OrdenacionDTO> respuesta = ordenacionController.encontrarActOrdenacionPorId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody().getValores()).isEmpty();
     }
 
-    // Test para verificar que readOrdenacion propaga RuntimeException cuando la ordenación no existe
+    // Test para verificar que encontrarActOrdenacionPorId propaga RuntimeException cuando la ordenación no existe
     @Test
-    void readOrdenacion_noExiste_propagaRuntimeException() {
-        when(ordenacionService.readOrdenacion(99L))
+    void encontrarActOrdenacionPorId_noExiste_propagaRuntimeException() {
+        when(ordenacionService.encontrarActOrdenacionPorId(99L))
                 .thenThrow(new RuntimeException("La actividad de ordenación no existe"));
 
-        assertThatThrownBy(() -> ordenacionController.readOrdenacion(99L))
+        assertThatThrownBy(() -> ordenacionController.encontrarActOrdenacionPorId(99L))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La actividad de ordenación no existe");
     }
 
     // -------------------------------------------------------
-    // PUT /api/ordenaciones/update/{id} - updateActOrdenacion
+    // PUT /api/ordenaciones/update/{id} - actualizarActOrdenacion
     // -------------------------------------------------------
 
-    // Test para verificar que updateActOrdenacion retorna 200 OK con la ordenación actualizada
+    // Test para verificar que actualizarActOrdenacion retorna 200 OK con la ordenación actualizada
     @Test
-    void updateActOrdenacion_existente_retorna200ConOrdenacionActualizada() {
+    void actualizarActOrdenacion_existente_retorna200ConOrdenacionActualizada() {
         Ordenacion actualizada = new Ordenacion();
         actualizada.setId(10L);
         actualizada.setTitulo("Nuevo título");
@@ -159,60 +159,60 @@ class OrdenacionControllerTest {
         actualizada.setTema(tema);
         actualizada.setValores(List.of("X", "Y", "Z"));
 
-        when(ordenacionService.updateActOrdenacion(
-                eq(10L), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(ordenacionService.actualizarActOrdenacion(
+                eq(10L), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(actualizada);
 
         ordenacionRequest.setTitulo("Nuevo título");
-        ResponseEntity<Long> respuesta = ordenacionController.updateActOrdenacion(10L, ordenacionRequest);
+        ResponseEntity<Long> respuesta = ordenacionController.actualizarActOrdenacion(10L, ordenacionRequest);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).isEqualTo(10L);
     }
 
-    // Test para verificar que updateActOrdenacion propaga AccessDeniedException cuando el service la lanza
+    // Test para verificar que actualizarActOrdenacion propaga AccessDeniedException cuando el service la lanza
     @Test
-    void updateActOrdenacion_accesoNoPermitido_propagaAccessDeniedException() {
-        when(ordenacionService.updateActOrdenacion(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+    void actualizarActOrdenacion_accesoNoPermitido_propagaAccessDeniedException() {
+        when(ordenacionService.actualizarActOrdenacion(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new AccessDeniedException("Solo un maestro puede actualizar actividades de ordenación"));
 
-        assertThatThrownBy(() -> ordenacionController.updateActOrdenacion(10L, ordenacionRequest))
+        assertThatThrownBy(() -> ordenacionController.actualizarActOrdenacion(10L, ordenacionRequest))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede actualizar actividades de ordenación");
     }
 
-    // Test para verificar que updateActOrdenacion propaga RuntimeException cuando la ordenación no existe
+    // Test para verificar que actualizarActOrdenacion propaga RuntimeException cuando la ordenación no existe
     @Test
-    void updateActOrdenacion_noExiste_propagaRuntimeException() {
-        when(ordenacionService.updateActOrdenacion(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+    void actualizarActOrdenacion_noExiste_propagaRuntimeException() {
+        when(ordenacionService.actualizarActOrdenacion(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new RuntimeException("La actividad de ordenación no existe"));
 
-        assertThatThrownBy(() -> ordenacionController.updateActOrdenacion(99L, ordenacionRequest))
+        assertThatThrownBy(() -> ordenacionController.actualizarActOrdenacion(99L, ordenacionRequest))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("La actividad de ordenación no existe");
     }
 
     // -------------------------------------------------------
-    // DELETE /api/ordenaciones/delete/{id} - deleteActOrdenacion
+    // DELETE /api/ordenaciones/delete/{id} - eliminarActOrdenacionPorId
     // -------------------------------------------------------
 
-    // Test para verificar que deleteActOrdenacion retorna 204 NO CONTENT sin cuerpo cuando la eliminación es exitosa
+    // Test para verificar que eliminarActOrdenacionPorId retorna 204 NO CONTENT sin cuerpo cuando la eliminación es exitosa
     @Test
-    void deleteActOrdenacion_existente_retorna204SinCuerpo() {
-        ResponseEntity<Void> respuesta = ordenacionController.deleteActOrdenacion(10L);
+    void eliminarActOrdenacionPorId_existente_retorna204SinCuerpo() {
+        ResponseEntity<Void> respuesta = ordenacionController.eliminarActOrdenacionPorId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(respuesta.getBody()).isNull();
-        verify(ordenacionService).deleteActOrdenacion(10L);
+        verify(ordenacionService).eliminarActOrdenacionPorId(10L);
     }
 
-    // Test para verificar que deleteActOrdenacion propaga AccessDeniedException cuando el service la lanza
+    // Test para verificar que eliminarActOrdenacionPorId propaga AccessDeniedException cuando el service la lanza
     @Test
-    void deleteActOrdenacion_accesoNoPermitido_propagaAccessDeniedException() {
+    void eliminarActOrdenacionPorId_accesoNoPermitido_propagaAccessDeniedException() {
         doThrow(new AccessDeniedException("Solo un maestro puede eliminar actividades de ordenación"))
-                .when(ordenacionService).deleteActOrdenacion(10L);
+                .when(ordenacionService).eliminarActOrdenacionPorId(10L);
 
-        assertThatThrownBy(() -> ordenacionController.deleteActOrdenacion(10L))
+        assertThatThrownBy(() -> ordenacionController.eliminarActOrdenacionPorId(10L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede eliminar actividades de ordenación");
     }

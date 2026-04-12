@@ -96,7 +96,7 @@
   font-size: 1.2rem;
   font-weight: 700;
   color: #333;
-  margin: 0 0 16px;
+  margin: 0 0 60px; 
 }
 
 .mapa-feedback {
@@ -209,12 +209,30 @@
 .mapa-map-mascota {
   position: absolute;
   left: 50%;
-  top: calc(100% + 4px);
+  
+  /* CAMBIO CLAVE: Al poner un valor negativo (-8px), 
+     la mascota se solapa ligeramente con el círculo de la actividad */
+  bottom: calc(100% - 8px); 
+  
   transform: translateX(-50%);
-  width: 39px;
+  width: 75px; 
   height: auto;
   display: block;
-  z-index: 2;
+  z-index: 10;
+  
+  /* Reducimos un poco la fuerza de la animación para que no se aleje */
+  animation: mascotaFlotandoCerca 2s ease-in-out infinite;
+  filter: drop-shadow(0px 6px 0px rgba(0,0,0,0.2));
+}
+
+/* Animación ajustada: ahora se mueve solo un poquito (4px) */
+@keyframes mascotaFlotandoCerca {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-4px);
+  }
 }
 
 /* optional: distinguish completed visually without changing the alternating bg */

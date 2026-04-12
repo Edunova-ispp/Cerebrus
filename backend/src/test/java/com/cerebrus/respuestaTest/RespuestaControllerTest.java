@@ -34,9 +34,9 @@ public class RespuestaControllerTest {
 	@InjectMocks
 	private RespuestaMaestroController controller;
 
-    // Test para verificar que el método crearRespuesta devuelve CREATED y delega correctamente al servicio
+    // Test para verificar que el método crearRespuestaMaestro devuelve CREATED y delega correctamente al servicio
 	@Test
-	void crearRespuesta_devuelveCreated() {
+	void crearRespuestaMaestro_devuelveCreated() {
 		Pregunta pregunta = new Pregunta();
 		pregunta.setId(10L);
 
@@ -53,27 +53,27 @@ public class RespuestaControllerTest {
 		created.setCorrecta(true);
 		created.setPregunta(pregunta);
 
-		when(respuestaService.crearRespuesta(eq("Opción A"), eq("img.png"), eq(true), eq(10L))).thenReturn(created);
+		when(respuestaService.crearRespuestaMaestro(eq("Opción A"), eq("img.png"), eq(true), eq(10L))).thenReturn(created);
 
-		ResponseEntity<Long> response = controller.crearRespuesta(request);
+		ResponseEntity<Long> response = controller.crearRespuestaMaestro(request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(response.getBody()).isEqualTo(99L);
-		verify(respuestaService).crearRespuesta("Opción A", "img.png", true, 10L);
+		verify(respuestaService).crearRespuestaMaestro("Opción A", "img.png", true, 10L);
 	}
 
-    // Test para verificar que el método crearRespuesta lanza NullPointerException y no llama al servicio 
+    // Test para verificar que el método crearRespuestaMaestro lanza NullPointerException y no llama al servicio 
     // cuando se le pasa null
 	@Test
-	void crearRespuesta_cuandoEsNula_devuelveNullPointer() {
-		assertThatThrownBy(() -> controller.crearRespuesta(null))
+	void crearRespuestaMaestro_cuandoEsNula_devuelveNullPointer() {
+		assertThatThrownBy(() -> controller.crearRespuestaMaestro(null))
 				.isInstanceOf(NullPointerException.class);
 		verifyNoInteractions(respuestaService);
 	}
 
-    // Test para verificar que el método crearRespuesta permitte null en el campo imagen y delega correctamente al servicio
+    // Test para verificar que el método crearRespuestaMaestro permitte null en el campo imagen y delega correctamente al servicio
 	@Test
-	void crearRespuesta_permiteImagenNull() {
+	void crearRespuestaMaestro_permiteImagenNull() {
 		Pregunta pregunta = new Pregunta();
 		pregunta.setId(7L);
 
@@ -86,18 +86,18 @@ public class RespuestaControllerTest {
 		RespuestaMaestro created = new RespuestaMaestro();
 		created.setId(1L);
 
-		when(respuestaService.crearRespuesta(eq("Texto"), eq(null), eq(false), eq(7L))).thenReturn(created);
+		when(respuestaService.crearRespuestaMaestro(eq("Texto"), eq(null), eq(false), eq(7L))).thenReturn(created);
 
-		ResponseEntity<Long> response = controller.crearRespuesta(request);
+		ResponseEntity<Long> response = controller.crearRespuestaMaestro(request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(response.getBody()).isEqualTo(1L);
-		verify(respuestaService).crearRespuesta("Texto", null, false, 7L);
+		verify(respuestaService).crearRespuestaMaestro("Texto", null, false, 7L);
 	}
 
-    // Test para verificar que el método crearRespuesta permitte null en el campo correcta y delega correctamente al servicio
+    // Test para verificar que el método crearRespuestaMaestro permitte null en el campo correcta y delega correctamente al servicio
 	@Test
-	void crearRespuesta_permiteCorrectaNull() {
+	void crearRespuestaMaestro_permiteCorrectaNull() {
 		Pregunta pregunta = new Pregunta();
 		pregunta.setId(8L);
 
@@ -110,33 +110,33 @@ public class RespuestaControllerTest {
 		RespuestaMaestro created = new RespuestaMaestro();
 		created.setId(2L);
 
-		when(respuestaService.crearRespuesta(eq("Texto"), eq("img"), isNull(), eq(8L))).thenReturn(created);
+		when(respuestaService.crearRespuestaMaestro(eq("Texto"), eq("img"), isNull(), eq(8L))).thenReturn(created);
 
-		ResponseEntity<Long> response = controller.crearRespuesta(request);
+		ResponseEntity<Long> response = controller.crearRespuestaMaestro(request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertThat(response.getBody()).isEqualTo(2L);
-		verify(respuestaService).crearRespuesta("Texto", "img", null, 8L);
+		verify(respuestaService).crearRespuestaMaestro("Texto", "img", null, 8L);
 	}
 
-    // Test para verificar que el método crearRespuesta lanza NullPointerException y no llama al servicio 
+    // Test para verificar que el método crearRespuestaMaestro lanza NullPointerException y no llama al servicio 
     // cuando se le pasa una pregunta nula
 	@Test
-	void crearRespuesta_cuandoPreguntaEsNull_lanzaNullPointer() {
+	void crearRespuestaMaestro_cuandoPreguntaEsNull_lanzaNullPointer() {
 		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Texto");
 		request.setImagen(null);
 		request.setCorrecta(true);
 		request.setPregunta(null);
 
-		assertThatThrownBy(() -> controller.crearRespuesta(request))
+		assertThatThrownBy(() -> controller.crearRespuestaMaestro(request))
 				.isInstanceOf(NullPointerException.class);
 		verifyNoInteractions(respuestaService);
 	}
 
-    // Test para verificar que el método crearRespuesta propaga ResourceNotFoundException lanzada por el servicio
+    // Test para verificar que el método crearRespuestaMaestro propaga ResourceNotFoundException lanzada por el servicio
 	@Test
-	void crearRespuesta_propagaNotFoundFromService() {
+	void crearRespuestaMaestro_propagaNotFoundFromService() {
 		Pregunta pregunta = new Pregunta();
 		pregunta.setId(123L);
 
@@ -146,17 +146,17 @@ public class RespuestaControllerTest {
 		request.setCorrecta(true);
 		request.setPregunta(pregunta);
 
-		when(respuestaService.crearRespuesta(eq("Texto"), eq("x"), eq(true), eq(123L)))
+		when(respuestaService.crearRespuestaMaestro(eq("Texto"), eq("x"), eq(true), eq(123L)))
 				.thenThrow(new ResourceNotFoundException("Pregunta", "id", 123L));
 
-		assertThatThrownBy(() -> controller.crearRespuesta(request))
+		assertThatThrownBy(() -> controller.crearRespuestaMaestro(request))
 				.isInstanceOf(ResourceNotFoundException.class);
-		verify(respuestaService).crearRespuesta("Texto", "x", true, 123L);
+		verify(respuestaService).crearRespuestaMaestro("Texto", "x", true, 123L);
 	}
 
-    // Test para verificar que el método crearRespuesta propaga AccessDeniedException lanzada por el servicio
+    // Test para verificar que el método crearRespuestaMaestro propaga AccessDeniedException lanzada por el servicio
 	@Test
-	void crearRespuesta_propagaAccessDeniedFromService() {
+	void crearRespuestaMaestro_propagaAccessDeniedFromService() {
 		Pregunta pregunta = new Pregunta();
 		pregunta.setId(123L);
 
@@ -166,160 +166,160 @@ public class RespuestaControllerTest {
 		request.setCorrecta(true);
 		request.setPregunta(pregunta);
 
-		when(respuestaService.crearRespuesta(eq("Texto"), eq("x"), eq(true), eq(123L)))
+		when(respuestaService.crearRespuestaMaestro(eq("Texto"), eq("x"), eq(true), eq(123L)))
 				.thenThrow(new AccessDeniedException("Solo maestros"));
 
-		assertThatThrownBy(() -> controller.crearRespuesta(request))
+		assertThatThrownBy(() -> controller.crearRespuestaMaestro(request))
 				.isInstanceOf(AccessDeniedException.class);
-		verify(respuestaService).crearRespuesta("Texto", "x", true, 123L);
+		verify(respuestaService).crearRespuestaMaestro("Texto", "x", true, 123L);
 	}
 
-    // Test para verificar que el método readRespuesta devuelve OK y delega correctamente al servicio
+    // Test para verificar que el método encontrarRespuestaMaestroPorId devuelve OK y delega correctamente al servicio
 	@Test
-	void readRespuesta_devuelveOk() {
+	void encontrarRespuestaMaestroPorId_devuelveOk() {
 		RespuestaMaestro respuesta = new RespuestaMaestro();
 		respuesta.setId(5L);
 
-		when(respuestaService.readRespuesta(5L)).thenReturn(respuesta);
+		when(respuestaService.encontrarRespuestaMaestroPorId(5L)).thenReturn(respuesta);
 
-		ResponseEntity<RespuestaMaestro> response = controller.readRespuesta(5L);
+		ResponseEntity<RespuestaMaestro> response = controller.encontrarRespuestaMaestroPorId(5L);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody()).isSameAs(respuesta);
-		verify(respuestaService).readRespuesta(5L);
+		verify(respuestaService).encontrarRespuestaMaestroPorId(5L);
 	}
 
-    // Test para verificar que el método readRespuesta propaga ResourceNotFoundException lanzada por el servicio
+    // Test para verificar que el método encontrarRespuestaMaestroPorId propaga ResourceNotFoundException lanzada por el servicio
 	@Test
-	void readRespuesta_propagaNotFoundFromService() {
-		when(respuestaService.readRespuesta(404L))
+	void encontrarRespuestaMaestroPorId_propagaNotFoundFromService() {
+		when(respuestaService.encontrarRespuestaMaestroPorId(404L))
 				.thenThrow(new ResourceNotFoundException("Respuesta", "id", 404L));
 
-		assertThatThrownBy(() -> controller.readRespuesta(404L))
+		assertThatThrownBy(() -> controller.encontrarRespuestaMaestroPorId(404L))
 				.isInstanceOf(ResourceNotFoundException.class);
 	}
 
-    // Test para verificar que el método updateRespuesta devuelve NO_CONTENT y delega correctamente al servicio
+    // Test para verificar que el método actualizarRespuestaMaestro devuelve NO_CONTENT y delega correctamente al servicio
 	@Test
-	void updateRespuesta_devuelveOk() {
+	void actualizarRespuestaMaestro_devuelveOk() {
 		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Nueva");
 		request.setImagen("img2.png");
 		request.setCorrecta(false);
 
-		ResponseEntity<Void> response = controller.updateRespuesta(9L, request);
+		ResponseEntity<Void> response = controller.actualizarRespuestaMaestro(9L, request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 		assertThat(response.getBody()).isNull();
-		verify(respuestaService).updateRespuesta(9L, "Nueva", "img2.png", false);
+		verify(respuestaService).actualizarRespuestaMaestro(9L, "Nueva", "img2.png", false);
 	}
 
-    // Test para verificar que el método updateRespuesta usa el id del path incluso si el body tiene un 
+    // Test para verificar que el método actualizarRespuestaMaestro usa el id del path incluso si el body tiene un 
     // id diferente, y delega correctamente al servicio
 	@Test
-	void updateRespuesta_usaPathId_inclusoSiBodyTieneDiferenteId() {
+	void actualizarRespuestaMaestro_usaPathId_inclusoSiBodyTieneDiferenteId() {
 		RespuestaMaestro request = new RespuestaMaestro();
 		request.setId(1234L);
 		request.setRespuesta("Nueva");
 		request.setImagen("img2.png");
 		request.setCorrecta(false);
 
-		ResponseEntity<Void> response = controller.updateRespuesta(9L, request);
+		ResponseEntity<Void> response = controller.actualizarRespuestaMaestro(9L, request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 		assertThat(response.getBody()).isNull();
-		verify(respuestaService).updateRespuesta(9L, "Nueva", "img2.png", false);
+		verify(respuestaService).actualizarRespuestaMaestro(9L, "Nueva", "img2.png", false);
 	}
 
-    // Test para verificar que el método updateRespuesta lanza NullPointerException y no llama al servicio 
+    // Test para verificar que el método actualizarRespuestaMaestro lanza NullPointerException y no llama al servicio 
     // cuando se le pasa una request nula
 	@Test
-	void updateRespuesta_cuandoRequestEsNull_lanzaNullPointer() {
-		assertThatThrownBy(() -> controller.updateRespuesta(1L, null))
+	void actualizarRespuestaMaestro_cuandoRequestEsNull_lanzaNullPointer() {
+		assertThatThrownBy(() -> controller.actualizarRespuestaMaestro(1L, null))
 				.isInstanceOf(NullPointerException.class);
 		verifyNoInteractions(respuestaService);
 	}
 
-    // Test para verificar que el método updateRespuesta permitte null en el campo imagen y 
+    // Test para verificar que el método actualizarRespuestaMaestro permitte null en el campo imagen y 
     // delega correctamente al servicio
 	@Test
-	void updateRespuesta_permiteImagenNull() {
+	void actualizarRespuestaMaestro_permiteImagenNull() {
 		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Nueva");
 		request.setImagen(null);
 		request.setCorrecta(true);
 
-		ResponseEntity<Void> response = controller.updateRespuesta(9L, request);
+		ResponseEntity<Void> response = controller.actualizarRespuestaMaestro(9L, request);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 		assertThat(response.getBody()).isNull();
-		verify(respuestaService).updateRespuesta(9L, "Nueva", null, true);
+		verify(respuestaService).actualizarRespuestaMaestro(9L, "Nueva", null, true);
 	}
 
-    // Test para verificar que el método updateRespuesta propaga AccessDeniedException lanzada por el servicio
-	void updateRespuesta_propagaAccessDeniedFromService() {
+    // Test para verificar que el método actualizarRespuestaMaestro propaga AccessDeniedException lanzada por el servicio
+	void actualizarRespuestaMaestro_propagaAccessDeniedFromService() {
 		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Nueva");
 		request.setImagen(null);
 		request.setCorrecta(true);
 
-		when(respuestaService.updateRespuesta(eq(1L), eq("Nueva"), eq(null), eq(true)))
+		when(respuestaService.actualizarRespuestaMaestro(eq(1L), eq("Nueva"), eq(null), eq(true)))
 				.thenThrow(new AccessDeniedException("Solo maestros"));
 
-		assertThatThrownBy(() -> controller.updateRespuesta(1L, request))
+		assertThatThrownBy(() -> controller.actualizarRespuestaMaestro(1L, request))
 				.isInstanceOf(AccessDeniedException.class);
-		verify(respuestaService).updateRespuesta(1L, "Nueva", null, true);
+		verify(respuestaService).actualizarRespuestaMaestro(1L, "Nueva", null, true);
 	}
 
-    // Test para verificar que el método updateRespuesta propaga ResourceNotFoundException lanzada por el servicio
+    // Test para verificar que el método actualizarRespuestaMaestro propaga ResourceNotFoundException lanzada por el servicio
 	@Test
-	void updateRespuesta_propagaNotFoundFromService() {
+	void actualizarRespuestaMaestro_propagaNotFoundFromService() {
 		RespuestaMaestro request = new RespuestaMaestro();
 		request.setRespuesta("Nueva");
 		request.setImagen("img2.png");
 		request.setCorrecta(false);
 
-		when(respuestaService.updateRespuesta(eq(404L), eq("Nueva"), eq("img2.png"), eq(false)))
+		when(respuestaService.actualizarRespuestaMaestro(eq(404L), eq("Nueva"), eq("img2.png"), eq(false)))
 				.thenThrow(new ResourceNotFoundException("Respuesta", "id", 404L));
 
-		assertThatThrownBy(() -> controller.updateRespuesta(404L, request))
+		assertThatThrownBy(() -> controller.actualizarRespuestaMaestro(404L, request))
 				.isInstanceOf(ResourceNotFoundException.class);
-		verify(respuestaService).updateRespuesta(404L, "Nueva", "img2.png", false);
+		verify(respuestaService).actualizarRespuestaMaestro(404L, "Nueva", "img2.png", false);
 	}
 
-    // Test para verificar que el método deleteRespuesta devuelve NO_CONTENT y delega correctamente al servicio
+    // Test para verificar que el método eliminarRespuestaMaestroPorId devuelve NO_CONTENT y delega correctamente al servicio
 	@Test
-	void deleteRespuesta_devuelveNoContent() {
-		doNothing().when(respuestaService).deleteRespuesta(3L);
+	void eliminarRespuestaMaestroPorId_devuelveNoContent() {
+		doNothing().when(respuestaService).eliminarRespuestaMaestroPorId(3L);
 
-		ResponseEntity<Void> response = controller.deleteRespuesta(3L);
+		ResponseEntity<Void> response = controller.eliminarRespuestaMaestroPorId(3L);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
 		assertThat(response.getBody()).isNull();
-		verify(respuestaService).deleteRespuesta(3L);
+		verify(respuestaService).eliminarRespuestaMaestroPorId(3L);
 	}
 
-    // Test para verificar que el método deleteRespuesta propaga ResourceNotFoundException lanzada por el servicio
+    // Test para verificar que el método eliminarRespuestaMaestroPorId propaga ResourceNotFoundException lanzada por el servicio
 	@Test
-	void deleteRespuesta_propagaNotFoundFromService() {
+	void eliminarRespuestaMaestroPorId_propagaNotFoundFromService() {
 		doThrow(new ResourceNotFoundException("Respuesta", "id", 3L))
 				.when(respuestaService)
-				.deleteRespuesta(3L);
+				.eliminarRespuestaMaestroPorId(3L);
 
-		assertThatThrownBy(() -> controller.deleteRespuesta(3L))
+		assertThatThrownBy(() -> controller.eliminarRespuestaMaestroPorId(3L))
 				.isInstanceOf(ResourceNotFoundException.class);
-		verify(respuestaService).deleteRespuesta(3L);
+		verify(respuestaService).eliminarRespuestaMaestroPorId(3L);
 	}
 
-    // Test para verificar que el método deleteRespuesta propaga AccessDeniedException lanzada por el servicio
+    // Test para verificar que el método eliminarRespuestaMaestroPorId propaga AccessDeniedException lanzada por el servicio
 	@Test
-	void deleteRespuesta_propagaAccessDeniedFromService() {
+	void eliminarRespuestaMaestroPorId_propagaAccessDeniedFromService() {
 		doThrow(new AccessDeniedException("Solo maestros"))
 				.when(respuestaService)
-				.deleteRespuesta(55L);
+				.eliminarRespuestaMaestroPorId(55L);
 
-		assertThatThrownBy(() -> controller.deleteRespuesta(55L))
+		assertThatThrownBy(() -> controller.eliminarRespuestaMaestroPorId(55L))
 				.isInstanceOf(AccessDeniedException.class);
-		verify(respuestaService).deleteRespuesta(55L);
+		verify(respuestaService).eliminarRespuestaMaestroPorId(55L);
 	}
 }

@@ -1,6 +1,5 @@
 package com.cerebrus.usuario.organizacion;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +28,12 @@ public class Organizacion extends Usuario {
 
     @Column(nullable = false)
     private String nombreCentro;
+
+    @Column(nullable = false)
+    private Boolean emailConfirmado = false;
+
+    @Column(nullable = false)
+    private Integer codigoVerificacion;
 
     // Relaciones
 
@@ -90,13 +95,27 @@ public class Organizacion extends Usuario {
         this.suscripciones = suscripciones;
     }
 
-    // Atributo derivado que se obtiene a partir de la fecha de fin de la última suscripción activa
+    public Boolean getEmailConfirmado() {
+        return emailConfirmado;
+    }
+
+    public Integer getCodigoVerificacion() {
+        return codigoVerificacion;
+    }
+    public void setEmailConfirmado(Boolean emailConfirmado) {
+        this.emailConfirmado = emailConfirmado;
+    }
+    public void setCodigoVerificacion(Integer codigoVerificacion) {
+        this.codigoVerificacion = codigoVerificacion;
+    }
+
+    // Atributo derivado. Indica si la organización tiene una suscripción activa.
     public Boolean getActivo() {
         if (suscripciones == null || suscripciones.isEmpty()) {
             return false;
         }
         Suscripcion ultimaSuscripcion = suscripciones.get(suscripciones.size() - 1);
-        return ultimaSuscripcion.getFechaFin() == null || ultimaSuscripcion.getFechaFin().isAfter(LocalDate.now());
+        return ultimaSuscripcion.isActiva();
     }
 
     @Override

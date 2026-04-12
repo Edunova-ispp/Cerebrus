@@ -7,8 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.exceptions.ResourceNotFoundException;
-import com.cerebrus.puntoImage.PuntoImagen;
-import com.cerebrus.puntoImage.PuntoImagenService;
+import com.cerebrus.puntoImagen.PuntoImagen;
+import com.cerebrus.puntoImagen.PuntoImagenService;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
@@ -38,7 +38,7 @@ public class RespAlumnoPuntoImagenServiceImpl implements RespAlumnoPuntoImagenSe
         }
 
         RespAlumnoPuntoImagen respAlumnoPuntoImagen = new RespAlumnoPuntoImagen();
-        PuntoImagen puntoImagen = puntoImagenService.obtenerPuntoImagenPorId(puntoImagenId);
+        PuntoImagen puntoImagen = puntoImagenService.encontrarPuntoImagenPorId(puntoImagenId);
         ActividadAlumno actividadAlumno = respAlumnoPuntoImagenRepository.encontrarActividadAlumnoPorId(actividadAlumnoId); 
         if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
             || !actividadAlumno.getAlumno().getId().equals(current.getId())) {

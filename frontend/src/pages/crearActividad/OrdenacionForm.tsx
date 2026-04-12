@@ -66,6 +66,10 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
     const initialItems = initialValues.valores?.length ? [...initialValues.valores] : [''];
     setOrdenItems(initialItems);
     setOrdenItemKeys(initialItems.map(() => makeLocalKey()));
+
+    // Auto-detectar si los valores son URLs de imágenes
+    const looksLikeImages = initialItems.some(v => /^https?:\/\/.+\.(png|jpe?g|gif|webp|svg|bmp)/i.test(v.trim()));
+    if (looksLikeImages) setOrdenItemsKind('images');
   }, [initialValues]);
 
   const valores = useMemo(() => {
@@ -282,7 +286,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
                 />
               )}
               <input
-                type={ordenItemsKind === 'images' ? 'url' : 'text'}
+                type="text"
                 className="of-input"
                 placeholder={ordenItemsKind === 'images' ? `URL imagen ${i + 1}` : `Elemento ${i + 1}`}
                 value={v}

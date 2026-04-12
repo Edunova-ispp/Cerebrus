@@ -1,21 +1,20 @@
 package com.cerebrus.temaTest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -29,6 +28,7 @@ import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.tema.TemaServiceImpl;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
+import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
 import com.cerebrus.usuario.maestro.MaestroRepository;
 
@@ -162,21 +162,21 @@ class TemaServiceImplTest {
     }
 
     @Test
-    void obtenerTemasPorCursoAlumno_alumnoInscrito_retornaListaTemas() {
-        when(cursoService.ObtenerCursosUsuarioLogueado()).thenReturn(List.of(curso));
+    void encontrarTemasPorCursoAlumnoId_alumnoInscrito_retornaListaTemas() {
+        when(cursoService.encontrarCursosPorUsuarioLogueado()).thenReturn(List.of(curso));
         when(temaRepository.findByCursoId(10L)).thenReturn(List.of(tema));
 
-        List<Tema> resultado = temaService.ObtenerTemasPorCursoAlumno(10L);
+        List<Tema> resultado = temaService.encontrarTemasPorCursoAlumnoId(10L);
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado).containsExactly(tema);
     }
 
     @Test
-    void obtenerTemasPorCursoAlumno_alumnoNoInscrito_lanzaAccessDeniedException() {
-        when(cursoService.ObtenerCursosUsuarioLogueado()).thenReturn(new ArrayList<>());
+    void encontrarTemasPorCursoAlumnoId_alumnoNoInscrito_lanzaAccessDeniedException() {
+        when(cursoService.encontrarCursosPorUsuarioLogueado()).thenReturn(new ArrayList<>());
 
-        assertThatThrownBy(() -> temaService.ObtenerTemasPorCursoAlumno(10L))
+        assertThatThrownBy(() -> temaService.encontrarTemasPorCursoAlumnoId(10L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessageContaining("inscrito en este curso");
 
@@ -184,22 +184,22 @@ class TemaServiceImplTest {
     }
 
     @Test
-    void obtenerTemasPorCursoMaestro_usuarioEsMaestro_retornaListaTemas() {
+    void encontrarTemasPorCursoMaestroId_usuarioEsMaestro_retornaListaTemas() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
-        when(cursoService.getCursoById(10L)).thenReturn(curso);
+        when(cursoService.encontrarCursoPorId(10L)).thenReturn(curso);
         when(temaRepository.findByCursoId(10L)).thenReturn(List.of(tema));
 
-        List<Tema> resultado = temaService.ObtenerTemasPorCursoMaestro(10L);
+        List<Tema> resultado = temaService.encontrarTemasPorCursoMaestroId(10L);
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado).containsExactly(tema);
     }
 
     @Test
-    void obtenerTemasPorCursoMaestro_usuarioNoEsMaestro_lanzaAccessDeniedException() {
+    void encontrarTemasPorCursoMaestroId_usuarioNoEsMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(usuarioNoMaestro);
 
-        assertThatThrownBy(() -> temaService.ObtenerTemasPorCursoMaestro(10L))
+        assertThatThrownBy(() -> temaService.encontrarTemasPorCursoMaestroId(10L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("El usuario no es un maestro.");
 
@@ -207,26 +207,65 @@ class TemaServiceImplTest {
     }
 
     @Test
-    void obtenerTemaPorId_existente_retornaTema() {
+    void encontrarTemaPorId_existente_retornaTema() {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(temaRepository.findById(100L)).thenReturn(Optional.of(tema));
 
-        Tema resultado = temaService.obtenerTemaPorId(100L);
+        Tema resultado = temaService.encontrarTemaPorId(100L);
 
         assertThat(resultado).isEqualTo(tema);
     }
 
     @Test
-    void obtenerTemaPorId_noExiste_lanzaIllegalArgumentException() {
+    void encontrarTemaPorId_noExiste_lanzaIllegalArgumentException() {
         when(temaRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> temaService.obtenerTemaPorId(999L))
+        assertThatThrownBy(() -> temaService.encontrarTemaPorId(999L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Tema no encontrado con ID: 999");
     }
 
     @Test
-    void eliminarTema_maestroPropietario_eliminaTemaYActividades() {
+    void encontrarTemaPorId_usuarioNoAlumnoNiMaestro_lanzaAccessDeniedException() {
+        when(usuarioService.findCurrentUser()).thenReturn(usuarioNoMaestro);
+        when(temaRepository.findById(100L)).thenReturn(Optional.of(tema));
+
+        assertThatThrownBy(() -> temaService.encontrarTemaPorId(100L))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Solo un usuario logueado como alumno o maestro puede obtener un tema");
+    }
+
+    @Test
+    void encontrarTemaPorId_alumnoNoInscrito_lanzaAccessDeniedException() {
+        Alumno alumnoNoInscrito = new Alumno();
+        alumnoNoInscrito.setId(4L);
+        curso.setInscripciones(new ArrayList<>());
+
+        when(usuarioService.findCurrentUser()).thenReturn(alumnoNoInscrito);
+        when(temaRepository.findById(100L)).thenReturn(Optional.of(tema));
+
+        assertThatThrownBy(() -> temaService.encontrarTemaPorId(100L))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Solo alguien perteneciente al curso puede acceder a este tema");
+    }
+
+    @Test
+    void encontrarTemasPorCursoMaestroId_maestroNoPropietario_lanzaAccessDeniedException() {
+        Curso cursoDeOtroMaestro = new Curso();
+        cursoDeOtroMaestro.setId(10L);
+        cursoDeOtroMaestro.setMaestro(otroMaestro);
+
+        when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        when(temaRepository.findByCursoId(10L)).thenReturn(List.of(tema));
+        when(cursoService.encontrarCursoPorId(10L)).thenReturn(cursoDeOtroMaestro);
+
+        assertThatThrownBy(() -> temaService.encontrarTemasPorCursoMaestroId(10L))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("El maestro no es propietario del curso.");
+    }
+
+    @Test
+    void eliminarTemaPorId_maestroPropietario_eliminaTemaYActividades() {
         Actividad actividad1 = new Actividad() {};
         actividad1.setId(501L);
         Actividad actividad2 = new Actividad() {};
@@ -236,7 +275,7 @@ class TemaServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(actividadRepository.findByTemaId(100L)).thenReturn(List.of(actividad1, actividad2));
 
-        temaService.eliminarTema(100L);
+        temaService.eliminarTemaPorId(100L);
 
         verify(actividadRepository).delete(actividad1);
         verify(actividadRepository).delete(actividad2);
@@ -244,20 +283,20 @@ class TemaServiceImplTest {
     }
 
     @Test
-    void eliminarTema_temaNoExiste_lanzaIllegalArgumentException() {
+    void eliminarTemaPorId_temaNoExiste_lanzaIllegalArgumentException() {
         when(temaRepository.findById(999L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> temaService.eliminarTema(999L))
+        assertThatThrownBy(() -> temaService.eliminarTemaPorId(999L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Tema no encontrado");
     }
 
     @Test
-    void eliminarTema_usuarioSinPermiso_lanzaAccessDeniedException() {
+    void eliminarTemaPorId_usuarioSinPermiso_lanzaAccessDeniedException() {
         when(temaRepository.findById(100L)).thenReturn(Optional.of(tema));
         when(usuarioService.findCurrentUser()).thenReturn(otroMaestro);
 
-        assertThatThrownBy(() -> temaService.eliminarTema(100L))
+        assertThatThrownBy(() -> temaService.eliminarTemaPorId(100L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("El usuario no tiene permiso para eliminar este tema.");
 

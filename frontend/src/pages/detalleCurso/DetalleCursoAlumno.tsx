@@ -93,7 +93,6 @@ export default function DetalleCursoAlumno({ curso, progreso }: Props) {
             {progreso?.estado === "TERMINADA" && (
               <div
                 className="detalle-hero-btn detalle-hero-btn--acabado"
-                
                 aria-label="Curso completado"
               >
                 ✅ Completado

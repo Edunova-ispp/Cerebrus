@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.cerebrus.actividad.marcarImagen.dto.MarcarImagenDTO;
-import com.cerebrus.puntoImage.dto.PuntoImagenDTO;
+import com.cerebrus.puntoImagen.dto.PuntoImagenDTO;
 
 import jakarta.validation.Valid;
 
@@ -36,38 +36,38 @@ public class MarcarImagenController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<MarcarImagenDTO> crearMarcarImagen(@RequestBody @Valid MarcarImagenDTO marcarImagenDTO) {
-        MarcarImagen marcarImagenCreada = marcarImagenService.crearMarcarImagen(marcarImagenDTO);
-        MarcarImagenDTO marcarImagenCreadaDTO = toMarcarImagenDTO(marcarImagenCreada);
+    public ResponseEntity<MarcarImagenDTO> crearActMarcarImagen(@RequestBody @Valid MarcarImagenDTO marcarImagenDTO) {
+        MarcarImagen marcarImagenCreada = marcarImagenService.crearActMarcarImagen(marcarImagenDTO);
+        MarcarImagenDTO marcarImagenCreadaDTO = obtenerMarcarImagenDTO(marcarImagenCreada);
         return new ResponseEntity<>(marcarImagenCreadaDTO, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MarcarImagenDTO> obtenerMarcarImagenPorId(@PathVariable Long id) {
-        MarcarImagen marcarImagen = marcarImagenService.obtenerMarcarImagenPorId(id);
-        MarcarImagenDTO marcarImagenDTO = toMarcarImagenDTO(marcarImagen);
+    public ResponseEntity<MarcarImagenDTO> encontrarActMarcarImagenPorId(@PathVariable Long id) {
+        MarcarImagen marcarImagen = marcarImagenService.encontrarActMarcarImagenPorId(id);
+        MarcarImagenDTO marcarImagenDTO = obtenerMarcarImagenDTO(marcarImagen);
         return ResponseEntity.ok(marcarImagenDTO);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<MarcarImagenDTO> actualizarMarcarImagen(@PathVariable Long id, @RequestBody @Valid MarcarImagenDTO marcarImagenDTO) {
-        MarcarImagen marcarImagenActualizada = marcarImagenService.actualizarMarcarImagen(id, marcarImagenDTO);
-        MarcarImagenDTO marcarImagenActualizadaDTO = toMarcarImagenDTO(marcarImagenActualizada);
+    public ResponseEntity<MarcarImagenDTO> actualizarActMarcarImagen(@PathVariable Long id, @RequestBody @Valid MarcarImagenDTO marcarImagenDTO) {
+        MarcarImagen marcarImagenActualizada = marcarImagenService.actualizarActMarcarImagen(id, marcarImagenDTO);
+        MarcarImagenDTO marcarImagenActualizadaDTO = obtenerMarcarImagenDTO(marcarImagenActualizada);
         return ResponseEntity.ok(marcarImagenActualizadaDTO);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<Void> eliminarMarcarImagen(@PathVariable Long id) {
-        marcarImagenService.eliminarMarcarImagen(id);
+    public ResponseEntity<Void> eliminarActMarcarImagenPorId(@PathVariable Long id) {
+        marcarImagenService.eliminarActMarcarImagenPorId(id);
         return ResponseEntity.noContent().build();
     }
 
-    private static MarcarImagenDTO toMarcarImagenDTO(MarcarImagen marcarImagen) {
+    private static MarcarImagenDTO obtenerMarcarImagenDTO(MarcarImagen marcarImagen) {
         return new MarcarImagenDTO(
             marcarImagen.getId(),
             marcarImagen.getTitulo(),
@@ -85,7 +85,11 @@ public class MarcarImagenController {
                     punto.getPixelX(),
                     punto.getPixelY()
                 ))
-                .toList()
+                .toList(),
+            marcarImagen.getMostrarPuntuacion(),
+            marcarImagen.getPermitirReintento(),
+            marcarImagen.getEncontrarRespuestaMaestro(),
+            marcarImagen.getEncontrarRespuestaAlumno()
         );
     }
 }

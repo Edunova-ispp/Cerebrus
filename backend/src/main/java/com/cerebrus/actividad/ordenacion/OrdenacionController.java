@@ -46,29 +46,33 @@ public class OrdenacionController {
             ordenacion.getRespVisible(),
             ordenacion.getComentariosRespVisible(),
             ordenacion.getPosicion(),
-            ordenacion.getValores()
+            ordenacion.getValores(),
+            ordenacion.getMostrarPuntuacion(),
+            ordenacion.getPermitirReintento(),
+            ordenacion.getEncontrarRespuestaMaestro(),
+            ordenacion.getEncontrarRespuestaAlumno()
         );
 
         return new ResponseEntity<>(ordenacionCreada.getId(), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrdenacionDTO> readOrdenacion(@PathVariable Long id) {
-        Ordenacion ordenacion = ordenacionService.readOrdenacion(id);
-        return new ResponseEntity<>(toDto(ordenacion), HttpStatus.OK);
+    public ResponseEntity<OrdenacionDTO> encontrarActOrdenacionPorId(@PathVariable Long id) {
+        Ordenacion ordenacion = ordenacionService.encontrarActOrdenacionPorId(id);
+        return new ResponseEntity<>(obtenerOrdenacionDto(ordenacion), HttpStatus.OK);
     }
 
     @GetMapping("/{id}/maestro")
-    public ResponseEntity<OrdenacionDTO> readOrdenacionMaestro(@PathVariable Long id) {
-        Ordenacion ordenacion = ordenacionService.readOrdenacionMaestro(id);
-        return new ResponseEntity<>(toDto(ordenacion), HttpStatus.OK);
+    public ResponseEntity<OrdenacionDTO> encontrarActOrdenacionMaestroPorId(@PathVariable Long id) {
+        Ordenacion ordenacion = ordenacionService.encontrarActOrdenacionMaestroPorId(id);
+        return new ResponseEntity<>(obtenerOrdenacionDto(ordenacion), HttpStatus.OK);
     }
 
     @PutMapping("/update/{id}")
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<Long> updateActOrdenacion(@PathVariable Long id,
+    public ResponseEntity<Long> actualizarActOrdenacion(@PathVariable Long id,
          @RequestBody @Valid Ordenacion ordenacion) {
-        Ordenacion ordenacionActualizada = ordenacionService.updateActOrdenacion(
+        Ordenacion ordenacionActualizada = ordenacionService.actualizarActOrdenacion(
             id,
             ordenacion.getTitulo(),
             ordenacion.getDescripcion(),
@@ -78,7 +82,11 @@ public class OrdenacionController {
             ordenacion.getRespVisible(),
             ordenacion.getComentariosRespVisible(),
             ordenacion.getPosicion(),
-            ordenacion.getValores()
+            ordenacion.getValores(),
+                ordenacion.getMostrarPuntuacion(),
+                ordenacion.getPermitirReintento(),
+                ordenacion.getEncontrarRespuestaMaestro(),
+                ordenacion.getEncontrarRespuestaAlumno()
         );
         return new ResponseEntity<>(ordenacionActualizada.getId(), HttpStatus.OK);
     }
@@ -86,12 +94,12 @@ public class OrdenacionController {
     @DeleteMapping("/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAuthority('MAESTRO')")
-    public ResponseEntity<Void> deleteActOrdenacion(@PathVariable Long id) {
-        ordenacionService.deleteActOrdenacion(id);
+    public ResponseEntity<Void> eliminarActOrdenacionPorId(@PathVariable Long id) {
+        ordenacionService.eliminarActOrdenacionPorId(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    private static OrdenacionDTO toDto(Ordenacion ordenacion) {
+    private static OrdenacionDTO obtenerOrdenacionDto(Ordenacion ordenacion) {
         return new OrdenacionDTO(
             ordenacion.getId(),
             ordenacion.getTitulo(),
@@ -102,7 +110,11 @@ public class OrdenacionController {
             ordenacion.getComentariosRespVisible(),
             ordenacion.getPosicion(),
             ordenacion.getTema() == null ? null : ordenacion.getTema().getId(),
-            ordenacion.getValores()
+            ordenacion.getValores(),
+            ordenacion.getMostrarPuntuacion(),
+            ordenacion.getPermitirReintento(),
+            ordenacion.getEncontrarRespuestaMaestro(),
+            ordenacion.getEncontrarRespuestaAlumno()
         );
     }
 }
