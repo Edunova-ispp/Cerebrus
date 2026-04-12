@@ -38,6 +38,9 @@ import EdunovaPage from "./pages/edunova/EdunovaPage.tsx";
 
 import Suscripcion from "./pages/suscripcion/Suscripcion.tsx";
 import ResumenSuscripcion from "./pages/suscripcion/ResumenSuscripcion.tsx";
+import GestionUsuarios from "./pages/gestionUsuarios/GestionUsuarios.tsx";
+import CreacionUsuario from "./pages/gestionUsuarios/CreacionUsuario.tsx";
+
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
 class WatchbugErrorBoundary extends Component<
   { children: React.ReactNode },
@@ -195,6 +198,12 @@ function App() {
         } />
         <Route path="/resumen-suscripcion" element={
           <ProtectedRoute allowedRoles={['DUENO', 'ORGANIZACION']}><ResumenSuscripcion /></ProtectedRoute>
+        } />
+        <Route path="/gestion-usuarios" element={
+          <ProtectedRoute allowedRoles={['ORGANIZACION']}><GestionUsuarios /></ProtectedRoute>
+        } />
+        <Route path="/gestion-usuarios/crear-usuario" element={
+          <ProtectedRoute allowedRoles={['ORGANIZACION']}><CreacionUsuario /></ProtectedRoute>
         } />
 
       </Routes>

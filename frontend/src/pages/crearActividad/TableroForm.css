@@ -37,45 +37,47 @@
 
 .tbl-input {
   width: 100%;
-  background: var(--color-accent);
-  border: 2px solid #000;
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
   border-radius: 8px;
   padding: 8px 10px;
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
-  color: #000;
-  transition: background 0.15s;
+  color: var(--t-text);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .tbl-input:hover {
-  background: var( --color-accent-light);
+  border-color: var(--t-border-dark);
 }
 
 .tbl-input:focus {
   outline: none;
-  background: var( --color-accent-light);
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .tbl-textarea {
   width: 100%;
-  background: var(--color-accent);
-  border: 2px solid #000;
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
   border-radius: 8px;
   padding: 8px 10px;
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
-  color: #000;
+  color: var(--t-text);
   resize: vertical;
-  transition: background 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .tbl-textarea:hover {
-  background: var( --color-accent-light);
+  border-color: var(--t-border-dark);
 }
 
 .tbl-textarea:focus {
   outline: none;
-  background: var( --color-accent-light);
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 /* ── Secciones ─────────────────────────────────────────────── */
@@ -104,25 +106,25 @@
   align-items: center;
   gap: 10px;
   padding: 18px 26px;
-  background: #FFF8EE;
-  border: 3px solid #000;
-  border-radius: 12px;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
   cursor: pointer;
   font-family: 'Oxygen', sans-serif;
-  transition: transform 0.12s, box-shadow 0.12s, background 0.15s;
-  box-shadow: 4px 4px 0 #000;
+  transition: all 0.15s;
+  box-shadow: var(--t-shadow-sm);
 }
 
 .tbl-tamano-btn:hover {
-  background: var(--color-accent);
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 #000;
+  background: var(--t-primary-light);
+  border-color: var(--t-primary);
+  box-shadow: var(--t-shadow);
 }
 
 .tbl-tamano-btn--active {
-  background: var( --color-accent-light);
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 #000;
+  background: var(--t-primary-light);
+  border-color: var(--t-primary);
+  box-shadow: var(--t-shadow);
 }
 
 .tbl-tamano-label {
@@ -174,7 +176,7 @@
 
 .tbl-q-row--header {
   padding-bottom: 6px;
-  border-bottom: 2px solid #000;
+  border-bottom: 1px solid var(--t-border);
   margin-bottom: 2px;
 }
 
@@ -196,17 +198,17 @@
 }
 
 .tbl-respuesta-input {
-  background: var(--color-accent) !important;
-  border-color: #000 !important;
+  background: var(--t-input-focus) !important;
+  border-color: var(--t-primary) !important;
 }
 
 .tbl-respuesta-input:hover {
-  background: var( --color-accent-light) !important;
+  background: var(--t-primary-light) !important;
 }
 
 .tbl-respuesta-input:focus {
-  background: var( --color-accent-light) !important;
-  border-color: #000 !important;
+  background: var(--t-primary-light) !important;
+  border-color: var(--t-primary) !important;
 }
 
 /* ── Feedback ──────────────────────────────────────────────── */
