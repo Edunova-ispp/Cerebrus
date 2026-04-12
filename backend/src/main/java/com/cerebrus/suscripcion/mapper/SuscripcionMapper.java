@@ -15,7 +15,8 @@ public class SuscripcionMapper {
             suscripcion.getPrecio(),
             suscripcion.getFechaInicio(),
             suscripcion.getFechaFin(),
-            suscripcion.isActiva()
+            suscripcion.isActiva(),
+            suscripcion.getEstadoPagoSuscripcion()
         );
     }
 
