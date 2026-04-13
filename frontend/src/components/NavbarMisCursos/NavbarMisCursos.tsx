@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/icons/logoCebrerusTopbar.png";
 import misCursosIcon from "../../assets/icons/misCursos.svg";
 import perfilIcon from "../../assets/icons/perfil.svg";
+import trofeoIcon from "../../assets/icons/Trofeo.svg";
 import { getCurrentUserRoles } from "../../types/curso";
 import "./NavbarMisCursos.css";
 
@@ -97,6 +98,7 @@ export default function NavbarMisCursos() {
               )}
               {isAlumno && (
                 <button type="button" className="navbar-link" onClick={() => navigate("/puntos")}>
+                  <img src={trofeoIcon} alt="" className="navbar-icon" />
                   <span>Puntos</span>
                 </button>
               )}
