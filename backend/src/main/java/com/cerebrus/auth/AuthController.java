@@ -11,6 +11,7 @@ import com.cerebrus.usuario.maestro.MaestroRepository;
 
 import jakarta.validation.Valid;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -86,7 +87,15 @@ public class AuthController {
 
                 if (orgId == null || !suscripcionRepository.findByOrganizacionIdSuscripcionActiva(orgId).isPresent()) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(new MessageResponse("Acceso denegado: La organización a la que pertenece no tiene una suscripción activa."));
+                        .body(new MessageResponse("CUENTA_ORG_NO_SUSCRIPCION"));
+                }
+            } else if (roles.contains("ORGANIZACION")) {
+                if (suscripcionRepository.findByOrganizacionIdSuscripcionExpirada(userDetails.getId()).isPresent()) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(new MessageResponse("ORG_SUSCRIPCION_EXPIRADA"));
+                } else if (!suscripcionRepository.findByOrganizacionIdSuscripcionActiva(userDetails.getId()).isPresent()) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(new MessageResponse("ORG_NO_SUSCRIPCION"));
                 }
             }
 
