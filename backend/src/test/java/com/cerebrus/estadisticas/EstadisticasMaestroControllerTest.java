@@ -1,18 +1,17 @@
 package com.cerebrus.estadisticas;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -271,7 +270,7 @@ class EstadisticasMaestroControllerTest {
     @Test
     void obtenerResumenEstadisticasAlumno_alumnoExistente_retorna200ConResumen() {
         EstadisticasAlumnoResumenDTO resumen = new EstadisticasAlumnoResumenDTO(
-            2L, "Alumno 1", 8.5, 6.0, 10.0, 3, 5, 120, List.of());
+                2L, "Alumno 1", 8.5, 6.0, 10.0, 3, 5, 120, 0, List.of());
         when(estadisticasMaestroService.obtenerResumenEstadisticasAlumno(10L, 2L)).thenReturn(resumen);
 
         ResponseEntity<?> respuesta = controller.obtenerResumenEstadisticasAlumno(10L, 2L);

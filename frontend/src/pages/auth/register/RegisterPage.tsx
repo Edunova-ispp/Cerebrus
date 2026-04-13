@@ -68,6 +68,7 @@ const RegisterPage = () => {
         setIsSuccess(true); 
       } else {
         // TRADUCCIÓN DE ERRORES: Si el backend se queja del 'username', el usuario debe ver 'email'
+        
         let mensajeError = data.message || 'Error en el servidor';
 
         if (mensajeError.toLowerCase().includes("nombre de usuario") || 

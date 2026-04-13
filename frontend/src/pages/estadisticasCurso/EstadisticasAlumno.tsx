@@ -12,6 +12,7 @@ interface IntentoActividad {
   puntuacion: number;
   nota: number;
   tiempoMinutos: number;
+  tiempoSegundos?: number;
   numAbandonos: number;
 }
 
@@ -66,6 +67,7 @@ interface EstadisticasAlumnoData {
   numActividadesCompletadas: number;
   totalActividades: number;
   tiempoTotalMinutos: number;
+  tiempoTotalSegundos?: number;
   temas: TemaEstadisticas[];
 }
 
@@ -98,10 +100,17 @@ function formatFecha(iso: string | null): string {
   );
 }
 
-function formatTiempo(min: number): string {
-  if (!min || min <= 0) return '< 1 min';
-  if (min === 1) return '1 min';
-  return `${min} min`;
+function formatTiempo(min?: number | null, segundos?: number | null): string {
+  const totalSegundos =
+    typeof segundos === 'number' && Number.isFinite(segundos)
+      ? segundos
+      : (min ?? 0) * 60;
+  if (totalSegundos <= 0) return '—';
+  if (totalSegundos < 60) return `${totalSegundos} s`;
+  const mins = Math.floor(totalSegundos / 60);
+  const secs = totalSegundos % 60;
+  if (secs === 0) return mins === 1 ? '1 min' : `${mins} min`;
+  return `${mins} min ${secs} s`;
 }
 
 function formatNota2Dec(nota: number | null | undefined): string {
@@ -130,6 +139,20 @@ function calcularNotaSobre10(puntuacion: number | null | undefined, puntuacionMa
   return (puntuacion / puntuacionMaxima) * 10;
 }
 
+export function calcularNotaActualTema(tema: TemaEstadisticas): number | null {
+  if (tema.actividades.length === 0) return null;
+
+  const sumaNotas = tema.actividades.reduce((acc, actividad) => {
+    const notaActividad = calcularNotaSobre10(actividad.puntuacionAlumno, actividad.puntuacionMaxima) ?? actividad.notaAlumno;
+    if (typeof notaActividad === 'number' && Number.isFinite(notaActividad)) {
+      return acc + Math.max(0, Math.min(10, notaActividad));
+    }
+    return acc;
+  }, 0);
+
+  return sumaNotas / tema.actividades.length;
+}
+
 function notaBadgeClass(nota: number | null, media: number): string {
   if (nota === null) return 'ea-nota-badge ea-nota-badge--none';
   if (nota >= media + 1) return 'ea-nota-badge ea-nota-badge--above';
@@ -152,11 +175,7 @@ function labelEstadoSemaforo(estado: 'riesgo' | 'atencion' | 'bien' | null): str
 }
 
 function obtenerResumenTema(tema: TemaEstadisticas): TemaResumen {
-  // Calcular nota de cada actividad en escala 0-10, limitada al rango [0, 10]
-  const notasActividades = tema.actividades
-    .map(a => calcularNotaSobre10(a.puntuacionAlumno, a.puntuacionMaxima) ?? a.notaAlumno)
-    .filter((n): n is number => typeof n === 'number' && Number.isFinite(n))
-    .map(n => Math.max(0, Math.min(10, n)));
+  const notaActual = calcularNotaActualTema(tema);
 
   const notasCompletadas = tema.actividades
     .filter(a => a.completada)
@@ -165,10 +184,6 @@ function obtenerResumenTema(tema: TemaEstadisticas): TemaResumen {
     .map(n => Math.max(0, Math.min(10, n)));
 
   const totalActividades = tema.actividades.length;
-  const sumaTodasLasActividades = notasActividades.reduce((acc, n) => acc + n, 0);
-
-  // La nota actual del tema se calcula sobre TODAS las actividades del tema.
-  const notaActual = notasActividades.length > 0 ? sumaTodasLasActividades / notasActividades.length : null;
   const notaMin = notasCompletadas.length > 0 ? Math.min(...notasCompletadas) : null;
   const notaMax = notasCompletadas.length > 0 ? Math.max(...notasCompletadas) : null;
 
@@ -369,7 +384,7 @@ export default function EstadisticasAlumno({ cursoIdProp, alumnoId }: Estadistic
       { label: 'Nota mínima', value: notaMinGlobal !== null ? formatNota2Dec(notaMinGlobal) : '—', mod: 'min' },
       { label: 'Nota máxima', value: notaMaxGlobal !== null ? formatNota2Dec(notaMaxGlobal) : '—', mod: 'max' },
       { label: 'Actividades', value: `${data.numActividadesCompletadas}/${data.totalActividades}`, mod: 'completadas' },
-      { label: 'Tiempo total', value: formatTiempo(data.tiempoTotalMinutos), mod: 'tiempo' },
+      { label: 'Tiempo total', value: formatTiempo(data.tiempoTotalMinutos, data.tiempoTotalSegundos), mod: 'tiempo' },
     ];
   }, [data]);
 

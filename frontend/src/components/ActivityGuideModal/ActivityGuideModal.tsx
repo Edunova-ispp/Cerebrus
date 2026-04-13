@@ -9,6 +9,7 @@ interface Props {
   readonly subtitle?: string;
   readonly content: string;
   readonly onClose: () => void;
+  readonly variant?: 'teacher' | 'student';
 }
 
 export default function ActivityGuideModal({ open, role, title, subtitle, content, onClose }: Props) {

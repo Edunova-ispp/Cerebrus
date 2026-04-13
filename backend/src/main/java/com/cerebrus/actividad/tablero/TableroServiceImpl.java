@@ -11,14 +11,14 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cerebrus.comun.enumerados.TamanoTablero;
-import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.tablero.dto.TableroDTO;
 import com.cerebrus.actividad.tablero.dto.TableroRequest;
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
 import com.cerebrus.actividadAlumn.ActividadAlumnoService;
+import com.cerebrus.comun.enumerados.TamanoTablero;
+import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.pregunta.Pregunta;
@@ -246,8 +246,13 @@ public class TableroServiceImpl implements TableroService {
             if (respuestaAlumnoExistente != null) {
                 respuestaAlumnoExistente.setRespuesta(respuesta);
                 respuestaAlumnoExistente.setCorrecta(correcta);
+                if (respuestaAlumnoExistente instanceof RespAlumnoGeneral respAlumnoGeneralExistente && !correcta) {
+                    int fallosPrevios = java.util.Objects.requireNonNullElse(respAlumnoGeneralExistente.getNumFallos(), 0);
+                    respAlumnoGeneralExistente.setNumFallos(fallosPrevios + 1);
+                }
             } else {
                 RespAlumnoGeneral respuestaAlumnoNueva = new RespAlumnoGeneral(correcta, actividadAlumno, respuesta, pregunta);
+                respuestaAlumnoNueva.setNumFallos(Boolean.TRUE.equals(correcta) ? 0 : 1);
                 actividadAlumno.getRespuestasAlumno().add(respuestaAlumnoNueva);
             }
 
@@ -263,20 +268,16 @@ public class TableroServiceImpl implements TableroService {
 
             if (preguntasCorrectasUnicas.size() == tablero.getPreguntas().size()) {
                 actividadAlumno.setFechaFin(LocalDateTime.now());
-                int numErrores = 0;
-                for(RespuestaAlumno resp : actividadAlumno.getRespuestasAlumno()) {
-                    if(!resp.getCorrecta()) {
-                        numErrores++;
+                int numFallosTotales = 0;
+                for (RespuestaAlumno resp : actividadAlumno.getRespuestasAlumno()) {
+                    if (resp instanceof RespAlumnoGeneral respGeneral) {
+                        numFallosTotales += java.util.Objects.requireNonNullElse(respGeneral.getNumFallos(), 0);
                     }
                 }
-                Integer notaFinal = Math.round(10 - (numErrores * (10 / tablero.getPreguntas().size()/4)));
-                if (notaFinal <= 0) {
-                    notaFinal = 1;
-                }
-                Integer puntuacionFinal = Math.round(tablero.getPuntuacion() - (numErrores * (tablero.getPuntuacion() / tablero.getPreguntas().size()/4)));
-                if (puntuacionFinal <= 0) {
-                    puntuacionFinal = 1;
-                }
+
+                int notaFinal = Math.max(0, 10 - numFallosTotales);
+                Integer puntuacionBase = java.util.Objects.requireNonNullElse(tablero.getPuntuacion(), 0);
+                Integer puntuacionFinal = (int) Math.round(puntuacionBase.doubleValue() * (notaFinal / 10.0));
                 actividadAlumno.setNota(notaFinal);
                 actividadAlumno.setPuntuacion(puntuacionFinal);
             }

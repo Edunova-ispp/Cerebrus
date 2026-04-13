@@ -147,7 +147,6 @@
   border: 1px solid var(--t-border);
   border-radius: var(--t-radius-lg);
   box-shadow: var(--t-shadow);
-  transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .mis-cursos-page.maestro .curso-card:hover {

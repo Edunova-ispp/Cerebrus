@@ -52,6 +52,7 @@ export default function ActivityGuideButton({ activityType, role, buttonLabel = 
         subtitle={`Actividad: ${activityLabel}`}
         content={guide}
         onClose={() => setOpen(false)}
+        variant={role === 'maestro' ? 'teacher' : 'student'}
       />
     </>
   );

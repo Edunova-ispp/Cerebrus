@@ -12,13 +12,14 @@ public class EstadisticasAlumnoResumenDTO {
     private Integer numActividadesCompletadas;
     private Integer totalActividades;
     private Integer tiempoTotalMinutos;
+    private Integer tiempoTotalSegundos;
     private List<TemaEstadisticasAlumnoDTO> temas;
 
     public EstadisticasAlumnoResumenDTO() {}
 
     public EstadisticasAlumnoResumenDTO(Long alumnoId, String nombreAlumno, Double notaMedia,
             Double notaMin, Double notaMax, Integer numActividadesCompletadas,
-            Integer totalActividades, Integer tiempoTotalMinutos,
+            Integer totalActividades, Integer tiempoTotalMinutos, Integer tiempoTotalSegundos,
             List<TemaEstadisticasAlumnoDTO> temas) {
         this.alumnoId = alumnoId;
         this.nombreAlumno = nombreAlumno;
@@ -28,6 +29,7 @@ public class EstadisticasAlumnoResumenDTO {
         this.numActividadesCompletadas = numActividadesCompletadas;
         this.totalActividades = totalActividades;
         this.tiempoTotalMinutos = tiempoTotalMinutos;
+        this.tiempoTotalSegundos = tiempoTotalSegundos;
         this.temas = temas;
     }
 
@@ -47,6 +49,8 @@ public class EstadisticasAlumnoResumenDTO {
     public void setTotalActividades(Integer totalActividades) { this.totalActividades = totalActividades; }
     public Integer getTiempoTotalMinutos() { return tiempoTotalMinutos; }
     public void setTiempoTotalMinutos(Integer tiempoTotalMinutos) { this.tiempoTotalMinutos = tiempoTotalMinutos; }
+    public Integer getTiempoTotalSegundos() { return tiempoTotalSegundos; }
+    public void setTiempoTotalSegundos(Integer tiempoTotalSegundos) { this.tiempoTotalSegundos = tiempoTotalSegundos; }
     public List<TemaEstadisticasAlumnoDTO> getTemas() { return temas; }
     public void setTemas(List<TemaEstadisticasAlumnoDTO> temas) { this.temas = temas; }
 }

@@ -1,11 +1,10 @@
 package com.cerebrus.estadisticas.dto;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
 class EstadisticasDTOTest {
@@ -79,7 +78,7 @@ class EstadisticasDTOTest {
         LocalDateTime fin = LocalDateTime.now();
         
         IntentoActividadDTO dto = new IntentoActividadDTO(
-            1L, inicio, fin, 100, 9, 30, 0);
+            1L, inicio, fin, 100, 9, 30, 0, 0);
 
         assertThat(dto.getId()).isEqualTo(1L);
         assertThat(dto.getFechaInicio()).isEqualTo(inicio);
@@ -431,7 +430,7 @@ class EstadisticasDTOTest {
         List<TemaEstadisticasAlumnoDTO> temas = new ArrayList<>();
         
         EstadisticasAlumnoResumenDTO dto = new EstadisticasAlumnoResumenDTO(
-            1L, "Juan Pérez", 7.5, 6.0, 9.0, 5, 8, 120, temas);
+            1L, "Juan Pérez", 7.5, 6.0, 9.0, 5, 8, 120, 0, temas);
 
         assertThat(dto.getAlumnoId()).isEqualTo(1L);
         assertThat(dto.getNombreAlumno()).isEqualTo("Juan Pérez");
@@ -488,7 +487,7 @@ class EstadisticasDTOTest {
     @Test
     void intentoActividadDTO_withNullDates_handlesCorrectly() {
         IntentoActividadDTO dto = new IntentoActividadDTO(
-            1L, null, null, 100, 9, 30, 0);
+            1L, null, null, 100, 9, 30, 0, 0);
 
         assertThat(dto.getId()).isEqualTo(1L);
         assertThat(dto.getFechaInicio()).isNull();

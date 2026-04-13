@@ -82,7 +82,7 @@ public class OrganizacionController {
         try {
             List<String> errores = organizacionService.leerArchivoImportacionUsuarios(archivo);
             if (!errores.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Errores encontrados en el archivo, se han podido introducir los usuarios cuya fila en el archivo no haya tenido un error. Los errores son:: " + String.join(", ", errores));
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Errores encontrados en el archivo. No se ha importado ningún usuario. Los errores son: " + String.join(", ", errores));
             } else {
                 return ResponseEntity.ok("Archivo importado correctamente");
             }
