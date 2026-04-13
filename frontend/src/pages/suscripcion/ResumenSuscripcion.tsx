@@ -59,7 +59,7 @@ export default function ResumenSuscripcion() {
       setErrorPago(null);
 
       const res = await apiFetch(
-        `${apiBase}/api/suscripciones/organizacion/${organizacionId}/crear`,
+        `${apiBase}/api/suscripciones/crear-suscripcion/${organizacionId}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

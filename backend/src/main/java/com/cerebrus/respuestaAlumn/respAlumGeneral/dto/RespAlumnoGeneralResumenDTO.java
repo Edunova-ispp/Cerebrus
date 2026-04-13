@@ -6,15 +6,17 @@ public class RespAlumnoGeneralResumenDTO {
     private String respuesta;
     private Boolean correcta;
     private String respuestaCorrecta;
+    private Integer numFallos;
 
     public RespAlumnoGeneralResumenDTO() {
     }
 
-    public RespAlumnoGeneralResumenDTO(Long preguntaId, String respuesta, Boolean correcta, String respuestaCorrecta) {
+    public RespAlumnoGeneralResumenDTO(Long preguntaId, String respuesta, Boolean correcta, String respuestaCorrecta, Integer numFallos) {
         this.preguntaId = preguntaId;
         this.respuesta = respuesta;
         this.correcta = correcta;
         this.respuestaCorrecta = respuestaCorrecta;
+        this.numFallos = numFallos;
     }
 
     public Long getPreguntaId() {
@@ -47,5 +49,13 @@ public class RespAlumnoGeneralResumenDTO {
 
     public void setRespuestaCorrecta(String respuestaCorrecta) {
         this.respuestaCorrecta = respuestaCorrecta;
+    }
+
+    public Integer getNumFallos() {
+        return numFallos;
+    }
+
+    public void setNumFallos(Integer numFallos) {
+        this.numFallos = numFallos;
     }
 }
