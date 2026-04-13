@@ -70,7 +70,7 @@ class ActividadAlumnoControllerTest {
     void crearActAlumno_datosCompletos_retorna201ConDTO() {
         ActividadAlumnoDTO request = new ActividadAlumnoDTO(
                 null, 100, LocalDateTime.of(2024, 1, 1, 9, 0),
-                LocalDateTime.of(2024, 1, 1, 9, 30), 8, 0, 1L, 50L);
+                                LocalDateTime.of(2024, 1, 1, 9, 30), 8, 0, false, 1L, 50L);
         when(actividadAlumnoService.crearActAlumno(
                 eq(100), any(LocalDateTime.class), any(LocalDateTime.class),
                 eq(8), eq(0), eq(1L), eq(50L)))
@@ -90,7 +90,7 @@ class ActividadAlumnoControllerTest {
     @Test
     void crearActAlumno_puntuacionNull_usaCero() {
         ActividadAlumnoDTO request = new ActividadAlumnoDTO(
-                null, null, LocalDateTime.now(), LocalDateTime.now(), null, null, 1L, 50L);
+                                null, null, LocalDateTime.now(), LocalDateTime.now(), null, null, false, 1L, 50L);
         actividadAlumno.setPuntuacion(0);
         actividadAlumno.setNota(0);
         actividadAlumno.setNumAbandonos(0);
@@ -108,7 +108,7 @@ class ActividadAlumnoControllerTest {
     @Test
     void crearActAlumno_actividadNoExiste_propagaResourceNotFoundException() {
         ActividadAlumnoDTO request = new ActividadAlumnoDTO(
-                null, 100, LocalDateTime.now(), LocalDateTime.now(), 8, 0, 1L, 99L);
+                                null, 100, LocalDateTime.now(), LocalDateTime.now(), 8, 0, false, 1L, 99L);
         when(actividadAlumnoService.crearActAlumno(
                 anyInt(), any(), any(), anyInt(), anyInt(), anyLong(), anyLong()))
                 .thenThrow(new ResourceNotFoundException("La actividad no existe"));
@@ -120,7 +120,7 @@ class ActividadAlumnoControllerTest {
     @Test
     void crearActAlumno_parejaYaExiste_retorna201ConExistente() {
         ActividadAlumnoDTO request = new ActividadAlumnoDTO(
-                null, 100, LocalDateTime.now(), LocalDateTime.now(), 8, 0, 1L, 50L);
+                                null, 100, LocalDateTime.now(), LocalDateTime.now(), 8, 0, false, 1L, 50L);
         when(actividadAlumnoService.crearActAlumno(
                 anyInt(), any(), any(), anyInt(), anyInt(), anyLong(), anyLong()))
                 .thenReturn(actividadAlumno);
@@ -158,12 +158,12 @@ class ActividadAlumnoControllerTest {
     @Test
     void actualizarActAlumno_datosValidos_retorna200ConDTOActualizado() {
         ActividadAlumnoDTO request = new ActividadAlumnoDTO(
-                null, 200, LocalDateTime.now(), LocalDateTime.now(), 9, 1, 1L, 50L);
+                null, 200, LocalDateTime.now(), LocalDateTime.now(), 9, 1, true, 1L, 50L);
         actividadAlumno.setPuntuacion(200);
         actividadAlumno.setNota(9);
         actividadAlumno.setNumAbandonos(1);
         when(actividadAlumnoService.actualizarActAlumno(
-                eq(10L), eq(200), any(), any(), eq(9), eq(1)))
+                eq(10L), eq(200), any(), any(), eq(9), eq(1), eq(true)))
                 .thenReturn(actividadAlumno);
 
         ResponseEntity<ActividadAlumnoDTO> respuesta = controller.actualizarActAlumno(10L, request);
@@ -172,15 +172,15 @@ class ActividadAlumnoControllerTest {
         assertThat(respuesta.getBody().getPuntuacion()).isEqualTo(200);
         assertThat(respuesta.getBody().getNota()).isEqualTo(9);
         assertThat(respuesta.getBody().getNumAbandonos()).isEqualTo(1);
-        verify(actividadAlumnoService).actualizarActAlumno(eq(10L), eq(200), any(), any(), eq(9), eq(1));
+                verify(actividadAlumnoService).actualizarActAlumno(eq(10L), eq(200), any(), any(), eq(9), eq(1), eq(true));
     }
 
     @Test
     void actualizarActAlumno_noExiste_propagaResourceNotFoundException() {
         ActividadAlumnoDTO request = new ActividadAlumnoDTO(
-                null, 100, LocalDateTime.now(), LocalDateTime.now(), 8, 0, 1L, 50L);
+                null, 100, LocalDateTime.now(), LocalDateTime.now(), 8, 0, false, 1L, 50L);
         when(actividadAlumnoService.actualizarActAlumno(
-                eq(99L), any(), any(), any(), any(), any()))
+                eq(99L), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new ResourceNotFoundException("La actividad del alumno no existe"));
 
         assertThatThrownBy(() -> controller.actualizarActAlumno(99L, request))

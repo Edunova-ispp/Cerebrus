@@ -35,7 +35,7 @@ public class ActividadServiceImpl implements ActividadService {
     }
 
     @Override
-    public Actividad crearActTeoria(String titulo, String descripcion, String imagen, Long temaId) {
+    public Actividad crearActTeoria(String titulo, String descripcion, String imagen, Long temaId, Boolean permitirReintento) {
 
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
@@ -54,7 +54,7 @@ public class ActividadServiceImpl implements ActividadService {
         // Las actividades de teoría no aportan puntuación, pero el campo requiere mínimo 1 por validación
         Actividad actividad = new General(titulo, descripcion, Integer.valueOf(1), imagen,
             Boolean.FALSE, "", nuevaPosicion, Integer.valueOf(1), tema, TipoActGeneral.TEORIA,
-            Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
+            Boolean.FALSE, Boolean.TRUE.equals(permitirReintento), Boolean.FALSE, Boolean.FALSE);
 
         return actividadRepository.save(actividad);
     }
@@ -106,7 +106,7 @@ public class ActividadServiceImpl implements ActividadService {
     }
 
     @Override
-    public Actividad actualizarActTeoria(Long id, String titulo, String descripcion,String imagen ) {
+    public Actividad actualizarActTeoria(Long id, String titulo, String descripcion,String imagen, Boolean permitirReintento ) {
         Usuario u = usuarioService.findCurrentUser();
         if (!(u instanceof Maestro)) {
             throw new AccessDeniedException("Solo un maestro puede editar actividades de teoría");
@@ -120,6 +120,7 @@ public class ActividadServiceImpl implements ActividadService {
             actividad.setTitulo(titulo);
             actividad.setDescripcion(descripcion);
             actividad.setImagen(imagen);
+            actividad.setPermitirReintento(Boolean.TRUE.equals(permitirReintento));
             return actividadRepository.save(actividad);
         }
     }

@@ -1,0 +1,2 @@
+ALTER TABLE actividad_alumno
+    ADD COLUMN IF NOT EXISTS solucion_usada BOOLEAN NOT NULL DEFAULT FALSE;

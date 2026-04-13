@@ -23,6 +23,10 @@ type OrdenacionDTO = {
     puntuacion: number;
     imagen: string | null;
     respVisible: boolean;
+    permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     comentariosRespVisible: string | null;
     posicion: number;
     temaId: number;
@@ -34,6 +38,10 @@ type TeoriaDTO = {
     titulo: string;
     descripcion: string;
     imagen: string;
+    permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     posicion: number;
     temaId: number;
 };
@@ -45,6 +53,10 @@ type GeneralTestMaestroDTO = {
     puntuacion: number;
     imagen: string | null;
     respVisible: boolean;
+    permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     comentariosRespVisible: string | null;
     posicion: number;
     version: number;
@@ -62,6 +74,10 @@ type CrucigramaMaestroDTO = {
     descripcion: string;
     puntuacion: number;
     respVisible: boolean;
+    permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     temaId: number;
     preguntas: {
         id: number;
@@ -78,6 +94,10 @@ type PreguntaAbiertaMaestroDTO = {
     puntuacion: number;
     imagen: string | null;
     respVisible: boolean;
+    permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     comentariosRespVisible: string | null;
     posicion: number;
     version: number;
@@ -103,6 +123,10 @@ type MarcarImagenDTO = {
     puntuacion: number;
     imagenActividad: string | null;
     respVisible: boolean;
+    permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     comentariosRespVisible: string | null;
     temaId: number;
     imagenAMarcar: string;
@@ -118,6 +142,10 @@ type TableroDTO = {
     posicion: number;
     temaId: number;
     respVisible: boolean;
+    permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     preguntas: {
         id: number;
         pregunta: string;
@@ -132,6 +160,10 @@ type ClasificacionMaestroDTO = {
     puntuacion: number;
     imagen: string | null;
     respVisible: boolean;
+    permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     comentariosRespVisible: string | null;
     posicion: number;
     version: number;
@@ -146,6 +178,10 @@ type GeneralCartaMaestroDTO = {
     puntuacion: number;
     imagen: string | null;
     respVisible: boolean;
+    permitirReintento?: boolean;
+    mostrarPuntuacion?: boolean;
+    encontrarRespuestaMaestro?: boolean;
+    encontrarRespuestaAlumno?: boolean;
     comentariosRespVisible: string | null;
     posicion: number;
     version: number;
@@ -416,6 +452,10 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             puntuacion: preguntaAbierta.puntuacion,
             imagen: preguntaAbierta.imagen,
             respVisible: preguntaAbierta.respVisible,
+            permitirReintento: preguntaAbierta.permitirReintento,
+            mostrarPuntuacion: preguntaAbierta.mostrarPuntuacion,
+            encontrarRespuestaMaestro: preguntaAbierta.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: preguntaAbierta.encontrarRespuestaAlumno,
             comentariosRespVisible: preguntaAbierta.comentariosRespVisible,
             posicion: preguntaAbierta.posicion,
             version: preguntaAbierta.version,
@@ -434,6 +474,10 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             descripcion: tablero.descripcion,
             puntuacion: tablero.puntuacion,
             respVisible: tablero.respVisible,
+            permitirReintento: tablero.permitirReintento,
+            mostrarPuntuacion: tablero.mostrarPuntuacion,
+            encontrarRespuestaMaestro: tablero.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: tablero.encontrarRespuestaAlumno,
             tamano: tablero.tamano,
             temaId: tablero.temaId,
             preguntas: tablero.preguntas.map((p) => ({
@@ -449,6 +493,10 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             puntuacion: generalTest.puntuacion,
             imagen: generalTest.imagen,
             respVisible: generalTest.respVisible,
+            permitirReintento: generalTest.permitirReintento,
+            mostrarPuntuacion: generalTest.mostrarPuntuacion,
+            encontrarRespuestaMaestro: generalTest.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: generalTest.encontrarRespuestaAlumno,
             comentariosRespVisible: generalTest.comentariosRespVisible,
             posicion: generalTest.posicion,
             version: generalTest.version,
@@ -462,6 +510,10 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             descripcion: crucigrama.descripcion || '',
             puntuacion: crucigrama.puntuacion,
             respVisible: crucigrama.respVisible,
+            permitirReintento: crucigrama.permitirReintento,
+            mostrarPuntuacion: crucigrama.mostrarPuntuacion,
+            encontrarRespuestaMaestro: crucigrama.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: crucigrama.encontrarRespuestaAlumno,
             temaId: crucigrama.temaId,
             preguntasYRespuestas: crucigrama.preguntasYRespuestas,
         } : undefined;
@@ -473,6 +525,10 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             puntuacion: ordenacion.puntuacion,
             imagen: ordenacion.imagen,
             respVisible: ordenacion.respVisible,
+            permitirReintento: ordenacion.permitirReintento,
+            mostrarPuntuacion: ordenacion.mostrarPuntuacion,
+            encontrarRespuestaMaestro: ordenacion.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: ordenacion.encontrarRespuestaAlumno,
             comentariosRespVisible: ordenacion.comentariosRespVisible,
             posicion: ordenacion.posicion,
             temaId: ordenacion.temaId,
@@ -484,6 +540,10 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             titulo: teoria.titulo,
             descripcion: teoria.descripcion,
             imagen: teoria.imagen,
+            permitirReintento: teoria.permitirReintento,
+            mostrarPuntuacion: teoria.mostrarPuntuacion,
+            encontrarRespuestaMaestro: teoria.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: teoria.encontrarRespuestaAlumno,
             posicion: teoria.posicion,
             temaId: teoria.temaId,
         } : undefined;
@@ -495,6 +555,10 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             puntuacion: generalCarta.puntuacion,
             imagen: generalCarta.imagen,
             respVisible: generalCarta.respVisible,
+            permitirReintento: generalCarta.permitirReintento,
+            mostrarPuntuacion: generalCarta.mostrarPuntuacion,
+            encontrarRespuestaMaestro: generalCarta.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: generalCarta.encontrarRespuestaAlumno,
             comentariosRespVisible: generalCarta.comentariosRespVisible,
             posicion: generalCarta.posicion,
             version: generalCarta.version,
@@ -508,6 +572,10 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             descripcion: marcarImagen.descripcion,
             puntuacion: marcarImagen.puntuacion,
             respVisible: marcarImagen.respVisible,
+            permitirReintento: marcarImagen.permitirReintento,
+            mostrarPuntuacion: marcarImagen.mostrarPuntuacion,
+            encontrarRespuestaMaestro: marcarImagen.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: marcarImagen.encontrarRespuestaAlumno,
             comentariosRespVisible: marcarImagen.comentariosRespVisible,
             temaId: marcarImagen.temaId,
             imagenAMarcar: marcarImagen.imagenAMarcar,
@@ -525,6 +593,10 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
             descripcion: clasificacion.descripcion,
             puntuacion: clasificacion.puntuacion,
             respVisible: clasificacion.respVisible,
+            permitirReintento: clasificacion.permitirReintento,
+            mostrarPuntuacion: clasificacion.mostrarPuntuacion,
+            encontrarRespuestaMaestro: clasificacion.encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: clasificacion.encontrarRespuestaAlumno,
             comentariosRespVisible: clasificacion.comentariosRespVisible,
             posicion: clasificacion.posicion,
             version: clasificacion.version,

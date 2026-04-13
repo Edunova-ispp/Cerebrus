@@ -39,7 +39,8 @@ public class ActividadController {
                 request.getTitulo(),
                 request.getDescripcion(),
                 request.getImagen(),
-                request.getTemaId()
+                request.getTemaId(),
+                request.getPermitirReintento()
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(obtenerTeoriaDto(actividad));
     }
@@ -69,7 +70,8 @@ public class ActividadController {
                 id,
                 request.getTitulo(),
                 request.getDescripcion(),
-                request.getImagen()
+                request.getImagen(),
+                request.getPermitirReintento()
             );
             return ResponseEntity.ok(obtenerTeoriaDto(actividad));
     }
@@ -90,7 +92,8 @@ public class ActividadController {
             actividad.getDescripcion(),
             actividad.getImagen(),
             actividad.getPosicion(),
-            actividad.getTema() == null ? null : actividad.getTema().getId()
+            actividad.getTema() == null ? null : actividad.getTema().getId(),
+            actividad.getPermitirReintento()
         );
     }
 
@@ -100,6 +103,7 @@ public class ActividadController {
         private String descripcion;
         private Integer puntuacion;
         private String imagen;
+        private Boolean permitirReintento;
         @NotNull
         private Long temaId;
 
@@ -111,6 +115,8 @@ public class ActividadController {
         public void setPuntuacion(Integer puntuacion) { this.puntuacion = puntuacion; }
         public String getImagen() { return imagen; }
         public void setImagen(String imagen) { this.imagen = imagen; }
+        public Boolean getPermitirReintento() { return permitirReintento; }
+        public void setPermitirReintento(Boolean permitirReintento) { this.permitirReintento = permitirReintento; }
         public Long getTemaId() { return temaId; }
         public void setTemaId(Long temaId) { this.temaId = temaId; }
     }

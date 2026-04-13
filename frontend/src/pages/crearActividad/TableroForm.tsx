@@ -12,10 +12,14 @@ export interface TableroFormInitialValues {
   readonly descripcion: string | null;
   readonly puntuacion: number;
   readonly respVisible: boolean;
+  readonly permitirReintento?: boolean;
   /** true = 3×3 (8 preguntas), false = 4×4 (15 preguntas) */
   readonly tamano: boolean;
   readonly temaId: number;
   readonly preguntas: readonly { readonly pregunta: string; readonly respuesta: string }[];
+  readonly mostrarPuntuacion?: boolean;
+  readonly encontrarRespuestaMaestro?: boolean;
+  readonly encontrarRespuestaAlumno?: boolean;
 }
 
 interface Props {
@@ -47,6 +51,10 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
   const [respVisible, setRespVisible] = useState(false);
+  const [permitirReintento, setPermitirReintento] = useState(false);
+  const [mostrarPuntuacion, setMostrarPuntuacion] = useState(false);
+  const [encontrarRespuestaMaestro, setEncontrarRespuestaMaestro] = useState(false);
+  const [encontrarRespuestaAlumno, setEncontrarRespuestaAlumno] = useState(false);
   const [tamano, setTamano] = useState<boolean | null>(null);
   const [temaIdState, setTemaIdState] = useState<number | null>(null);
   const [preguntas, setPreguntas] = useState<QPair[]>([]);
@@ -69,6 +77,10 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion));
     setRespVisible(initialValues.respVisible);
+    setPermitirReintento(Boolean(initialValues.permitirReintento));
+    setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion));
+    setEncontrarRespuestaMaestro(Boolean(initialValues.encontrarRespuestaMaestro));
+    setEncontrarRespuestaAlumno(Boolean(initialValues.encontrarRespuestaAlumno));
     setTamano(initialValues.tamano);
     setTemaIdState(initialValues.temaId);
     setPreguntas(
@@ -120,6 +132,10 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
       tamano,
       temaId: mode === 'create' ? Number.parseInt(temaId!, 10) : temaIdState,
       respVisible,
+      permitirReintento,
+      mostrarPuntuacion,
+      encontrarRespuestaMaestro,
+      encontrarRespuestaAlumno,
       preguntasYRespuestas,
     };
   };
@@ -251,6 +267,41 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
               onChange={(e) => setRespVisible(e.target.checked)}
             />
             <span>Mostrar respuesta correcta al alumno</span>
+          </label>
+          <label className="tbl-label tbl-label--check">
+            <input
+              type="checkbox"
+              checked={permitirReintento}
+              onChange={(e) => setPermitirReintento(e.target.checked)}
+            />
+            <span>Permitir reintentos</span>
+          </label>
+
+          <label className="tbl-label tbl-label--check">
+            <input
+              type="checkbox"
+              checked={mostrarPuntuacion}
+              onChange={(e) => setMostrarPuntuacion(e.target.checked)}
+            />
+            <span>Mostrar puntuación</span>
+          </label>
+
+          <label className="tbl-label tbl-label--check">
+            <input
+              type="checkbox"
+              checked={encontrarRespuestaMaestro}
+              onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
+            />
+            <span>Mostrar respuesta correcta</span>
+          </label>
+
+          <label className="tbl-label tbl-label--check">
+            <input
+              type="checkbox"
+              checked={encontrarRespuestaAlumno}
+              onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
+            />
+            <span>Mostrar mi respuesta</span>
           </label>
           <div>
             <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>

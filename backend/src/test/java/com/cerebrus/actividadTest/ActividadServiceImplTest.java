@@ -53,7 +53,7 @@ class ActividadServiceImplTest {
         when(temaService.encontrarTemaPorId(99L))
                 .thenThrow(new IllegalArgumentException("Tema no encontrado con ID: 99"));
 
-        assertThatThrownBy(() -> actividadService.crearActTeoria("Titulo", "Desc", null, 99L))
+        assertThatThrownBy(() -> actividadService.crearActTeoria("Titulo", "Desc", null, 99L, false))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Tema no encontrado");
 
@@ -64,7 +64,7 @@ class ActividadServiceImplTest {
     void crearActTeoria_usuarioNoEsMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(new com.cerebrus.usuario.Usuario() {});
 
-        assertThatThrownBy(() -> actividadService.crearActTeoria("T", "D", null, 1L))
+        assertThatThrownBy(() -> actividadService.crearActTeoria("T", "D", null, 1L, false))
                 .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
 
         verify(actividadRepository, never()).save(any());
@@ -81,7 +81,7 @@ class ActividadServiceImplTest {
         when(actividadRepository.findMaxPosicionByTemaId(55L)).thenReturn(null);
         when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Actividad resultado = actividadService.crearActTeoria("Título", "Desc", null, 55L);
+        Actividad resultado = actividadService.crearActTeoria("Título", "Desc", null, 55L, false);
 
         assertThat(resultado).isNotNull();
         assertThat(resultado).isInstanceOf(General.class);
@@ -113,7 +113,7 @@ class ActividadServiceImplTest {
         when(actividadRepository.findMaxPosicionByTemaId(56L)).thenReturn(0);
         when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        actividadService.crearActTeoria("T", "D", null, 56L);
+        actividadService.crearActTeoria("T", "D", null, 56L, false);
 
         verify(actividadRepository).save(actividadCaptor.capture());
         assertThat(actividadCaptor.getValue().getPosicion()).isEqualTo(1);
@@ -130,7 +130,7 @@ class ActividadServiceImplTest {
         when(actividadRepository.findMaxPosicionByTemaId(57L)).thenReturn(12);
         when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        actividadService.crearActTeoria("T", "D", null, 57L);
+        actividadService.crearActTeoria("T", "D", null, 57L, false);
 
         verify(actividadRepository).save(actividadCaptor.capture());
         assertThat(actividadCaptor.getValue().getPosicion()).isEqualTo(13);
@@ -375,7 +375,7 @@ class ActividadServiceImplTest {
     @Test
     void actualizarActTeoria_usuarioNoEsMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(new com.cerebrus.usuario.Usuario() {});
-        assertThatThrownBy(() -> actividadService.actualizarActTeoria(1L, "T", "D", null))
+        assertThatThrownBy(() -> actividadService.actualizarActTeoria(1L, "T", "D", null, false))
             .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
             .hasMessageContaining("Solo un maestro");
     }
@@ -391,7 +391,7 @@ class ActividadServiceImplTest {
         actividad.setTema(tema);
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(actividadRepository.findById(5L)).thenReturn(java.util.Optional.of(actividad));
-        assertThatThrownBy(() -> actividadService.actualizarActTeoria(5L, "T", "D", null))
+        assertThatThrownBy(() -> actividadService.actualizarActTeoria(5L, "T", "D", null, false))
             .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
             .hasMessageContaining("no son tuyos");
     }
@@ -407,7 +407,7 @@ class ActividadServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(actividadRepository.findById(5L)).thenReturn(java.util.Optional.of(actividad));
         when(actividadRepository.save(any(Actividad.class))).thenAnswer(inv -> inv.getArgument(0));
-        Actividad result = actividadService.actualizarActTeoria(5L, "Nuevo T", "Nueva D", "img.png");
+        Actividad result = actividadService.actualizarActTeoria(5L, "Nuevo T", "Nueva D", "img.png", false);
         assertThat(result.getTitulo()).isEqualTo("Nuevo T");
         assertThat(result.getDescripcion()).isEqualTo("Nueva D");
         assertThat(result.getImagen()).isEqualTo("img.png");

@@ -23,11 +23,14 @@ export interface CartaFormInitialValues {
   readonly puntuacion: number;
   readonly imagen: string | null;
   readonly respVisible: boolean;
+  readonly permitirReintento?: boolean;
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly version: number;
   readonly temaId?: number;
   readonly preguntas?: readonly CartaFormInitialPregunta[];
+  readonly mostrarPuntuacion?: boolean;
+  readonly encontrarRespuestaMaestro?: boolean;
 }
 
 interface Card {
@@ -62,7 +65,10 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
   const [puntuacion, setPuntuacion] = useState('');
   const [imagen, setImagen] = useState('');
   const [respVisible, setRespVisible] = useState(false);
+  const [permitirReintento, setPermitirReintento] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
+  const [mostrarPuntuacion, setMostrarPuntuacion] = useState(false);
+  const [encontrarRespuestaMaestro, setEncontrarRespuestaMaestro] = useState(false);
   const [cards, setCards] = useState<Card[]>([makeEmptyCard()]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -83,7 +89,10 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
     setPuntuacion(String(initialValues.puntuacion ?? ''));
     setImagen(initialValues.imagen ?? '');
     setRespVisible(Boolean(initialValues.respVisible));
+    setPermitirReintento(Boolean(initialValues.permitirReintento));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
+    setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion));
+    setEncontrarRespuestaMaestro(Boolean(initialValues.encontrarRespuestaMaestro));
 
     if (initialValues.preguntas && initialValues.preguntas.length > 0) {
       originalCardsRef.current = [...initialValues.preguntas];
@@ -115,39 +124,46 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
 
   const updateCardImagen = (ci: number, imagen: string) =>
     setCards((prev) => prev.map((c, i) => (i === ci ? { ...c, imagen } : c)));
-  const handleIAResult = (data: any) => {
-    console.log("Datos crudos de la IA (Cartas):", data);
+  const handleIAResult = (data: unknown) => {
+    console.log('Datos crudos de la IA (Cartas):', data);
 
-    if (data.titulo) setTitulo(String(data.titulo));
-    if (data.descripcion) setDescripcion(String(data.descripcion));
-    if (data.puntuacion) setPuntuacion(String(data.puntuacion));
-    const arrayPreguntas = data.preguntas || data.cartas || data.items || [];
+    const source = data as Record<string, unknown> | null;
+    if (!source) return;
 
-    if (Array.isArray(arrayPreguntas) && arrayPreguntas.length > 0) {
-      const mappedCards: Card[] = arrayPreguntas.map((p: any) => {
-        const preguntaText = p.enunciado || p.pregunta || p.anverso || '';
-
-        let respuestaText = '';
-        if (p.respuesta) {
-          if (typeof p.respuesta === 'string') {
-            respuestaText = p.respuesta;
-          } else {
-            respuestaText = p.respuesta.texto || p.respuesta.text || p.respuesta.respuesta || '';
-          }
-        } else if (p.respuestas && Array.isArray(p.respuestas) && p.respuestas.length > 0) {
-          respuestaText = p.respuestas[0].texto || p.respuestas[0].respuesta || '';
-        }
-
-        return {
-          localKey: makeLocalCardKey(),
-          pregunta: String(preguntaText),
-          respuesta: String(respuestaText),
-          imagen: ''
-        };
-      });
-
-      setCards(mappedCards);
+    if (typeof source.titulo === 'string') setTitulo(source.titulo);
+    if (typeof source.descripcion === 'string') setDescripcion(source.descripcion);
+    if (typeof source.puntuacion === 'string' || typeof source.puntuacion === 'number') {
+      setPuntuacion(String(source.puntuacion));
     }
+
+    const rawQuestions = [source.preguntas, source.cartas, source.items].find(Array.isArray);
+    if (!Array.isArray(rawQuestions) || rawQuestions.length === 0) return;
+
+    const mappedCards: Card[] = rawQuestions.map((item) => {
+      const current = item as Record<string, unknown>;
+      const preguntaText = current.enunciado ?? current.pregunta ?? current.anverso ?? '';
+
+      let respuestaText = '';
+      const respuestaValue = current.respuesta;
+      if (typeof respuestaValue === 'string') {
+        respuestaText = respuestaValue;
+      } else if (respuestaValue && typeof respuestaValue === 'object') {
+        const respuestaObject = respuestaValue as Record<string, unknown>;
+        respuestaText = String(respuestaObject.texto ?? respuestaObject.text ?? respuestaObject.respuesta ?? '');
+      } else if (Array.isArray(current.respuestas) && current.respuestas.length > 0) {
+        const firstRespuesta = current.respuestas[0] as Record<string, unknown>;
+        respuestaText = String(firstRespuesta.texto ?? firstRespuesta.respuesta ?? '');
+      }
+
+      return {
+        localKey: makeLocalCardKey(),
+        pregunta: String(preguntaText),
+        respuesta: String(respuestaText),
+        imagen: '',
+      };
+    });
+
+    setCards(mappedCards);
   };
 
   // ── Validation ───────────────────────────────────────────────────────────
@@ -210,7 +226,11 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             imagen: imagen.trim() || null,
             tema: { id: temaIdNum },
             respVisible,
+            permitirReintento,
             comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
+            mostrarPuntuacion,
+            encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno: false,
             preguntas: [],
           }),
         });
@@ -244,12 +264,16 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             titulo: titulo.trim(),
             descripcion: descripcion.trim() || null,
             puntuacion: puntuacionNum,
+            mostrarPuntuacion,
+            encontrarRespuestaMaestro,
             imagen: imagen.trim() || null,
             tema: { id: temaIdNum },
             respVisible,
+            permitirReintento,
             comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || '') : '',
             posicion: initialValues?.posicion ?? 0,
             version: initialValues?.version ?? 1,
+            encontrarRespuestaAlumno: false,
           }),
         });
 
@@ -406,6 +430,33 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
                 onChange={(e) => setRespVisible(e.target.checked)}
               />
               <span>Mostrar correcciones al alumno</span>
+            </label>
+
+            <label className="cf-check-label">
+              <input
+                type="checkbox"
+                checked={permitirReintento}
+                onChange={(e) => setPermitirReintento(e.target.checked)}
+              />
+              <span>Permitir reintentos</span>
+            </label>
+
+            <label className="cf-check-label">
+              <input
+                type="checkbox"
+                checked={mostrarPuntuacion}
+                onChange={(e) => setMostrarPuntuacion(e.target.checked)}
+              />
+              <span>Mostrar puntuación</span>
+            </label>
+
+            <label className="cf-check-label">
+              <input
+                type="checkbox"
+                checked={encontrarRespuestaMaestro}
+                onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
+              />
+              <span>Mostrar respuesta correcta</span>
             </label>
 
             {respVisible && (

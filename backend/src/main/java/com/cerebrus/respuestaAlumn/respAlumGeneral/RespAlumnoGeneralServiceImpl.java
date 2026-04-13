@@ -26,6 +26,7 @@ import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiert
 import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiertaResponse;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoAbiertaResponse;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralCreateResponse;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralResumenDTO;
 import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
 import com.cerebrus.respuestaMaestro.RespuestaMaestroService;
@@ -175,6 +176,41 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<RespAlumnoGeneralResumenDTO> listarRespuestasPorActividadAlumno(Long actividadAlumnoId) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede consultar sus respuestas");
+        }
+
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actividadAlumnoId)
+            .orElseThrow(() -> new ResourceNotFoundException("ActividadAlumno", "id", actividadAlumnoId));
+
+        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
+            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes consultar respuestas de una ActividadAlumno que no es tuya");
+        }
+
+        return respAlumnoGeneralRepository.findByActividadAlumnoIdOrderByIdAsc(actividadAlumnoId)
+            .stream()
+            .map(r -> {
+                String respuestaCorrecta = null;
+                if (r.getPregunta() != null && r.getPregunta().getRespuestasMaestro() != null) {
+                    respuestaCorrecta = r.getPregunta().getRespuestasMaestro().stream()
+                        .filter(rm -> Boolean.TRUE.equals(rm.getCorrecta()))
+                        .map(RespuestaMaestro::getRespuesta)
+                        .collect(java.util.stream.Collectors.joining(", "));
+                }
+                return new RespAlumnoGeneralResumenDTO(
+                    r.getPregunta() != null ? r.getPregunta().getId() : null,
+                    r.getRespuesta(),
+                    r.getCorrecta(),
+                    respuestaCorrecta);
+            })
+            .toList();
+    }
+
+    @Override
     @Transactional
     public HashMap<Long, String> corregirCrucigrama(LinkedHashMap<Long, String> respuestas, Long crucigramaId) {
         Usuario current = usuarioService.findCurrentUser();
@@ -187,17 +223,13 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         Integer puntuacion = 0;
         Integer puntuacionASumar = actividadRepository.findById(crucigramaId).orElseThrow(() -> new ResourceNotFoundException("El crucigrama no existe")).getPuntuacion() / respuestas.size();
         List<RespAlumnoGeneral> respuestasAlumno = new java.util.ArrayList<>();
-        // Buscar si ya existe ActividadAlumno para este alumno y actividad
-        // Si NO existe, crear UNA NUEVA
-        // Si existe, reutilizar la misma y actualizar datos
         ActividadAlumno actividadAlumno;
         var existente = actividadAlumnoRepository.findByAlumnoIdAndActividadId(alumno.getId(), crucigramaId);
-        if (existente.isPresent()) {
-            // Ya existe: usar la misma
+        if (existente.isPresent() && existente.get().getEstadoActividad() != com.cerebrus.comun.enumerados.EstadoActividad.TERMINADA) {
             actividadAlumno = existente.get();
         } else {
-            // NO existe: crear una nueva
-            actividadAlumno = actividadAlumnoRepository.save(new ActividadAlumno(0, LocalDateTime.now(), null, 0, 0, alumno, actividadRepository.findByID(crucigramaId)));
+            com.cerebrus.actividad.Actividad actividad = actividadRepository.findByID(crucigramaId);
+            actividadAlumno = actividadAlumnoRepository.save(new ActividadAlumno(0, LocalDateTime.now(), null, 0, 0, alumno, actividad));
         }
 
         HashMap<Long, String> resultado = new HashMap<>();

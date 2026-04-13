@@ -1,0 +1,212 @@
+.dia-wrap {
+  width: min(1100px, 95vw);
+  margin: 20px auto;
+}
+
+.dia-box {
+  background: #fff5de;
+  border: 2px solid #d9c091;
+  border-radius: 14px;
+  padding: 18px;
+  font-family: 'Oxygen', sans-serif;
+}
+
+.dia-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.dia-back,
+.dia-score-row button {
+  border: 1px solid #634d28;
+  background: #f4e4c0;
+  color: #2f2513;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.dia-link-curso {
+  color: #523e1b;
+  text-decoration: underline;
+  font-weight: 700;
+}
+
+.dia-title {
+  margin: 14px 0 4px;
+  font-size: 1.35rem;
+  color: #2a1f10;
+}
+
+.dia-subtitle {
+  margin: 0 0 12px;
+  color: #634d28;
+}
+
+.dia-actividad-imagen-wrap {
+  margin: 10px 0 14px;
+  background: #fff;
+  border: 1px solid #e4d6bc;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.dia-actividad-imagen {
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  border-radius: 8px;
+  display: block;
+}
+
+.dia-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.dia-metric {
+  background: #fff;
+  border: 1px solid #e4d6bc;
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dia-metric span {
+  font-size: 0.78rem;
+  color: #6d5b3e;
+}
+
+.dia-metric strong {
+  font-size: 1rem;
+  color: #1f170b;
+}
+
+.dia-score-editor {
+  margin-top: 16px;
+  background: #fff;
+  border: 1px solid #e4d6bc;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.dia-score-editor label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.dia-score-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dia-score-row input {
+  width: 120px;
+  border: 1px solid #c7b28e;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 1rem;
+}
+
+.dia-max {
+  color: #5a4727;
+  font-weight: 700;
+}
+
+.dia-respuestas {
+  margin-top: 18px;
+}
+
+.dia-respuestas h2 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+}
+
+.dia-respuesta-card {
+  background: #fff;
+  border: 1px solid #e4d6bc;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.dia-respuesta-card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dia-pill {
+  background: #efe6d1;
+  color: #4b3a1f;
+  border: 1px solid #c9b58d;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  font-weight: 700;
+}
+
+.dia-correcta {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.dia-correcta.ok {
+  color: #1c6c24;
+}
+
+.dia-correcta.ko {
+  color: #9f2517;
+}
+
+.dia-respuesta-card h3 {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+}
+
+.dia-respuesta-card p {
+  margin: 0;
+  color: #352813;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.dia-empty {
+  color: #7d6b4d;
+  font-style: italic;
+}
+
+.dia-error {
+  color: #9f2517;
+  margin-top: 8px;
+}
+
+.dia-success {
+  color: #1c6c24;
+  margin-top: 8px;
+}
+
+@media (max-width: 640px) {
+  .dia-wrap {
+    width: 96vw;
+    margin: 12px auto;
+  }
+
+  .dia-box {
+    padding: 12px;
+  }
+
+  .dia-title {
+    font-size: 1.12rem;
+  }
+}

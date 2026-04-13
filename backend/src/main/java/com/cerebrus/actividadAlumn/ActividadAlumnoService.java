@@ -10,7 +10,7 @@ public interface ActividadAlumnoService {
     ActividadAlumno encontrarActAlumnoPorId(Long id);
     Optional<ActividadAlumno> encontrarActAlumnoPorAlumnoIdYActId(Long alumnoId, Long actividadId);
     ActividadAlumno actualizarActAlumno(Long id, Integer puntuacion,
-         LocalDateTime inicio, LocalDateTime acabada, Integer nota, Integer numAbandonos);
+            LocalDateTime inicio, LocalDateTime acabada, Integer nota, Integer numAbandonos, Boolean solucionUsada);
     void eliminarActAlumnoPorId(Long id);
     Integer existeActAlumnoPorActIdYCurrentUserId(Long actividadId);
     ActividadAlumno abandonarActAlumnoPorId(Long actividadAlumnoId);

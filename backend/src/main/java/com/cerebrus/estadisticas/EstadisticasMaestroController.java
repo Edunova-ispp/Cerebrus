@@ -10,6 +10,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +24,9 @@ import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasAlumnoResumenDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
+import com.cerebrus.estadisticas.dto.ActualizarPuntuacionIntentoRequest;
+import com.cerebrus.estadisticas.dto.IntentoActividadDTO;
+import com.cerebrus.estadisticas.dto.IntentoActividadDetalleDTO;
 import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
 
 @RestController
@@ -119,6 +124,50 @@ public class EstadisticasMaestroController {
         try {
             EstadisticasAlumnoResumenDTO resultado = estadisticasMaestroService.obtenerResumenEstadisticasAlumno(cursoId, alumnoId);
             return ResponseEntity.ok(resultado);
+        } catch (AccessDeniedException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+
+    @GetMapping("/cursos/{cursoId}/alumnos/{alumnoId}/actividades/{actividadId}/intentos/{intentoId}")
+    public ResponseEntity<?> obtenerDetalleIntento(@PathVariable Long cursoId, @PathVariable Long alumnoId,
+            @PathVariable Long actividadId, @PathVariable Long intentoId) {
+        try {
+            IntentoActividadDetalleDTO detalle = estadisticasMaestroService
+                    .obtenerDetalleIntento(cursoId, alumnoId, actividadId, intentoId);
+            return ResponseEntity.ok(detalle);
+        } catch (AccessDeniedException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(403).body(error);
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("404 Not Found")) {
+                Map<String, Object> error = Map.of("error", e.getMessage());
+                return ResponseEntity.status(404).body(error);
+            }
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+
+    @PutMapping("/cursos/{cursoId}/alumnos/{alumnoId}/actividades/{actividadId}/intentos/{intentoId}/puntuacion")
+    public ResponseEntity<?> actualizarPuntuacionIntento(@PathVariable Long cursoId, @PathVariable Long alumnoId,
+            @PathVariable Long actividadId, @PathVariable Long intentoId,
+            @RequestBody ActualizarPuntuacionIntentoRequest request) {
+        try {
+            IntentoActividadDTO actualizado = estadisticasMaestroService
+                    .actualizarPuntuacionIntento(cursoId, alumnoId, actividadId, intentoId, request.getPuntuacion());
+            return ResponseEntity.ok(actualizado);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> error = Map.of("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
         } catch (AccessDeniedException e) {
             Map<String, Object> error = Map.of("error", e.getMessage());
             return ResponseEntity.status(403).body(error);
