@@ -314,7 +314,7 @@ export default function SimuladorPago() {
             onClick={handleSimularFallo}
             disabled={procesando}
           >
-            ✕ Pago fallido
+            ✕ Volver
           </button>
         </div>
 
