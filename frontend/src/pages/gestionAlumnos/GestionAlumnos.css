@@ -1,0 +1,210 @@
+/* ===== EMBEDDED & PAGE ===== */
+.ga-embedded {
+  width: 100%;
+  font-family: 'Oxygen', sans-serif;
+}
+
+.ga-page {
+  width: 100%;
+  font-family: 'Oxygen', sans-serif;
+}
+
+/* ===== HEADER ===== */
+.ga-title {
+  margin: 0 0 4px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--t-text);
+}
+
+.ga-subtitle {
+  margin: 0 0 16px;
+  font-size: 0.92rem;
+  color: #64748B;
+}
+
+/* ===== TOASTS ===== */
+.ga-toast {
+  padding: 10px 16px;
+  border-radius: var(--t-radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.ga-toast--ok {
+  background: #ECFDF5;
+  color: var(--t-success);
+  border: 1px solid var(--t-success);
+}
+
+.ga-toast--err {
+  background: #FEF2F2;
+  color: var(--t-danger);
+  border: 1px solid var(--t-danger);
+}
+
+/* ===== TOOLBAR ===== */
+.ga-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.ga-search {
+  flex: 1;
+  max-width: 360px;
+  padding: 9px 14px;
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.92rem;
+  color: var(--t-text);
+  background: var(--t-card);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.ga-search:focus {
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+/* ===== LOADING / EMPTY ===== */
+.ga-loading,
+.ga-empty {
+  text-align: center;
+  padding: 40px 0;
+  color: #64748B;
+  font-size: 0.95rem;
+}
+
+/* ===== TABLE ===== */
+.ga-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--t-radius);
+  border: 1px solid var(--t-border);
+  box-shadow: var(--t-shadow-sm);
+  background: var(--t-card);
+}
+
+.ga-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.ga-table th {
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  font-weight: 700;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--t-border);
+  white-space: nowrap;
+}
+
+.ga-table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--t-border);
+  color: var(--t-text);
+  vertical-align: middle;
+}
+
+.ga-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ga-table tbody tr:hover {
+  background: var(--t-primary-light);
+}
+
+/* ===== BADGE ===== */
+.ga-badge--puntos {
+  display: inline-block;
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+}
+
+/* ===== ACTION CELLS & BUTTONS ===== */
+.ga-actions-cell {
+  white-space: nowrap;
+}
+
+.ga-btn {
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+
+.ga-btn--danger {
+  background: var(--t-danger);
+  color: #fff;
+}
+
+.ga-btn--danger:hover {
+  background: #DC2626;
+  box-shadow: var(--t-shadow-sm);
+}
+
+.ga-btn--secondary {
+  background: var(--t-card);
+  color: var(--t-text);
+  border: 1px solid var(--t-border);
+}
+
+.ga-btn--secondary:hover {
+  background: var(--t-bg);
+  border-color: var(--t-text);
+}
+
+/* ===== OVERLAY & MODAL ===== */
+.ga-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.ga-modal {
+  background: var(--t-card);
+  border-radius: var(--t-radius-lg);
+  box-shadow: var(--t-shadow);
+  padding: 28px 32px;
+  max-width: 420px;
+  width: 90%;
+}
+
+.ga-modal-title {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--t-text);
+}
+
+.ga-modal-text {
+  margin: 0 0 20px;
+  font-size: 0.92rem;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.ga-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
