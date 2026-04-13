@@ -21,6 +21,7 @@ import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 import com.cerebrus.actividad.marcarImagen.MarcarImagenService;
 import com.cerebrus.actividad.ordenacion.Ordenacion;
 import com.cerebrus.actividad.ordenacion.OrdenacionService;
+import com.cerebrus.actividad.tablero.Tablero;
 import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
@@ -268,6 +269,8 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
             corregirActAlumnoAutomaticamenteTipoOrdenacion(actividadAlumno, respuestasIds, actividad);
         } else if(actividad instanceof MarcarImagen){
             corregirActAlumnoAutomaticamenteTipoMarcarImagen(actividadAlumno, respuestasIds, actividad);
+        } else if (actividad instanceof Tablero) {
+            corregirActAlumnoAutomaticamenteTipoTablero(actividadAlumno, actividad);
         } else {    
         // CASO PARA TEORÍA: se ha movido dentro de instancia de GENERAL porque la actividad de teoria es una actividad general
         }
@@ -517,6 +520,22 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
 
         actividadAlumno.setPuntuacion(puntuacionFinal);
         actividadAlumno.setNota(notaFinal);
+    }
+
+    private void corregirActAlumnoAutomaticamenteTipoTablero(ActividadAlumno actividadAlumno, Actividad actividad) {
+        int puntuacionMaxima = actividad.getPuntuacion() != null ? actividad.getPuntuacion() : 0;
+        int numFallosTotales = actividadAlumno.getRespuestasAlumno().stream()
+            .filter(RespAlumnoGeneral.class::isInstance)
+            .map(RespAlumnoGeneral.class::cast)
+            .mapToInt(resp -> java.util.Objects.requireNonNullElse(resp.getNumFallos(), 0))
+            .sum();
+
+        int notaFinal = Math.max(0, 10 - numFallosTotales);
+        int puntuacionFinal = (int) Math.round(puntuacionMaxima * (notaFinal / 10.0));
+
+        actividadAlumno.setPuntuacion(puntuacionFinal);
+        actividadAlumno.setNota(notaFinal);
+        actividadAlumno.setFechaFin(LocalDateTime.now());
     }
 
     private void corregirActAlumnoAutomaticamenteTipoCrucigrama(ActividadAlumno actividadAlumno, Actividad actividad) {

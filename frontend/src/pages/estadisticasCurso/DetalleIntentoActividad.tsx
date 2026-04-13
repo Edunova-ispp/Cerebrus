@@ -10,6 +10,7 @@ interface RespuestaIntento {
   enunciado: string;
   respuestaAlumno: string;
   correcta: boolean | null;
+  numFallos?: number | null;
 }
 
 interface IntentoDetalle {
@@ -78,6 +79,11 @@ export default function DetalleIntentoActividad() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const totalFallos = useMemo(
+    () => detalle?.respuestas.reduce((acc, respuesta) => acc + Number(respuesta.numFallos ?? 0), 0) ?? 0,
+    [detalle],
+  );
 
   useEffect(() => {
     if (!cursoId || !alumnoId || !actividadId || !intentoId) return;
@@ -185,6 +191,12 @@ export default function DetalleIntentoActividad() {
           <div className="dia-metric"><span>Tiempo</span><strong>{formatTiempo(detalle.tiempoMinutos)}</strong></div>
           <div className="dia-metric"><span>Abandonos</span><strong>{detalle.numAbandonos ?? 0}</strong></div>
           <div className="dia-metric"><span>Nota</span><strong>{detalle.nota ?? 0}/10</strong></div>
+          {detalle.actividadTipo === 'Tablero' && (
+            <div className="dia-metric">
+              <span>Fallos acumulados</span>
+              <strong>{totalFallos}</strong>
+            </div>
+          )}
         </div>
 
         <div className="dia-score-editor">
@@ -224,6 +236,11 @@ export default function DetalleIntentoActividad() {
                 </header>
                 <h3>{r.enunciado || `Respuesta #${idx + 1}`}</h3>
                 <p>{r.respuestaAlumno || 'Sin contenido'}</p>
+                {detalle.actividadTipo === 'Tablero' && typeof r.numFallos === 'number' && (
+                  <p className="dia-respuesta-fallos">
+                    Fallos previos en esta pregunta: {r.numFallos}
+                  </p>
+                )}
               </article>
             ))
           )}

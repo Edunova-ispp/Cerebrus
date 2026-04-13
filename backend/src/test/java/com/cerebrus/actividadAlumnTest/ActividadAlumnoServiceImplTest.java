@@ -29,6 +29,7 @@ import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 import com.cerebrus.actividad.marcarImagen.MarcarImagenService;
 import com.cerebrus.actividad.ordenacion.Ordenacion;
 import com.cerebrus.actividad.ordenacion.OrdenacionService;
+import com.cerebrus.actividad.tablero.Tablero;
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
 import com.cerebrus.actividadAlumn.ActividadAlumnoServiceImpl;
@@ -612,6 +613,32 @@ class ActividadAlumnoServiceImplTest {
 
         assertThat(resultado.getNota()).isEqualTo(10);
         assertThat(resultado.getPuntuacion()).isEqualTo(100);
+    }
+
+    @Test
+    void corregirActAlumnoAutomaticamente_tipoTablero_penalizaFallosAcumulados() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
+        Tablero tablero = new Tablero();
+        tablero.setId(60L);
+        tablero.setPuntuacion(100);
+        tablero.setPreguntas(new ArrayList<>());
+        actividadAlumno.setActividad(tablero);
+
+        RespAlumnoGeneral resp1 = new RespAlumnoGeneral(false, actividadAlumno, "fallo", new Pregunta());
+        resp1.setNumFallos(2);
+        RespAlumnoGeneral resp2 = new RespAlumnoGeneral(true, actividadAlumno, "bien", new Pregunta());
+        resp2.setNumFallos(0);
+        actividadAlumno.setRespuestasAlumno(new ArrayList<>(List.of(resp1, resp2)));
+
+        when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
+        when(actividadAlumnoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ActividadAlumno resultado = service.corregirActAlumnoAutomaticamente(10L, List.of());
+
+        assertThat(resultado.getNota()).isEqualTo(8);
+        assertThat(resultado.getPuntuacion()).isEqualTo(80);
+        assertThat(resultado.getFechaFin()).isNotNull();
     }
 
     @Test

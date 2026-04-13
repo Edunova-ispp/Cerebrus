@@ -26,8 +26,6 @@ import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.estadisticas.dto.ActividadEstadisticasAlumnoDTO;
-import com.cerebrus.estadisticas.dto.IntentoActividadDetalleDTO;
-import com.cerebrus.estadisticas.dto.IntentoDetalleRespuestaDTO;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
@@ -35,9 +33,11 @@ import com.cerebrus.estadisticas.dto.EstadisticasAlumnoResumenDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 import com.cerebrus.estadisticas.dto.IntentoActividadDTO;
+import com.cerebrus.estadisticas.dto.IntentoActividadDetalleDTO;
+import com.cerebrus.estadisticas.dto.IntentoDetalleRespuestaDTO;
+import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
 import com.cerebrus.estadisticas.dto.TemaEstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.TiempoAlumnoDTO;
-import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.respuestaAlumn.RespuestaAlumno;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneral;
@@ -1271,7 +1271,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
 
     private IntentoDetalleRespuestaDTO mapearRespuestaIntento(RespuestaAlumno respuestaAlumno) {
         if (respuestaAlumno == null) {
-            return new IntentoDetalleRespuestaDTO(null, "OTRO", "Respuesta", "", null);
+            return new IntentoDetalleRespuestaDTO(null, "OTRO", "Respuesta", "", null, null);
         }
 
         if (respuestaAlumno instanceof RespAlumnoGeneral rag) {
@@ -1293,7 +1293,8 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                     "GENERAL",
                     enunciado,
                     rag.getRespuesta(),
-                    correcta);
+                    correcta,
+                    rag.getNumFallos());
         }
         if (respuestaAlumno instanceof RespAlumnoPuntoImagen rpi) {
             String respuestaCorrecta = (rpi.getPuntoImagen() != null && rpi.getPuntoImagen().getRespuesta() != null)
@@ -1307,7 +1308,8 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                     "PUNTO_IMAGEN",
                     enunciado,
                     rpi.getRespuesta(),
-                    rpi.getCorrecta());
+                    rpi.getCorrecta(),
+                    null);
         }
         if (respuestaAlumno instanceof RespAlumnoOrdenacion rao) {
             String enunciado = "Ordenacion";
@@ -1317,7 +1319,8 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                     "ORDENACION",
                     enunciado,
                     valor,
-                    rao.getCorrecta());
+                    rao.getCorrecta(),
+                    null);
         }
 
         return new IntentoDetalleRespuestaDTO(
@@ -1325,7 +1328,8 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                 "OTRO",
                 "Respuesta",
                 "",
-                respuestaAlumno.getCorrecta());
+                respuestaAlumno.getCorrecta(),
+                null);
     }
 
     private Integer calcularNotaDesdePuntuacion(Integer puntuacion, Integer puntuacionMaximaActividad) {
