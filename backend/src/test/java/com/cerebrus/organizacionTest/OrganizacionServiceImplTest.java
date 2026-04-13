@@ -1,31 +1,31 @@
 package com.cerebrus.organizacionTest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.cerebrus.comun.enumerados.EstadoPagoSuscripcion;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.suscripcion.Suscripcion;
 import com.cerebrus.usuario.Usuario;
@@ -381,13 +381,18 @@ class OrganizacionServiceImplTest {
         org.setAlumnos(new ArrayList<>());
         org.setSuscripciones(new ArrayList<>());
 
+        LocalDate hoy = LocalDate.now();
         if (activa) {
             Suscripcion s = new Suscripcion();
-            s.setFechaFin(LocalDate.now().plusDays(30));
+            s.setFechaInicio(hoy.minusDays(1));
+            s.setFechaFin(hoy.plusDays(30));
+            s.setEstadoPagoSuscripcion(EstadoPagoSuscripcion.PAGADA);
             org.getSuscripciones().add(s);
         } else {
             Suscripcion s = new Suscripcion();
-            s.setFechaFin(LocalDate.now().minusDays(1));
+            s.setFechaInicio(hoy.minusDays(30));
+            s.setFechaFin(hoy.minusDays(1));
+            s.setEstadoPagoSuscripcion(EstadoPagoSuscripcion.PAGADA);
             org.getSuscripciones().add(s);
         }
         return org;
