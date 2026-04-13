@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import logo from "../../../assets/logo.png";
 import "./LoginPage.css";
@@ -9,25 +9,16 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   
-  // Estados para la activación de cuenta
-  const [searchParams] = useSearchParams();
-  const [manualCode, setManualCode] = useState(''); 
+  // Activación automática de cuenta desde parámetro en URL
+  const [searchParams, setSearchParams] = useSearchParams();
+  const processedCodeRef = useRef<string | null>(null);
   const [mensajeActivacion, setMensajeActivacion] = useState<{ texto: string, tipo: 'ok' | 'err' } | null>(null);
   const [loadingCode, setLoadingCode] = useState(false);
   
   const navigate = useNavigate();
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
-  // 1. LÓGICA AUTOMÁTICA: Detecta el código si viene en la URL (?confirmCode=12345678)
-  useEffect(() => {
-    const codeFromUrl = searchParams.get('confirmCode');
-    if (codeFromUrl) {
-      activarCuenta(codeFromUrl);
-    }
-  }, [searchParams]);
-
-  // Función para activar cuenta (usada por link o por botón manual)
-  const activarCuenta = async (codigo: string) => {
+  const activarCuenta = useCallback(async (codigo: string) => {
     setLoadingCode(true);
     setMensajeActivacion(null);
     try {
@@ -40,17 +31,31 @@ const Login = () => {
 
       if (response.ok) {
         setMensajeActivacion({ texto: "✅ ¡Cuenta activada! Ya puedes iniciar sesión.", tipo: 'ok' });
-        setManualCode(''); 
         setError(''); // Limpiamos errores de login previos
       } else {
         setMensajeActivacion({ texto: `❌ ${data.message || 'Código inválido'}`, tipo: 'err' });
       }
-    } catch (err) {
+    } catch {
       setMensajeActivacion({ texto: "❌ Error de conexión al activar.", tipo: 'err' });
     } finally {
       setLoadingCode(false);
     }
-  };
+  }, [apiBase]);
+
+  useEffect(() => {
+    const codeFromUrl = searchParams.get('validatoncode') ?? searchParams.get('confirmCode');
+    if (!codeFromUrl || processedCodeRef.current === codeFromUrl) {
+      return;
+    }
+
+    processedCodeRef.current = codeFromUrl;
+    activarCuenta(codeFromUrl);
+
+    const updatedParams = new URLSearchParams(searchParams);
+    updatedParams.delete('validatoncode');
+    updatedParams.delete('confirmCode');
+    setSearchParams(updatedParams, { replace: true });
+  }, [activarCuenta, searchParams, setSearchParams]);
 
   const handleLogin = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -80,22 +85,28 @@ const Login = () => {
         }
       } else {
         if (response.status === 403 && data.message === "CUENTA_NO_VERIFICADA") {
-          setError('⚠️ Cuenta no activada. Introduce el código enviado a tu email aquí abajo.');
-          
-          document.querySelector('.pixel-divider')?.scrollIntoView({ behavior: 'smooth' });
+          setError('⚠️ Cuenta no activada. Revisa tu correo y pulsa el botón de activación.');
         } else {
           setError(data.message || 'Credenciales incorrectas.');
         }
       }
-    } catch (err) {
+    } catch {
       setError('No se pudo conectar con el servidor.');
     }
   };
 
   return (
     <div className="login-page-container">
+      <button
+        type="button"
+        className="login-corner-logo-btn"
+        onClick={() => navigate('/')}
+        aria-label="Volver al inicio"
+      >
+        <img src={logo} alt="Cerebrus" className="login-corner-logo" />
+      </button>
+
       <div className="login-box">
-        
         {mensajeActivacion && (
           <div className={`login-activation-banner ${mensajeActivacion.tipo}`}>
             {mensajeActivacion.texto}
@@ -103,76 +114,53 @@ const Login = () => {
         )}
 
         <div className="login-header">
-          <img src={logo} alt="Cerebrus Logo" className="login-logo" />
           <h2 className="login-title">Iniciar Sesión</h2>
         </div>
         
         <form onSubmit={handleLogin} className="login-form">
-          <div className="pixel-input-wrapper">
-            <label htmlFor="identificador">Correo electrónico o Usuario:</label>
-            <input 
-              id="identificador"
-              type="text" 
-              value={identificador} 
-              onChange={(e) => setIdentificador(e.target.value)} 
-              required 
-              autoComplete="username"
-            />
+          <div className="login-field-group">
+            <label className="login-field-label" htmlFor="identificador">Correo electrónico o Usuario:</label>
+            <div className="pixel-input-wrapper">
+              <input 
+                id="identificador"
+                type="text" 
+                value={identificador} 
+                onChange={(e) => setIdentificador(e.target.value)} 
+                required 
+                autoComplete="username"
+              />
+            </div>
           </div>
 
-          <div className="pixel-input-wrapper">
-            <label htmlFor="password">Contraseña:</label>
-            <div className="password-input-container">
-              <input 
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
-                autoComplete="current-password"
-              />
-              <button 
-                type="button" 
-                className="login-pw-toggle" 
-                onClick={() => setShowPassword(!showPassword)}
-                tabIndex={-1}
-              >
-                {showPassword ? '🙈' : '👁️'}
-              </button>
-              
+          <div className="login-field-group">
+            <label className="login-field-label" htmlFor="password">Contraseña:</label>
+            <div className="pixel-input-wrapper">
+              <div className="password-input-container">
+                <input 
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  required 
+                  autoComplete="current-password"
+                />
+                <button 
+                  type="button" 
+                  className="login-pw-toggle" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
             </div>
           </div>
 
           {error && <div className="login-error-msg">{error}</div>}
+          {loadingCode && <div className="login-error-msg">Procesando activación de cuenta...</div>}
 
           <button type="submit" className="pixel-btn-submit">ENTRAR</button>
         </form>
-
-        <div className="pixel-divider">
-          <span className="activation-subtitle">O ACTIVA TU CUENTA</span>
-        </div>
-
-        {/* SECCIÓN MANUAL DE VERIFICACIÓN */}
-        <div className="manual-verify-section">
-          <p className="activation-help-text">¿Recibiste un código? Introdúcelo aquí:</p>
-          <div className="pixel-input-wrapper">
-            <input 
-              type="text" 
-              placeholder="Código de 8 dígitos" 
-              value={manualCode}
-              onChange={(e) => setManualCode(e.target.value.replace(/\D/g, ''))} // Solo números
-              maxLength={8}
-            />
-          </div>
-
-          <button type="submit" 
-            onClick={() => activarCuenta(manualCode)} 
-            disabled={loadingCode || manualCode.length < 4}
-            className="pixel-btn-submit"
-          >
-            {loadingCode ? "Procesando..." : "ACTIVAR CUENTA"}
-          </button>
-        </div>
 
         <p className="login-register-text">
           ¿No tienes cuenta? <span onClick={() => navigate('/auth/register')}>Regístrate aquí</span>

@@ -11,6 +11,7 @@ interface UserData {
   segundoApellido?: string;
   nombreUsuario: string;
   correoElectronico: string;
+  nombreOrganizacion?: string;
 }
 
 export default function Perfil() {
@@ -120,6 +121,10 @@ export default function Perfil() {
                 <span className="perfil-label">Email</span>
                 <span className="perfil-value">{user.correoElectronico || '—'}</span>
               </div>
+              <div className="perfil-field">
+                <span className="perfil-label">Organización</span>
+                <span className="perfil-value">{user.nombreOrganizacion || '—'}</span>
+              </div>
               <div className="perfil-actions">
                 {isOrganizacion && (
                   <button className="perfil-btn perfil-btn--edit" onClick={() => setEditing(true)}>
@@ -149,6 +154,10 @@ export default function Perfil() {
               <label className="perfil-form-label">
                 Email
                 <input type="email" value={form.correoElectronico} onChange={e => setForm(f => ({ ...f, correoElectronico: e.target.value }))} />
+              </label>
+              <label className="perfil-form-label">
+                Organización
+                <input value={user.nombreOrganizacion || ''} readOnly disabled />
               </label>
               <div className="perfil-actions">
                 <button className="perfil-btn perfil-btn--save" onClick={handleSave} disabled={saving}>
