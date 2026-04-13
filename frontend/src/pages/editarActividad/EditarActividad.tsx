@@ -278,6 +278,36 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
     };
 
     useEffect(() => {
+        if (loading || error) return;
+
+        const contenedor = document.querySelector('.ca-contenido');
+        if (!contenedor) return;
+
+        const botonesGuardar = Array.from(
+            contenedor.querySelectorAll<HTMLButtonElement>('button.ca-btn-guardar, button.cf-btn-submit')
+        );
+
+        botonesGuardar.forEach((botonGuardar) => {
+            const hermanoAnterior = botonGuardar.previousElementSibling;
+            if (hermanoAnterior instanceof HTMLButtonElement && hermanoAnterior.dataset.caCancelInline === '1') {
+                return;
+            }
+
+            const botonCancelar = document.createElement('button');
+            botonCancelar.type = 'button';
+            botonCancelar.className = 'ca-btn-cancelar';
+            botonCancelar.textContent = 'Cancelar';
+            botonCancelar.dataset.caCancelInline = '1';
+            botonCancelar.onclick = (event) => {
+                event.preventDefault();
+                handleCancelarEdicion();
+            };
+
+            botonGuardar.parentElement?.insertBefore(botonCancelar, botonGuardar);
+        });
+    }, [loading, error, kind, embedded, onDone, cursoId, navigate]);
+
+    useEffect(() => {
         const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
         if (!actividadId) return;
 
@@ -660,9 +690,6 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
                 <div className="ca-contenido">
                     {!loading && !error && (
                         <div className="ca-help-row">
-                            <button className="ca-btn-cancelar" type="button" onClick={handleCancelarEdicion}>
-                                Cancelar edición
-                            </button>
                             <ActivityGuideButton activityType={guideType} role="maestro" buttonLabel="Tutorial" />
                         </div>
                     )}

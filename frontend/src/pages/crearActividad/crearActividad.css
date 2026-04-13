@@ -236,3 +236,25 @@
   gap: 16px;
   margin-top: 20px;
 }
+
+.ca-contenido .tbl-footer {
+  align-items: center;
+  gap: 16px;
+}
+
+.ca-contenido button.ca-btn-cancelar + button.ca-btn-guardar,
+.ca-contenido button.ca-btn-cancelar + button.cf-btn-submit {
+  margin-left: 12px;
+}
+
+.ca-contenido .tf-footer-stack {
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.ca-contenido .tf-footer-stack .tf-error {
+  grid-column: 1 / -1;
+}

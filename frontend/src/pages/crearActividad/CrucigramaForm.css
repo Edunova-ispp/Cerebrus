@@ -6,6 +6,10 @@
   box-sizing: border-box;
 }
 
+.cf-form {
+  text-align: center;
+}
+
 /* ── Error banner ── */
 .cf-error {
   color: #c0392b !important;
@@ -163,8 +167,10 @@
 
 /* ── Submit button ── */
 .cf-btn-submit {
-  display: block;
-  margin: 28px auto 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 28px 0 0;
   min-width: 260px;
   padding: 12px 24px;
   background: var(--t-primary);
@@ -178,6 +184,13 @@
   cursor: pointer;
   text-align: center;
   transition: background 0.15s, box-shadow 0.15s;
+}
+
+.cf-form button.ca-btn-cancelar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 28px;
 }
 
 .cf-btn-submit:hover:not(:disabled) {
