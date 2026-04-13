@@ -80,7 +80,28 @@
 .ca-help-row {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 12px;
+}
+
+.ca-btn-cancelar {
+  background: #fff;
+  color: #b42318;
+  border: 1px solid #f04438;
+  border-radius: 8px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.ca-btn-cancelar:hover {
+  background: #fff2f0;
+  color: #912018;
+  border-color: #d92d20;
 }
 
 .ca-contenido > form {

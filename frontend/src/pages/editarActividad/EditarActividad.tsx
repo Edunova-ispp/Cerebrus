@@ -265,6 +265,18 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
     const [generalCarta, setGeneralCarta] = useState<GeneralCartaMaestroDTO | null>(null);
     const [clasificacion, setClasificacion] = useState<ClasificacionMaestroDTO | null>(null);
 
+    const handleCancelarEdicion = () => {
+        const confirmar = window.confirm('Si cancelas la edición se descartarán los cambios no guardados. ¿Quieres continuar?');
+        if (!confirmar) return;
+
+        if (embedded && onDone) {
+            onDone();
+            return;
+        }
+
+        navigate(`/cursos/${cursoId}`);
+    };
+
     useEffect(() => {
         const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
         if (!actividadId) return;
@@ -648,6 +660,9 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
                 <div className="ca-contenido">
                     {!loading && !error && (
                         <div className="ca-help-row">
+                            <button className="ca-btn-cancelar" type="button" onClick={handleCancelarEdicion}>
+                                Cancelar edición
+                            </button>
                             <ActivityGuideButton activityType={guideType} role="maestro" buttonLabel="Tutorial" />
                         </div>
                     )}
