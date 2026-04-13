@@ -21,6 +21,11 @@ interface EstadisticasTemasProps {
   readonly embedded?: boolean;
 }
 
+function formatearDecimal2(valor: number | null | undefined): string {
+  if (typeof valor !== 'number' || !Number.isFinite(valor)) return '0.00';
+  return valor.toFixed(2);
+}
+
 export default function EstadisticasTemas({ cursoIdProp, embedded }: EstadisticasTemasProps = {}) {
   const params = useParams<{ id: string }>();
   const id = cursoIdProp ?? params.id;
@@ -36,10 +41,10 @@ export default function EstadisticasTemas({ cursoIdProp, embedded }: Estadistica
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const notaMediaMostrada = (stats: EstadisticasTemaDTO | undefined) => {
+  const notaMediaMostrada = (stats: EstadisticasTemaDTO | undefined): string => {
     const valor = stats?.notaMediaTema;
-    if (typeof valor !== 'number' || !Number.isFinite(valor)) return 0;
-    return Math.round(valor * 100) / 100;
+    if (typeof valor !== 'number' || !Number.isFinite(valor)) return '0.00';
+    return valor.toFixed(2);
   };
 
   const formatearTiempoMinutos = (minutos: number | null | undefined): string => {
@@ -146,8 +151,8 @@ export default function EstadisticasTemas({ cursoIdProp, embedded }: Estadistica
                             <td className="text-center">{index + 1}</td>
                             <td>{tema.titulo}</td>
                             <td className="text-center font-bold">{notaMediaMostrada(stats)}</td>
-                            <td className="text-center font-bold">{stats?.notaMaximaTema ?? 0}</td>
-                            <td className="text-center font-bold">{stats?.notaMinimaTema ?? 0}</td>
+                            <td className="text-center font-bold">{formatearDecimal2(stats?.notaMaximaTema)}</td>
+                            <td className="text-center font-bold">{formatearDecimal2(stats?.notaMinimaTema)}</td>
                             <td className="text-center font-bold">{formatearTiempoMinutos(stats?.tiempoMedioTema)}</td>
                             <td className="text-center font-bold">{completadoPorTodosMostrado(stats)}</td>
                           </tr>

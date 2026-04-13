@@ -29,12 +29,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #d1005794;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  flex-wrap: nowrap;
+  min-height: 78px;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(255, 242, 148, 0.18) 0%, rgba(255, 242, 148, 0) 42%),
+    linear-gradient(155deg, rgba(255, 207, 207, 0.98) 0%, rgba(255, 168, 186, 0.98) 56%, rgba(255, 189, 205, 0.98) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 4px solid #000;
   border-radius: 20px;
-  padding: 0px 70px;
+  padding: 0px 24px;
   box-shadow: 6px 6px 0px #000;
 }
 
@@ -44,8 +48,9 @@
   padding: 0;
   cursor: pointer;
   display: flex;
-  align-items: flex-end;
-  align-self: stretch;
+  align-items: center;
+  align-self: center;
+  gap: 10px;
 
 }
 
@@ -53,16 +58,15 @@
   height: 70px;
   object-fit: contain;
   display: block;
-  transform: translateY(2px);
 }
 
 .navbar-title {
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 3.2rem;
+  font-size: 3.1rem;
   font-weight: bold;
-  margin-bottom: 9px;
-  transform: translateX(14px);
-  line-height: 1;
+  margin-bottom: 0;
+  transform: none;
+  line-height: 0.95;
   display: flex;
 }
 
@@ -99,7 +103,8 @@
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 10px;
+  flex-wrap: nowrap;
 }
 
 .navbar-link {
@@ -108,7 +113,7 @@
   color: #000638;
   padding: 4px 8px;
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: 2.6rem;
+  font-size: 1.6rem;
   font-weight: bold;
   cursor: pointer;
   display: flex;
@@ -116,6 +121,7 @@
   gap: 8px;
   transition: color 0.2s ease;
   border-radius: 8px;
+  white-space: nowrap;
 }
 
 .navbar-link:hover {
@@ -126,6 +132,18 @@
   filter: brightness(0) saturate(100%) invert(97%) sepia(57%) saturate(600%) hue-rotate(323deg) brightness(103%) contrast(103%);
 }
 
+.navbar-link:hover .navbar-icon--logout {
+  filter: none;
+}
+
+.navbar-link--logout {
+  color: #7a0030;
+}
+
+.navbar-link--logout:hover {
+  color: #fff294;
+}
+
 .navbar-icon {
   height: 32px;
   width: 32px;
@@ -133,12 +151,20 @@
   transition: filter 0.2s ease;
 }
 
+.navbar-icon--logout {
+  color: currentColor;
+  width: 36px;
+  height: 36px;
+}
+
 /* ===== TEACHER / MAESTRO NAVBAR OVERRIDE ===== */
 .navbar--maestro .navbar-inner {
-  background-color: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--t-border);
+  background:
+    radial-gradient(circle at 14% 24%, rgba(147, 197, 253, 0.32) 0%, rgba(147, 197, 253, 0) 42%),
+    linear-gradient(155deg, rgba(219, 234, 254, 0.68) 0%, rgba(191, 219, 254, 0.58) 56%, rgba(224, 242, 254, 0.62) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(37, 99, 235, 0.35);
   border-radius: var(--t-radius-lg);
   box-shadow: var(--t-shadow-md);
 }
@@ -174,4 +200,52 @@
 
 .navbar--maestro .navbar-link:hover .navbar-icon {
   filter: brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1971%) hue-rotate(215deg) brightness(99%) contrast(95%);
+}
+
+.navbar--maestro .navbar-link--logout {
+  color: #b91c1c;
+}
+
+.navbar--maestro .navbar-link--logout:hover {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+@media (max-width: 1100px) {
+  .navbar-inner {
+    padding: 0 14px;
+  }
+
+  .navbar-title {
+    font-size: 2.5rem;
+  }
+
+  .navbar-link {
+    font-size: 1.35rem;
+    padding: 4px 6px;
+    gap: 6px;
+  }
+
+  .navbar-icon {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 840px) {
+  .navbar-title {
+    display: none;
+  }
+
+  .navbar-logo {
+    height: 52px;
+  }
+
+  .navbar-links {
+    gap: 8px;
+  }
+
+  .navbar-link {
+    font-size: 1.1rem;
+  }
 }

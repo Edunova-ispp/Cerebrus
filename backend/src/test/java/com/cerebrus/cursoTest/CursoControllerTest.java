@@ -1,22 +1,21 @@
 package com.cerebrus.cursoTest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +27,6 @@ import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.estadisticas.EstadisticasMaestroController;
 import com.cerebrus.estadisticas.EstadisticasMaestroServiceImpl;
-import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
 
@@ -407,13 +405,13 @@ class CursoControllerTest {
     // Test para verificar que obtenerNotaMediaPorActividadPorCursoId retorna 200 OK con la lista de notas medias
     @Test
     void obtenerNotaMediaPorActividadPorCursoId_maestroPropietario_retorna200ConNotas() {
-        List<Integer> notas = List.of(8, 7, 9);
+        List<Double> notas = List.of(8.0, 7.0, 9.0);
         when(cursoService.obtenerNotaMediaPorActividadPorCursoId(10L)).thenReturn(notas);
 
-        ResponseEntity<List<Integer>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
+        ResponseEntity<List<Double>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(respuesta.getBody()).containsExactly(8, 7, 9);
+        assertThat(respuesta.getBody()).containsExactly(8.0, 7.0, 9.0);
     }
 
     // Test para verificar que obtenerNotaMediaPorActividadPorCursoId retorna 403 cuando el service lanza RuntimeException con mensaje 403
@@ -421,7 +419,7 @@ class CursoControllerTest {
     void obtenerNotaMediaPorActividadPorCursoId_accesoNoPermitido_retorna403() {
         when(cursoService.obtenerNotaMediaPorActividadPorCursoId(10L)).thenThrow(new RuntimeException("403 Forbidden"));
 
-        ResponseEntity<List<Integer>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
+        ResponseEntity<List<Double>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
@@ -431,7 +429,7 @@ class CursoControllerTest {
     void obtenerNotaMediaPorActividadPorCursoId_cursoNoExiste_retorna404() {
         when(cursoService.obtenerNotaMediaPorActividadPorCursoId(99L)).thenThrow(new RuntimeException("404 Not Found"));
 
-        ResponseEntity<List<Integer>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(99L);
+        ResponseEntity<List<Double>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(99L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -441,7 +439,7 @@ class CursoControllerTest {
     void obtenerNotaMediaPorActividadPorCursoId_errorInesperado_retorna500() {
         when(cursoService.obtenerNotaMediaPorActividadPorCursoId(10L)).thenThrow(new RuntimeException("Error interno"));
 
-        ResponseEntity<List<Integer>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
+        ResponseEntity<List<Double>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }

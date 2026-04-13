@@ -89,7 +89,34 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 340px;
+  max-height: min(52vh, 640px);
+}
+
+/* En el modo embebido del profesor, usa el alto libre del layout antes de scrollear. */
+.ltp-embedded {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.ltp-embedded .ltp-main {
+  padding: 0;
+  max-width: none;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.ltp-embedded .ltp-paneles {
+  min-height: clamp(420px, calc(100vh - 250px), 760px);
+}
+
+.ltp-embedded .ltp-panel {
+  min-height: 0;
+}
+
+.ltp-embedded .ltp-lista {
+  max-height: none;
 }
 
 .ltp-vacio {

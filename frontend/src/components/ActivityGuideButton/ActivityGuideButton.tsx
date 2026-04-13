@@ -47,6 +47,7 @@ export default function ActivityGuideButton({ activityType, role, buttonLabel = 
       </button>
       <ActivityGuideModal
         open={open}
+        role={role}
         title={`Tutorial para ${roleLabel}`}
         subtitle={`Actividad: ${activityLabel}`}
         content={guide}
