@@ -89,7 +89,7 @@ const Login = () => {
           document.querySelector('.pixel-divider')?.scrollIntoView({ behavior: 'smooth' });
         }
         else if (response.status === 403 && data.message === "ORG_NO_SUSCRIPCION") {
-          setError('⚠️ La organización no tiene una suscripción.');
+          setError('⚠️ La organización no tiene una suscripción pagada.');
 
           document.querySelector('.pixel-divider')?.scrollIntoView({ behavior: 'smooth' });
         } else if (response.status === 403 && data.message === "ORG_SUSCRIPCION_EXPIRADA") {
