@@ -25,10 +25,10 @@ describe("LoginPage", () => {
     renderLoginWithRoutes();
 
     expect(screen.getByText("Iniciar Sesión")).toBeInTheDocument();
-    expect(screen.getByLabelText("Usuario:")).toBeInTheDocument();
+    expect(screen.getByLabelText(/correo electrónico o usuario:/i)).toBeInTheDocument();
     expect(screen.getByLabelText("Contraseña:")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Iniciar sesión" })
+      screen.getByRole("button", { name: /entrar/i })
     ).toBeInTheDocument();
   });
 
@@ -44,9 +44,9 @@ describe("LoginPage", () => {
     renderLoginWithRoutes();
 
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText("Usuario:"), "alumno1");
+    await user.type(screen.getByLabelText(/correo electrónico o usuario:/i), "alumno1");
     await user.type(screen.getByLabelText("Contraseña:"), "bad-password");
-    await user.click(screen.getByRole("button", { name: "Iniciar sesión" }));
+    await user.click(screen.getByRole("button", { name: /entrar/i }));
 
     expect(await screen.findByText("Credenciales incorrectas")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -66,9 +66,9 @@ describe("LoginPage", () => {
     renderLoginWithRoutes();
 
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText("Usuario:"), "alumno1");
+    await user.type(screen.getByLabelText(/correo electrónico o usuario:/i), "alumno1");
     await user.type(screen.getByLabelText("Contraseña:"), "1234");
-    await user.click(screen.getByRole("button", { name: "Iniciar sesión" }));
+    await user.click(screen.getByRole("button", { name: /entrar/i }));
 
     expect(await screen.findByText("Mis Cursos Mock")).toBeInTheDocument();
 

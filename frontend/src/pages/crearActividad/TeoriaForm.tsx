@@ -10,8 +10,12 @@ export interface TeoriaFormInitialValues {
   readonly titulo: string;
   readonly descripcion: string;
   readonly imagen: string;
+  readonly permitirReintento?: boolean;
   readonly posicion: number;
   readonly temaId?: number;
+  readonly mostrarPuntuacion?: boolean;
+  readonly encontrarRespuestaMaestro?: boolean;
+  readonly encontrarRespuestaAlumno?: boolean;
 }
 
 interface Props {
@@ -27,6 +31,10 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [imagen, setImagen] = useState('');
+  const [permitirReintento, setPermitirReintento] = useState(false);
+  const [mostrarPuntuacion, setMostrarPuntuacion] = useState(false);
+  const [encontrarRespuestaMaestro, setEncontrarRespuestaMaestro] = useState(false);
+  const [encontrarRespuestaAlumno, setEncontrarRespuestaAlumno] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [iaModalOpen, setIaModalOpen] = useState(false);
@@ -43,6 +51,10 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setImagen(initialValues.imagen ?? '');
+    setPermitirReintento(Boolean(initialValues.permitirReintento));
+    setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion));
+    setEncontrarRespuestaMaestro(Boolean(initialValues.encontrarRespuestaMaestro));
+    setEncontrarRespuestaAlumno(Boolean(initialValues.encontrarRespuestaAlumno));
   }, [initialValues]);
 
   const validate = (): string | null => {
@@ -79,6 +91,10 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
             imagen: imagen.trim(),
+            permitirReintento,
+            mostrarPuntuacion,
+            encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno,
             temaId: temaId ? Number.parseInt(temaId, 10) : null,
           }),
         });
@@ -93,6 +109,10 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
             imagen: imagen.trim(),
+            permitirReintento,
+            mostrarPuntuacion,
+            encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno,
             temaId: temaIdNum,
           }),
         });
@@ -167,6 +187,45 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
                 onLoad={(e) => { (e.target as HTMLImageElement).style.display = 'block'; }}
               />
             )}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              id="teoria-reintento"
+              checked={permitirReintento}
+              onChange={(e) => setPermitirReintento(e.target.checked)}
+            />
+            <label className="cf-label" htmlFor="teoria-reintento">Permitir reintentos</label>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              id="teoria-mostrar-puntuacion"
+              checked={mostrarPuntuacion}
+              onChange={(e) => setMostrarPuntuacion(e.target.checked)}
+            />
+            <label className="cf-label" htmlFor="teoria-mostrar-puntuacion">Mostrar puntuación</label>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              id="teoria-mostrar-resp-maest"
+              checked={encontrarRespuestaMaestro}
+              onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
+            />
+            <label className="cf-label" htmlFor="teoria-mostrar-resp-maest">Mostrar respuesta correcta</label>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              id="teoria-mostrar-resp-alumn"
+              checked={encontrarRespuestaAlumno}
+              onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
+            />
+            <label className="cf-label" htmlFor="teoria-mostrar-resp-alumn">Mostrar mi respuesta</label>
           </div>
       </div>
 

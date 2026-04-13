@@ -41,9 +41,8 @@ public class AuthService {
     @Value("${brevo.sender.name:}")
     private String brevoSenderName;
 
-    public AuthService(UsuarioRepository usuarioRepository, 
-                       PasswordEncoder passwordEncoder, 
-                       OrganizacionRepository organizacionRepository) {
+    public AuthService(UsuarioRepository usuarioRepository,
+        PasswordEncoder passwordEncoder, OrganizacionRepository organizacionRepository) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.organizacionRepository = organizacionRepository;
@@ -142,8 +141,8 @@ public class AuthService {
             System.out.println("Correo de verificación enviado exitosamente. ID: " + result.getMessageId());
             
         } catch (Exception e) {
-            System.err.println("Error al enviar correo de verificación: " + e.getMessage());
-            e.printStackTrace();
+           throw new IllegalArgumentException("Error al enviar correo de verificación " + e.getMessage());
+           
         }
     }
 

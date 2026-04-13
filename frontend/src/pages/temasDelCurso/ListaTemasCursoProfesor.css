@@ -6,7 +6,7 @@
   width: 100vw;
   min-height: 100vh;
   box-sizing: border-box;
-  background-color: #FAF6ED;
+  background-color: var(--t-bg);
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
@@ -29,26 +29,26 @@
 /* ===== BOTÓN VOLVER ===== */
 .ltp-volver {
   align-self: flex-start;
-  background: var(--color-accent);
-  color: #000;
-  border: 3px solid #000;
-  border-radius: 12px;
+  background: var(--t-card);
+  color: var(--t-text);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
   padding: 6px 16px;
   cursor: pointer;
-  box-shadow: 3px 3px 0px #000;
-  transition: transform 0.1s;
+  box-shadow: var(--t-shadow-sm);
+  transition: background 0.15s, box-shadow 0.15s;
 }
-.ltp-volver:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0px #000; }
-.ltp-volver:active { transform: translate(1px, 1px); box-shadow: 2px 2px 0px #000; }
+.ltp-volver:hover { background: var(--t-primary-light); color: var(--t-primary); box-shadow: var(--t-shadow); }
+.ltp-volver:active { transform: translateY(1px); box-shadow: none; }
 
 /* ===== TÍTULO ===== */
 .ltp-titulo {
   font-family: 'Oxygen', sans-serif;
-  font-size: clamp(1.6rem, 4vw, 2.6rem);
-  font-weight: bold;
-  color: #000;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 700;
+  color: var(--t-text);
   margin: 0;
   text-align: center;
 }
@@ -72,10 +72,10 @@
 .ltp-panel {
   flex: 1;
   min-width: 260px;
-  background: #FFF8EE;
-  border: 4px solid #000;
-  border-radius: 16px;
-  box-shadow: 6px 6px 0px #000;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  box-shadow: var(--t-shadow);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -113,18 +113,18 @@
   border: 2px solid transparent;
 }
 .ltp-item:hover {
-  background: var(--color-accent);
+  background: var(--t-primary-light);
 }
 .ltp-item--activo {
-  background: var( --color-accent-light);
-  border: 2px solid #000;
-  font-weight: bold;
+  background: var(--t-input-focus);
+  border: 1px solid var(--t-primary);
+  font-weight: 600;
 }
 
 .ltp-item-titulo {
   flex: 1;
   overflow: hidden;
-  color: #000;
+  color: var(--t-text);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -138,40 +138,39 @@
 
 /* ===== BOTONES ICONO ===== */
 .ltp-btn-icono {
-  background: var(--color-accent);
-  border: 2px solid #000;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
   border-radius: 8px;
   width: 32px;
   height: 32px;
   cursor: pointer;
-  font-size: 1.2rem;
-  box-shadow: 2px 2px 0px #000;
-  transition: transform 0.1s;
+  font-size: 1.1rem;
+  box-shadow: var(--t-shadow-sm);
+  transition: background 0.15s, border-color 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
-
 }
-.ltp-btn-icono:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0px #000; }
-.ltp-btn-icono:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0px #000; }
+.ltp-btn-icono:hover { background: var(--t-primary-light); border-color: var(--t-primary); }
+.ltp-btn-icono:active { transform: translateY(1px); box-shadow: none; }
 
 /* ===== BOTÓN AÑADIR ===== */
 .ltp-btn-añadir {
-  background: var(--color-accent);
-  color: #000;
-  border: 3px solid #000;
-  border-top: 4px solid #000;
-  border-radius: 0 0 12px 12px;
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border: none;
+  border-top: 1px solid var(--t-border);
+  border-radius: 0 0 var(--t-radius-lg) var(--t-radius-lg);
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.1rem;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 600;
   padding: 10px;
   cursor: pointer;
   width: 100%;
-  box-shadow: 0 4px 0px #000;
-  transition: background 0.15s;
+  box-shadow: none;
+  transition: background 0.15s, color 0.15s;
 }
-.ltp-btn-añadir:hover { background: var( --color-accent-light); }
+.ltp-btn-añadir:hover { background: var(--t-primary); color: #fff; }
 
 .detalle-profesor-main {
   flex: 1;
@@ -187,43 +186,44 @@
 }
 
 /* Botón Volver */
-.detalle-volver {
+.ltp-page .detalle-volver {
   align-self: flex-start;
-  background: var(--color-accent);
-  color: #000;
-  border: 3px solid #000;
-  border-radius: 12px;
+  background: var(--t-card);
+  color: var(--t-text);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
   font-family: 'Oxygen', sans-serif;
   font-size: 1.1rem;
   padding: 6px 18px;
   cursor: pointer;
-  box-shadow: 3px 3px 0px #000;
-  transition: transform 0.1s;
+  box-shadow: var(--t-shadow-sm);
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
-.detalle-volver:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0px #000;
+.ltp-page .detalle-volver:hover {
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  box-shadow: var(--t-shadow);
 }
 
-.detalle-volver:active {
-  transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0px #000;
+.ltp-page .detalle-volver:active {
+  transform: translateY(1px);
+  box-shadow: none;
 }
 
 /* Banner de código */
 .detalle-profesor-banner {
-  background: #E285A9;
-  border: 4px solid #000;
-  border-radius: 16px;
-  box-shadow: 6px 6px 0px #000;
+  background: var(--t-primary);
+  border: 1px solid var(--t-primary);
+  border-radius: var(--t-radius-lg);
+  box-shadow: var(--t-shadow);
   padding: 12px 40px;
   font-family: 'Oxygen', sans-serif;
-  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
-  font-weight: bold;
-  color: #000;
+  font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+  font-weight: 600;
+  color: #fff;
   text-align: center;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 /* Fila de cajas */
@@ -238,17 +238,17 @@
   flex: 1;
   min-width: 260px;
   min-height: 320px;
-  background: #FFF;
-  border: 4px solid #000;
-  border-radius: 16px;
-  box-shadow: 6px 6px 0px #000;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  box-shadow: var(--t-shadow);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.6rem;
-  color: #aaa;
-  font-weight: bold;
+  font-size: 1.4rem;
+  color: var(--t-text-secondary);
+  font-weight: 600;
 }
 
 /* Botón editar */
@@ -259,25 +259,25 @@
 }
 
 .detalle-editar-btn {
-  background: #E285A9;
-  color: #000;
-  border: 4px solid #000;
-  border-radius: 16px;
+  background: var(--t-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--t-radius);
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.3rem;
-  font-weight: bold;
+  font-size: 1.1rem;
+  font-weight: 600;
   padding: 10px 40px;
   cursor: pointer;
-  box-shadow: 5px 5px 0px #000;
-  transition: transform 0.1s;
+  box-shadow: var(--t-shadow);
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 .detalle-editar-btn:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 7px 7px 0px #000;
+  background: var(--t-primary-hover);
+  box-shadow: var(--t-shadow-md);
 }
 
 .detalle-editar-btn:active {
-  transform: translate(1px, 1px);
-  box-shadow: 3px 3px 0px #000;
+  transform: translateY(1px);
+  box-shadow: var(--t-shadow-sm);
 }

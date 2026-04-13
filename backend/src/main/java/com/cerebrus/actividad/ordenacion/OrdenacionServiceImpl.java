@@ -3,13 +3,13 @@ package com.cerebrus.actividad.ordenacion;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
-import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.tema.Tema;
@@ -91,12 +91,10 @@ public class OrdenacionServiceImpl implements OrdenacionService {
             throw new AccessDeniedException("La actividad que buscas pertenece a un curso oculto");
         }
         List<Inscripcion> inscripciones = ordenacion.getTema().getCurso().getInscripciones();
-        List<String> valores = ordenacion.getValores();
-        List<String> valoresDesordenados = CerebrusUtils.shuffleCollection(valores).stream().toList();
-        ordenacion.setValores(valoresDesordenados);
         for (Inscripcion inscripcion : inscripciones) {
             if (inscripcion.getAlumno().getId().equals(current.getId())) {
                 AccesoActividadAlumnoUtils.validarActividadDesbloqueadaParaAlumno(ordenacion, current.getId());
+                Hibernate.initialize(ordenacion.getValores());
                 return ordenacion; 
             }
         }

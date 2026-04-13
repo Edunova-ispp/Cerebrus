@@ -1,6 +1,5 @@
 package com.cerebrus.actividad.general;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -320,7 +319,16 @@ public class GeneralServiceImpl implements GeneralService {
                 .stream()
                 .map(r -> new RespuestaDTO(r.getId(), r.getRespuesta()))
                 .toList();
-            return new PreguntaDTO(pregunta.getId(), pregunta.getPregunta(), pregunta.getImagen(), respuestasDTO);
+            int numRespuestasCorrectas = (int) pregunta.getRespuestasMaestro().stream()
+                .filter(r -> Boolean.TRUE.equals(r.getCorrecta()))
+                .count();
+            return new PreguntaDTO(
+                pregunta.getId(),
+                pregunta.getPregunta(),
+                pregunta.getImagen(),
+                respuestasDTO,
+                numRespuestasCorrectas
+            );
         }).toList();
 
         List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();
@@ -488,29 +496,17 @@ public class GeneralServiceImpl implements GeneralService {
         validarCursoVisibleParaAlumno(general);
 
         general.getPreguntas().forEach(p -> p.getRespuestasMaestro().size());
-        List<RespuestaMaestro> todasLasRespuestas = new ArrayList<>();
-        for (Pregunta p : general.getPreguntas()) {
-            todasLasRespuestas.addAll(p.getRespuestasMaestro());
-        }
-        List<RespuestaDTO> respuestasBarajadas = CerebrusUtils.shuffleCollection(todasLasRespuestas).stream()
-            .map(r -> new RespuestaDTO(r.getId(), r.getRespuesta()))
-            .toList();
-
-        List<PreguntaDTO> preguntasDTO = new ArrayList<>();
-        int numPreguntas = general.getPreguntas().size();
-        int numRespuestas = respuestasBarajadas.size();
-        int index = 0;
-
-        for (int i = 0; i < numPreguntas; i++) {
-            Pregunta p = general.getPreguntas().get(i);
-            List<RespuestaDTO> asignadas = new ArrayList<>();
-            
-            int toAssign = numRespuestas / numPreguntas + (i < numRespuestas % numPreguntas ? 1 : 0);
-            for (int j = 0; j < toAssign && index < numRespuestas; j++) {
-                asignadas.add(respuestasBarajadas.get(index++));
-            }
-            preguntasDTO.add(new PreguntaDTO(p.getId(), p.getPregunta(), p.getImagen(), asignadas));
-        }
+        List<PreguntaDTO> preguntasDTO = general.getPreguntas().stream().map(pregunta -> {
+            List<RespuestaDTO> respuestasDTO = pregunta.getRespuestasMaestro().stream()
+                .map(r -> new RespuestaDTO(r.getId(), r.getRespuesta()))
+                .toList();
+            return new PreguntaDTO(
+                pregunta.getId(),
+                pregunta.getPregunta(),
+                pregunta.getImagen(),
+                respuestasDTO
+            );
+        }).toList();
 
         List<Inscripcion> inscripciones = general.getTema().getCurso().getInscripciones();
         for (Inscripcion inscripcion : inscripciones) {
@@ -630,7 +626,11 @@ public class GeneralServiceImpl implements GeneralService {
             general.getPuntuacion(), general.getImagen(), general.getRespVisible(),
             general.getComentariosRespVisible(), general.getPosicion(), general.getVersion(),
             general.getTema() == null ? null : general.getTema().getId(),
-            preguntasDTO
+            preguntasDTO,
+            general.getMostrarPuntuacion(),
+            general.getPermitirReintento(),
+            general.getEncontrarRespuestaMaestro(),
+            general.getEncontrarRespuestaAlumno()
         );
     }
 

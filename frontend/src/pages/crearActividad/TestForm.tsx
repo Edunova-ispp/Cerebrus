@@ -22,6 +22,10 @@ export interface TestFormInitialValues {
   readonly puntuacion: number;
   readonly imagen: string | null;
   readonly respVisible: boolean;
+  readonly permitirReintento?: boolean;
+  readonly mostrarPuntuacion?: boolean;
+  readonly encontrarRespuestaMaestro?: boolean;
+  readonly encontrarRespuestaAlumno?: boolean;
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly version: number;
@@ -70,6 +74,10 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
   const [puntuacion, setPuntuacion] = useState('');
   const [imagen, setImagen] = useState('');
   const [respVisible, setRespVisible] = useState(false);
+  const [permitirReintento, setPermitirReintento] = useState(false);
+  const [mostrarPuntuacion, setMostrarPuntuacion] = useState(false);
+  const [encontrarRespuestaMaestro, setEncontrarRespuestaMaestro] = useState(false);
+  const [encontrarRespuestaAlumno, setEncontrarRespuestaAlumno] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
   const [questions, setQuestions] = useState<Question[]>([makeEmptyQuestion()]);
   const [error, setError] = useState('');
@@ -91,6 +99,10 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
     setPuntuacion(String(initialValues.puntuacion ?? ''));
     setImagen(initialValues.imagen ?? '');
     setRespVisible(Boolean(initialValues.respVisible));
+    setPermitirReintento(Boolean(initialValues.permitirReintento));
+    setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion ?? false));
+    setEncontrarRespuestaMaestro(Boolean(initialValues.encontrarRespuestaMaestro ?? false));
+    setEncontrarRespuestaAlumno(Boolean(initialValues.encontrarRespuestaAlumno ?? false));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
 
     if (initialValues.preguntas && initialValues.preguntas.length > 0) {
@@ -145,11 +157,16 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
       ),
     );
 
-  const setCorrect = (qi: number, oi: number) =>
+  const toggleCorrect = (qi: number, oi: number) =>
     setQuestions((prev) =>
       prev.map((q, i) =>
         i === qi
-          ? { ...q, options: q.options.map((opt, j) => ({ ...opt, correcta: j === oi })) }
+          ? {
+              ...q,
+              options: q.options.map((opt, j) =>
+                j === oi ? { ...opt, correcta: !opt.correcta } : opt,
+              ),
+            }
           : q,
       ),
     );
@@ -179,7 +196,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
           return `La opción ${oi + 1} de la pregunta ${qi + 1} está vacía`;
       }
       if (!q.options.some((o) => o.correcta))
-        return `Una de las respuestas debe ser marcada como correcta`;
+        return `Marca al menos una respuesta correcta en la pregunta ${qi + 1}`;
     }
 
     if (mode === 'edit' && !generalId) return 'Falta el id de la actividad a editar';
@@ -216,6 +233,10 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
             imagen: imagen.trim() || null,
             tema: { id: temaIdNum },
             respVisible,
+            permitirReintento,
+            mostrarPuntuacion,
+            encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno,
             comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
             preguntas: [],
           }),
@@ -260,6 +281,10 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
             imagen: imagen.trim() || null,
             tema: { id: temaIdNum },
             respVisible,
+            permitirReintento,
+            mostrarPuntuacion,
+            encontrarRespuestaMaestro,
+            encontrarRespuestaAlumno,
             comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || '') : '',
             posicion: initialValues?.posicion ?? 0,
             version: initialValues?.version ?? 1,
@@ -460,6 +485,42 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
             <span>Mostrar correcciones al alumno</span>
           </label>
 
+          <label className="tf-check-label">
+            <input
+              type="checkbox"
+              checked={permitirReintento}
+              onChange={(e) => setPermitirReintento(e.target.checked)}
+            />
+            <span>Permitir reintentos</span>
+          </label>
+
+          <label className="tf-check-label">
+            <input
+              type="checkbox"
+              checked={mostrarPuntuacion}
+              onChange={(e) => setMostrarPuntuacion(e.target.checked)}
+            />
+            <span>Mostrar puntuación</span>
+          </label>
+
+          <label className="tf-check-label">
+            <input
+              type="checkbox"
+              checked={encontrarRespuestaMaestro}
+              onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
+            />
+            <span>Mostrar respuesta correcta</span>
+          </label>
+
+          <label className="tf-check-label">
+            <input
+              type="checkbox"
+              checked={encontrarRespuestaAlumno}
+              onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
+            />
+            <span>Mostrar mi respuesta</span>
+          </label>
+
           {respVisible && (
             <div>
               <label className="tf-label" htmlFor="tf-comentarios">Comentarios</label>
@@ -477,7 +538,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
 
       <div className="tf-questions">
           <p className="tf-help">
-            Añade las preguntas y opciones. Marca cuál es la correcta con <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
+            Añade las preguntas y opciones. Marca todas las correctas con <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
           </p>
 
           {questions.map((q, qi) => (
@@ -521,8 +582,8 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
                     <button
                       type="button"
                       className={`tf-btn-correct${opt.correcta ? ' tf-btn-correct--active' : ''}`}
-                      onClick={() => setCorrect(qi, oi)}
-                      title={opt.correcta ? 'Respuesta correcta' : 'Marcar como correcta'}
+                      onClick={() => toggleCorrect(qi, oi)}
+                      title={opt.correcta ? 'Respuesta correcta (clic para desmarcar)' : 'Marcar como correcta'}
                     >
                       ✓
                     </button>

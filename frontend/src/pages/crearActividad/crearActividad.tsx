@@ -11,8 +11,21 @@ import { CartaForm } from './CartaForm';
 import { TableroForm } from './TableroForm';
 import { CrucigramaForm } from './CrucigramaForm';
 import { PreguntaAbiertaForm } from './PreguntaAbiertaForm';
+import ActivityGuideButton from '../../components/ActivityGuideButton/ActivityGuideButton';
 
 const TIPOS = ['Teoría', 'Tipo test', 'Poner en orden', 'Marcar en imagen', 'Tablero', 'Clasificación', 'Carta', 'Crucigrama', 'Pregunta Abierta'];
+
+const GUIDE_TYPE_BY_LABEL: Record<string, string> = {
+  'Teoría': 'teoria',
+  'Tipo test': 'test',
+  'Poner en orden': 'ordenacion',
+  'Marcar en imagen': 'marcar-imagen',
+  Tablero: 'tablero',
+  'Clasificación': 'clasificacion',
+  Carta: 'carta',
+  Crucigrama: 'crucigrama',
+  'Pregunta Abierta': 'pregunta-abierta',
+};
 
 interface CrearActividadProps {
   readonly cursoIdProp?: string;
@@ -26,6 +39,7 @@ export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDo
   const cursoId = cursoIdProp ?? params.id;
   const navigate = useNavigate();
   const [tipoSeleccionado, setTipoSeleccionado] = useState<string | null>(null);
+  const guideType = tipoSeleccionado ? GUIDE_TYPE_BY_LABEL[tipoSeleccionado] ?? 'general' : 'general';
 
   const formContent =
     tipoSeleccionado === 'Poner en orden' ? <OrdenacionForm temaIdProp={temaIdProp} cursoIdProp={cursoId} onDone={onDone} /> :
@@ -68,6 +82,9 @@ export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDo
       <div className="ca-embedded">
         {sidebar}
         <div className="ca-contenido">
+          <div className="ca-help-row">
+            <ActivityGuideButton activityType={guideType} role="maestro" buttonLabel="Tutorial" />
+          </div>
           {formContent}
         </div>
       </div>
@@ -80,6 +97,9 @@ export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDo
       <main className="ca-main">
         {sidebar}
         <div className="ca-contenido">
+          <div className="ca-help-row">
+            <ActivityGuideButton activityType={guideType} role="maestro" buttonLabel="Tutorial" />
+          </div>
           {formContent}
         </div>
       </main>

@@ -1,0 +1,183 @@
+package com.cerebrus.integration.profesor;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import com.cerebrus.curso.Curso;
+import com.cerebrus.curso.CursoRepository;
+import com.cerebrus.estadisticas.EstadisticasMaestroController;
+import com.cerebrus.estadisticas.EstadisticasMaestroService;
+import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
+import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
+import com.cerebrus.estadisticas.dto.TiempoAlumnoDTO;
+import com.cerebrus.exceptions.GlobalExceptionHandler;
+
+@ExtendWith(MockitoExtension.class)
+class EstadisticasProfesorIntegrationTest {
+
+    @Mock
+    private EstadisticasMaestroService estadisticasMaestroService;
+
+    @Mock
+    private CursoRepository cursoRepository;
+
+    @InjectMocks
+    private EstadisticasMaestroController estadisticasMaestroController;
+
+    private MockMvc mockMvc;
+
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(estadisticasMaestroController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
+    }
+
+    @Test
+    void obtenerEstadisticasCurso_ok_devuelve200() throws Exception {
+        EstadisticasCursoDTO dto = new EstadisticasCursoDTO(true, 7.6, 32.1, 10, 4);
+        when(estadisticasMaestroService.obtenerEstadisticasCurso(4001L)).thenReturn(dto);
+
+        mockMvc.perform(get("/api/estadisticas/cursos/4001/estadisiticas-curso"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cursoCompletadoPorTodos").value(true))
+                .andExpect(jsonPath("$.notaMediaCurso").value(7.6))
+                .andExpect(jsonPath("$.tiempoMedioCurso").value(32.1));
+    }
+
+    @Test
+    void obtenerActividadesCompletadas_ok_devuelveMapa() throws Exception {
+        Curso curso = new Curso();
+        curso.setId(4001L);
+
+        when(cursoRepository.findById(4001L)).thenReturn(Optional.of(curso));
+        when(estadisticasMaestroService.numActividadesRealizadasPorAlumno(curso))
+                .thenReturn(Map.of("Harry Potter", 5L));
+
+        mockMvc.perform(get("/api/estadisticas/cursos/4001/actividades-completadas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.['Harry Potter']").value(5));
+    }
+
+    @Test
+    void obtenerActividadesCompletadas_cursoNoExiste_devuelve404() throws Exception {
+        when(cursoRepository.findById(9999L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/estadisticas/cursos/9999/actividades-completadas"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").exists());
+    }
+
+    @Test
+    void obtenerActividadesCompletadas_noPropietario_devuelve403() throws Exception {
+        Curso curso = new Curso();
+        curso.setId(4001L);
+
+        when(cursoRepository.findById(4001L)).thenReturn(Optional.of(curso));
+        when(estadisticasMaestroService.numActividadesRealizadasPorAlumno(curso))
+                .thenThrow(new AccessDeniedException("Solo un maestro propietario"));
+
+        mockMvc.perform(get("/api/estadisticas/cursos/4001/actividades-completadas"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("Solo un maestro propietario"));
+    }
+
+    @Test
+    void obtenerPuntosCurso_noPropietario_devuelve403() throws Exception {
+        when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(4001L))
+                .thenThrow(new AccessDeniedException("No autorizado"));
+
+        mockMvc.perform(get("/api/estadisticas/cursos/4001/puntos"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void obtenerPuntosCurso_cursoNoExiste_devuelve404() throws Exception {
+        when(estadisticasMaestroService.calcularTotalPuntosCursoPorAlumno(9999L))
+                .thenThrow(new RuntimeException("404 Not Found: curso"));
+
+        mockMvc.perform(get("/api/estadisticas/cursos/9999/puntos"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void obtenerEstadisticasActividadTema_ok_devuelve200() throws Exception {
+        when(estadisticasMaestroService.obtenerEstadisticasCursoActividad(4001L, 5001L))
+                .thenReturn(Map.of(6001L, new EstadisticasActividadDTO(true, 20.0, 8.0, 10, 4)));
+
+        mockMvc.perform(get("/api/estadisticas/cursos/4001/temas/5001/estadisticas-actividades"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.6001.actividadCompletadaPorTodos").value(true))
+                .andExpect(jsonPath("$.6001.notaMediaActividad").value(8.0));
+    }
+
+    @Test
+    void obtenerAlumnosRapidosLentos_limiteCero_edgeCase_devuelve200() throws Exception {
+        AlumnosMasRapidosLentosDTO dto = new AlumnosMasRapidosLentosDTO(List.of(), List.of(), 0.0);
+        when(estadisticasMaestroService.obtenerAlumnosMasRapidosLentosCurso(eq(4001L), eq(0))).thenReturn(dto);
+
+        mockMvc.perform(get("/api/estadisticas/cursos/4001/alumnos-rapidos-lentos?limite=0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.masRapidos").isArray())
+                .andExpect(jsonPath("$.masLentos").isArray())
+                .andExpect(jsonPath("$.tiempoPromedio").value(0.0));
+    }
+
+    @Test
+    void obtenerAlumnosRapidosLentos_noPropietario_devuelve403() throws Exception {
+        when(estadisticasMaestroService.obtenerAlumnosMasRapidosLentosCurso(4001L, 3))
+                .thenThrow(new AccessDeniedException("No autorizado"));
+
+        mockMvc.perform(get("/api/estadisticas/cursos/4001/alumnos-rapidos-lentos"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("No autorizado"));
+    }
+
+    @Test
+    void obtenerTiempoAlumnoCurso_ok_devuelveTiempo() throws Exception {
+        when(estadisticasMaestroService.obtenerTiempoAlumnoEnCurso(2101L, 4001L)).thenReturn(123);
+
+        mockMvc.perform(get("/api/estadisticas/cursos/4001/alumno/2101/tiempo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tiempoMinutos").value(123));
+    }
+
+    @Test
+    void obtenerResumenEstadisticasAlumno_noExiste_devuelve404() throws Exception {
+        when(estadisticasMaestroService.obtenerResumenEstadisticasAlumno(4001L, 999L))
+                .thenThrow(new RuntimeException("404 Not Found: alumno"));
+
+        mockMvc.perform(get("/api/estadisticas/cursos/4001/alumnos/999"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").exists());
+    }
+
+    @Test
+    void obtenerResumenEstadisticasAlumno_errorInesperado_devuelve500() throws Exception {
+        when(estadisticasMaestroService.obtenerResumenEstadisticasAlumno(4001L, 2101L))
+                .thenThrow(new RuntimeException("error interno"));
+
+        mockMvc.perform(get("/api/estadisticas/cursos/4001/alumnos/2101"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error").value("error interno"));
+    }
+}

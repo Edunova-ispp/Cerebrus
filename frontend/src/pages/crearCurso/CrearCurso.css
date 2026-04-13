@@ -1,6 +1,7 @@
 .crear-curso-page {
   min-height: 100vh;
   font-family: 'Oxygen', sans-serif;
+  background-color: var(--t-bg);
 }
 
 .crear-curso-main {
@@ -12,17 +13,22 @@
   align-items: flex-start; /* ...alinea todo su contenido a la izquierda */
 }
 
-.detalle-volver {
+.crear-curso-page .detalle-volver {
   background: none;
   border: none;
-  color: #000;
+  color: var(--t-text);
   font-family: 'Oxygen', sans-serif;
   font-size: 1.2rem;
   cursor: pointer;
   padding: 0;
-  margin-bottom: 15px; /* Espacio antes del título */
+  margin-bottom: 15px;
   display: flex;
   align-items: center;
+  transition: color 0.15s;
+}
+
+.crear-curso-page .detalle-volver:hover {
+  color: var(--t-primary);
 }
 
 .welcome-text {
@@ -34,13 +40,13 @@
   width: 100%;
 }
 .crear-curso-card {
-  background: white;
-  border: 4px solid #000;
-  border-radius: 24px;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
   padding: 30px;
-  width: 100%; /* Que ocupe el ancho disponible */
+  width: 100%;
   box-sizing: border-box;
-  box-shadow: 8px 8px 0px rgba(0,0,0,0.1);
+  box-shadow: var(--t-shadow);
 }
 
 .crear-curso-layout {
@@ -67,40 +73,59 @@
 }
 
 .pixel-input {
-  background-color: var(--color-accent-light);
-  border: 3px solid #000;
-  border-radius: 15px;
+  background-color: var(--t-input-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
   padding: 12px 15px;
   width: 100%;
   box-sizing: border-box;
   font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pixel-input:focus {
+  outline: none;
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 /* Textarea más estilizado y menos ancho si lo deseas */
 .pixel-textarea {
-  background-color: var(--color-accent-light);
-  border: 4px solid #000;
-  border-radius: 15px;
+  background-color: var(--t-input-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
   padding: 12px 15px;
   width: 100%;
-  height: 120px; /* Altura reducida */
+  height: 120px;
   resize: none;
   font-family: inherit;
   box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pixel-textarea:focus {
+  outline: none;
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 
 /* ZONA DE IMAGEN */
 .pixel-drop-zone {
   width: 100%;
-  height: 260px; /* Un poco más alta para que destaque */
-  background-color: #FFFDE7; /* Amarillo muy clarito de fondo */
-  border: 4px solid #000;
-  border-radius: 20px;
+  height: 260px;
+  background-color: var(--t-input-bg);
+  border: 2px dashed var(--t-border-dark);
+  border-radius: var(--t-radius);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.pixel-drop-zone:hover {
+  border-color: var(--t-primary);
 }
 
 .pixel-fallback-box {
@@ -109,13 +134,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-accent-light); /* Amarillo sólido acorde a la estética */
+  background-color: var(--t-primary-light);
 }
 
 .pixel-fallback-initials {
   font-size: 5rem;
-  color: #000; /* Texto negro para contraste pixel puro */
-  text-shadow: 3px 3px 0px #fff;
+  color: var(--t-primary);
+  text-shadow: none;
 }
 
 .pixel-preview-img {
@@ -127,25 +152,28 @@
 /* BOTÓN CREAR */
 .pixel-btn-submit-main {
   width: 100%;
-  background-color: var(--color-accent);
-  border: 4px solid #000;
-  border-radius: 18px;
-  padding: 18px;
+  background-color: var(--t-primary);
+  border: none;
+  border-radius: 8px;
+  padding: 14px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.8rem;
-  font-weight: bold;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
   cursor: pointer;
-  box-shadow: 6px 6px 0px #000;
+  box-shadow: var(--t-shadow);
   margin-top: 10px;
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 .pixel-btn-submit-main:hover {
-  background-color: var( --color-accent-light);
+  background-color: var(--t-primary-hover);
+  box-shadow: var(--t-shadow-md);
 }
 
 .pixel-btn-submit-main:active {
-  transform: translate(3px, 3px);
-  box-shadow: 3px 3px 0px #000;
+  transform: translateY(1px);
+  box-shadow: var(--t-shadow-sm);
 }
 
 @media (max-width: 850px) {

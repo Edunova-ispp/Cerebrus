@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
+import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
+import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
 import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
@@ -33,14 +35,29 @@ type GeneralCartaDTO = {
   readonly posicion: number;
   readonly temaId: number | null;
   readonly preguntas: PreguntaDTO[];
+  readonly permitirReintento?: boolean;
+  readonly mostrarPuntuacion?: boolean;
+  readonly encontrarRespuestaMaestro?: boolean;
+  readonly encontrarRespuestaAlumno?: boolean;
 };
 
-type ActividadAlumnoDTO = { readonly id: number; readonly puntuacion?: number };
+type ActividadAlumnoDTO = {
+  readonly id: number;
+  readonly puntuacion?: number | null;
+  readonly fechaFin?: string | null;
+};
 
 type RespAlumnoGeneralCreateResponse = {
   readonly id: number;
   readonly correcta: boolean;
   readonly comentario: string;
+};
+
+type RespAlumnoGeneralResumenDTO = {
+  readonly preguntaId: number | null;
+  readonly respuesta: string;
+  readonly correcta?: boolean | null;
+  readonly respuestaCorrecta?: string | null;
 };
 
 /** A card on the board – either a "pregunta" side or a "respuesta" side */
@@ -62,6 +79,13 @@ function getCurrentUserIdFromJwt(): number | null {
     (info as Record<string, unknown>)?.sub;
   const userId = typeof raw === 'string' ? Number(raw) : raw;
   return typeof userId === 'number' && Number.isFinite(userId) ? userId : null;
+}
+
+function isCompletedAttempt(fechaFin?: string | null): boolean {
+  if (!fechaFin) return false;
+  const parsed = new Date(fechaFin);
+  if (Number.isNaN(parsed.getTime())) return false;
+  return parsed.getFullYear() !== 1970;
 }
 
 function shuffle<T>(arr: T[]): T[] {
@@ -86,6 +110,8 @@ export default function CartaAlumno() {
 
   const [carta, setCarta] = useState<GeneralCartaDTO | null>(null);
   const [actividadAlumnoId, setActividadAlumnoId] = useState<number | null>(null);
+  const [lastAttemptScore, setLastAttemptScore] = useState<number | null>(null);
+  const [activityConfig, setActivityConfig] = useState<ActivityResultConfig | null>(null);
   const [board, setBoard] = useState<BoardCard[]>([]);
   const [flipped, setFlipped] = useState<Set<string>>(new Set());
   const [matched, setMatched] = useState<Set<string>>(new Set());
@@ -97,6 +123,10 @@ export default function CartaAlumno() {
   const [finished, setFinished] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [earnedPoints, setEarnedPoints] = useState<number | null>(null);
+  const [showAnswerModal, setShowAnswerModal] = useState(false);
+  const [answerModalMode, setAnswerModalMode] = useState<'student' | 'correct'>('student');
+  const [studentAnswersByQuestion, setStudentAnswersByQuestion] = useState<Map<number, string>>(new Map());
+  const [correctAnswersByQuestion, setCorrectAnswersByQuestion] = useState<Map<number, string>>(new Map());
 
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
@@ -121,6 +151,25 @@ export default function CartaAlumno() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const hydrateAnswersFromHistory = async (actividadId: number) => {
+    const histRes = await apiFetch(`${apiBase}/api/respuestas-alumno-general/actividad-alumno/${actividadId}`);
+    const histData = (await histRes.json()) as RespAlumnoGeneralResumenDTO[];
+
+    const studentMap = new Map<number, string>();
+    const correctMap = new Map<number, string>();
+
+    for (const item of histData) {
+      if (typeof item.preguntaId !== 'number') continue;
+      studentMap.set(item.preguntaId, item.respuesta);
+      if (item.respuestaCorrecta && !correctMap.has(item.preguntaId)) {
+        correctMap.set(item.preguntaId, item.respuestaCorrecta);
+      }
+    }
+
+    setStudentAnswersByQuestion(studentMap);
+    setCorrectAnswersByQuestion(correctMap);
+  };
+
   // ── Initial load ──────────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -143,6 +192,14 @@ export default function CartaAlumno() {
         const cartaRes = await apiFetch(`${apiBase}/api/generales/cartas/${cartaIdNum}`);
         const cartaData = (await cartaRes.json()) as GeneralCartaDTO;
         setCarta(cartaData);
+        
+        // Load activity configuration
+        setActivityConfig({
+          showScore: cartaData.mostrarPuntuacion ?? true,
+          allowRetry: cartaData.permitirReintento ?? false,
+          showCorrectAnswer: cartaData.encontrarRespuestaMaestro ?? true,
+          showStudentAnswer: cartaData.encontrarRespuestaAlumno ?? true,
+        });
 
         // 2. Build board cards (one pregunta + one respuesta per question, shuffled)
         const cards: BoardCard[] = [];
@@ -172,21 +229,32 @@ export default function CartaAlumno() {
         const alumnoId = getCurrentUserIdFromJwt();
         if (!alumnoId) throw new TypeError('No se pudo identificar al alumno. Inicia sesión de nuevo.');
 
-        const ensureRes = await apiFetch(`${apiBase}/api/actividades-alumno/ensure/${cartaData.id}`);
-        const ensureValue = (await ensureRes.json()) as unknown;
-        const exists = ensureValue === 1 || ensureValue === '1' || ensureValue === true;
-
-        if (exists) {
+        let hasExisting = false;
+        try {
           const getAA = await apiFetch(
             `${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${cartaData.id}`,
           );
           const aaData = (await getAA.json()) as ActividadAlumnoDTO;
           if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+            hasExisting = true;
             setActividadAlumnoId(aaData.id);
-          } else {
-            throw new TypeError('Respuesta inválida al obtener ActividadAlumno');
+            if (isCompletedAttempt(aaData.fechaFin)) {
+              completedRef.current = true;
+              setFinished(true);
+              setLastAttemptScore(aaData.puntuacion ?? 0);
+              try {
+                await hydrateAnswersFromHistory(aaData.id);
+              } catch {
+                setStudentAnswersByQuestion(new Map());
+                setCorrectAnswersByQuestion(new Map());
+              }
+            }
           }
-        } else {
+        } catch {
+          hasExisting = false;
+        }
+
+        if (!hasExisting) {
           const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
             method: 'POST',
             body: JSON.stringify({ alumnoId, actividadId: cartaData.id }),
@@ -243,6 +311,80 @@ export default function CartaAlumno() {
       doCorrect();
     }
   }, [matched, board.length, actividadAlumnoId, respAlumnoIds, finished, apiBase]);
+
+  // ── Retry and View Answers handlers ──────────────────────────────────────
+
+  const handleRetry = async () => {
+    if (!carta) return;
+
+    try {
+      const alumnoId = getCurrentUserIdFromJwt();
+      if (!alumnoId || !carta) {
+        throw new TypeError('No se pudo identificar al alumno.');
+      }
+
+      const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
+        method: 'POST',
+        body: JSON.stringify({ alumnoId, actividadId: carta.id }),
+      });
+      const aaData = (await createAA.json()) as ActividadAlumnoDTO;
+      if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+        setActividadAlumnoId(aaData.id);
+        actividadAlumnoIdRef.current = aaData.id;
+      }
+
+      completedRef.current = false;
+      abandonReportedRef.current = false;
+      setBoard(shuffle(
+        carta.preguntas.flatMap((pregunta) => {
+          const respuesta = pregunta.respuestas[0];
+          if (!respuesta) return [];
+          return [
+            {
+              uid: `p-${pregunta.id}`,
+              kind: 'pregunta' as const,
+              preguntaId: pregunta.id,
+              respuestaId: respuesta.id,
+              text: pregunta.pregunta,
+              imagen: pregunta.imagen,
+            },
+            {
+              uid: `r-${respuesta.id}`,
+              kind: 'respuesta' as const,
+              preguntaId: pregunta.id,
+              respuestaId: respuesta.id,
+              text: respuesta.respuesta,
+              imagen: null,
+            },
+          ];
+        })
+      ));
+      setFlipped(new Set());
+      setMatched(new Set());
+      setFirstPick(null);
+      setChecking(false);
+      setElapsed(0);
+      setFinished(false);
+      setLastAttemptScore(null);
+      setEarnedPoints(null);
+      setRespAlumnoIds([]);
+      setStudentAnswersByQuestion(new Map());
+      setCorrectAnswersByQuestion(new Map());
+      setShowAnswerModal(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No se pudo crear un nuevo intento');
+    }
+  };
+
+  const handleViewStudentAnswers = () => {
+    setAnswerModalMode('student');
+    setShowAnswerModal(true);
+  };
+
+  const handleViewCorrectAnswers = () => {
+    setAnswerModalMode('correct');
+    setShowAnswerModal(true);
+  };
 
   // ── Card click handler ────────────────────────────────────────────────────
 
@@ -334,7 +476,7 @@ export default function CartaAlumno() {
         {carta && !loading && (
           <>
             {/* ── Header ── */}
-            <ActivityHeader title={carta.titulo} />
+            <ActivityHeader title={carta.titulo} guideType="carta" guideRole="alumno" />
 
             {/* ── Progress ── */}
             <div className="ca-al-progress">
@@ -394,16 +536,47 @@ export default function CartaAlumno() {
             </div>
 
             {/* ── Completion popup ── */}
-            {finished && (
+            {finished && activityConfig ? (
+              <ActivityResultScreen
+                title="¡ACTIVIDAD CARTA COMPLETADA!"
+                score={lastAttemptScore ?? (earnedPoints || 0)}
+                maxScore={carta?.puntuacion || 100}
+                config={activityConfig}
+                onContinue={() => navigate(-1)}
+                onRetry={handleRetry}
+                onViewStudentAnswer={handleViewStudentAnswers}
+                onViewCorrectAnswer={handleViewCorrectAnswers}
+                onCancel={() => navigate(-1)}
+              />
+            ) : finished ? (
               <CompletionPopup
                 title="¡ACTIVIDAD CARTA COMPLETADA!"
                 subtitle={`⏱ ${String(Math.floor(elapsed / 60)).padStart(2, '0')}:${String(elapsed % 60).padStart(2, '0')}${earnedPoints != null ? `  •  ${earnedPoints} puntos` : ''}`}
                 onContinue={() => navigate(-1)}
               />
-            )}
+            ) : null}
           </>
         )}
       </main>
+
+      {showAnswerModal && (
+        <AnswerViewModal
+          title={answerModalMode === 'student' ? 'Mi respuesta' : 'Respuesta correcta'}
+          answers={carta ? carta.preguntas.map((pregunta) => {
+            const respuesta = pregunta.respuestas[0];
+            const studentAnswer = studentAnswersByQuestion.get(pregunta.id) ?? '(Respuesta del intento no disponible)';
+            const correctAnswer = correctAnswersByQuestion.get(pregunta.id) ?? (respuesta?.respuesta || '(No disponible)');
+            return {
+              question: pregunta.pregunta,
+              studentAnswer,
+              correctAnswer,
+              isCorrect: studentAnswer === correctAnswer,
+            };
+          }) : []}
+          onClose={() => setShowAnswerModal(false)}
+          mode={answerModalMode}
+        />
+      )}
     </div>
   );
 }

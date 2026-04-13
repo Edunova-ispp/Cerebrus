@@ -1,12 +1,15 @@
 package com.cerebrus.usuario.organizacion;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.Row;
@@ -61,6 +64,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional(readOnly = true)
     public Page<Maestro> listarMaestros(Long organizacionId, int page, int size) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "listar maestros");
+        // Comprobar suscripciones activas antes de listar maestros
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede listar maestros.");
+        }
         // Forzar carga de maestros dentro de la transación
         Hibernate.initialize(organizacion.getMaestros());
         // Devolver copias planas para evitar serialización de relaciones lazy
@@ -74,6 +82,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional(readOnly = true)
     public Page<Alumno> listarAlumnos(Long organizacionId, int page, int size) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "listar alumnos");
+        // Comprobar suscripciones activas antes de listar alumnos
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede listar alumnos.");
+        }
         // Forzar carga de alumnos dentro de la transación
         Hibernate.initialize(organizacion.getAlumnos());
         // Devolver copias planas para evitar serialización de relaciones lazy
@@ -87,18 +100,12 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional(readOnly = true)
     public Usuario buscarUsuario(Long organizacionId, Long usuarioId) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "buscar usuarios");
-        // Forzar carga de ambas colecciones dentro de la transacción
-        Hibernate.initialize(organizacion.getMaestros());
-        Hibernate.initialize(organizacion.getAlumnos());
-        // Hacer copias de las colecciones para evitar lazy loading posterior
-        List<Usuario> usuarios = Stream.concat(
-                        new ArrayList<>(organizacion.getMaestros()).stream().map(m -> (Usuario) m),
-                        new ArrayList<>(organizacion.getAlumnos()).stream().map(a -> (Usuario) a))
-                .toList();
-        Usuario usuario = usuarios.stream()
-                .filter(u -> u.getId().equals(usuarioId))
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + usuarioId));
+        // Comprobar suscripciones activas antes de buscar usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede buscar usuarios.");
+        }
+        Usuario usuario = encontrarUsuarioEnOrganizacion(organizacion, usuarioId);
         return toSafeUsuario(usuario);
     }
 
@@ -106,20 +113,38 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     @Transactional
     public void eliminarUsuario(Long organizacionId, Long usuarioId) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "eliminar usuarios");
-        Usuario usuarioAEliminar = buscarUsuario(organizacionId, usuarioId);
-        if (usuarioAEliminar instanceof Maestro) {
-            organizacion.getMaestros().remove(usuarioAEliminar);
-        } else if (usuarioAEliminar instanceof Alumno) {
-            organizacion.getAlumnos().remove(usuarioAEliminar);
+        // Comprobar suscripciones activas antes de eliminar usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede eliminar usuarios.");
         }
-        usuarioRepository.deleteById(usuarioAEliminar.getId());
+        
+        // Inicializar las colecciones dentro de la transacción
+        Hibernate.initialize(organizacion.getMaestros());
+        Hibernate.initialize(organizacion.getAlumnos());
+        
+        boolean eliminado = organizacion.getMaestros().removeIf(maestro -> maestro.getId().equals(usuarioId));
+        if (!eliminado) {
+            eliminado = organizacion.getAlumnos().removeIf(alumno -> alumno.getId().equals(usuarioId));
+        }
+
+        if (!eliminado) {
+            throw new ResourceNotFoundException("Usuario no encontrado en la organización con ID: " + usuarioId);
+        }
+
+        usuarioRepository.deleteById(usuarioId);
     }
 
     @Override
     @Transactional
     public Usuario actualizarUsuario(Long organizacionId, Long usuarioId, UsuarioActualizarDTO usuarioActualizado) {
         Organizacion organizacion = validarYObtenerOrganizacionPropietaria(organizacionId, "actualizar usuarios");
-        Usuario usuarioExistente = buscarUsuario(organizacionId, usuarioId);
+        // Comprobar suscripciones activas antes de actualizar usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede actualizar usuarios.");
+        }
+        Usuario usuarioExistente = encontrarUsuarioEnOrganizacion(organizacion, usuarioId);
         validarNombreUsuarioUnicoEnOrganizacion(organizacion, usuarioExistente.getId(), usuarioActualizado.getNombreUsuario());
         // Solo se permiten actualizar ciertos campos
         usuarioExistente.setNombre(usuarioActualizado.getNombre());
@@ -131,6 +156,18 @@ public class OrganizacionServiceImpl implements OrganizacionService {
             usuarioExistente.setContrasena(usuarioActualizado.getContrasena());
         }
         return toSafeUsuario(usuarioRepository.save(usuarioExistente));
+    }
+
+    private Usuario encontrarUsuarioEnOrganizacion(Organizacion organizacion, Long usuarioId) {
+        Hibernate.initialize(organizacion.getMaestros());
+        Hibernate.initialize(organizacion.getAlumnos());
+
+        return Stream.concat(
+                organizacion.getMaestros().stream().map(m -> (Usuario) m),
+                organizacion.getAlumnos().stream().map(a -> (Usuario) a))
+            .filter(u -> u.getId().equals(usuarioId))
+            .findFirst()
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + usuarioId));
     }
 
     private Organizacion validarYObtenerOrganizacionPropietaria(Long organizacionId, String accion) {
@@ -203,6 +240,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         }
         
         Organizacion organizacion = (Organizacion) usuarioActual;
+        // Comprobar suscripciones activas antes de crear usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede crear usuarios.");
+        }
                  
 
         String rolUpper = request.getRol().toUpperCase();
@@ -226,7 +268,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         Usuario nuevoUsuario = null;
         
         if ("MAESTRO".equals(rolUpper)) {
-            nuevoUsuario = new Maestro(
+            Maestro maestro = new Maestro(
                 request.getNombre(),
                 request.getPrimerApellido(),
                 request.getSegundoApellido(),
@@ -235,9 +277,11 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 passwordEncoder.encode(request.getPassword()),
                 organizacion
             );
-            
+            maestro.setOrganizacion(organizacion);
+            organizacion.getMaestros().add(maestro);
+            nuevoUsuario = maestro;
         } else if ("ALUMNO".equals(rolUpper)) {
-            nuevoUsuario = new Alumno(
+            Alumno alumno = new Alumno(
                 request.getNombre(),
                 request.getPrimerApellido(),
                 request.getSegundoApellido(),
@@ -247,6 +291,9 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 0,
                 organizacion
             );
+            alumno.setOrganizacion(organizacion);
+            organizacion.getAlumnos().add(alumno);
+            nuevoUsuario = alumno;
             
         } else {
             throw new IllegalArgumentException("Rol inválido. Use: MAESTRO o ALUMNO.");
@@ -325,11 +372,40 @@ public class OrganizacionServiceImpl implements OrganizacionService {
 
         if(!errores.isEmpty()) {
             return errores;
-        } else {
-            usuarioRepository.save(nuevoUsuario);
-            return errores;
         }
+
+        // NOTA: la importación masiva es atómica; el guardado se realiza al final
+        // si no hay errores en ninguna fila.
+        return errores;
         
+    }
+
+    private Usuario construirUsuarioImportacionMasiva(CreateUserRequest request, Organizacion organizacion) {
+        String rolUpper = request.getRol().toUpperCase();
+        if ("MAESTRO".equals(rolUpper)) {
+            return new Maestro(
+                request.getNombre(),
+                request.getPrimerApellido(),
+                request.getSegundoApellido(),
+                request.getUsername(),
+                request.getEmail() != null ? request.getEmail() : "",
+                passwordEncoder.encode(request.getPassword()),
+                organizacion
+            );
+        }
+        if ("ALUMNO".equals(rolUpper)) {
+            return new Alumno(
+                request.getNombre(),
+                request.getPrimerApellido(),
+                request.getSegundoApellido(),
+                request.getUsername(),
+                request.getEmail() != null ? request.getEmail() : "",
+                passwordEncoder.encode(request.getPassword()),
+                0,
+                organizacion
+            );
+        }
+        return null;
     }
 
     private Maestro toSafeMaestro(Maestro original) {
@@ -363,6 +439,13 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         List<String> errores = new ArrayList<>();
         InputStream inputStream = archivo.getInputStream();
         Usuario usuarioActual = usuarioService.findCurrentUser();
+        Organizacion organizacion = (Organizacion) usuarioActual;
+
+        // Comprobar suscripciones activas antes de importar usuarios
+        boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
+        if (!tieneSuscripcionActiva) {
+            throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede importar usuarios.");
+        }
         
         if (!(usuarioActual instanceof Organizacion)) {
             throw new AccessDeniedException("Solo usuarios con rol ORGANIZACIÓN pueden crear nuevos usuarios.");
@@ -387,7 +470,10 @@ public class OrganizacionServiceImpl implements OrganizacionService {
 
     private List<String> leerArchivoCSV(InputStream inputStream) {
         List<String> errores = new ArrayList<>();
+        List<CreateUserRequest> requests = new ArrayList<>();
+        List<Integer> filas = new ArrayList<>();
         Integer numFila = 0;
+
         try (Scanner scanner = new Scanner(inputStream, "UTF-8")) {
             while(scanner.hasNextLine()) {
                 if(numFila <= 600) {
@@ -407,33 +493,75 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                     } else if(numFila.equals(1)) {
                         continue; // Saltar la fila del encabezado
                     }
-                    String nombre = campos.get(0);
-                    String primerApellido = campos.get(1);
-                    String segundoApellido = campos.get(2);
-                    String correoElectronico = campos.get(3);
-                    String nombreUsuario = campos.get(4);
-                    String contrasena = campos.get(5);
-                    String rol = campos.get(6);
+
                     CreateUserRequest request = new CreateUserRequest();
-                    request.setNombre(nombre);
-                    request.setPrimerApellido(primerApellido);
-                    request.setSegundoApellido(segundoApellido);
-                    request.setEmail(correoElectronico);
-                    request.setUsername(nombreUsuario);
-                    request.setPassword(contrasena);
-                    request.setRol(rol);
-                    errores.addAll(crearUsuarioImportacionMasiva(request, numFila));
+                    request.setNombre(campos.get(0));
+                    request.setPrimerApellido(campos.get(1));
+                    request.setSegundoApellido(campos.get(2));
+                    request.setEmail(campos.get(3));
+                    request.setUsername(campos.get(4));
+                    request.setPassword(campos.get(5));
+                    request.setRol(campos.get(6));
+
+                    requests.add(request);
+                    filas.add(numFila);
                 } else {
-                    errores.add("El archivo CSV excede el límite de 600 filas. Se han procesado las primeras 600 filas.");
+                    errores.add("El archivo CSV excede el límite de 600 filas.");
                     break;
                 }
             }
         }
+
+        // Validación completa antes de guardar (importación atómica)
+        Set<String> usernamesEnArchivo = new HashSet<>();
+        Set<String> emailsEnArchivo = new HashSet<>();
+
+        for (int i = 0; i < requests.size(); i++) {
+            CreateUserRequest request = requests.get(i);
+            Integer fila = filas.get(i);
+
+            String username = request.getUsername() != null ? request.getUsername().trim() : "";
+            if (!username.isEmpty()) {
+                String key = username.toLowerCase();
+                if (usernamesEnArchivo.contains(key)) {
+                    errores.add("El username ' " + username + "' está repetido en el archivo. Error en fila " + fila + " del archivo.");
+                } else {
+                    usernamesEnArchivo.add(key);
+                }
+            }
+
+            String email = request.getEmail() != null ? request.getEmail().trim() : "";
+            if (!email.isEmpty()) {
+                String key = email.toLowerCase();
+                if (emailsEnArchivo.contains(key)) {
+                    errores.add("El email ' " + email + "' está repetido en el archivo. Error en fila " + fila + " del archivo.");
+                } else {
+                    emailsEnArchivo.add(key);
+                }
+            }
+
+            errores.addAll(crearUsuarioImportacionMasiva(request, fila));
+        }
+
+        if(!errores.isEmpty()) {
+            return errores;
+        }
+
+        Usuario usuarioActual = usuarioService.findCurrentUser();
+        Organizacion organizacion = (Organizacion) usuarioActual;
+        List<Usuario> nuevosUsuarios = new ArrayList<>();
+        for (CreateUserRequest request : requests) {
+            Usuario nuevo = construirUsuarioImportacionMasiva(request, organizacion);
+            if (nuevo != null) nuevosUsuarios.add(nuevo);
+        }
+        usuarioRepository.saveAll(nuevosUsuarios);
         return errores;
     }
 
     private List<String> leerArchivoExcel(InputStream inputStream, String nombreArchivo) throws IOException{
         List<String> errores = new ArrayList<>();
+        List<CreateUserRequest> requests = new ArrayList<>();
+        List<Integer> filas = new ArrayList<>();
         Workbook workbook = null;
         try {
             if (nombreArchivo.toLowerCase().endsWith(".xls")) {
@@ -473,25 +601,16 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                             throw new IllegalArgumentException("El archivo Excel no tiene el formato correcto. La primera fila debe contener los encabezados: Nombre, Primer Apellido, Segundo Apellido, Correo Electrónico, Nombre de Usuario, Contraseña, Rol");
                         }
                     } else {
-                        // Procesar filas de datos
-                        String nombre = campos.get(0);
-                        String primerApellido = campos.get(1);
-                        String segundoApellido = campos.get(2);
-                        String correoElectronico = campos.get(3);
-                        String nombreUsuario = campos.get(4);
-                        String contrasena = campos.get(5);
-                        String rol = campos.get(6);
-    
                         CreateUserRequest request = new CreateUserRequest();
-                        request.setNombre(nombre);
-                        request.setPrimerApellido(primerApellido);
-                        request.setSegundoApellido(segundoApellido);
-                        request.setEmail(correoElectronico);
-                        request.setUsername(nombreUsuario);
-                        request.setPassword(contrasena);
-                        request.setRol(rol);
-    
-                        errores.addAll(crearUsuarioImportacionMasiva(request, row.getRowNum() + 1));
+                        request.setNombre(campos.get(0));
+                        request.setPrimerApellido(campos.get(1));
+                        request.setSegundoApellido(campos.get(2));
+                        request.setEmail(campos.get(3));
+                        request.setUsername(campos.get(4));
+                        request.setPassword(campos.get(5));
+                        request.setRol(campos.get(6));
+                        requests.add(request);
+                        filas.add(row.getRowNum() + 1);
                     }
                 } else {
                     errores.add("El archivo Excel excede el límite de 600 filas. Se han procesado las primeras 600 filas.");
@@ -503,6 +622,50 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 workbook.close();  // Cerrar para liberar recursos
             }
         }
+
+        // Validación completa antes de guardar (importación atómica)
+        Set<String> usernamesEnArchivo = new HashSet<>();
+        Set<String> emailsEnArchivo = new HashSet<>();
+
+        for (int i = 0; i < requests.size(); i++) {
+            CreateUserRequest request = requests.get(i);
+            Integer fila = filas.get(i);
+
+            String username = request.getUsername() != null ? request.getUsername().trim() : "";
+            if (!username.isEmpty()) {
+                String key = username.toLowerCase();
+                if (usernamesEnArchivo.contains(key)) {
+                    errores.add("El username ' " + username + "' está repetido en el archivo. Error en fila " + fila + " del archivo.");
+                } else {
+                    usernamesEnArchivo.add(key);
+                }
+            }
+
+            String email = request.getEmail() != null ? request.getEmail().trim() : "";
+            if (!email.isEmpty()) {
+                String key = email.toLowerCase();
+                if (emailsEnArchivo.contains(key)) {
+                    errores.add("El email ' " + email + "' está repetido en el archivo. Error en fila " + fila + " del archivo.");
+                } else {
+                    emailsEnArchivo.add(key);
+                }
+            }
+
+            errores.addAll(crearUsuarioImportacionMasiva(request, fila));
+        }
+
+        if(!errores.isEmpty()) {
+            return errores;
+        }
+
+        Usuario usuarioActual = usuarioService.findCurrentUser();
+        Organizacion organizacion = (Organizacion) usuarioActual;
+        List<Usuario> nuevosUsuarios = new ArrayList<>();
+        for (CreateUserRequest request : requests) {
+            Usuario nuevo = construirUsuarioImportacionMasiva(request, organizacion);
+            if (nuevo != null) nuevosUsuarios.add(nuevo);
+        }
+        usuarioRepository.saveAll(nuevosUsuarios);
         return errores;
     }
 
@@ -511,12 +674,10 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         if (cell == null) {
             return "";
         }
-        return switch (cell.getCellType()) {
-            case STRING -> cell.getStringCellValue();
-            case NUMERIC -> String.valueOf(cell.getNumericCellValue());
-            case BLANK -> "";
-            default -> "";
-        };
+
+        // DataFormatter devuelve el valor formateado tal y como lo vería el usuario en Excel,
+        // evitando casos como contraseñas numéricas convertidas a "123.0".
+        DataFormatter formatter = new DataFormatter();
+        return formatter.formatCellValue(cell);
     }
 }
-

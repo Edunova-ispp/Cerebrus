@@ -1,6 +1,9 @@
 package com.cerebrus.usuario;
 
 import jakarta.validation.Valid;
+
+import java.util.Optional;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -11,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.usuario.organizacion.Organizacion;
 
 @Service
 public class UsuarioService {
@@ -82,5 +86,20 @@ public class UsuarioService {
     public void deleteUser(Long id) {
         Usuario toDelete = findById(id);
         this.userRepository.delete(toDelete);
+    }
+
+
+@Transactional(readOnly = true)
+public boolean isUsuarioHabilitado(String identificador) {
+    Optional<Usuario> usuarioOpt = userRepository.findByNombreUsuarioOrCorreoElectronico(identificador, identificador);
+    
+    if (usuarioOpt.isEmpty()) return false;
+
+    Usuario user = usuarioOpt.get();
+    if (user instanceof Organizacion) {
+        Boolean confirmado = ((Organizacion) user).getEmailConfirmado();
+        return confirmado != null && confirmado;
+    }
+    return true;
     }
 }
