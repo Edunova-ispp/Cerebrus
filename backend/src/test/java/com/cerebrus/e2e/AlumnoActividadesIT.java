@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -24,6 +25,7 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
     private static final long ACTIVIDAD_CARTA_SEED_ID = 10402L;
     private static final long ACTIVIDAD_TABLERO_SEED_ID = 10414L;
     private static final long ACTIVIDAD_MARCAR_IMAGEN_SEED_ID = 10415L;
+
 
     @Test
     @DisplayName("Sin autenticacion, rutas de alumno redirigen a login")

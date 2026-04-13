@@ -19,16 +19,6 @@ class CursoIT extends SeleniumBaseTest {
     private static final String ALUMNO = "alumno_harry";
     private static final String PASSWORD = "123456";
 
-    @BeforeEach
-void clearData() {
-    // Primero navegar al dominio para que las cookies sean del dominio correcto
-    navigateTo("/");
-    driver.manage().deleteAllCookies();
-    ((org.openqa.selenium.JavascriptExecutor) driver)
-        .executeScript("window.localStorage.clear(); window.sessionStorage.clear();");
-    // Forzar recarga para que el frontend procese el estado vacío
-    driver.navigate().refresh();
-}
 
     @Test
     @DisplayName("Sin autenticacion, rutas de cursos redirigen a login")
@@ -62,7 +52,6 @@ void clearData() {
         // Rellenar formulario
         driver.findElement(By.id("titulo")).sendKeys("Curso E2E Temporal");
         driver.findElement(By.id("descripcion")).sendKeys("Descripción temporal");
-        driver.findElement(By.id("imagen")).sendKeys("img.png");
 
         driver.findElement(By.xpath("//button[normalize-space()='Crear curso']")).click();
 

@@ -23,16 +23,7 @@ class SmokeIT extends SeleniumBaseTest {
 
     private static final Duration WAIT = Duration.ofSeconds(10);
 
-    @BeforeEach
-void clearData() {
-    // Primero navegar al dominio para que las cookies sean del dominio correcto
-    navigateTo("/");
-    driver.manage().deleteAllCookies();
-    ((org.openqa.selenium.JavascriptExecutor) driver)
-        .executeScript("window.localStorage.clear(); window.sessionStorage.clear();");
-    // Forzar recarga para que el frontend procese el estado vacío
-    driver.navigate().refresh();
-}
+    
 
     @Test
     @DisplayName("La landing page carga y muestra el título CerebrUS")

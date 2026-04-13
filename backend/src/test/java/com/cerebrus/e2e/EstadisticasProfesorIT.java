@@ -20,16 +20,7 @@ class EstadisticasProfesorIT extends SeleniumBaseTest {
     private static final String PROFESOR_NO_OWNER = "profe_snape";
     private static final String PASSWORD = "123456";
 
-         @BeforeEach
-void clearData() {
-    // Primero navegar al dominio para que las cookies sean del dominio correcto
-    navigateTo("/");
-    driver.manage().deleteAllCookies();
-    ((org.openqa.selenium.JavascriptExecutor) driver)
-        .executeScript("window.localStorage.clear(); window.sessionStorage.clear();");
-    // Forzar recarga para que el frontend procese el estado vacío
-    driver.navigate().refresh();
-}
+         
     @Test
     @DisplayName("Sin autenticacion, rutas de estadisticas de profesor redirigen a login")
     void rutasEstadisticasSinAutenticacionRedirigenALogin() {

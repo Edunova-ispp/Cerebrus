@@ -57,16 +57,24 @@ public abstract class SeleniumBaseTest {
     }
 
     @BeforeEach
-    void resetBrowserState() {
-        if (driver instanceof JavascriptExecutor js) {
-            try {
-                js.executeScript("window.localStorage.clear(); window.sessionStorage.clear();");
-            } catch (WebDriverException ignored) {
-                // Some Chrome sessions start on a data: URL where Storage APIs are disabled.
-            }
-        }
+void resetBrowserState() {
+    // 1. Primero navegar a una página estable del dominio
+    try {
+        driver.get(BASE_URL + "/");
+    } catch (WebDriverException ignored) {}
+
+    // 2. Borrar cookies (ahora el driver está en un dominio válido)
+    try {
         driver.manage().deleteAllCookies();
+    } catch (WebDriverException ignored) {}
+
+    // 3. Limpiar storage
+    if (driver instanceof JavascriptExecutor js) {
+        try {
+            js.executeScript("window.localStorage.clear(); window.sessionStorage.clear();");
+        } catch (WebDriverException ignored) {}
     }
+}
 
     @AfterAll
     void tearDownDriver() {
