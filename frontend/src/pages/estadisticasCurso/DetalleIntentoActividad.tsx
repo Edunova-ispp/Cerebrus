@@ -46,7 +46,10 @@ function formatFecha(iso?: string | null): string {
 }
 
 function formatTiempo(min?: number | null, segundos?: number | null): string {
-  const totalSegundos = ((min ?? 0) * 60) + (segundos ?? 0);
+  const totalSegundos =
+    typeof segundos === 'number' && Number.isFinite(segundos)
+      ? segundos
+      : (min ?? 0) * 60;
   if (totalSegundos <= 0) return '—';
   if (totalSegundos < 60) return `${totalSegundos} s`;
   const mins = Math.floor(totalSegundos / 60);

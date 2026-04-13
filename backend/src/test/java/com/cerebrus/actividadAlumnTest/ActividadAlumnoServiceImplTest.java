@@ -569,9 +569,39 @@ class ActividadAlumnoServiceImplTest {
 
         ActividadAlumno resultado = service.corregirActAlumnoAutomaticamente(10L, List.of(101L, 102L));
 
-        // 1 correcta: +50, 1 incorrecta: -25 → 25
-        assertThat(resultado.getPuntuacion()).isEqualTo(25);
-        assertThat(resultado.getNota()).isEqualTo(3); // round(2.5)
+        // 1 correcta de 2: 50 puntos y nota 5, sin penalización por fallo.
+        assertThat(resultado.getPuntuacion()).isEqualTo(50);
+        assertThat(resultado.getNota()).isEqualTo(5);
+    }
+
+    @Test
+    void corregirActAlumnoAutomaticamente_tipoTest_tresPreguntas_sinPenalizacion_reparte100Entre3() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        General actividadGeneral = crearActividadGeneral(TipoActGeneral.TEST, 100, 3);
+        actividadAlumno.setActividad(actividadGeneral);
+
+        Pregunta pregunta1 = actividadGeneral.getPreguntas().get(0);
+        Pregunta pregunta2 = actividadGeneral.getPreguntas().get(1);
+        Pregunta pregunta3 = actividadGeneral.getPreguntas().get(2);
+        pregunta1.setRespuestasMaestro(List.of(crearRespuestaMaestro("p1_ok", true), crearRespuestaMaestro("p1_bad", false)));
+        pregunta2.setRespuestasMaestro(List.of(crearRespuestaMaestro("p2_ok", true), crearRespuestaMaestro("p2_bad", false)));
+        pregunta3.setRespuestasMaestro(List.of(crearRespuestaMaestro("p3_ok", true), crearRespuestaMaestro("p3_bad", false)));
+
+        // Solo acierta 1 de 3 preguntas: 100/3 = 33.33 -> round = 33.
+        RespAlumnoGeneral resp1 = crearRespAlumnoGeneral(101L, pregunta1, "p1_ok");
+        RespAlumnoGeneral resp2 = crearRespAlumnoGeneral(102L, pregunta2, "p2_bad");
+        RespAlumnoGeneral resp3 = crearRespAlumnoGeneral(103L, pregunta3, "p3_bad");
+
+        when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
+        when(respuestaAlumnoService.encontrarRespuestaAlumnoPorId(101L)).thenReturn(resp1);
+        when(respuestaAlumnoService.encontrarRespuestaAlumnoPorId(102L)).thenReturn(resp2);
+        when(respuestaAlumnoService.encontrarRespuestaAlumnoPorId(103L)).thenReturn(resp3);
+        when(actividadAlumnoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ActividadAlumno resultado = service.corregirActAlumnoAutomaticamente(10L, List.of(101L, 102L, 103L));
+
+        assertThat(resultado.getPuntuacion()).isEqualTo(33);
+        assertThat(resultado.getNota()).isEqualTo(3);
     }
 
     @Test

@@ -351,18 +351,9 @@ public class ActividadAlumnoServiceImpl implements ActividadAlumnoService {
             if (preguntaCorrecta) {
                 puntuacionAcumulada += valorPuntoPorPregunta;
                 notaAcumulada += valorNotaPorPregunta;
-            } else {
-                puntuacionAcumulada -= valorPuntoPorPregunta / 2;
-                notaAcumulada -= valorNotaPorPregunta / 2;
             }
         }
 
-        if(puntuacionAcumulada < 0) {
-            puntuacionAcumulada = 0;
-        }
-        if(notaAcumulada < 0) {
-            notaAcumulada = 0;
-        }
         actividadAlumno.setPuntuacion((int) Math.round(puntuacionAcumulada));
         actividadAlumno.setNota((int) Math.round(notaAcumulada));
         actividadAlumno.setFechaFin(LocalDateTime.now());
