@@ -1,29 +1,30 @@
 package com.cerebrus.actividad.tablero;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cerebrus.comun.enumerados.TamanoTablero;
-import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.tablero.dto.TableroDTO;
 import com.cerebrus.actividad.tablero.dto.TableroRequest;
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
 import com.cerebrus.actividadAlumn.ActividadAlumnoService;
+import com.cerebrus.comun.enumerados.TamanoTablero;
+import com.cerebrus.comun.utils.AccesoActividadAlumnoUtils;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.pregunta.PreguntaRepository;
 import com.cerebrus.respuestaAlumn.RespuestaAlumno;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneral;
-import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneralRepository;
 import com.cerebrus.respuestaMaestro.RespuestaMaestro;
 import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
 import com.cerebrus.tema.Tema;
@@ -234,28 +235,49 @@ public class TableroServiceImpl implements TableroService {
             Boolean correcta = pregunta.getRespuestasMaestro().get(0).getRespuesta().toLowerCase().strip().equals(cleanedRespuesta.toLowerCase().strip());
             
             ActividadAlumno actividadAlumno = actividadAlumnoService.crearActAlumno(0, LocalDateTime.now(), null, 0, 0, alumno.getId(), tablero.getId());
-            if((tablero.getTamano().equals(TamanoTablero.TRES_X_TRES) && actividadAlumno.getRespuestasAlumno().stream().filter(a -> a.getCorrecta()).count()%8  == 0) || ((tablero.getTamano().equals(TamanoTablero.CUATRO_X_CUATRO) && actividadAlumno.getRespuestasAlumno().stream().filter(a -> a.getCorrecta()).count()%15  == 0))) {
-                actividadAlumno.getRespuestasAlumno().clear();
+
+            RespAlumnoGeneral respuestaAlumnoExistente = actividadAlumno.getRespuestasAlumno().stream()
+                .filter(RespAlumnoGeneral.class::isInstance)
+                .map(RespAlumnoGeneral.class::cast)
+                .filter(r -> r.getPregunta() != null && r.getPregunta().getId() != null && r.getPregunta().getId().equals(preguntaId))
+                .findFirst()
+                .orElse(null);
+
+            if (respuestaAlumnoExistente != null) {
+                respuestaAlumnoExistente.setRespuesta(respuesta);
+                respuestaAlumnoExistente.setCorrecta(correcta);
+                if (respuestaAlumnoExistente instanceof RespAlumnoGeneral respAlumnoGeneralExistente && !correcta) {
+                    int fallosPrevios = java.util.Objects.requireNonNullElse(respAlumnoGeneralExistente.getNumFallos(), 0);
+                    respAlumnoGeneralExistente.setNumFallos(fallosPrevios + 1);
+                }
+            } else {
+                RespAlumnoGeneral respuestaAlumnoNueva = new RespAlumnoGeneral(correcta, actividadAlumno, respuesta, pregunta);
+                respuestaAlumnoNueva.setNumFallos(Boolean.TRUE.equals(correcta) ? 0 : 1);
+                actividadAlumno.getRespuestasAlumno().add(respuestaAlumnoNueva);
             }
-            
-            RespAlumnoGeneral respuestaAlumno = new RespAlumnoGeneral(correcta, actividadAlumno, respuesta, pregunta);
-            actividadAlumno.getRespuestasAlumno().add(respuestaAlumno);
-            if(correcta  && actividadAlumno.getRespuestasAlumno().stream().filter(a -> a.getCorrecta()).count() == tablero.getPreguntas().size()) {
+
+            Set<Long> preguntasCorrectasUnicas = new HashSet<>();
+            for (RespuestaAlumno resp : actividadAlumno.getRespuestasAlumno()) {
+                if (resp instanceof RespAlumnoGeneral respGeneral
+                    && Boolean.TRUE.equals(respGeneral.getCorrecta())
+                    && respGeneral.getPregunta() != null
+                    && respGeneral.getPregunta().getId() != null) {
+                    preguntasCorrectasUnicas.add(respGeneral.getPregunta().getId());
+                }
+            }
+
+            if (preguntasCorrectasUnicas.size() == tablero.getPreguntas().size()) {
                 actividadAlumno.setFechaFin(LocalDateTime.now());
-                int numErrores = 0;
-                for(RespuestaAlumno resp : actividadAlumno.getRespuestasAlumno()) {
-                    if(!resp.getCorrecta()) {
-                        numErrores++;
+                int numFallosTotales = 0;
+                for (RespuestaAlumno resp : actividadAlumno.getRespuestasAlumno()) {
+                    if (resp instanceof RespAlumnoGeneral respGeneral) {
+                        numFallosTotales += java.util.Objects.requireNonNullElse(respGeneral.getNumFallos(), 0);
                     }
                 }
-                Integer notaFinal = Math.round(10 - (numErrores * (10 / tablero.getPreguntas().size()/4)));
-                if (notaFinal <= 0) {
-                    notaFinal = 1;
-                }
-                Integer puntuacionFinal = Math.round(tablero.getPuntuacion() - (numErrores * (tablero.getPuntuacion() / tablero.getPreguntas().size()/4)));
-                if (puntuacionFinal <= 0) {
-                    puntuacionFinal = 1;
-                }
+
+                int notaFinal = Math.max(0, 10 - numFallosTotales);
+                Integer puntuacionBase = java.util.Objects.requireNonNullElse(tablero.getPuntuacion(), 0);
+                Integer puntuacionFinal = (int) Math.round(puntuacionBase.doubleValue() * (notaFinal / 10.0));
                 actividadAlumno.setNota(notaFinal);
                 actividadAlumno.setPuntuacion(puntuacionFinal);
             }

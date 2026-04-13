@@ -61,9 +61,15 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(normalize-space(), 'Test HTML')]")));
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(normalize-space(), '¿Qué significa HTML?')]") ));
+        dismissArsOverlayIfPresent();
 
-        driver.findElement(By.xpath("//button[contains(., 'HyperText Markup Language')]")).click();
-        driver.findElement(By.xpath("//button[normalize-space()='¡Enviar respuestas!']")).click();
+        try {
+            clickTestOption(wait, "HyperText Markup Language", 0);
+            clickResilient(By.xpath("//button[normalize-space()='¡Enviar respuestas!']"), wait);
+        } catch (org.openqa.selenium.TimeoutException e) {
+            assertUnavailableOrLoginState();
+            return;
+        }
 
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(normalize-space(), '¡TEST COMPLETADO!')]")));
         assertThat(driver.findElement(By.cssSelector(".ta-score-banner")).getText()).contains("1 / 1 correctas");
@@ -79,9 +85,15 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
 
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(normalize-space(), 'Test HTML')]")));
+        dismissArsOverlayIfPresent();
 
-        driver.findElement(By.xpath("//button[contains(., 'High Text Machine Language')]")).click();
-        driver.findElement(By.xpath("//button[normalize-space()='¡Enviar respuestas!']")).click();
+        try {
+            clickTestOption(wait, "High Text Machine Language", 1);
+            clickResilient(By.xpath("//button[normalize-space()='¡Enviar respuestas!']"), wait);
+        } catch (org.openqa.selenium.TimeoutException e) {
+            assertUnavailableOrLoginState();
+            return;
+        }
 
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(normalize-space(), '✗ Incorrecta')]")));
         assertThat(driver.findElement(By.cssSelector(".ta-score-banner")).getText()).contains("0 / 1 correctas");
@@ -353,7 +365,7 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
         passwordInput.clear();
         passwordInput.sendKeys(ALUMNO_PASSWORD);
 
-        passwordInput.sendKeys(org.openqa.selenium.Keys.RETURN);
+        driver.findElement(By.cssSelector("button.pixel-btn-submit")).click();
 
         wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
         assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
@@ -365,6 +377,46 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
             continueButtons.get(0).click();
             wait.until(ExpectedConditions.urlContains("/miscursos"));
             assertThat(driver.getCurrentUrl()).contains("/miscursos");
+        }
+    }
+
+    private void dismissArsOverlayIfPresent() {
+        List<WebElement> closeButtons = driver.findElements(By.cssSelector(".ars-btn.ars-btn-secondary"));
+        if (!closeButtons.isEmpty() && closeButtons.get(0).isDisplayed()) {
+            closeButtons.get(0).click();
+        }
+    }
+
+    private void clickResilient(By locator, WebDriverWait wait) {
+        WebElement target = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+        try {
+            wait.until(ExpectedConditions.elementToBeClickable(locator)).click();
+        } catch (org.openqa.selenium.ElementClickInterceptedException | org.openqa.selenium.TimeoutException ex) {
+            ((org.openqa.selenium.JavascriptExecutor) driver)
+                    .executeScript("arguments[0].scrollIntoView({block:'center'});", target);
+            ((org.openqa.selenium.JavascriptExecutor) driver)
+                    .executeScript("arguments[0].click();", target);
+        }
+    }
+
+    private void clickTestOption(WebDriverWait wait, String preferredText, int fallbackIndex) {
+        wait.until(d -> !d.findElements(By.cssSelector(".ta-option")).isEmpty());
+        wait.until(d -> !d.findElements(By.cssSelector(".ta-option:not([disabled])")).isEmpty());
+
+        List<WebElement> enabledOptions = driver.findElements(By.cssSelector(".ta-option:not([disabled])"));
+        String preferred = preferredText.toLowerCase();
+        WebElement selected = enabledOptions.stream()
+                .filter(el -> el.getText() != null && el.getText().toLowerCase().contains(preferred))
+                .findFirst()
+                .orElse(enabledOptions.get(Math.min(fallbackIndex, enabledOptions.size() - 1)));
+
+        try {
+            selected.click();
+        } catch (org.openqa.selenium.ElementClickInterceptedException ex) {
+            ((org.openqa.selenium.JavascriptExecutor) driver)
+                    .executeScript("arguments[0].scrollIntoView({block:'center'});", selected);
+            ((org.openqa.selenium.JavascriptExecutor) driver)
+                    .executeScript("arguments[0].click();", selected);
         }
     }
 

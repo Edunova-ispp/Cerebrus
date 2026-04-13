@@ -33,10 +33,19 @@ import com.cerebrus.estadisticas.dto.EstadisticasAlumnoResumenDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 import com.cerebrus.estadisticas.dto.IntentoActividadDTO;
+import com.cerebrus.estadisticas.dto.IntentoActividadDetalleDTO;
+import com.cerebrus.estadisticas.dto.IntentoDetalleRespuestaDTO;
+import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
 import com.cerebrus.estadisticas.dto.TemaEstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.TiempoAlumnoDTO;
-import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
 import com.cerebrus.inscripcion.Inscripcion;
+import com.cerebrus.pregunta.Pregunta;
+import com.cerebrus.respuestaAlumn.RespuestaAlumno;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneral;
+import com.cerebrus.respuestaAlumn.respAlumOrdenacion.RespAlumnoOrdenacion;
+import com.cerebrus.respuestaAlumn.respAlumPuntoImagen.RespAlumnoPuntoImagen;
+import com.cerebrus.respuestaMaestro.RespuestaMaestro;
+import com.cerebrus.respuestaMaestro.RespuestaMaestroRepository;
 import com.cerebrus.tema.Tema;
 import com.cerebrus.tema.TemaRepository;
 import com.cerebrus.usuario.Usuario;
@@ -54,14 +63,16 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
     private final ActividadRepository actividadRepository;
     private final CursoRepository cursoRepository;
     private final TemaRepository temaRepository;
+        private final RespuestaMaestroRepository respuestaMaestroRepository;
 
     @Autowired
-    public EstadisticasMaestroServiceImpl(EstadisticasMaestroRepository estadisticasRepository, UsuarioService usuarioService, ActividadRepository actividadRepository, CursoRepository cursoRepository, TemaRepository temaRepository) {
+        public EstadisticasMaestroServiceImpl(EstadisticasMaestroRepository estadisticasRepository, UsuarioService usuarioService, ActividadRepository actividadRepository, CursoRepository cursoRepository, TemaRepository temaRepository, RespuestaMaestroRepository respuestaMaestroRepository) {
          this.estadisticasRepository = estadisticasRepository;
          this.usuarioService = usuarioService;
          this.actividadRepository = actividadRepository;
          this.cursoRepository = cursoRepository;
          this.temaRepository = temaRepository;
+            this.respuestaMaestroRepository = respuestaMaestroRepository;
     }
 
     @Transactional(readOnly = true)
@@ -801,12 +812,11 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                     }
                 }
 
-                // Build intentos list
+                // Build full history of attempts for this activity.
                 List<IntentoActividadDTO> intentos = instanciasAlumno.stream()
-                        .filter(aa -> aa.getEstadoActividad() == EstadoActividad.TERMINADA)
                         .sorted((a, b) -> {
-                            LocalDateTime fa = a.getFechaFin() != null ? a.getFechaFin() : a.getFechaInicio();
-                            LocalDateTime fb = b.getFechaFin() != null ? b.getFechaFin() : b.getFechaInicio();
+                            LocalDateTime fa = fechaEfectivaIntento(a);
+                            LocalDateTime fb = fechaEfectivaIntento(b);
                             if (fa == null && fb == null) return 0;
                             if (fa == null) return -1;
                             if (fb == null) return 1;
@@ -819,6 +829,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                                 aa.getPuntuacion(),
                                 aa.getNota(),
                                 aa.getTiempoMinutos(),
+                                aa.getTiempoSegundos(),
                                 aa.getNumAbandonos()))
                         .toList();
 
@@ -851,6 +862,18 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                 : notasAlumno.stream().mapToInt(Integer::intValue).min().orElse(0);
         Integer notaMax = notasAlumno.isEmpty() ? null
                 : notasAlumno.stream().mapToInt(Integer::intValue).max().orElse(0);
+        Integer tiempoTotalSegundos = 0;
+        for (Tema tema : curso.getTemas()) {
+            for (Actividad actividad : tema.getActividades()) {
+                ActividadAlumno ultimaTerminada = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
+                        .filter(aa -> aa.getAlumno().getId().equals(alumnoId) && aa.getEstadoActividad() == EstadoActividad.TERMINADA)
+                        .findFirst()
+                        .orElse(null);
+                if (ultimaTerminada != null && ultimaTerminada.getTiempoSegundos() != null) {
+                    tiempoTotalSegundos += ultimaTerminada.getTiempoSegundos();
+                }
+            }
+        }
 
         return new EstadisticasAlumnoResumenDTO(
                 alumnoId,
@@ -861,7 +884,109 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                 actividadesCompletadas,
                 totalActividades,
                 tiempoTotal,
+                tiempoTotalSegundos,
                 temasDTO);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public IntentoActividadDetalleDTO obtenerDetalleIntento(Long cursoId, Long alumnoId, Long actividadId, Long intentoId) {
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+            .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        validarPropietarioCurso(maestro, curso);
+
+        Actividad actividad = actividadRepository.findById(actividadId)
+            .orElseThrow(() -> new RuntimeException("404 Not Found: La actividad con ID " + actividadId + " no existe."));
+
+        if (actividad.getTema() == null || actividad.getTema().getCurso() == null
+            || !actividad.getTema().getCurso().getId().equals(cursoId)) {
+            throw new RuntimeException("404 Not Found: La actividad no pertenece al curso indicado.");
+        }
+
+        ActividadAlumno intento = actividad.getActividadesAlumno().stream()
+            .filter(aa -> aa.getId().equals(intentoId))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("404 Not Found: El intento con ID " + intentoId + " no existe."));
+
+        if (intento.getAlumno() == null || !intento.getAlumno().getId().equals(alumnoId)) {
+            throw new RuntimeException("404 Not Found: El intento no pertenece al alumno indicado.");
+        }
+
+        List<IntentoDetalleRespuestaDTO> respuestas = intento.getRespuestasAlumno().stream()
+            .map(this::mapearRespuestaIntento)
+            .toList();
+
+        return new IntentoActividadDetalleDTO(
+            intento.getId(),
+            cursoId,
+            alumnoId,
+            actividadId,
+            actividad.getTitulo(),
+            obtenerTipoActividad(actividad),
+            obtenerImagenActividad(actividad),
+            actividad.getPuntuacion(),
+            intento.getFechaInicio(),
+            intento.getFechaFin(),
+            intento.getTiempoMinutos(),
+            intento.getTiempoSegundos(),
+            intento.getPuntuacion(),
+            intento.getNota(),
+            intento.getNumAbandonos(),
+            respuestas);
+    }
+
+    @Override
+    @Transactional
+    public IntentoActividadDTO actualizarPuntuacionIntento(Long cursoId, Long alumnoId, Long actividadId, Long intentoId,
+        Integer nuevaPuntuacion) {
+        if (nuevaPuntuacion == null) {
+            throw new IllegalArgumentException("La puntuación es obligatoria.");
+        }
+
+        Usuario usuario = usuarioService.findCurrentUser();
+        Maestro maestro = validarMaestro(usuario);
+
+        Curso curso = cursoRepository.findById(cursoId)
+            .orElseThrow(() -> new RuntimeException("404 Not Found: El curso con ID " + cursoId + " no existe."));
+        validarPropietarioCurso(maestro, curso);
+
+        Actividad actividad = actividadRepository.findById(actividadId)
+            .orElseThrow(() -> new RuntimeException("404 Not Found: La actividad con ID " + actividadId + " no existe."));
+
+        if (actividad.getTema() == null || actividad.getTema().getCurso() == null
+            || !actividad.getTema().getCurso().getId().equals(cursoId)) {
+            throw new RuntimeException("404 Not Found: La actividad no pertenece al curso indicado.");
+        }
+
+        ActividadAlumno intento = actividad.getActividadesAlumno().stream()
+            .filter(aa -> aa.getId().equals(intentoId))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("404 Not Found: El intento con ID " + intentoId + " no existe."));
+
+        if (intento.getAlumno() == null || !intento.getAlumno().getId().equals(alumnoId)) {
+            throw new RuntimeException("404 Not Found: El intento no pertenece al alumno indicado.");
+        }
+
+        if (actividad.getPuntuacion() != null && nuevaPuntuacion > actividad.getPuntuacion()) {
+            throw new IllegalArgumentException("La puntuacion no puede superar la puntuacion maxima de la actividad.");
+        }
+
+        int puntuacionNormalizada = Math.max(0, nuevaPuntuacion);
+        intento.setPuntuacion(puntuacionNormalizada);
+        intento.setNota(calcularNotaDesdePuntuacion(puntuacionNormalizada, actividad.getPuntuacion()));
+
+        return new IntentoActividadDTO(
+            intento.getId(),
+            intento.getFechaInicio(),
+            intento.getFechaFin(),
+            intento.getPuntuacion(),
+            intento.getNota(),
+            intento.getTiempoMinutos(),
+            intento.getTiempoSegundos(),
+            intento.getNumAbandonos());
     }
 
     // ==================== MÉTODOS AUXILIARES ====================
@@ -900,8 +1025,8 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
     }
 
     private boolean esMasReciente(ActividadAlumno candidata, ActividadAlumno actual) {
-        LocalDateTime fechaCandidata = candidata.getFechaFin() != null ? candidata.getFechaFin() : candidata.getFechaInicio();
-        LocalDateTime fechaActual = actual.getFechaFin() != null ? actual.getFechaFin() : actual.getFechaInicio();
+        LocalDateTime fechaCandidata = fechaEfectivaIntento(candidata);
+        LocalDateTime fechaActual = fechaEfectivaIntento(actual);
 
         if (fechaCandidata == null && fechaActual == null) {
             return candidata.getId() != null && actual.getId() != null && candidata.getId() > actual.getId();
@@ -914,6 +1039,20 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         }
 
         return fechaCandidata.isAfter(fechaActual);
+    }
+
+    private LocalDateTime fechaEfectivaIntento(ActividadAlumno actividadAlumno) {
+        LocalDateTime fechaFin = actividadAlumno.getFechaFin();
+        LocalDateTime fechaInicio = actividadAlumno.getFechaInicio();
+        LocalDateTime epoch = LocalDateTime.of(1970, 1, 1, 0, 0);
+
+        if (fechaFin != null && !fechaFin.equals(epoch)) {
+            return fechaFin;
+        }
+        if (fechaInicio != null && !fechaInicio.equals(epoch)) {
+            return fechaInicio;
+        }
+        return null;
     }
 
     private Boolean actividadCompletadaPorTodos(Curso curso, Actividad actividad) {
@@ -1145,6 +1284,102 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
             return "MarcarImagen";
         }
         return "Otro";
+    }
+
+    private IntentoDetalleRespuestaDTO mapearRespuestaIntento(RespuestaAlumno respuestaAlumno) {
+        if (respuestaAlumno == null) {
+            return new IntentoDetalleRespuestaDTO(null, "OTRO", "Respuesta", "", null, null);
+        }
+
+        if (respuestaAlumno instanceof RespAlumnoGeneral rag) {
+            String enunciado = "Pregunta";
+            Boolean correcta = rag.getCorrecta();
+
+            try {
+                // Try to load the Pregunta - it might not exist if deleted
+                Pregunta pregunta = rag.getPregunta();
+                if (pregunta != null) {
+                    enunciado = pregunta.getPregunta();
+
+                    if (pregunta.getActividad() instanceof General general
+                        && general.getTipo() == com.cerebrus.comun.enumerados.TipoActGeneral.CLASIFICACION
+                        && rag.getRespuesta() != null) {
+                        correcta = respuestaMaestroRepository.findByRespuesta(rag.getRespuesta())
+                            .map(RespuestaMaestro::getPregunta)
+                            .filter(preguntaMaestra -> preguntaMaestra != null && preguntaMaestra.getId() != null)
+                            .map(preguntaMaestra -> preguntaMaestra.getId().equals(pregunta.getId()) ? Boolean.TRUE : Boolean.FALSE)
+                            .orElse(Boolean.FALSE);
+                    }
+                }
+            } catch (jakarta.persistence.EntityNotFoundException e) {
+                // Pregunta doesn't exist - use default enunciado
+                log.warn("Pregunta not found for RespAlumnoGeneral ID: {}", rag.getId());
+            }
+
+            return new IntentoDetalleRespuestaDTO(
+                    rag.getId(),
+                    "GENERAL",
+                    enunciado,
+                    rag.getRespuesta(),
+                    correcta,
+                    rag.getNumFallos());
+        }
+        if (respuestaAlumno instanceof RespAlumnoPuntoImagen rpi) {
+            String respuestaCorrecta = (rpi.getPuntoImagen() != null && rpi.getPuntoImagen().getRespuesta() != null)
+                ? rpi.getPuntoImagen().getRespuesta()
+                : "";
+            String enunciado = respuestaCorrecta.isBlank()
+                ? "Punto imagen"
+                : "Punto imagen: " + respuestaCorrecta;
+            return new IntentoDetalleRespuestaDTO(
+                    rpi.getId(),
+                    "PUNTO_IMAGEN",
+                    enunciado,
+                    rpi.getRespuesta(),
+                    rpi.getCorrecta(),
+                    null);
+        }
+        if (respuestaAlumno instanceof RespAlumnoOrdenacion rao) {
+            String enunciado = "Ordenacion";
+            String valor = rao.getValoresAlum() == null ? "" : String.join(" > ", rao.getValoresAlum());
+            return new IntentoDetalleRespuestaDTO(
+                    rao.getId(),
+                    "ORDENACION",
+                    enunciado,
+                    valor,
+                    rao.getCorrecta(),
+                    null);
+        }
+
+        return new IntentoDetalleRespuestaDTO(
+                respuestaAlumno.getId(),
+                "OTRO",
+                "Respuesta",
+                "",
+                respuestaAlumno.getCorrecta(),
+                null);
+    }
+
+    private Integer calcularNotaDesdePuntuacion(Integer puntuacion, Integer puntuacionMaximaActividad) {
+        if (puntuacion == null || puntuacion <= 0) {
+            return 0;
+        }
+        if (puntuacionMaximaActividad == null || puntuacionMaximaActividad <= 0) {
+            return 0;
+        }
+        double proporcion = (double) puntuacion / (double) puntuacionMaximaActividad;
+        int nota = (int) Math.round(proporcion * 10.0);
+        return Math.max(0, Math.min(10, nota));
+    }
+
+    private String obtenerImagenActividad(Actividad actividad) {
+        if (actividad == null) {
+            return null;
+        }
+        if (actividad instanceof MarcarImagen marcarImagen) {
+            return marcarImagen.getImagenAMarcar();
+        }
+        return actividad.getImagen();
     }
 
 }

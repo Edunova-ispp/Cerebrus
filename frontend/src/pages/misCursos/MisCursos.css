@@ -93,10 +93,110 @@
 }
 
 /* === PROFESOR: Oxygen === */
+.mis-cursos-page.maestro {
+  background-color: var(--t-bg);
+}
+
 .mis-cursos-page.maestro .mis-cursos-title,
 .mis-cursos-page.maestro .join-label,
 .mis-cursos-page.maestro .join-input,
 .mis-cursos-page.maestro .join-btn,
 .mis-cursos-page.maestro .mis-cursos-feedback {
   font-family: 'Oxygen', sans-serif;
+}
+
+.mis-cursos-page.maestro .mis-cursos-title {
+  color: var(--t-text);
+}
+
+.mis-cursos-page.maestro .join-input {
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
+  box-shadow: var(--t-shadow-sm);
+  color: var(--t-text);
+  font-weight: 500;
+}
+
+.mis-cursos-page.maestro .join-input:focus {
+  outline: none;
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.mis-cursos-page.maestro .join-btn {
+  background: var(--t-primary);
+  color: #fff;
+  border: 1px solid var(--t-primary);
+  border-radius: 8px;
+  box-shadow: var(--t-shadow-sm);
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.mis-cursos-page.maestro .join-btn:hover {
+  background: var(--t-primary-hover);
+}
+
+/* === CursoCard teacher overrides === */
+.mis-cursos-page.maestro .curso-card {
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  box-shadow: var(--t-shadow);
+}
+
+.mis-cursos-page.maestro .curso-card:hover {
+  box-shadow: var(--t-shadow-md);
+}
+
+.mis-cursos-page.maestro .curso-card__cover {
+  border-bottom: 1px solid var(--t-border);
+}
+
+.mis-cursos-page.maestro .curso-card__footer {
+  background-color: var(--t-primary) !important;
+}
+
+.mis-cursos-page.maestro .curso-card:nth-child(even) .curso-card__footer {
+  background-color: #4F46E5 !important;
+}
+
+.mis-cursos-page.maestro .curso-card__titulo {
+  font-family: 'Oxygen', sans-serif;
+  font-weight: 600;
+  font-size: 1.15rem;
+}
+
+.mis-cursos-page.maestro .curso-card__initials {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 2.4rem;
+  color: var(--t-text-secondary);
+}
+
+.mis-cursos-page.maestro .curso-card__maestro-info {
+  border-top: 1px solid var(--t-border);
+}
+
+.mis-cursos-page.maestro .curso-card__maestro-label,
+.mis-cursos-page.maestro .curso-card__maestro-value {
+  font-family: 'Oxygen', sans-serif;
+}
+
+.mis-cursos-page.maestro .curso-card__expand-btn {
+  background: var(--t-primary-light);
+  border: 1px solid var(--t-border);
+  border-radius: 6px;
+  box-shadow: none;
+  color: var(--t-primary);
+}
+
+.mis-cursos-page.maestro .curso-card__expand-btn:hover {
+  background: var(--t-input-focus);
+  transform: none;
+  box-shadow: none;
+}
+
+.mis-cursos-page.maestro .curso-card__delete-btn {
+  border: 1px solid var(--t-border);
+  box-shadow: var(--t-shadow-sm);
 }

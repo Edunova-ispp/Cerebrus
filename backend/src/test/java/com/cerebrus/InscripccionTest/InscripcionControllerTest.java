@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.inscripcion.InscripcionController;
 import com.cerebrus.inscripcion.InscripcionService;
+import com.cerebrus.inscripcion.dto.AlumnoCursoDTO;
 
 @ExtendWith(MockitoExtension.class)
 class InscripcionControllerTest {
@@ -86,5 +90,27 @@ class InscripcionControllerTest {
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(respuesta.getBody()).isEqualTo("Error interno");
+    }
+
+    @Test
+    void listarAlumnosPorCurso_retornaPuntosCalculados() {
+        AlumnoCursoDTO alumno = new AlumnoCursoDTO(
+                2L,
+                "Alumno",
+                "Uno",
+                null,
+                "alumno1",
+                "alumno1@correo.com",
+                57,
+                LocalDate.of(2026, 4, 1));
+
+        when(inscripcionService.listarInscripcionesPorCurso(10L)).thenReturn(List.of(alumno));
+
+        ResponseEntity<List<AlumnoCursoDTO>> respuesta = controller.listarAlumnosPorCurso(10L);
+
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(respuesta.getBody()).hasSize(1);
+        assertThat(respuesta.getBody().get(0).getPuntos()).isEqualTo(57);
+        verify(inscripcionService).listarInscripcionesPorCurso(10L);
     }
 }

@@ -3,6 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
+import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
+import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
+import ActivityGuideButton from '../../components/ActivityGuideButton/ActivityGuideButton';
 import espadaImg from '../../assets/props/espada.png';
 import './MarcarImagenAlumno.css';
 
@@ -24,12 +27,25 @@ type MarcarImagenDTO = {
   readonly temaId: number | null;
   readonly imagenAMarcar: string;
   readonly puntosImagen: PuntoImagenDTO[];
+  readonly permitirReintento?: boolean;
+  readonly mostrarPuntuacion?: boolean;
+  readonly encontrarRespuestaMaestro?: boolean;
+  readonly encontrarRespuestaAlumno?: boolean;
 };
 
 type ActividadAlumnoDTO = {
   readonly id: number;
   readonly nota?: number;
+  readonly puntuacion?: number | null;
+  readonly fechaFin?: string | null;
 };
+
+function isCompletedAttempt(fechaFin?: string | null): boolean {
+  if (!fechaFin) return false;
+  const parsed = new Date(fechaFin);
+  if (Number.isNaN(parsed.getTime())) return false;
+  return parsed.getFullYear() !== 1970;
+}
 
 type RespAlumnoPuntoImagenDTO = {
   readonly id: number;
@@ -66,18 +82,18 @@ export default function MarcarImagenAlumno() {
 
   const [actividad, setActividad] = useState<MarcarImagenDTO | null>(null);
   const [actividadAlumnoId, setActividadAlumnoId] = useState<number | null>(null);
+  const [activityConfig, setActivityConfig] = useState<ActivityResultConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
-  const [feedback, setFeedback] = useState<{
-    correcta: boolean;
-    aciertos: number;
-    total: number;
-    comentario?: string;
-  } | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [lastAttemptScore, setLastAttemptScore] = useState<number | null>(null);
+  const [lastAttemptGrade, setLastAttemptGrade] = useState<number | null>(null);
   const [selectedPuntoId, setSelectedPuntoId] = useState<number | null>(null);
   const [respuestas, setRespuestas] = useState<Record<number, string>>({});
   const [imageDims, setImageDims] = useState<ImageDims | null>(null);
+  const [showAnswerModal, setShowAnswerModal] = useState(false);
+  const [answerModalMode, setAnswerModalMode] = useState<'student' | 'correct'>('student');
 
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
@@ -146,12 +162,19 @@ export default function MarcarImagenAlumno() {
 
       setLoading(true);
       setError('');
-      setFeedback(null);
 
       try {
         const actRes = await apiFetch(`${apiBase}/api/marcar-imagenes/${marcarImagenIdNum}`);
         const actData = (await actRes.json()) as MarcarImagenDTO;
         setActividad(actData);
+
+        // Load activity configuration
+        setActivityConfig({
+          showScore: actData.mostrarPuntuacion ?? true,
+          allowRetry: actData.permitirReintento ?? false,
+          showCorrectAnswer: actData.encontrarRespuestaMaestro ?? true,
+          showStudentAnswer: actData.encontrarRespuestaAlumno ?? true,
+        });
 
         const puntos = Array.isArray(actData.puntosImagen) ? actData.puntosImagen : [];
         if (puntos.length > 0) {
@@ -161,19 +184,27 @@ export default function MarcarImagenAlumno() {
         const alumnoId = getCurrentUserIdFromJwt();
         if (!alumnoId) throw new TypeError('No se pudo identificar al alumno conectado. Inicia sesión de nuevo.');
 
-        const ensureRes = await apiFetch(`${apiBase}/api/actividades-alumno/ensure/${actData.id}`);
-        const ensureValue = (await ensureRes.json()) as unknown;
-        const exists = ensureValue === 1 || ensureValue === '1' || ensureValue === true;
-
-        if (exists) {
+        let hasExisting = false;
+        try {
           const getAA = await apiFetch(`${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${actData.id}`);
           const aaData = (await getAA.json()) as ActividadAlumnoDTO;
           if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+            hasExisting = true;
             setActividadAlumnoId(aaData.id);
+            if (isCompletedAttempt(aaData.fechaFin)) {
+              completedRef.current = true;
+              setSubmitted(true);
+              setLastAttemptScore(aaData.puntuacion ?? 0);
+              setLastAttemptGrade(aaData.nota ?? null);
+            }
           } else {
             throw new TypeError('Respuesta inválida al obtener ActividadAlumno');
           }
-        } else {
+        } catch {
+          hasExisting = false;
+        }
+
+        if (!hasExisting) {
           const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
             method: 'POST',
             body: JSON.stringify({ alumnoId, actividadId: actData.id }),
@@ -249,7 +280,6 @@ export default function MarcarImagenAlumno() {
 
   const handleSubmit = async () => {
     setError('');
-    setFeedback(null);
 
     if (!actividad) {
       setError('No se ha cargado la actividad');
@@ -292,22 +322,67 @@ export default function MarcarImagenAlumno() {
       });
       const aa = (await corregirRes.json()) as ActividadAlumnoDTO;
       const nota = typeof aa?.nota === 'number' ? aa.nota : 0;
+      setLastAttemptScore(typeof aa?.puntuacion === 'number' ? aa.puntuacion : null);
+      setLastAttemptGrade(typeof aa?.nota === 'number' ? aa.nota : null);
       const correcta = nota >= 10;
 
       if (correcta) completedRef.current = true;
 
-      setFeedback({
-        correcta,
-        aciertos: aciertosEstimados.aciertos,
-        total: aciertosEstimados.total,
-        comentario: actividad.respVisible ? actividad.comentariosRespVisible ?? undefined : undefined,
-      });
+      setSubmitted(true);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Error enviando la respuesta';
       setError(msg);
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleRetry = async () => {
+    if (!actividad) return;
+
+    try {
+      const alumnoId = getCurrentUserIdFromJwt();
+      if (!alumnoId) {
+        throw new TypeError('No se pudo identificar al alumno.');
+      }
+
+      const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
+        method: 'POST',
+        body: JSON.stringify({ alumnoId, actividadId: actividad.id }),
+      });
+      const aaData = (await createAA.json()) as ActividadAlumnoDTO;
+      if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+        setActividadAlumnoId(aaData.id);
+        actividadAlumnoIdRef.current = aaData.id;
+      }
+
+      completedRef.current = false;
+      abandonReportedRef.current = false;
+      setRespuestas({});
+      setSubmitted(false);
+      setLastAttemptScore(null);
+      setLastAttemptGrade(null);
+      setError('');
+      setShowAnswerModal(false);
+      setAnswerModalMode('student');
+
+      const puntosActuales = Array.isArray(actividad.puntosImagen) ? actividad.puntosImagen : [];
+      if (puntosActuales.length > 0) {
+        setSelectedPuntoId(puntosActuales[0].id);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No se pudo crear un nuevo intento');
+    }
+  };
+
+  const handleViewStudentAnswers = () => {
+    setAnswerModalMode('student');
+    setShowAnswerModal(true);
+  };
+
+  const handleViewCorrectAnswers = () => {
+    setAnswerModalMode('correct');
+    setShowAnswerModal(true);
   };
 
   if (loading) {
@@ -325,23 +400,6 @@ export default function MarcarImagenAlumno() {
     <div className="marcar-imagen-alumno-page">
       <NavbarMisCursos />
 
-      {feedback && (
-        <div className="mia-alert-overlay" role="dialog" aria-modal="true">
-          <div className="mia-alert" onMouseDown={(ev) => ev.stopPropagation()}>
-            <div className="mia-alert-title">
-              {feedback.correcta ? '¡Correcto!' : `¡${feedback.aciertos}/${feedback.total} aciertos!`}
-            </div>
-            {actividad?.respVisible && feedback.comentario && !feedback.correcta && (
-              <div className="mia-alert-comment">{feedback.comentario}</div>
-            )}
-
-            <button className="ca-btn-guardar" type="button" onClick={() => navigate(-1)}>
-              Volver
-            </button>
-          </div>
-        </div>
-      )}
-
       <main className="marcar-imagen-alumno-main">
         {actividad && (
           <>
@@ -354,6 +412,8 @@ export default function MarcarImagenAlumno() {
               <div className="mia-title-banner">
                 <h1 className="mia-title-text">{actividad.titulo}</h1>
               </div>
+
+              <ActivityGuideButton activityType="marcar-imagen" role="alumno" />
             </div>
 
             {actividad.descripcion && <p className="mia-description">{actividad.descripcion}</p>}
@@ -438,7 +498,7 @@ export default function MarcarImagenAlumno() {
 
             <div className="mia-bottom">
               <div className="mia-bottom-inner">
-                {!feedback && (
+                {!submitted && (
                   <button
                     className="ca-btn-guardar"
                     type="button"
@@ -450,9 +510,47 @@ export default function MarcarImagenAlumno() {
                 )}
               </div>
             </div>
+
+            {submitted && activityConfig ? (
+              <ActivityResultScreen
+                title="¡MARCAR IMAGEN COMPLETADA!"
+                score={lastAttemptScore ?? Math.round((aciertosEstimados.aciertos / Math.max(aciertosEstimados.total, 1)) * actividad.puntuacion)}
+                maxScore={actividad.puntuacion}
+                grade={lastAttemptGrade ?? undefined}
+                config={activityConfig}
+                onContinue={() => navigate(-1)}
+                onRetry={handleRetry}
+                onViewStudentAnswer={handleViewStudentAnswers}
+                onViewCorrectAnswer={handleViewCorrectAnswers}
+                onCancel={() => navigate(-1)}
+              />
+            ) : submitted ? (
+              <div className="mia-alert-overlay" role="dialog" aria-modal="true">
+                <div className="mia-alert" onMouseDown={(ev) => ev.stopPropagation()}>
+                  <div className="mia-alert-title">¡Actividad completada!</div>
+                  <button className="ca-btn-guardar" type="button" onClick={() => navigate(-1)}>
+                    Volver
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </>
         )}
       </main>
+
+      {showAnswerModal && (
+        <AnswerViewModal
+          title={answerModalMode === 'student' ? 'Mi respuesta' : 'Respuesta correcta'}
+          answers={actividad ? actividad.puntosImagen.map((punto, idx) => ({
+            question: `Punto ${idx + 1}`,
+            studentAnswer: respuestas[punto.id] || '(No marcado)',
+            correctAnswer: punto.respuesta,
+            isCorrect: respuestas[punto.id]?.trim().toLowerCase() === punto.respuesta.trim().toLowerCase(),
+          })) : []}
+          onClose={() => setShowAnswerModal(false)}
+          mode={answerModalMode}
+        />
+      )}
     </div>
   );
 }

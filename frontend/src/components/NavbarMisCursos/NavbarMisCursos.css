@@ -132,3 +132,46 @@
   object-fit: contain;
   transition: filter 0.2s ease;
 }
+
+/* ===== TEACHER / MAESTRO NAVBAR OVERRIDE ===== */
+.navbar--maestro .navbar-inner {
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  box-shadow: var(--t-shadow-md);
+}
+
+.navbar--maestro .navbar-title {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 3.2rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.navbar--maestro .navbar-char {
+  -webkit-text-stroke: 0;
+  paint-order: normal;
+  text-shadow: none;
+  color: var(--t-primary) !important;
+}
+
+.navbar--maestro .navbar-link {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--t-text);
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.navbar--maestro .navbar-link:hover {
+  color: var(--t-primary);
+  background: var(--t-primary-light);
+}
+
+.navbar--maestro .navbar-link:hover .navbar-icon {
+  filter: brightness(0) saturate(100%) invert(27%) sepia(96%) saturate(1971%) hue-rotate(215deg) brightness(99%) contrast(95%);
+}

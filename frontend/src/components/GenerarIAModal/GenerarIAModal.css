@@ -13,15 +13,15 @@
 /* ── Modal box ───────────────────────────────────────────── */
 
 .iam-modal {
-  background: #FFF8EE;
-  border: 4px solid #000;
-  border-radius: 16px;
-  box-shadow: 8px 8px 0px #000;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  box-shadow: var(--t-shadow-lg);
   padding: 28px 32px;
   width: 90%;
   max-width: 520px;
   font-family: 'Oxygen', sans-serif;
-  color: #000;
+  color: var(--t-text);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -39,20 +39,22 @@
 .iam-textarea {
   width: 100%;
   min-height: 120px;
-  background: #f9eed4;
-  border: 2px solid #000;
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
   border-radius: 8px;
   padding: 10px 12px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.3rem;
-  color: #000;
+  font-size: 1rem;
+  color: var(--t-text);
   resize: vertical;
   box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .iam-textarea:focus {
   outline: none;
-  background: #f5efe4;
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .iam-textarea:disabled {
@@ -102,19 +104,18 @@
 
 .iam-btn {
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.05rem;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 600;
   padding: 10px 28px;
-  border-radius: 12px;
-  border: 3px solid #000;
+  border-radius: 8px;
+  border: none;
   cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.1s;
-  box-shadow: 4px 4px 0px #000;
+  transition: background 0.15s, box-shadow 0.15s;
+  box-shadow: var(--t-shadow-sm);
 }
 
 .iam-btn:hover:not(:disabled) {
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0px #000;
+  box-shadow: var(--t-shadow);
 }
 
 .iam-btn:disabled {
@@ -124,17 +125,17 @@
 }
 
 .iam-btn-cancel {
-  background: var(--color-error-light, #ff6e7a);
-  color: #000;
+  background: var(--t-danger-light);
+  color: var(--t-danger);
 }
 
 .iam-btn-generate {
-  background: var(--color-accent);
-  color: #000;
+  background: var(--t-primary);
+  color: #fff;
 }
 
 .iam-btn-generate:hover:not(:disabled) {
-  background: var( --color-accent-light);
+  background: var(--t-primary-hover);
 }
 
 /* ── Loading indicator ───────────────────────────────────── */
@@ -170,25 +171,25 @@
 .iam-trigger-btn {
   position: relative;
   overflow: hidden;
-  background: #FFF394;
-  color: #000;
-  border: 2px solid #dec92b;
-  border-radius: 12px;
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border: 1px solid var(--t-primary);
+  border-radius: 8px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.05rem;
-  font-weight: bold;
+  font-size: 0.95rem;
+  font-weight: 600;
   padding: 10px 24px;
   cursor: pointer;
-  box-shadow: 4px 4px 0 #D6BD00;
-  transition: background 0.12s, transform 0.1s, box-shadow 0.1s;
+  box-shadow: var(--t-shadow-sm);
+  transition: background 0.15s, box-shadow 0.15s;
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
 .iam-trigger-btn:hover {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 #D6BD00;
+  background: var(--t-input-focus);
+  box-shadow: var(--t-shadow);
 }
 
 /* Sparkle / shine sweep */

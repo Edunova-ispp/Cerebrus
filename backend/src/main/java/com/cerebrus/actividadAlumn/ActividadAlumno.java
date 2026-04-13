@@ -5,6 +5,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cerebrus.actividad.Actividad;
+import com.cerebrus.comun.enumerados.EstadoActividad;
+import com.cerebrus.respuestaAlumn.RespuestaAlumno;
+import com.cerebrus.usuario.alumno.Alumno;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,11 +23,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-
-import com.cerebrus.actividad.Actividad;
-import com.cerebrus.comun.enumerados.EstadoActividad;
-import com.cerebrus.respuestaAlumn.RespuestaAlumno;
-import com.cerebrus.usuario.alumno.Alumno;
 
 @Entity
 @Table(name = "actividad_alumno")
@@ -43,6 +43,9 @@ public class ActividadAlumno {
 
     @Column(nullable = false)
     private Integer numAbandonos = 0;
+
+    @Column(nullable = false)
+    private Boolean solucionUsada = false;
 
     @Column (nullable = false)
     @Min(0)
@@ -117,6 +120,14 @@ public class ActividadAlumno {
         this.numAbandonos = numAbandonos;
     }
 
+    public Boolean getSolucionUsada() {
+        return solucionUsada;
+    }
+
+    public void setSolucionUsada(Boolean solucionUsada) {
+        this.solucionUsada = solucionUsada;
+    }
+
     public Integer getNota(){
         return nota;
     }
@@ -133,6 +144,15 @@ public class ActividadAlumno {
         if (fechaFin.isBefore(fechaInicio)) return 0;
         long minutos = ChronoUnit.MINUTES.between(fechaInicio, fechaFin);
         return (int) minutos;
+    }
+
+    public Integer getTiempoSegundos() {
+        LocalDateTime epoch = LocalDateTime.of(1970, 1, 1, 0, 0);
+        if (fechaInicio == null || fechaFin == null) return 0;
+        if (fechaInicio.equals(epoch) || fechaFin.equals(epoch)) return 0;
+        if (fechaFin.isBefore(fechaInicio)) return 0;
+        long segundos = ChronoUnit.SECONDS.between(fechaInicio, fechaFin);
+        return (int) segundos;
     }
 
     public Integer getNumRepeticiones(){
@@ -154,9 +174,6 @@ public class ActividadAlumno {
         // Actividad terminada si tiene fechaFin válida (no epoch) — cubre Teoría y cualquier
         // actividad que selle fechaFin al completarse sin generar respuestasAlumno
         if (fechaFin != null && !fechaFin.equals(epoch) && fechaFin.getYear() > 1970) {
-            return EstadoActividad.TERMINADA;
-        }
-        if (getNumRepeticiones() > 0 && respuestasAlumno.get(respuestasAlumno.size()-1).getCorrecta().equals(Boolean.TRUE)) {
             return EstadoActividad.TERMINADA;
         }
         if (fechaInicio != null && !fechaInicio.equals(epoch)) {
@@ -199,6 +216,7 @@ public class ActividadAlumno {
                 ", fecha_fin=" + fechaFin +
                 ", nota=" + nota +
                 ", num_abandonos=" + numAbandonos +
+                ", solucion_usada=" + solucionUsada +
                 ", num_repeticiones=" + getNumRepeticiones() +
                 ", num_fallos=" + getNumFallos() +
                 ", estado=" + getEstadoActividad() +

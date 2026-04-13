@@ -5,6 +5,8 @@ import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
+import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
+import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
 import './TestAlumno.css';
 import dragonImg from '../../assets/props/dragon.png';
 import caballeroImg from '../../assets/props/caballero.png';
@@ -15,6 +17,7 @@ import caballeroImg from '../../assets/props/caballero.png';
 type RespuestaDTO = {
   readonly id: number;
   readonly respuesta: string;
+  readonly correcta?: boolean;
 };
 
 type PreguntaDTO = {
@@ -36,6 +39,10 @@ type GeneralTestDTO = {
   readonly posicion: number;
   readonly temaId: number | null;
   readonly preguntas: PreguntaDTO[];
+  readonly permitirReintento?: boolean;
+  readonly mostrarPuntuacion?: boolean;
+  readonly encontrarRespuestaMaestro?: boolean;
+  readonly encontrarRespuestaAlumno?: boolean;
 };
 
 type RespAlumnoGeneralCreateResponse = {
@@ -51,7 +58,18 @@ type QuestionResult = {
   readonly selectedCorrectById: Map<number, boolean>;
 };
 
-type ActividadAlumnoDTO = { readonly id: number };
+type ActividadAlumnoDTO = {
+  readonly id: number;
+  readonly puntuacion?: number | null;
+  readonly fechaFin?: string | null;
+};
+
+type RespAlumnoGeneralResumenDTO = {
+  readonly preguntaId: number | null;
+  readonly respuesta: string;
+  readonly correcta?: boolean | null;
+  readonly respuestaCorrecta?: string | null;
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -64,6 +82,13 @@ function getCurrentUserIdFromJwt(): number | null {
     (info as Record<string, unknown>)?.sub;
   const userId = typeof raw === 'string' ? Number(raw) : raw;
   return typeof userId === 'number' && Number.isFinite(userId) ? userId : null;
+}
+
+function isCompletedAttempt(fechaFin?: string | null): boolean {
+  if (!fechaFin) return false;
+  const parsed = new Date(fechaFin);
+  if (Number.isNaN(parsed.getTime())) return false;
+  return parsed.getFullYear() !== 1970;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
@@ -79,6 +104,8 @@ export default function TestAlumno() {
 
   const [test, setTest] = useState<GeneralTestDTO | null>(null);
   const [actividadAlumnoId, setActividadAlumnoId] = useState<number | null>(null);
+  const [lastAttemptScore, setLastAttemptScore] = useState<number | null>(null);
+  const [activityConfig, setActivityConfig] = useState<ActivityResultConfig | null>(null);
   // preguntaId -> set of selected respuesta IDs
   const [selections, setSelections] = useState<Map<number, Set<number>>>(new Map());
   const [results, setResults] = useState<Map<number, QuestionResult>>(new Map());
@@ -86,6 +113,10 @@ export default function TestAlumno() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [showAnswerModal, setShowAnswerModal] = useState(false);
+  const [answerModalMode, setAnswerModalMode] = useState<'student' | 'correct'>('student');
+  const [submittedAnswersByQuestion, setSubmittedAnswersByQuestion] = useState<Map<number, string[]>>(new Map());
+  const [submittedCorrectByQuestion, setSubmittedCorrectByQuestion] = useState<Map<number, string>>(new Map());
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
   // Pagination: which question is currently shown
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -108,7 +139,7 @@ export default function TestAlumno() {
       abandonReportedRef.current = true;
       apiFetch(`${apiBase}/api/actividades-alumno/${id}/abandon`, { method: 'POST' }).catch(() => {});
     };
-  }, []);
+  }, [apiBase]);
 
   // Initial load
   useEffect(() => {
@@ -131,6 +162,14 @@ export default function TestAlumno() {
         const testRes = await apiFetch(`${apiBase}/api/generales/test/${testIdNum}`);
         const testData = (await testRes.json()) as GeneralTestDTO;
         setTest(testData);
+        
+        // Load activity configuration
+        setActivityConfig({
+          showScore: testData.mostrarPuntuacion ?? true,
+          allowRetry: testData.permitirReintento ?? false,
+          showCorrectAnswer: testData.encontrarRespuestaMaestro ?? true,
+          showStudentAnswer: testData.encontrarRespuestaAlumno ?? true,
+        });
 
         // 2. Resolve ActividadAlumno
         const alumnoId = getCurrentUserIdFromJwt();
@@ -138,21 +177,41 @@ export default function TestAlumno() {
           throw new TypeError('No se pudo identificar al alumno. Inicia sesión de nuevo.');
         }
 
-        const ensureRes = await apiFetch(`${apiBase}/api/actividades-alumno/ensure/${testData.id}`);
-        const ensureValue = (await ensureRes.json()) as unknown;
-        const exists = ensureValue === 1 || ensureValue === '1' || ensureValue === true;
-
-        if (exists) {
+        let hasExisting = false;
+        try {
           const getAA = await apiFetch(
             `${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${testData.id}`,
           );
           const aaData = (await getAA.json()) as ActividadAlumnoDTO;
           if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+            hasExisting = true;
             setActividadAlumnoId(aaData.id);
-          } else {
-            throw new TypeError('Respuesta inválida al obtener ActividadAlumno');
+            if (isCompletedAttempt(aaData.fechaFin)) {
+              completedRef.current = true;
+              setSubmitted(true);
+              setLastAttemptScore(aaData.puntuacion ?? 0);
+              const histRes = await apiFetch(`${apiBase}/api/respuestas-alumno-general/actividad-alumno/${aaData.id}`);
+              const histData = (await histRes.json()) as RespAlumnoGeneralResumenDTO[];
+              const map = new Map<number, string[]>();
+              const correctMap = new Map<number, string>();
+              for (const item of histData) {
+                if (typeof item.preguntaId !== 'number') continue;
+                const current = map.get(item.preguntaId) ?? [];
+                current.push(item.respuesta);
+                map.set(item.preguntaId, current);
+                if (item.respuestaCorrecta && !correctMap.has(item.preguntaId)) {
+                  correctMap.set(item.preguntaId, item.respuestaCorrecta);
+                }
+              }
+              setSubmittedAnswersByQuestion(map);
+              setSubmittedCorrectByQuestion(correctMap);
+            }
           }
-        } else {
+        } catch {
+          hasExisting = false;
+        }
+
+        if (!hasExisting) {
           const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
             method: 'POST',
             body: JSON.stringify({ alumnoId, actividadId: testData.id }),
@@ -174,7 +233,7 @@ export default function TestAlumno() {
     };
 
     run();
-  }, [testId, testIdNum]);
+  }, [testId, testIdNum, apiBase]);
 
   // ── Derived state ─────────────────────────────────────────────────────────
 
@@ -222,8 +281,27 @@ export default function TestAlumno() {
     if (!test || !actividadAlumnoId || !allAnswered) return;
     setError('');
     setSubmitting(true);
+    setLastAttemptScore(null);
 
     try {
+      const alumnoId = getCurrentUserIdFromJwt();
+      if (!alumnoId) {
+        throw new TypeError('No se pudo identificar al alumno. Inicia sesión de nuevo.');
+      }
+
+      // Reasegura el intento activo justo antes de enviar para evitar usar
+      // un intento antiguo/terminado en escenarios de reintento.
+      const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
+        method: 'POST',
+        body: JSON.stringify({ alumnoId, actividadId: test.id }),
+      });
+      const ensuredAA = (await createAA.json()) as ActividadAlumnoDTO;
+      if (typeof ensuredAA?.id !== 'number' || !Number.isFinite(ensuredAA.id)) {
+        throw new TypeError('No se pudo preparar el intento de la actividad.');
+      }
+      const actividadAlumnoIdActual = ensuredAA.id;
+      setActividadAlumnoId(actividadAlumnoIdActual);
+
       const respuestasIds: number[] = [];
       const resultEntries = await Promise.all(
         test.preguntas.map(async (p) => {
@@ -234,7 +312,7 @@ export default function TestAlumno() {
               const res = await apiFetch(`${apiBase}/api/respuestas-alumno-general`, {
                 method: 'POST',
                 body: JSON.stringify({
-                  actividadAlumnoId,
+                  actividadAlumnoId: actividadAlumnoIdActual,
                   preguntaId: p.id,
                   respuestaId: selectedId,
                 }),
@@ -275,11 +353,31 @@ export default function TestAlumno() {
       );
 
       if (respuestasIds.length > 0) {
-    await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
-      method: 'PUT',
-      body: JSON.stringify(respuestasIds),
-    });
-}
+        const corregirRes = await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoIdActual}`, {
+          method: 'PUT',
+          body: JSON.stringify(respuestasIds),
+        });
+        const corregido = (await corregirRes.json()) as ActividadAlumnoDTO;
+        if (typeof corregido?.puntuacion === 'number') {
+          setLastAttemptScore(corregido.puntuacion);
+        }
+
+        const histRes = await apiFetch(`${apiBase}/api/respuestas-alumno-general/actividad-alumno/${actividadAlumnoIdActual}`);
+        const histData = (await histRes.json()) as RespAlumnoGeneralResumenDTO[];
+        const map = new Map<number, string[]>();
+        const correctMap = new Map<number, string>();
+        for (const item of histData) {
+          if (typeof item.preguntaId !== 'number') continue;
+          const current = map.get(item.preguntaId) ?? [];
+          current.push(item.respuesta);
+          map.set(item.preguntaId, current);
+          if (item.respuestaCorrecta && !correctMap.has(item.preguntaId)) {
+            correctMap.set(item.preguntaId, item.respuestaCorrecta);
+          }
+        }
+        setSubmittedAnswersByQuestion(map);
+        setSubmittedCorrectByQuestion(correctMap);
+      }
 
       
 
@@ -297,6 +395,28 @@ export default function TestAlumno() {
     }
   };
 
+  const handleRetry = () => {
+    // Reset all state to allow retrying
+    setSelections(new Map());
+    setResults(new Map());
+    setSubmitted(false);
+    setLastAttemptScore(null);
+    setSubmittedAnswersByQuestion(new Map());
+    setSubmittedCorrectByQuestion(new Map());
+    setCurrentIndex(0);
+    setError('');
+  };
+
+  const handleViewStudentAnswers = () => {
+    setAnswerModalMode('student');
+    setShowAnswerModal(true);
+  };
+
+  const handleViewCorrectAnswers = () => {
+    setAnswerModalMode('correct');
+    setShowAnswerModal(true);
+  };
+
   // ── Score summary ─────────────────────────────────────────────────────────
 
   const score = useMemo(() => {
@@ -305,6 +425,12 @@ export default function TestAlumno() {
     const correct = [...results.values()].filter((r) => r.correcta).length;
     return { correct, total };
   }, [submitted, results]);
+
+  const scorePoints = useMemo(() => {
+    if (typeof lastAttemptScore === 'number') return lastAttemptScore;
+    if (!score || !test || score.total === 0) return 0;
+    return Math.round((score.correct / score.total) * test.puntuacion);
+  }, [lastAttemptScore, score, test]);
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -373,7 +499,7 @@ export default function TestAlumno() {
         {test && currentPregunta && (
           <>
             {/* ── Header ── */}
-            <ActivityHeader title={test.titulo} />
+            <ActivityHeader title={test.titulo} guideType="test" guideRole="alumno" />
 
             {/* ── Score banner after submit ── */}
             {submitted && score && (
@@ -518,7 +644,48 @@ export default function TestAlumno() {
 
         {!test && !error && <p className="ca-text">No se encontró el test.</p>}
 
-        {submitted && <CompletionPopup title="¡TEST COMPLETADO!" onContinue={() => navigate(-1)} />}
+        {submitted && activityConfig ? (
+          <ActivityResultScreen
+            title="¡TEST COMPLETADO!"
+            score={scorePoints}
+            maxScore={test?.puntuacion || 100}
+            config={activityConfig}
+            onContinue={() => navigate(-1)}
+            onRetry={handleRetry}
+            onViewStudentAnswer={handleViewStudentAnswers}
+            onViewCorrectAnswer={handleViewCorrectAnswers}
+            onCancel={() => navigate(-1)}
+          />
+        ) : submitted ? (
+          <CompletionPopup title="¡TEST COMPLETADO!" onContinue={() => navigate(-1)} />
+        ) : null}
+
+        {showAnswerModal && (
+          <AnswerViewModal
+            title={answerModalMode === 'student' ? 'Mi respuesta' : 'Respuesta correcta'}
+            answers={test ? test.preguntas.map((pregunta) => {
+              const result = results.get(pregunta.id);
+              const selectedIds = selections.get(pregunta.id) || new Set();
+              const selectedAnswersText = pregunta.respuestas
+                .filter(r => selectedIds.has(r.id))
+                .map(r => r.respuesta)
+                .join(', ');
+              return {
+                question: pregunta.pregunta,
+                studentAnswer:
+                  (submittedAnswersByQuestion.get(pregunta.id)?.join(', ') || selectedAnswersText) ||
+                  '(No respondida)',
+                correctAnswer:
+                  submittedCorrectByQuestion.get(pregunta.id) ||
+                  pregunta.respuestas.filter((r) => r.correcta).map((r) => r.respuesta).join(', ') ||
+                  '(No disponible)',
+                isCorrect: result?.correcta,
+              };
+            }) : []}
+            onClose={() => setShowAnswerModal(false)}
+            mode={answerModalMode}
+          />
+        )}
       </main>
     </div>
   );

@@ -328,3 +328,61 @@
   font-family: 'Oxygen', sans-serif;
 }
 
+/* === PROFESOR: Professional modal === */
+.maestro .codigo-modal {
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  box-shadow: var(--t-shadow-lg);
+}
+
+.maestro .codigo-modal__copy-btn {
+  background: var(--t-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1rem;
+  box-shadow: var(--t-shadow);
+}
+
+.maestro .codigo-modal__copy-btn:hover {
+  background: var(--t-primary-hover);
+  transform: none;
+  box-shadow: var(--t-shadow-md);
+}
+
+.maestro .codigo-modal__close-btn {
+  border: none;
+  border-radius: 50%;
+  box-shadow: var(--t-shadow-sm);
+  font-family: 'Oxygen', sans-serif;
+}
+
+.maestro .curso-card__toggle-slider {
+  border: 1px solid var(--t-border-dark);
+  border-radius: 13px;
+  box-shadow: none;
+}
+
+.maestro .curso-card__toggle-slider::before {
+  border-radius: 50%;
+  background: var(--t-text-secondary);
+}
+
+.maestro .curso-card__toggle input:checked + .curso-card__toggle-slider {
+  background: var(--t-primary);
+}
+
+.maestro .curso-card__toggle input:checked + .curso-card__toggle-slider::before {
+  background: #fff;
+}
+
+.maestro .curso-card__delete-btn {
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  box-shadow: var(--t-shadow-sm);
+  font-size: 0.85rem;
+}

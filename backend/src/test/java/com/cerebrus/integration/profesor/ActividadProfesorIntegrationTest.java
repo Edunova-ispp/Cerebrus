@@ -53,7 +53,7 @@ class ActividadProfesorIntegrationTest {
     @Test
     void crearTeoria_ok_devuelve201() throws Exception {
         Actividad actividad = buildActividad(901L, "Teoria 1", "desc", "img.png", 7, 1L);
-        when(actividadService.crearActTeoria(any(), any(), any(), any())).thenReturn(actividad);
+        when(actividadService.crearActTeoria(any(), any(), any(), any(), any())).thenReturn(actividad);
 
         Map<String, Object> body = Map.of(
                 "titulo", "Teoria 1",
@@ -87,7 +87,7 @@ class ActividadProfesorIntegrationTest {
     @Test
     void actualizarTeoria_ok_devuelve200() throws Exception {
         Actividad actividad = buildActividad(902L, "Teoria 2 edit", "desc", "img2.png", 8, 1L);
-        when(actividadService.actualizarActTeoria(eq(902L), any(), any(), any())).thenReturn(actividad);
+        when(actividadService.actualizarActTeoria(eq(902L), any(), any(), any(), any())).thenReturn(actividad);
 
         Map<String, Object> body = Map.of(
                 "titulo", "Teoria 2 edit",
@@ -106,7 +106,7 @@ class ActividadProfesorIntegrationTest {
     @Test
     void actualizarTeoria_noPropietario_devuelve403() throws Exception {
         doThrow(new AccessDeniedException("No puedes editar actividades de cursos que no son tuyos"))
-                .when(actividadService).actualizarActTeoria(eq(902L), any(), any(), any());
+                .when(actividadService).actualizarActTeoria(eq(902L), any(), any(), any(), any());
 
         Map<String, Object> body = Map.of(
                 "titulo", "Teoria 2 edit",

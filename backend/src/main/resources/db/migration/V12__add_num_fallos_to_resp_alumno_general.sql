@@ -1,0 +1,2 @@
+ALTER TABLE resp_alumno_general
+    ADD COLUMN IF NOT EXISTS num_fallos INTEGER NOT NULL DEFAULT 0;

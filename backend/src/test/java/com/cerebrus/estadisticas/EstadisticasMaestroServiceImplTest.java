@@ -26,6 +26,7 @@ import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
+import com.cerebrus.estadisticas.dto.ActividadEstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasAlumnoResumenDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
@@ -926,6 +927,87 @@ class EstadisticasMaestroServiceImplTest {
         assertThat(resultado.getNotaMedia()).isEqualTo(8.0);
         assertThat(resultado.getNotaMax()).isEqualTo(8);
         assertThat(resultado.getNotaMin()).isEqualTo(8);
+    }
+
+    @Test
+    void obtenerResumenEstadisticasAlumno_variasRepeticiones_retornaHistorialCompleto() {
+        Tema tema = crearTema(1L, curso);
+        tema.setTitulo("Tema 1");
+        Actividad actividad = crearActividad();
+        actividad.setTitulo("Actividad 1");
+
+        ActividadAlumno aa1 = crearActividadAlumnoTerminada(alumno);
+        aa1.setId(11L);
+        aa1.setNota(6);
+        aa1.setFechaInicio(LocalDateTime.now().minusMinutes(40));
+        aa1.setFechaFin(LocalDateTime.now().minusMinutes(30));
+        aa1.setPuntuacion(60);
+
+        ActividadAlumno aa2 = crearActividadAlumnoTerminada(alumno);
+        aa2.setId(12L);
+        aa2.setNota(9);
+        aa2.setFechaInicio(LocalDateTime.now().minusMinutes(20));
+        aa2.setFechaFin(LocalDateTime.now().minusMinutes(10));
+        aa2.setPuntuacion(90);
+
+        actividad.setActividadesAlumno(List.of(aa1, aa2));
+        curso.setInscripciones(List.of(new Inscripcion(0, LocalDate.now(), alumno, curso)));
+        curso.setTemas(List.of(tema));
+
+        when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        when(cursoRepository.findById(10L)).thenReturn(Optional.of(curso));
+        when(actividadRepository.findByTemaId(1L)).thenReturn(List.of(actividad));
+
+        EstadisticasAlumnoResumenDTO resultado = estadisticasService.obtenerResumenEstadisticasAlumno(10L, 2L);
+
+        List<ActividadEstadisticasAlumnoDTO> actividades = resultado.getTemas().get(0).getActividades();
+        assertThat(actividades).hasSize(1);
+        assertThat(actividades.get(0).getNotaAlumno()).isEqualTo(9);
+        assertThat(actividades.get(0).getPuntuacionAlumno()).isEqualTo(90);
+        assertThat(actividades.get(0).getIntentos()).hasSize(2);
+        assertThat(actividades.get(0).getIntentos().get(0).getId()).isEqualTo(11L);
+        assertThat(actividades.get(0).getIntentos().get(1).getId()).isEqualTo(12L);
+    }
+
+    @Test
+    void obtenerResumenEstadisticasAlumno_conIntentoEnCurso_yTerminada_retornaAmbosIntentos() {
+        Tema tema = crearTema(1L, curso);
+        tema.setTitulo("Tema 1");
+        Actividad actividad = crearActividad();
+        actividad.setTitulo("Actividad 1");
+
+        ActividadAlumno aa1 = crearActividadAlumnoTerminada(alumno);
+        aa1.setId(11L);
+        aa1.setNota(7);
+        aa1.setFechaInicio(LocalDateTime.now().minusMinutes(50));
+        aa1.setFechaFin(LocalDateTime.now().minusMinutes(40));
+        aa1.setPuntuacion(70);
+
+        ActividadAlumno aa2 = new ActividadAlumno();
+        aa2.setId(12L);
+        aa2.setAlumno(alumno);
+        aa2.setActividad(actividad);
+        aa2.setNota(0);
+        aa2.setPuntuacion(0);
+        aa2.setFechaInicio(LocalDateTime.now().minusMinutes(10));
+        aa2.setFechaFin(LocalDateTime.of(1970, 1, 1, 0, 0));
+        aa2.setNumAbandonos(0);
+
+        actividad.setActividadesAlumno(List.of(aa1, aa2));
+        curso.setInscripciones(List.of(new Inscripcion(0, LocalDate.now(), alumno, curso)));
+        curso.setTemas(List.of(tema));
+
+        when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        when(cursoRepository.findById(10L)).thenReturn(Optional.of(curso));
+        when(actividadRepository.findByTemaId(1L)).thenReturn(List.of(actividad));
+
+        EstadisticasAlumnoResumenDTO resultado = estadisticasService.obtenerResumenEstadisticasAlumno(10L, 2L);
+
+        List<ActividadEstadisticasAlumnoDTO> actividades = resultado.getTemas().get(0).getActividades();
+        assertThat(actividades.get(0).getNotaAlumno()).isEqualTo(7);
+        assertThat(actividades.get(0).getIntentos()).hasSize(2);
+        assertThat(actividades.get(0).getIntentos().get(0).getId()).isEqualTo(11L);
+        assertThat(actividades.get(0).getIntentos().get(1).getId()).isEqualTo(12L);
     }
 
     @Test

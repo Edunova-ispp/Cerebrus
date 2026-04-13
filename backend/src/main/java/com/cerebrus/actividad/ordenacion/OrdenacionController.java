@@ -1,5 +1,8 @@
 package com.cerebrus.actividad.ordenacion;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.actividad.ordenacion.dto.OrdenacionDTO;
+import com.cerebrus.comun.utils.CerebrusUtils;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import jakarta.validation.Valid;
@@ -59,7 +63,7 @@ public class OrdenacionController {
     @GetMapping("/{id}")
     public ResponseEntity<OrdenacionDTO> encontrarActOrdenacionPorId(@PathVariable Long id) {
         Ordenacion ordenacion = ordenacionService.encontrarActOrdenacionPorId(id);
-        return new ResponseEntity<>(obtenerOrdenacionDto(ordenacion), HttpStatus.OK);
+        return new ResponseEntity<>(obtenerOrdenacionDtoAlumno(ordenacion), HttpStatus.OK);
     }
 
     @GetMapping("/{id}/maestro")
@@ -111,6 +115,30 @@ public class OrdenacionController {
             ordenacion.getPosicion(),
             ordenacion.getTema() == null ? null : ordenacion.getTema().getId(),
             ordenacion.getValores(),
+            ordenacion.getMostrarPuntuacion(),
+            ordenacion.getPermitirReintento(),
+            ordenacion.getEncontrarRespuestaMaestro(),
+            ordenacion.getEncontrarRespuestaAlumno()
+        );
+    }
+
+    private static OrdenacionDTO obtenerOrdenacionDtoAlumno(Ordenacion ordenacion) {
+        List<String> valoresOriginales = ordenacion.getValores() == null
+            ? List.of()
+            : new ArrayList<>(ordenacion.getValores());
+        List<String> valoresDesordenados = CerebrusUtils.shuffleCollection(valoresOriginales).stream().toList();
+
+        return new OrdenacionDTO(
+            ordenacion.getId(),
+            ordenacion.getTitulo(),
+            ordenacion.getDescripcion(),
+            ordenacion.getPuntuacion(),
+            ordenacion.getImagen(),
+            ordenacion.getRespVisible(),
+            ordenacion.getComentariosRespVisible(),
+            ordenacion.getPosicion(),
+            ordenacion.getTema() == null ? null : ordenacion.getTema().getId(),
+            valoresDesordenados,
             ordenacion.getMostrarPuntuacion(),
             ordenacion.getPermitirReintento(),
             ordenacion.getEncontrarRespuestaMaestro(),

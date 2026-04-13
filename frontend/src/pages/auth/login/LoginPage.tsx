@@ -80,10 +80,24 @@ const Login = () => {
         }
       } else {
         if (response.status === 403 && data.message === "CUENTA_NO_VERIFICADA") {
-          setError('⚠️ Cuenta no activada. Introduce el código enviado a tu email aquí abajo.');
+          setError('⚠️ Error de verificación. Comprueba que tu cuenta esté activada o pertenezca a una organización con suscripción activa.');
           
           document.querySelector('.pixel-divider')?.scrollIntoView({ behavior: 'smooth' });
-        } else {
+        } else if (response.status === 403 && data.message === "CUENTA_ORG_NO_SUSCRIPCION") {
+          setError('⚠️ La cuenta pertenece a una organización sin suscripción activa.');
+          
+          document.querySelector('.pixel-divider')?.scrollIntoView({ behavior: 'smooth' });
+        }
+        else if (response.status === 403 && data.message === "ORG_NO_SUSCRIPCION") {
+          setError('⚠️ La organización no tiene una suscripción pagada.');
+
+          document.querySelector('.pixel-divider')?.scrollIntoView({ behavior: 'smooth' });
+        } else if (response.status === 403 && data.message === "ORG_SUSCRIPCION_EXPIRADA") {
+          setError('⚠️ La organización tiene una suscripción expirada.');
+
+          document.querySelector('.pixel-divider')?.scrollIntoView({ behavior: 'smooth' });
+        }
+        else {
           setError(data.message || 'Credenciales incorrectas.');
         }
       }
@@ -139,6 +153,7 @@ const Login = () => {
               >
                 {showPassword ? '🙈' : '👁️'}
               </button>
+              
             </div>
           </div>
 

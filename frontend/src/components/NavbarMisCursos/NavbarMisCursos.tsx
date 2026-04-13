@@ -3,13 +3,18 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/icons/logoCebrerusTopbar.png";
 import misCursosIcon from "../../assets/icons/misCursos.svg";
 import perfilIcon from "../../assets/icons/perfil.svg";
+import trofeoIcon from "../../assets/icons/Trofeo.svg";
 import { getCurrentUserRoles } from "../../types/curso";
 import "./NavbarMisCursos.css";
 
 export default function NavbarMisCursos() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-  const isMaestro = getCurrentUserRoles().some((r) => r.toUpperCase().includes("MAESTRO"));
+  const roles = getCurrentUserRoles();
+  const isMaestro = roles.some((r) => r.toUpperCase().includes("MAESTRO"));
+  const isOrganizacion = roles.some((r) => r.toUpperCase().includes("ORGANIZACION"));
+  const isAlumno = roles.some((r) => r.toUpperCase().includes("ALUMNO"));
+  const homeRoute = isOrganizacion ? "/suscripcion" : "/misCursos";
 
   /* ── Auto-hide on scroll ── */
   const [visible, setVisible] = useState(true);
@@ -65,12 +70,12 @@ export default function NavbarMisCursos() {
   return (
     <>
       <div className={`navbar-wrap${visible ? "" : " navbar-wrap--hidden"}`}>
-        <nav className={`navbar${isMaestro ? ' navbar--maestro' : ''}`}>
+        <nav className={`navbar${isMaestro ? ' navbar--maestro' : ''}${isOrganizacion ? ' navbar--maestro' : ''}`}>
           <div className="navbar-inner">
             <button
               type="button"
               className="navbar-logo-btn"
-              onClick={() => navigate("/misCursos")}
+              onClick={() => navigate(homeRoute)}
             >
               <img src={logo} alt="Cerebrus" className="navbar-logo" />
               <span className="navbar-title">
@@ -85,10 +90,28 @@ export default function NavbarMisCursos() {
               </span>
             </button>
             <div className="navbar-links">
-              <button type="button" className="navbar-link" onClick={() => navigate("/misCursos")}>
-                <img src={misCursosIcon} alt="" className="navbar-icon" />
-                <span>Mis Cursos</span>
-              </button>
+              {!isOrganizacion && (
+                <button type="button" className="navbar-link" onClick={() => navigate("/misCursos")}>
+                  <img src={misCursosIcon} alt="" className="navbar-icon" />
+                  <span>Mis Cursos</span>
+                </button>
+              )}
+              {isAlumno && (
+                <button type="button" className="navbar-link" onClick={() => navigate("/puntos")}>
+                  <img src={trofeoIcon} alt="" className="navbar-icon" />
+                  <span>Puntos</span>
+                </button>
+              )}
+              {isOrganizacion && (
+                <button type="button" className="navbar-link" onClick={() => navigate("/suscripcion")}>
+                  <span>Suscripción</span>
+                </button>
+              )}
+              {isOrganizacion && (
+                <button type="button" className="navbar-link" onClick={() => navigate("/gestion-usuarios")}>
+                  <span>Usuarios</span>
+                </button>
+              )}
               <button type="button" className="navbar-link" onClick={() => navigate("/perfil")}>
                 <img src={perfilIcon} alt="" className="navbar-icon" />
                 <span>Perfil</span>

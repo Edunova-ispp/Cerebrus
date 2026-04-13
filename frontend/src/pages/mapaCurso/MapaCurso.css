@@ -3,6 +3,32 @@
   font-family: 'Pixelify Sans', sans-serif;
 }
 
+.mapa-page .detalle-volver {
+  display: block;
+  background: var(--color-accent, #FFF294);
+  color: #000;
+  border: 3px solid #000;
+  border-radius: 12px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.1rem;
+  font-weight: bold;
+  padding: 8px 20px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #000;
+  transition: transform 0.1s, box-shadow 0.1s;
+  margin-bottom: 16px;
+}
+
+.mapa-page .detalle-volver:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.mapa-page .detalle-volver:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 #000;
+}
+
 .mapa-main {
   max-width: 1100px;
   margin: 0 auto;

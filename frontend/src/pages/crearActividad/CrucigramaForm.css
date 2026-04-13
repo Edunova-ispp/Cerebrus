@@ -45,15 +45,14 @@
   width: 100%;
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
-  color: #000;
-  background: #f9eed4;
-  border: 3px solid #000;
-  border-radius: 10px;
-  box-shadow: 3px 3px 0 #000;
-  padding: 9px 12px;
+  color: var(--t-text);
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
+  padding: 8px 10px;
   box-sizing: border-box;
   outline: none;
-  transition: background 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .cf-input:hover,
@@ -61,7 +60,8 @@
 .cf-textarea:hover,
 .cf-textarea:focus {
   outline: none;
-  background: var(--color-accent-light);
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .cf-textarea { resize: vertical; min-height: 80px; }
@@ -83,7 +83,7 @@
 .cf-checkbox-row input[type='checkbox'] {
   width: 20px;
   height: 20px;
-  accent-color: #000;
+  accent-color: var(--t-primary);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -96,8 +96,8 @@
 /* ── Section title ── */
 .cf-section-title {
   font-size: 1.05rem;
-  font-weight: bold;
-  color: #000;
+  font-weight: 600;
+  color: var(--t-text);
   margin: 0 0 16px;
   display: flex;
   align-items: center;
@@ -105,9 +105,9 @@
 }
 
 .cf-section-title span {
-  background: var(--color-accent);
-  color: #000;
-  border: 2px solid #000;
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border: 1px solid var(--t-primary);
   border-radius: 6px;
   padding: 2px 8px;
   font-size: 0.85rem;
@@ -146,9 +146,9 @@
   align-items: center;
   gap: 6px;
   margin-top: 8px;
-  background: var(--color-accent);
-  color: #000;
-  border: 2px solid #000;
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border: 1px solid var(--t-primary);
   border-radius: 8px;
   padding: 8px 18px;
   font-family: 'Oxygen', sans-serif;
@@ -158,7 +158,7 @@
 }
 
 .cf-btn-add:hover {
-  background: var(--color-accent-light);
+  background: var(--t-input-focus);
 }
 
 /* ── Submit button ── */
@@ -166,45 +166,44 @@
   display: block;
   margin: 28px auto 0;
   min-width: 260px;
-  padding: 10px 24px;
-  background: var(--color-accent);
-  color: #000;
-  border: 3px solid #000;
-  border-radius: 12px;
-  box-shadow: 4px 4px 0px #000;
+  padding: 12px 24px;
+  background: var(--t-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  box-shadow: var(--t-shadow);
   font-family: 'Oxygen', sans-serif;
   font-size: 1.1rem;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
-  text-align: center; /* <-- Añade esto */
-  transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+  text-align: center;
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 .cf-btn-submit:hover:not(:disabled) {
-  background: var(--color-accent-light);
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px #000;
+  background: var(--t-primary-hover);
+  box-shadow: var(--t-shadow-md);
 }
 
 .cf-btn-submit:active:not(:disabled) {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 #000;
+  transform: translateY(1px);
+  box-shadow: var(--t-shadow-sm);
 }
 
 .cf-btn-submit:disabled {
   opacity: 0.5;
   cursor: default;
-  box-shadow: 2px 2px 0 #aaa;
+  box-shadow: var(--t-shadow-sm);
 }
 
 /* ── Word count badge ── */
 .cf-word-count {
-  background: var(--color-accent);
-  border: 2px solid #000;
+  background: var(--t-primary-light);
+  border: 1px solid var(--t-primary);
   border-radius: 8px;
   padding: 2px 8px;
   font-size: 0.85rem;
-  font-weight: bold;
-  color: #000;
+  font-weight: 600;
+  color: var(--t-primary);
   margin-left: 6px;
 }

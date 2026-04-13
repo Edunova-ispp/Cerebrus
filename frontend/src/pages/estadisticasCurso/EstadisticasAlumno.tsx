@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
 import './EstadisticasAlumno.css';
 
@@ -12,6 +12,7 @@ interface IntentoActividad {
   puntuacion: number;
   nota: number;
   tiempoMinutos: number;
+  tiempoSegundos?: number;
   numAbandonos: number;
 }
 
@@ -44,6 +45,7 @@ interface EstadisticasAlumnoData {
   numActividadesCompletadas: number;
   totalActividades: number;
   tiempoTotalMinutos: number;
+  tiempoTotalSegundos?: number;
   temas: TemaEstadisticas[];
 }
 
@@ -76,10 +78,17 @@ function formatFecha(iso: string | null): string {
   );
 }
 
-function formatTiempo(min: number): string {
-  if (!min || min <= 0) return '—';
-  if (min === 1) return '1 min';
-  return `${min} min`;
+function formatTiempo(min?: number | null, segundos?: number | null): string {
+  const totalSegundos =
+    typeof segundos === 'number' && Number.isFinite(segundos)
+      ? segundos
+      : (min ?? 0) * 60;
+  if (totalSegundos <= 0) return '—';
+  if (totalSegundos < 60) return `${totalSegundos} s`;
+  const mins = Math.floor(totalSegundos / 60);
+  const secs = totalSegundos % 60;
+  if (secs === 0) return mins === 1 ? '1 min' : `${mins} min`;
+  return `${mins} min ${secs} s`;
 }
 
 function notaBadgeClass(nota: number | null, media: number): string {
@@ -100,6 +109,7 @@ interface EstadisticasAlumnoProps {
 export default function EstadisticasAlumno({ cursoIdProp, alumnoId }: EstadisticasAlumnoProps = {}) {
   const params = useParams<{ id: string }>();
   const id = cursoIdProp ?? params.id;
+  const navigate = useNavigate();
 
   const [data, setData] = useState<EstadisticasAlumnoData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -154,6 +164,11 @@ export default function EstadisticasAlumno({ cursoIdProp, alumnoId }: Estadistic
     });
   };
 
+  const irDetalleIntento = (actividadId: number, intentoId: number) => {
+    if (!id || !alumnoId) return;
+    navigate(`/estadisticas/cursos/${id}/alumnos/${alumnoId}/actividades/${actividadId}/intentos/${intentoId}`);
+  };
+
   const statCards = useMemo(() => {
     if (!data) return null;
     return [
@@ -161,7 +176,7 @@ export default function EstadisticasAlumno({ cursoIdProp, alumnoId }: Estadistic
       { label: 'Nota mínima', value: data.notaMin !== null ? String(data.notaMin) : '—', mod: 'min' },
       { label: 'Nota máxima', value: data.notaMax !== null ? String(data.notaMax) : '—', mod: 'max' },
       { label: 'Actividades', value: `${data.numActividadesCompletadas}/${data.totalActividades}`, mod: 'completadas' },
-      { label: 'Tiempo total', value: formatTiempo(data.tiempoTotalMinutos), mod: 'tiempo' },
+      { label: 'Tiempo total', value: formatTiempo(data.tiempoTotalMinutos, data.tiempoTotalSegundos), mod: 'tiempo' },
     ];
   }, [data]);
 
@@ -252,7 +267,12 @@ export default function EstadisticasAlumno({ cursoIdProp, alumnoId }: Estadistic
                           <p className="ea-empty">Sin intentos registrados</p>
                         ) : (
                           act.intentos.map((intento, idx) => (
-                            <div key={intento.id} className="ea-intento-row">
+                            <button
+                              key={intento.id}
+                              type="button"
+                              className="ea-intento-row ea-intento-row--clickable"
+                              onClick={() => irDetalleIntento(act.actividadId, intento.id)}
+                            >
                               <span className="ea-intento-num">#{idx + 1}</span>
                               <span className="ea-intento-fecha">
                                 {formatFecha(intento.fechaFin || intento.fechaInicio)}
@@ -264,14 +284,14 @@ export default function EstadisticasAlumno({ cursoIdProp, alumnoId }: Estadistic
                                 {intento.puntuacion !== null ? `${intento.puntuacion} pts` : '—'}
                               </span>
                               <span className="ea-intento-tiempo">
-                                {formatTiempo(intento.tiempoMinutos)}
+                                {formatTiempo(intento.tiempoMinutos, intento.tiempoSegundos)}
                               </span>
                               {intento.numAbandonos > 0 && (
                                 <span className="ea-intento-abandonos">
                                   {intento.numAbandonos} abandono{intento.numAbandonos !== 1 ? 's' : ''}
                                 </span>
                               )}
-                            </div>
+                            </button>
                           ))
                         )}
                       </div>
