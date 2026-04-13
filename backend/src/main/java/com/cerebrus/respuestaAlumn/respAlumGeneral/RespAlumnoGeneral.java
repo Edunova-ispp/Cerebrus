@@ -16,6 +16,9 @@ public class RespAlumnoGeneral extends RespuestaAlumno {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String respuesta;
 
+    @Column(nullable = false)
+    private Integer numFallos = 0;
+
     //Relaciones
     @ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
     private Pregunta pregunta;
@@ -29,6 +32,7 @@ public class RespAlumnoGeneral extends RespuestaAlumno {
         super(correcta, actividadAlumno);
         this.respuesta = respuesta;
         this.pregunta = pregunta;
+        this.numFallos = 0;
     }
 
     // Getters y Setters
@@ -38,6 +42,14 @@ public class RespAlumnoGeneral extends RespuestaAlumno {
 
     public void setRespuesta(String respuesta) {
         this.respuesta = respuesta;
+    }
+
+    public Integer getNumFallos() {
+        return numFallos;
+    }
+
+    public void setNumFallos(Integer numFallos) {
+        this.numFallos = numFallos;
     }
 
     public Pregunta getPregunta() {
@@ -53,6 +65,7 @@ public class RespAlumnoGeneral extends RespuestaAlumno {
         return "RespAlumnoGeneral{" +
                 "id=" + getId() +
                 ", correcta=" + getCorrecta() +
+                ", numFallos=" + numFallos +
                 ", respuesta='" + respuesta + '\'' +
                 '}';
     }

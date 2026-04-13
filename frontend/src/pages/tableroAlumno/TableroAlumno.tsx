@@ -44,6 +44,7 @@ type RespAlumnoGeneralResumenDTO = {
   readonly respuesta: string;
   readonly correcta?: boolean | null;
   readonly respuestaCorrecta?: string | null;
+  readonly numFallos?: number | null;
 };
 
 // ── Helpers ───────────────────────────────────────────────
@@ -258,12 +259,14 @@ export default function TableroAlumno() {
   const [answerHistory, setAnswerHistory] = useState<Map<number, string>>(new Map());
   const [submittedAnswersByQuestion, setSubmittedAnswersByQuestion] = useState<Map<number, string>>(new Map());
   const [correctAnswersByQuestion, setCorrectAnswersByQuestion] = useState<Map<number, string>>(new Map());
+  const [boardFailureCount, setBoardFailureCount] = useState(0);
 
   const hydrateAnswersFromHistory = useCallback(async (actividadAlumnoIdValue: number) => {
     const histRes = await apiFetch(`${API_BASE}/api/respuestas-alumno-general/actividad-alumno/${actividadAlumnoIdValue}`);
     const histData = (await histRes.json()) as RespAlumnoGeneralResumenDTO[];
     const studentMap = new Map<number, string>();
     const correctMap = new Map<number, string>();
+    let failureCount = 0;
 
     for (const item of histData) {
       if (typeof item.preguntaId !== 'number') continue;
@@ -271,10 +274,12 @@ export default function TableroAlumno() {
       if (item.respuestaCorrecta && !correctMap.has(item.preguntaId)) {
         correctMap.set(item.preguntaId, item.respuestaCorrecta);
       }
+      failureCount += Number(item.numFallos ?? 0);
     }
 
     setSubmittedAnswersByQuestion(studentMap);
     setCorrectAnswersByQuestion(correctMap);
+    setBoardFailureCount(failureCount);
   }, []);
 
   // Sincronizar el ID para el cleanup del abandono
@@ -344,6 +349,7 @@ export default function TableroAlumno() {
                 } catch {
                   setSubmittedAnswersByQuestion(new Map());
                   setCorrectAnswersByQuestion(new Map());
+                  setBoardFailureCount(0);
                 }
               }
             }
@@ -470,6 +476,7 @@ export default function TableroAlumno() {
   const modalQuestion = modalQIdx !== null ? tablero.preguntas[modalQIdx] : null;
 
   const handleRetry = () => {
+    setLastAttemptScore(null);
     setCerberoPos([0, 0]);
     setAnsweredSet(new Set());
     setModalCell(null);
@@ -479,6 +486,7 @@ export default function TableroAlumno() {
     setAnswerHistory(new Map());
     setSubmittedAnswersByQuestion(new Map());
     setCorrectAnswersByQuestion(new Map());
+    setBoardFailureCount(0);
     completedRef.current = false;
   };
 
@@ -526,17 +534,22 @@ export default function TableroAlumno() {
           )}
 
           {showCompleted && activityConfig ? (
-            <ActivityResultScreen
-              title="¡HAS COMPLETADO EL TABLERO!"
-              score={lastAttemptScore ?? answeredSet.size}
-              maxScore={tablero.puntuacion ?? completionTarget}
-              config={activityConfig}
-              onContinue={() => navigate(-1)}
-              onRetry={handleRetry}
-              onViewStudentAnswer={handleViewStudentAnswers}
-              onViewCorrectAnswer={handleViewCorrectAnswers}
-              onCancel={() => navigate(-1)}
-            />
+            <>
+              <ActivityResultScreen
+                title="¡HAS COMPLETADO EL TABLERO!"
+                score={lastAttemptScore ?? answeredSet.size}
+                maxScore={tablero.puntuacion ?? completionTarget}
+                config={activityConfig}
+                onContinue={() => navigate(-1)}
+                onRetry={handleRetry}
+                onViewStudentAnswer={handleViewStudentAnswers}
+                onViewCorrectAnswer={handleViewCorrectAnswers}
+                onCancel={() => navigate(-1)}
+                detail={boardFailureCount > 0
+                  ? `Penalización acumulada: ${boardFailureCount} fallo${boardFailureCount === 1 ? '' : 's'} antes de acertar.`
+                  : 'Sin penalización por fallos.'}
+              />
+            </>
           ) : showCompleted ? (
             <CompletionPopup title="¡HAS COMPLETADO EL TABLERO!" onContinue={() => navigate(-1)} />
           ) : null}
