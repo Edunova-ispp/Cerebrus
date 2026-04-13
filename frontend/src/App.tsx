@@ -34,6 +34,7 @@ import EstadisticasTema from "./pages/estadisticasCurso/EstadisticasTema.tsx";
 import DetalleIntentoActividad from "./pages/estadisticasCurso/DetalleIntentoActividad.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import PreguntaAbiertaAlumno from "./pages/preguntaAbiertaAlumno/PreguntaAbiertaAlumno.tsx";
+import PuntosAlumno from "./pages/puntosAlumno/PuntosAlumno.tsx";
 import TermsPage from "./pages/legal/TermsPage.tsx";
 import EdunovaPage from "./pages/edunova/EdunovaPage.tsx";
 
@@ -150,6 +151,9 @@ function App() {
         } />
         <Route path="/estadisticas/:id" element={
           <ProtectedRoute allowedRoles={['ALUMNO']}><EstadisticasAlumno /></ProtectedRoute>
+        } />
+        <Route path="/puntos" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><PuntosAlumno /></ProtectedRoute>
         } />
 
         {/* Rutas profesores y dueños */}

@@ -12,6 +12,7 @@ export default function NavbarMisCursos() {
   const roles = getCurrentUserRoles();
   const isMaestro = roles.some((r) => r.toUpperCase().includes("MAESTRO"));
   const isOrganizacion = roles.some((r) => r.toUpperCase().includes("ORGANIZACION"));
+  const isAlumno = roles.some((r) => r.toUpperCase().includes("ALUMNO"));
   const homeRoute = isOrganizacion ? "/suscripcion" : "/misCursos";
 
   /* ── Auto-hide on scroll ── */
@@ -92,6 +93,11 @@ export default function NavbarMisCursos() {
                 <button type="button" className="navbar-link" onClick={() => navigate("/misCursos")}>
                   <img src={misCursosIcon} alt="" className="navbar-icon" />
                   <span>Mis Cursos</span>
+                </button>
+              )}
+              {isAlumno && (
+                <button type="button" className="navbar-link" onClick={() => navigate("/puntos")}>
+                  <span>Puntos</span>
                 </button>
               )}
               {isOrganizacion && (
