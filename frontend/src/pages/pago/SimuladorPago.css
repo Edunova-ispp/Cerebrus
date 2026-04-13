@@ -1,0 +1,447 @@
+/* ── Página ─────────────────────────────────────────── */
+
+.sim-page {
+  min-height: 100vh;
+  background: var(--t-bg);
+  font-family: 'Oxygen', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px 60px;
+}
+
+/* ── Card principal ──────────────────────────────────── */
+
+.sim-card {
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  padding: 32px 36px;
+  box-shadow: var(--t-shadow);
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Cabecera ────────────────────────────────────────── */
+
+.sim-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--t-border);
+}
+
+.sim-bank-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--t-primary-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.sim-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--t-text);
+  margin: 4px 0 0;
+}
+
+.sim-subtitle {
+  font-size: 0.8rem;
+  color: var(--t-text-secondary);
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 20px;
+  padding: 3px 12px;
+}
+
+/* ── Info transacción ────────────────────────────────── */
+
+.sim-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.sim-info__row {
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sim-info__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--t-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sim-info__value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--t-text);
+}
+
+.sim-info__value--mono {
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+/* ── Tarjeta visual ──────────────────────────────────── */
+
+.sim-card-visual {
+  background: var(--t-primary);
+  border-radius: var(--t-radius-lg);
+  padding: 20px 22px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sim-card-visual::before {
+  content: '';
+  position: absolute;
+  right: -20px;
+  top: -20px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+}
+
+.sim-card-visual::after {
+  content: '';
+  position: absolute;
+  right: 30px;
+  bottom: -30px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+}
+
+.sim-card-visual__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sim-card-visual__chip {
+  width: 32px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.sim-card-visual__network {
+  display: flex;
+}
+
+.sim-card-visual__circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+
+.sim-card-visual__circle--front {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.sim-card-visual__circle--back {
+  background: rgba(255, 255, 255, 0.25);
+  margin-left: -10px;
+}
+
+.sim-card-visual__number {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.sim-card-visual__bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.sim-card-visual__field-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 3px;
+}
+
+.sim-card-visual__field-value {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: monospace;
+  color: #fff;
+}
+
+/* ── Nota datos ficticios ────────────────────────────── */
+
+.sim-fake-note {
+  font-size: 0.85rem;
+  color: var(--t-text-secondary);
+  text-align: center;
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
+  padding: 10px 14px;
+  margin: 0;
+}
+
+/* ── Divider ─────────────────────────────────────────── */
+
+.sim-divider {
+  border: none;
+  border-top: 1px solid var(--t-border);
+  margin: 0;
+}
+
+/* ── Error ───────────────────────────────────────────── */
+
+.sim-error {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--t-danger);
+  padding: 10px 14px;
+  background: var(--t-danger-light);
+  border: 1px solid var(--t-danger);
+  border-radius: var(--t-radius);
+  box-shadow: none;
+  margin: 0;
+}
+
+/* ── Botones ─────────────────────────────────────────── */
+
+.sim-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.sim-btn {
+  flex: 1;
+  border: none;
+  border-radius: var(--t-radius);
+  padding: 13px 16px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.sim-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  box-shadow: none;
+}
+
+.sim-btn--success {
+  background: var(--t-primary);
+  color: #fff;
+  box-shadow: var(--t-shadow);
+}
+
+.sim-btn--success:hover:not(:disabled) {
+  background: var(--t-primary-hover);
+  box-shadow: var(--t-shadow-md);
+}
+
+.sim-btn--danger {
+  background: var(--t-card);
+  color: var(--t-danger);
+  border: 1px solid var(--t-danger);
+  box-shadow: none;
+}
+
+.sim-btn--danger:hover:not(:disabled) {
+  background: var(--t-danger-light);
+  box-shadow: var(--t-shadow-sm);
+}
+
+.sim-btn--secondary {
+  background: var(--t-card);
+  color: var(--t-text);
+  border: 1px solid var(--t-border);
+  box-shadow: var(--t-shadow-sm);
+}
+
+.sim-btn--secondary:hover:not(:disabled) {
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border-color: var(--t-primary);
+  box-shadow: var(--t-shadow);
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .sim-card {
+    padding: 24px 20px;
+  }
+
+  .sim-info {
+    grid-template-columns: 1fr;
+  }
+
+  .sim-actions {
+    flex-direction: column;
+  }
+}
+
+/* ── Formulario editable ─────────────────────────────── */
+
+.sim-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sim-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sim-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.sim-form__label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--t-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sim-form__input {
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
+  padding: 10px 14px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1rem;
+  color: var(--t-text);
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.sim-form__input:focus {
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+@media (max-width: 480px) {
+  .sim-form__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Añadir al final de SimuladorPago.css ── */
+
+/* Tarjeta 3D con flip */
+.sim-card-3d {
+  perspective: 1000px;
+  margin: 1.25rem 0;
+}
+
+.sim-card-3d__inner {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sim-card-3d--flipped .sim-card-3d__inner {
+  transform: rotateY(180deg);
+}
+
+.sim-card-3d__front,
+.sim-card-3d__back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.sim-card-3d__back {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Banda magnética */
+.sim-card-visual__stripe {
+  width: 100%;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.5);
+  margin-bottom: 1rem;
+}
+
+/* Área CVV en cara trasera */
+.sim-card-visual__cvv-area {
+  padding: 0 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.sim-card-visual__cvv-box {
+  background: white;
+  color: #1a1a2e;
+  padding: 0.35rem 1rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* Inputs con error */
+.sim-form__input--error {
+  border-color: #e53e3e !important;
+  background: #fff5f5 !important;
+}
+
+/* Mensaje de error bajo input */
+.sim-form__error {
+  display: block;
+  color: #e53e3e;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
