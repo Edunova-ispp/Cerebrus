@@ -34,6 +34,7 @@ import EstadisticasTema from "./pages/estadisticasCurso/EstadisticasTema.tsx";
 import DetalleIntentoActividad from "./pages/estadisticasCurso/DetalleIntentoActividad.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import PreguntaAbiertaAlumno from "./pages/preguntaAbiertaAlumno/PreguntaAbiertaAlumno.tsx";
+import PuntosAlumno from "./pages/puntosAlumno/PuntosAlumno.tsx";
 import TermsPage from "./pages/legal/TermsPage.tsx";
 import EdunovaPage from "./pages/edunova/EdunovaPage.tsx";
 
@@ -42,7 +43,6 @@ import ResumenSuscripcion from "./pages/suscripcion/ResumenSuscripcion.tsx";
 import GestionUsuarios from "./pages/gestionUsuarios/GestionUsuarios.tsx";
 import CreacionUsuario from "./pages/gestionUsuarios/CreacionUsuario.tsx";
 import ImportarUsuarios from "./pages/gestionUsuarios/ImportarUsuarios.tsx";
-
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
 class WatchbugErrorBoundary extends Component<
   { children: React.ReactNode },
@@ -151,6 +151,9 @@ function App() {
         } />
         <Route path="/estadisticas/:id" element={
           <ProtectedRoute allowedRoles={['ALUMNO']}><EstadisticasAlumno /></ProtectedRoute>
+        } />
+        <Route path="/puntos" element={
+          <ProtectedRoute allowedRoles={['ALUMNO']}><PuntosAlumno /></ProtectedRoute>
         } />
 
         {/* Rutas profesores y dueños */}

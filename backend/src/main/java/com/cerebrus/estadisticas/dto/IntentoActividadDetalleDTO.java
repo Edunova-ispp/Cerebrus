@@ -16,6 +16,7 @@ public class IntentoActividadDetalleDTO {
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;
     private Integer tiempoMinutos;
+    private Integer tiempoSegundos;
     private Integer puntuacion;
     private Integer nota;
     private Integer numAbandonos;
@@ -25,7 +26,7 @@ public class IntentoActividadDetalleDTO {
 
     public IntentoActividadDetalleDTO(Long intentoId, Long cursoId, Long alumnoId, Long actividadId,
             String actividadTitulo, String actividadTipo, String actividadImagen, Integer puntuacionMaxima,
-            LocalDateTime fechaInicio, LocalDateTime fechaFin, Integer tiempoMinutos,
+            LocalDateTime fechaInicio, LocalDateTime fechaFin, Integer tiempoMinutos, Integer tiempoSegundos,
             Integer puntuacion, Integer nota, Integer numAbandonos,
             List<IntentoDetalleRespuestaDTO> respuestas) {
         this.intentoId = intentoId;
@@ -39,6 +40,7 @@ public class IntentoActividadDetalleDTO {
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.tiempoMinutos = tiempoMinutos;
+        this.tiempoSegundos = tiempoSegundos;
         this.puntuacion = puntuacion;
         this.nota = nota;
         this.numAbandonos = numAbandonos;
@@ -131,6 +133,14 @@ public class IntentoActividadDetalleDTO {
 
     public void setTiempoMinutos(Integer tiempoMinutos) {
         this.tiempoMinutos = tiempoMinutos;
+    }
+
+    public Integer getTiempoSegundos() {
+        return tiempoSegundos;
+    }
+
+    public void setTiempoSegundos(Integer tiempoSegundos) {
+        this.tiempoSegundos = tiempoSegundos;
     }
 
     public Integer getPuntuacion() {

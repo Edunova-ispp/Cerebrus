@@ -51,17 +51,6 @@
   border-color: var(--t-danger);
 }
 
-.gu-toast--floating {
-  position: fixed;
-  bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2000;
-  max-width: calc(100vw - 40px);
-  box-shadow: 6px 6px 0 #000;
-  pointer-events: none;
-}
-
 /* ── Toolbar ── */
 .gu-toolbar {
   display: flex;
@@ -296,9 +285,9 @@
   background: var(--t-card);
   border: 1px solid var(--t-border);
   border-radius: var(--t-radius-lg);
-  padding: 32px 36px;
+  padding: 24px 28px;
   width: 100%;
-  max-width: 520px;
+  max-width: 400px;
   box-shadow: var(--t-shadow-lg);
   position: relative;
   max-height: 90vh;
@@ -362,25 +351,25 @@
 .gu-edit-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: 18px;
+  gap: 10px;
+  margin-top: 14px;
 }
 
 .gu-form-label {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 0.95rem;
+  gap: 3px;
+  font-size: 0.88rem;
   font-weight: 600;
   color: var(--t-text);
 }
 
 .gu-form-label input {
-  padding: 10px 14px;
+  padding: 8px 12px;
   border: 1px solid var(--t-border);
   border-radius: var(--t-radius);
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 0.92rem;
   background: var(--t-input-bg);
   transition: border-color 0.15s, box-shadow 0.15s;
 }
@@ -395,6 +384,7 @@
   display: flex;
   gap: 12px;
   margin-top: 20px;
+  justify-content: center;
 }
 
 /* ── Confirm text ── */
@@ -422,34 +412,10 @@
   .gu-modal { padding: 24px 20px; }
 }
 
-/* ── Create user page / actions ── */
+/* ── Create user button ── */
 .gu-create-user-btn {
   width: 50%;
   align-self: center;
-}
-
-.gu-create-form {
-  align-items: center;
-}
-
-.gu-create-form .gu-form-label {
-  width: 33.333%;
-  min-width: 260px;
-}
-
-
-.gu-create-header {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.gu-back-btn {
-  padding: 8px 14px;
-  position: absolute;
-  left: 0;
 }
 
 .gu-role-field {
@@ -480,11 +446,4 @@
 .gu-role-btn--alumno.gu-role-btn--selected {
   background: #155724;
   color: #d4edda;
-}
-
-@media (max-width: 640px) {
-  .gu-create-form .gu-form-label {
-    width: 100%;
-    min-width: 0;
-  }
 }

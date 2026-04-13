@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/icons/logoCebrerusTopbar.png";
 import misCursosIcon from "../../assets/icons/misCursos.svg";
 import perfilIcon from "../../assets/icons/perfil.svg";
+import trofeoIcon from "../../assets/icons/Trofeo.svg";
 import { getCurrentUserRoles } from "../../types/curso";
 import "./NavbarMisCursos.css";
 
@@ -12,6 +13,7 @@ export default function NavbarMisCursos() {
   const roles = getCurrentUserRoles();
   const isMaestro = roles.some((r) => r.toUpperCase().includes("MAESTRO"));
   const isOrganizacion = roles.some((r) => r.toUpperCase().includes("ORGANIZACION"));
+  const isAlumno = roles.some((r) => r.toUpperCase().includes("ALUMNO"));
   const homeRoute = isOrganizacion ? "/suscripcion" : "/misCursos";
 
   /* ── Auto-hide on scroll ── */
@@ -92,6 +94,12 @@ export default function NavbarMisCursos() {
                 <button type="button" className="navbar-link" onClick={() => navigate("/misCursos")}>
                   <img src={misCursosIcon} alt="" className="navbar-icon" />
                   <span>Mis Cursos</span>
+                </button>
+              )}
+              {isAlumno && (
+                <button type="button" className="navbar-link" onClick={() => navigate("/puntos")}>
+                  <img src={trofeoIcon} alt="" className="navbar-icon" />
+                  <span>Puntos</span>
                 </button>
               )}
               {isOrganizacion && (

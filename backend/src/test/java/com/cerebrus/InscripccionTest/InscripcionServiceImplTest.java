@@ -3,9 +3,14 @@ package com.cerebrus.InscripccionTest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,9 +21,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
+import com.cerebrus.actividad.Actividad;
+import com.cerebrus.actividad.ActividadRepository;
+import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.inscripcion.Inscripcion;
 import com.cerebrus.inscripcion.InscripcionRepository;
 import com.cerebrus.inscripcion.InscripcionServiceImpl;
+import com.cerebrus.inscripcion.dto.AlumnoCursoDTO;
+import com.cerebrus.tema.Tema;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
@@ -34,6 +44,9 @@ class InscripcionServiceImplTest {
 
     @Mock
     private CursoRepository cursoRepository;
+
+    @Mock
+    private ActividadRepository actividadRepository;
 
     @InjectMocks
     private InscripcionServiceImpl inscripcionService;
@@ -158,5 +171,36 @@ class InscripcionServiceImplTest {
 
         assertThat(resultado.getPuntos()).isEqualTo(0);
         assertThat(resultado.getFechaInscripcion()).isEqualTo(java.time.LocalDate.now());
+    }
+
+    @Test
+    void listarInscripcionesPorCurso_retornaPuntosRealesDelAlumno() {
+        Tema tema = new Tema();
+        tema.setId(100L);
+        curso.setTemas(List.of(tema));
+        curso.setMaestro(maestro);
+
+        Actividad actividad = mock(Actividad.class);
+
+        ActividadAlumno actividadAlumno = new ActividadAlumno();
+        actividadAlumno.setId(300L);
+        actividadAlumno.setAlumno(alumno);
+        actividadAlumno.setPuntuacion(42);
+        actividadAlumno.setFechaInicio(LocalDateTime.now().minusMinutes(10));
+        actividadAlumno.setFechaFin(LocalDateTime.now());
+        when(actividad.getActividadesAlumno()).thenReturn(List.of(actividadAlumno));
+
+        Inscripcion inscripcion = new Inscripcion(0, LocalDate.now(), alumno, curso);
+
+        when(usuarioService.findCurrentUser()).thenReturn(maestro);
+        when(cursoRepository.findByID(10L)).thenReturn(curso);
+        when(inscripcionRepository.findByCursoIdWithAlumno(10L)).thenReturn(List.of(inscripcion));
+        when(actividadRepository.findByTemaId(100L)).thenReturn(List.of(actividad));
+
+        List<AlumnoCursoDTO> resultado = inscripcionService.listarInscripcionesPorCurso(10L);
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).getPuntos()).isEqualTo(42);
+        assertThat(resultado.get(0).getAlumnoId()).isEqualTo(1L);
     }
 }

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
@@ -37,7 +37,6 @@ type FiltroRol = 'TODOS' | 'MAESTRO' | 'ALUMNO';
 export default function GestionUsuarios() {
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
   const navigate = useNavigate();
-  const location = useLocation();
   const userInfo = getCurrentUserInfo() as Record<string, unknown> | null;
   const organizacionId = userInfo?.id as number | undefined;
 
@@ -52,29 +51,6 @@ export default function GestionUsuarios() {
   const [totalMaestros, setTotalMaestros] = useState(0);
   const [totalAlumnos, setTotalAlumnos] = useState(0);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [navbarToast, setNavbarToast] = useState<string | null>(null);
-  const consumedToastKeyRef = useRef<string | null>(null);
-
-  // ── Toast from navigation state (e.g., create-user success) ──
-  useEffect(() => {
-    if (consumedToastKeyRef.current === location.key) return;
-
-    const toast = (location.state as { toast?: string } | null)?.toast;
-    if (!toast) return;
-
-    consumedToastKeyRef.current = location.key;
-    setNavbarToast(toast);
-
-    // Limpiar state para que no reaparezca al refrescar
-    navigate(location.pathname, { replace: true, state: null });
-  }, [location.key, location.pathname, location.state, navigate]);
-
-  // ── Auto-dismiss toast ──
-  useEffect(() => {
-    if (!navbarToast) return;
-    const t = window.setTimeout(() => setNavbarToast(null), 4000);
-    return () => window.clearTimeout(t);
-  }, [navbarToast]);
 
   // ── Detail / Edit modal ──
   const [selectedUser, setSelectedUser] = useState<UsuarioDetalle | null>(null);
@@ -83,6 +59,12 @@ export default function GestionUsuarios() {
   const [editForm, setEditForm] = useState({ nombre: '', primerApellido: '', segundoApellido: '', nombreUsuario: '', correoElectronico: '' });
   const [saving, setSaving] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
+
+  // ── Create modal ──
+  const [showCreate, setShowCreate] = useState(false);
+  const [createForm, setCreateForm] = useState({ nombre: '', primerApellido: '', segundoApellido: '', email: '', username: '', password: '', rol: 'ALUMNO' as 'MAESTRO' | 'ALUMNO' });
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   // ── Delete confirm ──
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: number; nombre: string } | null>(null);
@@ -218,18 +200,56 @@ export default function GestionUsuarios() {
     }
   };
 
+  // ── Create user ──
+  const openCreateModal = () => {
+    setCreateForm({ nombre: '', primerApellido: '', segundoApellido: '', email: '', username: '', password: '', rol: 'ALUMNO' });
+    setCreateError(null);
+    setShowCreate(true);
+  };
+
+  const handleCreate = async () => {
+    setCreateError(null);
+    const errors: string[] = [];
+    if (!createForm.nombre.trim()) errors.push('El nombre es obligatorio');
+    if (!createForm.primerApellido.trim()) errors.push('El primer apellido es obligatorio');
+    if (!createForm.username.trim()) errors.push('El username es obligatorio');
+    if (!createForm.password.trim()) errors.push('La contraseña es obligatoria');
+    const emailTrimmed = createForm.email.trim();
+    if (emailTrimmed && !emailTrimmed.includes('@')) errors.push('El email debe ser válido');
+    if (errors.length > 0) { setCreateError(errors.join('. ')); return; }
+
+    setCreating(true);
+    try {
+      const payload = {
+        nombre: createForm.nombre.trim(),
+        primerApellido: createForm.primerApellido.trim(),
+        segundoApellido: createForm.segundoApellido.trim() || undefined,
+        username: createForm.username.trim(),
+        email: createForm.email.trim() || undefined,
+        password: createForm.password,
+        rol: createForm.rol,
+      };
+      await apiFetch(`${apiBase}/api/organizaciones/usuarios`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      setShowCreate(false);
+      setSuccessMsg('Usuario creado con éxito');
+      setTimeout(() => setSuccessMsg(null), 3000);
+      fetchUsers();
+    } catch (err: unknown) {
+      setCreateError(err instanceof Error ? err.message : 'Error al crear el usuario');
+    } finally {
+      setCreating(false);
+    }
+  };
+
   const totalPagesMaestros = Math.ceil(totalMaestros / PAGE_SIZE);
   const totalPagesAlumnos = Math.ceil(totalAlumnos / PAGE_SIZE);
 
   return (
     <div className="gu-page">
       <NavbarMisCursos />
-
-      {navbarToast && (
-        <div className="gu-toast gu-toast--ok gu-toast--floating" role="status" aria-live="polite">
-          {navbarToast}
-        </div>
-      )}
 
       <main className="gu-main">
         <div className="gu-wrapper">
@@ -416,6 +436,70 @@ export default function GestionUsuarios() {
                 {deleting ? 'Eliminando…' : 'Eliminar'}
               </button>
               <button className="gu-btn gu-btn--secondary" onClick={() => setDeleteConfirm(null)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Create User Modal ── */}
+      {showCreate && (
+        <div className="gu-overlay" onClick={() => setShowCreate(false)}>
+          <div className="gu-modal" onClick={e => e.stopPropagation()}>
+            <button className="gu-modal-close" onClick={() => setShowCreate(false)}>✕</button>
+            <h2 className="gu-modal-title">Crear Usuario</h2>
+
+            {createError && <div className="gu-toast gu-toast--err" style={{ margin: '12px 0' }}>{createError}</div>}
+
+            <div className="gu-edit-form">
+              <label className="gu-form-label">
+                Nombre
+                <input value={createForm.nombre} onChange={e => setCreateForm(f => ({ ...f, nombre: e.target.value }))} autoComplete="given-name" />
+              </label>
+              <label className="gu-form-label">
+                Primer Apellido
+                <input value={createForm.primerApellido} onChange={e => setCreateForm(f => ({ ...f, primerApellido: e.target.value }))} autoComplete="family-name" />
+              </label>
+              <label className="gu-form-label">
+                Segundo Apellido (opcional)
+                <input value={createForm.segundoApellido} onChange={e => setCreateForm(f => ({ ...f, segundoApellido: e.target.value }))} autoComplete="family-name" />
+              </label>
+              <label className="gu-form-label">
+                Email (opcional)
+                <input type="email" value={createForm.email} onChange={e => setCreateForm(f => ({ ...f, email: e.target.value }))} autoComplete="email" />
+              </label>
+              <label className="gu-form-label">
+                Username
+                <input value={createForm.username} onChange={e => setCreateForm(f => ({ ...f, username: e.target.value }))} autoComplete="username" />
+              </label>
+              <label className="gu-form-label">
+                Contraseña
+                <input type="password" value={createForm.password} onChange={e => setCreateForm(f => ({ ...f, password: e.target.value }))} autoComplete="new-password" />
+              </label>
+              <div className="gu-field gu-role-field">
+                <span className="gu-field-label">TIPO DE USUARIO</span>
+                <div className="gu-role-buttons">
+                  <button
+                    type="button"
+                    className={`gu-filter-btn gu-role-btn--maestro${createForm.rol === 'MAESTRO' ? ' gu-role-btn--selected' : ''}`}
+                    onClick={() => setCreateForm(f => ({ ...f, rol: 'MAESTRO' }))}
+                  >
+                    Profesor
+                  </button>
+                  <button
+                    type="button"
+                    className={`gu-filter-btn gu-role-btn--alumno${createForm.rol === 'ALUMNO' ? ' gu-role-btn--selected' : ''}`}
+                    onClick={() => setCreateForm(f => ({ ...f, rol: 'ALUMNO' }))}
+                  >
+                    Alumno
+                  </button>
+                </div>
+              </div>
+              <div className="gu-modal-actions">
+                <button className="gu-btn gu-btn--primary" onClick={handleCreate} disabled={creating}>
+                  {creating ? 'Creando…' : 'Crear usuario'}
+                </button>
+                <button className="gu-btn gu-btn--secondary" onClick={() => setShowCreate(false)}>Cancelar</button>
+              </div>
             </div>
           </div>
         </div>

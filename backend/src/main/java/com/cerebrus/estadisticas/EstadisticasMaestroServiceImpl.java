@@ -26,8 +26,6 @@ import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
 import com.cerebrus.estadisticas.dto.ActividadEstadisticasAlumnoDTO;
-import com.cerebrus.estadisticas.dto.IntentoActividadDetalleDTO;
-import com.cerebrus.estadisticas.dto.IntentoDetalleRespuestaDTO;
 import com.cerebrus.estadisticas.dto.AlumnosMasRapidosLentosDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasActividadDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasAlumnoDTO;
@@ -35,10 +33,13 @@ import com.cerebrus.estadisticas.dto.EstadisticasAlumnoResumenDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasCursoDTO;
 import com.cerebrus.estadisticas.dto.EstadisticasTemaDTO;
 import com.cerebrus.estadisticas.dto.IntentoActividadDTO;
+import com.cerebrus.estadisticas.dto.IntentoActividadDetalleDTO;
+import com.cerebrus.estadisticas.dto.IntentoDetalleRespuestaDTO;
+import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
 import com.cerebrus.estadisticas.dto.TemaEstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.TiempoAlumnoDTO;
-import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
 import com.cerebrus.inscripcion.Inscripcion;
+import com.cerebrus.pregunta.Pregunta;
 import com.cerebrus.respuestaAlumn.RespuestaAlumno;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.RespAlumnoGeneral;
 import com.cerebrus.respuestaAlumn.respAlumOrdenacion.RespAlumnoOrdenacion;
@@ -828,6 +829,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                                 aa.getPuntuacion(),
                                 aa.getNota(),
                                 aa.getTiempoMinutos(),
+                                aa.getTiempoSegundos(),
                                 aa.getNumAbandonos()))
                         .toList();
 
@@ -860,6 +862,18 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                 : notasAlumno.stream().mapToInt(Integer::intValue).min().orElse(0);
         Integer notaMax = notasAlumno.isEmpty() ? null
                 : notasAlumno.stream().mapToInt(Integer::intValue).max().orElse(0);
+        Integer tiempoTotalSegundos = 0;
+        for (Tema tema : curso.getTemas()) {
+            for (Actividad actividad : tema.getActividades()) {
+                ActividadAlumno ultimaTerminada = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
+                        .filter(aa -> aa.getAlumno().getId().equals(alumnoId) && aa.getEstadoActividad() == EstadoActividad.TERMINADA)
+                        .findFirst()
+                        .orElse(null);
+                if (ultimaTerminada != null && ultimaTerminada.getTiempoSegundos() != null) {
+                    tiempoTotalSegundos += ultimaTerminada.getTiempoSegundos();
+                }
+            }
+        }
 
         return new EstadisticasAlumnoResumenDTO(
                 alumnoId,
@@ -870,6 +884,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                 actividadesCompletadas,
                 totalActividades,
                 tiempoTotal,
+                tiempoTotalSegundos,
                 temasDTO);
     }
 
@@ -916,6 +931,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
             intento.getFechaInicio(),
             intento.getFechaFin(),
             intento.getTiempoMinutos(),
+            intento.getTiempoSegundos(),
             intento.getPuntuacion(),
             intento.getNota(),
             intento.getNumAbandonos(),
@@ -969,6 +985,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
             intento.getPuntuacion(),
             intento.getNota(),
             intento.getTiempoMinutos(),
+            intento.getTiempoSegundos(),
             intento.getNumAbandonos());
     }
 
@@ -1271,21 +1288,32 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
 
     private IntentoDetalleRespuestaDTO mapearRespuestaIntento(RespuestaAlumno respuestaAlumno) {
         if (respuestaAlumno == null) {
-            return new IntentoDetalleRespuestaDTO(null, "OTRO", "Respuesta", "", null);
+            return new IntentoDetalleRespuestaDTO(null, "OTRO", "Respuesta", "", null, null);
         }
 
         if (respuestaAlumno instanceof RespAlumnoGeneral rag) {
-            String enunciado = rag.getPregunta() != null ? rag.getPregunta().getPregunta() : "Pregunta";
+            String enunciado = "Pregunta";
             Boolean correcta = rag.getCorrecta();
 
-            if (rag.getPregunta() != null && rag.getPregunta().getActividad() instanceof General general
-                && general.getTipo() == com.cerebrus.comun.enumerados.TipoActGeneral.CLASIFICACION
-                && rag.getRespuesta() != null) {
-                correcta = respuestaMaestroRepository.findByRespuesta(rag.getRespuesta())
-                    .map(RespuestaMaestro::getPregunta)
-                    .filter(preguntaMaestra -> preguntaMaestra != null && preguntaMaestra.getId() != null)
-                    .map(preguntaMaestra -> preguntaMaestra.getId().equals(rag.getPregunta().getId()))
-                    .orElse(Boolean.FALSE);
+            try {
+                // Try to load the Pregunta - it might not exist if deleted
+                Pregunta pregunta = rag.getPregunta();
+                if (pregunta != null) {
+                    enunciado = pregunta.getPregunta();
+
+                    if (pregunta.getActividad() instanceof General general
+                        && general.getTipo() == com.cerebrus.comun.enumerados.TipoActGeneral.CLASIFICACION
+                        && rag.getRespuesta() != null) {
+                        correcta = respuestaMaestroRepository.findByRespuesta(rag.getRespuesta())
+                            .map(RespuestaMaestro::getPregunta)
+                            .filter(preguntaMaestra -> preguntaMaestra != null && preguntaMaestra.getId() != null)
+                            .map(preguntaMaestra -> preguntaMaestra.getId().equals(pregunta.getId()) ? Boolean.TRUE : Boolean.FALSE)
+                            .orElse(Boolean.FALSE);
+                    }
+                }
+            } catch (jakarta.persistence.EntityNotFoundException e) {
+                // Pregunta doesn't exist - use default enunciado
+                log.warn("Pregunta not found for RespAlumnoGeneral ID: {}", rag.getId());
             }
 
             return new IntentoDetalleRespuestaDTO(
@@ -1293,7 +1321,8 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                     "GENERAL",
                     enunciado,
                     rag.getRespuesta(),
-                    correcta);
+                    correcta,
+                    rag.getNumFallos());
         }
         if (respuestaAlumno instanceof RespAlumnoPuntoImagen rpi) {
             String respuestaCorrecta = (rpi.getPuntoImagen() != null && rpi.getPuntoImagen().getRespuesta() != null)
@@ -1307,7 +1336,8 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                     "PUNTO_IMAGEN",
                     enunciado,
                     rpi.getRespuesta(),
-                    rpi.getCorrecta());
+                    rpi.getCorrecta(),
+                    null);
         }
         if (respuestaAlumno instanceof RespAlumnoOrdenacion rao) {
             String enunciado = "Ordenacion";
@@ -1317,7 +1347,8 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                     "ORDENACION",
                     enunciado,
                     valor,
-                    rao.getCorrecta());
+                    rao.getCorrecta(),
+                    null);
         }
 
         return new IntentoDetalleRespuestaDTO(
@@ -1325,7 +1356,8 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                 "OTRO",
                 "Respuesta",
                 "",
-                respuestaAlumno.getCorrecta());
+                respuestaAlumno.getCorrecta(),
+                null);
     }
 
     private Integer calcularNotaDesdePuntuacion(Integer puntuacion, Integer puntuacionMaximaActividad) {

@@ -15,9 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividad.general.General;
-import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
+import com.cerebrus.comun.enumerados.TipoActGeneral;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.iaconnection.IaConnectionService;
 import com.cerebrus.pregunta.Pregunta;
@@ -205,7 +205,8 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
                     r.getPregunta() != null ? r.getPregunta().getId() : null,
                     r.getRespuesta(),
                     r.getCorrecta(),
-                    respuestaCorrecta);
+                    respuestaCorrecta,
+                    r.getNumFallos());
             })
             .toList();
     }

@@ -1,0 +1,324 @@
+/* ═══════════════════════════════════════
+   Puntos del Alumno – Gamified Student Theme
+   ═══════════════════════════════════════ */
+
+.puntos-page {
+  min-height: 100vh;
+  background-color: #FAF6ED;
+  font-family: 'Pixelify Sans', sans-serif;
+  padding: 32px 24px 60px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Title */
+.puntos-title {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  color: #0F1338;
+  margin: 0 0 40px;
+  text-align: center;
+}
+
+/* Loading / Error */
+.puntos-loading,
+.puntos-error {
+  text-align: center;
+  padding: 80px 20px;
+  font-size: 1.2rem;
+  color: #666;
+}
+.puntos-error {
+  color: #c0392b;
+}
+
+/* ══════════════════════════════════════
+   Timeline – Horizontal evolution
+   ══════════════════════════════════════ */
+.puntos-timeline {
+  margin: 0 auto 20px;
+  padding: 0 10px;
+}
+
+/* Row of mascot images */
+.puntos-timeline-nodes {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 6px;
+  margin-bottom: 16px;
+}
+
+.puntos-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  max-width: 160px;
+}
+
+.puntos-node-img {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: grayscale(1) brightness(0.55) opacity(0.45);
+  transition: filter 0.3s, transform 0.3s;
+}
+
+.puntos-node--alcanzada .puntos-node-img {
+  filter: none;
+  opacity: 1;
+}
+
+.puntos-node--actual .puntos-node-img {
+  filter: none;
+  opacity: 1;
+  transform: scale(1.18);
+  filter: drop-shadow(0 0 6px rgba(124, 77, 255, 0.35));
+}
+
+.puntos-node-name {
+  font-size: 0.7rem;
+  color: #999;
+  text-align: center;
+  margin-top: 6px;
+  line-height: 1.15;
+  max-width: 110px;
+}
+
+.puntos-node--alcanzada .puntos-node-name {
+  color: #555;
+}
+
+.puntos-node--actual .puntos-node-name {
+  color: #7C4DFF;
+  font-weight: bold;
+}
+
+/* ── Progress track (line + dots) ── */
+.puntos-track {
+  position: relative;
+  height: 48px;
+  margin: 0 6px;
+  display: flex;
+  align-items: center;
+}
+
+/* Background line */
+.puntos-track-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 10px;
+  margin-top: -5px;
+  background: repeating-linear-gradient(
+    90deg,
+    #D10057 0px,
+    #D10057 12px,
+    transparent 12px,
+    transparent 20px
+  );
+  border-radius: 5px;
+}
+
+/* Filled portion */
+.puntos-track-fill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 10px;
+  margin-top: -5px;
+  background: repeating-linear-gradient(
+    90deg,
+    #7C4DFF 0px,
+    #7C4DFF 12px,
+    transparent 12px,
+    transparent 20px
+  );
+  border-radius: 5px;
+  z-index: 1;
+  transition: width 0.6s ease-out;
+}
+
+/* Dots at each arena */
+.puntos-track-dot {
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  margin-top: -20px;
+  margin-left: -20px;
+  border-radius: 50%;
+  background: #D10057;
+  border: 3px solid #000;
+  z-index: 2;
+  box-shadow: 2px 2px 0 #000;
+}
+
+.puntos-track-dot--filled {
+  background: #7C4DFF;
+  box-shadow: 0 0 8px rgba(124, 77, 255, 0.45), 2px 2px 0 #000;
+}
+
+/* Student marker on the track */
+.puntos-marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  animation: markerBounce 2s ease-in-out infinite;
+}
+
+@keyframes markerBounce {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50%      { transform: translate(-50%, calc(-50% - 5px)); }
+}
+
+.puntos-marker-img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(1px 1px 0 #000);
+}
+
+/* Labels row below the track */
+.puntos-timeline-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 6px 0;
+}
+
+.puntos-label-pts {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #D10057;
+  text-align: center;
+  flex: 1;
+  max-width: 160px;
+}
+
+/* ── Alumno badge (summary card) ── */
+.puntos-alumno-badge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--color-accent, #FFF294);
+  border: 3px solid #000;
+  border-radius: 14px;
+  padding: 14px 24px;
+  box-shadow: 4px 4px 0 #000;
+  width: fit-content;
+  margin: 28px auto 0;
+}
+
+.puntos-alumno-badge-img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(1px 1px 0 #000);
+}
+
+.puntos-alumno-badge-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.puntos-alumno-badge-name {
+  font-size: 1.1rem;
+  color: #0F1338;
+}
+
+.puntos-alumno-badge-arena {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.puntos-alumno-badge-pts {
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: #D10057;
+}
+
+.puntos-alumno-badge-next {
+  font-size: 0.8rem;
+  color: #777;
+  margin-top: 2px;
+}
+
+.puntos-alumno-badge-next strong {
+  color: #7C4DFF;
+}
+
+.puntos-alumno-badge-max {
+  font-size: 0.85rem;
+  color: #D10057;
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+/* ══════════════════════════════════════
+   Responsive
+   ══════════════════════════════════════ */
+@media (max-width: 768px) {
+  .puntos-timeline-nodes {
+    gap: 4px;
+  }
+
+  .puntos-node-img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .puntos-node-name {
+    display: none;
+  }
+
+  .puntos-label-pts {
+    font-size: 0.65rem;
+  }
+
+  .puntos-alumno-badge {
+    padding: 12px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .puntos-page {
+    padding: 16px 12px 40px;
+  }
+
+  .puntos-title {
+    font-size: 1.6rem;
+  }
+
+  .puntos-node-img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .puntos-track-dot {
+    width: 26px;
+    height: 26px;
+    margin-top: -13px;
+    margin-left: -13px;
+  }
+
+  .puntos-alumno-badge {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .puntos-alumno-badge-img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .puntos-alumno-badge-pts {
+    font-size: 1rem;
+  }
+}

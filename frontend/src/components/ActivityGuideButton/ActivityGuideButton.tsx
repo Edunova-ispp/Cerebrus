@@ -42,7 +42,7 @@ export default function ActivityGuideButton({ activityType, role, buttonLabel = 
 
   return (
     <>
-      <button type="button" className="agb-btn" onClick={() => setOpen(true)}>
+      <button type="button" className={`agb-btn agb-btn--${role}`} onClick={() => setOpen(true)}>
         {buttonLabel}
       </button>
       <ActivityGuideModal
@@ -51,6 +51,7 @@ export default function ActivityGuideButton({ activityType, role, buttonLabel = 
         subtitle={`Actividad: ${activityLabel}`}
         content={guide}
         onClose={() => setOpen(false)}
+        variant={role === 'maestro' ? 'teacher' : 'student'}
       />
     </>
   );

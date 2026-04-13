@@ -10,18 +10,20 @@ public class IntentoActividadDTO {
     private Integer puntuacion;
     private Integer nota;
     private Integer tiempoMinutos;
+    private Integer tiempoSegundos;
     private Integer numAbandonos;
 
     public IntentoActividadDTO() {}
 
     public IntentoActividadDTO(Long id, LocalDateTime fechaInicio, LocalDateTime fechaFin,
-            Integer puntuacion, Integer nota, Integer tiempoMinutos, Integer numAbandonos) {
+            Integer puntuacion, Integer nota, Integer tiempoMinutos, Integer tiempoSegundos, Integer numAbandonos) {
         this.id = id;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.puntuacion = puntuacion;
         this.nota = nota;
         this.tiempoMinutos = tiempoMinutos;
+        this.tiempoSegundos = tiempoSegundos;
         this.numAbandonos = numAbandonos;
     }
 
@@ -37,6 +39,8 @@ public class IntentoActividadDTO {
     public void setNota(Integer nota) { this.nota = nota; }
     public Integer getTiempoMinutos() { return tiempoMinutos; }
     public void setTiempoMinutos(Integer tiempoMinutos) { this.tiempoMinutos = tiempoMinutos; }
+    public Integer getTiempoSegundos() { return tiempoSegundos; }
+    public void setTiempoSegundos(Integer tiempoSegundos) { this.tiempoSegundos = tiempoSegundos; }
     public Integer getNumAbandonos() { return numAbandonos; }
     public void setNumAbandonos(Integer numAbandonos) { this.numAbandonos = numAbandonos; }
 }
