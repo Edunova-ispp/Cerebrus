@@ -141,8 +141,8 @@ public class AuthService {
             System.out.println("Correo de verificación enviado exitosamente. ID: " + result.getMessageId());
             
         } catch (Exception e) {
-            System.err.println("Error al enviar correo de verificación: " + e.getMessage());
-            e.printStackTrace();
+           throw new IllegalArgumentException("Error al enviar correo de verificación " + e.getMessage());
+           
         }
     }
 
