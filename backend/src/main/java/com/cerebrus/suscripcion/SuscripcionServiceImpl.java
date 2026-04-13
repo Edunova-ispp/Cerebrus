@@ -269,11 +269,11 @@ public class SuscripcionServiceImpl implements SuscripcionService {
     @Transactional
     public void confirmarPagoExitoso(String transaccionId) {
         Suscripcion suscripcion = suscripcionRepository.findByTransaccionId(transaccionId)
-                .orElseThrow(() -> new IllegalArgumentException("Transacción no encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Transacción no encontrada: " + transaccionId));
 
-        if ((suscripcion.getEstadoPagoSuscripcion() == EstadoPagoSuscripcion.PAGADA)) {
+        if (suscripcion.getEstadoPagoSuscripcion() == EstadoPagoSuscripcion.PAGADA) {
             throw new IllegalArgumentException("Esta suscripción ya ha sido pagada");
-                }
+        }
 
         suscripcion.setEstadoPagoSuscripcion(EstadoPagoSuscripcion.PAGADA);
         suscripcionRepository.save(suscripcion);
