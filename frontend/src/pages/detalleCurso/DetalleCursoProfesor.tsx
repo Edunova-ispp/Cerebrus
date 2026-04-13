@@ -25,8 +25,8 @@ interface Props {
   readonly curso: Curso;
 }
 
-const TABS: { key: "mapa" | "estadisticas" | "editar" | "alumnos"; label: string }[] = [
-  { key: "mapa", label: "Mapa del curso" },
+const TABS: { key: "mapa" | "estadisticas" | "editar"; label: string }[] = [
+  { key: "mapa", label: "Estructura del curso" },
   { key: "estadisticas", label: "Estadísticas" },
   { key: "alumnos", label: "Alumnos" },
   { key: "editar", label: "Editar curso" },

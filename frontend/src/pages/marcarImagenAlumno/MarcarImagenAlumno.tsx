@@ -500,7 +500,7 @@ export default function MarcarImagenAlumno() {
               <div className="mia-bottom-inner">
                 {!submitted && (
                   <button
-                    className="ca-btn-guardar"
+                    className="mia-submit-btn"
                     type="button"
                     disabled={submitting || !actividadAlumnoId || !allAnswered}
                     onClick={handleSubmit}

@@ -1,5 +1,10 @@
 .landing-page {
   font-family: 'Pixelify Sans', sans-serif;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(255, 242, 148, 0.32) 0%, rgba(255, 242, 148, 0) 34%),
+    radial-gradient(circle at 84% 80%, rgba(226, 133, 169, 0.18) 0%, rgba(226, 133, 169, 0) 38%),
+    linear-gradient(160deg, #fffdf6 0%, #fff8fb 52%, #fff9f2 100%);
   padding: 16px 60px 40px;
   box-sizing: border-box;
   position: relative;
@@ -119,6 +124,7 @@
   align-items: center;
   transition: transform 0.2s ease, filter 0.2s ease;
   align-self: stretch;
+  position: relative;
 }
 
 .landing-card-wrapper:hover {
@@ -142,8 +148,8 @@
   justify-content: center;
   align-items: flex-end;
   margin-bottom: -20px;
-  z-index: -1;
   position: relative;
+  z-index: 1;
 }
 
 .landing-card-wrapper:nth-child(2) .landing-card-images {
@@ -158,6 +164,8 @@
 }
 
 .landing-card {
+  position: relative;
+  z-index: 2;
   border-radius: 30px;
   padding: 20px 16px 20px;
   width: 100%;

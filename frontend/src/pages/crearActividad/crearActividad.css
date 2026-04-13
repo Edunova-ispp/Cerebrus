@@ -80,7 +80,28 @@
 .ca-help-row {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 12px;
+}
+
+.ca-btn-cancelar {
+  background: #fff;
+  color: #b42318;
+  border: 1px solid #f04438;
+  border-radius: 8px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.ca-btn-cancelar:hover {
+  background: #fff2f0;
+  color: #912018;
+  border-color: #d92d20;
 }
 
 .ca-contenido > form {
@@ -214,4 +235,41 @@
   align-items: center;
   gap: 16px;
   margin-top: 20px;
+}
+
+.ca-contenido .tbl-footer {
+  align-items: center;
+  gap: 16px;
+}
+
+.ca-contenido .ca-actions-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.ca-contenido .ca-actions-row > .ca-btn-cancelar,
+.ca-contenido .ca-actions-row > .ca-btn-guardar,
+.ca-contenido .ca-actions-row > .cf-btn-submit {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  align-self: center;
+}
+
+.ca-contenido button.ca-btn-cancelar + button.ca-btn-guardar,
+.ca-contenido button.ca-btn-cancelar + button.cf-btn-submit {
+  margin-left: 0;
+}
+
+.ca-contenido .tf-footer-stack {
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.ca-contenido .tf-footer-stack .tf-error {
+  grid-column: 1 / -1;
 }

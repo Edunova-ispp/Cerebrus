@@ -430,13 +430,13 @@ class EstadisticasDTOTest {
         List<TemaEstadisticasAlumnoDTO> temas = new ArrayList<>();
         
         EstadisticasAlumnoResumenDTO dto = new EstadisticasAlumnoResumenDTO(
-            1L, "Juan Pérez", 7.5, 6, 9, 5, 8, 120, 0, temas);
+            1L, "Juan Pérez", 7.5, 6.0, 9.0, 5, 8, 120, 0, temas);
 
         assertThat(dto.getAlumnoId()).isEqualTo(1L);
         assertThat(dto.getNombreAlumno()).isEqualTo("Juan Pérez");
         assertThat(dto.getNotaMedia()).isEqualTo(7.5);
-        assertThat(dto.getNotaMin()).isEqualTo(6);
-        assertThat(dto.getNotaMax()).isEqualTo(9);
+        assertThat(dto.getNotaMin()).isEqualTo(6.0);
+        assertThat(dto.getNotaMax()).isEqualTo(9.0);
         assertThat(dto.getNumActividadesCompletadas()).isEqualTo(5);
         assertThat(dto.getTotalActividades()).isEqualTo(8);
         assertThat(dto.getTiempoTotalMinutos()).isEqualTo(120);
@@ -452,8 +452,8 @@ class EstadisticasDTOTest {
         dto.setAlumnoId(2L);
         dto.setNombreAlumno("María García");
         dto.setNotaMedia(8.0);
-        dto.setNotaMin(7);
-        dto.setNotaMax(10);
+        dto.setNotaMin(7.0);
+        dto.setNotaMax(10.0);
         dto.setNumActividadesCompletadas(6);
         dto.setTotalActividades(10);
         dto.setTiempoTotalMinutos(150);
@@ -462,8 +462,8 @@ class EstadisticasDTOTest {
         assertThat(dto.getAlumnoId()).isEqualTo(2L);
         assertThat(dto.getNombreAlumno()).isEqualTo("María García");
         assertThat(dto.getNotaMedia()).isEqualTo(8.0);
-        assertThat(dto.getNotaMin()).isEqualTo(7);
-        assertThat(dto.getNotaMax()).isEqualTo(10);
+        assertThat(dto.getNotaMin()).isEqualTo(7.0);
+        assertThat(dto.getNotaMax()).isEqualTo(10.0);
         assertThat(dto.getNumActividadesCompletadas()).isEqualTo(6);
         assertThat(dto.getTotalActividades()).isEqualTo(10);
         assertThat(dto.getTiempoTotalMinutos()).isEqualTo(150);

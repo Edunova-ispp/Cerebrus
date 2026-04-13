@@ -27,6 +27,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 class TemasIT extends SeleniumBaseTest {
 
         private static final Duration WAIT = Duration.ofSeconds(10);
+        private static final String BACKEND_URL = System.getProperty("selenium.backendUrl", "http://localhost:8080");
         private static final String MAESTRO_USER = "profe_snape";
         private static final String MAESTRO_PASSWORD = "123456";
         private static final String ALUMNO_USER = "alumno_harry";
@@ -170,7 +171,7 @@ class TemasIT extends SeleniumBaseTest {
 
                 login(ALUMNO_USER, ALUMNO_PASSWORD);
                 openStudentCourseMap(sharedCourse.id());
-                assertStudentSeesThemeInMap(currentThemeTitle);
+                assertStudentSeesThemeInMap(sharedCourse.id(), currentThemeTitle);
         }
 
         @Test
@@ -274,7 +275,7 @@ class TemasIT extends SeleniumBaseTest {
 
                 login(ALUMNO_USER, ALUMNO_PASSWORD);
                 openStudentCourseMap(sharedCourse.id());
-                assertStudentSeesThemeInMap(currentThemeTitle);
+                assertStudentSeesThemeInMap(sharedCourse.id(), currentThemeTitle);
 
                 login(MAESTRO_USER, MAESTRO_PASSWORD);
                 navigateTo("/cursos/" + sharedCourse.id());
@@ -290,7 +291,7 @@ class TemasIT extends SeleniumBaseTest {
 
                 login(ALUMNO_USER, ALUMNO_PASSWORD);
                 openStudentCourseMap(sharedCourse.id());
-                assertStudentDoesNotSeeThemeInMap(currentThemeTitle);
+                assertStudentDoesNotSeeThemeInMap(sharedCourse.id(), currentThemeTitle);
         }
 
         @Test
@@ -372,6 +373,14 @@ class TemasIT extends SeleniumBaseTest {
                 navigateTo("/auth/login");
                 clearClientSession();
 
+                if (loginViaApi(user, password)) {
+                        navigateTo("/miscursos");
+                        WebDriverWait apiWait = new WebDriverWait(driver, WAIT);
+                        apiWait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
+                        assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
+                        return;
+                }
+
                 WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
                 WebElement userInput = pageWait.until(
                                 ExpectedConditions.visibilityOfElementLocated(By.id("identificador"))
@@ -388,6 +397,48 @@ class TemasIT extends SeleniumBaseTest {
                 driver.navigate().refresh();
                 pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h1.mis-cursos-title")));
         }
+
+                private boolean loginViaApi(String user, String password) {
+                                Object raw = ((JavascriptExecutor) driver).executeAsyncScript("""
+                                                const user = arguments[0];
+                                                const password = arguments[1];
+                                                const backendUrl = arguments[2];
+                                                const done = arguments[arguments.length - 1];
+
+                                                const base = String(backendUrl || '');
+                                                const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
+
+                                                fetch(normalizedBase + '/auth/login', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ identificador: user, password })
+                                                })
+                                                        .then(async (response) => {
+                                                                let data = null;
+                                                                try {
+                                                                        data = await response.json();
+                                                                } catch (ignored) {
+                                                                        data = null;
+                                                                }
+
+                                                                if (!response.ok || !data || !data.token) {
+                                                                        done(false);
+                                                                        return;
+                                                                }
+
+                                                                localStorage.setItem('token', data.token);
+                                                                localStorage.setItem('username', data.username || user);
+                                                                const roleValue = Array.isArray(data.roles)
+                                                                        ? data.roles.join(',')
+                                                                        : String(data.roles || '');
+                                                                localStorage.setItem('role', roleValue);
+                                                                done(true);
+                                                        })
+                                                        .catch(() => done(false));
+                                                """, user, password, BACKEND_URL);
+
+                                return Boolean.TRUE.equals(raw);
+                }
 
         private CourseContext createCourseAndOpenDetail(String courseTitle) {
                 navigateTo("/crearCurso");
@@ -543,7 +594,9 @@ class TemasIT extends SeleniumBaseTest {
                 pageWait.until(ExpectedConditions.urlContains("/mapa/" + courseId));
         }
 
-        private void assertStudentSeesThemeInMap(String themeTitle) {
+        private void assertStudentSeesThemeInMap(String courseId, String themeTitle) {
+                assertThemePresenceViaApi(courseId, themeTitle, true);
+
                 WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(20));
                 WebElement themeButton = pageWait.until(
                                 ExpectedConditions.visibilityOfElementLocated(
@@ -553,10 +606,40 @@ class TemasIT extends SeleniumBaseTest {
                 assertThat(themeButton.getText()).isEqualTo(themeTitle);
         }
 
-        private void assertStudentDoesNotSeeThemeInMap(String themeTitle) {
+        private void assertStudentDoesNotSeeThemeInMap(String courseId, String themeTitle) {
+                assertThemePresenceViaApi(courseId, themeTitle, false);
+
                 assertThat(driver.findElements(
                                 By.xpath("//button[contains(@class, 'mapa-tema-btn') and normalize-space() = '" + themeTitle + "']")
                 )).isEmpty();
+        }
+
+        private void assertThemePresenceViaApi(String courseId, String themeTitle, boolean expectedPresent) {
+                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
+                pageWait.until(d -> {
+                        Object raw = ((JavascriptExecutor) d).executeAsyncScript("""
+                                const courseId = arguments[0];
+                                const title = arguments[1];
+                                const backendUrl = arguments[2];
+                                const done = arguments[arguments.length - 1];
+
+                                const base = String(backendUrl || '');
+                                const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
+                                const token = localStorage.getItem('token') || '';
+
+                                fetch(normalizedBase + '/api/temas/curso/' + courseId + '/alumno', {
+                                        headers: token ? { Authorization: 'Bearer ' + token } : {}
+                                })
+                                        .then((response) => response.ok ? response.json() : [])
+                                        .then((data) => {
+                                                const temas = Array.isArray(data) ? data : [];
+                                                done(temas.some((tema) => tema && tema.titulo === title));
+                                        })
+                                        .catch(() => done(false));
+                                """, courseId, themeTitle, BACKEND_URL);
+
+                        return expectedPresent ? Boolean.TRUE.equals(raw) : Boolean.FALSE.equals(raw);
+                });
         }
 
         private void deleteThemeByTitle(String themeTitle) {

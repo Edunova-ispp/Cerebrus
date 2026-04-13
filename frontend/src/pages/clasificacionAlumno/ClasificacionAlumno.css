@@ -5,6 +5,10 @@
     width: 100vw;
     min-height: 100vh;
     box-sizing: border-box;
+    background:
+      radial-gradient(circle at 12% 16%, rgba(255, 242, 148, 0.30) 0%, rgba(255, 242, 148, 0) 34%),
+      radial-gradient(circle at 86% 84%, rgba(226, 133, 169, 0.16) 0%, rgba(226, 133, 169, 0) 36%),
+      linear-gradient(155deg, #fffdf7 0%, #fff9fc 54%, #fffaf4 100%);
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
@@ -85,6 +89,17 @@
     line-height: 1.15;
     text-shadow: 3px 3px 0px #000;
     color: var(--color-accent); 
+  }
+
+  .clf-description {
+    margin: 0 0 14px;
+    text-align: center;
+    color: #2f1e3d;
+    font-size: 1.05rem;
+    line-height: 1.35;
+    white-space: pre-line;
+    text-shadow: none;
+    -webkit-text-stroke: 0;
   }
   
   .clf-container {

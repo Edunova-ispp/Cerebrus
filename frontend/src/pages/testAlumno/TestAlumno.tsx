@@ -499,7 +499,12 @@ export default function TestAlumno() {
         {test && currentPregunta && (
           <>
             {/* ── Header ── */}
-            <ActivityHeader title={test.titulo} guideType="test" guideRole="alumno" />
+            <ActivityHeader
+              title={test.titulo}
+              subtitle={test.descripcion?.trim() || undefined}
+              guideType="test"
+              guideRole="alumno"
+            />
 
             {/* ── Score banner after submit ── */}
             {submitted && score && (
@@ -624,7 +629,7 @@ export default function TestAlumno() {
               ) : (
                 <button
                   type="button"
-                  className="ca-btn-guardar"
+                  className="ta-nav-btn ta-nav-btn--next"
                   onClick={handleNext}
                 >
                   Siguiente →

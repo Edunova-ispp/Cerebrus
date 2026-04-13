@@ -7,6 +7,10 @@
   left: 0;
   width: 100vw;
   min-height: 100vh;
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255, 242, 148, 0.30) 0%, rgba(255, 242, 148, 0) 34%),
+    radial-gradient(circle at 86% 84%, rgba(226, 133, 169, 0.16) 0%, rgba(226, 133, 169, 0) 36%),
+    linear-gradient(155deg, #fffdf7 0%, #fff9fc 54%, #fffaf4 100%);
   color: #000;
   display: flex;
   flex-direction: column;

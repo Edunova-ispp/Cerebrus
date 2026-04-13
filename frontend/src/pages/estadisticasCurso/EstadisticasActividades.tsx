@@ -28,6 +28,11 @@ interface RepeticionesActividadDTO {
   repeticionesMaxima: number | null;
 }
 
+function formatearDecimal2(valor: number | null | undefined): string {
+  if (typeof valor !== 'number' || !Number.isFinite(valor)) return '0.00';
+  return valor.toFixed(2);
+}
+
 interface EstadisticasActividadesProps {
   readonly cursoIdProp?: string;
   readonly embedded?: boolean;
@@ -100,16 +105,16 @@ export default function EstadisticasActividades({ cursoIdProp, embedded, temaIdS
     }
   };
 
-  const notaMediaMostrada = (stats: EstadisticasActividadDTO | undefined) => {
+  const notaMediaMostrada = (stats: EstadisticasActividadDTO | undefined): string => {
     const valor = stats?.notaMediaActividad;
-    if (typeof valor !== 'number' || !Number.isFinite(valor)) return 0;
-    return Math.round(valor * 100) / 100;
+    if (typeof valor !== 'number' || !Number.isFinite(valor)) return '0.00';
+    return valor.toFixed(2);
   };
 
-  const repeticionesMediaMostrada = (reps: RepeticionesActividadDTO | undefined) => {
+  const repeticionesMediaMostrada = (reps: RepeticionesActividadDTO | undefined): string => {
     const valor = reps?.repeticionesMedia;
-    if (typeof valor !== 'number' || !Number.isFinite(valor)) return 0;
-    return Math.round(valor * 100) / 100;
+    if (typeof valor !== 'number' || !Number.isFinite(valor)) return '0.00';
+    return valor.toFixed(2);
   };
 
   const formatearTiempoMinutos = (minutos: number | null | undefined): string => {
@@ -230,8 +235,8 @@ export default function EstadisticasActividades({ cursoIdProp, embedded, temaIdS
                             return (
                               <>
                                 <td className="text-center font-bold">{notaMediaMostrada(stats)}</td>
-                                <td className="text-center font-bold">{stats?.notaMaximaActividad ?? 0}</td>
-                                <td className="text-center font-bold">{stats?.notaMinimaActividad ?? 0}</td>
+                                <td className="text-center font-bold">{formatearDecimal2(stats?.notaMaximaActividad)}</td>
+                                <td className="text-center font-bold">{formatearDecimal2(stats?.notaMinimaActividad)}</td>
                                 <td className="text-center font-bold">{formatearTiempoMinutos(stats?.tiempoMedioActividad)}</td>
                                 <td className="text-center font-bold">{repeticionesMediaMostrada(reps)}</td>
                                 <td className="text-center font-bold">{reps?.repeticionesMinima ?? 0}</td>

@@ -16,6 +16,13 @@ export default function NavbarMisCursos() {
   const isAlumno = roles.some((r) => r.toUpperCase().includes("ALUMNO"));
   const homeRoute = isOrganizacion ? "/suscripcion" : "/misCursos";
 
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+    navigate("/");
+  }, [navigate]);
+
   /* ── Auto-hide on scroll ── */
   const [visible, setVisible] = useState(true);
   const lastY = useRef(0);
@@ -115,6 +122,15 @@ export default function NavbarMisCursos() {
               <button type="button" className="navbar-link" onClick={() => navigate("/perfil")}>
                 <img src={perfilIcon} alt="" className="navbar-icon" />
                 <span>Perfil</span>
+              </button>
+              <button type="button" className="navbar-link navbar-link--logout" onClick={handleLogout}>
+              <svg className="navbar-icon navbar-icon--logout" viewBox="0 0 24 24" aria-hidden="true" focusable="false" style={{ transform: 'scaleX(-1)' }}>
+                <path
+                  fill="currentColor"
+                  d="M14 3H19C19.5523 3 20 3.44772 20 4V20C20 20.5523 19.5523 21 19 21H14V19H18V5H14V3ZM10.2929 7.29289L11.7071 8.70711L9.41421 11H17V13H9.41421L11.7071 15.2929L10.2929 16.7071L6.58579 13L5.17157 12L6.58579 11L10.2929 7.29289Z"
+                />
+              </svg>
+                <span>Cerrar sesión</span>
               </button>
             </div>
           </div>

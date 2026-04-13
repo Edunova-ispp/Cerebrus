@@ -150,7 +150,7 @@ public class CursoController {
     }
 
     @GetMapping("/{id}/NotasMedias")
-    public ResponseEntity<List<Integer>> obtenerNotaMediaPorActividadPorCursoId(@PathVariable Long id) {
+    public ResponseEntity<List<Double>> obtenerNotaMediaPorActividadPorCursoId(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(cursoService.obtenerNotaMediaPorActividadPorCursoId(id));
         } catch (RuntimeException e) {
