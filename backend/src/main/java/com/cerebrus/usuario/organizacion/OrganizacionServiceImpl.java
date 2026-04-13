@@ -506,7 +506,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                     requests.add(request);
                     filas.add(numFila);
                 } else {
-                    errores.add("El archivo CSV excede el límite de 600 filas. Se han procesado las primeras 600 filas.");
+                    errores.add("El archivo CSV excede el límite de 600 filas.");
                     break;
                 }
             }

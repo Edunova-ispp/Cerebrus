@@ -398,6 +398,15 @@
 }
 
 /* ── Confirm text ── */
+.gu-info-text {
+  font-size: 1.1rem;
+  color: #333;
+  text-align: left;
+  line-height: 1.5;
+  margin: 16px 0 0;
+}
+
+/* ── Confirm text ── */
 .gu-confirm-text {
   font-size: 1.1rem;
   color: #333;

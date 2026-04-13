@@ -142,14 +142,24 @@ export default function ImportarUsuarios() {
 
             <div className="gu-field">
               <span className="gu-field-label">FORMATO DEL ARCHIVO</span>
-              <p className="gu-confirm-text">
-                Puedes subir un <strong>.csv</strong> o un <strong>.xlsx</strong> con un máximo de <strong>600</strong> filas.
+              <p className="gu-info-text">
+                Para importar archivos es posible subir un archivo <strong>.csv</strong> o un <strong>.xlsx (Excel)</strong> con un <strong>máximo de 600 filas, asegúrese de que el archivo no excede este número de filas o de lo contrario no se importará ningún usuario</strong>.
+                <br />
                 La primera fila debe ser el encabezado con estas 7 columnas (en este orden):
                 <br />
                 <strong>Nombre, Primer Apellido, Segundo Apellido, Correo Electronico, Nombre de Usuario, Contrasena, Rol</strong>
                 <br />
                 En la columna <strong>Rol</strong> usa únicamente <strong>MAESTRO</strong> o <strong>ALUMNO</strong>.
               </p>
+
+              <div className="gu-modal-actions">
+                <a className="gu-filter-btn gu-create-user-btn" href="/usuarios_plantilla.csv" download>
+                  Descargar plantilla CSV
+                </a>
+                <a className="gu-filter-btn gu-create-user-btn" href="/usuarios_plantilla.xlsx" download>
+                  Descargar plantilla Excel
+                </a>
+              </div>
             </div>
 
             {result.parsedErrors.length > 0 && (
