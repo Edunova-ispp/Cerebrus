@@ -4,11 +4,12 @@
 }
 
 .dia-box {
-  background: #fff5de;
-  border: 2px solid #d9c091;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
   border-radius: 14px;
   padding: 18px;
   font-family: 'Oxygen', sans-serif;
+  box-shadow: var(--t-shadow-sm);
 }
 
 .dia-topbar {
@@ -20,17 +21,24 @@
 
 .dia-back,
 .dia-score-row button {
-  border: 1px solid #634d28;
-  background: #f4e4c0;
-  color: #2f2513;
+  border: 1px solid var(--t-border-dark);
+  background: var(--t-card);
+  color: var(--t-text);
   border-radius: 8px;
   padding: 8px 12px;
   cursor: pointer;
   font-weight: 700;
 }
 
+.dia-back:hover,
+.dia-score-row button:hover {
+  border-color: var(--t-primary);
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+}
+
 .dia-link-curso {
-  color: #523e1b;
+  color: var(--t-primary);
   text-decoration: underline;
   font-weight: 700;
 }
@@ -38,18 +46,18 @@
 .dia-title {
   margin: 14px 0 4px;
   font-size: 1.35rem;
-  color: #2a1f10;
+  color: var(--t-text);
 }
 
 .dia-subtitle {
   margin: 0 0 12px;
-  color: #634d28;
+  color: #64748b;
 }
 
 .dia-actividad-imagen-wrap {
   margin: 10px 0 14px;
   background: #fff;
-  border: 1px solid #e4d6bc;
+  border: 1px solid var(--t-border);
   border-radius: 10px;
   padding: 10px;
 }
@@ -70,7 +78,7 @@
 
 .dia-metric {
   background: #fff;
-  border: 1px solid #e4d6bc;
+  border: 1px solid var(--t-border);
   border-radius: 10px;
   padding: 10px;
   display: flex;
@@ -80,18 +88,18 @@
 
 .dia-metric span {
   font-size: 0.78rem;
-  color: #6d5b3e;
+  color: #64748b;
 }
 
 .dia-metric strong {
   font-size: 1rem;
-  color: #1f170b;
+  color: var(--t-text);
 }
 
 .dia-score-editor {
   margin-top: 16px;
   background: #fff;
-  border: 1px solid #e4d6bc;
+  border: 1px solid var(--t-border);
   border-radius: 10px;
   padding: 12px;
 }
@@ -111,14 +119,20 @@
 
 .dia-score-row input {
   width: 120px;
-  border: 1px solid #c7b28e;
+  border: 1px solid var(--t-border-dark);
   border-radius: 8px;
   padding: 8px;
   font-size: 1rem;
 }
 
+.dia-score-row input:focus {
+  outline: none;
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
 .dia-max {
-  color: #5a4727;
+  color: #64748b;
   font-weight: 700;
 }
 
@@ -133,7 +147,7 @@
 
 .dia-respuesta-card {
   background: #fff;
-  border: 1px solid #e4d6bc;
+  border: 1px solid var(--t-border);
   border-radius: 10px;
   padding: 12px;
   margin-bottom: 10px;
@@ -147,9 +161,9 @@
 }
 
 .dia-pill {
-  background: #efe6d1;
-  color: #4b3a1f;
-  border: 1px solid #c9b58d;
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border: 1px solid #bfdbfe;
   border-radius: 999px;
   font-size: 0.7rem;
   padding: 2px 8px;
@@ -176,13 +190,13 @@
 
 .dia-respuesta-card p {
   margin: 0;
-  color: #352813;
+  color: var(--t-text);
   white-space: pre-wrap;
   word-break: break-word;
 }
 
 .dia-empty {
-  color: #7d6b4d;
+  color: #64748b;
   font-style: italic;
 }
 

@@ -482,6 +482,9 @@ export default function ClasificacionAlumno() {
               </div>
               <ActivityGuideButton activityType="clasificacion" role="alumno" />
             </div>
+            {clasificacion.descripcion?.trim() && (
+              <p className="clf-description">{clasificacion.descripcion}</p>
+            )}
             <div className="ta-battle-bar" style={{ marginBottom: '16px' }}>
               <img src={varitaImg} alt="Varita" className="ta-magic-start" />
               <div className="ta-progress-track">

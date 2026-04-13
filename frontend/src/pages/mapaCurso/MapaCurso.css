@@ -33,6 +33,10 @@
   max-width: 1100px;
   margin: 0 auto;
   padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
 }
 
 .mapa-back-btn {
@@ -54,6 +58,7 @@
   display: flex;
   gap: 24px;
   align-items: flex-start;
+  width: 100%;
 }
 
 /* ── Left sidebar ── */

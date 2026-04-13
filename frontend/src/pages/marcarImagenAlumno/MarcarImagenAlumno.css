@@ -83,6 +83,9 @@
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1.15rem;
   color: #000;
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+  white-space: pre-line;
 }
 
 .mia-image-section {

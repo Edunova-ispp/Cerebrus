@@ -87,6 +87,17 @@
     text-shadow: 3px 3px 0px #000;
     color: var(--color-accent); 
   }
+
+  .clf-description {
+    margin: 0 0 14px;
+    text-align: center;
+    color: #2f1e3d;
+    font-size: 1.05rem;
+    line-height: 1.35;
+    white-space: pre-line;
+    text-shadow: none;
+    -webkit-text-stroke: 0;
+  }
   
   .clf-container {
     display: grid;

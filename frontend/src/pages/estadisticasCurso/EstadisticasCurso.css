@@ -581,7 +581,7 @@
   font-size: 1.15rem;
   font-weight: 700;
   margin: 0;
-  color: #000;
+  color: var(--t-text);
 }
 
 .chart-subtitle {
@@ -589,12 +589,13 @@
   font-size: 1rem;
   font-weight: 600;
   margin: 0;
-  color: #333;
+  color: #334155;
 }
 
 .chart-toggle {
   display: flex;
-  background: #fcfcfc;
+  background: #f8fafc;
+  border: 1px solid var(--t-border);
   border-radius: 8px;
   padding: 3px;
   gap: 2px;
@@ -610,19 +611,20 @@
   border-radius: 6px;
   cursor: pointer;
   background: transparent;
-  color: #555;
+  color: #64748b;
   transition: all 0.2s;
 }
 
 .chart-toggle-btn:hover {
-  color: #000;
+  color: var(--t-primary);
+  background: #f1f5f9;
 }
 
 .chart-toggle-btn--active {
   background: var(--t-primary-light);
   color: var(--t-primary);
   font-weight: 700;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 0 1px #bfdbfe;
 }
 
 /* ===================== CHARTS (SVG) ===================== */
@@ -637,14 +639,27 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: 12px;
+  box-shadow: var(--t-shadow-sm);
+  padding: 14px;
 }
 
 .chart-title {
   margin: 0;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--t-text);
 }
 
 .chart-scroll-container {
   width: 100%;
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+  border: 1px solid var(--t-border);
+  border-radius: 10px;
+  padding: 8px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -655,7 +670,8 @@
   gap: 18px;
   align-items: center;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1rem;
+  font-size: 0.92rem;
+  color: #334155;
 }
 
 .legend-item {
@@ -667,7 +683,7 @@
 .legend-swatch {
   width: 14px;
   height: 14px;
-  border: 1px solid var(--t-border-dark);
+  border: 1px solid #1d4ed8;
   border-radius: 3px;
   box-sizing: border-box;
 }
@@ -676,7 +692,7 @@
   width: 22px;
   height: 0;
   border-top-style: solid;
-  border-top-color: var(--t-text-secondary);
+  border-top-color: #2563eb;
 }
 
 /* ===================== RESPONSIVE ===================== */

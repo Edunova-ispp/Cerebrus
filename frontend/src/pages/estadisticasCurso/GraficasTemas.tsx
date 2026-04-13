@@ -36,6 +36,13 @@ function BarChart({
   barColor: string;
   legendBarLabel: string;
 }) {
+  const axisColor = '#94a3b8';
+  const trendColor = '#2563eb';
+  const averageColor = '#0ea5e9';
+  const barBorderColor = '#1d4ed8';
+  const valueColor = '#1e293b';
+  const labelColor = '#475569';
+
   const height = 300;
   const margin = { top: 22, right: 18, bottom: 78, left: 18 };
   const chartHeight = height - margin.top - margin.bottom;
@@ -83,27 +90,28 @@ function BarChart({
                   width={barWidth}
                   height={barH}
                   fill={barColor}
-                  stroke="#000"
-                  strokeWidth={2}
+                  stroke={barBorderColor}
+                  strokeWidth={1.5}
                   rx={6}
                 />
                 <text
                   x={labelX}
                   y={y - 6}
                   textAnchor="middle"
-                  fontSize="12"
-                  fontFamily="'Pixelify Sans', sans-serif"
-                  fill="#000"
+                  fontSize="11"
+                  fontFamily="'Oxygen', sans-serif"
+                  fill={valueColor}
                 >
                   {valueText}
                 </text>
                 <text
                   x={labelX}
                   y={height - 14}
-                  textAnchor="end"
-                  fontSize="20"
-                  fontFamily="'Pixelify Sans', sans-serif"
-                  fill="#000"
+                  textAnchor="middle"
+                  fontSize="12"
+                  fontWeight="700"
+                  fontFamily="'Oxygen', sans-serif"
+                  fill={labelColor}
                 >
                   {d.label}
                 </text>
@@ -115,7 +123,7 @@ function BarChart({
             <polyline
               points={progresoPoints}
               fill="none"
-              stroke="#000"
+              stroke={trendColor}
               strokeWidth={2}
             />
           )}
@@ -126,8 +134,8 @@ function BarChart({
               y1={yMedia}
               x2={width - margin.right + 6}
               y2={yMedia}
-              stroke="#FF0000"
-              strokeWidth={4}
+              stroke={averageColor}
+              strokeWidth={3}
             />
           )}
 
@@ -136,8 +144,8 @@ function BarChart({
             y1={margin.top + chartHeight}
             x2={width - margin.right + 6}
             y2={margin.top + chartHeight}
-            stroke="#000"
-            strokeWidth={2}
+            stroke={axisColor}
+            strokeWidth={1.5}
           />
         </svg>
       </div>
@@ -148,12 +156,12 @@ function BarChart({
           {legendBarLabel}
         </span>
         <span className="legend-item">
-          <span className="legend-line" style={{ borderTopColor: '#000', borderTopWidth: 2 }} />
-          Línea negra: progreso (tope de cada barra)
+          <span className="legend-line" style={{ borderTopColor: trendColor, borderTopWidth: 2 }} />
+          Línea azul: progreso (tope de cada barra)
         </span>
         <span className="legend-item">
-          <span className="legend-line" style={{ borderTopColor: '#FF0000', borderTopWidth: 4 }} />
-          Línea roja: media
+          <span className="legend-line" style={{ borderTopColor: averageColor, borderTopWidth: 3 }} />
+          Línea celeste: media
         </span>
       </div>
 
@@ -296,7 +304,7 @@ export default function GraficasTemas({ cursoIdProp, embedded }: { cursoIdProp?:
                   <BarChart
                     titulo="Nota media por tema"
                     data={datosNotaMedia}
-                    barColor="#D10057"
+                    barColor="#3b82f6"
                     legendBarLabel="Barras: nota media"
                   />
                 ) : (
@@ -304,7 +312,7 @@ export default function GraficasTemas({ cursoIdProp, embedded }: { cursoIdProp?:
                     titulo="Tiempo medio por tema"
                     data={datosTiempoMedio}
                     unidad="mins"
-                    barColor="#7C4DFF"
+                    barColor="#60a5fa"
                     legendBarLabel="Barras: tiempo medio"
                   />
                 )}
