@@ -1,7 +1,6 @@
 package com.cerebrus.inscripcion;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cerebrus.inscripcion.dto.AlumnoCursoDTO;
-import com.cerebrus.usuario.alumno.Alumno;
 
 
 @RestController
@@ -59,20 +57,7 @@ public class InscripcionController {
     @PreAuthorize("hasAuthority('MAESTRO')")
     public ResponseEntity<List<AlumnoCursoDTO>> listarAlumnosPorCurso(@PathVariable Long cursoId) {
         try {
-            List<Inscripcion> inscripciones = inscripcionService.listarInscripcionesPorCurso(cursoId);
-            List<AlumnoCursoDTO> dtos = inscripciones.stream().map(i -> {
-                Alumno a = i.getAlumno();
-                return new AlumnoCursoDTO(
-                    a.getId(),
-                    a.getNombre(),
-                    a.getPrimerApellido(),
-                    a.getSegundoApellido(),
-                    a.getNombreUsuario(),
-                    a.getCorreoElectronico(),
-                    i.getPuntos(),
-                    i.getFechaInscripcion()
-                );
-            }).collect(Collectors.toList());
+            List<AlumnoCursoDTO> dtos = inscripcionService.listarInscripcionesPorCurso(cursoId);
             return ResponseEntity.ok(dtos);
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
