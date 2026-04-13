@@ -8,6 +8,7 @@ import CrearTema from "../crearTema/CrearTema";
 import EditarTema from "../editarTema/EditarTema";
 import CrearActividad from "../crearActividad/crearActividad";
 import EditarActividad from "../editarActividad/EditarActividad";
+import GestionAlumnos from "../gestionAlumnos/GestionAlumnos";
 import "./DetalleCursoProfesor.css";
 
 type View =
@@ -17,15 +18,17 @@ type View =
   | { tab: "mapa"; action: "crearActividad"; temaId: number }
   | { tab: "mapa"; action: "editarActividad"; temaId: number; actividadId: number }
   | { tab: "estadisticas" }
-  | { tab: "editar" };
+  | { tab: "editar" }
+  | { tab: "alumnos" };
 
 interface Props {
   readonly curso: Curso;
 }
 
-const TABS: { key: "mapa" | "estadisticas" | "editar"; label: string }[] = [
+const TABS: { key: "mapa" | "estadisticas" | "editar" | "alumnos"; label: string }[] = [
   { key: "mapa", label: "Mapa del curso" },
   { key: "estadisticas", label: "Estadísticas" },
+  { key: "alumnos", label: "Alumnos" },
   { key: "editar", label: "Editar curso" },
 ];
 
@@ -38,6 +41,8 @@ export default function DetalleCursoProfesor({ curso }: Props) {
     switch (view.tab) {
       case "estadisticas":
         return <EstadisticasCurso cursoId={String(curso.id)} embedded />;
+      case "alumnos":
+        return <GestionAlumnos cursoId={String(curso.id)} embedded />;
       case "editar":
         return <EditarCurso cursoId={String(curso.id)} embedded />;
       case "mapa": {

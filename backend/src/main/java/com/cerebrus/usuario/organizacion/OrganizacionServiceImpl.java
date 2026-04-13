@@ -1,12 +1,15 @@
 package com.cerebrus.usuario.organizacion;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.Row;
@@ -369,11 +372,40 @@ public class OrganizacionServiceImpl implements OrganizacionService {
 
         if(!errores.isEmpty()) {
             return errores;
-        } else {
-            usuarioRepository.save(nuevoUsuario);
-            return errores;
         }
+
+        // NOTA: la importación masiva es atómica; el guardado se realiza al final
+        // si no hay errores en ninguna fila.
+        return errores;
         
+    }
+
+    private Usuario construirUsuarioImportacionMasiva(CreateUserRequest request, Organizacion organizacion) {
+        String rolUpper = request.getRol().toUpperCase();
+        if ("MAESTRO".equals(rolUpper)) {
+            return new Maestro(
+                request.getNombre(),
+                request.getPrimerApellido(),
+                request.getSegundoApellido(),
+                request.getUsername(),
+                request.getEmail() != null ? request.getEmail() : "",
+                passwordEncoder.encode(request.getPassword()),
+                organizacion
+            );
+        }
+        if ("ALUMNO".equals(rolUpper)) {
+            return new Alumno(
+                request.getNombre(),
+                request.getPrimerApellido(),
+                request.getSegundoApellido(),
+                request.getUsername(),
+                request.getEmail() != null ? request.getEmail() : "",
+                passwordEncoder.encode(request.getPassword()),
+                0,
+                organizacion
+            );
+        }
+        return null;
     }
 
     private Maestro toSafeMaestro(Maestro original) {
@@ -438,7 +470,10 @@ public class OrganizacionServiceImpl implements OrganizacionService {
 
     private List<String> leerArchivoCSV(InputStream inputStream) {
         List<String> errores = new ArrayList<>();
+        List<CreateUserRequest> requests = new ArrayList<>();
+        List<Integer> filas = new ArrayList<>();
         Integer numFila = 0;
+
         try (Scanner scanner = new Scanner(inputStream, "UTF-8")) {
             while(scanner.hasNextLine()) {
                 if(numFila <= 600) {
@@ -458,33 +493,75 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                     } else if(numFila.equals(1)) {
                         continue; // Saltar la fila del encabezado
                     }
-                    String nombre = campos.get(0);
-                    String primerApellido = campos.get(1);
-                    String segundoApellido = campos.get(2);
-                    String correoElectronico = campos.get(3);
-                    String nombreUsuario = campos.get(4);
-                    String contrasena = campos.get(5);
-                    String rol = campos.get(6);
+
                     CreateUserRequest request = new CreateUserRequest();
-                    request.setNombre(nombre);
-                    request.setPrimerApellido(primerApellido);
-                    request.setSegundoApellido(segundoApellido);
-                    request.setEmail(correoElectronico);
-                    request.setUsername(nombreUsuario);
-                    request.setPassword(contrasena);
-                    request.setRol(rol);
-                    errores.addAll(crearUsuarioImportacionMasiva(request, numFila));
+                    request.setNombre(campos.get(0));
+                    request.setPrimerApellido(campos.get(1));
+                    request.setSegundoApellido(campos.get(2));
+                    request.setEmail(campos.get(3));
+                    request.setUsername(campos.get(4));
+                    request.setPassword(campos.get(5));
+                    request.setRol(campos.get(6));
+
+                    requests.add(request);
+                    filas.add(numFila);
                 } else {
-                    errores.add("El archivo CSV excede el límite de 600 filas. Se han procesado las primeras 600 filas.");
+                    errores.add("El archivo CSV excede el límite de 600 filas.");
                     break;
                 }
             }
         }
+
+        // Validación completa antes de guardar (importación atómica)
+        Set<String> usernamesEnArchivo = new HashSet<>();
+        Set<String> emailsEnArchivo = new HashSet<>();
+
+        for (int i = 0; i < requests.size(); i++) {
+            CreateUserRequest request = requests.get(i);
+            Integer fila = filas.get(i);
+
+            String username = request.getUsername() != null ? request.getUsername().trim() : "";
+            if (!username.isEmpty()) {
+                String key = username.toLowerCase();
+                if (usernamesEnArchivo.contains(key)) {
+                    errores.add("El username ' " + username + "' está repetido en el archivo. Error en fila " + fila + " del archivo.");
+                } else {
+                    usernamesEnArchivo.add(key);
+                }
+            }
+
+            String email = request.getEmail() != null ? request.getEmail().trim() : "";
+            if (!email.isEmpty()) {
+                String key = email.toLowerCase();
+                if (emailsEnArchivo.contains(key)) {
+                    errores.add("El email ' " + email + "' está repetido en el archivo. Error en fila " + fila + " del archivo.");
+                } else {
+                    emailsEnArchivo.add(key);
+                }
+            }
+
+            errores.addAll(crearUsuarioImportacionMasiva(request, fila));
+        }
+
+        if(!errores.isEmpty()) {
+            return errores;
+        }
+
+        Usuario usuarioActual = usuarioService.findCurrentUser();
+        Organizacion organizacion = (Organizacion) usuarioActual;
+        List<Usuario> nuevosUsuarios = new ArrayList<>();
+        for (CreateUserRequest request : requests) {
+            Usuario nuevo = construirUsuarioImportacionMasiva(request, organizacion);
+            if (nuevo != null) nuevosUsuarios.add(nuevo);
+        }
+        usuarioRepository.saveAll(nuevosUsuarios);
         return errores;
     }
 
     private List<String> leerArchivoExcel(InputStream inputStream, String nombreArchivo) throws IOException{
         List<String> errores = new ArrayList<>();
+        List<CreateUserRequest> requests = new ArrayList<>();
+        List<Integer> filas = new ArrayList<>();
         Workbook workbook = null;
         try {
             if (nombreArchivo.toLowerCase().endsWith(".xls")) {
@@ -524,25 +601,16 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                             throw new IllegalArgumentException("El archivo Excel no tiene el formato correcto. La primera fila debe contener los encabezados: Nombre, Primer Apellido, Segundo Apellido, Correo Electrónico, Nombre de Usuario, Contraseña, Rol");
                         }
                     } else {
-                        // Procesar filas de datos
-                        String nombre = campos.get(0);
-                        String primerApellido = campos.get(1);
-                        String segundoApellido = campos.get(2);
-                        String correoElectronico = campos.get(3);
-                        String nombreUsuario = campos.get(4);
-                        String contrasena = campos.get(5);
-                        String rol = campos.get(6);
-    
                         CreateUserRequest request = new CreateUserRequest();
-                        request.setNombre(nombre);
-                        request.setPrimerApellido(primerApellido);
-                        request.setSegundoApellido(segundoApellido);
-                        request.setEmail(correoElectronico);
-                        request.setUsername(nombreUsuario);
-                        request.setPassword(contrasena);
-                        request.setRol(rol);
-    
-                        errores.addAll(crearUsuarioImportacionMasiva(request, row.getRowNum() + 1));
+                        request.setNombre(campos.get(0));
+                        request.setPrimerApellido(campos.get(1));
+                        request.setSegundoApellido(campos.get(2));
+                        request.setEmail(campos.get(3));
+                        request.setUsername(campos.get(4));
+                        request.setPassword(campos.get(5));
+                        request.setRol(campos.get(6));
+                        requests.add(request);
+                        filas.add(row.getRowNum() + 1);
                     }
                 } else {
                     errores.add("El archivo Excel excede el límite de 600 filas. Se han procesado las primeras 600 filas.");
@@ -554,6 +622,50 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 workbook.close();  // Cerrar para liberar recursos
             }
         }
+
+        // Validación completa antes de guardar (importación atómica)
+        Set<String> usernamesEnArchivo = new HashSet<>();
+        Set<String> emailsEnArchivo = new HashSet<>();
+
+        for (int i = 0; i < requests.size(); i++) {
+            CreateUserRequest request = requests.get(i);
+            Integer fila = filas.get(i);
+
+            String username = request.getUsername() != null ? request.getUsername().trim() : "";
+            if (!username.isEmpty()) {
+                String key = username.toLowerCase();
+                if (usernamesEnArchivo.contains(key)) {
+                    errores.add("El username ' " + username + "' está repetido en el archivo. Error en fila " + fila + " del archivo.");
+                } else {
+                    usernamesEnArchivo.add(key);
+                }
+            }
+
+            String email = request.getEmail() != null ? request.getEmail().trim() : "";
+            if (!email.isEmpty()) {
+                String key = email.toLowerCase();
+                if (emailsEnArchivo.contains(key)) {
+                    errores.add("El email ' " + email + "' está repetido en el archivo. Error en fila " + fila + " del archivo.");
+                } else {
+                    emailsEnArchivo.add(key);
+                }
+            }
+
+            errores.addAll(crearUsuarioImportacionMasiva(request, fila));
+        }
+
+        if(!errores.isEmpty()) {
+            return errores;
+        }
+
+        Usuario usuarioActual = usuarioService.findCurrentUser();
+        Organizacion organizacion = (Organizacion) usuarioActual;
+        List<Usuario> nuevosUsuarios = new ArrayList<>();
+        for (CreateUserRequest request : requests) {
+            Usuario nuevo = construirUsuarioImportacionMasiva(request, organizacion);
+            if (nuevo != null) nuevosUsuarios.add(nuevo);
+        }
+        usuarioRepository.saveAll(nuevosUsuarios);
         return errores;
     }
 
@@ -562,11 +674,10 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         if (cell == null) {
             return "";
         }
-        return switch (cell.getCellType()) {
-            case STRING -> cell.getStringCellValue();
-            case NUMERIC -> String.valueOf(cell.getNumericCellValue());
-            case BLANK -> "";
-            default -> "";
-        };
+
+        // DataFormatter devuelve el valor formateado tal y como lo vería el usuario en Excel,
+        // evitando casos como contraseñas numéricas convertidas a "123.0".
+        DataFormatter formatter = new DataFormatter();
+        return formatter.formatCellValue(cell);
     }
 }

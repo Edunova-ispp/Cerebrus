@@ -7,16 +7,18 @@ public class IntentoDetalleRespuestaDTO {
     private String enunciado;
     private String respuestaAlumno;
     private Boolean correcta;
+    private Integer numFallos;
 
     public IntentoDetalleRespuestaDTO() {}
 
     public IntentoDetalleRespuestaDTO(Long respuestaId, String tipoRespuesta, String enunciado,
-            String respuestaAlumno, Boolean correcta) {
+            String respuestaAlumno, Boolean correcta, Integer numFallos) {
         this.respuestaId = respuestaId;
         this.tipoRespuesta = tipoRespuesta;
         this.enunciado = enunciado;
         this.respuestaAlumno = respuestaAlumno;
         this.correcta = correcta;
+        this.numFallos = numFallos;
     }
 
     public Long getRespuestaId() {
@@ -57,5 +59,13 @@ public class IntentoDetalleRespuestaDTO {
 
     public void setCorrecta(Boolean correcta) {
         this.correcta = correcta;
+    }
+
+    public Integer getNumFallos() {
+        return numFallos;
+    }
+
+    public void setNumFallos(Integer numFallos) {
+        this.numFallos = numFallos;
     }
 }

@@ -187,7 +187,8 @@
   color: #aaa;
 }
 
-.ca-btn-guardar {
+.ca-page .ca-btn-guardar,
+.ca-embedded .ca-btn-guardar {
   background: var(--t-primary);
   color: #fff;
   border: none;
@@ -200,9 +201,12 @@
   box-shadow: var(--t-shadow);
   transition: background 0.15s, box-shadow 0.15s;
 }
-.ca-btn-guardar:hover { background: var(--t-primary-hover); box-shadow: var(--t-shadow-md); }
-.ca-btn-guardar:active { transform: translateY(1px); box-shadow: var(--t-shadow-sm); }
-.ca-btn-guardar:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: var(--t-shadow); }
+.ca-page .ca-btn-guardar:hover,
+.ca-embedded .ca-btn-guardar:hover { background: var(--t-primary-hover); box-shadow: var(--t-shadow-md); }
+.ca-page .ca-btn-guardar:active,
+.ca-embedded .ca-btn-guardar:active { transform: translateY(1px); box-shadow: var(--t-shadow-sm); }
+.ca-page .ca-btn-guardar:disabled,
+.ca-embedded .ca-btn-guardar:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: var(--t-shadow); }
 
 .ca-form-footer {
   display: flex;

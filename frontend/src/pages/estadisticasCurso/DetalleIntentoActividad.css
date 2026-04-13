@@ -181,6 +181,13 @@
   word-break: break-word;
 }
 
+.dia-respuesta-fallos {
+  margin-top: 8px !important;
+  color: #7a5d1f !important;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .dia-empty {
   color: #7d6b4d;
   font-style: italic;

@@ -10,6 +10,7 @@ interface RespuestaIntento {
   enunciado: string;
   respuestaAlumno: string;
   correcta: boolean | null;
+  numFallos?: number | null;
 }
 
 interface IntentoDetalle {
@@ -24,6 +25,7 @@ interface IntentoDetalle {
   fechaInicio: string;
   fechaFin: string;
   tiempoMinutos: number;
+  tiempoSegundos?: number;
   puntuacion: number;
   nota: number;
   numAbandonos: number;
@@ -43,9 +45,17 @@ function formatFecha(iso?: string | null): string {
   return `${d.toLocaleDateString('es-ES')} ${d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
-function formatTiempo(min?: number | null): string {
-  if (!min || min <= 0) return '—';
-  return `${min} min`;
+function formatTiempo(min?: number | null, segundos?: number | null): string {
+  const totalSegundos =
+    typeof segundos === 'number' && Number.isFinite(segundos)
+      ? segundos
+      : (min ?? 0) * 60;
+  if (totalSegundos <= 0) return '—';
+  if (totalSegundos < 60) return `${totalSegundos} s`;
+  const mins = Math.floor(totalSegundos / 60);
+  const secs = totalSegundos % 60;
+  if (secs === 0) return mins === 1 ? '1 min' : `${mins} min`;
+  return `${mins} min ${secs} s`;
 }
 
 function tipoLegible(tipo: string): string {
@@ -78,6 +88,11 @@ export default function DetalleIntentoActividad() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const totalFallos = useMemo(
+    () => detalle?.respuestas.reduce((acc, respuesta) => acc + Number(respuesta.numFallos ?? 0), 0) ?? 0,
+    [detalle],
+  );
 
   useEffect(() => {
     if (!cursoId || !alumnoId || !actividadId || !intentoId) return;
@@ -182,9 +197,15 @@ export default function DetalleIntentoActividad() {
         <div className="dia-metrics">
           <div className="dia-metric"><span>Fecha inicio</span><strong>{formatFecha(detalle.fechaInicio)}</strong></div>
           <div className="dia-metric"><span>Fecha fin</span><strong>{formatFecha(detalle.fechaFin)}</strong></div>
-          <div className="dia-metric"><span>Tiempo</span><strong>{formatTiempo(detalle.tiempoMinutos)}</strong></div>
+          <div className="dia-metric"><span>Tiempo</span><strong>{formatTiempo(detalle.tiempoMinutos, detalle.tiempoSegundos)}</strong></div>
           <div className="dia-metric"><span>Abandonos</span><strong>{detalle.numAbandonos ?? 0}</strong></div>
           <div className="dia-metric"><span>Nota</span><strong>{detalle.nota ?? 0}/10</strong></div>
+          {detalle.actividadTipo === 'Tablero' && (
+            <div className="dia-metric">
+              <span>Fallos acumulados</span>
+              <strong>{totalFallos}</strong>
+            </div>
+          )}
         </div>
 
         <div className="dia-score-editor">
@@ -224,6 +245,11 @@ export default function DetalleIntentoActividad() {
                 </header>
                 <h3>{r.enunciado || `Respuesta #${idx + 1}`}</h3>
                 <p>{r.respuestaAlumno || 'Sin contenido'}</p>
+                {detalle.actividadTipo === 'Tablero' && typeof r.numFallos === 'number' && (
+                  <p className="dia-respuesta-fallos">
+                    Fallos previos en esta pregunta: {r.numFallos}
+                  </p>
+                )}
               </article>
             ))
           )}

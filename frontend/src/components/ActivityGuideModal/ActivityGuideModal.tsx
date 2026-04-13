@@ -7,9 +7,10 @@ interface Props {
   readonly subtitle?: string;
   readonly content: string;
   readonly onClose: () => void;
+  readonly variant?: 'teacher' | 'student';
 }
 
-export default function ActivityGuideModal({ open, title, subtitle, content, onClose }: Props) {
+export default function ActivityGuideModal({ open, title, subtitle, content, onClose, variant = 'student' }: Props) {
   useEffect(() => {
     if (!open) return;
 
@@ -37,7 +38,7 @@ export default function ActivityGuideModal({ open, title, subtitle, content, onC
         }
       }}
     >
-      <div className="agm-card" onMouseDown={(event) => event.stopPropagation()}>
+      <div className={`agm-card agm-card--${variant}`} onMouseDown={(event) => event.stopPropagation()}>
         <div className="agm-header">
           <div className="agm-title-wrap">
             <h2 className="agm-title">{title}</h2>

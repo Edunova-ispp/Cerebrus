@@ -5,6 +5,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cerebrus.actividad.Actividad;
+import com.cerebrus.comun.enumerados.EstadoActividad;
+import com.cerebrus.respuestaAlumn.RespuestaAlumno;
+import com.cerebrus.usuario.alumno.Alumno;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,11 +23,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-
-import com.cerebrus.actividad.Actividad;
-import com.cerebrus.comun.enumerados.EstadoActividad;
-import com.cerebrus.respuestaAlumn.RespuestaAlumno;
-import com.cerebrus.usuario.alumno.Alumno;
 
 @Entity
 @Table(name = "actividad_alumno")
@@ -144,6 +144,15 @@ public class ActividadAlumno {
         if (fechaFin.isBefore(fechaInicio)) return 0;
         long minutos = ChronoUnit.MINUTES.between(fechaInicio, fechaFin);
         return (int) minutos;
+    }
+
+    public Integer getTiempoSegundos() {
+        LocalDateTime epoch = LocalDateTime.of(1970, 1, 1, 0, 0);
+        if (fechaInicio == null || fechaFin == null) return 0;
+        if (fechaInicio.equals(epoch) || fechaFin.equals(epoch)) return 0;
+        if (fechaFin.isBefore(fechaInicio)) return 0;
+        long segundos = ChronoUnit.SECONDS.between(fechaInicio, fechaFin);
+        return (int) segundos;
     }
 
     public Integer getNumRepeticiones(){

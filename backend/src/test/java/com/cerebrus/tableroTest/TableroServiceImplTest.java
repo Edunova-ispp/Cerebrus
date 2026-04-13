@@ -1,20 +1,27 @@
 package com.cerebrus.tableroTest;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -554,6 +561,34 @@ public class TableroServiceImplTest {
 		assertThat(result).isEqualTo("Respuesta correcta");
 		String result2 = tableroService.crearRespuestaAPreguntaEnActTablero("incorrecta", 1L, 2L);
 		assertThat(result2).isEqualTo("Respuesta incorrecta");
+	}
+
+	@Test
+	void crearRespuestaAPreguntaTablero_penalizaCadaIntentoIncorrecto() {
+		Alumno alumno = mock(Alumno.class);
+		Pregunta pregunta = buildPreguntaWithRespuestaMaestro(2L, "respuesta");
+		Tablero tablero = buildTableroWithAlumno(alumno, pregunta, true, true, true, 100, true);
+		lenient().when(tableroRepository.findById(1L)).thenReturn(Optional.of(tablero));
+		lenient().when(preguntaRepository.findById(2L)).thenReturn(Optional.of(pregunta));
+		lenient().when(usuarioService.findCurrentUser()).thenReturn(alumno);
+		lenient().when(pregunta.getActividad()).thenReturn(tablero);
+
+		ActividadAlumno actividadAlumno = mock(ActividadAlumno.class);
+		lenient().when(actividadAlumno.getId()).thenReturn(11L);
+		List<RespuestaAlumno> respuestasAlumno = new ArrayList<>();
+		lenient().when(actividadAlumno.getRespuestasAlumno()).thenReturn(respuestasAlumno);
+		lenient().when(actividadAlumnoService.crearActAlumno(anyInt(), any(), any(), anyInt(), anyInt(), anyLong(), anyLong())).thenReturn(actividadAlumno);
+
+		String result1 = tableroService.crearRespuestaAPreguntaEnActTablero("fallo1", 1L, 2L);
+		String result2 = tableroService.crearRespuestaAPreguntaEnActTablero("fallo2", 1L, 2L);
+		String result3 = tableroService.crearRespuestaAPreguntaEnActTablero("respuesta", 1L, 2L);
+
+		assertThat(result1).contains("Respuesta incorrecta");
+		assertThat(result2).contains("Respuesta incorrecta");
+		assertThat(result3).contains("Respuesta correcta");
+		assertThat(respuestasAlumno).hasSize(1);
+		verify(actividadAlumno).setNota(8);
+		verify(actividadAlumno).setPuntuacion(80);
 	}
 
     	// Helper to build a Tablero with all required mocks for alumno scenario
