@@ -14,6 +14,7 @@ interface Props {
   readonly score?: number;
   readonly maxScore?: number;
   readonly grade?: number;
+  readonly detail?: string;
   readonly config: ActivityResultConfig;
   readonly onContinue: () => void;
   readonly onRetry?: () => void;
@@ -27,6 +28,7 @@ export default function ActivityResultScreen({
   score = 0,
   maxScore = 100,
   grade,
+  detail,
   config,
   onContinue,
   onRetry,
@@ -59,6 +61,7 @@ export default function ActivityResultScreen({
               <span className="ars-score-max">/ {maxScore}</span>
             </div>
             <div className="ars-score-grade">Nota: {notaSobre10.toFixed(1)} / 10</div>
+            {detail && <div className="ars-score-detail">{detail}</div>}
           </div>
         )}
 

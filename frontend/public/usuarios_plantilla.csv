@@ -1,0 +1,4 @@
+Nombre,Primer Apellido,Segundo Apellido,Correo Electronico,Nombre de Usuario,Contrasena,Rol
+Carlos,Fernández,García,carlos.fernandez@example.com,carlosfdez,123456,MAESTRO
+Ana,García,López,ana.garcia@example.com,anagarcia,123456,ALUMNO
+Juan,Pérez,Martínez,juan.perez@example.com,juanperez,123456,ALUMNO
