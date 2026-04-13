@@ -49,6 +49,12 @@ function validarTitular(titular: string): string | null {
 // ── Componente ────────────────────────────────────────────────────────────────
 
 export default function SimuladorPago() {
+  const tarjetasPrueba = [
+    '4242 4242 4242 4242',
+    '5555 5555 5555 4444',
+    '4000 0000 0000 0002',
+  ];
+
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -73,6 +79,11 @@ export default function SimuladorPago() {
     const formatted = raw.match(/.{1,4}/g)?.join(' ') ?? raw;
     setNumeroTarjeta(formatted);
     setErrores(prev => ({ ...prev, numeroTarjeta: validarTarjeta(formatted) }));
+  };
+
+  const aplicarTarjetaPrueba = (tarjeta: string) => {
+    setNumeroTarjeta(tarjeta);
+    setErrores(prev => ({ ...prev, numeroTarjeta: validarTarjeta(tarjeta) }));
   };
 
   const handleCaducidad = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -233,6 +244,23 @@ export default function SimuladorPago() {
 
         {/* Formulario */}
         <div className="sim-form">
+
+          <div className="sim-test-cards">
+            <p className="sim-test-cards__title">Tarjetas de prueba</p>
+            <p className="sim-test-cards__subtitle">Entorno de pruebas: usa una de estas tarjetas válidas.</p>
+            <div className="sim-test-cards__list">
+              {tarjetasPrueba.map((tarjeta) => (
+                <button
+                  key={tarjeta}
+                  type="button"
+                  className="sim-test-cards__item"
+                  onClick={() => aplicarTarjetaPrueba(tarjeta)}
+                >
+                  {tarjeta}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="sim-form__field">
             <label className="sim-form__label">Número de tarjeta</label>

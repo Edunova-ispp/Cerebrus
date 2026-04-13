@@ -323,6 +323,51 @@
   gap: 14px;
 }
 
+.sim-test-cards {
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius);
+  padding: 12px;
+}
+
+.sim-test-cards__title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--t-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sim-test-cards__subtitle {
+  margin: 6px 0 10px;
+  font-size: 0.8rem;
+  color: var(--t-text-secondary);
+}
+
+.sim-test-cards__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sim-test-cards__item {
+  border: 1px solid var(--t-border);
+  background: var(--t-card);
+  color: var(--t-text);
+  border-radius: var(--t-radius);
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-family: monospace;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.sim-test-cards__item:hover {
+  border-color: var(--t-primary);
+  background: var(--t-primary-light);
+}
+
 .sim-form__field {
   display: flex;
   flex-direction: column;
