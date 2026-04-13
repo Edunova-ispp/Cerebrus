@@ -89,11 +89,6 @@ public class AuthController {
                         .body(new MessageResponse("CUENTA_ORG_NO_SUSCRIPCION"));
                 }
 
-            } else if (roles.contains("ORGANIZACION")) {
-                if (suscripcionRepository.findByOrganizacionIdSuscripcionExpirada(userDetails.getId()).isPresent()) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(new MessageResponse("ORG_SUSCRIPCION_EXPIRADA"));
-                } 
             }
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
