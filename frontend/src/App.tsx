@@ -43,6 +43,7 @@ import ResumenSuscripcion from "./pages/suscripcion/ResumenSuscripcion.tsx";
 import GestionUsuarios from "./pages/gestionUsuarios/GestionUsuarios.tsx";
 import CreacionUsuario from "./pages/gestionUsuarios/CreacionUsuario.tsx";
 import ImportarUsuarios from "./pages/gestionUsuarios/ImportarUsuarios.tsx";
+import Pago from "./pages/pago/SimuladorPago.tsx";
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
 class WatchbugErrorBoundary extends Component<
   { children: React.ReactNode },
@@ -215,6 +216,9 @@ function App() {
         } />
         <Route path="/gestion-usuarios/importar-usuarios" element={
           <ProtectedRoute allowedRoles={['ORGANIZACION']}><ImportarUsuarios /></ProtectedRoute>
+        } />
+        <Route path="/simulador-pago" element={
+          <ProtectedRoute allowedRoles={['ORGANIZACION', 'DUENO']}><Pago /></ProtectedRoute>
         } />
 
       </Routes>

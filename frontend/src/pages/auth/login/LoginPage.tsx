@@ -87,11 +87,6 @@ const Login = () => {
           setError('⚠️ La cuenta pertenece a una organización sin suscripción activa.');
           
           document.querySelector('.pixel-divider')?.scrollIntoView({ behavior: 'smooth' });
-        }
-        else if (response.status === 403 && data.message === "ORG_NO_SUSCRIPCION") {
-          setError('⚠️ La organización no tiene una suscripción pagada.');
-
-          document.querySelector('.pixel-divider')?.scrollIntoView({ behavior: 'smooth' });
         } else if (response.status === 403 && data.message === "ORG_SUSCRIPCION_EXPIRADA") {
           setError('⚠️ La organización tiene una suscripción expirada.');
 
