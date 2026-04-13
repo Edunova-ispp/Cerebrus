@@ -1,17 +1,25 @@
 package com.cerebrus.inscripcion;
 
+import java.util.Comparator;
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cerebrus.actividad.Actividad;
+import com.cerebrus.actividad.ActividadRepository;
+import com.cerebrus.actividadAlumn.ActividadAlumno;
+import com.cerebrus.comun.enumerados.EstadoActividad;
 import com.cerebrus.curso.Curso;
 import com.cerebrus.curso.CursoRepository;
+import com.cerebrus.inscripcion.dto.AlumnoCursoDTO;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.maestro.Maestro;
 
 @Service
 @Transactional
@@ -20,12 +28,14 @@ public class InscripcionServiceImpl implements InscripcionService {
     private final InscripcionRepository inscripcionRepository;
     private final UsuarioService usuarioService;
     private final CursoRepository cursoRepository;
+    private final ActividadRepository actividadRepository;
 
     @Autowired
-    public InscripcionServiceImpl(InscripcionRepository inscripcionRepository, UsuarioService usuarioService, CursoRepository cursoRepository) {
+    public InscripcionServiceImpl(InscripcionRepository inscripcionRepository, UsuarioService usuarioService, CursoRepository cursoRepository, ActividadRepository actividadRepository) {
         this.inscripcionRepository = inscripcionRepository;
         this.usuarioService = usuarioService;
         this.cursoRepository = cursoRepository;
+        this.actividadRepository = actividadRepository;
     }
 
     @Override
@@ -54,5 +64,80 @@ public class InscripcionServiceImpl implements InscripcionService {
         } else {
             throw new AccessDeniedException("Solo un alumno puede inscribirse en un curso");
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AlumnoCursoDTO> listarInscripcionesPorCurso(Long cursoId) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede ver los alumnos de un curso");
+        }
+        Curso curso = cursoRepository.findByID(cursoId);
+        if (curso == null) {
+            throw new RuntimeException("404 Not Found");
+        }
+        if (!curso.getMaestro().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No tienes permisos sobre este curso");
+        }
+
+        return inscripcionRepository.findByCursoIdWithAlumno(cursoId).stream()
+                .map(inscripcion -> {
+                    Alumno alumno = inscripcion.getAlumno();
+                    Integer puntos = calcularPuntosCursoAlumno(curso, alumno.getId());
+                    return new AlumnoCursoDTO(
+                            alumno.getId(),
+                            alumno.getNombre(),
+                            alumno.getPrimerApellido(),
+                            alumno.getSegundoApellido(),
+                            alumno.getNombreUsuario(),
+                            alumno.getCorreoElectronico(),
+                            puntos,
+                            inscripcion.getFechaInscripcion());
+                })
+                .toList();
+    }
+
+    @Override
+    public void expulsarAlumno(Long cursoId, Long alumnoId) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Maestro)) {
+            throw new AccessDeniedException("Solo un maestro puede expulsar alumnos");
+        }
+        Curso curso = cursoRepository.findByID(cursoId);
+        if (curso == null) {
+            throw new RuntimeException("404 Not Found");
+        }
+        if (!curso.getMaestro().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No tienes permisos sobre este curso");
+        }
+        Inscripcion inscripcion = inscripcionRepository.findByAlumnoIdAndCursoId(alumnoId, cursoId);
+        if (inscripcion == null) {
+            throw new RuntimeException("404 Not Found");
+        }
+        inscripcionRepository.delete(inscripcion);
+    }
+
+    private Integer calcularPuntosCursoAlumno(Curso curso, Long alumnoId) {
+        int totalPuntos = 0;
+
+        for (var tema : curso.getTemas()) {
+            List<Actividad> actividades = actividadRepository.findByTemaId(tema.getId());
+
+            for (Actividad actividad : actividades) {
+                Integer puntosActividad = actividad.getActividadesAlumno().stream()
+                        .filter(aa -> aa.getAlumno() != null
+                                && aa.getAlumno().getId() != null
+                                && aa.getAlumno().getId().equals(alumnoId)
+                                && aa.getEstadoActividad() == EstadoActividad.TERMINADA)
+                        .max(Comparator.comparing(ActividadAlumno::getId))
+                        .map(ActividadAlumno::getPuntuacion)
+                        .orElse(0);
+
+                totalPuntos += puntosActividad;
+            }
+        }
+
+        return totalPuntos;
     }
 }

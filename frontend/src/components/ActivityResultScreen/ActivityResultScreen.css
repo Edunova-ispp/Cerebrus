@@ -12,49 +12,48 @@
 }
 
 .ars-popup {
-  background: #fffdf5;
-  border-radius: 16px;
-  padding: 40px 30px;
-  max-width: 450px;
+  background: #FFF8E1;
+  border-radius: 18px;
+  padding: 32px 28px 28px;
+  max-width: 460px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
   overflow-x: hidden;
-  box-shadow: none;
   border: 4px solid #000;
+  box-shadow: 6px 6px 0 #000;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  font-family: 'Pixelify Sans', 'Oxygen', sans-serif;
+  font-family: 'Pixelify Sans', sans-serif;
 }
 
 .ars-title {
-  font-size: 26px;
+  font-size: 1.6rem;
   font-weight: 700;
-  color: #222;
-  margin: 0 0 20px 0;
+  color: #0F1338;
+  margin: 0 0 16px 0;
   line-height: 1.3;
-  text-shadow: none;
   letter-spacing: 0.5px;
 }
 
 .ars-score-section {
   background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 25px;
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
   width: 100%;
   border: 3px solid #000;
+  box-shadow: 3px 3px 0 #000;
 }
 
 .ars-score-label {
-  margin: 0 0 10px 0;
-  font-size: 1rem;
-  color: #444;
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  color: #555;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  text-shadow: none;
+  letter-spacing: 1px;
 }
 
 .ars-score-display {
@@ -62,27 +61,24 @@
   align-items: baseline;
   justify-content: center;
   gap: 5px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .ars-score-value {
-  font-size: 2.2rem;
+  font-size: 2.8rem;
   font-weight: 700;
-  color: #000;
-  text-shadow: none;
+  color: #0F1338;
 }
 
 .ars-score-max {
-  font-size: 1.25rem;
-  color: #444;
-  text-shadow: none;
+  font-size: 1.2rem;
+  color: #666;
 }
 
 .ars-score-grade {
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1f7a3e;
-  text-shadow: none;
 }
 
 .ars-score-detail {
@@ -96,43 +92,29 @@
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: 20px;
-  margin-bottom: 30px;
-  height: 180px;
+  gap: 16px;
+  margin-bottom: 24px;
+  height: 140px;
 }
 
 .ars-caballero {
-  max-width: 120px;
+  max-width: 110px;
   height: auto;
-  animation: bounce-in 0.6s ease-out;
+  image-rendering: pixelated;
+  animation: ars-bounce 0.5s ease-out;
 }
 
 .ars-monstruo {
-  max-width: 120px;
+  max-width: 100px;
   height: auto;
-  animation: bounce-in-delayed 0.6s ease-out;
+  image-rendering: pixelated;
+  animation: ars-bounce 0.5s 0.15s ease-out both;
 }
 
-@keyframes bounce-in {
-  0% {
-    opacity: 0;
-    transform: translateY(20px) scale(0.8);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes bounce-in-delayed {
-  0% {
-    opacity: 0;
-    transform: translateY(20px) scale(0.8);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+@keyframes ars-bounce {
+  0%   { opacity: 0; transform: translateY(20px) scale(0.8); }
+  60%  { transform: translateY(-6px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .ars-actions {
@@ -146,77 +128,79 @@
 .ars-btn {
   padding: 12px 20px;
   border: 3px solid #000;
-  border-radius: 14px;
-  font-family: 'Pixelify Sans', 'Oxygen', sans-serif;
+  border-radius: 12px;
+  font-family: 'Pixelify Sans', sans-serif;
   font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.08s ease;
   text-align: center;
   white-space: normal;
   overflow-wrap: anywhere;
-  box-shadow: none;
+  box-shadow: 3px 3px 0 #000;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.ars-btn:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.ars-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 #000;
 }
 
 .ars-btn-primary {
-  background: #ffcf4d;
+  background: var(--color-accent, #FFF294);
   color: #000;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .ars-btn-primary:hover {
-  background: #ffd96b;
-}
-
-.ars-btn-primary:active,
-.ars-btn-secondary:active {
-  transform: translateY(1px);
+  background: #ffe94d;
 }
 
 .ars-btn-secondary {
-  background: #ffffff;
-  color: #1f2a38;
+  background: #fff;
+  color: #0F1338;
 }
 
 .ars-btn-secondary:hover {
-  background: #f8f8f8;
+  background: #f5f5f0;
 }
 
 .ars-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  box-shadow: none;
+  transform: none;
+  box-shadow: 3px 3px 0 #000;
 }
 
 @media (max-width: 600px) {
   .ars-popup {
-    padding: 30px 20px;
+    padding: 24px 18px;
     max-width: 95%;
   }
 
   .ars-title {
-    font-size: 20px;
+    font-size: 1.3rem;
   }
 
   .ars-imgs {
-    height: 140px;
+    height: 110px;
     gap: 10px;
   }
 
   .ars-caballero,
   .ars-monstruo {
-    max-width: 100px;
-  }
-
-  .ars-score-display {
-    gap: 3px;
+    max-width: 80px;
   }
 
   .ars-score-value {
-    font-size: 28px;
+    font-size: 2rem;
   }
 
   .ars-score-max {
-    font-size: 14px;
+    font-size: 1rem;
   }
 }
