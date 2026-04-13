@@ -239,13 +239,21 @@ export default function GestionUsuarios() {
           {successMsg && <div className="gu-toast gu-toast--ok">{successMsg}</div>}
           {error && <div className="gu-toast gu-toast--err">{error}</div>}
 
-          {/* Create user */}
-          <button
-            className="gu-filter-btn gu-create-user-btn"
-            onClick={() => navigate('/gestion-usuarios/crear-usuario')}
-          >
-            Crear usuario
-          </button>
+          {/* Create and import users */}
+          <div>
+            <button
+              className="gu-filter-btn gu-create-user-btn"
+              onClick={() => navigate('/gestion-usuarios/crear-usuario')}
+            >
+              Crear usuario
+            </button>
+            <button
+              className="gu-filter-btn gu-create-user-btn"
+              onClick={() => navigate('/gestion-usuarios/importar-usuarios')}
+            >
+              Importar usuarios
+            </button>
+          </div>
 
           {/* Toolbar */}
           <div className="gu-toolbar">
