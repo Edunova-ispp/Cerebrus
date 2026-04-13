@@ -18,6 +18,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 class AlumnoActividadesIT extends SeleniumBaseTest {
 
     private static final Duration WAIT = Duration.ofSeconds(15);
+    private static final String BACKEND_URL = System.getProperty("selenium.backendUrl", "http://localhost:8080");
     private static final String ALUMNO_USUARIO = "alumno_harry";
     private static final String ALUMNO_ARTES_USUARIO = "alumno_ron";
     private static final String ALUMNO_PASSWORD = "123456";
@@ -356,6 +357,14 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
     private void loginAsAlumno(String usuario) {
         navigateTo("/auth/login");
 
+        if (loginAsAlumnoViaApi(usuario)) {
+            navigateTo("/miscursos");
+            WebDriverWait wait = new WebDriverWait(driver, WAIT);
+            wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
+            assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
+            return;
+        }
+
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
         WebElement usuarioInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
         usuarioInput.clear();
@@ -369,6 +378,48 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
 
         wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
         assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
+    }
+
+    private boolean loginAsAlumnoViaApi(String usuario) {
+        Object raw = ((org.openqa.selenium.JavascriptExecutor) driver).executeAsyncScript("""
+            const usuario = arguments[0];
+            const password = arguments[1];
+            const backendUrl = arguments[2];
+            const done = arguments[arguments.length - 1];
+
+            const base = String(backendUrl || '');
+            const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
+
+            fetch(normalizedBase + '/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ identificador: usuario, password })
+            })
+                .then(async (response) => {
+                    let data = null;
+                    try {
+                        data = await response.json();
+                    } catch (ignored) {
+                        data = null;
+                    }
+
+                    if (!response.ok || !data || !data.token) {
+                        done(false);
+                        return;
+                    }
+
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('username', data.username || usuario);
+                    const roleValue = Array.isArray(data.roles)
+                        ? data.roles.join(',')
+                        : String(data.roles || '');
+                    localStorage.setItem('role', roleValue);
+                    done(true);
+                })
+                .catch(() => done(false));
+            """, usuario, ALUMNO_PASSWORD, BACKEND_URL);
+
+        return Boolean.TRUE.equals(raw);
     }
 
     private void clickContinueIfPresent(WebDriverWait wait) {

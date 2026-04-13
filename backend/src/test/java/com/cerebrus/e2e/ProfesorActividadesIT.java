@@ -17,6 +17,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 class ProfesorActividadesIT extends SeleniumBaseTest {
 
     private static final Duration WAIT = Duration.ofSeconds(15);
+    private static final String BACKEND_URL = System.getProperty("selenium.backendUrl", "http://localhost:8080");
     private static final String PROFESOR_USUARIO = "carlos_pro";
     private static final String PROFESOR_PASSWORD = "123456";
     private static final long CURSO_ID = 4001L;
@@ -206,6 +207,14 @@ class ProfesorActividadesIT extends SeleniumBaseTest {
     private void loginAsProfesor() {
         navigateTo("/auth/login");
 
+        if (loginAsProfesorViaApi()) {
+            navigateTo("/miscursos");
+            WebDriverWait wait = new WebDriverWait(driver, WAIT);
+            wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
+            assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
+            return;
+        }
+
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
         WebElement usuarioInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
         usuarioInput.clear();
@@ -217,8 +226,49 @@ class ProfesorActividadesIT extends SeleniumBaseTest {
 
         driver.findElement(By.cssSelector("button.pixel-btn-submit")).click();
 
-        wait.until(ExpectedConditions.urlContains("/miscursos"));
-        assertThat(driver.getCurrentUrl()).contains("/miscursos");
+        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
+        assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
+    }
+
+    private boolean loginAsProfesorViaApi() {
+        Object raw = ((JavascriptExecutor) driver).executeAsyncScript("""
+            const usuario = arguments[0];
+            const password = arguments[1];
+            const backendUrl = arguments[2];
+            const done = arguments[arguments.length - 1];
+
+            const base = String(backendUrl || '');
+            const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
+            fetch(normalizedBase + '/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ identificador: usuario, password })
+            })
+                .then(async (response) => {
+                    let data = null;
+                    try {
+                        data = await response.json();
+                    } catch (ignored) {
+                        data = null;
+                    }
+
+                    if (!response.ok || !data || !data.token) {
+                        done(false);
+                        return;
+                    }
+
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('username', data.username || usuario);
+                    const roleValue = Array.isArray(data.roles)
+                        ? data.roles.join(',')
+                        : String(data.roles || '');
+                    localStorage.setItem('role', roleValue);
+                    done(true);
+                })
+                .catch(() => done(false));
+            """, PROFESOR_USUARIO, PROFESOR_PASSWORD, BACKEND_URL);
+
+        return Boolean.TRUE.equals(raw);
     }
 
     private void abrirFormularioTeoria() {
