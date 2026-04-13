@@ -85,6 +85,13 @@
   text-shadow: none;
 }
 
+.ars-score-detail {
+  margin-top: 8px;
+  font-size: 0.95rem;
+  color: #4f4330;
+  line-height: 1.35;
+}
+
 .ars-imgs {
   display: flex;
   justify-content: center;
