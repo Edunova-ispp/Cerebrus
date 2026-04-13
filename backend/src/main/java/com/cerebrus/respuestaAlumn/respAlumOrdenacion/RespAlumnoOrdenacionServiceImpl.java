@@ -1,6 +1,7 @@
 package com.cerebrus.respuestaAlumn.respAlumOrdenacion;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import com.cerebrus.actividad.ordenacion.OrdenacionRepository;
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
 import com.cerebrus.respuestaAlumn.respAlumOrdenacion.dto.RespAlumnoOrdenacionCreateResponse;
+import com.cerebrus.respuestaAlumn.respAlumOrdenacion.dto.RespAlumnoOrdenacionDetalleDTO;
 import com.cerebrus.respuestaAlumn.respAlumOrdenacion.dto.RespAlumnoOrdenacionDTO;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
@@ -56,7 +58,7 @@ public class RespAlumnoOrdenacionServiceImpl implements RespAlumnoOrdenacionServ
 
         List<String> valoresCorrectos = ordenacion.getValores();
         Boolean correcta = valoresAlum.equals(valoresCorrectos);
-        Integer numFallosAntes = actividadAlumno.getNumFallos();
+        int numFallosAntes = actividadAlumno.getNumFallos() == null ? 0 : actividadAlumno.getNumFallos();
         String comentario = null;
         if (ordenacion.getRespVisible()) {
             comentario = ordenacion.getComentariosRespVisible();
@@ -76,7 +78,7 @@ public class RespAlumnoOrdenacionServiceImpl implements RespAlumnoOrdenacionServ
             actividadAlumno.setFechaFin(LocalDateTime.now());
             actividadAlumno.setPuntuacion(ordenacion.getPuntuacion());
 
-            int notaCalculada = 10 - (numFallosAntes == null ? 0 : numFallosAntes.intValue());
+            int notaCalculada = 10 - numFallosAntes;
             if (notaCalculada < 1) {
                 notaCalculada = 1;
             }
@@ -94,6 +96,38 @@ public class RespAlumnoOrdenacionServiceImpl implements RespAlumnoOrdenacionServ
     public RespAlumnoOrdenacion encontrarRespuestaAlumnoOrdenacionPorId(Long id) {
         RespAlumnoOrdenacion respAlumnoOrdenacion = respAlumnoOrdenacionRepository.findById(id).orElseThrow(() -> new RuntimeException("La respuesta del alumno a la actividad de ordenación no existe"));
         return respAlumnoOrdenacion;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RespAlumnoOrdenacionDetalleDTO encontrarUltimaRespuestaPorActividadAlumno(Long actividadAlumnoId) {
+        Usuario current = usuarioService.findCurrentUser();
+        if (!(current instanceof Alumno)) {
+            throw new AccessDeniedException("Solo un alumno puede consultar sus respuestas de ordenación");
+        }
+
+        ActividadAlumno actividadAlumno = actividadAlumnoRepository.findById(actividadAlumnoId)
+            .orElseThrow(() -> new RuntimeException("La actividad del alumno no existe"));
+
+        if (actividadAlumno.getAlumno() == null || actividadAlumno.getAlumno().getId() == null
+            || !actividadAlumno.getAlumno().getId().equals(current.getId())) {
+            throw new AccessDeniedException("No puedes consultar respuestas de una ActividadAlumno que no es tuya");
+        }
+
+        RespAlumnoOrdenacion resp = respAlumnoOrdenacionRepository
+            .findTopByActividadAlumnoIdOrderByIdDesc(actividadAlumnoId)
+            .orElseThrow(() -> new RuntimeException("No existen respuestas de ordenación para este intento"));
+
+        List<String> valoresAlum = new ArrayList<>(resp.getValoresAlum());
+        List<String> valoresCorrectos = resp.getOrdenacion() != null
+            ? new ArrayList<>(resp.getOrdenacion().getValores())
+            : List.of();
+
+        return new RespAlumnoOrdenacionDetalleDTO(
+            resp.getId(),
+            resp.getCorrecta(),
+            valoresAlum,
+            valoresCorrectos);
     }
 
     @Override

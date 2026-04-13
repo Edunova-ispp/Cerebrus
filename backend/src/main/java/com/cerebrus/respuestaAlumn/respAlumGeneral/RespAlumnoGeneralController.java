@@ -2,6 +2,7 @@ package com.cerebrus.respuestaAlumn.respAlumGeneral;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiertaRequest;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.EvaluacionActividadAbiertaResponse;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralCreateResponse;
+import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralResumenDTO;
 import com.cerebrus.respuestaAlumn.respAlumGeneral.dto.RespAlumnoGeneralRequest;
 
 import jakarta.validation.Valid;
@@ -53,6 +55,13 @@ public class RespAlumnoGeneralController {
     public ResponseEntity<RespAlumnoGeneral> encontrarRespuestaAlumnoGeneralPorId(@PathVariable Long id) {
         RespAlumnoGeneral respAlumnoGeneral = respAlumnoGeneralService.encontrarRespuestaAlumnoGeneralPorId(id);
         return new ResponseEntity<>(respAlumnoGeneral, HttpStatus.OK);
+    }
+
+    @GetMapping("/actividad-alumno/{actividadAlumnoId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<List<RespAlumnoGeneralResumenDTO>> listarRespuestasPorActividadAlumno(@PathVariable Long actividadAlumnoId) {
+        List<RespAlumnoGeneralResumenDTO> respuestas = respAlumnoGeneralService.listarRespuestasPorActividadAlumno(actividadAlumnoId);
+        return new ResponseEntity<>(respuestas, HttpStatus.OK);
     }
 
     // ESTOS MÉTODOS QUEDAN DEFINIDOS POR SI ES NECESARIO UTILIZARLOS, PERO PARA LA FEATURE 35 NO SON NECESARIOS

@@ -54,20 +54,21 @@
 
 .of-input {
   width: 100%;
-  background: var(--color-accent);
-  border: 2px solid #000;
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
   border-radius: 8px;
   padding: 8px 10px;
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
-  color: #000;
-  transition: background 0.15s;
+  color: var(--t-text);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .of-input:hover,
 .of-input:focus {
   outline: none;
-  background: var( --color-accent-light);
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .of-input-sm {
@@ -77,21 +78,22 @@
 
 .of-textarea {
   width: 100%;
-  background: var(--color-accent);
-  border: 2px solid #000;
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
   border-radius: 8px;
   padding: 8px 10px;
   font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
-  color: #000;
+  color: var(--t-text);
   resize: vertical;
-  transition: background 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .of-textarea:hover,
 .of-textarea:focus {
   outline: none;
-  background: var( --color-accent-light);
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 /* ── Row helpers ───────────────────────────────────────────── */
@@ -121,24 +123,26 @@
 }
 
 .of-kind-btn {
-  background: var(--color-accent);
-  color: #000;
-  border: 2px solid #000;
+  background: var(--t-primary-light);
+  color: var(--t-text);
+  border: 1px solid var(--t-border);
   border-radius: 8px;
   padding: 6px 16px;
   font-family: 'Oxygen', sans-serif;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s;
 }
 
 .of-kind-btn:hover:not(:disabled) {
-  background: var( --color-accent-light);
+  background: var(--t-input-focus);
+  border-color: var(--t-primary);
 }
 
 .of-kind-btn:disabled {
-  background: #000;
-  color: var(--color-accent);
+  background: var(--t-primary);
+  color: #fff;
+  border-color: var(--t-primary);
   cursor: default;
 }
 
@@ -171,13 +175,13 @@
 /* ── Add button ────────────────────────────────────────────── */
 
 .of-btn-add {
-  background: var(--color-accent);
-  color: #000;
-  border: 2px solid #000;
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border: 1px solid var(--t-primary);
   border-radius: 8px;
   padding: 8px 20px;
   font-family: 'Oxygen', sans-serif;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
   transition: background 0.15s;
@@ -185,7 +189,7 @@
 }
 
 .of-btn-add:hover {
-  background: var( --color-accent-light);
+  background: var(--t-input-focus);
 }
 
 /* ── Error / success ───────────────────────────────────────── */

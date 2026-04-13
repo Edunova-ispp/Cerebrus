@@ -74,7 +74,7 @@ const Login = () => {
         if (rolUsuario.includes("ALUMNO") || rolUsuario.includes("MAESTRO")) {
           navigate('/miscursos');
         } else if (rolUsuario.includes("ORGANIZACION") || rolUsuario.includes("DUENO")) {
-          navigate('/infoDueños');
+          navigate('/suscripcion');
         } else {
           navigate('/');
         }
@@ -139,6 +139,7 @@ const Login = () => {
               >
                 {showPassword ? '🙈' : '👁️'}
               </button>
+              
             </div>
           </div>
 

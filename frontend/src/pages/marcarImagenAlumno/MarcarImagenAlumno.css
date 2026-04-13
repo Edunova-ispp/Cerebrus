@@ -27,7 +27,7 @@
 
 .mia-top {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 16px;
   margin-bottom: 10px;

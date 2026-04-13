@@ -44,6 +44,9 @@ public class ActividadAlumno {
     @Column(nullable = false)
     private Integer numAbandonos = 0;
 
+    @Column(nullable = false)
+    private Boolean solucionUsada = false;
+
     @Column (nullable = false)
     @Min(0)
     @Max(10)
@@ -117,6 +120,14 @@ public class ActividadAlumno {
         this.numAbandonos = numAbandonos;
     }
 
+    public Boolean getSolucionUsada() {
+        return solucionUsada;
+    }
+
+    public void setSolucionUsada(Boolean solucionUsada) {
+        this.solucionUsada = solucionUsada;
+    }
+
     public Integer getNota(){
         return nota;
     }
@@ -154,9 +165,6 @@ public class ActividadAlumno {
         // Actividad terminada si tiene fechaFin válida (no epoch) — cubre Teoría y cualquier
         // actividad que selle fechaFin al completarse sin generar respuestasAlumno
         if (fechaFin != null && !fechaFin.equals(epoch) && fechaFin.getYear() > 1970) {
-            return EstadoActividad.TERMINADA;
-        }
-        if (getNumRepeticiones() > 0 && respuestasAlumno.get(respuestasAlumno.size()-1).getCorrecta().equals(Boolean.TRUE)) {
             return EstadoActividad.TERMINADA;
         }
         if (fechaInicio != null && !fechaInicio.equals(epoch)) {
@@ -199,6 +207,7 @@ public class ActividadAlumno {
                 ", fecha_fin=" + fechaFin +
                 ", nota=" + nota +
                 ", num_abandonos=" + numAbandonos +
+                ", solucion_usada=" + solucionUsada +
                 ", num_repeticiones=" + getNumRepeticiones() +
                 ", num_fallos=" + getNumFallos() +
                 ", estado=" + getEstadoActividad() +

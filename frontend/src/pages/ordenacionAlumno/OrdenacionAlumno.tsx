@@ -6,6 +6,8 @@ import { getCurrentUserInfo } from '../../types/curso';
 import kingImg from '../../assets/props/king.png';
 import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
+import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
+import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
 import './OrdenacionAlumno.css';
 
 type OrdenacionDTO = {
@@ -19,6 +21,10 @@ type OrdenacionDTO = {
   readonly posicion: number;
   readonly temaId: number | null;
   readonly valores: string[];
+  readonly permitirReintento?: boolean;
+  readonly mostrarPuntuacion?: boolean;
+  readonly encontrarRespuestaMaestro?: boolean;
+  readonly encontrarRespuestaAlumno?: boolean;
 };
 
 type RespAlumnoOrdenacionCreateResponse = {
@@ -31,12 +37,26 @@ type RespAlumnoOrdenacionCreateResponse = {
 
 type ActividadAlumnoDTO = {
   readonly id: number;
-  readonly puntuacion?: number;
+  readonly puntuacion?: number | null;
   readonly nota?: number;
-  readonly fechaInicio?: string;
-  readonly fechaFin?: string;
+  readonly fechaInicio?: string | null;
+  readonly fechaFin?: string | null;
   readonly numAbandonos?: number;
 };
+
+type RespAlumnoOrdenacionDetalleDTO = {
+  readonly id: number;
+  readonly correcta: boolean;
+  readonly valoresAlum: string[];
+  readonly valoresCorrectos: string[];
+};
+
+function isCompletedAttempt(fechaFin?: string | null): boolean {
+  if (!fechaFin) return false;
+  const parsed = new Date(fechaFin);
+  if (Number.isNaN(parsed.getTime())) return false;
+  return parsed.getFullYear() !== 1970;
+}
 
 function getCurrentUserIdFromJwt(): number | null {
   const info = getCurrentUserInfo();
@@ -75,6 +95,10 @@ function moveItem<T>(items: readonly T[], fromIndex: number, toIndex: number): T
   return next;
 }
 
+function normalizeForComparison(value?: string): string {
+  return (value ?? '').trim();
+}
+
 export default function OrdenacionAlumno() {
   const { ordenacionId } = useParams<{ ordenacionId: string }>();
   const navigate = useNavigate();
@@ -87,11 +111,17 @@ export default function OrdenacionAlumno() {
   const [ordenacion, setOrdenacion] = useState<OrdenacionDTO | null>(null);
   const [items, setItems] = useState<string[]>([]);
   const [actividadAlumnoId, setActividadAlumnoId] = useState<number | null>(null);
+  const [lastAttemptScore, setLastAttemptScore] = useState<number | null>(null);
+  const [lastAttemptGrade, setLastAttemptGrade] = useState<number | null>(null);
+  const [activityConfig, setActivityConfig] = useState<ActivityResultConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
   const [feedback, setFeedback] = useState<{ correcta: boolean; comentario?: string } | null>(null);
-  const [incorrectos, setIncorrectos] = useState(0);
+  const [showAnswerModal, setShowAnswerModal] = useState(false);
+  const [answerModalMode, setAnswerModalMode] = useState<'student' | 'correct'>('student');
+  const [submittedOrder, setSubmittedOrder] = useState<string[] | null>(null);
+  const [correctOrder, setCorrectOrder] = useState<string[] | null>(null);
   const incorrectosRef = useRef(0);
   const pendingRespuestaIdRef = useRef<number | null>(null);
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
@@ -137,23 +167,46 @@ export default function OrdenacionAlumno() {
         const ordData = (await ordRes.json()) as OrdenacionDTO;
         setOrdenacion(ordData);
         setItems(Array.isArray(ordData.valores) ? [...ordData.valores] : []);
+        
+        // Load activity configuration
+        setActivityConfig({
+          showScore: ordData.mostrarPuntuacion ?? true,
+          allowRetry: ordData.permitirReintento ?? false,
+          showCorrectAnswer: ordData.encontrarRespuestaMaestro ?? true,
+          showStudentAnswer: ordData.encontrarRespuestaAlumno ?? true,
+        });
 
         const alumnoId = getCurrentUserIdFromJwt();
         if (!alumnoId) throw new TypeError('No se pudo identificar al alumno conectado. Inicia sesión de nuevo.');
 
-        const ensureRes = await apiFetch(`${apiBase}/api/actividades-alumno/ensure/${ordData.id}`);
-        const ensureValue = (await ensureRes.json()) as unknown;
-        const exists = ensureValue === 1 || ensureValue === '1' || ensureValue === true;
-
-        if (exists) {
+        let hasExisting = false;
+        try {
           const getAA = await apiFetch(`${apiBase}/api/actividades-alumno/alumno/${alumnoId}/actividad/${ordData.id}`);
           const aaData = (await getAA.json()) as ActividadAlumnoDTO;
           if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+            hasExisting = true;
             setActividadAlumnoId(aaData.id);
-          } else {
-            throw new TypeError('Respuesta inválida al obtener ActividadAlumno');
+            if (isCompletedAttempt(aaData.fechaFin)) {
+              completedRef.current = true;
+              setFeedback({ correcta: true });
+              setLastAttemptScore(aaData.puntuacion ?? 0);
+              setLastAttemptGrade(aaData.nota ?? null);
+              try {
+                const ultimaRes = await apiFetch(`${apiBase}/api/respuestas-alumno-ordenacion/actividad-alumno/${aaData.id}/ultima`);
+                const ultimaData = (await ultimaRes.json()) as RespAlumnoOrdenacionDetalleDTO;
+                setSubmittedOrder(Array.isArray(ultimaData.valoresAlum) ? [...ultimaData.valoresAlum] : null);
+                setCorrectOrder(Array.isArray(ultimaData.valoresCorrectos) ? [...ultimaData.valoresCorrectos] : null);
+              } catch {
+                setSubmittedOrder(null);
+                setCorrectOrder(null);
+              }
+            }
           }
-        } else {
+        } catch {
+          hasExisting = false;
+        }
+
+        if (!hasExisting) {
           const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
             method: 'POST',
             body: JSON.stringify({ alumnoId, actividadId: ordData.id }),
@@ -203,13 +256,36 @@ export default function OrdenacionAlumno() {
       if (!res.ok) throw new TypeError('Error al guardar la respuesta');
 
       const data = (await res.json()) as RespAlumnoOrdenacionCreateResponse;
+      setSubmittedOrder([...items]);
       const respuestaId = data?.respAlumnoOrdenacion?.id;
       const correcta = Boolean(data?.respAlumnoOrdenacion?.correcta);
       const comentario = typeof data?.comentario === 'string' ? data.comentario : '';
 
+      try {
+        const ultimaRes = await apiFetch(`${apiBase}/api/respuestas-alumno-ordenacion/actividad-alumno/${actividadAlumnoId}/ultima`);
+        const ultimaData = (await ultimaRes.json()) as RespAlumnoOrdenacionDetalleDTO;
+        setSubmittedOrder(Array.isArray(ultimaData.valoresAlum) ? [...ultimaData.valoresAlum] : [...items]);
+        setCorrectOrder(Array.isArray(ultimaData.valoresCorrectos) ? [...ultimaData.valoresCorrectos] : null);
+      } catch {
+        setCorrectOrder(null);
+      }
+
       if (correcta) {
-        // Guardamos el id para usarlo en handleContinuar
         if (respuestaId) pendingRespuestaIdRef.current = respuestaId;
+
+        if (respuestaId) {
+          const aaRes = await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
+            method: 'PUT',
+            body: JSON.stringify([respuestaId]),
+          });
+          const aaData = (await aaRes.json()) as ActividadAlumnoDTO;
+          setLastAttemptScore(aaData.puntuacion ?? 0);
+          setLastAttemptGrade(aaData.nota ?? null);
+        } else {
+          setLastAttemptScore(0);
+          setLastAttemptGrade(0);
+        }
+
         completedRef.current = true;
         setFeedback({ correcta: true, comentario: undefined });
         return;
@@ -218,7 +294,6 @@ export default function OrdenacionAlumno() {
       // Respuesta incorrecta: contar intento fallido
       const nuevosIncorrectos = incorrectosRef.current + 1;
       incorrectosRef.current = nuevosIncorrectos;
-      setIncorrectos(nuevosIncorrectos);
       setFeedback({
         correcta,
         comentario: ordenacion.respVisible ? comentario : undefined,
@@ -232,42 +307,90 @@ export default function OrdenacionAlumno() {
   };
 
   const handleContinuar = async () => {
-    const rid = pendingRespuestaIdRef.current;
-    console.log('[OrdenacionAlumno] handleContinuar — actividadAlumnoId:', actividadAlumnoId, 'pendingRespuestaId:', rid, 'incorrectos:', incorrectosRef.current);
-    if (actividadAlumnoId && rid !== null) {
-      try {
-        // Registrar la actividad como completada y obtener puntuación del backend
-        const aaRes = await apiFetch(`${apiBase}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
-          method: 'PUT',
-          body: JSON.stringify([rid]),
-        });
-        const aaData = (await aaRes.json()) as ActividadAlumnoDTO;
-        console.log('[OrdenacionAlumno] corregir-automaticamente response:', aaData);
-
-        // Aplicar penalización por intentos incorrectos (20% por cada fallo, mínimo 10%)
-        const inc = incorrectosRef.current;
-        if (inc > 0) {
-          const factor = Math.max(1 - inc * 0.2, 0.1);
-          const updateBody = {
-            puntuacion: Math.max(Math.round((aaData.puntuacion ?? 0) * factor), 0),
-            nota: Math.max(Math.round((aaData.nota ?? 0) * factor), 0),
-            fechaInicio: aaData.fechaInicio ?? null,
-            fechaFin: aaData.fechaFin ?? null,
-            numAbandonos: aaData.numAbandonos ?? 0,
-          };
-          console.log(`[OrdenacionAlumno] aplicando penalización (${inc} fallos, factor=${factor.toFixed(2)}):`, updateBody);
-          await apiFetch(`${apiBase}/api/actividades-alumno/update/${actividadAlumnoId}`, {
-            method: 'PUT',
-            body: JSON.stringify(updateBody),
-          });
-        }
-      } catch (e) {
-        console.error('[OrdenacionAlumno] error registrando completión:', e);
-      }
-    } else {
-      console.warn('[OrdenacionAlumno] no se puede registrar — actividadAlumnoId:', actividadAlumnoId, 'rid:', rid);
-    }
     navigate(-1);
+  };
+
+  const handleRetry = async () => {
+    if (!ordenacion) return;
+
+    try {
+      const alumnoId = getCurrentUserIdFromJwt();
+      if (!alumnoId) {
+        throw new TypeError('No se pudo identificar al alumno.');
+      }
+
+      const createAA = await apiFetch(`${apiBase}/api/actividades-alumno`, {
+        method: 'POST',
+        body: JSON.stringify({ alumnoId, actividadId: ordenacion.id }),
+      });
+      const aaData = (await createAA.json()) as ActividadAlumnoDTO;
+      if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+        setActividadAlumnoId(aaData.id);
+        actividadAlumnoIdRef.current = aaData.id;
+      }
+
+      completedRef.current = false;
+      abandonReportedRef.current = false;
+      setItems([...ordenacion.valores]);
+      setFeedback(null);
+      setSubmittedOrder(null);
+      setCorrectOrder(null);
+      setLastAttemptScore(null);
+      setLastAttemptGrade(null);
+      setShowAnswerModal(false);
+      setAnswerModalMode('student');
+      setError('');
+      incorrectosRef.current = 0;
+      pendingRespuestaIdRef.current = null;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No se pudo crear un nuevo intento');
+    }
+  };
+
+  const handleViewStudentAnswers = () => {
+    const loadAndOpen = async () => {
+      if (!actividadAlumnoId) {
+        setError('No se ha podido cargar la respuesta de este intento.');
+        return;
+      }
+
+      try {
+        const ultimaRes = await apiFetch(`${apiBase}/api/respuestas-alumno-ordenacion/actividad-alumno/${actividadAlumnoId}/ultima`);
+        const ultimaData = (await ultimaRes.json()) as RespAlumnoOrdenacionDetalleDTO;
+        setSubmittedOrder(Array.isArray(ultimaData.valoresAlum) ? [...ultimaData.valoresAlum] : null);
+        setCorrectOrder(Array.isArray(ultimaData.valoresCorrectos) ? [...ultimaData.valoresCorrectos] : null);
+      } catch {
+        // Si no hay detalle disponible, mostramos lo que ya tenemos sin forzar comparaciones falsas.
+      }
+
+      setAnswerModalMode('student');
+      setShowAnswerModal(true);
+    };
+
+    void loadAndOpen();
+  };
+
+  const handleViewCorrectAnswers = () => {
+    const loadAndOpen = async () => {
+      if (!actividadAlumnoId) {
+        setError('No se ha podido cargar la respuesta correcta de este intento.');
+        return;
+      }
+
+      try {
+        const ultimaRes = await apiFetch(`${apiBase}/api/respuestas-alumno-ordenacion/actividad-alumno/${actividadAlumnoId}/ultima`);
+        const ultimaData = (await ultimaRes.json()) as RespAlumnoOrdenacionDetalleDTO;
+        setSubmittedOrder(Array.isArray(ultimaData.valoresAlum) ? [...ultimaData.valoresAlum] : null);
+        setCorrectOrder(Array.isArray(ultimaData.valoresCorrectos) ? [...ultimaData.valoresCorrectos] : null);
+      } catch {
+        // Si falla la consulta, evitamos usar el orden mezclado cargado para jugar.
+      }
+
+      setAnswerModalMode('correct');
+      setShowAnswerModal(true);
+    };
+
+    void loadAndOpen();
   };
 
   if (loading) {
@@ -295,7 +418,12 @@ export default function OrdenacionAlumno() {
         {ordenacion && (
           
           <>
-            <ActivityHeader title={ordenacion.titulo} subtitle={ordenacion.descripcion ?? undefined} />
+            <ActivityHeader
+              title={ordenacion.titulo}
+              subtitle={ordenacion.descripcion ?? undefined}
+              guideType="ordenacion"
+              guideRole="alumno"
+            />
 
             {/* Layout: rey izquierda, items derecha */}
 <div className="ord-content-row">
@@ -332,7 +460,7 @@ export default function OrdenacionAlumno() {
             <button
               className="ord-arrow-btn"
               type="button"
-              disabled={index === 0}
+              disabled={index === 0 || Boolean(feedback?.correcta)}
               onClick={() => setItems((prev) => moveItem(prev, index, index - 1))}
             >
               ↑
@@ -340,7 +468,7 @@ export default function OrdenacionAlumno() {
             <button
               className="ord-arrow-btn"
               type="button"
-              disabled={index === items.length - 1}
+              disabled={index === items.length - 1 || Boolean(feedback?.correcta)}
               onClick={() => setItems((prev) => moveItem(prev, index, index + 1))}
             >
               ↓
@@ -377,7 +505,56 @@ export default function OrdenacionAlumno() {
 
         {!ordenacion && !error && <p className="ca-text">No se encontró la ordenación.</p>}
 
-        {feedback?.correcta && <CompletionPopup title="¡ORDENACIÓN COMPLETADA!" onContinue={handleContinuar} />}
+        {feedback?.correcta && activityConfig ? (
+          <ActivityResultScreen
+            title="¡ORDENACIÓN COMPLETADA!"
+            score={lastAttemptScore ?? (ordenacion?.puntuacion || 0)}
+            maxScore={ordenacion?.puntuacion || 100}
+            grade={lastAttemptGrade ?? undefined}
+            config={activityConfig}
+            onContinue={handleContinuar}
+            onRetry={handleRetry}
+            onViewStudentAnswer={handleViewStudentAnswers}
+            onViewCorrectAnswer={handleViewCorrectAnswers}
+            onCancel={() => navigate(-1)}
+          />
+        ) : feedback?.correcta ? (
+          <CompletionPopup title="¡ORDENACIÓN COMPLETADA!" onContinue={handleContinuar} />
+        ) : null}
+
+        {showAnswerModal && (
+          <AnswerViewModal
+            title={answerModalMode === 'student' ? 'Mi respuesta' : 'Respuesta correcta'}
+            answers={ordenacion ? (() => {
+              const studentValues = submittedOrder ?? items;
+              const correctValues = correctOrder ?? [];
+
+              if (answerModalMode === 'student') {
+                return studentValues.map((studentValue, idx) => {
+                  const hasReference = idx < correctValues.length;
+                  const studentNorm = normalizeForComparison(studentValue);
+                  const correctNorm = normalizeForComparison(correctValues[idx]);
+
+                  return {
+                    question: `Posición ${idx + 1}`,
+                    studentAnswer: studentValue,
+                    correctAnswer: hasReference ? (correctValues[idx] ?? '') : '(Sin referencia)',
+                    isCorrect: hasReference ? studentNorm === correctNorm : undefined,
+                  };
+                });
+              }
+
+              return correctValues.map((correctValue, idx) => ({
+                question: `Posición ${idx + 1}`,
+                studentAnswer: studentValues[idx] ?? '(No respondida)',
+                correctAnswer: correctValue,
+                isCorrect: normalizeForComparison(studentValues[idx]) === normalizeForComparison(correctValue),
+              }));
+            })() : []}
+            onClose={() => setShowAnswerModal(false)}
+            mode={answerModalMode}
+          />
+        )}
       </main>
     </div>
   );

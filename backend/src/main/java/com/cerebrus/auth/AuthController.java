@@ -96,13 +96,13 @@ public class AuthController {
             return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles));
             
         } catch (DisabledException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new MessageResponse("CUENTA_NO_VERIFICADA"));
 
-    } catch (BadCredentialsException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new MessageResponse("Credenciales incorrectas"));
-    }
+        }
     }
 
     @PostMapping("/logout")

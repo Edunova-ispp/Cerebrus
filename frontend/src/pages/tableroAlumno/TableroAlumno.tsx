@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import hombreMisteriosoImg from '../../assets/props/hombreMisterioso.png';
 import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
+import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
+import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { getCurrentUserInfo } from '../../types/curso';
 import { apiFetch } from '../../utils/api';
@@ -23,7 +25,25 @@ type TableroAlumnoDTO = {
   titulo: string;
   tamano: boolean; // true = 3×3, false = 4×4
   respVisible: boolean;
+  puntuacion?: number;
+  permitirReintento?: boolean;
+  mostrarPuntuacion?: boolean;
+  encontrarRespuestaMaestro?: boolean;
+  encontrarRespuestaAlumno?: boolean;
   preguntas: PreguntaDTO[];
+};
+
+type ActividadAlumnoDTO = {
+  id: number;
+  puntuacion?: number | null;
+  fechaFin?: string | null;
+};
+
+type RespAlumnoGeneralResumenDTO = {
+  readonly preguntaId: number | null;
+  readonly respuesta: string;
+  readonly correcta?: boolean | null;
+  readonly respuestaCorrecta?: string | null;
 };
 
 // ── Helpers ───────────────────────────────────────────────
@@ -46,6 +66,13 @@ function getCurrentUserIdFromJwt(): number | null {
     (info as Record<string, unknown>)?.sub;
   const userId = typeof raw === 'string' ? Number(raw) : raw;
   return typeof userId === 'number' && Number.isFinite(userId) ? userId : null;
+}
+
+function isCompletedAttempt(fechaFin?: string | null): boolean {
+  if (!fechaFin) return false;
+  const parsed = new Date(fechaFin);
+  if (Number.isNaN(parsed.getTime())) return false;
+  return parsed.getFullYear() !== 1970;
 }
 
 function cellToQIndex(r: number, c: number, size: number): number | null {
@@ -212,6 +239,8 @@ export default function TableroAlumno() {
 
   const [tablero, setTablero] = useState<TableroAlumnoDTO | null>(null);
   const [actividadAlumnoId, setActividadAlumnoId] = useState<number | null>(null);
+  const [lastAttemptScore, setLastAttemptScore] = useState<number | null>(null);
+  const [activityConfig, setActivityConfig] = useState<ActivityResultConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -223,6 +252,30 @@ export default function TableroAlumno() {
   const [feedback, setFeedback] = useState<{ correct: boolean; msg: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [puntosAlumno, setPuntosAlumno] = useState(0);
+  const [attemptCompleted, setAttemptCompleted] = useState(false);
+  const [showAnswerModal, setShowAnswerModal] = useState(false);
+  const [answerModalMode, setAnswerModalMode] = useState<'student' | 'correct'>('student');
+  const [answerHistory, setAnswerHistory] = useState<Map<number, string>>(new Map());
+  const [submittedAnswersByQuestion, setSubmittedAnswersByQuestion] = useState<Map<number, string>>(new Map());
+  const [correctAnswersByQuestion, setCorrectAnswersByQuestion] = useState<Map<number, string>>(new Map());
+
+  const hydrateAnswersFromHistory = useCallback(async (actividadAlumnoIdValue: number) => {
+    const histRes = await apiFetch(`${API_BASE}/api/respuestas-alumno-general/actividad-alumno/${actividadAlumnoIdValue}`);
+    const histData = (await histRes.json()) as RespAlumnoGeneralResumenDTO[];
+    const studentMap = new Map<number, string>();
+    const correctMap = new Map<number, string>();
+
+    for (const item of histData) {
+      if (typeof item.preguntaId !== 'number') continue;
+      studentMap.set(item.preguntaId, item.respuesta);
+      if (item.respuestaCorrecta && !correctMap.has(item.preguntaId)) {
+        correctMap.set(item.preguntaId, item.respuestaCorrecta);
+      }
+    }
+
+    setSubmittedAnswersByQuestion(studentMap);
+    setCorrectAnswersByQuestion(correctMap);
+  }, []);
 
   // Sincronizar el ID para el cleanup del abandono
   useEffect(() => {
@@ -248,8 +301,14 @@ export default function TableroAlumno() {
 
       try {
         const res = await apiFetch(`${API_BASE}/api/tableros/${tableroId}`);
-        const data = await res.json();
+        const data = (await res.json()) as TableroAlumnoDTO;
         setTablero(data);
+        setActivityConfig({
+          showScore: data.mostrarPuntuacion ?? true,
+          allowRetry: data.permitirReintento ?? false,
+          showCorrectAnswer: data.encontrarRespuestaMaestro ?? true,
+          showStudentAnswer: data.encontrarRespuestaAlumno ?? true,
+        });
 
         // Registro de la actividad del alumno (¡Empieza el tiempo!)
         const alumnoId = getCurrentUserIdFromJwt();
@@ -269,19 +328,35 @@ export default function TableroAlumno() {
                 }
               }
         if (alumnoId) {
-          const ensureRes = await apiFetch(`${API_BASE}/api/actividades-alumno/ensure/${data.id}`);
-          const exists = (await ensureRes.json()) == 1;
-
-          if (exists) {
+          let hasExisting = false;
+          try {
             const getAA = await apiFetch(`${API_BASE}/api/actividades-alumno/alumno/${alumnoId}/actividad/${data.id}`);
-            const aaData = await getAA.json();
-            setActividadAlumnoId(aaData.id);
-          } else {
+            const aaData = (await getAA.json()) as ActividadAlumnoDTO;
+            if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+              hasExisting = true;
+              setActividadAlumnoId(aaData.id);
+              if (isCompletedAttempt(aaData.fechaFin)) {
+                completedRef.current = true;
+                setAttemptCompleted(true);
+                setLastAttemptScore(aaData.puntuacion ?? 0);
+                try {
+                  await hydrateAnswersFromHistory(aaData.id);
+                } catch {
+                  setSubmittedAnswersByQuestion(new Map());
+                  setCorrectAnswersByQuestion(new Map());
+                }
+              }
+            }
+          } catch {
+            hasExisting = false;
+          }
+
+          if (!hasExisting) {
             const createAA = await apiFetch(`${API_BASE}/api/actividades-alumno`, {
               method: 'POST',
               body: JSON.stringify({ alumnoId, actividadId: data.id }),
             });
-            const aaData = await createAA.json();
+            const aaData = (await createAA.json()) as ActividadAlumnoDTO;
             setActividadAlumnoId(aaData.id);
           }
         }
@@ -306,6 +381,7 @@ export default function TableroAlumno() {
   const size = tablero?.tamano ? 3 : 4;
   const completionTarget = tablero?.tamano ? 8 : 15;
   const isComplete = answeredSet.size >= completionTarget;
+  const showCompleted = attemptCompleted || isComplete;
 
   // Registrar el final de la actividad (¡Termina el tiempo!)
   useEffect(() => {
@@ -314,9 +390,23 @@ export default function TableroAlumno() {
       apiFetch(`${API_BASE}/api/actividades-alumno/corregir-automaticamente/${actividadAlumnoId}`, {
         method: 'PUT',
         body: JSON.stringify([]) // Tablero no usa Ids aquí, pero llama al endpoint para sellar la fechaFin
-      }).catch(() => {});
+      })
+        .then(async (r) => {
+          const maybeAA = (await r.json()) as ActividadAlumnoDTO;
+          if (typeof maybeAA?.puntuacion === 'number') {
+            setLastAttemptScore(maybeAA.puntuacion);
+          }
+          if (typeof maybeAA?.id === 'number') {
+            try {
+              await hydrateAnswersFromHistory(maybeAA.id);
+            } catch {
+              // Si falla, el modal seguirá mostrando el historial local del alumno.
+            }
+          }
+        })
+        .catch(() => {});
     }
-  }, [isComplete, actividadAlumnoId]);
+  }, [isComplete, actividadAlumnoId, hydrateAnswersFromHistory]);
 
 
   if (loading) return <StatusMessage />;
@@ -325,7 +415,7 @@ export default function TableroAlumno() {
   // ── Handlers ──────────────────────────────────────────
 
   const handleCellClick = (r: number, c: number) => {
-    if (isComplete) return;
+    if (showCompleted) return;
     const qIdx = cellToQIndex(r, c, size);
     if (qIdx === null) return;
     if (!isNeighbor(cerberoPos[0], cerberoPos[1], r, c)) return;
@@ -354,6 +444,11 @@ export default function TableroAlumno() {
       const msg = await res.text();
       const correct = msg.toLowerCase().includes('correcta') && !msg.toLowerCase().includes('incorrecta');
       setFeedback({ correct, msg });
+      setAnswerHistory((prev) => {
+        const next = new Map(prev);
+        next.set(q.id, inputAnswer.trim());
+        return next;
+      });
       if (correct) {
         setAnsweredSet((prev) => new Set(prev).add(qIdx));
         setCerberoPos([mr, mc]);
@@ -374,6 +469,29 @@ export default function TableroAlumno() {
   const modalQIdx = modalCell ? cellToQIndex(modalCell[0], modalCell[1], size) : null;
   const modalQuestion = modalQIdx !== null ? tablero.preguntas[modalQIdx] : null;
 
+  const handleRetry = () => {
+    setCerberoPos([0, 0]);
+    setAnsweredSet(new Set());
+    setModalCell(null);
+    setInputAnswer('');
+    setFeedback(null);
+    setAttemptCompleted(false);
+    setAnswerHistory(new Map());
+    setSubmittedAnswersByQuestion(new Map());
+    setCorrectAnswersByQuestion(new Map());
+    completedRef.current = false;
+  };
+
+  const handleViewStudentAnswers = () => {
+    setAnswerModalMode('student');
+    setShowAnswerModal(true);
+  };
+
+  const handleViewCorrectAnswers = () => {
+    setAnswerModalMode('correct');
+    setShowAnswerModal(true);
+  };
+
   // ── Render ────────────────────────────────────────────
 
   return (
@@ -381,7 +499,7 @@ export default function TableroAlumno() {
       <NavbarMisCursos />
       <main className="ta-main">
         <div className="ta-wrapper">
-          <ActivityHeader title={tablero.titulo} />
+          <ActivityHeader title={tablero.titulo} guideType="tablero" guideRole="alumno" />
 
           <div className="ta-progress">
             <img src={hombreMisteriosoImg} alt="Hombre misterioso" className="ta-progress-avatar" />
@@ -403,11 +521,25 @@ export default function TableroAlumno() {
             </div>
           </div>
 
-          {!isComplete && !modalCell && (
+          {!showCompleted && !modalCell && (
             <p className="tablero-hint">Pulsa una casilla adyacente a Cerbero para responder o retroceder</p>
           )}
 
-          {isComplete && <CompletionPopup title="¡HAS COMPLETADO EL TABLERO!" onContinue={() => navigate(-1)} />}
+          {showCompleted && activityConfig ? (
+            <ActivityResultScreen
+              title="¡HAS COMPLETADO EL TABLERO!"
+              score={lastAttemptScore ?? answeredSet.size}
+              maxScore={tablero.puntuacion ?? completionTarget}
+              config={activityConfig}
+              onContinue={() => navigate(-1)}
+              onRetry={handleRetry}
+              onViewStudentAnswer={handleViewStudentAnswers}
+              onViewCorrectAnswer={handleViewCorrectAnswers}
+              onCancel={() => navigate(-1)}
+            />
+          ) : showCompleted ? (
+            <CompletionPopup title="¡HAS COMPLETADO EL TABLERO!" onContinue={() => navigate(-1)} />
+          ) : null}
         </div>
       </main>
 
@@ -420,6 +552,20 @@ export default function TableroAlumno() {
           onInputChange={setInputAnswer}
           onSubmit={handleSubmit}
           onClose={closeModal}
+        />
+      )}
+
+      {showAnswerModal && (
+        <AnswerViewModal
+          title={answerModalMode === 'student' ? 'Mi respuesta' : 'Respuesta correcta'}
+          answers={tablero.preguntas.map((p) => ({
+            question: p.pregunta,
+            studentAnswer: submittedAnswersByQuestion.get(p.id) || answerHistory.get(p.id) || '(No respondida)',
+            correctAnswer: correctAnswersByQuestion.get(p.id) || '(No disponible)',
+            isCorrect: undefined,
+          }))}
+          onClose={() => setShowAnswerModal(false)}
+          mode={answerModalMode}
         />
       )}
     </div>

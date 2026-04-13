@@ -33,6 +33,7 @@ class TemasIT extends SeleniumBaseTest {
         private static final String ALUMNO_PASSWORD = "123456";
         private static final String COURSE_TITLE = "Curso de Temas Selenium " + System.currentTimeMillis();
         private static final String COURSE_DESCRIPTION = "Curso de prueba para Selenium";
+        private static final String COURSE_CUSTOM_CODE = "TM" + System.currentTimeMillis();
         private static final String COURSE_THEME_TITLE = "Introducción a las fracciones";
         private static final String RENAMED_THEME_TITLE = "Fracciones avanzadas";
 
@@ -417,6 +418,12 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
                 descriptionInput.clear();
                 descriptionInput.sendKeys(COURSE_DESCRIPTION);
 
+                WebElement codeInput = pageWait.until(
+                                ExpectedConditions.visibilityOfElementLocated(By.id("codigo"))
+                );
+                codeInput.clear();
+                codeInput.sendKeys(COURSE_CUSTOM_CODE);
+
                 driver.findElement(By.cssSelector("button.pixel-btn-submit-main")).click();
 
                 try {
@@ -426,7 +433,15 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
                         // Si el navegador no muestra alerta, seguimos con la navegación.
                 }
 
-                pageWait.until(ExpectedConditions.urlContains("/miscursos"));
+                try {
+                        pageWait.until(ExpectedConditions.urlContains("/miscursos"));
+                } catch (org.openqa.selenium.TimeoutException timeoutException) {
+                        List<WebElement> errors = driver.findElements(By.cssSelector("p.error-msg"));
+                        if (!errors.isEmpty()) {
+                                throw new AssertionError("No se pudo crear el curso: " + errors.get(0).getText(), timeoutException);
+                        }
+                        throw timeoutException;
+                }
                 WebElement courseCard = pageWait.until(
                                 ExpectedConditions.visibilityOfElementLocated(
                                                 By.xpath("//div[contains(@class, 'curso-card')][.//span[contains(@class, 'curso-card__titulo') and normalize-space() = '" + courseTitle + "']]")

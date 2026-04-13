@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
 import './EstadisticasAlumno.css';
 
@@ -100,6 +100,7 @@ interface EstadisticasAlumnoProps {
 export default function EstadisticasAlumno({ cursoIdProp, alumnoId }: EstadisticasAlumnoProps = {}) {
   const params = useParams<{ id: string }>();
   const id = cursoIdProp ?? params.id;
+  const navigate = useNavigate();
 
   const [data, setData] = useState<EstadisticasAlumnoData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -152,6 +153,11 @@ export default function EstadisticasAlumno({ cursoIdProp, alumnoId }: Estadistic
       if (s.has(actId)) s.delete(actId); else s.add(actId);
       return s;
     });
+  };
+
+  const irDetalleIntento = (actividadId: number, intentoId: number) => {
+    if (!id || !alumnoId) return;
+    navigate(`/estadisticas/cursos/${id}/alumnos/${alumnoId}/actividades/${actividadId}/intentos/${intentoId}`);
   };
 
   const statCards = useMemo(() => {
@@ -252,7 +258,12 @@ export default function EstadisticasAlumno({ cursoIdProp, alumnoId }: Estadistic
                           <p className="ea-empty">Sin intentos registrados</p>
                         ) : (
                           act.intentos.map((intento, idx) => (
-                            <div key={intento.id} className="ea-intento-row">
+                            <button
+                              key={intento.id}
+                              type="button"
+                              className="ea-intento-row ea-intento-row--clickable"
+                              onClick={() => irDetalleIntento(act.actividadId, intento.id)}
+                            >
                               <span className="ea-intento-num">#{idx + 1}</span>
                               <span className="ea-intento-fecha">
                                 {formatFecha(intento.fechaFin || intento.fechaInicio)}
@@ -271,7 +282,7 @@ export default function EstadisticasAlumno({ cursoIdProp, alumnoId }: Estadistic
                                   {intento.numAbandonos} abandono{intento.numAbandonos !== 1 ? 's' : ''}
                                 </span>
                               )}
-                            </div>
+                            </button>
                           ))
                         )}
                       </div>

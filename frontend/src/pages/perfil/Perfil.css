@@ -1,35 +1,185 @@
-.perfil-container {
+.perfil-page {
+  min-height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px 20px;
+  font-family: 'Oxygen', sans-serif;
+  background: var(--t-bg);
+}
+
+.perfil-card {
+  width: 100%;
+  max-width: 500px;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  padding: 36px 32px;
+  box-shadow: var(--t-shadow-md);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 70vh;
-  gap: 32px;
-  font-family: 'Oxygen', sans-serif;
+  gap: 20px;
 }
 
-.perfil-title {
-  font-size: 4rem;
-  color: var(--color-text);
-  paint-order: stroke fill;
-  margin: 0;
-}
-
-.perfil-logout-btn {
-  font-family: 'Oxygen', sans-serif;
+.perfil-heading {
   font-size: 2rem;
-  font-weight: bold;
-  color: var(--color-text);
-  background-color: var(--color-accent);
-  border: 3px solid var(--color-text);
-  border-radius: 12px;
-  padding: 8px 24px;
-  box-shadow: 4px 4px 0px var(--color-text);
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  font-weight: 700;
+  color: var(--color-text, #000638);
+  margin: 0;
+  text-align: center;
 }
 
-.perfil-logout-btn:hover {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0px var(--color-text);
+.perfil-loading {
+  text-align: center;
+  color: #888;
+  font-size: 1.1rem;
+}
+
+/* ── Messages ── */
+.perfil-msg {
+  text-align: center;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1px solid;
+}
+.perfil-msg--ok {
+  background: #d4edda;
+  color: #155724;
+  border-color: #155724;
+}
+.perfil-msg--err {
+  background: #f8d7da;
+  color: #721c24;
+  border-color: #721c24;
+}
+
+/* ── Fields ── */
+.perfil-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.perfil-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.perfil-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.perfil-value {
+  font-size: 1.1rem;
+  color: #222;
+}
+
+/* ── Form ── */
+.perfil-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.perfil-form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text, #000638);
+}
+
+.perfil-form-label input {
+  padding: 10px 14px;
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  background: var(--t-input-bg);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.perfil-form-label input:focus {
+  outline: none;
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ── Actions ── */
+.perfil-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.perfil-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.perfil-btn:active {
+  transform: scale(0.97);
+}
+.perfil-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.perfil-btn--edit {
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border-color: var(--t-primary);
+  box-shadow: var(--t-shadow-sm);
+}
+.perfil-btn--edit:hover {
+  background: var(--t-input-focus);
+}
+
+.perfil-btn--save {
+  background: var(--t-primary);
+  color: #fff;
+  border-color: var(--t-primary);
+  box-shadow: var(--t-shadow-sm);
+}
+.perfil-btn--save:hover {
+  background: var(--t-primary-hover);
+}
+
+.perfil-btn--cancel {
+  background: var(--t-card);
+  color: var(--t-text-secondary);
+  border-color: var(--t-border);
+  box-shadow: var(--t-shadow-sm);
+}
+.perfil-btn--cancel:hover {
+  background: #f1f5f9;
+}
+
+.perfil-btn--logout {
+  background: var(--t-danger-light);
+  color: var(--t-danger);
+  border-color: var(--t-danger);
+  box-shadow: var(--t-shadow-sm);
+}
+.perfil-btn--logout:hover {
+  background: #fecaca;
+}
+
+@media (max-width: 480px) {
+  .perfil-card { padding: 24px 18px; }
+  .perfil-heading { font-size: 1.6rem; }
+  .perfil-actions { flex-direction: column; }
 }

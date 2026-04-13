@@ -18,6 +18,7 @@ public class ActividadDTO {
     private final Integer puntuacion;
     private final Integer posicion;
     private final String tipo;
+    private final Boolean permitirReintento;
 
     public ActividadDTO(Actividad actividad) {
         this.id = actividad.getId();
@@ -40,5 +41,6 @@ public class ActividadDTO {
         } else {
             this.puntuacion = 0;
         }
+        this.permitirReintento = Boolean.TRUE.equals(actividad.getPermitirReintento());
     }
 }

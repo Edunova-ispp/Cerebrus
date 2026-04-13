@@ -16,6 +16,7 @@ export default function CrearCurso() {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [imagen, setImagen] = useState('');
+  const [codigo, setCodigo] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [imagenError, setImagenError] = useState(false);
@@ -30,6 +31,11 @@ export default function CrearCurso() {
 
     if (!titulo.trim()) {
       setError('El título del curso es requerido');
+      return;
+    }
+
+    if (!codigo.trim()) {
+      setError('El código del curso es requerido');
       return;
     }
 
@@ -52,13 +58,18 @@ export default function CrearCurso() {
           titulo: titulo.trim(),
           descripcion: descripcion.trim() || '',
           imagen: imagen.trim() || '',
+          codigo: codigo.trim() || '',
+
         }),
       });
-
+      console.log('Response status:', response);
       if (response.ok) {
         alert('¡Curso creado exitosamente!');
         navigate('/miscursos');
-      } else {
+      } else if(response.status === 409){
+        setError('Este código ya está en uso, por favor elige otro.');
+
+      }else {
         const data = await response.json();
         setError(data.message || 'Error al crear el curso');
       }
@@ -119,6 +130,20 @@ export default function CrearCurso() {
         placeholder="https://... <opcional>"
       />
     </div>
+
+      <div className="input-group">
+      <label htmlFor="codigo">Código Personalizado</label>
+      <input
+        id="codigo"
+        type="text"
+        value={codigo}
+        onChange={(e) => setCodigo(e.target.value)}
+        className="pixel-input"
+        placeholder="Código único para el curso..."
+      />
+    </div>
+
+    
   </div>
 
   {/* Columna Derecha */}

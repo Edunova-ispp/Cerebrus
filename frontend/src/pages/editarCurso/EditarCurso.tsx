@@ -21,6 +21,7 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [imagen, setImagen] = useState('');
+  const [codigo, setCodigo] = useState('');
   const [error, setError] = useState('');
   const [imagenError, setImagenError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -50,6 +51,7 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
           setTitulo(data[0] || '');
           setDescripcion(data[1] || '');
           setImagen(data[2] || '');
+          setCodigo(data[3] || '');
           setError('');
         } else {
           if (response.status === 404) {
@@ -81,6 +83,11 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
       return;
     }
 
+    if (!codigo.trim()) {
+      setError('El código del curso es requerido');
+      return;
+    }
+
     setLoadingUpdate(true);
 
     try {
@@ -94,9 +101,10 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
           titulo: titulo.trim(),
           descripcion: descripcion.trim() || '',
           imagen: imagen.trim() || '',
+          codigo: codigo.trim() || '',
         }),
       });
-
+console.log('Response status:', response);
       if (response.ok) {
         alert('¡Curso actualizado exitosamente!');
         navigate('/miscursos');
@@ -105,7 +113,11 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
           setError('El curso no existe.');
         } else if (response.status === 403) {
           setError('No tienes permiso para editar este curso.');
-      } else {
+
+      } else if(response.status === 409){
+        setError('Este código ya está en uso, por favor elige otro.');
+
+      }else {
         setError('Error al actualizar el curso.');
       }
     }
@@ -177,6 +189,17 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
                   onChange={(e) => { setImagen(e.target.value); setImagenError(false); }}
                   className="pixel-input"
                   placeholder="https://..."
+                  disabled={loadingUpdate}
+                />
+              </div>
+              <div className="input-group">
+                <label htmlFor="codigo">Código Personalizado</label>
+                <input
+                  id="codigo"
+                  type="text"
+                  value={codigo}
+                  onChange={(e) => setCodigo(e.target.value)}
+                  className="pixel-input"
                   disabled={loadingUpdate}
                 />
               </div>

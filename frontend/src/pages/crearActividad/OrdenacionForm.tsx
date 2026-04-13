@@ -12,10 +12,14 @@ export interface OrdenacionFormInitialValues {
   readonly puntuacion: number;
   readonly imagen: string | null;
   readonly respVisible: boolean;
+  readonly permitirReintento?: boolean;
   readonly comentariosRespVisible: string | null;
   readonly posicion: number;
   readonly temaId?: number;
   readonly valores: string[];
+  readonly mostrarPuntuacion?: boolean;
+  readonly encontrarRespuestaMaestro?: boolean;
+  readonly encontrarRespuestaAlumno?: boolean;
 }
 
 interface Props {
@@ -36,7 +40,11 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
   const [respVisible, setRespVisible] = useState(false);
+  const [permitirReintento, setPermitirReintento] = useState(false);
   const [comentariosRespVisible, setComentariosRespVisible] = useState('');
+  const [mostrarPuntuacion, setMostrarPuntuacion] = useState(false);
+  const [encontrarRespuestaMaestro, setEncontrarRespuestaMaestro] = useState(false);
+  const [encontrarRespuestaAlumno, setEncontrarRespuestaAlumno] = useState(false);
   const [ordenItems, setOrdenItems] = useState<string[]>(['']);
   const [ordenItemKeys, setOrdenItemKeys] = useState<string[]>([makeLocalKey()]);
   const [ordenItemsKind, setOrdenItemsKind] = useState<'words' | 'images'>('words');
@@ -62,7 +70,11 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
     setRespVisible(Boolean(initialValues.respVisible));
+    setPermitirReintento(Boolean(initialValues.permitirReintento));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
+    setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion));
+    setEncontrarRespuestaMaestro(Boolean(initialValues.encontrarRespuestaMaestro));
+    setEncontrarRespuestaAlumno(Boolean(initialValues.encontrarRespuestaAlumno));
     const initialItems = initialValues.valores?.length ? [...initialValues.valores] : [''];
     setOrdenItems(initialItems);
     setOrdenItemKeys(initialItems.map(() => makeLocalKey()));
@@ -146,7 +158,11 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
           imagen: '',
           tema: { id: temaIdNum },
           respVisible,
+          permitirReintento,
           comentariosRespVisible: respVisible ? (comentariosRespVisible.trim() || null) : null,
+          mostrarPuntuacion,
+          encontrarRespuestaMaestro,
+          encontrarRespuestaAlumno,
           ...(mode === 'edit' ? { posicion: posicionOriginal } : {}),
           valores,
         }),
@@ -183,7 +199,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
         onResult={handleIAResult}
       />
 
-      {/* ── Metadata ── */
+      {/* ── Metadata ── */}
       <div className="of-meta-section">
         <div className="of-col">
           <div>
@@ -232,6 +248,43 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
               onChange={(e) => setRespVisible(e.target.checked)}
             />
             Correcciones visibles
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={permitirReintento}
+              onChange={(e) => setPermitirReintento(e.target.checked)}
+            />
+            Permitir reintentos
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={mostrarPuntuacion}
+              onChange={(e) => setMostrarPuntuacion(e.target.checked)}
+            />
+            Mostrar puntuación
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={encontrarRespuestaMaestro}
+              onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
+            />
+            Mostrar respuesta correcta
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={encontrarRespuestaAlumno}
+              onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
+            />
+            Mostrar mi respuesta
+          </div>
+
           {respVisible && (
             <div>
               <label className="of-label" htmlFor="of-comentarios">Comentarios</label>
@@ -246,9 +299,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
           )}
         </div>
       </div>
-      </div>
 
-    }
       <div className="of-items-section">
         <p className="of-help">
           Actividad de ordenación. El alumno debe organizar los valores siguiendo un criterio

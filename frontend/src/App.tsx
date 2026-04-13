@@ -31,10 +31,16 @@ import CrucigramaAlumno from "./pages/crucigramaAlumno/CrucigramaAlumno";
 import EstadisticasAlumno from "./pages/estadisticasCurso/EstadisticasAlumno.tsx";
 import EstadisticasActividad from "./pages/estadisticasCurso/EstadisticasActividad.tsx";
 import EstadisticasTema from "./pages/estadisticasCurso/EstadisticasTema.tsx";
+import DetalleIntentoActividad from "./pages/estadisticasCurso/DetalleIntentoActividad.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import PreguntaAbiertaAlumno from "./pages/preguntaAbiertaAlumno/PreguntaAbiertaAlumno.tsx";
 import TermsPage from "./pages/legal/TermsPage.tsx";
 import EdunovaPage from "./pages/edunova/EdunovaPage.tsx";
+
+import Suscripcion from "./pages/suscripcion/Suscripcion.tsx";
+import ResumenSuscripcion from "./pages/suscripcion/ResumenSuscripcion.tsx";
+import GestionUsuarios from "./pages/gestionUsuarios/GestionUsuarios.tsx";
+import CreacionUsuario from "./pages/gestionUsuarios/CreacionUsuario.tsx";
 
 // ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
 class WatchbugErrorBoundary extends Component<
@@ -59,7 +65,6 @@ class WatchbugErrorBoundary extends Component<
         stack: (error.stack ?? '') + '\n\nComponent Stack:\n' + info.componentStack,
         timestamp: new Date().toISOString(),
       });
-      // Actualizar badge si el widget ya está montado
       if (typeof (globalThis as any).updateErrorBadge === 'function') {
         (globalThis as any).updateErrorBadge();
       }
@@ -98,19 +103,19 @@ function App() {
       <Route path="/infoProfesores" element={<InfoPage userType="profesor" />} />
       <Route path="/infoDueños"    element={<InfoPage userType="dueno" />} />
 
-      {/* Rutas roles */}
-      <Route path="/misCursos" element={
+        {/* Rutas comunes (varios roles) */}
+        <Route path="/misCursos" element={
           <ProtectedRoute allowedRoles={['ALUMNO', 'MAESTRO', 'DUENO']}><MisCursos /></ProtectedRoute>
         } />
         <Route path="/cursos/:id" element={
           <ProtectedRoute allowedRoles={['ALUMNO', 'MAESTRO', 'DUENO']}><DetalleCurso /></ProtectedRoute>
         } />
         <Route path="/perfil" element={
-          <ProtectedRoute allowedRoles={['ALUMNO', 'MAESTRO', 'DUENO']}><Perfil /></ProtectedRoute>
+          <ProtectedRoute allowedRoles={['ALUMNO', 'MAESTRO', 'DUENO', 'ORGANIZACION']}><Perfil /></ProtectedRoute>
         } />
 
-      {/* Rutas alumnos */}
-      <Route path="/mapa/:id" element={
+        {/* Rutas alumnos */}
+        <Route path="/mapa/:id" element={
           <ProtectedRoute allowedRoles={['ALUMNO']}><MapaCurso /></ProtectedRoute>
         } />
         <Route path="/ordenaciones/:ordenacionId/alumno" element={
@@ -147,31 +152,31 @@ function App() {
           <ProtectedRoute allowedRoles={['ALUMNO']}><EstadisticasAlumno /></ProtectedRoute>
         } />
 
-      {/* Rutas profesores y dueños */}
+        {/* Rutas profesores y dueños */}
         <Route path="/crearCurso" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><CrearCurso /></ProtectedRoute>
-        } />  
+        } />
         <Route path="/editarCurso/:id" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EditarCurso /></ProtectedRoute>
-        } /> 
+        } />
         <Route path="/cursos/:id/temas/crear" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><CrearTema /></ProtectedRoute>
-        } /> 
+        } />
         <Route path="/cursos/:id/temas/:temaId/editar" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EditarTema /></ProtectedRoute>
-        } /> 
+        } />
         <Route path="/cursos/:id/temas/:temaId/actividades/:actividadId/editar" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EditarActividad /></ProtectedRoute>
-        } /> 
+        } />
         <Route path="/cursos/:id/temas/:temaId/actividades/crear" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><CrearActividad /></ProtectedRoute>
-        } /> 
+        } />
         <Route path="/estadisticas/:id/actividades" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EstadisticasActividades /></ProtectedRoute>
-        } /> 
+        } />
         <Route path="/estadisticas/:cursoId/actividades/graficas" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><GraficasActividades /></ProtectedRoute>
-        } /> 
+        } />
         <Route path="/estadisticas/:id/temas" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EstadisticasTemas /></ProtectedRoute>
         } />
@@ -187,7 +192,25 @@ function App() {
         <Route path="/estadisticas/actividades/:id" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EstadisticasActividad /></ProtectedRoute>
         } />
-    </Routes>
+        <Route path="/estadisticas/cursos/:cursoId/alumnos/:alumnoId/actividades/:actividadId/intentos/:intentoId" element={
+          <ProtectedRoute allowedRoles={['MAESTRO']}><DetalleIntentoActividad /></ProtectedRoute>
+        } />
+
+        {/* Rutas organización (solo DUENO) */}
+        <Route path="suscripcion" element={
+          <ProtectedRoute allowedRoles={['DUENO', 'ORGANIZACION']}><Suscripcion /></ProtectedRoute>
+        } />
+        <Route path="/resumen-suscripcion" element={
+          <ProtectedRoute allowedRoles={['DUENO', 'ORGANIZACION']}><ResumenSuscripcion /></ProtectedRoute>
+        } />
+        <Route path="/gestion-usuarios" element={
+          <ProtectedRoute allowedRoles={['ORGANIZACION']}><GestionUsuarios /></ProtectedRoute>
+        } />
+        <Route path="/gestion-usuarios/crear-usuario" element={
+          <ProtectedRoute allowedRoles={['ORGANIZACION']}><CreacionUsuario /></ProtectedRoute>
+        } />
+
+      </Routes>
     </WatchbugErrorBoundary>
   );
 }

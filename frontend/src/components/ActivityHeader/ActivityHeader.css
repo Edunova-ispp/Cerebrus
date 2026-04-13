@@ -2,7 +2,7 @@
 
 .ah-top {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 16px;
 }
@@ -66,4 +66,11 @@
   font-size: 1.05rem;
   color: #000;
   text-align: center;
+}
+
+@media (max-width: 900px) {
+  .ah-top {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 }
