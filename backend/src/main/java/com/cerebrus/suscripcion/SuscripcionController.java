@@ -69,8 +69,8 @@ public class SuscripcionController {
         return new ResponseEntity<>(suscripcionService.crearSuscripcion(organizacionId, request), HttpStatus.CREATED);
     }
 
-    @PostMapping("/confirmar-pago")
-    public ResponseEntity<String> confirmarPago(@RequestParam String transaccionId) {
+    @PostMapping("/confirmar-pago/{transaccionId}")
+    public ResponseEntity<String> confirmarPago(@PathVariable String transaccionId) {
         try {
             suscripcionService.confirmarPagoExitoso(transaccionId);
             return ResponseEntity.ok("Pago confirmado y suscripción activada.");

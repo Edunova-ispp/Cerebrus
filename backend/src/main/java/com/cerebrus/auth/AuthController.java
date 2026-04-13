@@ -84,19 +84,11 @@ public class AuthController {
                     orgId = alumnoRepository.findById(userDetails.getId())
                             .map(a -> a.getOrganizacion().getId()).orElse(null);
                 }
-
                 if (orgId == null || !suscripcionRepository.findByOrganizacionIdSuscripcionActiva(orgId).isPresent()) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(new MessageResponse("CUENTA_ORG_NO_SUSCRIPCION"));
                 }
-            } else if (roles.contains("ORGANIZACION")) {
-                if (suscripcionRepository.findByOrganizacionIdSuscripcionExpirada(userDetails.getId()).isPresent()) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(new MessageResponse("ORG_SUSCRIPCION_EXPIRADA"));
-                } else if (!suscripcionRepository.findByOrganizacionIdSuscripcionActiva(userDetails.getId()).isPresent()) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(new MessageResponse("ORG_NO_SUSCRIPCION"));
-                }
+
             }
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
