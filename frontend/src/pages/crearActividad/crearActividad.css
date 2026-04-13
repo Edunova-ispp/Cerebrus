@@ -242,9 +242,24 @@
   gap: 16px;
 }
 
+.ca-contenido .ca-actions-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.ca-contenido .ca-actions-row > .ca-btn-cancelar,
+.ca-contenido .ca-actions-row > .ca-btn-guardar,
+.ca-contenido .ca-actions-row > .cf-btn-submit {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  align-self: center;
+}
+
 .ca-contenido button.ca-btn-cancelar + button.ca-btn-guardar,
 .ca-contenido button.ca-btn-cancelar + button.cf-btn-submit {
-  margin-left: 12px;
+  margin-left: 0;
 }
 
 .ca-contenido .tf-footer-stack {
