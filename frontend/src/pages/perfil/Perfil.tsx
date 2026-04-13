@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import NavbarMisCursos from "../../components/NavbarMisCursos/NavbarMisCursos";
 import { apiFetch } from "../../utils/api";
 import { getCurrentUserInfo } from "../../types/curso";
@@ -16,11 +15,17 @@ interface UserData {
 
 export default function Perfil() {
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
-  const navigate = useNavigate();
   const userInfo = getCurrentUserInfo() as Record<string, unknown> | null;
   const roles = (userInfo?.authorities as string[]) ?? [];
+  const isAlumno = roles.some(r => r.toUpperCase().includes('ALUMNO'));
+  const isMaestro = roles.some(r => r.toUpperCase().includes('MAESTRO'));
   const isOrganizacion = roles.some(r => r.toUpperCase().includes('ORGANIZACION'));
-  const organizacionId = userInfo?.id as number | undefined;
+
+  const profileModeClass = isAlumno
+    ? 'perfil-page--alumno'
+    : (isMaestro || isOrganizacion)
+      ? 'perfil-page--maestro'
+      : 'perfil-page--default';
 
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,13 +54,6 @@ export default function Perfil() {
       }
     })();
   }, [apiBase]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    localStorage.removeItem("role");
-    navigate("/");
-  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -86,7 +84,7 @@ export default function Perfil() {
   };
 
   return (
-    <>
+    <div className={`perfil-shell ${profileModeClass}`}>
       <NavbarMisCursos />
       <div className="perfil-page">
         <div className="perfil-card">
@@ -128,9 +126,6 @@ export default function Perfil() {
                     Editar perfil
                   </button>
                 )}
-                <button className="perfil-btn perfil-btn--logout" onClick={handleLogout}>
-                  Cerrar sesión
-                </button>
               </div>
             </div>
           ) : (
@@ -167,6 +162,6 @@ export default function Perfil() {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }

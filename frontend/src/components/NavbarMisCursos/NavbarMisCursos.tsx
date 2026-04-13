@@ -14,6 +14,13 @@ export default function NavbarMisCursos() {
   const isOrganizacion = roles.some((r) => r.toUpperCase().includes("ORGANIZACION"));
   const homeRoute = isOrganizacion ? "/suscripcion" : "/misCursos";
 
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+    navigate("/");
+  }, [navigate]);
+
   /* ── Auto-hide on scroll ── */
   const [visible, setVisible] = useState(true);
   const lastY = useRef(0);
@@ -107,6 +114,9 @@ export default function NavbarMisCursos() {
               <button type="button" className="navbar-link" onClick={() => navigate("/perfil")}>
                 <img src={perfilIcon} alt="" className="navbar-icon" />
                 <span>Perfil</span>
+              </button>
+              <button type="button" className="navbar-link navbar-link--logout" onClick={handleLogout}>
+                <span>Cerrar sesión</span>
               </button>
             </div>
           </div>

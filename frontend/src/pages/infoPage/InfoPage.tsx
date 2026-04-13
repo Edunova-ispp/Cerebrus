@@ -2,7 +2,9 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "./InfoPage.css";
 import logo from "../../assets/logo.png";
-import ProfileIcon from "../../assets/icons/profile.svg?react";
+import maguito from "../../assets/props/maguito.png";
+import libro from "../../assets/props/libro.png";
+import dueno from "../../assets/props/dueño.png";
 
 export type UserType = "alumno" | "profesor" | "dueno";
 
@@ -21,14 +23,12 @@ const TITLE = [
   { key: "s-1", char: "s", cls: "accent" },
 ];
 
-// Video camera icon as inline SVG
-function VideoIcon() {
-  return (
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z" />
-    </svg>
-  );
-}
+const SECTION_IMAGE: Record<keyof typeof SECTIONS, { src: string; alt: string }> = {
+  cerebrus: { src: logo, alt: "Cerebrus" },
+  institucion: { src: dueno, alt: "Gestión de institución" },
+  profesor: { src: libro, alt: "Herramientas para profes" },
+  alumno: { src: maguito, alt: "Aprendizaje para alumnos" },
+};
 
 const SECTIONS = {
   cerebrus: {
@@ -99,10 +99,11 @@ function InfoPage({ userType }: InfoPageProps) {
           const reverse = reverseOverride ?? s.reverse;
           const textFrom  = reverse ? 80 : -80;
           const videoFrom = reverse ? -80 : 80;
+          const textCardColor = idx % 2 === 0 ? "primary" : "secondary";
           return (
             <div key={key} className={`info-section${reverse ? " reverse" : ""}`}>
               <motion.div
-                className={`info-text-card ${s.color}`}
+                className={`info-text-card ${textCardColor}`}
                 initial={{ opacity: 0, x: textFrom }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
@@ -118,7 +119,12 @@ function InfoPage({ userType }: InfoPageProps) {
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.5, delay: idx * 0.05 + 0.1, ease: "easeOut" }}
               >
-                <VideoIcon />
+                <img
+                  src={SECTION_IMAGE[key].src}
+                  alt={SECTION_IMAGE[key].alt}
+                  className="info-section-image"
+                  loading="lazy"
+                />
               </motion.div>
             </div>
           );
