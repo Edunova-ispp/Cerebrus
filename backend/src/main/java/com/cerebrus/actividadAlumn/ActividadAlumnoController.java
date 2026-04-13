@@ -77,7 +77,8 @@ public class ActividadAlumnoController {
             actividadAlumno.getFechaInicio(),
             actividadAlumno.getFechaFin(),
             actividadAlumno.getNota(),
-            actividadAlumno.getNumAbandonos()
+            actividadAlumno.getNumAbandonos(),
+            actividadAlumno.getSolucionUsada()
         );
         return new ResponseEntity<>(obtenerActAlumnoDto(actividadAlumnoActualizada), HttpStatus.OK);
     }
@@ -143,6 +144,7 @@ public class ActividadAlumnoController {
             aa.getFechaFin(),
             aa.getNota(),
             aa.getNumAbandonos(),
+            aa.getSolucionUsada(),
             aa.getAlumno() == null ? null : aa.getAlumno().getId(),
             aa.getActividad() == null ? null : aa.getActividad().getId()
         );

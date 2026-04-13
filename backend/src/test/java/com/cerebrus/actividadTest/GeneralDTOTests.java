@@ -40,7 +40,8 @@ public class GeneralDTOTests {
         // 2. Instanciar el DTO (Cubre el constructor)
         GeneralAbiertaAlumnoDTO dto = new GeneralAbiertaAlumnoDTO(
             1L, "Título", "Descripción", 10, "imagen.jpg", 
-            true, "Comentario", 1, 1, 5L, preguntas
+            true, "Comentario", 1, 1, 5L, preguntas,
+            false, false, false, false
         );
 
         // 3. Verificaciones (Cubre todos los getters)
@@ -396,7 +397,8 @@ public class GeneralDTOTests {
             "Contenido de la lección", 
             "teoria.png", 
             1, 
-            100L
+            100L,
+            false
         );
 
         // 2. Verificaciones (Cubre todos los getters)
@@ -406,6 +408,7 @@ public class GeneralDTOTests {
         assertThat(dto.getImagen()).isEqualTo("teoria.png");
         assertThat(dto.getPosicion()).isEqualTo(1);
         assertThat(dto.getTemaId()).isEqualTo(100L);
+        assertThat(dto.getPermitirReintento()).isFalse();
     }
 
     @Test

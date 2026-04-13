@@ -29,6 +29,7 @@ import com.cerebrus.actividad.marcarImagen.MarcarImagen;
 import com.cerebrus.actividad.marcarImagen.MarcarImagenService;
 import com.cerebrus.actividad.ordenacion.Ordenacion;
 import com.cerebrus.actividad.ordenacion.OrdenacionService;
+import com.cerebrus.actividad.tablero.Tablero;
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
 import com.cerebrus.actividadAlumn.ActividadAlumnoServiceImpl;
@@ -123,8 +124,9 @@ class ActividadAlumnoServiceImplTest {
     }
 
     @Test
-        void crearActAlumno_parejaYaExiste_retornaExistenteSinGuardar() {
+    void crearActAlumno_intentoEnCurso_retornaExistenteSinGuardar() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        actividadAlumno.setFechaFin(LocalDateTime.of(1970, 1, 1, 0, 0));
         when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L))
             .thenReturn(Optional.of(actividadAlumno));
 
@@ -134,6 +136,41 @@ class ActividadAlumnoServiceImplTest {
         assertThat(resultado.getId()).isEqualTo(10L);
         verify(actividadAlumnoRepository, never()).save(any());
         verify(actividadRepository, never()).findById(any());
+    }
+
+    @Test
+    void crearActAlumno_reintentoPermitido_creaNuevaInstancia() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        actividad.setPermitirReintento(true);
+        actividadAlumno.setFechaFin(LocalDateTime.now().minusMinutes(5));
+        when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L))
+            .thenReturn(Optional.of(actividadAlumno));
+        when(actividadRepository.findById(50L)).thenReturn(Optional.of(actividad));
+        when(alumnoRepository.findById(1L)).thenReturn(Optional.of(alumno));
+        when(actividadAlumnoRepository.save(any(ActividadAlumno.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ActividadAlumno resultado = service.crearActAlumno(100, LocalDateTime.now(),
+            LocalDateTime.now(), 8, 0, 1L, 50L);
+
+        assertThat(resultado).isNotSameAs(actividadAlumno);
+        verify(actividadAlumnoRepository).save(any(ActividadAlumno.class));
+    }
+
+    @Test
+    void crearActAlumno_terminadaSinReintento_lanzaAccessDenied() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        actividad.setPermitirReintento(false);
+        actividadAlumno.setFechaFin(LocalDateTime.now().minusMinutes(5));
+        when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L))
+            .thenReturn(Optional.of(actividadAlumno));
+        when(actividadRepository.findById(50L)).thenReturn(Optional.of(actividad));
+
+        assertThatThrownBy(() -> service.crearActAlumno(100, LocalDateTime.now(),
+            LocalDateTime.now(), 8, 0, 1L, 50L))
+            .isInstanceOf(AccessDeniedException.class)
+            .hasMessage("No se permite el reintento para esta actividad");
+
+        verify(actividadAlumnoRepository, never()).save(any());
     }
 
     @Test
@@ -224,6 +261,30 @@ class ActividadAlumnoServiceImplTest {
     }
 
     @Test
+    void existeActAlumnoPorActIdYCurrentUserId_terminada_retorna0() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        actividadAlumno.setFechaFin(LocalDateTime.now().minusMinutes(1));
+        when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L))
+                .thenReturn(Optional.of(actividadAlumno));
+
+        Integer resultado = service.existeActAlumnoPorActIdYCurrentUserId(50L);
+
+        assertThat(resultado).isEqualTo(0);
+    }
+
+    @Test
+    void existeActAlumnoPorActIdYCurrentUserId_terminadaSinReintento_tambienRetorna0() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        actividadAlumno.setFechaFin(LocalDateTime.now().minusMinutes(1));
+        when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 50L))
+                .thenReturn(Optional.of(actividadAlumno));
+
+        Integer resultado = service.existeActAlumnoPorActIdYCurrentUserId(50L);
+
+        assertThat(resultado).isEqualTo(0);
+    }
+
+    @Test
     void existeActAlumnoPorActIdYCurrentUserId_noExiste_retorna0() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
         when(actividadAlumnoRepository.findByAlumnoIdAndActividadId(1L, 99L))
@@ -252,7 +313,7 @@ class ActividadAlumnoServiceImplTest {
         LocalDateTime nuevaFechaFin = LocalDateTime.now();
 
         ActividadAlumno resultado = service.actualizarActAlumno(10L, 200,
-                LocalDateTime.now(), nuevaFechaFin, 9, 1);
+            LocalDateTime.now(), nuevaFechaFin, 9, 1, false);
 
         assertThat(resultado.getPuntuacion()).isEqualTo(200);
         assertThat(resultado.getNota()).isEqualTo(9);
@@ -265,7 +326,7 @@ class ActividadAlumnoServiceImplTest {
         when(actividadAlumnoRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.actualizarActAlumno(99L, 100,
-                LocalDateTime.now(), LocalDateTime.now(), 8, 0))
+            LocalDateTime.now(), LocalDateTime.now(), 8, 0, false))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -508,9 +569,39 @@ class ActividadAlumnoServiceImplTest {
 
         ActividadAlumno resultado = service.corregirActAlumnoAutomaticamente(10L, List.of(101L, 102L));
 
-        // 1 correcta: +50, 1 incorrecta: -25 → 25
-        assertThat(resultado.getPuntuacion()).isEqualTo(25);
-        assertThat(resultado.getNota()).isEqualTo(3); // round(2.5)
+        // 1 correcta de 2: 50 puntos y nota 5, sin penalización por fallo.
+        assertThat(resultado.getPuntuacion()).isEqualTo(50);
+        assertThat(resultado.getNota()).isEqualTo(5);
+    }
+
+    @Test
+    void corregirActAlumnoAutomaticamente_tipoTest_tresPreguntas_sinPenalizacion_reparte100Entre3() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+        General actividadGeneral = crearActividadGeneral(TipoActGeneral.TEST, 100, 3);
+        actividadAlumno.setActividad(actividadGeneral);
+
+        Pregunta pregunta1 = actividadGeneral.getPreguntas().get(0);
+        Pregunta pregunta2 = actividadGeneral.getPreguntas().get(1);
+        Pregunta pregunta3 = actividadGeneral.getPreguntas().get(2);
+        pregunta1.setRespuestasMaestro(List.of(crearRespuestaMaestro("p1_ok", true), crearRespuestaMaestro("p1_bad", false)));
+        pregunta2.setRespuestasMaestro(List.of(crearRespuestaMaestro("p2_ok", true), crearRespuestaMaestro("p2_bad", false)));
+        pregunta3.setRespuestasMaestro(List.of(crearRespuestaMaestro("p3_ok", true), crearRespuestaMaestro("p3_bad", false)));
+
+        // Solo acierta 1 de 3 preguntas: 100/3 = 33.33 -> round = 33.
+        RespAlumnoGeneral resp1 = crearRespAlumnoGeneral(101L, pregunta1, "p1_ok");
+        RespAlumnoGeneral resp2 = crearRespAlumnoGeneral(102L, pregunta2, "p2_bad");
+        RespAlumnoGeneral resp3 = crearRespAlumnoGeneral(103L, pregunta3, "p3_bad");
+
+        when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
+        when(respuestaAlumnoService.encontrarRespuestaAlumnoPorId(101L)).thenReturn(resp1);
+        when(respuestaAlumnoService.encontrarRespuestaAlumnoPorId(102L)).thenReturn(resp2);
+        when(respuestaAlumnoService.encontrarRespuestaAlumnoPorId(103L)).thenReturn(resp3);
+        when(actividadAlumnoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ActividadAlumno resultado = service.corregirActAlumnoAutomaticamente(10L, List.of(101L, 102L, 103L));
+
+        assertThat(resultado.getPuntuacion()).isEqualTo(33);
+        assertThat(resultado.getNota()).isEqualTo(3);
     }
 
     @Test
@@ -552,6 +643,32 @@ class ActividadAlumnoServiceImplTest {
 
         assertThat(resultado.getNota()).isEqualTo(10);
         assertThat(resultado.getPuntuacion()).isEqualTo(100);
+    }
+
+    @Test
+    void corregirActAlumnoAutomaticamente_tipoTablero_penalizaFallosAcumulados() {
+        when(usuarioService.findCurrentUser()).thenReturn(alumno);
+
+        Tablero tablero = new Tablero();
+        tablero.setId(60L);
+        tablero.setPuntuacion(100);
+        tablero.setPreguntas(new ArrayList<>());
+        actividadAlumno.setActividad(tablero);
+
+        RespAlumnoGeneral resp1 = new RespAlumnoGeneral(false, actividadAlumno, "fallo", new Pregunta());
+        resp1.setNumFallos(2);
+        RespAlumnoGeneral resp2 = new RespAlumnoGeneral(true, actividadAlumno, "bien", new Pregunta());
+        resp2.setNumFallos(0);
+        actividadAlumno.setRespuestasAlumno(new ArrayList<>(List.of(resp1, resp2)));
+
+        when(actividadAlumnoRepository.findById(10L)).thenReturn(Optional.of(actividadAlumno));
+        when(actividadAlumnoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ActividadAlumno resultado = service.corregirActAlumnoAutomaticamente(10L, List.of());
+
+        assertThat(resultado.getNota()).isEqualTo(8);
+        assertThat(resultado.getPuntuacion()).isEqualTo(80);
+        assertThat(resultado.getFechaFin()).isNotNull();
     }
 
     @Test

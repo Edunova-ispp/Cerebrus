@@ -31,6 +31,7 @@ type ActividadDTO = {
   readonly puntuacion: number;
   readonly posicion: number;
   readonly tipo: string;
+  readonly permitirReintento?: boolean;
 };
 
 type CompletionInfo = {
@@ -315,7 +316,8 @@ export default function MapaCurso() {
                             const linearIndex = firstInRowLinearIndex + (reverse ? row.length - 1 - localIndex : localIndex);
                             const info = completionMap.get(act.id);
                             const state = info?.terminada ? 'terminada' : (info?.done ? 'iniciada' : 'pendiente');
-                            const locked = !unlockedActivityIds.has(act.id);
+                            const retryDisabledAndCompleted = info?.terminada && !Boolean(act.permitirReintento);
+                            const locked = !unlockedActivityIds.has(act.id) || retryDisabledAndCompleted;
                             const nodeBg = getNodeBgColor(linearIndex);
                             const iconSrc = getActivityIconSrc(act.tipo, act.posicion);
 

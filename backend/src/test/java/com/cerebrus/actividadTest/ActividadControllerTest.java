@@ -35,19 +35,20 @@ class ActividadControllerTest {
         request.setTitulo("Titulo");
         request.setDescripcion("Desc");
         request.setImagen("img.png");
+        request.setPermitirReintento(false);
         request.setTemaId(5L);
 
         Actividad actividad = new Actividad() {};
         actividad.setId(99L);
 
-        when(actividadService.crearActTeoria("Titulo", "Desc", "img.png", 5L))
+        when(actividadService.crearActTeoria("Titulo", "Desc", "img.png", 5L, false))
                 .thenReturn(actividad);
 
         ResponseEntity<TeoriaDTO> response = actividadController.crearActTeoria(request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
-        verify(actividadService).crearActTeoria("Titulo", "Desc", "img.png", 5L);
+        verify(actividadService).crearActTeoria("Titulo", "Desc", "img.png", 5L, false);
     }
 
     @Test
@@ -56,10 +57,11 @@ class ActividadControllerTest {
         request.setTitulo("Titulo");
         request.setDescripcion("Desc");
         request.setImagen(null);
+        request.setPermitirReintento(false);
         request.setTemaId(5L);
 
         Actividad actividad = new Actividad() {};
-        when(actividadService.crearActTeoria("Titulo", "Desc", null, 5L))
+        when(actividadService.crearActTeoria("Titulo", "Desc", null, 5L, false))
                 .thenReturn(actividad);
 
         ResponseEntity<TeoriaDTO> response = actividadController.crearActTeoria(request);
@@ -75,7 +77,7 @@ class ActividadControllerTest {
         request.setImagen("img");
         request.setTemaId(10L);
 
-        when(actividadService.crearActTeoria(any(), any(), any(), any()))
+        when(actividadService.crearActTeoria(any(), any(), any(), any(), any()))
                 .thenThrow(new IllegalArgumentException("Tema no encontrado"));
 
         assertThatThrownBy(() -> actividadController.crearActTeoria(request))
@@ -143,6 +145,7 @@ class ActividadControllerTest {
         request.setTitulo("Nuevo T");
         request.setDescripcion("Nueva D");
         request.setImagen("img.png");
+        request.setPermitirReintento(false);
         Actividad actividad = new Actividad() {};
         actividad.setId(7L);
         actividad.setTitulo("Nuevo T");
@@ -152,11 +155,11 @@ class ActividadControllerTest {
         com.cerebrus.tema.Tema tema = new com.cerebrus.tema.Tema();
         tema.setId(30L);
         actividad.setTema(tema);
-        when(actividadService.actualizarActTeoria(7L, "Nuevo T", "Nueva D", "img.png")).thenReturn(actividad);
+        when(actividadService.actualizarActTeoria(7L, "Nuevo T", "Nueva D", "img.png", false)).thenReturn(actividad);
         ResponseEntity<TeoriaDTO> response = actividadController.actualizarActTeoria(7L, request);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getId()).isEqualTo(7L);
-        verify(actividadService).actualizarActTeoria(7L, "Nuevo T", "Nueva D", "img.png");
+        verify(actividadService).actualizarActTeoria(7L, "Nuevo T", "Nueva D", "img.png", false);
     }
 }
