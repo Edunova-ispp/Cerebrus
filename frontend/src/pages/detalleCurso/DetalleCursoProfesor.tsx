@@ -24,7 +24,7 @@ interface Props {
 }
 
 const TABS: { key: "mapa" | "estadisticas" | "editar"; label: string }[] = [
-  { key: "mapa", label: "Mapa del curso" },
+  { key: "mapa", label: "Estructura del curso" },
   { key: "estadisticas", label: "Estadísticas" },
   { key: "editar", label: "Editar curso" },
 ];

@@ -80,6 +80,38 @@
   white-space: nowrap;
 }
 
+.ea-tema-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-left: 8px;
+}
+
+.ea-tema-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 1px 6px;
+  border: 1px solid #d5d5d5;
+  border-radius: 999px;
+  background: #f7f7f7;
+  line-height: 1.1;
+}
+
+.ea-tema-chip-label {
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: #6c6c6c;
+  letter-spacing: 0.02em;
+}
+
+.ea-tema-chip-value {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #2f2f2f;
+}
+
 .ea-tema-badge {
   flex-shrink: 0;
   font-size: 0.72rem;
@@ -348,4 +380,59 @@
   padding: 10px 16px 10px 28px;
   margin: 0;
   font-style: italic;
+}
+
+/* ===== TEMA CHART ===== */
+.ea-tema-chart {
+  border-top: 1px solid var(--t-border);
+  background: #fcfcfc;
+  padding: 10px 14px 14px;
+}
+
+.ea-tema-chart-title {
+  margin: 0 0 8px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+/* ===== SEMÁFORO STATE BADGES IN STAT CARDS ===== */
+.stat-card .analisis-semaforo-cell {
+  display: inline-block;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  padding: 0 8px;
+  border-radius: 4px;
+  margin-top: 6px;
+}
+
+.stat-card .analisis-semaforo-cell--riesgo {
+  color: #991b1b;
+  background-color: #fee2e2;
+  box-shadow: inset 0 0 0 1px #fca5a5, inset 3px 0 0 #dc2626;
+}
+
+.stat-card .analisis-semaforo-cell--atencion {
+  color: #1d4ed8;
+  background-color: #dbeafe;
+  box-shadow: inset 0 0 0 1px #93c5fd, inset 3px 0 0 #2563eb;
+}
+
+.stat-card .analisis-semaforo-cell--bien {
+  color: #166534;
+  background-color: #dcfce7;
+  box-shadow: inset 0 0 0 1px #86efac, inset 3px 0 0 #16a34a;
+}
+
+.ea-tema-chart-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  padding: 6px;
 }

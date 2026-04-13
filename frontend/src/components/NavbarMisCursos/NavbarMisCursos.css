@@ -132,6 +132,10 @@
   filter: brightness(0) saturate(100%) invert(97%) sepia(57%) saturate(600%) hue-rotate(323deg) brightness(103%) contrast(103%);
 }
 
+.navbar-link:hover .navbar-icon--logout {
+  filter: none;
+}
+
 .navbar-link--logout {
   color: #7a0030;
 }
@@ -145,6 +149,12 @@
   width: 32px;
   object-fit: contain;
   transition: filter 0.2s ease;
+}
+
+.navbar-icon--logout {
+  color: currentColor;
+  width: 36px;
+  height: 36px;
 }
 
 /* ===== TEACHER / MAESTRO NAVBAR OVERRIDE ===== */

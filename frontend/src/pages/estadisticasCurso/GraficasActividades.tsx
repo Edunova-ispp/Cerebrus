@@ -27,6 +27,10 @@ type BarDatum = {
   value: number;
 };
 
+function formatearDecimal2(valor: number): string {
+  return Number.isFinite(valor) ? valor.toFixed(2) : '0.00';
+}
+
 const MAX_BARS = 12;
 
 function BarChart({
@@ -86,7 +90,7 @@ function BarChart({
             const barH = (v / safeMax) * chartHeight;
             const y = margin.top + (chartHeight - barH);
             const labelX = x + barWidth / 2;
-            const valueText = `${Math.round(v * 100) / 100}${unidad ? ` ${unidad}` : ''}`;
+            const valueText = `${formatearDecimal2(v)}${unidad ? ` ${unidad}` : ''}`;
 
             return (
               <g key={`${d.label}-${idx}`}>

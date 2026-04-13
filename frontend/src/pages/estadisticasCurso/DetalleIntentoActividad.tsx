@@ -43,9 +43,41 @@ function formatFecha(iso?: string | null): string {
   return `${d.toLocaleDateString('es-ES')} ${d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
-function formatTiempo(min?: number | null): string {
-  if (!min || min <= 0) return '—';
-  return `${min} min`;
+function formatTiempo(fechaInicio?: string | null, fechaFin?: string | null, minutosFallback?: number | null): string {
+  if (fechaInicio && fechaFin) {
+    const inicio = new Date(fechaInicio);
+    const fin = new Date(fechaFin);
+    if (!isNaN(inicio.getTime()) && !isNaN(fin.getTime())) {
+      const totalSegundos = Math.max(0, Math.round((fin.getTime() - inicio.getTime()) / 1000));
+      if (totalSegundos < 60) {
+        return `${totalSegundos} s`;
+      }
+
+      const minutos = Math.floor(totalSegundos / 60);
+      const segundos = totalSegundos % 60;
+      if (segundos === 0) {
+        return minutos === 1 ? '1 min' : `${minutos} min`;
+      }
+      return `${minutos} min ${String(segundos).padStart(2, '0')} s`;
+    }
+  }
+
+  if (!minutosFallback || minutosFallback <= 0) return '< 1 min';
+  return minutosFallback === 1 ? '1 min' : `${minutosFallback} min`;
+}
+
+function formatNota2Dec(nota?: number | null): string {
+  if (typeof nota !== 'number' || !Number.isFinite(nota)) return '—';
+  return nota.toFixed(2);
+}
+
+function formatNotaDesdePuntuacion(puntuacion?: number | null, puntuacionMaxima?: number | null): string {
+  if (typeof puntuacion !== 'number' || !Number.isFinite(puntuacion)) return '—';
+  if (typeof puntuacionMaxima !== 'number' || !Number.isFinite(puntuacionMaxima) || puntuacionMaxima <= 0) {
+    return formatNota2Dec(puntuacion);
+  }
+
+  return ((puntuacion / puntuacionMaxima) * 10).toFixed(2);
 }
 
 function tipoLegible(tipo: string): string {
@@ -182,9 +214,9 @@ export default function DetalleIntentoActividad() {
         <div className="dia-metrics">
           <div className="dia-metric"><span>Fecha inicio</span><strong>{formatFecha(detalle.fechaInicio)}</strong></div>
           <div className="dia-metric"><span>Fecha fin</span><strong>{formatFecha(detalle.fechaFin)}</strong></div>
-          <div className="dia-metric"><span>Tiempo</span><strong>{formatTiempo(detalle.tiempoMinutos)}</strong></div>
+          <div className="dia-metric"><span>Tiempo</span><strong>{formatTiempo(detalle.fechaInicio, detalle.fechaFin, detalle.tiempoMinutos)}</strong></div>
           <div className="dia-metric"><span>Abandonos</span><strong>{detalle.numAbandonos ?? 0}</strong></div>
-          <div className="dia-metric"><span>Nota</span><strong>{detalle.nota ?? 0}/10</strong></div>
+          <div className="dia-metric"><span>Nota</span><strong>{formatNotaDesdePuntuacion(detalle.puntuacion, detalle.puntuacionMaxima)}/10</strong></div>
         </div>
 
         <div className="dia-score-editor">
