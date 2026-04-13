@@ -23,6 +23,7 @@ type PreguntaDTO = { id: number; pregunta: string };
 type TableroAlumnoDTO = {
   id: number;
   titulo: string;
+  descripcion?: string | null;
   tamano: boolean; // true = 3×3, false = 4×4
   respVisible: boolean;
   puntuacion?: number;
@@ -507,7 +508,12 @@ export default function TableroAlumno() {
       <NavbarMisCursos />
       <main className="ta-main">
         <div className="ta-wrapper">
-          <ActivityHeader title={tablero.titulo} guideType="tablero" guideRole="alumno" />
+          <ActivityHeader
+            title={tablero.titulo}
+            subtitle={tablero.descripcion?.trim() || undefined}
+            guideType="tablero"
+            guideRole="alumno"
+          />
 
           <div className="ta-progress">
             <img src={hombreMisteriosoImg} alt="Hombre misterioso" className="ta-progress-avatar" />

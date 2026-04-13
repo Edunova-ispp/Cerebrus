@@ -20,6 +20,11 @@ interface MediasCursoProps {
   readonly temaIdSeleccionado?: number;
 }
 
+function formatearNota2Dec(valor: number | null | undefined): string {
+  if (typeof valor !== 'number' || !Number.isFinite(valor)) return '0.00';
+  return valor.toFixed(2);
+}
+
 export default function MediasCurso({ cursoIdProp, embedded, temaIdSeleccionado }: MediasCursoProps = {}) {
   const params = useParams<{ id: string }>();
   const id = cursoIdProp ?? params.id;
@@ -98,16 +103,16 @@ export default function MediasCurso({ cursoIdProp, embedded, temaIdSeleccionado 
             <div className="stat-cards-row">
               <div className="stat-card">
                 <span className="stat-card__label">Nota media</span>
-                <span className="stat-card__value">{statsResumen.media.toFixed(1)}</span>
+                <span className="stat-card__value">{formatearNota2Dec(statsResumen.media)}</span>
               </div>
               <div className="stat-card">
                 <span className="stat-card__label">Mejor nota</span>
-                <span className="stat-card__value">{statsResumen.maxNota}</span>
+                <span className="stat-card__value">{formatearNota2Dec(statsResumen.maxNota)}</span>
                 <span className="stat-card__name">{statsResumen.mejorAct.titulo}</span>
               </div>
               <div className="stat-card">
                 <span className="stat-card__label">Peor nota</span>
-                <span className="stat-card__value">{statsResumen.minNota}</span>
+                <span className="stat-card__value">{formatearNota2Dec(statsResumen.minNota)}</span>
                 <span className="stat-card__name">{statsResumen.peorAct.titulo}</span>
               </div>
             </div>
@@ -132,7 +137,7 @@ export default function MediasCurso({ cursoIdProp, embedded, temaIdSeleccionado 
                         </span>
                       </td>
                       <td>{act.titulo}</td>
-                      <td className="text-center font-bold">{mapaNotas.get(act.id) ?? 0}</td>
+                      <td className="text-center font-bold">{formatearNota2Dec(mapaNotas.get(act.id) ?? 0)}</td>
                     </tr>
                   ))}
                 </tbody>

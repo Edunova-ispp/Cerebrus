@@ -270,7 +270,7 @@ class EstadisticasMaestroControllerTest {
     @Test
     void obtenerResumenEstadisticasAlumno_alumnoExistente_retorna200ConResumen() {
         EstadisticasAlumnoResumenDTO resumen = new EstadisticasAlumnoResumenDTO(
-                2L, "Alumno 1", 8.5, 6, 10, 3, 5, 120, 0, List.of());
+                2L, "Alumno 1", 8.5, 6.0, 10.0, 3, 5, 120, 0, List.of());
         when(estadisticasMaestroService.obtenerResumenEstadisticasAlumno(10L, 2L)).thenReturn(resumen);
 
         ResponseEntity<?> respuesta = controller.obtenerResumenEstadisticasAlumno(10L, 2L);

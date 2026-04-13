@@ -23,6 +23,9 @@
   display: flex;
   flex-direction: column;
   font-family: 'Pixelify Sans', 'Oxygen', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .avm-header {
@@ -36,10 +39,12 @@
 
 .avm-title {
   margin: 0;
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 600;
   color: #222;
   text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .avm-close {
@@ -112,17 +117,21 @@
   text-transform: uppercase;
   color: #444;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.2px;
   text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .avm-answer-text {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: #222;
   line-height: 1.5;
   word-wrap: break-word;
   text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .avm-status {

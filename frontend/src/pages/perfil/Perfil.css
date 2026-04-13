@@ -1,37 +1,70 @@
+.perfil-shell {
+  min-height: 100vh;
+  font-family: 'Pixelify Sans', sans-serif;
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255, 242, 148, 0.30) 0%, rgba(255, 242, 148, 0) 34%),
+    radial-gradient(circle at 86% 84%, rgba(226, 133, 169, 0.16) 0%, rgba(226, 133, 169, 0) 36%),
+    linear-gradient(155deg, #fffdf7 0%, #fff9fc 54%, #fffaf4 100%);
+}
+
 .perfil-page {
-  min-height: 80vh;
+  min-height: calc(100vh - 90px);
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 48px 20px;
+  padding: 28px 20px 48px;
+}
+
+.perfil-shell.perfil-page--maestro,
+.perfil-shell.perfil-page--default {
   font-family: 'Oxygen', sans-serif;
-  background: var(--t-bg);
 }
 
 .perfil-card {
   width: 100%;
-  max-width: 500px;
-  background: var(--t-card);
-  border: 1px solid var(--t-border);
-  border-radius: var(--t-radius-lg);
-  padding: 36px 32px;
-  box-shadow: var(--t-shadow-md);
+  max-width: 620px;
+  background: #e285a9;
+  border: 4px solid #000;
+  border-radius: 20px;
+  padding: 28px 26px;
+  box-shadow: 8px 8px 0 #000;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
+.perfil-page--maestro .perfil-card,
+.perfil-page--default .perfil-card {
+  max-width: 540px;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  box-shadow: var(--t-shadow-md);
+  padding: 34px 30px;
+}
+
 .perfil-heading {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-text, #000638);
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #fff294;
+  -webkit-text-stroke: 2px #000;
+  text-shadow: 3px 3px 0 #000;
   margin: 0;
   text-align: center;
 }
 
+.perfil-page--maestro .perfil-heading,
+.perfil-page--default .perfil-heading {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text, #000638);
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+
 .perfil-loading {
   text-align: center;
-  color: #888;
+  color: #1a1a1a;
   font-size: 1.1rem;
 }
 
@@ -39,20 +72,22 @@
 .perfil-msg {
   text-align: center;
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 0.95rem;
   font-weight: 600;
-  border: 1px solid;
+  border: 3px solid;
 }
 .perfil-msg--ok {
-  background: #d4edda;
-  color: #155724;
-  border-color: #155724;
+  background: #dbf7dd;
+  color: #0f6f2f;
+  border-color: #0f6f2f;
+  box-shadow: 3px 3px 0 #0f6f2f;
 }
 .perfil-msg--err {
-  background: #f8d7da;
+  background: #ffe0e5;
   color: #721c24;
   border-color: #721c24;
+  box-shadow: 3px 3px 0 #721c24;
 }
 
 /* ── Fields ── */
@@ -65,20 +100,42 @@
 .perfil-field {
   display: flex;
   flex-direction: column;
+  gap: 4px;
+  background: #fff3c7;
+  border: 3px solid #000;
+  border-radius: 12px;
+  padding: 10px 12px;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.perfil-page--maestro .perfil-field,
+.perfil-page--default .perfil-field {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
   gap: 2px;
 }
 
 .perfil-label {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: #888;
+  color: #3d3d3d;
   text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.perfil-page--maestro .perfil-label,
+.perfil-page--default .perfil-label {
+  font-size: 0.8rem;
+  color: #888;
   letter-spacing: 0.5px;
 }
 
 .perfil-value {
   font-size: 1.1rem;
-  color: #222;
+  color: #111;
 }
 
 /* ── Form ── */
@@ -91,23 +148,38 @@
 .perfil-form-label {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--color-text, #000638);
+  color: #111;
 }
 
 .perfil-form-label input {
-  padding: 10px 14px;
-  border: 1px solid var(--t-border);
-  border-radius: 8px;
+  padding: 10px 12px;
+  border: 3px solid #000;
+  border-radius: 12px;
   font-family: inherit;
   font-size: 1rem;
+  background: #fff3c7;
+  box-shadow: 3px 3px 0 #000;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.perfil-page--maestro .perfil-form-label input,
+.perfil-page--default .perfil-form-label input {
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
   background: var(--t-input-bg);
-  transition: border-color 0.15s, box-shadow 0.15s;
+  box-shadow: none;
 }
 .perfil-form-label input:focus {
   outline: none;
+  border-color: #7a0030;
+  background: #fff;
+}
+
+.perfil-page--maestro .perfil-form-label input:focus,
+.perfil-page--default .perfil-form-label input:focus {
   border-color: var(--t-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
@@ -121,17 +193,26 @@
 
 .perfil-btn {
   flex: 1;
-  padding: 12px 20px;
-  border: 1px solid var(--t-border);
-  border-radius: 8px;
+  padding: 10px 16px;
+  border: 3px solid #000;
+  border-radius: 12px;
   font-family: inherit;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, box-shadow 0.15s;
+  box-shadow: 3px 3px 0 #000;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.perfil-page--maestro .perfil-btn,
+.perfil-page--default .perfil-btn {
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
+  box-shadow: var(--t-shadow-sm);
 }
 .perfil-btn:active {
-  transform: scale(0.97);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000;
 }
 .perfil-btn:disabled {
   opacity: 0.6;
@@ -139,47 +220,49 @@
 }
 
 .perfil-btn--edit {
+  background: #fff294;
+  color: #1a1a1a;
+}
+
+.perfil-page--maestro .perfil-btn--edit,
+.perfil-page--default .perfil-btn--edit {
   background: var(--t-primary-light);
   color: var(--t-primary);
-  border-color: var(--t-primary);
-  box-shadow: var(--t-shadow-sm);
 }
 .perfil-btn--edit:hover {
-  background: var(--t-input-focus);
+  background: #ffe87a;
 }
 
 .perfil-btn--save {
+  background: #7c4dff;
+  color: #fff;
+}
+
+.perfil-page--maestro .perfil-btn--save,
+.perfil-page--default .perfil-btn--save {
   background: var(--t-primary);
   color: #fff;
-  border-color: var(--t-primary);
-  box-shadow: var(--t-shadow-sm);
 }
 .perfil-btn--save:hover {
-  background: var(--t-primary-hover);
+  background: #6940db;
 }
 
 .perfil-btn--cancel {
-  background: var(--t-card);
-  color: var(--t-text-secondary);
-  border-color: var(--t-border);
-  box-shadow: var(--t-shadow-sm);
-}
-.perfil-btn--cancel:hover {
-  background: #f1f5f9;
+  background: #fff3c7;
+  color: #222;
 }
 
-.perfil-btn--logout {
-  background: var(--t-danger-light);
-  color: var(--t-danger);
-  border-color: var(--t-danger);
-  box-shadow: var(--t-shadow-sm);
+.perfil-page--maestro .perfil-btn--cancel,
+.perfil-page--default .perfil-btn--cancel {
+  background: var(--t-card);
+  color: var(--t-text-secondary);
 }
-.perfil-btn--logout:hover {
-  background: #fecaca;
+.perfil-btn--cancel:hover {
+  background: #ffe7a8;
 }
 
 @media (max-width: 480px) {
-  .perfil-card { padding: 24px 18px; }
+  .perfil-card { padding: 22px 16px; }
   .perfil-heading { font-size: 1.6rem; }
   .perfil-actions { flex-direction: column; }
 }

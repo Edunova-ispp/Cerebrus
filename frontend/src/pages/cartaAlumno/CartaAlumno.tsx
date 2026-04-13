@@ -476,7 +476,12 @@ export default function CartaAlumno() {
         {carta && !loading && (
           <>
             {/* ── Header ── */}
-            <ActivityHeader title={carta.titulo} guideType="carta" guideRole="alumno" />
+            <ActivityHeader
+              title={carta.titulo}
+              subtitle={carta.descripcion?.trim() || undefined}
+              guideType="carta"
+              guideRole="alumno"
+            />
 
             {/* ── Progress ── */}
             <div className="ca-al-progress">
