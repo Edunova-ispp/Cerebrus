@@ -170,16 +170,21 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
 
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
+    if (titulo.trim().length > 25) return 'El título no puede exceder 25 caracteres';
+
+    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder 1000 caracteres';
 
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
     if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
+    if (puntuacionNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
 
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
     if (!cursoId) return 'Falta el id del curso en la URL';
 
     if (cards.length === 0) return 'Añade al menos una carta';
+    if (cards.length > 30) return 'No puedes añadir más de 20 cartas';
 
     for (let ci = 0; ci < cards.length; ci++) {
       const c = cards[ci];
@@ -542,9 +547,11 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             </div>
           ))}
 
-          <button type="button" className="cf-btn-add-card" onClick={addCard}>
-            + Añadir carta
-          </button>
+          {cards.length < 30 && (
+            <button type="button" className="cf-btn-add-card" onClick={addCard}>
+              + Añadir carta
+            </button>
+          )}
         </div>
 
         <div className="ca-form-footer">

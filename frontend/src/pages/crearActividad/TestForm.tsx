@@ -179,18 +179,25 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
     if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
+    if (puntuacionNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
 
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
     if (!cursoId) return 'Falta el id del curso en la URL';
 
+    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
+    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+
     if (questions.length === 0) return 'Añade al menos una pregunta';
+    if (questions.length > 100) return 'No puedes añadir más de 100 preguntas';
 
     for (let qi = 0; qi < questions.length; qi++) {
       const q = questions[qi];
       if (!q.text.trim()) return `La pregunta ${qi + 1} no tiene texto`;
       if (q.options.length < 2)
         return `La pregunta ${qi + 1} debe tener al menos 2 opciones`;
+      if (q.options.length > 26)
+        return `La pregunta ${qi + 1} no puede tener más de 26 opciones`;
       for (let oi = 0; oi < q.options.length; oi++) {
         if (!q.options[oi].text.trim())
           return `La opción ${oi + 1} de la pregunta ${qi + 1} está vacía`;
@@ -601,15 +608,19 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
                 ))}
               </div>
 
-              <button type="button" className="tf-btn-add-option" onClick={() => addOption(qi)}>
-                + Añadir opción
-              </button>
+              {q.options.length < 26 && (
+                <button type="button" className="tf-btn-add-option" onClick={() => addOption(qi)}>
+                  + Añadir opción
+                </button>
+              )}
             </div>
           ))}
 
-          <button type="button" className="tf-btn-add-question" onClick={addQuestion}>
+          {questions.length < 100 && (
+            <button type="button" className="tf-btn-add-question" onClick={addQuestion}>
             + Añadir pregunta
-          </button>
+            </button>
+          )}
         </div>
 
       <div className="ca-form-footer">

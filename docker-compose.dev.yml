@@ -45,6 +45,26 @@ services:
     ports:
       - "8080:8080"
     command: mvn spring-boot:run -Dspring-boot.run.profiles=docker
+
+  locust:
+    image: locustio/locust:2.39.1
+    container_name: cerebrus-locust
+    depends_on:
+      - backend
+    working_dir: /mnt/locust
+    volumes:
+      - ./locust:/mnt/locust
+    environment:
+      CEREBRUS_USERNAME: ${CEREBRUS_USERNAME:-alumno_harry}
+      CEREBRUS_PASSWORD: ${CEREBRUS_PASSWORD:-123456}
+      CEREBRUS_MAESTRO_USERNAME: ${CEREBRUS_MAESTRO_USERNAME:-carlos_pro}
+      CEREBRUS_MAESTRO_PASSWORD: ${CEREBRUS_MAESTRO_PASSWORD:-123456}
+    command:
+      - -f
+      - /mnt/locust/locustfile.py
+      - --host=http://backend:8080
+    ports:
+      - "8089:8089"
   
 
   frontend:
