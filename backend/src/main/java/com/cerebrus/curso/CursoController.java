@@ -94,7 +94,7 @@ public class CursoController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             } else if (e.getMessage().equals("403 Forbidden")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            } else if (e.getMessage().equals("Este código ya esta en uso, por favor elige otro")) {
+            } else if (e.getMessage().equals("Este código ya es utilizado por otro curso, por favor elige otro")) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
             }else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
