@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.TestInstance;
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -17,22 +18,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.Socket;
 
-/**
- * Clase base para todos los tests E2E con Selenium.
- *
- * Uso:
- *   - Extender esta clase en cada IT (e.g. LoginIT extends SeleniumBaseTest)
- *   - Ejecutar con: mvn verify -Pe2e
- *   - Opciones configurables por sistema:
- *       -Dselenium.baseUrl=http://localhost:5173   (default en perfil e2e)
- *         (si usas compose no-dev, normalmente será http://localhost:3000)
- *       -Dselenium.headless=false                  (default: true en CI)
- */
 @Tag("e2e")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class SeleniumBaseTest {
 
-    /** URL base de la aplicación frontend contra la que corren los tests. */
     protected static final String BASE_URL =
             System.getProperty("selenium.baseUrl", "http://localhost:5173");
 
@@ -43,6 +32,7 @@ public abstract class SeleniumBaseTest {
         ensureFrontendIsReachable();
 
         ChromeOptions options = new ChromeOptions();
+        options.setPageLoadStrategy(PageLoadStrategy.EAGER);
 
         boolean headless = Boolean.parseBoolean(
                 System.getProperty("selenium.headless", "true"));
@@ -57,24 +47,25 @@ public abstract class SeleniumBaseTest {
     }
 
     @BeforeEach
-void resetBrowserState() {
-    // 1. Primero navegar a una página estable del dominio
-    try {
-        driver.get(BASE_URL + "/");
-    } catch (WebDriverException ignored) {}
-
-    // 2. Borrar cookies (ahora el driver está en un dominio válido)
-    try {
-        driver.manage().deleteAllCookies();
-    } catch (WebDriverException ignored) {}
-
-    // 3. Limpiar storage
-    if (driver instanceof JavascriptExecutor js) {
+    void resetBrowserState() {
         try {
-            js.executeScript("window.localStorage.clear(); window.sessionStorage.clear();");
+            ((JavascriptExecutor) driver).executeScript("window.stop();");
         } catch (WebDriverException ignored) {}
+
+        try {
+            driver.get(BASE_URL + "/");
+        } catch (WebDriverException ignored) {}
+
+        try {
+            driver.manage().deleteAllCookies();
+        } catch (WebDriverException ignored) {}
+
+        if (driver instanceof JavascriptExecutor js) {
+            try {
+                js.executeScript("window.localStorage.clear(); window.sessionStorage.clear();");
+            } catch (WebDriverException ignored) {}
+        }
     }
-}
 
     @AfterAll
     void tearDownDriver() {
@@ -83,7 +74,6 @@ void resetBrowserState() {
         }
     }
 
-    /** Navega a una ruta relativa de la aplicación (e.g. "/auth/login"). */
     protected void navigateTo(String path) {
         driver.get(BASE_URL + path);
     }
