@@ -66,6 +66,9 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
     if (!cursoId) return 'Falta el id del curso en la URL';
     if (!descripcion.trim()) return 'La descripción es requerida en una actividad de teoría';
 
+    if (descripcion.trim().length > 350) return 'La descripción no puede exceder los 350 caracteres.';
+    if (/[\r\n]/.test(descripcion)) return 'La descripción no puede incluir saltos de línea.';
+
     return null;
   };
 
