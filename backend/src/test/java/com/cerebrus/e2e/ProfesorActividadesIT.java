@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -20,10 +21,12 @@ class ProfesorActividadesIT extends SeleniumBaseTest {
     private static final String BACKEND_URL = System.getProperty("selenium.backendUrl", "http://localhost:8080");
     private static final String PROFESOR_USUARIO = "carlos_pro";
     private static final String PROFESOR_PASSWORD = "123456";
-    private static final long CURSO_ID = 4001L;
-    private static final long TEMA_ID = 5002L;
+    private static final long CURSO_ID = 10101L;    
+    private static final long TEMA_ID = 10301L;
     private static final long CURSO_SEED_COMPLETO_ID = 10101L;
     private static final long TEMA_SEED_COMPLETO_ID = 10301L;
+
+     
 
     @Test
     @DisplayName("Sin autenticacion, rutas de crear/editar actividad redirigen a login")
@@ -45,43 +48,99 @@ class ProfesorActividadesIT extends SeleniumBaseTest {
     }
 
     @Test
-    @DisplayName("El profesor puede crear, editar y borrar una teoría desde la UI")
-    void profesorPuedeCrearEditarYBorrarUnaTeoria() {
-        loginAsProfesor();
+@DisplayName("El profesor puede crear, editar y borrar una teoría desde la UI")
+void profesorPuedeCrearEditarYBorrarUnaTeoria() {
+    login(PROFESOR_USUARIO, PROFESOR_PASSWORD);
 
-        navigateTo("/cursos/" + CURSO_ID);
-        waitUntilUrlContains("/cursos/" + CURSO_ID);
 
-        navigateTo("/cursos/" + CURSO_ID + "/temas/" + TEMA_ID + "/actividades/crear");
-        abrirFormularioTeoria();
+    navigateTo("/cursos/" + CURSO_ID + "/temas/" + TEMA_ID + "/actividades/crear");
+    abrirFormularioTeoria();
 
-        String tituloCreado = "E2E Teoría Temporal";
-        String descripcionCreada = "Contenido temporal creado por Selenium";
+    String tituloCreado = "E2E Teoría Temporal";
+    String descripcionCreada = "Contenido temporal creado por Selenium";
+    rellenarFormularioTeoria(tituloCreado, descripcionCreada);
+    guardarFormularioTeoria();
+try { Thread.sleep(3000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
 
-        rellenarFormularioTeoria(tituloCreado, descripcionCreada);
-        guardarFormularioTeoria();
+WebDriverWait wait = new WebDriverWait(driver, WAIT);
+wait.until(ExpectedConditions.or(
+    ExpectedConditions.urlContains("/miscursos"),
+    ExpectedConditions.urlContains("/cursos/" + CURSO_ID)
+));
+// Hacer click en el tema para que se muestren sus actividades en el panel derecho
+By temaLocator = By.xpath(
+    "//div[contains(@class,'ltp-panel')][1]" +
+    "//div[contains(@class,'ltp-item')]"
+);
 
-        waitUntilUrlContains("/cursos/" + CURSO_ID);
-        Long teoriaCreadaId = waitUntilTeoriaCreadaIdPorTitulo(TEMA_ID, tituloCreado);
-        assertThat(teoriaCreadaId).isNotNull();
+// Buscar el tema activo o el primero disponible y clickarlo si no está activo
+List<WebElement> temas = driver.findElements(
+    By.cssSelector("div.ltp-panel:first-child div.ltp-item")
+);
 
-        navigateTo("/cursos/" + CURSO_ID + "/temas/" + TEMA_ID + "/actividades/" + teoriaCreadaId + "/editar");
-        abrirFormularioTeoriaEnEdicion();
-        waitUntilFieldValue(By.id("teoria-titulo"), tituloCreado);
+// Buscar si ya hay un tema activo seleccionado, si no, seleccionar el primero
+boolean temaActivo = driver.findElements(
+    By.cssSelector("div.ltp-panel:first-child div.ltp-item--activo")
+).stream().findFirst().isPresent();
 
-        String tituloEditado = "E2E Teoría Temporal Editada";
-        String descripcionEditada = "Contenido temporal editado por Selenium";
-        rellenarFormularioTeoria(tituloEditado, descripcionEditada);
-        guardarFormularioTeoria();
+if (!temaActivo && !temas.isEmpty()) {
+    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", temas.get(0));
+    try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+}
 
-        waitUntilUrlContains("/cursos/" + CURSO_ID);
-        borrarTeoriaCreada(teoriaCreadaId);
-    }
+// Ahora buscar la actividad en el panel derecho
+By itemLocator = By.xpath(
+    "//div[contains(@class,'ltp-item')]" +
+    "[.//span[contains(@class,'ltp-item-titulo') and normalize-space()='" + tituloCreado + "']]"
+);
+// Navegar manualmente al curso
+navigateTo("/cursos/" + CURSO_ID);
+wait.until(ExpectedConditions.urlContains("/cursos/" + CURSO_ID));
 
+
+// Buscar el tema del panel izquierdo
+
+WebElement item = wait.until(ExpectedConditions.visibilityOfElementLocated(itemLocator));    
+WebElement editBtn = item.findElement(By.cssSelector("button[title='Editar']"));
+    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", editBtn);
+
+    // Esperar a que cargue el formulario de edición y verificar el título
+    abrirFormularioTeoriaEnEdicion();
+    waitUntilFieldValue(By.id("teoria-titulo"), tituloCreado);
+
+    // Editar
+    String tituloEditado = "E2E Teoría Temporal Editada";
+    String descripcionEditada = "Contenido temporal editado por Selenium";
+    rellenarFormularioTeoria(tituloEditado, descripcionEditada);
+    guardarFormularioTeoria();
+    // Volver al curso y borrar la actividad editada
+    wait.until(ExpectedConditions.urlContains("/cursos/" + CURSO_ID));
+
+    By itemEditadoLocator = By.xpath(
+        "//div[contains(@class,'ltp-item')]" +
+        "[.//span[contains(@class,'ltp-item-titulo') and normalize-space()='" + tituloEditado + "']]"
+    );
+    WebElement itemEditado = wait.until(ExpectedConditions.visibilityOfElementLocated(itemEditadoLocator));
+    WebElement deleteBtn = itemEditado.findElement(By.cssSelector("button[title='Borrar']"));
+    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", deleteBtn);
+
+    // Confirmar borrado si hay alerta
+    try {
+        wait.until(ExpectedConditions.alertIsPresent());
+        driver.switchTo().alert().accept();
+    } catch (org.openqa.selenium.TimeoutException ignored) {}
+
+    // Verificar que ya no aparece
+    wait.until(d -> d.findElements(itemEditadoLocator).isEmpty());
+    assertThat(driver.findElements(itemEditadoLocator)).isEmpty();
+
+    
+}
     @Test
     @DisplayName("La validación de teoría mantiene al profesor en la pantalla cuando faltan datos")
     void validacionTeoriaMantieneLaPantalla() {
-        loginAsProfesor();
+       login(PROFESOR_USUARIO, PROFESOR_PASSWORD);
+
 
         navigateTo("/cursos/" + CURSO_ID + "/temas/" + TEMA_ID + "/actividades/crear");
         abrirFormularioTeoria();
@@ -98,7 +157,8 @@ class ProfesorActividadesIT extends SeleniumBaseTest {
     @Test
     @DisplayName("El profesor ve correctamente los campos de todos los formularios de creación")
     void profesorVeCamposDeTodosLosFormulariosDeCreacion() {
-        loginAsProfesor();
+        login(PROFESOR_USUARIO, PROFESOR_PASSWORD);
+
 
         navigateTo("/cursos/" + CURSO_ID + "/temas/" + TEMA_ID + "/actividades/crear");
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
@@ -167,7 +227,8 @@ class ProfesorActividadesIT extends SeleniumBaseTest {
     @Test
     @DisplayName("El profesor puede abrir y editar campos de actividades seed en modo edición")
     void profesorPuedeEditarCamposDeActividadesSeed() {
-        loginAsProfesor();
+        login(PROFESOR_USUARIO, PROFESOR_PASSWORD);
+
 
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
 
@@ -204,72 +265,6 @@ class ProfesorActividadesIT extends SeleniumBaseTest {
         assertThat(ordenTitulo.getAttribute("value")).isEqualTo("Ciclo de Vida de una Planta (edición E2E)");
     }
 
-    private void loginAsProfesor() {
-        navigateTo("/auth/login");
-
-        if (loginAsProfesorViaApi()) {
-            navigateTo("/miscursos");
-            WebDriverWait wait = new WebDriverWait(driver, WAIT);
-            wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
-            assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
-            return;
-        }
-
-        WebDriverWait wait = new WebDriverWait(driver, WAIT);
-        WebElement usuarioInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
-        usuarioInput.clear();
-        usuarioInput.sendKeys(PROFESOR_USUARIO);
-
-        WebElement passwordInput = driver.findElement(By.id("password"));
-        passwordInput.clear();
-        passwordInput.sendKeys(PROFESOR_PASSWORD);
-
-        driver.findElement(By.cssSelector("button.pixel-btn-submit")).click();
-
-        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
-        assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
-    }
-
-    private boolean loginAsProfesorViaApi() {
-        Object raw = ((JavascriptExecutor) driver).executeAsyncScript("""
-            const usuario = arguments[0];
-            const password = arguments[1];
-            const backendUrl = arguments[2];
-            const done = arguments[arguments.length - 1];
-
-            const base = String(backendUrl || '');
-            const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
-            fetch(normalizedBase + '/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ identificador: usuario, password })
-            })
-                .then(async (response) => {
-                    let data = null;
-                    try {
-                        data = await response.json();
-                    } catch (ignored) {
-                        data = null;
-                    }
-
-                    if (!response.ok || !data || !data.token) {
-                        done(false);
-                        return;
-                    }
-
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('username', data.username || usuario);
-                    const roleValue = Array.isArray(data.roles)
-                        ? data.roles.join(',')
-                        : String(data.roles || '');
-                    localStorage.setItem('role', roleValue);
-                    done(true);
-                })
-                .catch(() => done(false));
-            """, PROFESOR_USUARIO, PROFESOR_PASSWORD, BACKEND_URL);
-
-        return Boolean.TRUE.equals(raw);
-    }
 
     private void abrirFormularioTeoria() {
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
@@ -289,9 +284,27 @@ class ProfesorActividadesIT extends SeleniumBaseTest {
     }
 
     private void guardarFormularioTeoria() {
-        WebDriverWait wait = new WebDriverWait(driver, WAIT);
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[normalize-space()='Guardar']"))).click();
-    }
+    WebDriverWait wait = new WebDriverWait(driver, WAIT);
+
+    // Ocultar el botón flotante de Watchbug que interfiere
+    ((JavascriptExecutor) driver).executeScript(
+        "const wb = document.getElementById('watchbug-dashboard-btn'); if (wb) wb.style.display = 'none';"
+    );
+
+    WebElement guardarBtn = wait.until(
+        ExpectedConditions.presenceOfElementLocated(
+            By.xpath("//button[normalize-space()='Guardar']")
+        )
+    );
+
+    ((JavascriptExecutor) driver).executeScript(
+        "arguments[0].scrollIntoView({block:'center'});", guardarBtn
+    );
+    // Usar JS click en lugar de .click() para evitar el interceptor de Watchbug
+    ((JavascriptExecutor) driver).executeScript(
+        "arguments[0].click();", guardarBtn
+    );
+}
 
     private void abrirFormularioTeoriaEnEdicion() {
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
