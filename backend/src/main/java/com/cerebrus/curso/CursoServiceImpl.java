@@ -44,6 +44,15 @@ public class CursoServiceImpl implements CursoService {
             throw new RuntimeException("Este código ya esta en uso, por favor elige otro");
         }
     }
+    public void validarCodigoUnicoActualizar(String codigo, Long id) {
+        // En la actualización, el código puede ser el mismo que el del curso que se está actualizando, 
+        // pero no puede ser el mismo que el de otro curso diferente.
+        Curso curso = cursoRepository.findByCodigo(codigo);
+        if (curso != null && !curso.getId().equals(id)) {
+            throw new RuntimeException("Este código ya es utilizado por otro curso, por favor elige otro");
+        }
+    }
+
     @Transactional
     @Override
     public Curso crearCurso(String titulo, String descripcion, String imagen, String codigoPersonalizado) {
@@ -137,7 +146,7 @@ public class CursoServiceImpl implements CursoService {
         if (!curso.getMaestro().getId().equals(usuario.getId())) {
             throw new AccessDeniedException("Solo el propietario del curso puede actualizarlo");
         }
-        validarCodigoUnico(codigo);
+        validarCodigoUnicoActualizar(codigo, id);
         curso.setTitulo(titulo);
         curso.setDescripcion(descripcion);
         curso.setImagen(imagen);
