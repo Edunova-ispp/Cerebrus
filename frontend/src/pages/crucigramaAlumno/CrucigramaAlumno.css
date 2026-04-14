@@ -141,6 +141,7 @@
 }
 
 /* ── Cells ── */
+.cr-cell {
   appearance: none;
   border: none;
   background: transparent;
@@ -166,6 +167,7 @@
   user-select: none;
   box-sizing: border-box;
 }
+
 
 .cr-cell:hover:not(.blocked) {
   background: #f0e0ff;
