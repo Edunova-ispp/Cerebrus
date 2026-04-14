@@ -71,8 +71,8 @@ class TemasIT extends SeleniumBaseTest {
                 );
 
                 assertThat(title.getText()).isEqualToIgnoringCase("MIS CURSOS");
-                assertThat(driver.findElements(By.cssSelector("div.curso-card"))).isNotEmpty();
-
+pageWait.until(d -> !d.findElements(By.cssSelector("div.curso-card")).isEmpty());
+assertThat(driver.findElements(By.cssSelector("div.curso-card"))).isNotEmpty();
                 navigateTo("/cursos/" + sharedCourse.id());
                 pageWait.until(ExpectedConditions.urlContains("/cursos/" + sharedCourse.id()));
 

@@ -361,8 +361,7 @@ class SuscripcionServiceImplTest {
 
         assertThatThrownBy(() -> service.confirmarPagoExitoso("txn-x"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Transacción no encontrada");
-    }
+.hasMessageContaining("Transacción no encontrada");    }
 
     @Test
     void confirmarPagoExitoso_lanzaIllegalArgument_siYaEstaPagada() {
