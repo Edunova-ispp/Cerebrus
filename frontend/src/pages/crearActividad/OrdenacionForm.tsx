@@ -97,6 +97,16 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       return;
     }
 
+    if (titulo.trim().length > 25) {
+      setError('El título no puede exceder los 25 caracteres.');
+      return;
+    }
+
+    if (descripcion.trim().length > 1000) {
+      setError('La descripción no puede exceder los 1000 caracteres.');
+      return;
+    }
+
     if (!puntuacion.trim()) {
       setError('La puntuación de la actividad de ordenación es requerida');
       return;
@@ -109,6 +119,10 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
     }
     if (puntuacionNum <= 0) {
       setError('La puntuación debe ser un número mayor a 0');
+      return;
+    }
+    if (puntuacionNum > 999999999) {
+      setError('La puntuación no puede exceder 999.999.999');
       return;
     }
 
@@ -355,16 +369,18 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
               />
             </div>
           ))}
-          <button
-            className="of-btn-add"
-            type="button"
-            onClick={() => {
-              setOrdenItems([...ordenItems, '']);
-              setOrdenItemKeys([...ordenItemKeys, makeLocalKey()]);
-            }}
-          >
-            +
-          </button>
+          {ordenItems.length < 50 && (
+            <button
+              className="of-btn-add"
+              type="button"
+              onClick={() => {
+                setOrdenItems([...ordenItems, '']);
+                setOrdenItemKeys([...ordenItemKeys, makeLocalKey()]);
+              }}
+            >
+              +
+            </button>
+          )}
         </div>
       </div>
 

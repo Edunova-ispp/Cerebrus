@@ -102,8 +102,13 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
 
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
+    
+    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
+
     const pts = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(pts) || pts <= 0) return 'La puntuación debe ser un número mayor a 0';
+    if (pts > 999999999) return 'La puntuación no puede exceder 999.999.999';
     if (tamano === null) return 'Selecciona el tamaño del tablero';
     if (mode === 'create' && !temaId) return 'Falta el id del tema en la URL';
     if (mode === 'edit' && !tableroId) return 'Falta el id del tablero a editar';

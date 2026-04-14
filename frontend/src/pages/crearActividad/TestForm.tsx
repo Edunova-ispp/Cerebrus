@@ -179,12 +179,13 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
     if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
+    if (puntuacionNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
 
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
     if (!cursoId) return 'Falta el id del curso en la URL';
 
-    if (descripcion.trim().length > 500) return 'La descripción no puede exceder los 500 caracteres.';
+    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
     if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
 
     if (questions.length === 0) return 'Añade al menos una pregunta';
