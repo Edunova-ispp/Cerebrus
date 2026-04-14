@@ -152,6 +152,11 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       return;
     }
 
+    if (valores.length > 50) {
+      setError('No puedes añadir más de 50 valores');
+      return;
+    }
+
     setLoading(true);
     try {
       const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");

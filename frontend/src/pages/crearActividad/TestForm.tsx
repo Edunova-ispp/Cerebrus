@@ -189,12 +189,15 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
     if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
 
     if (questions.length === 0) return 'Añade al menos una pregunta';
+    if (questions.length > 100) return 'No puedes añadir más de 100 preguntas';
 
     for (let qi = 0; qi < questions.length; qi++) {
       const q = questions[qi];
       if (!q.text.trim()) return `La pregunta ${qi + 1} no tiene texto`;
       if (q.options.length < 2)
         return `La pregunta ${qi + 1} debe tener al menos 2 opciones`;
+      if (q.options.length > 26)
+        return `La pregunta ${qi + 1} no puede tener más de 26 opciones`;
       for (let oi = 0; oi < q.options.length; oi++) {
         if (!q.options[oi].text.trim())
           return `La opción ${oi + 1} de la pregunta ${qi + 1} está vacía`;

@@ -73,6 +73,46 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
         return 'Error del servidor al guardar';
     };
 
+    const validate = (): string | null => {
+        if (!titulo.trim()) return 'El título es requerido';
+        if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+
+        if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
+
+        if (!temaId) return 'Falta el id del tema en la URL';
+        if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
+
+        if (!puntuacion.trim()) return 'La puntuación es requerida';
+        const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
+        if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
+        if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
+        if (puntuacionNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
+
+        const nonEmptyPairs = preguntas.filter((p) => p.pregunta.trim() || p.respuesta.trim());
+        if (nonEmptyPairs.length === 0) return 'Debes completar al menos una pregunta y su respuesta.';
+        if (preguntas.length > MAX_PALABRAS) return `No puedes añadir más de ${MAX_PALABRAS} palabras.`;
+
+        for (let i = 0; i < preguntas.length; i++) {
+            const clue = preguntas[i].pregunta.trim();
+            const rawAnswer = preguntas[i].respuesta.trim();
+
+            if (!clue && !rawAnswer) continue;
+            if (!clue) return `La pista de la palabra ${i + 1} es requerida`;
+            if (!rawAnswer) return `La palabra (respuesta) ${i + 1} es requerida`;
+
+            const normalizedRespuesta = sanitizeRespuesta(rawAnswer);
+            if (!normalizedRespuesta) return `La palabra (respuesta) ${i + 1} es requerida`;
+            if (!ONLY_LETTERS_REGEX.test(normalizedRespuesta)) {
+                return 'Las respuestas del crucigrama solo pueden contener letras.';
+            }
+        }
+
+        if (mode === 'edit' && !crucigramaId) return 'Falta el id del crucigrama a editar';
+        if (!cursoId) return 'Falta el id del curso en la URL';
+
+        return null;
+    };
+
     // ── Load initial values ───────────────────────────────────────────────
     useEffect(() => {
         if (!initialValues) return;
@@ -121,6 +161,12 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const validationError = validate();
+        if (validationError) {
+            setError(validationError);
+            return;
+        }
+
         setLoading(true);
         setError('');
 
@@ -129,20 +175,9 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
             preguntas.forEach(p => {
                 if (p.pregunta.trim() && p.respuesta.trim()) {
                     const normalizedRespuesta = sanitizeRespuesta(p.respuesta.trim());
-                    if (!ONLY_LETTERS_REGEX.test(normalizedRespuesta)) {
-                        throw new Error('Las respuestas del crucigrama solo pueden contener letras.');
-                    }
                     mapaPreguntas[p.pregunta.trim()] = normalizedRespuesta;
                 }
             });
-
-            if (Object.keys(mapaPreguntas).length === 0) {
-                throw new Error('Debes completar al menos una pregunta y su respuesta.');
-            }
-
-            if (Number(puntuacion) <= 0) {
-                throw new Error('La puntuación debe ser un número mayor a 0');
-            }
 
             const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
@@ -150,7 +185,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                 titulo: titulo.trim(),
                 descripcion: descripcion.trim(),
                 temaId: Number(temaId) || initialValues?.temaId,
-                puntuacion: Number(puntuacion),
+                puntuacion: Number.parseInt(puntuacion.trim(), 10),
                 respVisible: Boolean(respVisible),
                 permitirReintento: Boolean(permitirReintento),
                 mostrarPuntuacion: Boolean(mostrarPuntuacion),
