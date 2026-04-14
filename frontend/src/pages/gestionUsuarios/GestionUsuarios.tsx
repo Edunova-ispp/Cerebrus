@@ -367,10 +367,13 @@ export default function GestionUsuarios() {
 
       {/* ── Detail / Edit Modal ── */}
       {selectedUser && (
-        <div
-          className="gu-overlay"
-          onClick={(e) => e.target === e.currentTarget && setSelectedUser(null)}
-        >
+        <div className="gu-overlay">
+          <button
+            type="button"
+            className="gu-overlay-dismiss"
+            aria-label="Cerrar modal de detalle"
+            onClick={() => setSelectedUser(null)}
+          />
           <div className="gu-modal">
             <button className="gu-modal-close" onClick={() => setSelectedUser(null)}>✕</button>
             <h2 className="gu-modal-title">{editing ? 'Editar Usuario' : 'Detalle de Usuario'}</h2>
@@ -428,10 +431,13 @@ export default function GestionUsuarios() {
 
       {/* ── Delete Confirmation ── */}
       {deleteConfirm && (
-        <div
-          className="gu-overlay"
-          onClick={(e) => e.target === e.currentTarget && setDeleteConfirm(null)}
-        >
+        <div className="gu-overlay">
+          <button
+            type="button"
+            className="gu-overlay-dismiss"
+            aria-label="Cerrar modal de eliminacion"
+            onClick={() => setDeleteConfirm(null)}
+          />
           <div className="gu-modal gu-modal--small">
             <h2 className="gu-modal-title">Confirmar eliminación</h2>
             <p className="gu-confirm-text">
@@ -449,10 +455,13 @@ export default function GestionUsuarios() {
 
       {/* ── Create User Modal ── */}
       {showCreate && (
-        <div
-          className="gu-overlay"
-          onClick={(e) => e.target === e.currentTarget && setShowCreate(false)}
-        >
+        <div className="gu-overlay">
+          <button
+            type="button"
+            className="gu-overlay-dismiss"
+            aria-label="Cerrar modal de creacion"
+            onClick={() => setShowCreate(false)}
+          />
           <div className="gu-modal">
             <button className="gu-modal-close" onClick={() => setShowCreate(false)}>✕</button>
             <h2 className="gu-modal-title">Crear Usuario</h2>
