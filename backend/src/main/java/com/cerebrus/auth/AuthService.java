@@ -135,7 +135,7 @@ public class AuthService {
             sendSmtpEmail.setSender(sender);
             sendSmtpEmail.setTo(toList);
             sendSmtpEmail.setSubject("Verifica tu email en Cerebrus");
-            sendSmtpEmail.setHtmlContent("<h1>Bienvenido a Cerebrus</h1><p>Por favor verifica tu email para activar tu cuenta.</p><p>Tu códigode verificación es: <strong>" + codigoVerificacion + "</strong></p>");
+            sendSmtpEmail.setHtmlContent("<h1>Bienvenido a Cerebrus</h1><p>Por favor verifica tu email para activar tu cuenta.</p><p>Tu código de verificación es: <strong>" + codigoVerificacion + "</strong></p>");
 
             CreateSmtpEmail result = apiInstance.sendTransacEmail(sendSmtpEmail);
             System.out.println("Correo de verificación enviado exitosamente. ID: " + result.getMessageId());

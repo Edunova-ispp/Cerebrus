@@ -258,7 +258,7 @@ class AuthControllerTest {
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 		assertThat(response.getBody()).isInstanceOf(MessageResponse.class);
 		assertThat(((MessageResponse) response.getBody()).getMessage())
-				.isEqualTo("Acceso denegado: La organización a la que pertenece no tiene una suscripción activa.");
+.isEqualTo("CUENTA_ORG_NO_SUSCRIPCION");
 	}
 
     // Test para verificar que el login devuelve un error si las credenciales son incorrectas
@@ -323,7 +323,7 @@ class AuthControllerTest {
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 		assertThat(((MessageResponse) response.getBody()).getMessage())
-				.isEqualTo("Acceso denegado: La organización a la que pertenece no tiene una suscripción activa.");
+.isEqualTo("CUENTA_ORG_NO_SUSCRIPCION");
 		verify(suscripcionRepository, never()).findByOrganizacionIdSuscripcionActiva(any());
 	}
 

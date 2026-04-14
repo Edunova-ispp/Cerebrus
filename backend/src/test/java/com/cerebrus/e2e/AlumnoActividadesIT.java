@@ -136,9 +136,17 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
         List<WebElement> downButtons = driver.findElements(By.cssSelector(".ord-item .ord-arrow-btn:last-child"));
         downButtons.stream().filter(WebElement::isEnabled).findFirst().ifPresent(WebElement::click);
 
-        WebElement sendButton = driver.findElement(By.xpath("//button[normalize-space()='Enviar']"));
-        wait.until(ExpectedConditions.elementToBeClickable(sendButton));
-        sendButton.click();
+        dismissArsOverlayIfPresent();
+
+WebElement sendButton = wait.until(ExpectedConditions.presenceOfElementLocated(
+        By.xpath("//button[normalize-space()='Enviar']")));
+try {
+    wait.until(ExpectedConditions.elementToBeClickable(sendButton)).click();
+} catch (org.openqa.selenium.ElementClickInterceptedException ex) {
+    dismissArsOverlayIfPresent();
+    ((org.openqa.selenium.JavascriptExecutor) driver)
+            .executeScript("arguments[0].click();", sendButton);
+}
 
         wait.until(ExpectedConditions.or(
                 ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(normalize-space(), 'Tu respuesta es correcta.')]")),
@@ -356,22 +364,33 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
     }
 
     private void loginAsAlumno(String usuario) {
-        navigateTo("/auth/login");
+    // 1. Cerrar overlay ARS si quedó abierto del test anterior
+    try {
+        List<WebElement> closeButtons = driver.findElements(By.cssSelector(".ars-btn.ars-btn-secondary"));
+        if (!closeButtons.isEmpty() && closeButtons.get(0).isDisplayed()) {
+            closeButtons.get(0).click();
+        }
+    } catch (org.openqa.selenium.WebDriverException ignored) {}
 
-        WebDriverWait wait = new WebDriverWait(driver, WAIT);
-        WebElement usuarioInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
-        usuarioInput.clear();
-        usuarioInput.sendKeys(usuario);
+    // 2. Cerrar alert nativo si quedó abierto
+    try { driver.switchTo().alert().dismiss(); } catch (org.openqa.selenium.NoAlertPresentException ignored) {}
 
-        WebElement passwordInput = driver.findElement(By.id("password"));
-        passwordInput.clear();
-        passwordInput.sendKeys(ALUMNO_PASSWORD);
+    navigateTo("/auth/login");
 
-        driver.findElement(By.cssSelector("button.pixel-btn-submit")).click();
+    WebDriverWait wait = new WebDriverWait(driver, WAIT);
+    WebElement usuarioInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
+    usuarioInput.clear();
+    usuarioInput.sendKeys(usuario);
 
-        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
-        assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
-    }
+    WebElement passwordInput = driver.findElement(By.id("password"));
+    passwordInput.clear();
+    passwordInput.sendKeys(ALUMNO_PASSWORD);
+
+    driver.findElement(By.cssSelector("button.pixel-btn-submit")).click();
+
+    wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
+    assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
+}
 
     private void clickContinueIfPresent(WebDriverWait wait) {
         List<WebElement> continueButtons = driver.findElements(By.xpath("//button[normalize-space()='Continuar']"));
@@ -379,13 +398,6 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
             continueButtons.get(0).click();
             wait.until(ExpectedConditions.urlContains("/miscursos"));
             assertThat(driver.getCurrentUrl()).contains("/miscursos");
-        }
-    }
-
-    private void dismissArsOverlayIfPresent() {
-        List<WebElement> closeButtons = driver.findElements(By.cssSelector(".ars-btn.ars-btn-secondary"));
-        if (!closeButtons.isEmpty() && closeButtons.get(0).isDisplayed()) {
-            closeButtons.get(0).click();
         }
     }
 
@@ -460,4 +472,14 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
                 "login-box"
         );
     }
+
+    private void dismissArsOverlayIfPresent() {
+    try {
+        List<WebElement> closeButtons = driver.findElements(By.cssSelector(".ars-btn.ars-btn-secondary"));
+        if (!closeButtons.isEmpty() && closeButtons.get(0).isDisplayed()) {
+            ((org.openqa.selenium.JavascriptExecutor) driver)
+                    .executeScript("arguments[0].click();", closeButtons.get(0));
+        }
+    } catch (org.openqa.selenium.WebDriverException ignored) {}
+}
 }

@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Duration;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -18,7 +18,6 @@ class CursoIT extends SeleniumBaseTest {
     private static final String PROFESOR_OWNER = "carlos_pro";
     private static final String ALUMNO = "alumno_harry";
     private static final String PASSWORD = "123456";
-
 
     @Test
     @DisplayName("Sin autenticacion, rutas de cursos redirigen a login")
@@ -32,7 +31,6 @@ class CursoIT extends SeleniumBaseTest {
         );
 
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
-
         for (String ruta : rutasProtegidas) {
             navigateTo(ruta);
             wait.until(ExpectedConditions.urlContains("/auth/login"));
@@ -41,69 +39,58 @@ class CursoIT extends SeleniumBaseTest {
     }
 
     @Test
-    @DisplayName("Profesor propietario puede crear un curso")
-    void profesorPropietarioPuedeCrearCurso() {
-        login(PROFESOR_OWNER, PASSWORD);
+@DisplayName("Profesor propietario puede crear un curso")
+void profesorPropietarioPuedeCrearCurso() {
+    login(PROFESOR_OWNER, PASSWORD);
+    navigateTo("/crearCurso");
 
-        navigateTo("/crearCurso");
-        WebDriverWait wait = new WebDriverWait(driver, WAIT);
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titulo")));
+    WebDriverWait wait = new WebDriverWait(driver, WAIT);
+    wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titulo")));
 
-        // Rellenar formulario
-        driver.findElement(By.id("titulo")).sendKeys("Curso E2E Temporal");
-        driver.findElement(By.id("descripcion")).sendKeys("Descripción temporal");
+    String uniqueTitle = "Curso E2E " + System.currentTimeMillis();
+    driver.findElement(By.id("titulo")).sendKeys(uniqueTitle);
+    driver.findElement(By.id("descripcion")).sendKeys("Descripción temporal");
+    driver.findElement(By.id("codigo")).sendKeys("COD-" + System.currentTimeMillis()); // ← añadir
 
-        driver.findElement(By.xpath("//button[normalize-space()='Crear curso']")).click();
+    submitCursoForm(wait);
 
-        // Accept alert
-        try {
-            wait.until(ExpectedConditions.alertIsPresent());
-            driver.switchTo().alert().accept();
-        } catch (Exception e) {
-            // No alert
-        }
-
-        wait.until(ExpectedConditions.urlContains("/miscursos"));
-        assertThat(driver.getCurrentUrl()).contains("/miscursos");
-
-        // Verificar que el curso aparece en la lista (opcional, si hay lista)
-        // Aquí asumimos que se redirige a mis cursos
-    }
+    assertThat(driver.getCurrentUrl()).contains("/miscursos");
+}
 
     @Test
     @DisplayName("Alumno puede inscribirse en un curso")
     void alumnoPuedeInscribirseEnCurso() {
         login(ALUMNO, PASSWORD);
-
         navigateTo("/misCursos");
+
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
         wait.until(ExpectedConditions.urlContains("/misCursos"));
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath("//p[contains(text(), 'Cargando cursos...')]")));
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                By.xpath("//p[contains(text(), 'Cargando cursos...')]")));
 
-        // Fill the course code input
         WebElement codeInput = driver.findElement(By.id("codigoCursoInput"));
         codeInput.clear();
         codeInput.sendKeys("MAT-201");
 
-        // Click the join button
-        WebElement joinButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(text(), 'Unirse')]")));
-        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", joinButton);
-        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", joinButton);
+        WebElement joinButton = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//button[contains(text(), 'Unirse')]")));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", joinButton);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", joinButton);
 
-        // Wait for success message
-        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), "Matemáticas Mágicas"));
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(
+                By.tagName("body"), "Matemáticas Mágicas"));
     }
 
     @Test
     @DisplayName("Alumno puede ver detalles de un curso inscrito")
     void alumnoPuedeVerDetallesCursoInscrito() {
         login(ALUMNO, PASSWORD);
-
         navigateTo("/cursos/10101");
-        WebDriverWait wait = new WebDriverWait(driver, WAIT);
-        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), "Exploradores de la Naturaleza"));
 
-        // Verificar que se muestran detalles
+        WebDriverWait wait = new WebDriverWait(driver, WAIT);
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(
+                By.tagName("body"), "Exploradores de la Naturaleza"));
+
         assertThat(driver.getPageSource()).contains("Exploradores de la Naturaleza");
     }
 
@@ -111,8 +98,8 @@ class CursoIT extends SeleniumBaseTest {
     @DisplayName("Usuario no profesor no puede crear curso")
     void usuarioNoProfesorNoPuedeCrearCurso() {
         login(ALUMNO, PASSWORD);
-
         navigateTo("/crearCurso");
+
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
         wait.until(ExpectedConditions.urlContains("/"));
         assertThat(driver.getCurrentUrl()).isEqualTo("http://localhost:5173/");
@@ -122,8 +109,8 @@ class CursoIT extends SeleniumBaseTest {
     @DisplayName("Profesor puede ver mis cursos")
     void profesorPuedeVerMisCursos() {
         login(PROFESOR_OWNER, PASSWORD);
-
         navigateTo("/miscursos");
+
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
         wait.until(ExpectedConditions.urlContains("/miscursos"));
         assertThat(driver.getCurrentUrl()).contains("/miscursos");
@@ -133,8 +120,8 @@ class CursoIT extends SeleniumBaseTest {
     @DisplayName("Usuario no inscrito no puede ver detalles de curso")
     void usuarioNoInscritoNoPuedeVerDetallesCurso() {
         login(ALUMNO, PASSWORD);
-
         navigateTo("/cursos/9999");
+
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
         wait.until(ExpectedConditions.urlContains("/misCursos"));
         assertThat(driver.getCurrentUrl()).contains("/misCursos");
@@ -144,100 +131,101 @@ class CursoIT extends SeleniumBaseTest {
     @DisplayName("Profesor puede activar/desactivar un curso")
     void profesorPuedeActivarDesactivarCurso() {
         login(PROFESOR_OWNER, PASSWORD);
-
         navigateTo("/miscursos");
+
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
         wait.until(ExpectedConditions.urlContains("/miscursos"));
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath("//p[contains(text(), 'Cargando cursos...')]")));
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                By.xpath("//p[contains(text(), 'Cargando cursos...')]")));
 
-        // Find the first toggle
-        WebElement toggle = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//label[contains(@class, 'curso-card__toggle')]")));
+        WebElement toggle = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//label[contains(@class, 'curso-card__toggle')]")));
         WebElement input = toggle.findElement(By.xpath(".//input[@type='checkbox']"));
         boolean initialState = input.isSelected();
 
-        // Click to toggle
-        toggle.click();
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", toggle);
+        wait.until(d -> input.isSelected() != initialState);
+        assertThat(input.isSelected()).isNotEqualTo(initialState);
 
-        // Wait a bit for the update
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        boolean afterFirst = input.isSelected();
-        assertThat(afterFirst).isNotEqualTo(initialState);
-
-        // Toggle back to original state
-        toggle.click();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", toggle);
+        wait.until(d -> input.isSelected() == initialState);
     }
 
-@Test
+    @Test
 @DisplayName("Profesor puede eliminar un curso")
 void profesorPuedeEliminarCurso() {
     login(PROFESOR_OWNER, PASSWORD);
     WebDriverWait wait = new WebDriverWait(driver, WAIT);
 
-    // 1. Crear un curso único (usamos timestamp para que el nombre sea único siempre)
     String nombreCurso = "Borrar-" + System.currentTimeMillis();
     navigateTo("/crearCurso");
     wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))).sendKeys(nombreCurso);
     driver.findElement(By.id("descripcion")).sendKeys("Temporal");
-    driver.findElement(By.xpath("//button[normalize-space()='Crear curso']")).click();
-    
-    // Esperar a que se procese la creación (Alerta + Redirección)
-    try {
+    driver.findElement(By.id("codigo")).sendKeys("COD-" + System.currentTimeMillis()); // ← añadir
+
+    submitCursoForm(wait);
+
+        By cardLocator = By.xpath(
+                "//div[contains(@class, 'curso-card')]"
+                + "[.//span[contains(@class, 'curso-card__titulo') and normalize-space() = '"
+                + nombreCurso + "']]");
+        WebElement card = wait.until(ExpectedConditions.visibilityOfElementLocated(cardLocator));
+
+        WebElement deleteBtn = card.findElement(By.cssSelector("button.curso-card__delete-btn"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", deleteBtn);
+
         wait.until(ExpectedConditions.alertIsPresent());
         driver.switchTo().alert().accept();
-    } catch (Exception e) { /* No alert */ }
-    
-    wait.until(ExpectedConditions.urlContains("/miscursos"));
 
-    // 2. Localizar el curso específico que acabamos de crear
-    // Buscamos la card que contiene el nombre único
-    By cardLocator = By.xpath("//div[contains(@class, 'curso-card')][.//span[contains(@class, 'curso-card__titulo') and normalize-space() = '" + nombreCurso + "']]");
-    WebElement card = wait.until(ExpectedConditions.visibilityOfElementLocated(cardLocator));
+        navigateTo("/miscursos");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h1.mis-cursos-title")));
+        wait.until(d -> d.findElements(cardLocator).isEmpty());
+        assertThat(driver.findElements(cardLocator)).isEmpty();
+    }
 
-    // 3. Borrar esa card específica
-    WebElement deleteBtn = card.findElement(By.cssSelector("button.curso-card__delete-btn"));
-    deleteBtn.click();
+    private void login(String user, String password) {
+        try { driver.switchTo().alert().dismiss(); } catch (org.openqa.selenium.NoAlertPresentException ignored) {}
+        navigateTo("/auth/login");
 
-    wait.until(ExpectedConditions.alertIsPresent());
-    driver.switchTo().alert().accept();
+        WebDriverWait wait = new WebDriverWait(driver, WAIT);
+        WebElement usuarioInput = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
+        usuarioInput.clear();
+        usuarioInput.sendKeys(user);
 
-    // 4. Esperar a que la lista se actualice (inspirado en TemasIT)
-    navigateTo("/miscursos");
-    wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h1.mis-cursos-title")));
+        WebElement passwordInput = driver.findElement(By.id("password"));
+        passwordInput.clear();
+        passwordInput.sendKeys(password);
 
-    wait.until(d -> d.findElements(cardLocator).isEmpty());
-}
-    
-private void login(String user, String password) {
-    navigateTo("/auth/login");
+        passwordInput.sendKeys(org.openqa.selenium.Keys.RETURN);
+        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
+        assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
+    }
 
-    WebDriverWait wait = new WebDriverWait(driver, WAIT);
-    
-    // 1. Espera explícita al primer campo para asegurar que la página cargó
-    WebElement usuarioInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
-    usuarioInput.clear();
-    usuarioInput.sendKeys(user);
+    private void submitCursoForm(WebDriverWait wait) {
+        List<WebElement> submitBtns = driver.findElements(
+                By.cssSelector("button.pixel-btn-submit-main"));
+        if (!submitBtns.isEmpty()) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", submitBtns.get(0));
+        } else {
+            WebElement btn = wait.until(ExpectedConditions.elementToBeClickable(
+                    By.xpath("//button[contains(normalize-space(),'Crear curso') or contains(normalize-space(),'Crear Curso')]")));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btn);
+        }
 
-    WebElement passwordInput = driver.findElement(By.id("password"));
-    passwordInput.clear();
-    passwordInput.sendKeys(password);
+        try {
+            wait.until(ExpectedConditions.alertIsPresent());
+            driver.switchTo().alert().accept();
+        } catch (org.openqa.selenium.TimeoutException ignored) {}
 
-    // 2. Usar RETURN en lugar de click en el botón (evita el Timeout del botón)
-    passwordInput.sendKeys(org.openqa.selenium.Keys.RETURN);
-
-    // 3. Esperar a que la URL cambie para confirmar que el login procesó
-    wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
-    
-    // 4. Verificación extra opcional
-    assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
-}
+        try {
+            wait.until(ExpectedConditions.urlContains("/miscursos"));
+        } catch (org.openqa.selenium.TimeoutException e) {
+            List<WebElement> errors = driver.findElements(
+                    By.cssSelector("p.error-msg, [class*='error']"));
+            String errorText = errors.stream().filter(WebElement::isDisplayed)
+                    .map(WebElement::getText).findFirst().orElse("(sin mensaje de error)");
+            throw new AssertionError("Sigue en /crearCurso. Error visible: " + errorText, e);
+        }
+    }
 }

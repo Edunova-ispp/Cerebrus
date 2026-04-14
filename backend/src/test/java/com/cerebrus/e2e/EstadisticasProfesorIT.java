@@ -65,8 +65,9 @@ class EstadisticasProfesorIT extends SeleniumBaseTest {
 
         // 6. Ver detalle de un tema específico (Volviendo a Temas y pulsando 'Ver')
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Alumnos')]"))).click();
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Ron')]"))).click();
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Volver')]"))).click();
+        driver.findElements(By.tagName("button"))
+      .forEach(b -> System.out.println("BTN: [" + b.getText() + "]"));
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Estadísticas')]"))).click();
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Desglose y Gráficas')]"))).click();
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Actividades')]"))).click();
 

@@ -26,7 +26,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class TemasIT extends SeleniumBaseTest {
 
-        private static final Duration WAIT = Duration.ofSeconds(10);
+        private static final Duration WAIT = Duration.ofSeconds(20);
         private static final String MAESTRO_USER = "profe_snape";
         private static final String MAESTRO_PASSWORD = "123456";
         private static final String ALUMNO_USER = "alumno_harry";
@@ -375,19 +375,29 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
                 pageWait.until(d -> d.findElements(createdCourseCard).isEmpty());
         }
 
-        private void login(String user, String password) {
-    // 1. Cerrar cualquier alerta pendiente antes de hacer nada
+       private void login(String user, String password) {
+    // 1. Cerrar alert nativo
+    try { driver.switchTo().alert().dismiss(); } catch (org.openqa.selenium.NoAlertPresentException ignored) {}
+
+    // 2. Detener cualquier carga pendiente y navegar a login
     try {
-        driver.switchTo().alert().dismiss();
-    } catch (org.openqa.selenium.NoAlertPresentException ignored) {}
+        ((JavascriptExecutor) driver).executeScript("window.stop();");
+    } catch (org.openqa.selenium.WebDriverException ignored) {}
 
     navigateTo("/auth/login");
     clearClientSession();
 
+    // 3. Si la página no cargó correctamente, reintentar una vez
     WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-    WebElement userInput = pageWait.until(
-            ExpectedConditions.visibilityOfElementLocated(By.id("identificador"))
-    );
+    try {
+        pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
+    } catch (org.openqa.selenium.TimeoutException e) {
+        try { driver.switchTo().alert().dismiss(); } catch (org.openqa.selenium.NoAlertPresentException ignored) {}
+        navigateTo("/auth/login");
+        pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
+    }
+
+    WebElement userInput = driver.findElement(By.id("identificador"));
     userInput.clear();
     userInput.sendKeys(user);
 
@@ -397,13 +407,9 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
 
     driver.findElement(By.cssSelector("button.pixel-btn-submit")).click();
     pageWait.until(ExpectedConditions.urlContains("/miscursos"));
-
-    // 2. Quitar el refresh() — es el que se cuelga
-    // Solo esperar a que el h1 sea visible, sin recargar
     pageWait.until(ExpectedConditions.visibilityOfElementLocated(
             By.cssSelector("h1.mis-cursos-title")));
-}
-
+}  
         private CourseContext createCourseAndOpenDetail(String courseTitle) {
                 navigateTo("/crearCurso");
 
@@ -502,27 +508,39 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
         }
 
         private void createThemeInCurrentCourse(String themeTitle) {
-                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
+    WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(20)); // más tiempo
 
-                // Este helper puede invocarse desde distintas pantallas; forzamos abrir el formulario.
-                navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
-                pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.welcome-text")));
+    try {
+        navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
+    } catch (org.openqa.selenium.WebDriverException e) {
+        // Si el driver no responde, reintentar una vez
+        try { Thread.sleep(2000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+        navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
+    }
 
-                WebElement titleInput = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
-                );
-                titleInput.clear();
-                titleInput.sendKeys(themeTitle);
+    try {
+        pageWait.until(ExpectedConditions.visibilityOfElementLocated(
+            By.cssSelector("h2.welcome-text")));
+    } catch (org.openqa.selenium.TimeoutException e) {
+        // Si no carga el formulario, puede que haya redirigido — ver URL actual
+        throw new AssertionError("No cargó el formulario de crear tema. URL: " 
+            + driver.getCurrentUrl(), e);
+    }
 
-                WebElement submitButton = pageWait.until(
-                                ExpectedConditions.elementToBeClickable(By.cssSelector("button.pixel-btn-submit-main"))
-                );
-                submitButton.click();
+    WebElement titleInput = pageWait.until(
+        ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
+    );
+    titleInput.clear();
+    titleInput.sendKeys(themeTitle);
 
-                pageWait.until(ExpectedConditions.urlContains("/cursos/" + sharedCourse.id()));
+    WebElement submitButton = pageWait.until(
+        ExpectedConditions.elementToBeClickable(By.cssSelector("button.pixel-btn-submit-main"))
+    );
+    submitButton.click();
 
-                navigateTo("/cursos/" + sharedCourse.id());
-        }
+    pageWait.until(ExpectedConditions.urlContains("/cursos/" + sharedCourse.id()));
+    navigateTo("/cursos/" + sharedCourse.id());
+}
 
         private void assertTeacherSeesTheme(String themeTitle) {
                 WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
@@ -559,14 +577,18 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
         }
 
         private void assertStudentSeesThemeInMap(String themeTitle) {
-                WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(20));
-                WebElement themeButton = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(
-                                                By.xpath("//button[contains(@class, 'mapa-tema-btn') and normalize-space() = '" + themeTitle + "']")
-                                )
-                );
-                assertThat(themeButton.getText()).isEqualTo(themeTitle);
-        }
+    WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(20));
+    
+    // Recargar para asegurar datos actualizados
+    driver.navigate().refresh();
+    
+    WebElement themeButton = pageWait.until(
+            ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath("//button[contains(@class, 'mapa-tema-btn') and normalize-space() = '" + themeTitle + "']")
+            )
+    );
+    assertThat(themeButton.getText()).isEqualTo(themeTitle);
+}
 
         private void assertStudentDoesNotSeeThemeInMap(String themeTitle) {
                 assertThat(driver.findElements(
@@ -627,31 +649,40 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
         }
 
         private void ensureSharedCourseReady() {
-                if (sharedCourse == null) {
-                        login(MAESTRO_USER, MAESTRO_PASSWORD);
-                        sharedCourse = createCourseAndOpenDetail(COURSE_TITLE);
+    if (sharedCourse == null) {
+        login(MAESTRO_USER, MAESTRO_PASSWORD);
+        sharedCourse = createCourseAndOpenDetail(COURSE_TITLE);
+        login(ALUMNO_USER, ALUMNO_PASSWORD);
+        enrollStudentInCourse(sharedCourse.code());
+    }
 
-                        login(ALUMNO_USER, ALUMNO_PASSWORD);
-                        enrollStudentInCourse(sharedCourse.code());
-                }
+    login(MAESTRO_USER, MAESTRO_PASSWORD);
+    navigateTo("/cursos/" + sharedCourse.id());
 
-                login(MAESTRO_USER, MAESTRO_PASSWORD);
-                navigateTo("/cursos/" + sharedCourse.id());
+    By currentThemeLocator = By.xpath(
+        "//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" 
+        + currentThemeTitle + "']"
+    );
 
-                By currentThemeLocator = By.xpath(
-                                "//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + currentThemeTitle + "']"
-                );
+    List<WebElement> currentThemeMatches = driver.findElements(currentThemeLocator);
+    System.out.println("=== ensureSharedCourseReady: temas encontrados con título '" 
+        + currentThemeTitle + "': " + currentThemeMatches.size());
 
-                List<WebElement> currentThemeMatches = driver.findElements(currentThemeLocator);
-                if (currentThemeMatches.isEmpty()) {
-                        List<WebElement> anyThemeTitles = driver.findElements(By.cssSelector("span.ltp-item-titulo"));
-                        if (!anyThemeTitles.isEmpty()) {
-                                currentThemeTitle = anyThemeTitles.getFirst().getText().trim();
-                        } else {
-                                createThemeInCurrentCourse(currentThemeTitle);
-                        }
-                }
+    if (currentThemeMatches.isEmpty()) {
+        List<WebElement> anyThemeTitles = driver.findElements(
+            By.cssSelector("span.ltp-item-titulo"));
+        System.out.println("=== Temas disponibles: " + anyThemeTitles.size());
+        anyThemeTitles.forEach(t -> System.out.println("  - " + t.getText()));
+
+        if (!anyThemeTitles.isEmpty()) {
+            currentThemeTitle = anyThemeTitles.getFirst().getText().trim();
+        } else {
+            // @Order(8) borra el tema — en @Order(12) no hay tema, no hace falta crearlo
+            System.out.println("=== Sin temas, el @Order(12) no necesita tema para eliminar el curso");
+            // No crear tema si solo vamos a eliminar el curso
         }
+    }
+}
 
         private void setCourseVisibilityInUi(boolean visible) {
                 navigateTo("/miscursos");

@@ -52,7 +52,7 @@ class CursoProfesorIntegrationTest {
         curso.setId(1L);
         curso.setTitulo("Java Integration");
 
-        when(cursoService.crearCurso(any(), any(), any())).thenReturn(curso);
+        when(cursoService.crearCurso(any(), any(), any(), any())).thenReturn(curso);
 
         Map<String, Object> body = Map.of(
                 "titulo", "Java Integration",
@@ -70,7 +70,7 @@ class CursoProfesorIntegrationTest {
     @Test
     void actualizarCurso_noPropietario_devuelve403() throws Exception {
         doThrow(new AccessDeniedException("Solo el propietario del curso puede actualizarlo"))
-                .when(cursoService).actualizarCurso(eq(1L), any(), any(), any());
+                .when(cursoService).actualizarCurso(eq(1L), any(), any(), any(), any());
 
         Map<String, Object> body = Map.of("titulo", "Nuevo Titulo");
 
