@@ -1,5 +1,14 @@
 package com.cerebrus.auth;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.cerebrus.auth.payload.request.SignupRequest;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioRepository;
@@ -7,23 +16,13 @@ import com.cerebrus.usuario.organizacion.Organizacion;
 import com.cerebrus.usuario.organizacion.OrganizacionRepository;
 
 import sendinblue.ApiClient;
+import sendinblue.Configuration;
 import sendinblue.auth.ApiKeyAuth;
 import sibApi.TransactionalEmailsApi;
 import sibModel.CreateSmtpEmail;
 import sibModel.SendSmtpEmail;
 import sibModel.SendSmtpEmailSender;
 import sibModel.SendSmtpEmailTo;
-
-import sendinblue.Configuration;
-
-
-import java.util.ArrayList;
-import java.util.List;
-
-
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class AuthService {
@@ -40,6 +39,9 @@ public class AuthService {
     
     @Value("${brevo.sender.name:}")
     private String brevoSenderName;
+
+    @Value("${cerebrus.app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
 
     public AuthService(UsuarioRepository usuarioRepository,
         PasswordEncoder passwordEncoder, OrganizacionRepository organizacionRepository) {
@@ -131,11 +133,60 @@ public class AuthService {
             toList.add(to);
 
             // 4. Crear el cuerpo del correo de verificación
+                        String baseFrontendUrl = frontendUrl.replaceAll("/$", "");
+                        String loginUrl = baseFrontendUrl + "/auth/login?validatoncode="
+                + URLEncoder.encode(String.valueOf(codigoVerificacion), StandardCharsets.UTF_8);
+                        String logoUrl = baseFrontendUrl + "/cerebrus-logo.png";
+
+                        String htmlContent = """
+                                <html>
+                                    <body style='margin:0;padding:0;background:#fff7fa;font-family:Segoe UI,Arial,sans-serif;color:#1f2937;'>
+                                        <table role='presentation' width='100%' cellpadding='0' cellspacing='0' style='background:#fff7fa;padding:24px 0;'>
+                                            <tr>
+                                                <td align='center'>
+                                                    <table role='presentation' width='600' cellpadding='0' cellspacing='0' style='max-width:600px;width:100%;'>
+                                                        <tr>
+                                                            <td style='padding:0 20px 12px 20px;text-align:center;'>
+                                                                <img src='%s' alt='Cerebrus' style='height:64px;width:auto;display:block;margin:0 auto 10px auto;' />
+                                                                <h1 style='margin:0;font-size:28px;line-height:1.2;color:#d10057;'>Bienvenido a Cerebrus</h1>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style='padding:0 20px;'>
+                                                                <table role='presentation' width='100%' cellpadding='0' cellspacing='0' style='background:#ffffff;border:1px solid #f2d7e3;border-radius:16px;box-shadow:0 8px 24px rgba(209,0,87,0.08);'>
+                                                                    <tr>
+                                                                        <td style='padding:24px;'>
+                                                                            <p style='margin:0 0 12px 0;font-size:16px;line-height:1.5;'>¡Gracias por registrarte! Para activar tu cuenta, pulsa el siguiente botón:</p>
+                                                                            <p style='margin:18px 0 20px 0;text-align:center;'>
+                                                                                <a href='%s' style='display:inline-block;background:#d10057;color:#ffffff;text-decoration:none;padding:13px 24px;border-radius:10px;font-weight:700;font-size:16px;'>Activar mi cuenta</a>
+                                                                            </p>
+                                                                            <p style='margin:0 0 8px 0;font-size:14px;color:#4b5563;'>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+                                                                            <p style='margin:0;word-break:break-all;font-size:13px;line-height:1.5;'>
+                                                                                <a href='%s' style='color:#2563eb;text-decoration:underline;'>%s</a>
+                                                                            </p>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style='padding:14px 20px 0 20px;text-align:center;'>
+                                                                <p style='margin:0;font-size:12px;color:#6b7280;'>Este mensaje fue enviado automáticamente por Cerebrus.</p>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </body>
+                                </html>
+                                """.formatted(logoUrl, loginUrl, loginUrl, loginUrl);
+
             SendSmtpEmail sendSmtpEmail = new SendSmtpEmail();
             sendSmtpEmail.setSender(sender);
             sendSmtpEmail.setTo(toList);
             sendSmtpEmail.setSubject("Verifica tu email en Cerebrus");
-            sendSmtpEmail.setHtmlContent("<h1>Bienvenido a Cerebrus</h1><p>Por favor verifica tu email para activar tu cuenta.</p><p>Tu código de verificación es: <strong>" + codigoVerificacion + "</strong></p>");
+            sendSmtpEmail.setHtmlContent(htmlContent);
 
             CreateSmtpEmail result = apiInstance.sendTransacEmail(sendSmtpEmail);
             System.out.println("Correo de verificación enviado exitosamente. ID: " + result.getMessageId());

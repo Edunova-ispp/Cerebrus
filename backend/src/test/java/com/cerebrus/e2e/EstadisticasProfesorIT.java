@@ -52,24 +52,14 @@ class EstadisticasProfesorIT extends SeleniumBaseTest {
 
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Resumen general')]"))).click();
 
-        // 4. Cambiar al desglose por temas usando el menú interno
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Puntuaciones medias')]"))).click();
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Los Animales')]"))).click();
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Las Plantas')]"))).click();
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Volver')]"))).click();
-
-        // 5. Ver detalle de una actividad específica (Volviendo a Actividades y pulsando 'Ver')
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Tiempos por Actividad')]"))).click();
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Memoriza los Animales')]"))).click();
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Volver')]"))).click();
-
         // 6. Ver detalle de un tema específico (Volviendo a Temas y pulsando 'Ver')
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Alumnos')]"))).click();
         driver.findElements(By.tagName("button"))
       .forEach(b -> System.out.println("BTN: [" + b.getText() + "]"));
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Estadísticas')]"))).click();
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Desglose y Gráficas')]"))).click();
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Actividades')]"))).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Tendencias')]"))).click();
+                wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Análisis')]"))).click();
+
 
 
     }
@@ -89,25 +79,5 @@ class EstadisticasProfesorIT extends SeleniumBaseTest {
             // Si no aparece el mensaje de error, verificar que tampoco aparecen los datos
             assertThat(driver.getPageSource()).doesNotContain("Nota Media");
         }
-    }
-
-    private void login(String user, String password) {
-        navigateTo("/auth/login");
-
-        WebDriverWait wait = new WebDriverWait(driver, WAIT);
-        WebElement usuarioInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
-        usuarioInput.clear();
-        usuarioInput.sendKeys(user);
-
-        WebElement passwordInput = driver.findElement(By.id("password"));
-        passwordInput.clear();
-        passwordInput.sendKeys(password);
-
-        // Presionar Enter en el campo de password para enviar el formulario
-        passwordInput.sendKeys(org.openqa.selenium.Keys.RETURN);
-
-        // Esperar a que la URL cambie (salga de /auth/login)
-        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
-        assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
     }
 }

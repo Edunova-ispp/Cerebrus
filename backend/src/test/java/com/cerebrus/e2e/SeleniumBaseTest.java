@@ -7,15 +7,22 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.TestInstance;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.net.Socket;
 
 @Tag("e2e")
@@ -28,23 +35,24 @@ public abstract class SeleniumBaseTest {
     protected WebDriver driver;
 
     @BeforeAll
-    void initDriver() {
-        ensureFrontendIsReachable();
+void initDriver() {
+    ensureFrontendIsReachable();
 
-        ChromeOptions options = new ChromeOptions();
-        options.setPageLoadStrategy(PageLoadStrategy.EAGER);
+    ChromeOptions options = new ChromeOptions();
+    // Volver a NORMAL — EAGER rompe React SPAs
+    options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 
-        boolean headless = Boolean.parseBoolean(
-                System.getProperty("selenium.headless", "true"));
-        if (headless) {
-            options.addArguments("--headless=new");
-            options.addArguments("--no-sandbox");
-            options.addArguments("--disable-dev-shm-usage");
-        }
-
-        driver = new ChromeDriver(options);
-        driver.manage().window().maximize();
+    boolean headless = Boolean.parseBoolean(
+            System.getProperty("selenium.headless", "true"));
+    if (headless) {
+        options.addArguments("--headless=new");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
     }
+
+    driver = new ChromeDriver(options);
+    driver.manage().window().maximize();
+}
 
     @BeforeEach
     void resetBrowserState() {
@@ -99,4 +107,30 @@ public abstract class SeleniumBaseTest {
             );
         }
     }
+
+    // En SeleniumBaseTest.java — añadir este método protected
+protected void login(String user, String password) {
+    navigateTo("/auth/login");
+
+    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+
+    WebElement usuarioInput = wait.until(
+            ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
+    usuarioInput.clear();
+    usuarioInput.sendKeys(user);
+    wait.until(d -> !usuarioInput.getAttribute("value").isEmpty());
+
+    WebElement passwordInput = driver.findElement(By.id("password"));
+    passwordInput.clear();
+    passwordInput.sendKeys(password);
+    wait.until(d -> !passwordInput.getAttribute("value").isEmpty());
+
+    // Esperar a que el botón sea clickable (React hydration completa)
+    WebElement submitBtn = wait.until(
+            ExpectedConditions.elementToBeClickable(By.cssSelector("button.pixel-btn-submit")));
+    submitBtn.click();
+
+    wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
+    assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
+}
 }

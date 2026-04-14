@@ -7,8 +7,8 @@ public class EstadisticasAlumnoResumenDTO {
     private Long alumnoId;
     private String nombreAlumno;
     private Double notaMedia;
-    private Integer notaMin;
-    private Integer notaMax;
+    private Double notaMin;
+    private Double notaMax;
     private Integer numActividadesCompletadas;
     private Integer totalActividades;
     private Integer tiempoTotalMinutos;
@@ -18,7 +18,7 @@ public class EstadisticasAlumnoResumenDTO {
     public EstadisticasAlumnoResumenDTO() {}
 
     public EstadisticasAlumnoResumenDTO(Long alumnoId, String nombreAlumno, Double notaMedia,
-            Integer notaMin, Integer notaMax, Integer numActividadesCompletadas,
+            Double notaMin, Double notaMax, Integer numActividadesCompletadas,
             Integer totalActividades, Integer tiempoTotalMinutos, Integer tiempoTotalSegundos,
             List<TemaEstadisticasAlumnoDTO> temas) {
         this.alumnoId = alumnoId;
@@ -39,10 +39,10 @@ public class EstadisticasAlumnoResumenDTO {
     public void setNombreAlumno(String nombreAlumno) { this.nombreAlumno = nombreAlumno; }
     public Double getNotaMedia() { return notaMedia; }
     public void setNotaMedia(Double notaMedia) { this.notaMedia = notaMedia; }
-    public Integer getNotaMin() { return notaMin; }
-    public void setNotaMin(Integer notaMin) { this.notaMin = notaMin; }
-    public Integer getNotaMax() { return notaMax; }
-    public void setNotaMax(Integer notaMax) { this.notaMax = notaMax; }
+    public Double getNotaMin() { return notaMin; }
+    public void setNotaMin(Double notaMin) { this.notaMin = notaMin; }
+    public Double getNotaMax() { return notaMax; }
+    public void setNotaMax(Double notaMax) { this.notaMax = notaMax; }
     public Integer getNumActividadesCompletadas() { return numActividadesCompletadas; }
     public void setNumActividadesCompletadas(Integer numActividadesCompletadas) { this.numActividadesCompletadas = numActividadesCompletadas; }
     public Integer getTotalActividades() { return totalActividades; }

@@ -32,6 +32,14 @@
   letter-spacing: 0.5px;
 }
 
+.sub-org-name {
+  margin: -12px 0 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--t-text-secondary);
+  text-align: center;
+}
+
 .sub-layout {
   display: grid;
   grid-template-columns: 260px 1fr; 

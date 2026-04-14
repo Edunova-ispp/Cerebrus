@@ -13,5 +13,5 @@ public interface CursoService {
     void eliminarCursoPorId(Long id);
     ProgresoDTO encontrarProgresoPorCursoId(Long cursoId);
     Curso cambiarVisibilidad(Long id);
-    List<Integer> obtenerNotaMediaPorActividadPorCursoId(Long cursoId);
+    List<Double> obtenerNotaMediaPorActividadPorCursoId(Long cursoId);
 }

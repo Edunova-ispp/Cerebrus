@@ -36,10 +36,17 @@ export default function ActivityResultScreen({
   onViewCorrectAnswer,
   onCancel,
 }: Props) {
-  const notaSobre10 = typeof grade === 'number'
-    ? grade
-    : maxScore > 0
-      ? Math.round((score / maxScore) * 100) / 10
+  const hasScoreData =
+    typeof score === 'number' &&
+    Number.isFinite(score) &&
+    typeof maxScore === 'number' &&
+    Number.isFinite(maxScore) &&
+    maxScore > 0;
+
+  const notaSobre10 = hasScoreData
+    ? (score / maxScore) * 10
+    : typeof grade === 'number' && Number.isFinite(grade)
+      ? grade
       : 0;
 
   return (

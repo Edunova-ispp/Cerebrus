@@ -18,6 +18,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 class ProfesorActividadesIT extends SeleniumBaseTest {
 
     private static final Duration WAIT = Duration.ofSeconds(15);
+    private static final String BACKEND_URL = System.getProperty("selenium.backendUrl", "http://localhost:8080");
     private static final String PROFESOR_USUARIO = "carlos_pro";
     private static final String PROFESOR_PASSWORD = "123456";
     private static final long CURSO_ID = 10101L;    
@@ -49,7 +50,8 @@ class ProfesorActividadesIT extends SeleniumBaseTest {
     @Test
 @DisplayName("El profesor puede crear, editar y borrar una teoría desde la UI")
 void profesorPuedeCrearEditarYBorrarUnaTeoria() {
-    loginAsProfesor();
+    login(PROFESOR_USUARIO, PROFESOR_PASSWORD);
+
 
     navigateTo("/cursos/" + CURSO_ID + "/temas/" + TEMA_ID + "/actividades/crear");
     abrirFormularioTeoria();
@@ -137,7 +139,8 @@ WebElement editBtn = item.findElement(By.cssSelector("button[title='Editar']"));
     @Test
     @DisplayName("La validación de teoría mantiene al profesor en la pantalla cuando faltan datos")
     void validacionTeoriaMantieneLaPantalla() {
-        loginAsProfesor();
+       login(PROFESOR_USUARIO, PROFESOR_PASSWORD);
+
 
         navigateTo("/cursos/" + CURSO_ID + "/temas/" + TEMA_ID + "/actividades/crear");
         abrirFormularioTeoria();
@@ -154,7 +157,8 @@ WebElement editBtn = item.findElement(By.cssSelector("button[title='Editar']"));
     @Test
     @DisplayName("El profesor ve correctamente los campos de todos los formularios de creación")
     void profesorVeCamposDeTodosLosFormulariosDeCreacion() {
-        loginAsProfesor();
+        login(PROFESOR_USUARIO, PROFESOR_PASSWORD);
+
 
         navigateTo("/cursos/" + CURSO_ID + "/temas/" + TEMA_ID + "/actividades/crear");
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
@@ -223,7 +227,8 @@ WebElement editBtn = item.findElement(By.cssSelector("button[title='Editar']"));
     @Test
     @DisplayName("El profesor puede abrir y editar campos de actividades seed en modo edición")
     void profesorPuedeEditarCamposDeActividadesSeed() {
-        loginAsProfesor();
+        login(PROFESOR_USUARIO, PROFESOR_PASSWORD);
+
 
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
 
@@ -260,23 +265,6 @@ WebElement editBtn = item.findElement(By.cssSelector("button[title='Editar']"));
         assertThat(ordenTitulo.getAttribute("value")).isEqualTo("Ciclo de Vida de una Planta (edición E2E)");
     }
 
-    private void loginAsProfesor() {
-        navigateTo("/auth/login");
-
-        WebDriverWait wait = new WebDriverWait(driver, WAIT);
-        WebElement usuarioInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
-        usuarioInput.clear();
-        usuarioInput.sendKeys(PROFESOR_USUARIO);
-
-        WebElement passwordInput = driver.findElement(By.id("password"));
-        passwordInput.clear();
-        passwordInput.sendKeys(PROFESOR_PASSWORD);
-
-        driver.findElement(By.cssSelector("button.pixel-btn-submit")).click();
-
-        wait.until(ExpectedConditions.urlContains("/miscursos"));
-        assertThat(driver.getCurrentUrl()).contains("/miscursos");
-    }
 
     private void abrirFormularioTeoria() {
         WebDriverWait wait = new WebDriverWait(driver, WAIT);

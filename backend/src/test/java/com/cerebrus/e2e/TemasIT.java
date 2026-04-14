@@ -375,41 +375,6 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
                 pageWait.until(d -> d.findElements(createdCourseCard).isEmpty());
         }
 
-       private void login(String user, String password) {
-    // 1. Cerrar alert nativo
-    try { driver.switchTo().alert().dismiss(); } catch (org.openqa.selenium.NoAlertPresentException ignored) {}
-
-    // 2. Detener cualquier carga pendiente y navegar a login
-    try {
-        ((JavascriptExecutor) driver).executeScript("window.stop();");
-    } catch (org.openqa.selenium.WebDriverException ignored) {}
-
-    navigateTo("/auth/login");
-    clearClientSession();
-
-    // 3. Si la página no cargó correctamente, reintentar una vez
-    WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-    try {
-        pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
-    } catch (org.openqa.selenium.TimeoutException e) {
-        try { driver.switchTo().alert().dismiss(); } catch (org.openqa.selenium.NoAlertPresentException ignored) {}
-        navigateTo("/auth/login");
-        pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
-    }
-
-    WebElement userInput = driver.findElement(By.id("identificador"));
-    userInput.clear();
-    userInput.sendKeys(user);
-
-    WebElement passwordInput = driver.findElement(By.id("password"));
-    passwordInput.clear();
-    passwordInput.sendKeys(password);
-
-    driver.findElement(By.cssSelector("button.pixel-btn-submit")).click();
-    pageWait.until(ExpectedConditions.urlContains("/miscursos"));
-    pageWait.until(ExpectedConditions.visibilityOfElementLocated(
-            By.cssSelector("h1.mis-cursos-title")));
-}  
         private CourseContext createCourseAndOpenDetail(String courseTitle) {
                 navigateTo("/crearCurso");
 
@@ -559,35 +524,34 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
         }
 
         private void openStudentCourseMap(String courseId) {
-                navigateTo("/cursos/" + courseId);
+    // Timeout reducido solo para esta navegación que puede colgar
+    driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
+    try {
+        navigateTo("/cursos/" + courseId);
+    } catch (org.openqa.selenium.TimeoutException ignored) {
+        // La página SPA puede no disparar load — continuar si el DOM está listo
+    } finally {
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(300));
+    }
 
-                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-                List<WebElement> heroButtons = driver.findElements(By.cssSelector("button.detalle-hero-btn"));
-                if (!heroButtons.isEmpty()) {
-                        WebElement continueButton = pageWait.until(
-                                        ExpectedConditions.visibilityOf(heroButtons.get(0))
-                        );
-                        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", continueButton);
-                        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", continueButton);
-                } else {
-                        navigateTo("/mapa/" + courseId);
-                }
-
-                pageWait.until(ExpectedConditions.urlContains("/mapa/" + courseId));
+    WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
+    List<WebElement> heroButtons = driver.findElements(By.cssSelector("button.detalle-hero-btn"));
+    if (!heroButtons.isEmpty()) {
+        WebElement continueButton = pageWait.until(
+                ExpectedConditions.visibilityOf(heroButtons.get(0)));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", continueButton);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", continueButton);
+    } else {
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
+        try {
+            navigateTo("/mapa/" + courseId);
+        } catch (org.openqa.selenium.TimeoutException ignored) {}
+        finally {
+            driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(300));
         }
+    }
 
-        private void assertStudentSeesThemeInMap(String themeTitle) {
-    WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(20));
-    
-    // Recargar para asegurar datos actualizados
-    driver.navigate().refresh();
-    
-    WebElement themeButton = pageWait.until(
-            ExpectedConditions.visibilityOfElementLocated(
-                    By.xpath("//button[contains(@class, 'mapa-tema-btn') and normalize-space() = '" + themeTitle + "']")
-            )
-    );
-    assertThat(themeButton.getText()).isEqualTo(themeTitle);
+    pageWait.until(ExpectedConditions.urlContains("/mapa/" + courseId));
 }
 
         private void assertStudentDoesNotSeeThemeInMap(String themeTitle) {
@@ -706,5 +670,18 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
                         pageWait.until(ExpectedConditions.elementSelectionStateToBe(visibilityToggle, visible));
                 }
         }
+        private void assertStudentSeesThemeInMap(String themeTitle) {
+    WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(20));
+    
+    // Recargar para asegurar datos actualizados
+    driver.navigate().refresh();
+    
+    WebElement themeButton = pageWait.until(
+            ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath("//button[contains(@class, 'mapa-tema-btn') and normalize-space() = '" + themeTitle + "']")
+            )
+    );
+    assertThat(themeButton.getText()).isEqualTo(themeTitle);
+}
 
 }

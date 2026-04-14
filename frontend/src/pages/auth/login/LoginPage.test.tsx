@@ -78,4 +78,26 @@ describe("LoginPage", () => {
       expect(localStorage.getItem("role")).toBe("ROLE_ALUMNO");
     });
   });
+
+  it("activa la cuenta automáticamente con validatoncode en la URL", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({ message: "Email confirmado exitosamente." }),
+    } as Response);
+
+    render(
+      <MemoryRouter initialEntries={["/auth/login?validatoncode=12345678"]}>
+        <Routes>
+          <Route path="/auth/login" element={<LoginPage />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText(/cuenta activada/i)).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("/auth/confirm-email/12345678"),
+      expect.objectContaining({ method: "PUT" })
+    );
+  });
 });

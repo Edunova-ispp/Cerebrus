@@ -5,7 +5,10 @@
   width: 100vw;
   min-height: 100vh;
   box-sizing: border-box;
-  background-color: #FAF6ED;
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255, 242, 148, 0.30) 0%, rgba(255, 242, 148, 0) 34%),
+    radial-gradient(circle at 86% 84%, rgba(226, 133, 169, 0.16) 0%, rgba(226, 133, 169, 0) 36%),
+    linear-gradient(155deg, #fffdf7 0%, #fff9fc 54%, #fffaf4 100%);
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
@@ -83,6 +86,9 @@
   font-family: 'Pixelify Sans', sans-serif;
   font-size: 1.15rem;
   color: #000;
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+  white-space: pre-line;
 }
 
 .mia-image-section {
@@ -189,6 +195,38 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
+}
+
+.mia-submit-btn {
+  background: var(--color-accent, #FFF294);
+  color: #000;
+  border: 3px solid #000;
+  border-radius: 14px;
+  padding: 12px 24px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #000;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.1s;
+}
+
+.mia-submit-btn:hover:not(:disabled) {
+  background: var(--color-accent-light, #FCEF91);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.mia-submit-btn:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 #000;
+}
+
+.mia-submit-btn:disabled {
+  opacity: 0.38;
+  cursor: default;
+  box-shadow: 2px 2px 0 #000;
+  transform: none;
 }
 
 .mia-feedback {

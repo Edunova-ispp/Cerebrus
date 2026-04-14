@@ -183,25 +183,6 @@ void profesorPuedeEliminarCurso() {
         assertThat(driver.findElements(cardLocator)).isEmpty();
     }
 
-    private void login(String user, String password) {
-        try { driver.switchTo().alert().dismiss(); } catch (org.openqa.selenium.NoAlertPresentException ignored) {}
-        navigateTo("/auth/login");
-
-        WebDriverWait wait = new WebDriverWait(driver, WAIT);
-        WebElement usuarioInput = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
-        usuarioInput.clear();
-        usuarioInput.sendKeys(user);
-
-        WebElement passwordInput = driver.findElement(By.id("password"));
-        passwordInput.clear();
-        passwordInput.sendKeys(password);
-
-        passwordInput.sendKeys(org.openqa.selenium.Keys.RETURN);
-        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
-        assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
-    }
-
     private void submitCursoForm(WebDriverWait wait) {
         List<WebElement> submitBtns = driver.findElements(
                 By.cssSelector("button.pixel-btn-submit-main"));

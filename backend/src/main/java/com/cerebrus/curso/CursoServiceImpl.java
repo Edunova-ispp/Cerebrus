@@ -15,7 +15,6 @@ import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.actividadAlumn.ActividadAlumnoProgreso;
 import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
-import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
@@ -163,6 +162,7 @@ public class CursoServiceImpl implements CursoService {
         cursoRepository.delete(curso);
     }
 
+    @Override
     public ProgresoDTO encontrarProgresoPorCursoId(Long cursoId) {
         Curso curso = cursoRepository.findByID(cursoId);
         if (curso == null) {
@@ -254,7 +254,7 @@ public class CursoServiceImpl implements CursoService {
     }
 
     @Override
-    public List<Integer> obtenerNotaMediaPorActividadPorCursoId(Long cursoId) {
+    public List<Double> obtenerNotaMediaPorActividadPorCursoId(Long cursoId) {
         Curso curso = cursoRepository.findByID(cursoId);
         if (curso == null) {
             throw new RuntimeException("404 Not Found");
@@ -267,7 +267,7 @@ public class CursoServiceImpl implements CursoService {
         
         List<ActividadAlumno> actividades = actividadAlumnoRepository.findByCursoID(cursoId);
         System.out.println("Actividades encontradas para el curso ID " + cursoId + ": " + actividades.size());
-        List<Integer> notasMedias = new ArrayList<>();
+        List<Double> notasMedias = new ArrayList<>();
         List<Long> actividadesIds = new ArrayList<>();
         for (ActividadAlumno aa : actividades) {
             if (!actividadesIds.contains(aa.getActividad().getId())) {
@@ -284,7 +284,7 @@ public class CursoServiceImpl implements CursoService {
                     contadorNotas++;
                 }
             }
-            int notaMedia = contadorNotas > 0 ? sumaNotas / contadorNotas : 0;
+            double notaMedia = contadorNotas > 0 ? (double) sumaNotas / contadorNotas : 0.0;
             notasMedias.add(notaMedia);
         }
 

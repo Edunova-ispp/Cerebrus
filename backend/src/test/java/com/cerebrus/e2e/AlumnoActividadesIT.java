@@ -363,33 +363,9 @@ try {
         loginAsAlumno(ALUMNO_USUARIO);
     }
 
-    private void loginAsAlumno(String usuario) {
-    // 1. Cerrar overlay ARS si quedó abierto del test anterior
-    try {
-        List<WebElement> closeButtons = driver.findElements(By.cssSelector(".ars-btn.ars-btn-secondary"));
-        if (!closeButtons.isEmpty() && closeButtons.get(0).isDisplayed()) {
-            closeButtons.get(0).click();
-        }
-    } catch (org.openqa.selenium.WebDriverException ignored) {}
-
-    // 2. Cerrar alert nativo si quedó abierto
-    try { driver.switchTo().alert().dismiss(); } catch (org.openqa.selenium.NoAlertPresentException ignored) {}
-
-    navigateTo("/auth/login");
-
-    WebDriverWait wait = new WebDriverWait(driver, WAIT);
-    WebElement usuarioInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
-    usuarioInput.clear();
-    usuarioInput.sendKeys(usuario);
-
-    WebElement passwordInput = driver.findElement(By.id("password"));
-    passwordInput.clear();
-    passwordInput.sendKeys(ALUMNO_PASSWORD);
-
-    driver.findElement(By.cssSelector("button.pixel-btn-submit")).click();
-
-    wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
-    assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
+    // En AlumnoActividadesIT — simplificar loginAsAlumno
+private void loginAsAlumno(String usuario) {
+    login(usuario, ALUMNO_PASSWORD);
 }
 
     private void clickContinueIfPresent(WebDriverWait wait) {
