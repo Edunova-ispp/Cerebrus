@@ -99,12 +99,20 @@
   cursor: default;
   position: relative;
   transition: filter 0.12s, box-shadow 0.25s ease;
+  appearance: none;
+  padding: 0;
+  background: inherit;
+  font: inherit;
 }
 
 .ta-cell--light { background: #fff; }
 .ta-cell--dark  { background: #1a1a1a; }
 .ta-cell--cerbero { background: var(--color-primary, #D10057); }
 .ta-cell--clickable { cursor: pointer; }
+
+.ta-cell:disabled {
+  opacity: 1;
+}
 
 .ta-cell--dark.ta-cell--clickable:hover {
   background: #2a2a2a;

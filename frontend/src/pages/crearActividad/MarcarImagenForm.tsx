@@ -374,30 +374,31 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                   position: 'relative',
                 }}
               >
-                <img
-                  ref={imgRef}
-                  src={imagenAMarcar.trim()}
-                  alt="Vista previa"
-                  onLoad={handleImageLoad}
+                <button
+                  type="button"
                   onClick={handleImageClick}
-                  onKeyDown={(ev) => {
-                    if (ev.key === 'Enter' || ev.key === ' ') {
-                      ev.preventDefault();
-                      handleImageClick(ev as unknown as React.MouseEvent<HTMLImageElement>);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-label="Imagen para anadir puntos"
+                  aria-label="Imagen para añadir puntos"
                   style={{
-                    width: '100%',
-                    maxHeight: 350,
-                    objectFit: 'contain',
+                    all: 'unset',
                     display: 'block',
+                    width: '100%',
                     cursor: 'crosshair',
-                    userSelect: 'none',
                   }}
-                />
+                >
+                  <img
+                    ref={imgRef}
+                    src={imagenAMarcar.trim()}
+                    alt="Vista previa"
+                    onLoad={handleImageLoad}
+                    style={{
+                      width: '100%',
+                      maxHeight: 350,
+                      objectFit: 'contain',
+                      display: 'block',
+                      userSelect: 'none',
+                    }}
+                  />
+                </button>
 
                 {imageNaturalSize &&
                   puntos.map((p, idx) => {
@@ -453,17 +454,9 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                         padding: 6,
                         background: selected ? '#fff' : 'transparent',
                         position: 'relative',
+                        cursor: 'pointer',
                       }}
                       onClick={() => setSelectedPointIndex(i)}
-                      onKeyDown={(ev) => {
-                        if (ev.key === 'Enter' || ev.key === ' ') {
-                          ev.preventDefault();
-                          setSelectedPointIndex(i);
-                        }
-                      }}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`Seleccionar punto ${i + 1}`}
                     >
                       <button
                         type="button"

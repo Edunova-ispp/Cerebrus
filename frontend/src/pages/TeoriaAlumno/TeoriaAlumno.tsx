@@ -117,18 +117,11 @@ export default function TeoriaAlumno() {
           <>
             <ActivityHeader title={teoria.titulo} guideType="teoria" guideRole="alumno" />
 
-            <div 
+            <button
               className={`ta-flashcard ${isFlipped ? 'flipped' : ''}`} 
               onClick={() => setIsFlipped(!isFlipped)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setIsFlipped(!isFlipped);
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              aria-label="Girar tarjeta de teoria"
+              type="button"
+              style={{ background: 'transparent', border: 'none', padding: 0, width: '100%', textAlign: 'inherit' }}
             >
               <div className="ta-card-inner">
                 
@@ -170,7 +163,7 @@ export default function TeoriaAlumno() {
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
 
             {/* Botón de finalizar */}
             <div className="ta-bottom">

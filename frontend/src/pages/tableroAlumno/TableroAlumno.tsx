@@ -131,14 +131,6 @@ function QuestionModal({
     <div
       className="ta-modal-overlay"
       onClick={(e) => e.target === e.currentTarget && onClose()}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
-          onClose();
-        }
-      }}
-      role="button"
-      tabIndex={0}
-      aria-label="Cerrar pregunta"
     >
       <div className="ta-modal">
         <h3 className="ta-modal-title">Pregunta</h3>
@@ -199,14 +191,13 @@ function buildGridItems(
           : isDark ? 'ta-cell--dark' : 'ta-cell--light';
 
       items.push(
-        <div
+        <button
           key={`cell-${r}-${c}`}
           className={cx('ta-cell', cellVariant, isClickable && 'ta-cell--clickable', !isCerbero && isAnswered && 'ta-cell--done')}
           style={{ gridRow: r * 2 + 1, gridColumn: c * 2 + 1 }}
+          type="button"
           onClick={() => onCellClick(r, c)}
-          role={isClickable ? 'button' : undefined}
-          tabIndex={isClickable ? 0 : undefined}
-          onKeyDown={(e) => e.key === 'Enter' && onCellClick(r, c)}
+          disabled={!isClickable}
         >
           {isCerbero && (
             <img src={getMascotaEvolucionada(puntosAlumno)} className={cx('ta-char', isComplete && 'ta-char--victory')} alt="Cerbero" aria-hidden="true"/>
@@ -216,7 +207,7 @@ function buildGridItems(
               {isAnswered ? '✓' : '?'}
             </span>
           )}
-        </div>,
+        </button>,
       );
 
       if (c < size - 1) {

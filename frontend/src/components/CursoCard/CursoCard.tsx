@@ -35,14 +35,6 @@ export default function CursoCard({ curso, isMaestro = false, onToggleVisibilida
         <div
           className="codigo-modal-overlay"
           onClick={(e) => e.target === e.currentTarget && setModalOpen(false)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
-              setModalOpen(false);
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal de codigo"
         >
           <div className="codigo-modal">
             <p className="codigo-modal__label">Código del curso</p>

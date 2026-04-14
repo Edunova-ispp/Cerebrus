@@ -431,54 +431,6 @@ export default function CrucigramaAlumno() {
     containerRef.current?.focus();
   }, [cellMap, selection, submitted]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (!selection || submitted) return;
-    const { r, c, wordIdx } = selection;
-    const key = e.key.toUpperCase();
-
-    if (/^[A-ZÁÉÍÓÚÜÑ]$/.test(key) || /^[A-Z]$/.test(key)) {
-      e.preventDefault();
-      setAnswers(prev => new Map(prev).set(`${r},${c}`, key));
-      const word = words[wordIdx];
-      if (word) {
-        const cellsInWord: [number, number][] = Array.from({ length: word.word.length }, (_, i) => [
-          word.dir === 'h' ? word.row : word.row + i,
-          word.dir === 'h' ? word.col + i : word.col,
-        ]);
-        const pos = cellsInWord.findIndex(([cr, cc]) => cr === r && cc === c);
-        if (pos < cellsInWord.length - 1) {
-          const [nr, nc] = cellsInWord[pos + 1];
-          setSelection({ r: nr, c: nc, wordIdx });
-        }
-      }
-    } else if (e.key === 'Backspace') {
-      e.preventDefault();
-      if (answers.get(`${r},${c}`)) {
-        setAnswers(prev => { const m = new Map(prev); m.delete(`${r},${c}`); return m; });
-      } else {
-        const word = words[wordIdx];
-        if (word) {
-          const cellsInWord: [number, number][] = Array.from({ length: word.word.length }, (_, i) => [
-            word.dir === 'h' ? word.row : word.row + i,
-            word.dir === 'h' ? word.col + i : word.col,
-          ]);
-          const pos = cellsInWord.findIndex(([cr, cc]) => cr === r && cc === c);
-          if (pos > 0) {
-            const [pr, pc] = cellsInWord[pos - 1];
-            setAnswers(prev => { const m = new Map(prev); m.delete(`${pr},${pc}`); return m; });
-            setSelection({ r: pr, c: pc, wordIdx });
-          }
-        }
-      }
-    } else if (['ArrowRight','ArrowLeft','ArrowUp','ArrowDown'].includes(e.key)) {
-      e.preventDefault();
-      const dr = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : 0;
-      const dc = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-      const nextCell = cellMap.get(`${r + dr},${c + dc}`);
-      if (nextCell) setSelection({ r: r + dr, c: c + dc, wordIdx: nextCell.wordIds[0] });
-    }
-  }, [selection, submitted, words, answers, cellMap]);
-
   const handleCheck = async () => {
     const results = new Map<string, 'correct' | 'wrong'>();
     cellMap.forEach((cell, key) => {
@@ -550,7 +502,38 @@ export default function CrucigramaAlumno() {
     const word = words[wi];
     if (!word) return;
     setSelection({ r: word.row, c: word.col, wordIdx: wi });
-    containerRef.current?.focus();
+  };
+
+  const renderClueSection = (
+    clueWords: WordEntry[],
+    orientation: 'horizontal' | 'vertical',
+    title: string,
+    badge: '→' | '↓',
+  ) => {
+    if (clueWords.length === 0) return null;
+
+    return (
+      <div className="cr-clue-section">
+        <div className={`cr-clue-title ${orientation}`}>
+          <span className={`cr-arrow-badge ${orientation === 'horizontal' ? 'h' : 'v'}`}>{badge}</span>
+          {title}
+        </div>
+        {clueWords.map(word => {
+          const wi = words.indexOf(word);
+          return (
+            <button
+              key={`${orientation[0]}-${word.num}`}
+              className={`cr-clue-item ${selection?.wordIdx === wi ? 'active-clue-item' : ''}`}
+              type="button"
+              onClick={() => handleClueClick(wi)}
+            >
+              <span className={`cr-clue-num ${completedWordIds.has(wi) ? 'done' : ''}`}>{word.num}</span>
+              <span className="cr-clue-text">{word.clue}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
   };
 
   const activeClueInfo = useMemo(() => {
@@ -659,8 +642,6 @@ export default function CrucigramaAlumno() {
                 <div
                   ref={containerRef}
                   className="cr-grid"
-                  tabIndex={0}
-                  onKeyDown={handleKeyDown}
                   style={{
                     gridTemplateColumns: `repeat(${GRID_SIZE}, ${CELL_SIZE}px)`,
                     gridTemplateRows: `repeat(${GRID_SIZE}, ${CELL_SIZE}px)`,
@@ -676,18 +657,12 @@ export default function CrucigramaAlumno() {
                       const key = `${r},${c}`;
                       const cell = cellMap.get(key);
                       return (
-                        <div
+                        <button
                           key={key}
                           className={getCellClass(r, c)}
+                          type="button"
                           onClick={() => cell && handleCellClick(r, c)}
-                          onKeyDown={(e) => {
-                            if ((e.key === 'Enter' || e.key === ' ') && cell) {
-                              e.preventDefault();
-                              handleCellClick(r, c);
-                            }
-                          }}
-                          role={cell ? 'button' : undefined}
-                          tabIndex={cell ? 0 : undefined}
+                          disabled={!cell}
                         >
                           {cell && (
                             <>
@@ -695,7 +670,7 @@ export default function CrucigramaAlumno() {
                               <span className="cr-cell-letter">{answers.get(key) ?? ''}</span>
                             </>
                           )}
-                        </div>
+                        </button>
                       );
                     })
                   )}
@@ -704,64 +679,8 @@ export default function CrucigramaAlumno() {
 
               {/* Clues */}
               <div className="cr-clues">
-                {horizontalWords.length > 0 && (
-                  <div className="cr-clue-section">
-                    <div className="cr-clue-title horizontal">
-                      <span className="cr-arrow-badge h">→</span>
-                      Horizontal
-                    </div>
-                    {horizontalWords.map(word => {
-                      const wi = words.indexOf(word);
-                      return (
-                        <div
-                          key={`h-${word.num}`}
-                          className={`cr-clue-item ${selection?.wordIdx === wi ? 'active-clue-item' : ''}`}
-                          onClick={() => handleClueClick(wi)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              handleClueClick(wi);
-                            }
-                          }}
-                          role="button"
-                          tabIndex={0}
-                        >
-                          <span className={`cr-clue-num ${completedWordIds.has(wi) ? 'done' : ''}`}>{word.num}</span>
-                          <span className="cr-clue-text">{word.clue}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                {verticalWords.length > 0 && (
-                  <div className="cr-clue-section">
-                    <div className="cr-clue-title vertical">
-                      <span className="cr-arrow-badge v">↓</span>
-                      Vertical
-                    </div>
-                    {verticalWords.map(word => {
-                      const wi = words.indexOf(word);
-                      return (
-                        <div
-                          key={`v-${word.num}`}
-                          className={`cr-clue-item ${selection?.wordIdx === wi ? 'active-clue-item' : ''}`}
-                          onClick={() => handleClueClick(wi)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              handleClueClick(wi);
-                            }
-                          }}
-                          role="button"
-                          tabIndex={0}
-                        >
-                          <span className={`cr-clue-num ${completedWordIds.has(wi) ? 'done' : ''}`}>{word.num}</span>
-                          <span className="cr-clue-text">{word.clue}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                {renderClueSection(horizontalWords, 'horizontal', 'Horizontal', '→')}
+                {renderClueSection(verticalWords, 'vertical', 'Vertical', '↓')}
               </div>
             </div>
 

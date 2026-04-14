@@ -145,14 +145,6 @@ export default function GestionAlumnos({ cursoId, embedded }: Props) {
         <div
           className="ga-overlay"
           onClick={(e) => e.target === e.currentTarget && setConfirmId(null)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
-              setConfirmId(null);
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal de confirmacion"
         >
           <div className="ga-modal">
             <h3 className="ga-modal-title">Confirmar expulsión</h3>

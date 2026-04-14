@@ -13,7 +13,9 @@
     linear-gradient(155deg, #fffdf7 0%, #fff9fc 54%, #fffaf4 100%);
   color: #000;
   display: flex;
-  flex-direction: column;
+  appearance: none;
+  padding: 0;
+  font: inherit;
   overflow-x: hidden;
   z-index: 10;
   box-sizing: border-box;
@@ -21,6 +23,9 @@
 
 .crucigrama-main {
   flex: 1;
+.cr-cell:disabled {
+  opacity: 1;
+}
   max-width: 1100px;
   width: 100%;
   margin: 0 auto;
@@ -136,7 +141,12 @@
 }
 
 /* ── Cells ── */
-.cr-cell {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 4px 6px;
+  font: inherit;
+  text-align: left;
   width: 46px;
   height: 46px;
   border: 3px solid #000;
