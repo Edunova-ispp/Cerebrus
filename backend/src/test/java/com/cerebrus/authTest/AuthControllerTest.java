@@ -39,6 +39,8 @@ import com.cerebrus.suscripcion.Suscripcion;
 import com.cerebrus.suscripcion.SuscripcionRepository;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.alumno.AlumnoRepository;
+import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.maestro.MaestroRepository;
 import com.cerebrus.usuario.organizacion.Organizacion;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,6 +54,9 @@ class AuthControllerTest {
 
 	@Mock
 	private AlumnoRepository alumnoRepository;
+
+	@Mock
+	private MaestroRepository maestroRepository;
 
 	@Mock
 	private SuscripcionRepository suscripcionRepository;
@@ -188,6 +193,74 @@ class AuthControllerTest {
 		assertThat(body.getType()).isEqualTo("Bearer");
 	}
 
+	@Test
+	void authenticateUser_cuandoCredencialesMaestroYSuscripcionActiva_devuelveJwtResponse() {
+		LoginRequest request = new LoginRequest();
+		request.setIdentificador("profe1");
+		request.setPassword("pass");
+
+		Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
+		UserDetailsImpl principal = new UserDetailsImpl(8L, "profe1", "pass",
+				true, List.of(new SimpleGrantedAuthority("MAESTRO")));
+
+		Long organizacionId = 200L;
+		Organizacion mockOrg = new Organizacion();
+		mockOrg.setId(organizacionId);
+
+		Maestro mockMaestro = new Maestro();
+		mockMaestro.setId(8L);
+		mockMaestro.setOrganizacion(mockOrg);
+
+		Suscripcion mockSuscripcion = new Suscripcion();
+
+		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+				.thenReturn(authentication);
+		when(authentication.getPrincipal()).thenReturn(principal);
+		when(jwtUtils.generateJwtToken(authentication)).thenReturn("jwt-maestro");
+		when(maestroRepository.findById(8L)).thenReturn(Optional.of(mockMaestro));
+		when(suscripcionRepository.findByOrganizacionIdSuscripcionActiva(organizacionId))
+				.thenReturn(Optional.of(mockSuscripcion));
+
+		ResponseEntity<?> response = authController.authenticateUser(request);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).isInstanceOf(JwtResponse.class);
+		assertThat(((JwtResponse) response.getBody()).getToken()).isEqualTo("jwt-maestro");
+		verify(maestroRepository).findById(8L);
+	}
+
+	@Test
+	void authenticateUser_cuandoCredencialesMaestroSinSuscripcion_devuelveForbidden() {
+		LoginRequest request = new LoginRequest();
+		request.setIdentificador("profe2");
+		request.setPassword("pass");
+
+		Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
+		UserDetailsImpl principal = new UserDetailsImpl(9L, "profe2", "pass",
+				true, List.of(new SimpleGrantedAuthority("MAESTRO")));
+
+		Organizacion mockOrg = new Organizacion();
+		mockOrg.setId(200L);
+
+		Maestro mockMaestro = new Maestro();
+		mockMaestro.setId(9L);
+		mockMaestro.setOrganizacion(mockOrg);
+
+		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+				.thenReturn(authentication);
+		when(authentication.getPrincipal()).thenReturn(principal);
+		when(maestroRepository.findById(9L)).thenReturn(Optional.of(mockMaestro));
+		when(suscripcionRepository.findByOrganizacionIdSuscripcionActiva(200L))
+				.thenReturn(Optional.empty());
+
+		ResponseEntity<?> response = authController.authenticateUser(request);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+		assertThat(response.getBody()).isInstanceOf(MessageResponse.class);
+		assertThat(((MessageResponse) response.getBody()).getMessage())
+.isEqualTo("CUENTA_ORG_NO_SUSCRIPCION");
+	}
+
     // Test para verificar que el login devuelve un error si las credenciales son incorrectas
 	@Test
 	void authenticateUser_cuandoBadCredentials_devuelveUnauthorized() {
@@ -207,6 +280,53 @@ class AuthControllerTest {
 				.isEqualTo("Credenciales incorrectas");
 	}
 
+	@Test
+	void authenticateUser_cuandoRolNoEsMaestroNiAlumno_devuelveJwtSinComprobarSuscripcion() {
+		LoginRequest request = new LoginRequest();
+		request.setIdentificador("admin");
+		request.setPassword("pass");
+
+		Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
+		UserDetailsImpl principal = new UserDetailsImpl(50L, "admin", "pass",
+				true, List.of(new SimpleGrantedAuthority("ADMIN")));
+
+		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+				.thenReturn(authentication);
+		when(authentication.getPrincipal()).thenReturn(principal);
+		when(jwtUtils.generateJwtToken(authentication)).thenReturn("jwt-admin");
+
+		ResponseEntity<?> response = authController.authenticateUser(request);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(((JwtResponse) response.getBody()).getToken()).isEqualTo("jwt-admin");
+		verify(maestroRepository, never()).findById(any());
+		verify(alumnoRepository, never()).findById(any());
+		verify(suscripcionRepository, never()).findByOrganizacionIdSuscripcionActiva(any());
+	}
+
+	@Test
+	void authenticateUser_cuandoMaestroNoSeEncuentra_devuelveForbidden() {
+		LoginRequest request = new LoginRequest();
+		request.setIdentificador("profe3");
+		request.setPassword("pass");
+
+		Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
+		UserDetailsImpl principal = new UserDetailsImpl(99L, "profe3", "pass",
+				true, List.of(new SimpleGrantedAuthority("MAESTRO")));
+
+		when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+				.thenReturn(authentication);
+		when(authentication.getPrincipal()).thenReturn(principal);
+		when(maestroRepository.findById(99L)).thenReturn(Optional.empty());
+
+		ResponseEntity<?> response = authController.authenticateUser(request);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+		assertThat(((MessageResponse) response.getBody()).getMessage())
+.isEqualTo("CUENTA_ORG_NO_SUSCRIPCION");
+		verify(suscripcionRepository, never()).findByOrganizacionIdSuscripcionActiva(any());
+	}
+
     // Test para verificar que el logout funciona correctamente y limpia el SecurityContext
 	@Test
 	void logoutUser_limpiaSecurityContextYDevuelveOk() {
@@ -219,6 +339,50 @@ class AuthControllerTest {
 		assertThat(response.getBody()).isInstanceOf(MessageResponse.class);
 		assertThat(((MessageResponse) response.getBody()).getMessage())
 				.isEqualTo("Sesión cerrada. El cliente debe eliminar el token.");
+	}
+
+	@Test
+	void confirmarEmail_cuandoServicioVaBien_devuelveOk() {
+		ResponseEntity<?> response = authController.confirmarEmail(12345678);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).isInstanceOf(MessageResponse.class);
+		assertThat(((MessageResponse) response.getBody()).getMessage())
+				.isEqualTo("Email confirmado exitosamente.");
+		verify(authService).confirmarEmail(12345678);
+	}
+
+	@Test
+	void confirmarEmail_cuandoServicioFalla_devuelveBadRequest() {
+		doThrow(new IllegalArgumentException("Código inválido")).when(authService).confirmarEmail(11111111);
+
+		ResponseEntity<?> response = authController.confirmarEmail(11111111);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		assertThat(response.getBody()).isInstanceOf(MessageResponse.class);
+		assertThat(((MessageResponse) response.getBody()).getMessage()).isEqualTo("Código inválido");
+	}
+
+	@Test
+	void verificarEmailConfirmado_devuelveTrue() {
+		when(authService.usuarioVerificado(7L)).thenReturn(true);
+
+		ResponseEntity<Boolean> response = authController.verificarEmailConfirmado(7L);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).isTrue();
+		verify(authService).usuarioVerificado(7L);
+	}
+
+	@Test
+	void verificarEmailConfirmado_devuelveFalse() {
+		when(authService.usuarioVerificado(8L)).thenReturn(false);
+
+		ResponseEntity<Boolean> response = authController.verificarEmailConfirmado(8L);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).isFalse();
+		verify(authService).usuarioVerificado(8L);
 	}
 
     // Método auxiliar para crear un SignupRequest de prueba

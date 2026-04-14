@@ -100,11 +100,15 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
+    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+
+    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
 
     if (!puntuacion.trim()) return 'La puntuación es requerida';
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
     if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
+    if (puntuacionNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
 
     if (!temaIdNum) return 'Falta el id del tema en la URL';
     if (!cursoId) return 'Falta el id del curso en la URL';
@@ -112,6 +116,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
     if (!imagenAMarcar.trim()) return 'La URL de la imagen a marcar es requerida';
 
     if (puntos.length === 0) return 'Añade al menos un punto haciendo clic en la imagen';
+    if (puntos.length > 100) return 'La imagen no puede tener más de 100 puntos';
     if (puntos.some((p) => !p.respuesta.trim())) return 'Todos los puntos deben tener respuesta';
 
     if (mode === 'edit' && !marcarImagenId) return 'Falta el id de la actividad a editar';

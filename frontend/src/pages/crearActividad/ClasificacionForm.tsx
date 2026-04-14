@@ -156,12 +156,18 @@ const [showIAModal, setShowIAModal] = useState(false);
 
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
+    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+
+    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
+
     if (!puntuacion.trim()) return 'La puntuación es requerida';
 
     const pNum = Number.parseInt(puntuacion.trim(), 10);
     if (isNaN(pNum) || pNum <= 0) return 'La puntuación debe ser un número mayor a 0';
+    if (pNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
 
     if (preguntas.length < 2) return 'Debe haber al menos 2 categorías';
+    if (preguntas.length > 10) return 'No puedes tener más de 10 categorías';
 
     for (let i = 0; i < preguntas.length; i++) {
       if (!preguntas[i].text.trim()) {
@@ -169,6 +175,9 @@ const [showIAModal, setShowIAModal] = useState(false);
       }
       if (preguntas[i].respuestas.length === 0) {
         return `La categoría ${i + 1} debe tener al menos 1 elemento`;
+      }
+      if (preguntas[i].respuestas.length > 20) {
+        return `La categoría ${i + 1} no puede tener más de 20 elementos`;
       }
       const tieneElementosVacios = preguntas[i].respuestas.some((r) => !r.text.trim());
       if (tieneElementosVacios) {
@@ -442,13 +451,17 @@ const handleIAResult = (data: any) => {
                   <button type="button" className="tf-btn-remove-option" onClick={() => removeRespuesta(pIdx, rIdx)}>✕</button>
                 </div>
               ))}
-              <button type="button" className="tf-btn-add-option" onClick={() => addRespuesta(pIdx)}>+ Añadir Elemento</button>
+              {p.respuestas.length < 20 && (
+                <button type="button" className="tf-btn-add-option" onClick={() => addRespuesta(pIdx)}>+ Añadir Elemento</button>
+              )}
             </div>
           </div>
         ))}
-        <button type="button" className="tf-btn-add-question" onClick={addPregunta} style={{ width: '100%' }}>
-          + Añadir Nueva Categoría
-        </button>
+        {preguntas.length < 10 && (
+          <button type="button" className="tf-btn-add-question" onClick={addPregunta} style={{ width: '100%' }}>
+            + Añadir Nueva Categoría
+          </button>
+        )}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
