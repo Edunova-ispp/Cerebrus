@@ -112,15 +112,49 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
     setPreguntas(updated);
   };
 
-  const isValid = titulo.trim().length > 0 && puntos !== '' && preguntas.every(p => p.pregunta.trim() && p.respuesta.trim());
+  const validate = (): string | null => {
+    if (!titulo.trim()) return 'El título es requerido';
+    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+
+    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
+
+    if (!temaIdProp) return 'Falta el id del tema en la URL';
+    const temaIdNum = Number.parseInt(String(temaIdProp), 10);
+    if (Number.isNaN(temaIdNum)) return 'El id del tema no es válido';
+
+    if (puntos === '' || puntos === null || puntos === undefined) return 'La puntuación es requerida';
+    const puntosNum = typeof puntos === 'number' ? puntos : Number(puntos);
+    if (!Number.isFinite(puntosNum)) return 'La puntuación debe ser un número válido';
+    if (puntosNum <= 0) return 'La puntuación debe ser un número mayor a 0';
+    if (puntosNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
+
+    if (preguntas.length < 1) return 'Añade al menos una pregunta';
+    if (preguntas.length > 5) return 'No puedes añadir más de 5 preguntas';
+
+    for (let i = 0; i < preguntas.length; i++) {
+      if (!preguntas[i].pregunta.trim()) return `La pregunta ${i + 1} no tiene texto`;
+      if (!preguntas[i].respuesta.trim()) return `La pregunta ${i + 1} no tiene respuesta modelo`;
+    }
+
+    if (mode === 'edit' && !preguntaAbiertaId) return 'Falta el id de la actividad a editar';
+
+    return null;
+  };
 
   const handleGuardar = async () => {
-    if (!isValid) return;
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      setSuccess('');
+      return;
+    }
+
     setSaving(true);
     setError('');
+    setSuccess('');
 
     try {
-      const tId = Number(temaIdProp);
+      const tId = Number.parseInt(String(temaIdProp), 10);
       let gId = preguntaAbiertaId;
       const idsFinales: number[] = [];
       let posicionFinal = initialValues?.posicion;
@@ -347,7 +381,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
       </div>{/* close tf-questions */}
 
       <div className="ca-form-footer">
-        <button className="ca-btn-guardar" onClick={handleGuardar} disabled={saving || !isValid}>
+        <button className="ca-btn-guardar" onClick={handleGuardar} disabled={saving}>
           {saving ? 'GUARDANDO...' : 'GUARDAR'}
         </button>
       </div>
