@@ -184,6 +184,9 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
     if (!cursoId) return 'Falta el id del curso en la URL';
 
+    if (descripcion.trim().length > 500) return 'La descripción no puede exceder los 500 caracteres.';
+    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+
     if (questions.length === 0) return 'Añade al menos una pregunta';
 
     for (let qi = 0; qi < questions.length; qi++) {
@@ -601,15 +604,19 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
                 ))}
               </div>
 
-              <button type="button" className="tf-btn-add-option" onClick={() => addOption(qi)}>
-                + Añadir opción
-              </button>
+              {q.options.length < 26 && (
+                <button type="button" className="tf-btn-add-option" onClick={() => addOption(qi)}>
+                  + Añadir opción
+                </button>
+              )}
             </div>
           ))}
 
-          <button type="button" className="tf-btn-add-question" onClick={addQuestion}>
+          {questions.length < 100 && (
+            <button type="button" className="tf-btn-add-question" onClick={addQuestion}>
             + Añadir pregunta
-          </button>
+            </button>
+          )}
         </div>
 
       <div className="ca-form-footer">
