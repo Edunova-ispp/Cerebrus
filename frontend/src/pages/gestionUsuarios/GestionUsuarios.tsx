@@ -367,8 +367,19 @@ export default function GestionUsuarios() {
 
       {/* ── Detail / Edit Modal ── */}
       {selectedUser && (
-        <div className="gu-overlay" onClick={() => setSelectedUser(null)}>
-          <div className="gu-modal" onClick={e => e.stopPropagation()}>
+        <div
+          className="gu-overlay"
+          onClick={(e) => e.target === e.currentTarget && setSelectedUser(null)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+              setSelectedUser(null);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal de detalle"
+        >
+          <div className="gu-modal">
             <button className="gu-modal-close" onClick={() => setSelectedUser(null)}>✕</button>
             <h2 className="gu-modal-title">{editing ? 'Editar Usuario' : 'Detalle de Usuario'}</h2>
             <span className={`gu-badge gu-badge--${selectedRol.toLowerCase()}`}>
@@ -425,8 +436,19 @@ export default function GestionUsuarios() {
 
       {/* ── Delete Confirmation ── */}
       {deleteConfirm && (
-        <div className="gu-overlay" onClick={() => setDeleteConfirm(null)}>
-          <div className="gu-modal gu-modal--small" onClick={e => e.stopPropagation()}>
+        <div
+          className="gu-overlay"
+          onClick={(e) => e.target === e.currentTarget && setDeleteConfirm(null)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+              setDeleteConfirm(null);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal de eliminacion"
+        >
+          <div className="gu-modal gu-modal--small">
             <h2 className="gu-modal-title">Confirmar eliminación</h2>
             <p className="gu-confirm-text">
               ¿Estás seguro de que deseas eliminar a <strong>{deleteConfirm.nombre}</strong>? Esta acción no se puede deshacer.
@@ -443,8 +465,19 @@ export default function GestionUsuarios() {
 
       {/* ── Create User Modal ── */}
       {showCreate && (
-        <div className="gu-overlay" onClick={() => setShowCreate(false)}>
-          <div className="gu-modal" onClick={e => e.stopPropagation()}>
+        <div
+          className="gu-overlay"
+          onClick={(e) => e.target === e.currentTarget && setShowCreate(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+              setShowCreate(false);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal de creacion"
+        >
+          <div className="gu-modal">
             <button className="gu-modal-close" onClick={() => setShowCreate(false)}>✕</button>
             <h2 className="gu-modal-title">Crear Usuario</h2>
 

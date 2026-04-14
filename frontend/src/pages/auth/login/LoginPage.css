@@ -187,7 +187,11 @@
   text-align: center;
 }
 
-.login-register-text span {
+.login-register-link {
+  font: inherit;
+  background: none;
+  border: none;
+  padding: 0;
   font-weight: bold;
   color: #000638;
   cursor: pointer;
@@ -195,7 +199,7 @@
   transition: color 0.2s ease;
 }
 
-.login-register-text span:hover {
+.login-register-link:hover {
   color: var(--color-accent);
 }
 

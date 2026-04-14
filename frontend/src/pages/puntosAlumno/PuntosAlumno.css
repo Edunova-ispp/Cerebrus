@@ -72,7 +72,6 @@
 }
 
 .puntos-node--actual .puntos-node-img {
-  filter: none;
   opacity: 1;
   transform: scale(1.18);
   filter: drop-shadow(0 0 6px rgba(124, 77, 255, 0.35));

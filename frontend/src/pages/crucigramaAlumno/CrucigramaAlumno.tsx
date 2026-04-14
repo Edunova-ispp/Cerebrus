@@ -680,6 +680,14 @@ export default function CrucigramaAlumno() {
                           key={key}
                           className={getCellClass(r, c)}
                           onClick={() => cell && handleCellClick(r, c)}
+                          onKeyDown={(e) => {
+                            if ((e.key === 'Enter' || e.key === ' ') && cell) {
+                              e.preventDefault();
+                              handleCellClick(r, c);
+                            }
+                          }}
+                          role={cell ? 'button' : undefined}
+                          tabIndex={cell ? 0 : undefined}
                         >
                           {cell && (
                             <>
@@ -709,6 +717,14 @@ export default function CrucigramaAlumno() {
                           key={`h-${word.num}`}
                           className={`cr-clue-item ${selection?.wordIdx === wi ? 'active-clue-item' : ''}`}
                           onClick={() => handleClueClick(wi)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              handleClueClick(wi);
+                            }
+                          }}
+                          role="button"
+                          tabIndex={0}
                         >
                           <span className={`cr-clue-num ${completedWordIds.has(wi) ? 'done' : ''}`}>{word.num}</span>
                           <span className="cr-clue-text">{word.clue}</span>
@@ -730,6 +746,14 @@ export default function CrucigramaAlumno() {
                           key={`v-${word.num}`}
                           className={`cr-clue-item ${selection?.wordIdx === wi ? 'active-clue-item' : ''}`}
                           onClick={() => handleClueClick(wi)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              handleClueClick(wi);
+                            }
+                          }}
+                          role="button"
+                          tabIndex={0}
                         >
                           <span className={`cr-clue-num ${completedWordIds.has(wi) ? 'done' : ''}`}>{word.num}</span>
                           <span className="cr-clue-text">{word.clue}</span>

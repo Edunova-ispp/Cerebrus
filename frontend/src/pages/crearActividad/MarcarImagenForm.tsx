@@ -380,6 +380,15 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                   alt="Vista previa"
                   onLoad={handleImageLoad}
                   onClick={handleImageClick}
+                  onKeyDown={(ev) => {
+                    if (ev.key === 'Enter' || ev.key === ' ') {
+                      ev.preventDefault();
+                      handleImageClick(ev as unknown as React.MouseEvent<HTMLImageElement>);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Imagen para anadir puntos"
                   style={{
                     width: '100%',
                     maxHeight: 350,
@@ -446,6 +455,15 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                         position: 'relative',
                       }}
                       onClick={() => setSelectedPointIndex(i)}
+                      onKeyDown={(ev) => {
+                        if (ev.key === 'Enter' || ev.key === ' ') {
+                          ev.preventDefault();
+                          setSelectedPointIndex(i);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Seleccionar punto ${i + 1}`}
                     >
                       <button
                         type="button"

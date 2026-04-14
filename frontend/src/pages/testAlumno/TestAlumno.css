@@ -15,7 +15,7 @@
   font-size: 1.8rem;
   flex-direction: column;
   overflow-x: hidden;
-  font-family: 'Pixelify sans';
+  font-family: 'Pixelify Sans', sans-serif;
   z-index: 10;
 }
 

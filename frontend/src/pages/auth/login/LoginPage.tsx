@@ -170,7 +170,14 @@ const Login = () => {
         </form>
 
         <p className="login-register-text">
-          ¿No tienes cuenta? <span onClick={() => navigate('/auth/register')}>Regístrate aquí</span>
+          ¿No tienes cuenta?{' '}
+          <button
+            type="button"
+            className="login-register-link"
+            onClick={() => navigate('/auth/register')}
+          >
+            Regístrate aquí
+          </button>
         </p>
       </div>
     </div>

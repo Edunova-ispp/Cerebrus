@@ -136,14 +136,51 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
                     >
                       <span className="ltp-item-titulo">{tema.titulo}</span>
                       <div className="ltp-item-acciones">
-                        <button className="ltp-btn-icono" title="Editar" onClick={(e) => { e.stopPropagation(); isMaestro && (onEditarTema ? onEditarTema(tema.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${tema.id}/editar`)); }}>✎</button>                        
-                        <button className="ltp-btn-icono" title="Borrar" onClick={(e) => { e.stopPropagation(); isMaestro ? handleEliminarTema(tema.id) : undefined; }}>🗑</button>
+                        <button
+                          className="ltp-btn-icono"
+                          title="Editar"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isMaestro) return;
+                            if (onEditarTema) {
+                              onEditarTema(tema.id);
+                            } else {
+                              navigate(`/cursos/${id ?? curso?.id}/temas/${tema.id}/editar`);
+                            }
+                          }}
+                        >
+                          ✎
+                        </button>
+                        <button
+                          className="ltp-btn-icono"
+                          title="Borrar"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isMaestro) {
+                              handleEliminarTema(tema.id);
+                            }
+                          }}
+                        >
+                          🗑
+                        </button>
                       </div>
                     </div>
                   ))
                 )}
               </div>
-              <button className="ltp-btn-añadir" onClick={() => isMaestro && (onCrearTema ? onCrearTema() : navigate(`/cursos/${id ?? curso?.id}/temas/crear`))}>+ Añadir tema</button>
+              <button
+                className="ltp-btn-añadir"
+                onClick={() => {
+                  if (!isMaestro) return;
+                  if (onCrearTema) {
+                    onCrearTema();
+                  } else {
+                    navigate(`/cursos/${id ?? curso?.id}/temas/crear`);
+                  }
+                }}
+              >
+                + Añadir tema
+              </button>
             </div>
 
             {/* Panel derecho: Actividades */}
@@ -163,7 +200,12 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
                   title="Editar" 
                   onClick={(e) => { 
                     e.stopPropagation(); 
-                    isMaestro && (onEditarActividad ? onEditarActividad(temaSeleccionado.id, act.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/${act.id}/editar`));
+                    if (!isMaestro) return;
+                    if (onEditarActividad) {
+                      onEditarActividad(temaSeleccionado.id, act.id);
+                    } else {
+                      navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/${act.id}/editar`);
+                    }
                   }}
                 >
                   ✎
@@ -173,7 +215,9 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
                   title="Borrar" 
                   onClick={(e) => { 
                     e.stopPropagation(); 
-                    isMaestro ? handleEliminarActividad(act.id) : undefined; 
+                    if (isMaestro) {
+                      handleEliminarActividad(act.id);
+                    }
                   }}
                 >
                   🗑
@@ -185,7 +229,14 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
       </div>
       <button 
         className="ltp-btn-añadir" 
-        onClick={() => isMaestro && (onCrearActividad ? onCrearActividad(temaSeleccionado.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/crear`))}
+        onClick={() => {
+          if (!isMaestro) return;
+          if (onCrearActividad) {
+            onCrearActividad(temaSeleccionado.id);
+          } else {
+            navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/crear`);
+          }
+        }}
       >
         + Añadir actividad
       </button>

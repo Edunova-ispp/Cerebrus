@@ -120,6 +120,15 @@ export default function TeoriaAlumno() {
             <div 
               className={`ta-flashcard ${isFlipped ? 'flipped' : ''}`} 
               onClick={() => setIsFlipped(!isFlipped)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setIsFlipped(!isFlipped);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label="Girar tarjeta de teoria"
             >
               <div className="ta-card-inner">
                 

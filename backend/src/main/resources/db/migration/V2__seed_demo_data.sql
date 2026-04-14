@@ -151,11 +151,11 @@ SELECT 4005, 'Seguridad Web', 'OWASP Top 10 y buenas prácticas', '/seed/covers/
 WHERE NOT EXISTS (SELECT 1 FROM curso WHERE id = 4005);
 
 -- Si los cursos ya existían de antes con imagen vacía, la rellenamos.
-UPDATE curso SET imagen = '/seed/covers/cover-frontend.svg' WHERE id = 4001 AND COALESCE(imagen, '') = '';
-UPDATE curso SET imagen = '/seed/covers/cover-backend.svg' WHERE id = 4002 AND COALESCE(imagen, '') = '';
-UPDATE curso SET imagen = '/seed/covers/cover-proyecto.svg' WHERE id = 4003 AND COALESCE(imagen, '') = '';
-UPDATE curso SET imagen = '/seed/covers/cover-pociones.svg' WHERE id = 4004 AND COALESCE(imagen, '') = '';
-UPDATE curso SET imagen = '/seed/covers/cover-seguridad.svg' WHERE id = 4005 AND COALESCE(imagen, '') = '';
+UPDATE curso SET imagen = '/seed/covers/cover-frontend.svg' WHERE id = 4001 AND (imagen IS NULL OR imagen = '');
+UPDATE curso SET imagen = '/seed/covers/cover-backend.svg' WHERE id = 4002 AND (imagen IS NULL OR imagen = '');
+UPDATE curso SET imagen = '/seed/covers/cover-proyecto.svg' WHERE id = 4003 AND (imagen IS NULL OR imagen = '');
+UPDATE curso SET imagen = '/seed/covers/cover-pociones.svg' WHERE id = 4004 AND (imagen IS NULL OR imagen = '');
+UPDATE curso SET imagen = '/seed/covers/cover-seguridad.svg' WHERE id = 4005 AND (imagen IS NULL OR imagen = '');
 
 -- ==========================================
 -- 6) INSCRIPCIONES

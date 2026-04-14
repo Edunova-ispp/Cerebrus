@@ -128,7 +128,18 @@ function QuestionModal({
   onClose: () => void;
 }) {
   return (
-    <div className="ta-modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div
+      className="ta-modal-overlay"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+          onClose();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label="Cerrar pregunta"
+    >
       <div className="ta-modal">
         <h3 className="ta-modal-title">Pregunta</h3>
         <p className="ta-modal-q">{question.pregunta}</p>

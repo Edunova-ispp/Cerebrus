@@ -142,8 +142,19 @@ export default function GestionAlumnos({ cursoId, embedded }: Props) {
 
       {/* Confirmation modal */}
       {confirmId !== null && confirmAlumno && (
-        <div className="ga-overlay" onClick={() => setConfirmId(null)}>
-          <div className="ga-modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="ga-overlay"
+          onClick={(e) => e.target === e.currentTarget && setConfirmId(null)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+              setConfirmId(null);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal de confirmacion"
+        >
+          <div className="ga-modal">
             <h3 className="ga-modal-title">Confirmar expulsión</h3>
             <p className="ga-modal-text">
               ¿Estás seguro de que quieres expulsar a{" "}
