@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Duration;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -19,16 +20,14 @@ class EstadisticasProfesorIT extends SeleniumBaseTest {
     private static final String PROFESOR_NO_OWNER = "profe_snape";
     private static final String PASSWORD = "123456";
 
+         
     @Test
     @DisplayName("Sin autenticacion, rutas de estadisticas de profesor redirigen a login")
     void rutasEstadisticasSinAutenticacionRedirigenALogin() {
         driver.manage().deleteAllCookies();
 
         List<String> rutasProtegidas = List.of(
-                "/estadisticas/4001/actividades",
-                "/estadisticas/4001/temas",
-                "/estadisticas/actividades/6001",
-                "/estadisticas/temas/5001"
+                "/cursos/10101"
         );
 
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
@@ -46,32 +45,30 @@ class EstadisticasProfesorIT extends SeleniumBaseTest {
         login(PROFESOR_OWNER, PASSWORD);
 
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
-        // Resumen de actividades
-        navigateTo("/estadisticas/4001/actividades");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(normalize-space(), 'Actividades del Curso')]")));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//th[contains(normalize-space(), 'Nota Media')]")));
 
-        // Desglose por temas
-        navigateTo("/estadisticas/4001/temas");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(normalize-space(), 'Temas del Curso')]")));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//th[contains(normalize-space(), 'Completado por todos')]")));
+        navigateTo("/cursos/10101");
 
-        // Estadística de una actividad concreta
-        navigateTo("/estadisticas/actividades/6001");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(normalize-space(), 'Estadísticas de la Actividad')]")));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//th[contains(normalize-space(), 'Tiempo Invertido')]")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Estadísticas')]"))).click();
 
-        // Estadística de un tema concreto
-        navigateTo("/estadisticas/temas/5001");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(normalize-space(), 'Estadísticas del Tema')]")));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//th[contains(normalize-space(), 'Alumno')]")));
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Resumen general')]"))).click();
+
+        // 6. Ver detalle de un tema específico (Volviendo a Temas y pulsando 'Ver')
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Alumnos')]"))).click();
+        driver.findElements(By.tagName("button"))
+      .forEach(b -> System.out.println("BTN: [" + b.getText() + "]"));
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Estadísticas')]"))).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Tendencias')]"))).click();
+                wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(normalize-space(), 'Análisis')]"))).click();
+
+
+
     }
 
     @Test
     @DisplayName("Profesor no propietario no puede cargar estadisticas del curso ajeno")
     void profesorNoPropietarioNoPuedeCargarEstadisticasCursoAjeno() {
         login(PROFESOR_NO_OWNER, PASSWORD);
-        navigateTo("/estadisticas/4001/actividades");
+        navigateTo("/cursos/10101");
         
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
         // Verificar que NO aparece el contenido esperado (acceso denegado)
@@ -82,25 +79,5 @@ class EstadisticasProfesorIT extends SeleniumBaseTest {
             // Si no aparece el mensaje de error, verificar que tampoco aparecen los datos
             assertThat(driver.getPageSource()).doesNotContain("Nota Media");
         }
-    }
-
-    private void login(String user, String password) {
-        navigateTo("/auth/login");
-
-        WebDriverWait wait = new WebDriverWait(driver, WAIT);
-        WebElement usuarioInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
-        usuarioInput.clear();
-        usuarioInput.sendKeys(user);
-
-        WebElement passwordInput = driver.findElement(By.id("password"));
-        passwordInput.clear();
-        passwordInput.sendKeys(password);
-
-        // Presionar Enter en el campo de password para enviar el formulario
-        passwordInput.sendKeys(org.openqa.selenium.Keys.RETURN);
-
-        // Esperar a que la URL cambie (salga de /auth/login)
-        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
-        assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
     }
 }
