@@ -52,11 +52,12 @@ export default function CreacionUsuario() {
 
     if (!form.nombre.trim()) errors.push('El nombre es obligatorio');
     if (!form.primerApellido.trim()) errors.push('El primer apellido es obligatorio');
+    if (!form.email.trim()) errors.push('El email es obligatorio');
     if (!form.username.trim()) errors.push('El username es obligatorio');
     if (!form.password.trim()) errors.push('La contraseña es obligatoria');
 
     const emailTrimmed = form.email.trim();
-    if (emailTrimmed && !emailTrimmed.includes('@')) errors.push('El email debe ser válido');
+    if (!emailTrimmed.includes('@')) errors.push('El email debe ser válido');
 
     return errors;
   };
@@ -78,7 +79,7 @@ export default function CreacionUsuario() {
         primerApellido: form.primerApellido.trim(),
         segundoApellido: form.segundoApellido.trim() || undefined,
         username: form.username.trim(),
-        email: form.email.trim() || undefined,
+        email: form.email.trim(),
         password: form.password,
         rol: form.rol,
       };
@@ -146,7 +147,7 @@ export default function CreacionUsuario() {
             </label>
 
             <label className="gu-form-label">
-              Correo electrónico (opcional)
+              Correo electrónico
               <input
                 type="email"
                 value={form.email}
