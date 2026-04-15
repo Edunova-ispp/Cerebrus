@@ -1,5 +1,7 @@
 package com.cerebrus.usuario.organizacion;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -10,9 +12,9 @@ import java.util.stream.Stream;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,27 +22,22 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cerebrus.exceptions.ResourceNotFoundException;
-
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioRepository;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.organizacion.dto.CreateUserRequest;
 import com.cerebrus.usuario.organizacion.dto.UsuarioActualizarDTO;
 
 import jakarta.servlet.ServletException;
-import java.io.IOException;
-import java.io.InputStream;
-
-import com.cerebrus.usuario.organizacion.dto.CreateUserRequest;
 
 @Service
 @Transactional
@@ -258,10 +255,12 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         }
 
 
-        if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
-            if (usuarioRepository.existsByCorreoElectronico(request.getEmail())) {
-                throw new IllegalArgumentException("El email ' " + request.getEmail() + "' ya está registrado.");
-            }
+        String email = request.getEmail() != null ? request.getEmail().trim() : "";
+        if (email.isEmpty()) {
+            throw new IllegalArgumentException("El email es obligatorio.");
+        }
+        if (usuarioRepository.existsByCorreoElectronico(email)) {
+            throw new IllegalArgumentException("El email ' " + email + "' ya está registrado.");
         }
 
         
@@ -273,7 +272,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 request.getPrimerApellido(),
                 request.getSegundoApellido(),
                 request.getUsername(),
-                request.getEmail() != null ? request.getEmail() : "",
+                email,
                 passwordEncoder.encode(request.getPassword()),
                 organizacion
             );
@@ -286,7 +285,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 request.getPrimerApellido(),
                 request.getSegundoApellido(),
                 request.getUsername(),
-                request.getEmail() != null ? request.getEmail() : "",
+                email,
                 passwordEncoder.encode(request.getPassword()),
                 0,
                 organizacion
@@ -332,12 +331,13 @@ public class OrganizacionServiceImpl implements OrganizacionService {
             errores.add("La contraseña es obligatoria. Error en fila " + fila + " del archivo.");
         }
 
-        if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
-            if (usuarioRepository.existsByCorreoElectronico(request.getEmail())) {
-                errores.add("El email ' " + request.getEmail() + "' ya está registrado. Error en fila " + fila + " del archivo.");
-            } else if(!request.getEmail().contains("@")) {
-                errores.add("El email ' " + request.getEmail() + "' no es válido. Error en fila " + fila + " del archivo.");
-            }
+        String email = request.getEmail() != null ? request.getEmail().trim() : "";
+        if (email.isEmpty()) {
+            errores.add("El email es obligatorio. Error en fila " + fila + " del archivo.");
+        } else if (usuarioRepository.existsByCorreoElectronico(email)) {
+            errores.add("El email ' " + email + "' ya está registrado. Error en fila " + fila + " del archivo.");
+        } else if(!email.contains("@")) {
+            errores.add("El email ' " + email + "' no es válido. Error en fila " + fila + " del archivo.");
         }
 
         
@@ -349,7 +349,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 request.getPrimerApellido(),
                 request.getSegundoApellido(),
                 request.getUsername(),
-                request.getEmail() != null ? request.getEmail() : "",
+                email,
                 passwordEncoder.encode(request.getPassword()),
                 organizacion
             );
@@ -360,7 +360,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 request.getPrimerApellido(),
                 request.getSegundoApellido(),
                 request.getUsername(),
-                request.getEmail() != null ? request.getEmail() : "",
+                email,
                 passwordEncoder.encode(request.getPassword()),
                 0,
                 organizacion
@@ -388,7 +388,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 request.getPrimerApellido(),
                 request.getSegundoApellido(),
                 request.getUsername(),
-                request.getEmail() != null ? request.getEmail() : "",
+                request.getEmail().trim(),
                 passwordEncoder.encode(request.getPassword()),
                 organizacion
             );
@@ -399,7 +399,7 @@ public class OrganizacionServiceImpl implements OrganizacionService {
                 request.getPrimerApellido(),
                 request.getSegundoApellido(),
                 request.getUsername(),
-                request.getEmail() != null ? request.getEmail() : "",
+                request.getEmail().trim(),
                 passwordEncoder.encode(request.getPassword()),
                 0,
                 organizacion

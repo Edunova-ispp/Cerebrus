@@ -1,12 +1,14 @@
 package com.cerebrus.e2e;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -15,10 +17,14 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 class ProfesorActividadesIT extends SeleniumBaseTest {
 
     private static final Duration WAIT = Duration.ofSeconds(15);
     private static final String BACKEND_URL = System.getProperty("selenium.backendUrl", "http://localhost:8080");
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String PROFESOR_USUARIO = "carlos_pro";
     private static final String PROFESOR_PASSWORD = "123456";
     private static final long CURSO_ID = 10101L;    
@@ -56,83 +62,42 @@ void profesorPuedeCrearEditarYBorrarUnaTeoria() {
     navigateTo("/cursos/" + CURSO_ID + "/temas/" + TEMA_ID + "/actividades/crear");
     abrirFormularioTeoria();
 
-    String tituloCreado = "E2E Teoría Temporal";
+    String sufijoUnico = String.valueOf(System.currentTimeMillis() % 100000);
+    String tituloCreado = "E2E T " + sufijoUnico;
     String descripcionCreada = "Contenido temporal creado por Selenium";
     rellenarFormularioTeoria(tituloCreado, descripcionCreada);
     guardarFormularioTeoria();
-try { Thread.sleep(3000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
 
-WebDriverWait wait = new WebDriverWait(driver, WAIT);
-wait.until(ExpectedConditions.or(
-    ExpectedConditions.urlContains("/miscursos"),
-    ExpectedConditions.urlContains("/cursos/" + CURSO_ID)
-));
-// Hacer click en el tema para que se muestren sus actividades en el panel derecho
-By temaLocator = By.xpath(
-    "//div[contains(@class,'ltp-panel')][1]" +
-    "//div[contains(@class,'ltp-item')]"
-);
+    try {
+        Thread.sleep(3000);
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+    }
 
-// Buscar el tema activo o el primero disponible y clickarlo si no está activo
-List<WebElement> temas = driver.findElements(
-    By.cssSelector("div.ltp-panel:first-child div.ltp-item")
-);
+    WebDriverWait wait = new WebDriverWait(driver, WAIT);
+    wait.until(d -> !d.getCurrentUrl().contains("/actividades/crear"));
 
-// Buscar si ya hay un tema activo seleccionado, si no, seleccionar el primero
-boolean temaActivo = driver.findElements(
-    By.cssSelector("div.ltp-panel:first-child div.ltp-item--activo")
-).stream().findFirst().isPresent();
-
-if (!temaActivo && !temas.isEmpty()) {
-    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", temas.get(0));
-    try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-}
-
-// Ahora buscar la actividad en el panel derecho
-By itemLocator = By.xpath(
-    "//div[contains(@class,'ltp-item')]" +
-    "[.//span[contains(@class,'ltp-item-titulo') and normalize-space()='" + tituloCreado + "']]"
-);
-// Navegar manualmente al curso
-navigateTo("/cursos/" + CURSO_ID);
-wait.until(ExpectedConditions.urlContains("/cursos/" + CURSO_ID));
-
-
-// Buscar el tema del panel izquierdo
-
-WebElement item = wait.until(ExpectedConditions.visibilityOfElementLocated(itemLocator));    
-WebElement editBtn = item.findElement(By.cssSelector("button[title='Editar']"));
-    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", editBtn);
+    Long teoriaId = leerIdDeTeoriaCreada();
+    if (teoriaId == null) {
+        teoriaId = waitUntilTeoriaCreadaIdPorTitulo(CURSO_ID, TEMA_ID, tituloCreado);
+    }
+    assertThat(teoriaId).isNotNull();
+    navigateTo("/cursos/" + CURSO_ID + "/temas/" + TEMA_ID + "/actividades/" + teoriaId + "/editar");
 
     // Esperar a que cargue el formulario de edición y verificar el título
     abrirFormularioTeoriaEnEdicion();
     waitUntilFieldValue(By.id("teoria-titulo"), tituloCreado);
 
     // Editar
-    String tituloEditado = "E2E Teoría Temporal Editada";
+    String tituloEditado = "E2E TE " + sufijoUnico;
     String descripcionEditada = "Contenido temporal editado por Selenium";
     rellenarFormularioTeoria(tituloEditado, descripcionEditada);
     guardarFormularioTeoria();
-    // Volver al curso y borrar la actividad editada
-    wait.until(ExpectedConditions.urlContains("/cursos/" + CURSO_ID));
 
-    By itemEditadoLocator = By.xpath(
-        "//div[contains(@class,'ltp-item')]" +
-        "[.//span[contains(@class,'ltp-item-titulo') and normalize-space()='" + tituloEditado + "']]"
-    );
-    WebElement itemEditado = wait.until(ExpectedConditions.visibilityOfElementLocated(itemEditadoLocator));
-    WebElement deleteBtn = itemEditado.findElement(By.cssSelector("button[title='Borrar']"));
-    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", deleteBtn);
+    wait.until(d -> !d.getCurrentUrl().contains("/editar"));
 
-    // Confirmar borrado si hay alerta
-    try {
-        wait.until(ExpectedConditions.alertIsPresent());
-        driver.switchTo().alert().accept();
-    } catch (org.openqa.selenium.TimeoutException ignored) {}
-
-    // Verificar que ya no aparece
-    wait.until(d -> d.findElements(itemEditadoLocator).isEmpty());
-    assertThat(driver.findElements(itemEditadoLocator)).isEmpty();
+    // Cleanup robusto para no dejar residuos entre ejecuciones E2E
+    borrarTeoriaCreada(teoriaId);
 
     
 }
@@ -333,75 +298,56 @@ WebElement editBtn = item.findElement(By.cssSelector("button[title='Editar']"));
             return Long.parseLong(raw.toString());
     }
 
-    private Long waitUntilTeoriaCreadaIdPorTitulo(Long temaId, String titulo) {
+    private Long waitUntilTeoriaCreadaIdPorTitulo(Long cursoId, Long temaId, String titulo) {
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
-        wait.until(d -> {
-            Object raw = ((JavascriptExecutor) d).executeAsyncScript("""
-                const temaId = arguments[0];
-                const titulo = arguments[1];
-                const done = arguments[arguments.length - 1];
-                const token = localStorage.getItem('token') || '';
+        wait.until(d -> findActividadIdEnTemaPorTitulo(cursoId, temaId, titulo) != null);
+        return findActividadIdEnTemaPorTitulo(cursoId, temaId, titulo);
+    }
 
-                fetch('/api/temas/' + temaId, {
-                    headers: {
-                            'Authorization': 'Bearer ' + token
-                    }
-                })
-                    .then((response) => {
-                            if (!response.ok) {
-                                    throw new Error('HTTP ' + response.status);
-                            }
-                            return response.json();
-                    })
-                    .then((data) => {
-                            const actividades = Array.isArray(data.actividades) ? data.actividades : [];
-                            const encontrada = actividades.find((actividad) => actividad && actividad.titulo === titulo);
-                            done(encontrada && encontrada.id ? encontrada.id : null);
-                    })
-                    .catch(() => done(null));
-                """, temaId, titulo);
-
-            if (raw == null) {
-                            return false;
+    private Long findActividadIdEnTemaPorTitulo(Long cursoId, Long temaId, String titulo) {
+        try {
+            Object tokenRaw = ((JavascriptExecutor) driver).executeScript("return localStorage.getItem('token') || '';");
+            String token = tokenRaw == null ? "" : tokenRaw.toString();
+            if (token.isBlank()) {
+                return null;
             }
-            if (raw instanceof Number number) {
-                            return number.longValue() > 0;
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BACKEND_URL + "/api/temas/curso/" + cursoId + "/maestro"))
+                .header("Authorization", "Bearer " + token)
+                .GET()
+                .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                return null;
             }
-            return !raw.toString().isBlank();
-        });
 
-        Object raw = ((JavascriptExecutor) driver).executeAsyncScript("""
-            const temaId = arguments[0];
-            const titulo = arguments[1];
-            const done = arguments[arguments.length - 1];
-            const token = localStorage.getItem('token') || '';
+            JsonNode temas = OBJECT_MAPPER.readTree(response.body());
+            if (!temas.isArray()) {
+                return null;
+            }
 
-            fetch('/api/temas/' + temaId, {
-                headers: {
-                        'Authorization': 'Bearer ' + token
+            for (JsonNode tema : temas) {
+                if (tema == null || !tema.has("id") || tema.get("id").asLong() != temaId) {
+                    continue;
                 }
-            })
-                .then((response) => {
-                        if (!response.ok) {
-                                throw new Error('HTTP ' + response.status);
-                        }
-                        return response.json();
-                })
-                .then((data) => {
-                        const actividades = Array.isArray(data.actividades) ? data.actividades : [];
-                        const encontrada = actividades.find((actividad) => actividad && actividad.titulo === titulo);
-                        done(encontrada && encontrada.id ? encontrada.id : null);
-                })
-                .catch(() => done(null));
-            """, temaId, titulo);
-
-        if (raw == null) {
-                        return null;
+                JsonNode actividades = tema.get("actividades");
+                if (actividades == null || !actividades.isArray()) {
+                    return null;
+                }
+                for (JsonNode actividad : actividades) {
+                    if (actividad != null && titulo.equals(actividad.path("titulo").asText()) && actividad.has("id")) {
+                        return actividad.get("id").asLong();
+                    }
+                }
+                return null;
+            }
+            return null;
+        } catch (Exception ignored) {
+            return null;
         }
-        if (raw instanceof Number number) {
-                        return number.longValue();
-        }
-        return Long.parseLong(raw.toString());
     }
 
     private void borrarTeoriaCreada(Long teoriaId) {

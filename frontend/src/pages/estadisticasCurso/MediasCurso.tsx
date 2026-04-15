@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import './EstadisticasCurso.css';
@@ -36,8 +36,6 @@ export default function MediasCurso({ cursoIdProp, embedded, temaIdSeleccionado 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => { cargarTodo(); }, [id]);
-
   // When parent controls which tema is selected
   useEffect(() => {
     if (temaIdSeleccionado !== undefined && temas.length > 0) {
@@ -46,7 +44,7 @@ export default function MediasCurso({ cursoIdProp, embedded, temaIdSeleccionado 
     }
   }, [temaIdSeleccionado, temas]);
 
-  const cargarTodo = async () => {
+  const cargarTodo = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -80,7 +78,9 @@ export default function MediasCurso({ cursoIdProp, embedded, temaIdSeleccionado 
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, embedded]);
+
+  useEffect(() => { void cargarTodo(); }, [cargarTodo]);
 
   const statsResumen = useMemo(() => {
     if (!temaSeleccionado || temaSeleccionado.actividades.length === 0) return null;
@@ -178,10 +178,6 @@ export default function MediasCurso({ cursoIdProp, embedded, temaIdSeleccionado 
         ) : (
           <div className="stats-layout">
             <aside className="stats-sidebar">
-              <button className="stats-sidebar-btn stats-sidebar-btn--refresh" onClick={cargarTodo}>
-                Actualizar ↻
-              </button>
-              <hr className="stats-sidebar-divider" />
               <h3 className="stats-sidebar-title">Temas</h3>
               {loading && <p className="stats-sidebar-loading">Cargando...</p>}
               {!loading && temas.map(tema => (
