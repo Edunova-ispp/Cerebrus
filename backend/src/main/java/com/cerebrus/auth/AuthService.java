@@ -147,7 +147,7 @@ public class AuthService {
                                                     <table role='presentation' width='600' cellpadding='0' cellspacing='0' style='max-width:600px;width:100%;'>
                                                         <tr>
                                                             <td style='padding:0 20px 12px 20px;text-align:center;'>
-                                                                <img src='%s' alt='Cerebrus' style='height:64px;width:auto;display:block;margin:0 auto 10px auto;' />
+                                                                <img src='{{LOGO_URL}}' alt='Cerebrus' style='height:64px;width:auto;display:block;margin:0 auto 10px auto;' />
                                                                 <h1 style='margin:0;font-size:28px;line-height:1.2;color:#d10057;'>Bienvenido a Cerebrus</h1>
                                                             </td>
                                                         </tr>
@@ -158,11 +158,11 @@ public class AuthService {
                                                                         <td style='padding:24px;'>
                                                                             <p style='margin:0 0 12px 0;font-size:16px;line-height:1.5;'>¡Gracias por registrarte! Para activar tu cuenta, pulsa el siguiente botón:</p>
                                                                             <p style='margin:18px 0 20px 0;text-align:center;'>
-                                                                                <a href='%s' style='display:inline-block;background:#d10057;color:#ffffff;text-decoration:none;padding:13px 24px;border-radius:10px;font-weight:700;font-size:16px;'>Activar mi cuenta</a>
+                                                                                <a href='{{LOGIN_URL_BUTTON}}' style='display:inline-block;background:#d10057;color:#ffffff;text-decoration:none;padding:13px 24px;border-radius:10px;font-weight:700;font-size:16px;'>Activar mi cuenta</a>
                                                                             </p>
                                                                             <p style='margin:0 0 8px 0;font-size:14px;color:#4b5563;'>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
                                                                             <p style='margin:0;word-break:break-all;font-size:13px;line-height:1.5;'>
-                                                                                <a href='%s' style='color:#2563eb;text-decoration:underline;'>%s</a>
+                                                                                <a href='{{LOGIN_URL_LINK}}' style='color:#2563eb;text-decoration:underline;'>{{LOGIN_URL_TEXT}}</a>
                                                                             </p>
                                                                         </td>
                                                                     </tr>
@@ -180,7 +180,11 @@ public class AuthService {
                                         </table>
                                     </body>
                                 </html>
-                                """.formatted(logoUrl, loginUrl, loginUrl, loginUrl);
+                                """
+                                .replace("{{LOGO_URL}}", logoUrl)
+                                .replace("{{LOGIN_URL_BUTTON}}", loginUrl)
+                                .replace("{{LOGIN_URL_LINK}}", loginUrl)
+                                .replace("{{LOGIN_URL_TEXT}}", loginUrl);
 
             SendSmtpEmail sendSmtpEmail = new SendSmtpEmail();
             sendSmtpEmail.setSender(sender);
