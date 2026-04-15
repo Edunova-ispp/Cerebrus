@@ -256,7 +256,6 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
   const [estadisticasCurso, setEstadisticasCurso] = useState<EstadisticasCursoDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [recargandoTodo, setRecargandoTodo] = useState(false);
 
   const [statsView, setStatsView] = useState<StatsView>({ mode: "resumen" });
   const [temasList, setTemasList] = useState<OpcionItem[]>([]);
@@ -1091,36 +1090,6 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
     }
   }, [cargarAlumnosConNota]);
 
-  const handleRecargarDatos = useCallback(async () => {
-    setRecargandoTodo(true);
-    try {
-      const [alumnosActualizados] = await Promise.all([
-        cargarAlumnosConNota(),
-        cargarEstadisticas(),
-        cargarListaTemas(),
-        cargarListaActividades(),
-        cargarAnalisisData(),
-      ]);
-
-      setAlumnosList(alumnosActualizados);
-
-      if (statsView.mode === 'alumnoDetalle') {
-        const alumnoPresente = alumnosActualizados.find(a => a.id === statsView.alumnoId);
-        if (!alumnoPresente) {
-          if (alumnosActualizados.length > 0) {
-            setStatsView({ mode: 'alumnoDetalle', alumnoId: alumnosActualizados[0].id, alumnoNombre: alumnosActualizados[0].nombre });
-          } else {
-            setStatsView({ mode: 'alumnos' });
-          }
-        }
-      }
-    } catch (err) {
-      console.error('[handleRecargarDatos] Error recargando estadísticas:', err);
-    } finally {
-      setRecargandoTodo(false);
-    }
-  }, [cargarAlumnosConNota, cargarEstadisticas, cargarListaTemas, cargarListaActividades, cargarAnalisisData, statsView]);
-
   // Recalcular máximos y mínimos globales del curso basándose en las actividades reales
   const valoresGlobalesCurso = useMemo(() => {
     // Solo calcular si tenemos datos cargados
@@ -1378,13 +1347,6 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
 
     return (
       <>
-        <button
-          className="stats-sidebar-btn"
-          onClick={() => void handleRecargarDatos()}
-          disabled={recargandoTodo}
-        >
-          {recargandoTodo ? 'Recargando...' : 'Recargar'}
-        </button>
         <button
           className={`stats-sidebar-btn${statsView.mode === 'resumen' ? ' stats-sidebar-btn--active' : ''}`}
           onClick={() => setStatsView({ mode: "resumen" })}
