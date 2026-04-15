@@ -477,18 +477,38 @@ export default function TableroAlumno() {
   const modalQuestion = modalQIdx !== null ? tablero.preguntas[modalQIdx] : null;
 
   const handleRetry = () => {
-    setLastAttemptScore(null);
-    setCerberoPos([0, 0]);
-    setAnsweredSet(new Set());
-    setModalCell(null);
-    setInputAnswer('');
-    setFeedback(null);
-    setAttemptCompleted(false);
-    setAnswerHistory(new Map());
-    setSubmittedAnswersByQuestion(new Map());
-    setCorrectAnswersByQuestion(new Map());
-    setBoardFailureCount(0);
-    completedRef.current = false;
+    if (!tablero) return;
+
+    void (async () => {
+      try {
+        const alumnoId = getCurrentUserIdFromJwt();
+        if (!alumnoId) throw new Error('No se pudo identificar al alumno.');
+
+        const createAA = await apiFetch(`${API_BASE}/api/actividades-alumno`, {
+          method: 'POST',
+          body: JSON.stringify({ alumnoId, actividadId: tablero.id }),
+        });
+        const aaData = (await createAA.json()) as ActividadAlumnoDTO;
+        if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+          setActividadAlumnoId(aaData.id);
+        }
+
+        setLastAttemptScore(null);
+        setCerberoPos([0, 0]);
+        setAnsweredSet(new Set());
+        setModalCell(null);
+        setInputAnswer('');
+        setFeedback(null);
+        setAttemptCompleted(false);
+        setAnswerHistory(new Map());
+        setSubmittedAnswersByQuestion(new Map());
+        setCorrectAnswersByQuestion(new Map());
+        setBoardFailureCount(0);
+        completedRef.current = false;
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'No se pudo crear un nuevo intento');
+      }
+    })();
   };
 
   const handleViewStudentAnswers = () => {
