@@ -10,8 +10,11 @@ import com.cerebrus.usuario.alumno.AlumnoRepository;
 import com.cerebrus.usuario.maestro.MaestroRepository;
 
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 
-import java.time.LocalDate;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +39,9 @@ public class AuthController {
     private final AlumnoRepository alumnoRepository;
     private final SuscripcionRepository suscripcionRepository;
     private final JwtUtils jwtUtils;
+
+    @Value("${cerebrus.app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
 
     public AuthController(AuthenticationManager authenticationManager, AuthService authService, MaestroRepository maestroRepository, AlumnoRepository alumnoRepository, SuscripcionRepository suscripcionRepository, JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
@@ -76,7 +82,7 @@ public class AuthController {
                     .toList();
 
             if (roles.contains("MAESTRO") || roles.contains("ALUMNO")) {
-                Long orgId = null;
+                Long orgId;
 
                 if (roles.contains("MAESTRO")) {
                     orgId = maestroRepository.findById(userDetails.getId())
@@ -108,7 +114,7 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<?> confirmarEmailDesdeEnlace(
+    public ResponseEntity<?> redirigirALoginFrontend(
             @RequestParam(name = "validatoncode", required = false) Integer legacyValidationCode,
             @RequestParam(name = "validationCode", required = false) Integer validationCode,
             @RequestParam(name = "confirmCode", required = false) Integer confirmCode) {
@@ -116,17 +122,21 @@ public class AuthController {
         Integer codigo = Optional.ofNullable(legacyValidationCode)
                 .orElse(Optional.ofNullable(validationCode).orElse(confirmCode));
 
-        if (codigo == null) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Falta el código de validación en la URL."));
+        String baseFrontendUrl = (frontendUrl == null ? "" : frontendUrl.trim()).replaceAll("/$", "");
+        if (baseFrontendUrl.isBlank()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("No se ha configurado la URL de frontend."));
         }
 
-        try {
-            authService.confirmarEmail(codigo);
-            return ResponseEntity.ok(new MessageResponse("Email confirmado exitosamente. Ya puedes iniciar sesión."));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        StringBuilder redirectUrl = new StringBuilder(baseFrontendUrl).append("/auth/login");
+        if (codigo != null) {
+            redirectUrl
+                    .append("?validationCode=")
+                    .append(URLEncoder.encode(String.valueOf(codigo), StandardCharsets.UTF_8));
         }
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(redirectUrl.toString()))
+                .build();
     }
 
     @PostMapping("/logout")
@@ -135,6 +145,7 @@ public class AuthController {
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(new MessageResponse("Sesión cerrada. El cliente debe eliminar el token."));
     }
+
     @PutMapping("/confirm-email/{codigoVerificacion}")
     public ResponseEntity<?> confirmarEmail(@PathVariable Integer codigoVerificacion) {
         try {
@@ -147,10 +158,7 @@ public class AuthController {
 
     @GetMapping("/email-confirmed/{userId}")
     public ResponseEntity<Boolean> verificarEmailConfirmado(@PathVariable long userId) {
-        
-            boolean confirmado = authService.usuarioVerificado(userId);
-            
-                return ResponseEntity.ok(confirmado);
-            
-        }
+        boolean confirmado = authService.usuarioVerificado(userId);
+        return ResponseEntity.ok(confirmado);
+    }
 }
