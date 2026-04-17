@@ -1,7 +1,5 @@
 package com.cerebrus.auth;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,22 +57,18 @@ public class AuthService {
     }
     
     public void registrarUsuario(SignupRequest request) {
-        Usuario nuevoUsuario = null;
-
         String tipo = request.getTipoUsuario().toUpperCase();
 
-        switch (tipo) {
-           
-            case "ORGANIZACION":
+        Usuario nuevoUsuario = switch (tipo) {
+            case "ORGANIZACION" -> {
                 Organizacion org = new Organizacion();
                 org.setNombreCentro(request.getNombreCentro()); 
-                org.setEmailConfirmado(true);
+                org.setEmailConfirmado(false);
                 org.setCodigoVerificacion((int)(Math.random() * 90000000) + 10000000);
-                nuevoUsuario = org;
-                break;
-            default:
-                throw new IllegalArgumentException("Tipo de usuario inválido. Use: Solo puede registrarse como representante de una organización.");
-        }
+                yield org;
+            }
+            default -> throw new IllegalArgumentException("Tipo de usuario inválido. Use: Solo puede registrarse como representante de una organización.");
+        };
        
         if (existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("El correo electrónico ya está en uso.");
@@ -93,8 +87,7 @@ public class AuthService {
     public void confirmarEmail( Integer codigoVerificacion) {
         Usuario usuario = organizacionRepository.findByCodigoVerificacion(codigoVerificacion)
                 .orElseThrow(() -> new IllegalArgumentException("Código de verificación no encontrado."));
-        if (usuario instanceof Organizacion) {
-            Organizacion org = (Organizacion) usuario;
+        if (usuario instanceof Organizacion org) {
             if (org.getCodigoVerificacion().equals(codigoVerificacion)) {
                 org.setEmailConfirmado(true);
                 usuarioRepository.save(org);
@@ -132,13 +125,11 @@ public class AuthService {
             List<SendSmtpEmailTo> toList = new ArrayList<>();
             toList.add(to);
 
-            // 4. Crear el cuerpo del correo de verificación
-                        String baseFrontendUrl = frontendUrl.replaceAll("/$", "");
-                        String loginUrl = baseFrontendUrl + "/auth/confirm-email?validationCode="
-                + URLEncoder.encode(String.valueOf(codigoVerificacion), StandardCharsets.UTF_8);
-                        String logoUrl = baseFrontendUrl + "/cerebrus-logo.png";
+                // 4. Crear el cuerpo del correo de verificación
+                String baseFrontendUrl = frontendUrl.replaceAll("/$", "");
+                String logoUrl = baseFrontendUrl + "/cerebrus-logo.png";
 
-                        String htmlContent = """
+                String htmlContent = """
                                 <html>
                                     <body style='margin:0;padding:0;background:#fff7fa;font-family:Segoe UI,Arial,sans-serif;color:#1f2937;'>
                                         <table role='presentation' width='100%' cellpadding='0' cellspacing='0' style='background:#fff7fa;padding:24px 0;'>
@@ -156,14 +147,11 @@ public class AuthService {
                                                                 <table role='presentation' width='100%' cellpadding='0' cellspacing='0' style='background:#ffffff;border:1px solid #f2d7e3;border-radius:16px;box-shadow:0 8px 24px rgba(209,0,87,0.08);'>
                                                                     <tr>
                                                                         <td style='padding:24px;'>
-                                                                            <p style='margin:0 0 12px 0;font-size:16px;line-height:1.5;'>¡Gracias por registrarte! Para activar tu cuenta, pulsa el siguiente botón:</p>
+                                                                            <p style='margin:0 0 12px 0;font-size:16px;line-height:1.5;'>¡Gracias por registrarte! Introduce este código en la pantalla de verificación de Cerebrus para activar tu cuenta:</p>
                                                                             <p style='margin:18px 0 20px 0;text-align:center;'>
-                                                                                <a href='{{LOGIN_URL_BUTTON}}' style='display:inline-block;background:#d10057;color:#ffffff;text-decoration:none;padding:13px 24px;border-radius:10px;font-weight:700;font-size:16px;'>Activar mi cuenta</a>
+                                                                                <span style='display:inline-block;background:#fff3c7;color:#111827;padding:12px 20px;border-radius:10px;border:2px solid #111827;font-weight:700;font-size:24px;letter-spacing:2px;'>{{VERIFICATION_CODE}}</span>
                                                                             </p>
-                                                                            <p style='margin:0 0 8px 0;font-size:14px;color:#4b5563;'>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
-                                                                            <p style='margin:0;word-break:break-all;font-size:13px;line-height:1.5;'>
-                                                                                <a href='{{LOGIN_URL_LINK}}' style='color:#2563eb;text-decoration:underline;'>{{LOGIN_URL_TEXT}}</a>
-                                                                            </p>
+                                                                            <p style='margin:0;font-size:14px;color:#4b5563;'>Este código es personal. Si no solicitaste el registro, puedes ignorar este correo.</p>
                                                                         </td>
                                                                     </tr>
                                                                 </table>
@@ -182,9 +170,7 @@ public class AuthService {
                                 </html>
                                 """
                                 .replace("{{LOGO_URL}}", logoUrl)
-                                .replace("{{LOGIN_URL_BUTTON}}", loginUrl)
-                                .replace("{{LOGIN_URL_LINK}}", loginUrl)
-                                .replace("{{LOGIN_URL_TEXT}}", loginUrl);
+                                .replace("{{VERIFICATION_CODE}}", String.valueOf(codigoVerificacion));
 
             SendSmtpEmail sendSmtpEmail = new SendSmtpEmail();
             sendSmtpEmail.setSender(sender);
@@ -204,8 +190,8 @@ public class AuthService {
     public Boolean usuarioVerificado(long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con el ID: " + usuarioId));
-        if (usuario instanceof Organizacion) {
-            return ((Organizacion) usuario).getEmailConfirmado();
+        if (usuario instanceof Organizacion org) {
+            return org.getEmailConfirmado();
         }
         return false;
     }

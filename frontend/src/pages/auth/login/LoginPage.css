@@ -187,6 +187,21 @@
   text-align: center;
 }
 
+.login-verify-link {
+  margin-top: 12px;
+  background: transparent;
+  border: none;
+  color: #000638;
+  text-decoration: underline;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.02rem;
+  cursor: pointer;
+}
+
+.login-verify-link:hover {
+  color: #7a0030;
+}
+
 .login-register-text span {
   font-weight: bold;
   color: #000638;

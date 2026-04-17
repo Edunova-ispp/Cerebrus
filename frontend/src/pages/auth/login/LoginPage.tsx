@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import logo from "../../../assets/logo.png";
 import "./LoginPage.css";
 
@@ -9,54 +9,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   
-  // Activación automática de cuenta desde parámetro en URL
-  const [searchParams, setSearchParams] = useSearchParams();
-  const processedCodeRef = useRef<string | null>(null);
-  const [mensajeActivacion, setMensajeActivacion] = useState<{ texto: string, tipo: 'ok' | 'err' } | null>(null);
-  const [loadingCode, setLoadingCode] = useState(false);
-  
   const navigate = useNavigate();
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
-
-  const activarCuenta = useCallback(async (codigo: string) => {
-    setLoadingCode(true);
-    setMensajeActivacion(null);
-    try {
-      const response = await fetch(`${apiBase}/auth/confirm-email/${codigo}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMensajeActivacion({ texto: "✅ ¡Cuenta activada! Ya puedes iniciar sesión.", tipo: 'ok' });
-        setError(''); // Limpiamos errores de login previos
-      } else {
-        setMensajeActivacion({ texto: `❌ ${data.message || 'Código inválido'}`, tipo: 'err' });
-      }
-    } catch {
-      setMensajeActivacion({ texto: "❌ Error de conexión al activar.", tipo: 'err' });
-    } finally {
-      setLoadingCode(false);
-    }
-  }, [apiBase]);
-
-  useEffect(() => {
-    const codeFromUrl = searchParams.get('validatoncode') ?? searchParams.get('validationCode') ?? searchParams.get('confirmCode');
-    if (!codeFromUrl || processedCodeRef.current === codeFromUrl) {
-      return;
-    }
-
-    processedCodeRef.current = codeFromUrl;
-    activarCuenta(codeFromUrl);
-
-    const updatedParams = new URLSearchParams(searchParams);
-    updatedParams.delete('validatoncode');
-    updatedParams.delete('validationCode');
-    updatedParams.delete('confirmCode');
-    setSearchParams(updatedParams, { replace: true });
-  }, [activarCuenta, searchParams, setSearchParams]);
 
   const handleLogin = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -115,12 +69,6 @@ const Login = () => {
       </button>
 
       <div className="login-box">
-        {mensajeActivacion && (
-          <div className={`login-activation-banner ${mensajeActivacion.tipo}`}>
-            {mensajeActivacion.texto}
-          </div>
-        )}
-
         <div className="login-header">
           <h2 className="login-title">Iniciar Sesión</h2>
         </div>
@@ -165,10 +113,17 @@ const Login = () => {
           </div>
 
           {error && <div className="login-error-msg">{error}</div>}
-          {loadingCode && <div className="login-error-msg">Procesando activación de cuenta...</div>}
 
           <button type="submit" className="pixel-btn-submit">ENTRAR</button>
         </form>
+
+        <button
+          type="button"
+          className="login-verify-link"
+          onClick={() => navigate('/auth/verify-email')}
+        >
+          Tengo un código de verificación
+        </button>
 
         <p className="login-register-text">
           ¿No tienes cuenta? <span onClick={() => navigate('/auth/register')}>Regístrate aquí</span>
