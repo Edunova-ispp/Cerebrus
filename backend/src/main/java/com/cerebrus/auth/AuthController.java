@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -103,6 +104,28 @@ public class AuthController {
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new MessageResponse("Credenciales incorrectas"));
+        }
+    }
+
+    @GetMapping("/login")
+    public ResponseEntity<?> confirmarEmailDesdeEnlace(
+            @RequestParam(name = "validatoncode", required = false) Integer legacyValidationCode,
+            @RequestParam(name = "validationCode", required = false) Integer validationCode,
+            @RequestParam(name = "confirmCode", required = false) Integer confirmCode) {
+
+        Integer codigo = Optional.ofNullable(legacyValidationCode)
+                .orElse(Optional.ofNullable(validationCode).orElse(confirmCode));
+
+        if (codigo == null) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Falta el código de validación en la URL."));
+        }
+
+        try {
+            authService.confirmarEmail(codigo);
+            return ResponseEntity.ok(new MessageResponse("Email confirmado exitosamente. Ya puedes iniciar sesión."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
     }
 
