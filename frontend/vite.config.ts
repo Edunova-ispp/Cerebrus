@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
+  envDir: "../",
+  envPrefix: ["VITE_", "WATCHBUG_ADMIN", "LOGROCKET_"],
   plugins: [react(), svgr()],
   test: {
     environment: "jsdom",
@@ -16,6 +18,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       "/api": "http://backend:8080",
+      "/watchbug/": "http://watchbug:5000",
     },
     watch: {
       usePolling: true,
