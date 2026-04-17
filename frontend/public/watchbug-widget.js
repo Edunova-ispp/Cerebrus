@@ -436,7 +436,7 @@
                 // Error al cargar
                 button.style.cursor = 'pointer';
                 button.style.opacity = '1';
-                alert('No se pudo iniciar la grabación. Verifica tu conexión o desactiva el bloqueador de anuncios.');
+                alert('No se pudo iniciar la grabación. Verifica tu conexión o desactiva el bloqueador de anuncios o bloqueador de scripts.');
             }
         });
         
@@ -547,7 +547,8 @@
         
         // Click handler - abrir dashboard
         button.addEventListener('click', () => {
-            window.location.href = 'http://localhost:5000/watchbug/dashboard';
+            const apiBase = WATCHBUG_CONFIG.apiEndpoint.replace('/watchbug/report', '');
+            window.location.href = `${apiBase}/watchbug/dashboard`;
         });
         
         return button;
