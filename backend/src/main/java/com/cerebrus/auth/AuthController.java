@@ -10,7 +10,11 @@ import com.cerebrus.usuario.alumno.AlumnoRepository;
 import com.cerebrus.usuario.maestro.MaestroRepository;
 
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +40,9 @@ public class AuthController {
     private final AlumnoRepository alumnoRepository;
     private final SuscripcionRepository suscripcionRepository;
     private final JwtUtils jwtUtils;
+
+    @Value("${cerebrus.app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
 
     public AuthController(AuthenticationManager authenticationManager, AuthService authService, MaestroRepository maestroRepository, AlumnoRepository alumnoRepository, SuscripcionRepository suscripcionRepository, JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
@@ -130,24 +137,30 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logoutUser() {
+    public ResponseEntity<?> redirigirALoginFrontend(
         // JWT es stateless, el backend solo confirma la acción. El frontend debe borrar el token.
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(new MessageResponse("Sesión cerrada. El cliente debe eliminar el token."));
     }
     @PutMapping("/confirm-email/{codigoVerificacion}")
     public ResponseEntity<?> confirmarEmail(@PathVariable Integer codigoVerificacion) {
-        try {
-            authService.confirmarEmail(codigoVerificacion);
-            return ResponseEntity.ok(new MessageResponse("Email confirmado exitosamente."));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
-        }
-    }
 
-    @GetMapping("/email-confirmed/{userId}")
-    public ResponseEntity<Boolean> verificarEmailConfirmado(@PathVariable long userId) {
-        
+        String baseFrontendUrl = (frontendUrl == null ? "" : frontendUrl.trim()).replaceAll("/$", "");
+        if (baseFrontendUrl.isBlank()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("No se ha configurado la URL de frontend."));
+        }
+
+        StringBuilder redirectUrl = new StringBuilder(baseFrontendUrl).append("/auth/login");
+
+        if (codigo != null) {
+            redirectUrl
+                    .append("?validationCode=")
+                    .append(URLEncoder.encode(String.valueOf(codigo), StandardCharsets.UTF_8));
+        }
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(redirectUrl.toString()))
+                .build();
             boolean confirmado = authService.usuarioVerificado(userId);
             
                 return ResponseEntity.ok(confirmado);
