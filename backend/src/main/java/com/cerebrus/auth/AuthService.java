@@ -68,7 +68,7 @@ public class AuthService {
             case "ORGANIZACION":
                 Organizacion org = new Organizacion();
                 org.setNombreCentro(request.getNombreCentro()); 
-                org.setEmailConfirmado(false);
+                org.setEmailConfirmado(true);
                 org.setCodigoVerificacion((int)(Math.random() * 90000000) + 10000000);
                 nuevoUsuario = org;
                 break;
