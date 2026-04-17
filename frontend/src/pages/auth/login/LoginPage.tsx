@@ -23,7 +23,7 @@ const Login = () => {
     setMensajeActivacion(null);
     try {
       const response = await fetch(`${apiBase}/auth/confirm-email/${codigo}`, {
-        method: 'PUT',
+        method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       });
 
