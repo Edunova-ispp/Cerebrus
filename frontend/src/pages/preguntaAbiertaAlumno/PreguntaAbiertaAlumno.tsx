@@ -65,7 +65,7 @@ function isCompletedAttempt(fechaFin?: string | null): boolean {
 }
 
 export default function PreguntaAbiertaAlumno() {
-  const { actividadId } = useParams<{ actividadId: string }>();
+  const { actividadId } = useParams<{ actividadId?: string }>();
   const navigate = useNavigate();
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
