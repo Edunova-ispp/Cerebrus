@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,7 +82,7 @@ public class AuthController {
                     .toList();
 
             if (roles.contains("MAESTRO") || roles.contains("ALUMNO")) {
-                Long orgId = null;
+                Long orgId;
 
                 if (roles.contains("MAESTRO")) {
                     orgId = maestroRepository.findById(userDetails.getId())
@@ -115,7 +114,7 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<?> confirmarEmailDesdeEnlace(
+    public ResponseEntity<?> redirigirALoginFrontend(
             @RequestParam(name = "validatoncode", required = false) Integer legacyValidationCode,
             @RequestParam(name = "validationCode", required = false) Integer validationCode,
             @RequestParam(name = "confirmCode", required = false) Integer confirmCode) {
@@ -123,35 +122,12 @@ public class AuthController {
         Integer codigo = Optional.ofNullable(legacyValidationCode)
                 .orElse(Optional.ofNullable(validationCode).orElse(confirmCode));
 
-        if (codigo == null) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponse("Falta el código de validación en la URL."));
-        }
-
-        try {
-            authService.confirmarEmail(codigo);
-            return ResponseEntity.ok(new MessageResponse("Email confirmado exitosamente. Ya puedes iniciar sesión."));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
-        }
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<?> redirigirALoginFrontend(
-        // JWT es stateless, el backend solo confirma la acción. El frontend debe borrar el token.
-        SecurityContextHolder.clearContext();
-        return ResponseEntity.ok(new MessageResponse("Sesión cerrada. El cliente debe eliminar el token."));
-    }
-    @PutMapping("/confirm-email/{codigoVerificacion}")
-    public ResponseEntity<?> confirmarEmail(@PathVariable Integer codigoVerificacion) {
-
         String baseFrontendUrl = (frontendUrl == null ? "" : frontendUrl.trim()).replaceAll("/$", "");
         if (baseFrontendUrl.isBlank()) {
             return ResponseEntity.badRequest().body(new MessageResponse("No se ha configurado la URL de frontend."));
         }
 
         StringBuilder redirectUrl = new StringBuilder(baseFrontendUrl).append("/auth/login");
-
         if (codigo != null) {
             redirectUrl
                     .append("?validationCode=")
@@ -161,9 +137,28 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(redirectUrl.toString()))
                 .build();
-            boolean confirmado = authService.usuarioVerificado(userId);
-            
-                return ResponseEntity.ok(confirmado);
-            
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser() {
+        // JWT es stateless, el backend solo confirma la acción. El frontend debe borrar el token.
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok(new MessageResponse("Sesión cerrada. El cliente debe eliminar el token."));
+    }
+
+    @PutMapping("/confirm-email/{codigoVerificacion}")
+    public ResponseEntity<?> confirmarEmail(@PathVariable Integer codigoVerificacion) {
+        try {
+            authService.confirmarEmail(codigoVerificacion);
+            return ResponseEntity.ok(new MessageResponse("Email confirmado exitosamente."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
+    }
+
+    @GetMapping("/email-confirmed/{userId}")
+    public ResponseEntity<Boolean> verificarEmailConfirmado(@PathVariable long userId) {
+        boolean confirmado = authService.usuarioVerificado(userId);
+        return ResponseEntity.ok(confirmado);
+    }
 }
