@@ -134,7 +134,7 @@ public class AuthService {
 
             // 4. Crear el cuerpo del correo de verificación
                         String baseFrontendUrl = frontendUrl.replaceAll("/$", "");
-                        String loginUrl = baseFrontendUrl + "/auth/login?validationCode="
+                        String loginUrl = baseFrontendUrl + "/auth/confirm-email?validationCode="
                 + URLEncoder.encode(String.valueOf(codigoVerificacion), StandardCharsets.UTF_8);
                         String logoUrl = baseFrontendUrl + "/cerebrus-logo.png";
 

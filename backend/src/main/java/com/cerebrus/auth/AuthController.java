@@ -1,23 +1,12 @@
 package com.cerebrus.auth;
 
-import com.cerebrus.auth.payload.request.LoginRequest;
-import com.cerebrus.auth.payload.request.SignupRequest;
-import com.cerebrus.auth.payload.response.JwtResponse; 
-import com.cerebrus.auth.payload.response.MessageResponse; 
-import com.cerebrus.auth.security.JwtUtils;
-import com.cerebrus.suscripcion.SuscripcionRepository;
-import com.cerebrus.usuario.alumno.AlumnoRepository;
-import com.cerebrus.usuario.maestro.MaestroRepository;
-
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Value;
-
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,7 +16,24 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.cerebrus.auth.payload.request.LoginRequest;
+import com.cerebrus.auth.payload.request.SignupRequest;
+import com.cerebrus.auth.payload.response.JwtResponse;
+import com.cerebrus.auth.payload.response.MessageResponse;
+import com.cerebrus.auth.security.JwtUtils;
+import com.cerebrus.suscripcion.SuscripcionRepository;
+import com.cerebrus.usuario.alumno.AlumnoRepository;
+import com.cerebrus.usuario.maestro.MaestroRepository;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
@@ -146,7 +152,7 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("Sesión cerrada. El cliente debe eliminar el token."));
     }
 
-    @PutMapping("/confirm-email/{codigoVerificacion}")
+    @GetMapping("/confirm-email/{codigoVerificacion}")
     public ResponseEntity<?> confirmarEmail(@PathVariable Integer codigoVerificacion) {
         try {
             authService.confirmarEmail(codigoVerificacion);
