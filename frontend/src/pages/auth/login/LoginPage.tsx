@@ -43,7 +43,7 @@ const Login = () => {
   }, [apiBase]);
 
   useEffect(() => {
-    const codeFromUrl = searchParams.get('validatoncode') ?? searchParams.get('confirmCode');
+    const codeFromUrl = searchParams.get('validatoncode') ?? searchParams.get('validationCode') ?? searchParams.get('confirmCode');
     if (!codeFromUrl || processedCodeRef.current === codeFromUrl) {
       return;
     }
@@ -53,6 +53,7 @@ const Login = () => {
 
     const updatedParams = new URLSearchParams(searchParams);
     updatedParams.delete('validatoncode');
+    updatedParams.delete('validationCode');
     updatedParams.delete('confirmCode');
     setSearchParams(updatedParams, { replace: true });
   }, [activarCuenta, searchParams, setSearchParams]);
