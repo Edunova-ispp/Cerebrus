@@ -42,7 +42,6 @@ El objetivo de esta revisión es comprobar el estado funcional de los casos de u
 ### 3.1 CU: Gestión de Notificaciones
 * **Generación por eventos:** Notificación automática al producirse un match o recibirse un mensaje. [ ]
     ** *texto*
-    ** *texto*
 * **Visualización de Listado:** Pantalla de 'Notificaciones' con listado cronológico de las recibidas. [ ]
     ** *texto*
 * **Indicador de nuevas notificaciones:** Indicador visual en la interfaz cuando existen notificaciones nuevas. [ ]
