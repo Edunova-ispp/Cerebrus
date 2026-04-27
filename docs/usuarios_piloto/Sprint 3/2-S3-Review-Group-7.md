@@ -3,7 +3,7 @@
 **Grupo Evaluador:** Grupo 2 
 **Fecha de revisión:** 27/04/2026
 **Aplicación revisada:** https://sprint3.nbynexus.com/
-**Tiempo empleado en la revisión:** 1h 30 minutos.
+**Tiempo empleado en la revisión:** 3h.
 
 ---
 
