@@ -74,7 +74,6 @@ El objetivo es validar la funcionalidad de la plataforma tanto para el perfil de
 * **Marcar un objeto como devuelto:** [✅]
 * **Acceder al módulo de objetos desde el panel de control:** [✅]
 * **Barra para filtrar objetos:** [✅]
-    * Filtrado algo simple, sólo por nombre pero bueno, "filtra", aunque si nos ponemos exquisitos es más bien una búsqueda que un filtro. 
 * **Visualización de objetos reservados por otros usuarios:** [✅]
 * **Interfaz de gestión de objetos comunes:** [✅]
 * **Historial de uso y préstamos por objetos:** [✅]
