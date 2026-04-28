@@ -1,7 +1,6 @@
 /* --- CONTENEDOR PRINCIPAL --- */
 .logout-page-container {
   min-height: 100vh;
-  background-color: #f5f4ea; /* Fondo crema característico de Cerebrus */
   display: flex;
   justify-content: center;
   align-items: center;
