@@ -1,0 +1,124 @@
+/* 1. Subimos todo y ampliamos el contenedor */
+.ga-container {
+  max-width: 1200px; 
+  margin: 15px auto; /* Reducido al mínimo para subirlo más */
+  padding: 20px 32px 32px 32px; 
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-family: 'Oxygen', sans-serif;
+}
+
+/* 2. Títulos pegaditos arriba */
+.ga-title {
+  text-align: center;
+  margin: 0; 
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.ga-subtitle {
+  text-align: center;
+  margin: 2px 0 18px; /* Espacio mínimo para que la tabla suba */
+  font-size: 0.92rem;
+  color: #64748b;
+}
+
+/* 3. Toolbar compacta */
+.ga-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  gap: 16px;
+}
+
+.ga-search {
+  flex: 1;
+  max-width: 380px;
+  padding: 9px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  outline: none;
+}
+
+/* 4. TABLA MÁS GRANDE Y ALINEADA */
+.ga-table-wrap {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.ga-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* OBLIGATORIO para que el % del TSX funcione */
+}
+
+/* Alineamos el checkbox con el título */
+.ga-col-check {
+  width: 60px;
+  text-align: center !important;
+}
+
+.ga-table th {
+  background: #f8fafc;
+  padding: 16px; /* Más aire para que se vea "grande" */
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: var(--t-primary, #2563eb);
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.ga-table td {
+  padding: 16px; /* Filas más altas y legibles */
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.95rem;
+  vertical-align: middle;
+  text-align: left; /* Misma alineación que el th */
+}
+
+/* 5. Otros detalles */
+.ga-row--selected {
+  background: rgba(37, 99, 235, 0.04) !important;
+}
+
+.ga-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.ga-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.ga-btn {
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ga-btn--primary {
+  background: var(--t-primary, #2563eb);
+  color: white;
+  border: none;
+}
+
+.ga-btn--secondary {
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+}

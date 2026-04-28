@@ -7,6 +7,7 @@ import VerifyEmailPage from "./pages/auth/verifyEmail/VerifyEmailPage";
 import ClasificacionAlumno from "./pages/clasificacionAlumno/ClasificacionAlumno";
 import CrearActividad from "./pages/crearActividad/crearActividad.tsx";
 import CrearCurso from "./pages/crearCurso/CrearCurso";
+import InscribirAlumnos from "./pages/gestionAlumnos/InscribirAlumnos";
 import CrearTema from "./pages/crearTema/CrearTema";
 import DeployTesting from "./pages/deployTesting/DeployTesting";
 import DetalleCurso from "./pages/detalleCurso/DetalleCurso";
@@ -162,6 +163,9 @@ function App() {
         {/* Rutas profesores y dueños */}
         <Route path="/crearCurso" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><CrearCurso /></ProtectedRoute>
+        } />
+        <Route path="/inscribir-alumnos/:cursoId" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><InscribirAlumnos /></ProtectedRoute>
         } />
         <Route path="/editarCurso/:id" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EditarCurso /></ProtectedRoute>
