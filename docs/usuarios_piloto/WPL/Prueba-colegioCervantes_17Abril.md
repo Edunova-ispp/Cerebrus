@@ -11,6 +11,7 @@
 | Versión | Fecha | Autor/es | Descripción de los Cambios |
 | :---: | :---: | :--- | :--- |
 | 1.0 | 17/04/2026 | Rafael Segura | Creación del documento base |
+| 2.0 | 28/04/2026 | David Valencia | Añadido más detalles del feedback |
 
 ---
 
@@ -65,3 +66,6 @@ En general, estaban muy contentos. Como mejoras, señalaron los siguientes punto
 **Creación de tipo test**
 
 - No queda suficientemente claro qué respuesta está seleccionada como correcta. Aunque existe un tick, la señal visual no resulta lo bastante intuitiva.
+
+**Inscripción de alumnos a un curso**
+- Se solicita que el profesor pueda buscar e inscribir directamente a sus alumnos al curso, sin depender del código.
