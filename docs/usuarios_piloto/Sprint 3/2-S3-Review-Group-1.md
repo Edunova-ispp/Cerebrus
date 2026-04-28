@@ -12,6 +12,7 @@
 | Versión | Fecha | Autor/es | Descripción de los Cambios |
 | :---: | :---: | :--- | :--- |
 | 1.0 | 27/04/2026 | Rafael Segura | Versión inicial de documento |
+| 2.0 | 28/04/2026 | Manuel Toledo | Añadidos comentarios|
 
 ---
 
@@ -44,12 +45,14 @@ El objetivo de esta revisión es comprobar el estado funcional de los casos de u
     * Pensaba que era una notificación general pero es dentro del piso o del match, y ya te sale ahí el aviso del match o del chat. Funciona, es automático, así que bien, aunque si no entras al piso no te das cuenta de que tienes mensajes nuevos.
 * **Visualización de Listado:** Pantalla de 'Notificaciones' con listado cronológico de las recibidas. [✅]
     * Orden cronológico inverso, yo lo cambiaría para dejar las más nuevas arriba para ver las más recientes primero, por si no limpias las notificaciones y a lo mejor las antiguas ya no importan, han caducado, pero es cuestión de gustos.
+    * El boton de notificaciones esta demasiado escondido (hay que ir hasta el perfil para acceder) como suegerencia lo pondría en la pantalla de inicio.
 * **Indicador de nuevas notificaciones:** Indicador visual en la interfaz cuando existen notificaciones nuevas. [❌]
     * He activado notificaciones, creado incidencia, factura, match... en ningún lado veo el indicador visual, no sé dónde ni cuándo debe salir.
 * **Navegación Directa:** Redirección al evento correspondiente al interactuar con una notificación interna. [✅]
     * Redirige al apartado concreto, genial.
 * **Actualización de Estado leída:** Marca automática como 'Leída' al hacer clic; opción de marcar todas como leídas. [❌]
     * Directamente me han desaparecido. Yo no haría que desaparezcan hasta que se borren explícitamente con un botón de borrar notificación o algo. En ningún sitio sale "Leída".
+    * No hay ninguna opción para marcar todas como leidas.
 
 ### 3.2 CU: Filtros Avanzados para Arrendador
 * **Definición de Perfil Ideal:** El anunciante parametriza las características deseadas del compañero (edad, ocupación, hábitos) para el algoritmo de afinidad. [✅]
