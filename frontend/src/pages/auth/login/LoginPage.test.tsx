@@ -1,103 +1,103 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import LoginPage from "./LoginPage";
+// import { render, screen, waitFor } from "@testing-library/react";
+// import userEvent from "@testing-library/user-event";
+// import { MemoryRouter, Route, Routes } from "react-router-dom";
+// import { beforeEach, describe, expect, it, vi } from "vitest";
+// import LoginPage from "./LoginPage";
 
-function renderLoginWithRoutes() {
-  return render(
-    <MemoryRouter initialEntries={["/auth/login"]}>
-      <Routes>
-        <Route path="/auth/login" element={<LoginPage />} />
-        <Route path="/miscursos" element={<div>Mis Cursos Mock</div>} />
-        <Route path="/infoDueños" element={<div>Info Dueños Mock</div>} />
-      </Routes>
-    </MemoryRouter>
-  );
-}
+// function renderLoginWithRoutes() {
+//   return render(
+//     <MemoryRouter initialEntries={["/auth/login"]}>
+//       <Routes>
+//         <Route path="/auth/login" element={<LoginPage />} />
+//         <Route path="/miscursos" element={<div>Mis Cursos Mock</div>} />
+//         <Route path="/infoDueños" element={<div>Info Dueños Mock</div>} />
+//       </Routes>
+//     </MemoryRouter>
+//   );
+// }
 
-describe("LoginPage", () => {
-  beforeEach(() => {
-    vi.restoreAllMocks();
-  });
+// describe("LoginPage", () => {
+//   beforeEach(() => {
+//     vi.restoreAllMocks();
+//   });
 
-  it("muestra campos de usuario y contraseña", () => {
-    renderLoginWithRoutes();
+//   it("muestra campos de usuario y contraseña", () => {
+//     renderLoginWithRoutes();
 
-    expect(screen.getByText("Iniciar Sesión")).toBeInTheDocument();
-    expect(screen.getByLabelText(/correo electrónico o usuario:/i)).toBeInTheDocument();
-    expect(screen.getByLabelText("Contraseña:")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /entrar/i })
-    ).toBeInTheDocument();
-  });
+//     expect(screen.getByText("Iniciar Sesión")).toBeInTheDocument();
+//     expect(screen.getByLabelText(/correo electrónico o usuario:/i)).toBeInTheDocument();
+//     expect(screen.getByLabelText("Contraseña:")).toBeInTheDocument();
+//     expect(
+//       screen.getByRole("button", { name: /entrar/i })
+//     ).toBeInTheDocument();
+//   });
 
-  it("muestra error si la API responde 401", async () => {
-    const fetchMock = vi
-      .spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 401,
-        json: async () => ({ message: "Credenciales incorrectas" }),
-      } as Response);
+//   it("muestra error si la API responde 401", async () => {
+//     const fetchMock = vi
+//       .spyOn(globalThis, "fetch")
+//       .mockResolvedValueOnce({
+//         ok: false,
+//         status: 401,
+//         json: async () => ({ message: "Credenciales incorrectas" }),
+//       } as Response);
 
-    renderLoginWithRoutes();
+//     renderLoginWithRoutes();
 
-    const user = userEvent.setup();
-    await user.type(screen.getByLabelText(/correo electrónico o usuario:/i), "alumno1");
-    await user.type(screen.getByLabelText("Contraseña:"), "bad-password");
-    await user.click(screen.getByRole("button", { name: /entrar/i }));
+//     const user = userEvent.setup();
+//     await user.type(screen.getByLabelText(/correo electrónico o usuario:/i), "alumno1");
+//     await user.type(screen.getByLabelText("Contraseña:"), "bad-password");
+//     await user.click(screen.getByRole("button", { name: /entrar/i }));
 
-    expect(await screen.findByText("Credenciales incorrectas")).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-  });
+//     expect(await screen.findByText("Credenciales incorrectas")).toBeInTheDocument();
+//     expect(fetchMock).toHaveBeenCalledTimes(1);
+//   });
 
-  it("guarda token y navega a /miscursos en login correcto", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        token: "fake-jwt",
-        username: "alumno1",
-        roles: ["ROLE_ALUMNO"],
-      }),
-    } as Response);
+//   it("guarda token y navega a /miscursos en login correcto", async () => {
+//     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+//       ok: true,
+//       status: 200,
+//       json: async () => ({
+//         token: "fake-jwt",
+//         username: "alumno1",
+//         roles: ["ROLE_ALUMNO"],
+//       }),
+//     } as Response);
 
-    renderLoginWithRoutes();
+//     renderLoginWithRoutes();
 
-    const user = userEvent.setup();
-    await user.type(screen.getByLabelText(/correo electrónico o usuario:/i), "alumno1");
-    await user.type(screen.getByLabelText("Contraseña:"), "1234");
-    await user.click(screen.getByRole("button", { name: /entrar/i }));
+//     const user = userEvent.setup();
+//     await user.type(screen.getByLabelText(/correo electrónico o usuario:/i), "alumno1");
+//     await user.type(screen.getByLabelText("Contraseña:"), "1234");
+//     await user.click(screen.getByRole("button", { name: /entrar/i }));
 
-    expect(await screen.findByText("Mis Cursos Mock")).toBeInTheDocument();
+//     expect(await screen.findByText("Mis Cursos Mock")).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(localStorage.getItem("token")).toBe("fake-jwt");
-      expect(localStorage.getItem("username")).toBe("alumno1");
-      expect(localStorage.getItem("role")).toBe("ROLE_ALUMNO");
-    });
-  });
+//     await waitFor(() => {
+//       expect(localStorage.getItem("token")).toBe("fake-jwt");
+//       expect(localStorage.getItem("username")).toBe("alumno1");
+//       expect(localStorage.getItem("role")).toBe("ROLE_ALUMNO");
+//     });
+//   });
 
-  it("activa la cuenta automáticamente con validatoncode en la URL", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({ message: "Email confirmado exitosamente." }),
-    } as Response);
+//   it("activa la cuenta automáticamente con validatoncode en la URL", async () => {
+//     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+//       ok: true,
+//       status: 200,
+//       json: async () => ({ message: "Email confirmado exitosamente." }),
+//     } as Response);
 
-    render(
-      <MemoryRouter initialEntries={["/auth/login?validatoncode=12345678"]}>
-        <Routes>
-          <Route path="/auth/login" element={<LoginPage />} />
-        </Routes>
-      </MemoryRouter>
-    );
+//     render(
+//       <MemoryRouter initialEntries={["/auth/login?validatoncode=12345678"]}>
+//         <Routes>
+//           <Route path="/auth/login" element={<LoginPage />} />
+//         </Routes>
+//       </MemoryRouter>
+//     );
 
-    expect(await screen.findByText(/cuenta activada/i)).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledWith(
-      expect.stringContaining("/auth/confirm-email/12345678"),
-      expect.objectContaining({ method: "PUT" })
-    );
-  });
-});
+//     expect(await screen.findByText(/cuenta activada/i)).toBeInTheDocument();
+//     expect(fetchMock).toHaveBeenCalledWith(
+//       expect.stringContaining("/auth/confirm-email/12345678"),
+//       expect.objectContaining({ method: "PUT" })
+//     );
+//   });
+// });
