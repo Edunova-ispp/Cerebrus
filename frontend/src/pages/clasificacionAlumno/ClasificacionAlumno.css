@@ -138,6 +138,15 @@
     gap: 12px;
   }
 
+  /* Si hay número impar de pergaminos, el último queda solo: lo centramos en la fila */
+  @media (min-width: 901px) {
+    .clf-preguntas-list > .clf-pergamino-box:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+      justify-self: center;
+      max-width: calc((100% - 12px) / 2);
+    }
+  }
+
   @media (max-width: 900px) {
     .clf-preguntas-list {
       grid-template-columns: 1fr;
@@ -224,6 +233,22 @@
     flex: 1;
     min-height: 0;
     overflow: hidden;
+  }
+
+  /* Centrar la última fila (cuando no está completa) moviendo el primer elemento de esa fila */
+  .clf-respuestas-shelf > .clf-respuesta-item:nth-last-child(1):nth-child(8n + 1),
+  .clf-respuestas-shelf > .clf-respuesta-item:nth-last-child(2):nth-child(8n + 1) {
+    grid-column-start: 4;
+  }
+
+  .clf-respuestas-shelf > .clf-respuesta-item:nth-last-child(3):nth-child(8n + 1),
+  .clf-respuestas-shelf > .clf-respuesta-item:nth-last-child(4):nth-child(8n + 1) {
+    grid-column-start: 3;
+  }
+
+  .clf-respuestas-shelf > .clf-respuesta-item:nth-last-child(5):nth-child(8n + 1),
+  .clf-respuestas-shelf > .clf-respuesta-item:nth-last-child(6):nth-child(8n + 1) {
+    grid-column-start: 2;
   }
   
   .clf-respuesta-item {
