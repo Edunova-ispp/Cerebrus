@@ -167,17 +167,28 @@ const [showIAModal, setShowIAModal] = useState(false);
     if (pNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
 
     if (preguntas.length < 2) return 'Debe haber al menos 2 categorías';
-    if (preguntas.length > 10) return 'No puedes tener más de 10 categorías';
+    if (preguntas.length > 6) return 'No puedes tener más de 6 categorías';
 
     for (let i = 0; i < preguntas.length; i++) {
       if (!preguntas[i].text.trim()) {
         return `La categoría ${i + 1} debe tener un nombre`;
       }
+      if (preguntas[i].text.trim().length > 20) {
+        return `La categoría ${i + 1} debe tener un nombre no mayor a 20 caracteres`;
+      }
       if (preguntas[i].respuestas.length === 0) {
         return `La categoría ${i + 1} debe tener al menos 1 elemento`;
       }
-      if (preguntas[i].respuestas.length > 20) {
-        return `La categoría ${i + 1} no puede tener más de 20 elementos`;
+      if (preguntas[i].respuestas.length > 10) {
+        return `La categoría ${i + 1} no puede tener más de 10 elementos`;
+      }
+      for (let j = 0; j < preguntas[i].respuestas.length; j++) {
+        if (!preguntas[i].respuestas[j].text.trim()) {
+          return `El elemento ${j + 1} de la categoría ${i + 1} no puede estar vacío`;
+        }
+        if (preguntas[i].respuestas[j].text.trim().length > 20) {
+          return `El elemento ${j + 1} de la categoría ${i + 1} no puede exceder los 20 caracteres`;
+        }
       }
       const tieneElementosVacios = preguntas[i].respuestas.some((r) => !r.text.trim());
       if (tieneElementosVacios) {
@@ -429,7 +440,9 @@ const handleIAResult = (data: any) => {
           <div key={p.localKey} className="tf-question-block" style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px', marginBottom: '15px' }}>
             <div className="tf-question-header">
               <span className="tf-question-label">Categoría {pIdx + 1}</span>
-              <button type="button" className="tf-btn-remove-question" onClick={() => removePregunta(pIdx)}>✕</button>
+              {preguntas.length > 2 && (
+                <button type="button" className="tf-btn-remove-question" onClick={() => removePregunta(pIdx)}>✕</button>
+              )}
             </div>
             <input 
               type="text" 
@@ -448,16 +461,18 @@ const handleIAResult = (data: any) => {
                     value={r.text} 
                     onChange={(e) => updateRespuesta(pIdx, rIdx, { text: e.target.value })} 
                   />
-                  <button type="button" className="tf-btn-remove-option" onClick={() => removeRespuesta(pIdx, rIdx)}>✕</button>
+                  {p.respuestas.length > 1 && (
+                    <button type="button" className="tf-btn-remove-option" onClick={() => removeRespuesta(pIdx, rIdx)}>✕</button>
+                  )}
                 </div>
               ))}
-              {p.respuestas.length < 20 && (
+              {p.respuestas.length < 10 && (
                 <button type="button" className="tf-btn-add-option" onClick={() => addRespuesta(pIdx)}>+ Añadir Elemento</button>
               )}
             </div>
           </div>
         ))}
-        {preguntas.length < 10 && (
+        {preguntas.length < 6 && (
           <button type="button" className="tf-btn-add-question" onClick={addPregunta} style={{ width: '100%' }}>
             + Añadir Nueva Categoría
           </button>

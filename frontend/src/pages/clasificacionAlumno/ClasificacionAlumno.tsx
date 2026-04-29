@@ -98,10 +98,13 @@ export default function ClasificacionAlumno() {
   const { clasificacionId } = useParams<{ clasificacionId: string }>();
   const navigate = useNavigate();
 
+  const MAX_ITEMS_PER_CATEGORY = 10;
+
   const initInFlightRef = useRef(false);
   const completedRef = useRef(false);
   const abandonReportedRef = useRef(false);
   const actividadAlumnoIdRef = useRef<number | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
 
   const [clasificacion, setClasificacion] = useState<ClasificacionDTO | null>(null);
   const [actividadAlumnoId, setActividadAlumnoId] = useState<number | null>(null);
@@ -111,6 +114,7 @@ export default function ClasificacionAlumno() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ correcta: boolean; comentario?: string } | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
@@ -140,6 +144,26 @@ export default function ClasificacionAlumno() {
       apiFetch(`${apiBase}/api/actividades-alumno/${id}/abandon`, { method: 'POST' }).catch(() => {});
     };
   }, [apiBase]);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current != null) {
+        window.clearTimeout(toastTimerRef.current);
+        toastTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    if (toastTimerRef.current != null) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = window.setTimeout(() => {
+      setToastMessage(null);
+      toastTimerRef.current = null;
+    }, 5000);
+  };
 
   useEffect(() => {
     const run = async () => {
@@ -322,6 +346,20 @@ export default function ClasificacionAlumno() {
     if (!respuestaIdStr) return;
     
     const respuestaId = Number.parseInt(respuestaIdStr, 10);
+
+    const targetIdsNow = respuestasAsociadas.get(preguntaId) ?? [];
+    const alreadyInTarget = targetIdsNow.includes(respuestaId);
+    if (!alreadyInTarget && targetIdsNow.length >= MAX_ITEMS_PER_CATEGORY) {
+      setRespuestasAsociadas((prev) => {
+        const newMap = new Map(prev);
+        for (const [key, val] of newMap.entries()) {
+          newMap.set(key, val.filter((id) => id !== respuestaId));
+        }
+        return newMap;
+      });
+      showToast('¡No caben más piedras en la página!');
+      return;
+    }
 
     setRespuestasAsociadas((prev) => {
       const newMap = new Map(prev);
@@ -596,6 +634,12 @@ export default function ClasificacionAlumno() {
           </>
         )}
       </main>
+
+      {toastMessage && (
+        <div className="clf-toast-overlay" aria-live="polite" aria-atomic="true">
+          <div className="ta-score-banner ta-score-banner--neutral">{toastMessage}</div>
+        </div>
+      )}
 
       {showAnswerModal && (
         <AnswerViewModal
