@@ -266,7 +266,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            Correcciones visibles
+            Mostrar comentarios de corrección
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
@@ -301,7 +301,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
               checked={encontrarRespuestaAlumno}
               onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
             />
-            Mostrar mi respuesta
+            Mostrar respuesta del alumno
           </div>
 
           {respVisible && (

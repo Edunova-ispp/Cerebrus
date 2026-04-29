@@ -306,7 +306,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
               checked={encontrarRespuestaAlumno}
               onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
             />
-            <span>Mostrar mi respuesta</span>
+            <span>Mostrar respuesta del alumno</span>
           </label>
           <div>
             <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>

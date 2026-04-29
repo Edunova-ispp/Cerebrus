@@ -276,7 +276,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
               onChange={(e) => setRespVisible(e.target.checked)}
             />
             <label className="ca-text" htmlFor="mi-resp-visible">
-              Correcciones visibles
+              Mostrar comentarios de corrección
             </label>
           </div>
 
@@ -324,7 +324,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
               onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
             />
             <label className="ca-text" htmlFor="mi-mostrar-respuesta-alumno">
-              Mostrar mi respuesta
+              Mostrar respuesta del alumno
             </label>
           </div>
 

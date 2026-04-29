@@ -489,7 +489,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            <span>Mostrar correcciones al alumno</span>
+            <span>Mostrar comentarios de corrección</span>
           </label>
 
           <label className="tf-check-label">
@@ -525,7 +525,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
               checked={encontrarRespuestaAlumno}
               onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
             />
-            <span>Mostrar mi respuesta</span>
+            <span>Mostrar respuesta del alumno</span>
           </label>
 
           {respVisible && (

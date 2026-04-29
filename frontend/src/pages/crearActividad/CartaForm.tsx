@@ -434,7 +434,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
                 checked={respVisible}
                 onChange={(e) => setRespVisible(e.target.checked)}
               />
-              <span>Mostrar correcciones al alumno</span>
+              <span>Mostrar comentarios de corrección</span>
             </label>
 
             <label className="cf-check-label">

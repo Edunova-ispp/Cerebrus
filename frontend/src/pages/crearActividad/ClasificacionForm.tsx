@@ -392,7 +392,7 @@ const handleIAResult = (data: any) => {
           
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
             <input type="checkbox" id="respVisible" checked={respVisible} onChange={(e) => setRespVisible(e.target.checked)} />
-            <label className="ca-text" htmlFor="respVisible">Corregir automáticamente</label>
+            <label className="ca-text" htmlFor="respVisible">Mostrar comentarios de corrección</label>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
             <input type="checkbox" id="permitirReintento" checked={permitirReintento} onChange={(e) => setPermitirReintento(e.target.checked)} />
@@ -411,7 +411,7 @@ const handleIAResult = (data: any) => {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
             <input type="checkbox" id="clasificacion-mostrar-resp-alumn" checked={encontrarRespuestaAlumno} onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)} />
-            <label className="ca-text" htmlFor="clasificacion-mostrar-resp-alumn">Mostrar mi respuesta</label>
+            <label className="ca-text" htmlFor="clasificacion-mostrar-resp-alumn">Mostrar respuesta del alumno</label>
           </div>
           {respVisible && (
             <div style={{ marginTop: 10 }}>

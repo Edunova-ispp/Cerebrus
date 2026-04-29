@@ -319,7 +319,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
 
           <label className="tf-check-label">
             <input type="checkbox" checked={respVisible} onChange={e => setRespVisible(e.target.checked)} />
-            <span>Mostrar correcciones al alumno</span>
+            <span>Mostrar comentarios de corrección</span>
           </label>
 
           <label className="tf-check-label">
@@ -334,12 +334,12 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
 
           <label className="tf-check-label">
             <input type="checkbox" checked={encontrarRespuestaMaestro} onChange={e => setEncontrarRespuestaMaestro(e.target.checked)} />
-            <span>Mostrar respuesta correcta</span>
+            <span>Mostrar respuesta modelo</span>
           </label>
 
           <label className="tf-check-label">
             <input type="checkbox" checked={encontrarRespuestaAlumno} onChange={e => setEncontrarRespuestaAlumno(e.target.checked)} />
-            <span>Mostrar mi respuesta</span>
+            <span>Mostrar respuesta del alumno</span>
           </label>
 
           {respVisible && (

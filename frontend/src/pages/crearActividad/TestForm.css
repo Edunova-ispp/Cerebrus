@@ -203,8 +203,8 @@
 }
 
 .tf-option--correct .tf-option-input {
-  border-color: var(--t-primary);
-  background: var(--t-input-focus);
+  border-color: #7ECC81;
+  background: #CBF7CE;
 }
 
 /* -- Buttons --------------------------------------------------- */
@@ -223,15 +223,15 @@
 }
 
 .tf-btn-correct:hover {
-  background: var(--t-primary-light);
+  background: #E0FFE2;
   border-color: var(--t-primary);
-  color: var(--t-primary);
+  color: #7ECC81;
 }
 
 .tf-btn-correct--active {
-  background: var(--t-input-focus);
+  background: #CBF7CE;
   color: var(--t-primary);
-  border-color: var(--t-primary);
+  border-color: #7ECC81;
 }
 
 .tf-btn-remove-option {
