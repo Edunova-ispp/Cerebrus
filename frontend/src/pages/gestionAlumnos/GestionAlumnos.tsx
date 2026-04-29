@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../../utils/api";
 import "./GestionAlumnos.css";
 
@@ -21,6 +22,7 @@ interface Props {
 const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
 export default function GestionAlumnos({ cursoId, embedded }: Props) {
+  const navigate = useNavigate();
   const [alumnos, setAlumnos] = useState<AlumnoCurso[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -90,6 +92,13 @@ export default function GestionAlumnos({ cursoId, embedded }: Props) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <button
+          className="ga-btn ga-btn--primary"
+          type="button"
+          onClick={() => navigate(`/inscribir-alumnos/${cursoId}`)}
+        >
+          + Inscribir alumnos
+        </button>
       </div>
 
       {loading ? (
