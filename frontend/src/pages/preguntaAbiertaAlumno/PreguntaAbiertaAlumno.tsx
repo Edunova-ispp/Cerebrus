@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
+import IaNoPuedeCorregirScreen from '../../components/IaNoPuedeCorregirScreen/IaNoPuedeCorregirScreen';
 import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
@@ -15,6 +16,8 @@ import caballeroImg from '../../assets/props/caballero.png';
 type EvaluacionAbiertaResponse = {
   readonly notaFinal?: number;
   readonly puntuacionFinal?: number;
+  readonly iaNoDisponible?: boolean;
+  readonly iaMensaje?: string | null;
 };
 
 type PreguntaAbiertaDTO = {
@@ -80,6 +83,7 @@ export default function PreguntaAbiertaAlumno() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [iaNoPuedeCorregir, setIaNoPuedeCorregir] = useState(false);
   const [lastAttemptGrade, setLastAttemptGrade] = useState<number | null>(null);
   const [lastAttemptScore, setLastAttemptScore] = useState<number | null>(null);
   const [activityConfig, setActivityConfig] = useState<ActivityResultConfig | null>(null);
@@ -199,6 +203,7 @@ export default function PreguntaAbiertaAlumno() {
       if (!res.ok) {
         const errorData = await res.json();
         const backendMessage = errorData?.mensaje || errorData?.message || 'Error al procesar la corrección';
+
         throw new Error(backendMessage);
       }
 
@@ -206,6 +211,7 @@ export default function PreguntaAbiertaAlumno() {
       setLastAttemptGrade(typeof resultado?.notaFinal === 'number' ? resultado.notaFinal : null);
       setLastAttemptScore(typeof resultado?.puntuacionFinal === 'number' ? resultado.puntuacionFinal : null);
       setSubmitted(true);
+      setIaNoPuedeCorregir(resultado?.iaNoDisponible === true);
 
       await hydrateAnswersFromHistory(actividadAlumnoId);
     } catch (error) {
@@ -225,6 +231,7 @@ export default function PreguntaAbiertaAlumno() {
     if (!actividad) return;
 
     try {
+      setIaNoPuedeCorregir(false);
       const alumnoId = getCurrentUserIdFromJwt();
       if (!alumnoId) throw new Error('No se pudo identificar al alumno.');
 
@@ -342,20 +349,27 @@ export default function PreguntaAbiertaAlumno() {
           </>
         )}
 
-        {submitted && actividad && activityConfig && (
-          <ActivityResultScreen
-            title="¡ACTIVIDAD CORREGIDA!"
-            score={lastAttemptScore ?? 0}
-            maxScore={actividad.puntuacion}
-            grade={lastAttemptGrade ?? undefined}
-            config={activityConfig}
-            onContinue={() => navigate(-1)}
-            onRetry={handleRetry}
-            onViewStudentAnswer={handleViewStudentAnswers}
-            onViewCorrectAnswer={handleViewCorrectAnswers}
-            onCancel={() => navigate(-1)}
-          />
+        {submitted && actividad && (
+          iaNoPuedeCorregir ? (
+            <IaNoPuedeCorregirScreen onContinue={() => navigate(-1)} />
+          ) : (
+            activityConfig && (
+              <ActivityResultScreen
+                title="¡ACTIVIDAD CORREGIDA!"
+                score={lastAttemptScore ?? 0}
+                maxScore={actividad.puntuacion}
+                grade={lastAttemptGrade ?? undefined}
+                config={activityConfig}
+                onContinue={() => navigate(-1)}
+                onRetry={handleRetry}
+                onViewStudentAnswer={handleViewStudentAnswers}
+                onViewCorrectAnswer={handleViewCorrectAnswers}
+                onCancel={() => navigate(-1)}
+              />
+            )
+          )
         )}
+        
       </main>
 
       {showAnswerModal && (

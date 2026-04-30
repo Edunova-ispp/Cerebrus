@@ -1,6 +1,7 @@
 package com.cerebrus.iaconnection;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -397,6 +398,26 @@ public class IaConnectionServiceImpl implements IaConnectionService {
 
     @Override
     public Map<String, Object> evaluarRespuestaAbierta(String pregunta, String respuestaAlumno, String respuestaModelo, Integer puntuacionMaxima) {
+
+        if (pregunta == null || pregunta.isBlank()
+                || respuestaAlumno == null || respuestaAlumno.isBlank()
+                || respuestaModelo == null || respuestaModelo.isBlank()
+                || puntuacionMaxima == null || puntuacionMaxima <= 0) {
+            throw new IllegalArgumentException("Datos inválidos para evaluar la respuesta");
+        }
+
+        // Convención de retorno para que la capa de servicio pueda interpretar
+        // la indisponibilidad de Gemini sin depender de excepciones.
+        // - geminiDisponible: boolean
+        // - geminiMotivo: string
+        // - geminiMensaje: string (mensaje para mostrar/log)
+        java.util.function.Function<String, Map<String, Object>> geminiNoDisponible = (String mensaje) -> {
+            Map<String, Object> out = new HashMap<>();
+            out.put("geminiDisponible", false);
+            out.put("geminiMotivo", "INDISPONIBLE");
+            out.put("geminiMensaje", mensaje);
+            return out;
+        };
         
         String apikeyActual;
         Integer PeticionesMaximasDiariasPorKey = 20;
@@ -448,7 +469,7 @@ public class IaConnectionServiceImpl implements IaConnectionService {
                             IndiceKey = 1;
                             peticionesDiarias = 0;
                         } else {
-                            throw new QuotaExceededException("Se ha alcanzado la cuota diaria de IA. Podrás volver a intentarlo mañana.");
+                            return geminiNoDisponible.apply("Se ha alcanzado la cuota diaria de IA. Podrás volver a intentarlo mañana.");
                         }
                     }
                 }
@@ -477,7 +498,16 @@ public class IaConnectionServiceImpl implements IaConnectionService {
                     String errorTextRaw = (responseBody != null && !responseBody.isBlank()) ? responseBody : e.getMessage();
                     String errorText = errorTextRaw.toLowerCase();
 
-                    if (!(e.getStatusCode().value() == 429 || errorText.contains("resource_exhausted") || errorText.contains("quota exceeded"))) {
+                    boolean pareceCuota = e.getStatusCode().value() == 429
+                        || errorText.contains("resource_exhausted")
+                        || errorText.contains("quota exceeded");
+
+                    if (!pareceCuota) {
+                        // Si es un 5xx, lo tratamos como indisponibilidad externa del proveedor.
+                        if (e.getStatusCode().is5xxServerError()) {
+                            return geminiNoDisponible.apply("La IA no puede corregir ahora mismo. Inténtalo más tarde.");
+                        }
+                        // Otros 4xx (401/403/400...) suelen ser configuración/solicitud inválida.
                         throw new IllegalArgumentException("Error al evaluar la respuesta: " + e.getMessage());
                     }
 
@@ -489,7 +519,7 @@ public class IaConnectionServiceImpl implements IaConnectionService {
                     }
 
                     if (errorText.contains("perday") || errorText.contains("generaterequestsperdayperprojectpermodel-freetier")) {
-                        throw new QuotaExceededException("Se ha alcanzado la cuota diaria de IA. Podrás volver a intentarlo mañana.");
+                        return geminiNoDisponible.apply("Se ha alcanzado la cuota diaria de IA. Podrás volver a intentarlo mañana.");
                     }
 
                     Matcher retryMatcher = Pattern.compile("retry in\\s+([0-9]+(?:\\.[0-9]+)?)s", Pattern.CASE_INSENSITIVE)
@@ -497,20 +527,22 @@ public class IaConnectionServiceImpl implements IaConnectionService {
                     if (retryMatcher.find()) {
                         double retrySeconds = Double.parseDouble(retryMatcher.group(1));
                         int retrySecondsRounded = (int) Math.ceil(retrySeconds);
-                        throw new QuotaExceededException("La IA está temporalmente saturada. Reintenta en " + retrySecondsRounded + " segundos.");
+                        return geminiNoDisponible.apply("La IA está temporalmente saturada. Reintenta en " + retrySecondsRounded + " segundos.");
                     }
 
-                    throw new QuotaExceededException("La cuota de IA está agotada temporalmente. Inténtalo de nuevo más tarde.");
+                    return geminiNoDisponible.apply("La cuota de IA está agotada temporalmente. Inténtalo de nuevo más tarde.");
                 }
             }
 
             if (last429Exception != null) {
-                throw new QuotaExceededException("La cuota de IA está agotada temporalmente. Inténtalo de nuevo más tarde.");
+                return geminiNoDisponible.apply("La cuota de IA está agotada temporalmente. Inténtalo de nuevo más tarde.");
             }
 
             throw new IllegalArgumentException("Error al evaluar la respuesta: no se pudo completar la evaluación");
-        } catch (QuotaExceededException e) {
-            throw e;
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            return geminiNoDisponible.apply("La IA no puede corregir ahora mismo. Inténtalo más tarde.");
+        } catch (org.springframework.web.client.RestClientException e) {
+            return geminiNoDisponible.apply("La IA no puede corregir ahora mismo. Inténtalo más tarde.");
         } catch (Exception e) {
             throw new IllegalArgumentException("Error al evaluar la respuesta: " + e.getMessage());
         }
