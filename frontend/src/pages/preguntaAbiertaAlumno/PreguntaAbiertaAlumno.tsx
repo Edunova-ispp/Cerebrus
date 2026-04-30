@@ -351,7 +351,10 @@ export default function PreguntaAbiertaAlumno() {
 
         {submitted && actividad && (
           iaNoPuedeCorregir ? (
-            <IaNoPuedeCorregirScreen onContinue={() => navigate(-1)} />
+            <IaNoPuedeCorregirScreen
+              onContinue={() => navigate(-1)}
+              allowRetry={Boolean(actividad.permitirReintento)}
+            />
           ) : (
             activityConfig && (
               <ActivityResultScreen
