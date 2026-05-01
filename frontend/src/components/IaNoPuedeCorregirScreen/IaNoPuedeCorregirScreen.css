@@ -45,15 +45,32 @@
   -webkit-text-stroke-width: 0;
 }
 
+.ia-no-corr-cara {
+  font-size: 4.5rem;
+  font-weight: 600;
+  color: #b9122e;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-stroke-width: 0;
+}
+
 .ia-no-corr-desc {
   margin: 0 0 18px 0;
-  font-size: 0.98rem;
+  font-size: 1.0rem;
   color: #4f4330;
   line-height: 1.35;
   text-shadow: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-stroke-width: 0;
+}
+
+.ia-no-corr-desc--2 {
+  font-size: 1.1rem;
 }
 
 .ia-no-corr-actions {

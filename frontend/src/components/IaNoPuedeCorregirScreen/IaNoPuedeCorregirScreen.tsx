@@ -10,15 +10,16 @@ export default function IaNoPuedeCorregirScreen({ onContinue, allowRetry }: Prop
     <div className="ia-no-corr-overlay">
       <div className="ia-no-corr-popup">
         <h2 className="ia-no-corr-title">¡LA IA NO PUEDE CORREGIR!</h2>
+        <p className="ia-no-corr-cara">D:</p>
         <p className="ia-no-corr-desc">
           La IA no puede corregir tu actividad ahora mismo. ¡Pero no te preocupes! <strong>Tus respuestas quedan guardadas.</strong>
         </p>
         <p className="ia-no-corr-desc">
-          Por ahora obtienes la mitad de la nota y de la puntuación máxima, pero esto es solo <strong>temporal</strong>. 
+          Por ahora no obtienes ninguna puntuación, pero esto es solo <strong>temporal</strong>. 
         </p>
-        <p className="ia-no-corr-desc">
+        <p className="ia-no-corr-desc ia-no-corr-desc--2">
           {allowRetry ? (
-            <strong>Puedes intentarlo de nuevo más tarde o esperar a que el profesor corrija tu intento.</strong>
+            <strong>El profesor corregirá tu intento, aunque puedes volver a intentarlo de nuevo más tarde.</strong>
           ) : (
             <strong>El profesor corregirá tu intento.</strong>
           )}

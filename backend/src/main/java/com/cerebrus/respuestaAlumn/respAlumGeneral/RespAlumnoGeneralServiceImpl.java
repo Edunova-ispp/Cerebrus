@@ -367,7 +367,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
                         : "La IA no está disponible para corregir ahora mismo";
                     iaNoDisponible = true;
                     iaMensaje = geminiMensaje;
-                    puntuacionPregunta = Math.round(maxPuntuacionPorPregunta / 2.0f);
+                    puntuacionPregunta = 0;
                     comentariosIA = "";
                 } else {
                     for (Map.Entry<String, Object> evalEntry : evaluacion.entrySet()) {
@@ -381,7 +381,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
                     }
                 }
             } else {
-                puntuacionPregunta = Math.round(maxPuntuacionPorPregunta / 2.0f);
+                puntuacionPregunta = 0;
                 comentariosIA = "";
             }
 
