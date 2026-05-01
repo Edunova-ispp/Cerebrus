@@ -44,6 +44,9 @@ interface Pregunta {
   respuestas: RespuestaOption[];
 }
 
+const MAX_CATEGORIAS = 6;
+const MAX_ELEMENTOS = 10;
+
 function makeLocalKey(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -167,7 +170,7 @@ const [showIAModal, setShowIAModal] = useState(false);
     if (pNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
 
     if (preguntas.length < 2) return 'Debe haber al menos 2 categorías';
-    if (preguntas.length > 6) return 'No puedes tener más de 6 categorías';
+    if (preguntas.length > MAX_CATEGORIAS) return `No puedes tener más de ${MAX_CATEGORIAS} categorías`;
 
     for (let i = 0; i < preguntas.length; i++) {
       if (!preguntas[i].text.trim()) {
@@ -179,8 +182,8 @@ const [showIAModal, setShowIAModal] = useState(false);
       if (preguntas[i].respuestas.length === 0) {
         return `La categoría ${i + 1} debe tener al menos 1 elemento`;
       }
-      if (preguntas[i].respuestas.length > 10) {
-        return `La categoría ${i + 1} no puede tener más de 10 elementos`;
+      if (preguntas[i].respuestas.length > MAX_ELEMENTOS) {
+        return `La categoría ${i + 1} no puede tener más de ${MAX_ELEMENTOS} elementos`;
       }
       for (let j = 0; j < preguntas[i].respuestas.length; j++) {
         if (!preguntas[i].respuestas[j].text.trim()) {
@@ -435,11 +438,15 @@ const handleIAResult = (data: any) => {
       </div>
 
       <div className="ca-contenedor-blanco" style={{ marginTop: 16, flexDirection: 'column', alignItems: 'stretch' }}>
-        <h3 className="ca-text">Configuración de Categorías</h3>
+        <h3 className="cf-section-title">
+          Categorías
+          <span>{preguntas.length} / {MAX_CATEGORIAS} máx.</span>
+        </h3>
         {preguntas.map((p, pIdx) => (
           <div key={p.localKey} className="tf-question-block" style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px', marginBottom: '15px' }}>
             <div className="tf-question-header">
               <span className="tf-question-label">Categoría {pIdx + 1}</span>
+              <span className="paf-badge">{p.respuestas.length} / {MAX_ELEMENTOS} máx.</span>
               {preguntas.length > 2 && (
                 <button type="button" className="tf-btn-remove-question" onClick={() => removePregunta(pIdx)}>✕</button>
               )}
@@ -466,13 +473,13 @@ const handleIAResult = (data: any) => {
                   )}
                 </div>
               ))}
-              {p.respuestas.length < 10 && (
+              {p.respuestas.length < MAX_ELEMENTOS && (
                 <button type="button" className="tf-btn-add-option" onClick={() => addRespuesta(pIdx)}>+ Añadir Elemento</button>
               )}
             </div>
           </div>
         ))}
-        {preguntas.length < 6 && (
+        {preguntas.length < MAX_CATEGORIAS && (
           <button type="button" className="tf-btn-add-question" onClick={addPregunta} style={{ width: '100%' }}>
             + Añadir Nueva Categoría
           </button>

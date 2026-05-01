@@ -38,6 +38,8 @@ interface PreguntaAbiertaMeta {
   version?: number;
 }
 
+const MAX_PREGUNTAS = 5;
+
 export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
   mode,
   preguntaAbiertaId,
@@ -95,7 +97,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
   // --- HANDLERS PARA AÑADIR/ELIMINAR ---
 
   const handleAddPregunta = () => {
-    if (preguntas.length < 5) {
+    if (preguntas.length < MAX_PREGUNTAS) {
       setPreguntas([...preguntas, { pregunta: '', respuesta: '' }]);
     }
   };
@@ -129,7 +131,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
     if (puntosNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
 
     if (preguntas.length < 1) return 'Añade al menos una pregunta';
-    if (preguntas.length > 5) return 'No puedes añadir más de 5 preguntas';
+    if (preguntas.length > MAX_PREGUNTAS) return `No puedes añadir más de ${MAX_PREGUNTAS} preguntas`;
 
     for (let i = 0; i < preguntas.length; i++) {
       if (!preguntas[i].pregunta.trim()) return `La pregunta ${i + 1} no tiene texto`;
@@ -358,7 +360,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
 
         <div className="paf-preguntas-header">
           <span className="ca-text" style={{ fontWeight: 'bold' }}>Preguntas y Respuestas</span>
-          <span className="paf-badge">{preguntas.length} / 5</span>
+          <span className="paf-badge">{preguntas.length} / {MAX_PREGUNTAS} máx.</span>
         </div>
 
         {preguntas.map((p, index) => (
@@ -373,7 +375,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
           </div>
         ))}
 
-        {preguntas.length < 5 && (
+        {preguntas.length < MAX_PREGUNTAS && (
           <button type="button" className="paf-btn-add" onClick={handleAddPregunta}>
             + Añadir pregunta
           </button>

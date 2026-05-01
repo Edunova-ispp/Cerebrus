@@ -201,36 +201,6 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
             />
             <label className="cf-label" htmlFor="teoria-reintento">Permitir reintentos</label>
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <input
-              type="checkbox"
-              id="teoria-mostrar-puntuacion"
-              checked={mostrarPuntuacion}
-              onChange={(e) => setMostrarPuntuacion(e.target.checked)}
-            />
-            <label className="cf-label" htmlFor="teoria-mostrar-puntuacion">Mostrar puntuación</label>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <input
-              type="checkbox"
-              id="teoria-mostrar-resp-maest"
-              checked={encontrarRespuestaMaestro}
-              onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
-            />
-            <label className="cf-label" htmlFor="teoria-mostrar-resp-maest">Mostrar respuesta correcta</label>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <input
-              type="checkbox"
-              id="teoria-mostrar-resp-alumn"
-              checked={encontrarRespuestaAlumno}
-              onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
-            />
-            <label className="cf-label" htmlFor="teoria-mostrar-resp-alumn">Mostrar mi respuesta</label>
-          </div>
       </div>
 
       <div className="ca-form-footer">        <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>

@@ -31,6 +31,8 @@ interface Props {
   readonly onDone?: () => void;
 }
 
+const MAX_ELEMENTOS = 15;
+
 function makeLocalKey(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -152,8 +154,8 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       return;
     }
 
-    if (valores.length > 50) {
-      setError('No puedes añadir más de 50 valores');
+    if (valores.length > MAX_ELEMENTOS) {
+      setError(`No puedes añadir más de ${MAX_ELEMENTOS} valores`);
       return;
     }
 
@@ -343,6 +345,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
           >
             Imágenes
           </button>
+          <span className="paf-badge">{ordenItems.length} / {MAX_ELEMENTOS} máx.</span>
         </div>
 
         <div className="of-items-grid">
@@ -374,7 +377,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
               />
             </div>
           ))}
-          {ordenItems.length < 50 && (
+          {ordenItems.length < MAX_ELEMENTOS && (
             <button
               className="of-btn-add"
               type="button"

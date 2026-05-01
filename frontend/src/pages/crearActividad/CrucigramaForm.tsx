@@ -236,7 +236,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
             <div className="cf-card">
                 <div className="cf-grid-2">
                     <div>
-                        <label className="cf-label" htmlFor="cf-titulo">Título del crucigrama</label>
+                        <label className="cf-label" htmlFor="cf-titulo">Título *</label>
                         <input
                             id="cf-titulo"
                             type="text"
@@ -258,12 +258,12 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                         />
                     </div>
 
-                    <div>
-                        <label className="cf-label" htmlFor="cf-punt">Puntuación total</label>
+                    <div className="tf-col">
+                        <label className="cf-label" htmlFor="cf-punt">Puntuación *</label>
                         <input
                             id="cf-punt"
                             type="number"
-                            className="cf-input"
+                            className="tf-input tf-input-sm"
                             value={puntuacion}
                             min={1}
                             onChange={e => setPuntuacion(e.target.value)}
@@ -271,7 +271,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                         />
 
                         <label
-                            className="cf-checkbox-row"
+                            className="tf-check-label"
                             htmlFor="cf-visible"
                         >
                             <input
@@ -283,7 +283,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                             <span className="cf-checkbox-label">Mostrar solución al finalizar</span>
                         </label>
                         <label
-                            className="cf-checkbox-row"
+                            className="tf-check-label"
                             htmlFor="cf-reintento"
                         >
                             <input
@@ -295,7 +295,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                             <span className="cf-checkbox-label">Permitir reintentos</span>
                         </label>
                         <label
-                            className="cf-checkbox-row"
+                            className="tf-check-label"
                             htmlFor="cf-mostrar-puntuacion"
                         >
                             <input
@@ -307,7 +307,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                             <span className="cf-checkbox-label">Mostrar puntuación</span>
                         </label>
                         <label
-                            className="cf-checkbox-row"
+                            className="tf-check-label"
                             htmlFor="cf-mostrar-resp-maest"
                         >
                             <input
@@ -326,7 +326,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
             <div className="cf-card">
                 <h3 className="cf-section-title">
                     Palabras y pistas
-                    <span>{preguntas.length} / {MAX_PALABRAS}</span>
+                    <span>{preguntas.length} / {MAX_PALABRAS} máx.</span>
                 </h3>
 
                 {preguntas.map((p, index) => (

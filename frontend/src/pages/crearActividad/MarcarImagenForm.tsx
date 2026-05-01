@@ -35,6 +35,8 @@ interface Props {
   readonly onDone?: () => void;
 }
 
+const MAX_PUNTOS = 50;
+
 type Point = {
   id?: number;
   respuesta: string;
@@ -116,7 +118,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
     if (!imagenAMarcar.trim()) return 'La URL de la imagen a marcar es requerida';
 
     if (puntos.length === 0) return 'Añade al menos un punto haciendo clic en la imagen';
-    if (puntos.length > 100) return 'La imagen no puede tener más de 100 puntos';
+    if (puntos.length > MAX_PUNTOS) return `La imagen no puede tener más de ${MAX_PUNTOS} puntos`;
     if (puntos.some((p) => !p.respuesta.trim())) return 'Todos los puntos deben tener respuesta';
 
     if (mode === 'edit' && !marcarImagenId) return 'Falta el id de la actividad a editar';
@@ -134,6 +136,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
   const handleImageClick = (e: React.MouseEvent) => {
     const el = imgRef.current;
     if (!el) return;
+    if (puntos.length >= MAX_PUNTOS) return;
 
     const rect = el.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
@@ -363,6 +366,10 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
         className="ca-contenedor-blanco"
         style={{ gap: 16, marginTop: 16, marginBottom: 24, flexDirection: 'column', alignItems: 'stretch' }}
       >
+        <h3 className="cf-section-title">
+          Puntos
+          <span>{puntos.length} / {MAX_PUNTOS} máx.</span>
+        </h3>
         <p className="ca-ordenacion-help" style={{ marginTop: 0, marginBottom: 0 }}>
           Haz clic en la imagen para añadir puntos.
         </p>

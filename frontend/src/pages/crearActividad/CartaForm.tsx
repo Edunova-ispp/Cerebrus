@@ -33,6 +33,8 @@ export interface CartaFormInitialValues {
   readonly encontrarRespuestaMaestro?: boolean;
 }
 
+const MAX_CARDS = 9;
+
 interface Card {
   localKey: string;
   id?: number;
@@ -184,7 +186,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
     if (!cursoId) return 'Falta el id del curso en la URL';
 
     if (cards.length === 0) return 'Añade al menos una carta';
-    if (cards.length > 30) return 'No puedes añadir más de 20 cartas';
+    if (cards.length > MAX_CARDS) return `No puedes añadir más de ${MAX_CARDS} cartas`;
 
     for (let ci = 0; ci < cards.length; ci++) {
       const c = cards[ci];
@@ -485,6 +487,11 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
           <p className="cf-help">
             Añade las cartas. Cada carta tiene una <strong>pregunta</strong> (anverso) y una <strong>respuesta</strong> (reverso). El alumno deberá emparejar cada pregunta con su respuesta.
           </p>
+          
+          <h3 className="cf-section-title">
+            Cartas
+            <span>{cards.length} / {MAX_CARDS} máx.</span>
+          </h3>
 
           {cards.map((card, ci) => (
             <div key={card.localKey} className="cf-card-block">
@@ -547,7 +554,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             </div>
           ))}
 
-          {cards.length < 30 && (
+          {cards.length < MAX_CARDS && (
             <button type="button" className="cf-btn-add-card" onClick={addCard}>
               + Añadir carta
             </button>
