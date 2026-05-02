@@ -128,6 +128,9 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       return;
     }
 
+    if (respVisible && comentariosRespVisible.trim().length > 250) return 'Los comentarios no pueden exceder los 250 caracteres.';
+    if (respVisible && comentariosRespVisible.trim().length === 0) return 'Escribe un comentario para mostrar cuando la respuesta sea visible.';
+
     if (!temaId) {
       setError('Falta el id del tema en la URL');
       return;
@@ -157,6 +160,21 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
     if (valores.length > MAX_ELEMENTOS) {
       setError(`No puedes añadir más de ${MAX_ELEMENTOS} valores`);
       return;
+    }
+
+    for (let i = 0; i < valores.length; i++) {
+      if (valores[i].length > 40 && ordenItemsKind === 'words') {
+        setError(`El valor ${i + 1} no puede exceder los 40 caracteres.`);
+        return;
+      }
+      if (valores[i].trim() === '') {
+        setError(`El valor ${i + 1} no puede estar vacío.`);
+        return;
+      }
+      if (valores[i].trim() in valores.slice(0, i) || valores[i].trim() in valores.slice(i + 1, valores.length)) {
+        setError(`El valor ${i + 1} está repetido .`);
+        return;
+      }
     }
 
     setLoading(true);

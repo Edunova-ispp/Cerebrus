@@ -186,6 +186,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
     if (!cursoId) return 'Falta el id del curso en la URL';
 
     if (cards.length === 0) return 'Añade al menos una carta';
+    if (cards.length < 2) return 'Necesitas al menos dos cartas para crear la actividad';
     if (cards.length > MAX_CARDS) return `No puedes añadir más de ${MAX_CARDS} cartas`;
 
     for (let ci = 0; ci < cards.length; ci++) {

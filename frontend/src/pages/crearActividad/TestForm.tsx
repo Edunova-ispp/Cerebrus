@@ -191,6 +191,9 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
     if (questions.length === 0) return 'Añade al menos una pregunta';
     if (questions.length > 100) return 'No puedes añadir más de 100 preguntas';
 
+    if (respVisible && comentariosRespVisible.trim().length > 250) return 'Los comentarios no pueden exceder los 250 caracteres.';
+    if (respVisible && comentariosRespVisible.trim().length === 0) return 'Escribe un comentario para mostrar cuando la respuesta sea visible.';
+
     for (let qi = 0; qi < questions.length; qi++) {
       const q = questions[qi];
       if (!q.text.trim()) return `La pregunta ${qi + 1} no tiene texto`;
