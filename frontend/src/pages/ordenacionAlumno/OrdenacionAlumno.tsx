@@ -144,7 +144,7 @@ export default function OrdenacionAlumno() {
   ];
 
   function elegirAlAzar<T>(arr: readonly T[]): T {
-    return arr[Math.floor(Math.random() * arr.length)];
+    return arr[Math.floor(Math.random() * arr.length)]; // NOSONAR: uso no criptográfico, solo UI estética
   }
 
   const [bubbleLines] = useState(() => elegirAlAzar(FRASES_BLOQUE));
