@@ -373,7 +373,6 @@ const handleIAResult = (data: any) => {
 
   return (
     <form onSubmit={handleSubmit} className="tf-form">
-      {error && <p className="tf-error">{error}</p>}
       <GenerarIAModal
         tipoActividad="CLASIFICACION"
         open={showIAModal}
@@ -385,23 +384,45 @@ const handleIAResult = (data: any) => {
         <div className="tf-col">
           <div>
             <label className="cf-label" htmlFor="cf-titulo">Título *</label>
-            <input type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} required style={{ width: '100%' }} />
+            <input 
+              type="text" 
+              value={titulo} 
+              className="of-input"
+              onChange={(e) => setTitulo(e.target.value)} 
+              placeholder = "Título de la actividad"
+              required 
+              style={{ width: '100%' }} />
           </div>
           <div>
             <label className="cf-label" htmlFor="cf-descripcion">Descripción</label>
-            <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={3} style={{ width: '100%', resize: 'vertical' }} />
+            <textarea 
+              value={descripcion} 
+              className="of-textarea"
+              onChange={(e) => setDescripcion(e.target.value)} 
+              rows={3} 
+              style={{ width: '100%', resize: 'vertical' }} 
+              placeholder="Descripción de la actividad"
+            />
           </div>
         </div>
 
         <div className="tf-col">
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 80 }}>
             <div>
+              <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
+              <input
+                type="number"
+                id="cf-puntuacion"
+                value={puntuacion}
+                onChange={(e) => setPuntuacion(e.target.value)}
+                min="1"
+                required
+                style={{ width: 90 }}
+              />
+            </div>
             <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
               Generar con IA
             </button>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
-            <input type="number" value={puntuacion} onChange={(e) => setPuntuacion(e.target.value)} required style={{ width: 90 }} />
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
@@ -486,10 +507,17 @@ const handleIAResult = (data: any) => {
         )}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
-        <button className="ca-btn-guardar" type="submit" disabled={loading}>
-          {loading ? 'Guardando...' : 'Guardar Actividad'}
-        </button>
+      <div className="ca-form-footer">
+        <div className="tf-footer-stack">
+          <button className="ca-btn-guardar" type="submit" disabled={loading}>
+            {loading ? 'Guardando...' : 'Guardar Actividad'}
+          </button>
+          {error && (
+            <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+              {error}
+            </p>
+          )}
+        </div>
       </div>
     </form>
   );

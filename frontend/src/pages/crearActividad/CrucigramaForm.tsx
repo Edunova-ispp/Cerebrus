@@ -225,13 +225,6 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
     return (
         <form onSubmit={handleSubmit} className="cf-form">
 
-            {/* Error */}
-            {error && (
-                <div className="cf-error">
-                    ¡Atención! {error}
-                </div>
-            )}
-
             {/* ── Datos generales ── */}
             <div className="cf-card">
                 <div className="cf-grid-2">
@@ -270,18 +263,6 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                             required
                         />
 
-                        <label
-                            className="tf-check-label"
-                            htmlFor="cf-visible"
-                        >
-                            <input
-                                id="cf-visible"
-                                type="checkbox"
-                                checked={respVisible}
-                                onChange={e => setRespVisible(e.target.checked)}
-                            />
-                            <span className="cf-checkbox-label">Mostrar solución al finalizar</span>
-                        </label>
                         <label
                             className="tf-check-label"
                             htmlFor="cf-reintento"
@@ -373,18 +354,18 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                 )}
             </div>
 
-            {/* ── Submit ── */}
-            <button
-                className="cf-btn-submit"
-                type="submit"
-                disabled={loading}
-            >
-                {loading
-                    ? 'PROCESANDO...'
-                    : mode === 'edit'
-                        ? 'GUARDAR'
-                        : 'GUARDAR '}
-            </button>
+                        <div className="ca-form-footer">
+                            <div className="tf-footer-stack">
+                                <button className="cf-btn-submit" type="submit" disabled={loading}>
+                                    {loading ? 'PROCESANDO...' : mode === 'edit' ? 'GUARDAR' : 'GUARDAR '}
+                                </button>
+                                {error && (
+                                    <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+                                        {error}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
         </form>
     );
 }

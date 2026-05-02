@@ -214,21 +214,16 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
       className="ca-ordenacion-form"
       style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
     >
-      {error && (
-        <p className="ca-text" style={{ marginTop: 0, color: '#c0392b !important' }}>
-          {error}
-        </p>
-      )}
-
       <div className="ca-contenedor-blanco" style={{ gap: 24, maxWidth: '100%' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: '1 1 320px', minWidth: 0 }}>
           <div>
-            <label className="ca-text" htmlFor="mi-titulo">
-              Título
+            <label className="of-label" htmlFor="mi-titulo">
+              Título *
             </label>
             <input
               type="text"
               id="mi-titulo"
+              className="of-input"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               style={{ width: '100%' }}
@@ -238,11 +233,12 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
           </div>
 
           <div>
-            <label className="ca-text" htmlFor="mi-descripcion">
+            <label className="of-label" htmlFor="mi-descripcion">
               Descripción
             </label>
             <textarea
               id="mi-descripcion"
+              className="of-textarea"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               rows={3}
@@ -257,18 +253,20 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: '1 1 320px', minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label className="ca-text" htmlFor="mi-puntuacion" style={{ whiteSpace: 'nowrap' }}>
-              Puntuación
-            </label>
-            <input
-              type="number"
-              id="mi-puntuacion"
-              value={puntuacion}
-              onChange={(e) => setPuntuacion(e.target.value)}
-              style={{ width: 90 }}
-              min="1"
-              required
-            />
+            <div>
+              <label className="of-label" htmlFor="mi-puntuacion" style={{ whiteSpace: 'nowrap' }}>
+                Puntuación *
+              </label>
+              <input
+                type="number"
+                id="mi-puntuacion"
+                value={puntuacion}
+                onChange={(e) => setPuntuacion(e.target.value)}
+                style={{ width: 90 }}
+                min="1"
+                required
+              />
+            </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -436,10 +434,17 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                   })}
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <button className="ca-btn-guardar" type="submit" disabled={loading}>
-                  {loading ? 'Guardando...' : 'Guardar'}
-                </button>
+              <div className="ca-form-footer">
+                <div className="tf-footer-stack">
+                  <button className="ca-btn-guardar" type="submit" disabled={loading}>
+                    {loading ? 'Guardando...' : 'Guardar'}
+                  </button>
+                  {error && (
+                    <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+                      {error}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -526,10 +531,17 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
         )}
 
         {!imagenAMarcar.trim() && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 8 }}>
-            <button className="ca-btn-guardar" type="submit" disabled={loading}>
-              {loading ? 'Guardando...' : 'Guardar'}
-            </button>
+          <div className="ca-form-footer">
+            <div className="tf-footer-stack">
+              <button className="ca-btn-guardar" type="submit" disabled={loading}>
+                {loading ? 'Guardando...' : 'Guardar'}
+              </button>
+              {error && (
+                <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+                  {error}
+                </p>
+              )}
+            </div>
           </div>
         )}
       </div>

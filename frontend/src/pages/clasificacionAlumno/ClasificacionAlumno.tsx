@@ -5,6 +5,7 @@ import { getCurrentUserInfo } from '../../types/curso';
 import { apiFetch } from '../../utils/api';
 import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
 import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
+import CommentsViewModal from '../../components/CommentsViewModal/CommentsViewModal';
 
 import varitaImg from '../../assets/props/varita.png';
 import libroImg from '../../assets/props/libro.png';
@@ -124,6 +125,7 @@ export default function ClasificacionAlumno() {
   const [correctAnswersByQuestion, setCorrectAnswersByQuestion] = useState<Map<number, string>>(new Map());
   const [showAnswerModal, setShowAnswerModal] = useState(false);
   const [answerModalMode, setAnswerModalMode] = useState<'student' | 'correct'>('student');
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
 
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
@@ -210,6 +212,7 @@ export default function ClasificacionAlumno() {
           allowRetry: clsData.permitirReintento ?? false,
           showCorrectAnswer: clsData.encontrarRespuestaMaestro ?? true,
           showStudentAnswer: clsData.encontrarRespuestaAlumno ?? true,
+          showComments: clsData.respVisible ?? true,
         });
 
         const alumnoId = getCurrentUserIdFromJwt();
@@ -309,6 +312,7 @@ export default function ClasificacionAlumno() {
       setLastAttemptGrade(null);
       setFeedback(null);
       setSubmitted(false);
+      setShowCommentsModal(false);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'No se pudo crear el nuevo intento');
     }
@@ -322,6 +326,10 @@ export default function ClasificacionAlumno() {
   const handleViewCorrectAnswers = () => {
     setAnswerModalMode('correct');
     setShowAnswerModal(true);
+  };
+
+  const handleViewComments = () => {
+    setShowCommentsModal(true);
   };
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, respuestaId: number) => {
@@ -621,6 +629,7 @@ export default function ClasificacionAlumno() {
                 onRetry={handleRetry}
                 onViewStudentAnswer={handleViewStudentAnswers}
                 onViewCorrectAnswer={handleViewCorrectAnswers}
+                onViewComments={handleViewComments}
                 onCancel={() => navigate(-1)}
               />
             ) : submitted ? (
@@ -659,6 +668,14 @@ export default function ClasificacionAlumno() {
           }) : []}
           onClose={() => setShowAnswerModal(false)}
           mode={answerModalMode}
+        />
+      )}
+
+      {showCommentsModal && (
+        <CommentsViewModal
+          title="Comentarios"
+          comment={clasificacion?.comentariosRespVisible}
+          onClose={() => setShowCommentsModal(false)}
         />
       )}
     </div>

@@ -357,8 +357,6 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
   return (
     <>
       <form onSubmit={handleSubmit} className="cf-form">
-        {error && <p className="ca-text cf-error">{error}</p>}
-
         {/* ── TOP: Metadata ── */}
         <div className="cf-header">
           <div className="cf-col">
@@ -412,22 +410,22 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
           
 
           <div className="cf-col">
-                      <div>
-            <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
-              Generar con IA
-            </button>
-          </div>
-            <div>
-              <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
-              <input
-                type="number"
-                id="cf-puntuacion"
-                className="cf-input cf-input-sm"
-                value={puntuacion}
-                onChange={(e) => setPuntuacion(e.target.value)}
-                min="1"
-                required
-              />
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 80 }}>
+              <div>
+                <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
+                <input
+                  type="number"
+                  id="cf-puntuacion"
+                  className="cf-input cf-input-sm"
+                  value={puntuacion}
+                  onChange={(e) => setPuntuacion(e.target.value)}
+                  min="1"
+                  required
+                />
+              </div>
+              <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+                Generar con IA
+              </button>
             </div>
 
             <label className="cf-check-label">
@@ -562,9 +560,16 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
         </div>
 
         <div className="ca-form-footer">
-          <button className="ca-btn-guardar" type="submit" disabled={loading}>
-            {loading ? 'Guardando...' : 'Guardar'}
-          </button>
+          <div className="tf-footer-stack">
+            <button className="ca-btn-guardar" type="submit" disabled={loading}>
+              {loading ? 'Guardando...' : 'Guardar'}
+            </button>
+            {error && (
+              <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+                {error}
+              </p>
+            )}
+          </div>
         </div>
       </form>
       <GenerarIAModal

@@ -259,6 +259,7 @@ export default function CrucigramaAlumno() {
           allowRetry: data.permitirReintento ?? false,
           showCorrectAnswer: data.encontrarRespuestaMaestro ?? true,
           showStudentAnswer: data.encontrarRespuestaAlumno ?? true,
+          showComments: data.respVisible ?? true,
         });
 
         // Resolve ActividadAlumno

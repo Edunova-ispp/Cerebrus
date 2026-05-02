@@ -4,6 +4,7 @@ import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
 import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
 import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
+import CommentsViewModal from '../../components/CommentsViewModal/CommentsViewModal';
 import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
@@ -125,6 +126,7 @@ export default function CartaAlumno() {
   const [earnedPoints, setEarnedPoints] = useState<number | null>(null);
   const [showAnswerModal, setShowAnswerModal] = useState(false);
   const [answerModalMode, setAnswerModalMode] = useState<'student' | 'correct'>('student');
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [studentAnswersByQuestion, setStudentAnswersByQuestion] = useState<Map<number, string>>(new Map());
   const [correctAnswersByQuestion, setCorrectAnswersByQuestion] = useState<Map<number, string>>(new Map());
 
@@ -199,6 +201,7 @@ export default function CartaAlumno() {
           allowRetry: cartaData.permitirReintento ?? false,
           showCorrectAnswer: cartaData.encontrarRespuestaMaestro ?? true,
           showStudentAnswer: cartaData.encontrarRespuestaAlumno ?? true,
+          showComments: cartaData.respVisible ?? true,
         });
 
         // 2. Build board cards (one pregunta + one respuesta per question, shuffled)
@@ -371,6 +374,7 @@ export default function CartaAlumno() {
       setStudentAnswersByQuestion(new Map());
       setCorrectAnswersByQuestion(new Map());
       setShowAnswerModal(false);
+      setShowCommentsModal(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se pudo crear un nuevo intento');
     }
@@ -384,6 +388,10 @@ export default function CartaAlumno() {
   const handleViewCorrectAnswers = () => {
     setAnswerModalMode('correct');
     setShowAnswerModal(true);
+  };
+
+  const handleViewComments = () => {
+    setShowCommentsModal(true);
   };
 
   // ── Card click handler ────────────────────────────────────────────────────
@@ -551,6 +559,7 @@ export default function CartaAlumno() {
                 onRetry={handleRetry}
                 onViewStudentAnswer={handleViewStudentAnswers}
                 onViewCorrectAnswer={handleViewCorrectAnswers}
+                onViewComments={handleViewComments}
                 onCancel={() => navigate(-1)}
               />
             ) : finished ? (
@@ -580,6 +589,14 @@ export default function CartaAlumno() {
           }) : []}
           onClose={() => setShowAnswerModal(false)}
           mode={answerModalMode}
+        />
+      )}
+
+      {showCommentsModal && (
+        <CommentsViewModal
+          title="Comentarios"
+          comment={carta?.comentariosRespVisible}
+          onClose={() => setShowCommentsModal(false)}
         />
       )}
     </div>

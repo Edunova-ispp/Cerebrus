@@ -8,6 +8,7 @@ import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
 import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
 import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
+import CommentsViewModal from '../../components/CommentsViewModal/CommentsViewModal';
 import './OrdenacionAlumno.css';
 
 type OrdenacionDTO = {
@@ -120,6 +121,7 @@ export default function OrdenacionAlumno() {
   const [feedback, setFeedback] = useState<{ correcta: boolean; comentario?: string } | null>(null);
   const [showAnswerModal, setShowAnswerModal] = useState(false);
   const [answerModalMode, setAnswerModalMode] = useState<'student' | 'correct'>('student');
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [submittedOrder, setSubmittedOrder] = useState<string[] | null>(null);
   const [correctOrder, setCorrectOrder] = useState<string[] | null>(null);
   const incorrectosRef = useRef(0);
@@ -174,6 +176,7 @@ export default function OrdenacionAlumno() {
           allowRetry: ordData.permitirReintento ?? false,
           showCorrectAnswer: ordData.encontrarRespuestaMaestro ?? true,
           showStudentAnswer: ordData.encontrarRespuestaAlumno ?? true,
+          showComments: ordData.respVisible ?? true,
         });
 
         const alumnoId = getCurrentUserIdFromJwt();
@@ -339,6 +342,7 @@ export default function OrdenacionAlumno() {
       setLastAttemptGrade(null);
       setShowAnswerModal(false);
       setAnswerModalMode('student');
+      setShowCommentsModal(false);
       setError('');
       incorrectosRef.current = 0;
       pendingRespuestaIdRef.current = null;
@@ -391,6 +395,10 @@ export default function OrdenacionAlumno() {
     };
 
     void loadAndOpen();
+  };
+
+  const handleViewComments = () => {
+    setShowCommentsModal(true);
   };
 
   if (loading) {
@@ -516,6 +524,7 @@ export default function OrdenacionAlumno() {
             onRetry={handleRetry}
             onViewStudentAnswer={handleViewStudentAnswers}
             onViewCorrectAnswer={handleViewCorrectAnswers}
+            onViewComments={handleViewComments}
             onCancel={() => navigate(-1)}
           />
         ) : feedback?.correcta ? (
@@ -553,6 +562,14 @@ export default function OrdenacionAlumno() {
             })() : []}
             onClose={() => setShowAnswerModal(false)}
             mode={answerModalMode}
+          />
+        )}
+
+        {showCommentsModal && (
+          <CommentsViewModal
+            title="Comentarios"
+            comment={ordenacion?.comentariosRespVisible}
+            onClose={() => setShowCommentsModal(false)}
           />
         )}
       </main>

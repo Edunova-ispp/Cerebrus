@@ -211,8 +211,6 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
 
   return (
     <form onSubmit={handleSubmit} className="of-form">
-      {error && <p className="of-error">{error}</p>}
-
       <GenerarIAModal
         tipoActividad="ORDEN"
         open={iaModalOpen}
@@ -249,17 +247,22 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
         </div>
 
         <div className="of-col">
-          <div className="of-row">
-            <label className="of-label" htmlFor="of-puntuacion">Puntuación *</label>
-            <input
-              type="number"
-              id="of-puntuacion"
-              className="of-input of-input-sm"
-              value={puntuacion}
-              onChange={(e) => setPuntuacion(e.target.value)}
-              min="1"
-              required
-            />
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 80 }}>
+            <div>
+              <label className="of-label" htmlFor="of-puntuacion">Puntuación *</label>
+              <input
+                type="number"
+                id="of-puntuacion"
+                className="of-input of-input-sm"
+                value={puntuacion}
+                onChange={(e) => setPuntuacion(e.target.value)}
+                min="1"
+                required
+              />
+            </div>
+            <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+              Generar con IA
+            </button>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -324,8 +327,9 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       <div className="of-items-section">
         <p className="of-help">
           Actividad de ordenación. El alumno debe organizar los valores siguiendo un criterio
-          determinado. Introduzca los valores en el orden correcto y Cerebrus reorganizará los
-          valores aleatoriamente para sus alumnos.
+          determinado. Introduce los valores en el orden correcto y Cerebrus reorganizará los
+          valores aleatoriamente para sus alumnos. Pulsa la tecla de retroceso en un elemento 
+          vacío para eliminarlo.
         </p>
 
         <div className="of-kind-btns">
@@ -393,12 +397,16 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       </div>
 
       <div className="ca-form-footer">
-        <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
-          Generar con IA
-        </button>
-        <button className="ca-btn-guardar" type="submit" disabled={loading}>
-          {loading ? 'Guardando...' : 'Guardar'}
-        </button>
+        <div className="tf-footer-stack">
+          <button className="ca-btn-guardar" type="submit" disabled={loading}>
+            {loading ? 'Guardando...' : 'Guardar'}
+          </button>
+          {error && (
+            <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+              {error}
+            </p>
+          )}
+        </div>
       </div>
     </form>
   );

@@ -138,8 +138,6 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
 
   return (
     <form onSubmit={handleSubmit} className="of-form">
-      {error && <p className="of-error">{error}</p>}
-
       <GenerarIAModal
         tipoActividad="TEORIA"
         open={iaModalOpen}
@@ -203,11 +201,20 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
           </div>
       </div>
 
-      <div className="ca-form-footer">        <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+      <div className="ca-form-footer">
+        <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
           Generar con IA
-        </button>        <button className="ca-btn-guardar" type="submit" disabled={loading}>
-          {loading ? 'Guardando...' : 'Guardar'}
         </button>
+        <div className="tf-footer-stack">
+          <button className="ca-btn-guardar" type="submit" disabled={loading}>
+            {loading ? 'Guardando...' : 'Guardar'}
+          </button>
+          {error && (
+            <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+              {error}
+            </p>
+          )}
+        </div>
       </div>
     </form>
   );

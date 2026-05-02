@@ -5,6 +5,7 @@ import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
 import IaNoPuedeCorregirScreen from '../../components/IaNoPuedeCorregirScreen/IaNoPuedeCorregirScreen';
 import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
+import CommentsViewModal from '../../components/CommentsViewModal/CommentsViewModal';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 
@@ -32,6 +33,8 @@ type AbiertaAlumnoDTO = {
   readonly descripcion?: string | null;
   readonly puntuacion: number;
   readonly imagen?: string | null;
+  readonly respVisible?: boolean;
+  readonly comentariosRespVisible?: string | null;
   readonly preguntas: PreguntaAbiertaDTO[];
   readonly permitirReintento?: boolean;
   readonly mostrarPuntuacion?: boolean;
@@ -89,6 +92,7 @@ export default function PreguntaAbiertaAlumno() {
   const [activityConfig, setActivityConfig] = useState<ActivityResultConfig | null>(null);
   const [showAnswerModal, setShowAnswerModal] = useState(false);
   const [answerModalMode, setAnswerModalMode] = useState<'student' | 'correct'>('student');
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
 
   const hydrateAnswersFromHistory = async (actAlumnoId: number) => {
     try {
@@ -128,6 +132,7 @@ export default function PreguntaAbiertaAlumno() {
           allowRetry: data.permitirReintento ?? false,
           showCorrectAnswer: data.encontrarRespuestaMaestro ?? true,
           showStudentAnswer: data.encontrarRespuestaAlumno ?? true,
+          showComments: data.respVisible ?? true,
         });
 
         const initialMap = new Map<number, string>();
@@ -253,6 +258,7 @@ export default function PreguntaAbiertaAlumno() {
       setLastAttemptScore(null);
       setLastAttemptGrade(null);
       setSubmitted(false);
+      setShowCommentsModal(false);
     } catch {
       alert('No se pudo crear un nuevo intento.');
     }
@@ -266,6 +272,10 @@ export default function PreguntaAbiertaAlumno() {
   const handleViewCorrectAnswers = () => {
     setAnswerModalMode('correct');
     setShowAnswerModal(true);
+  };
+
+  const handleViewComments = () => {
+    setShowCommentsModal(true);
   };
 
   if (loading) return <div className="ta-loading">Preparando tu desafío...</div>;
@@ -367,6 +377,7 @@ export default function PreguntaAbiertaAlumno() {
                 onRetry={handleRetry}
                 onViewStudentAnswer={handleViewStudentAnswers}
                 onViewCorrectAnswer={handleViewCorrectAnswers}
+                onViewComments={handleViewComments}
                 onCancel={() => navigate(-1)}
               />
             )
@@ -391,6 +402,14 @@ export default function PreguntaAbiertaAlumno() {
           }
           onClose={() => setShowAnswerModal(false)}
           mode={answerModalMode}
+        />
+      )}
+
+      {showCommentsModal && (
+        <CommentsViewModal
+          title="Comentarios"
+          comment={actividad?.comentariosRespVisible}
+          onClose={() => setShowCommentsModal(false)}
         />
       )}
     </div>

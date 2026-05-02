@@ -265,7 +265,6 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
 
   return (
     <div className="paf-wrapper tf-form">
-      {error && <p className="tf-error">{error}</p>}
       {success && <p className="ca-text" style={{ color: '#27ae60' }}>{success}</p>}
 
       {/* ── TOP: Metadata ── */}
@@ -273,7 +272,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
         <div className="tf-col">
           <div>
             <label className="tf-label">Título *</label>
-            <input className="tf-input" value={titulo} onChange={e => setTitulo(e.target.value)} placeholder="Título de la actividad" />
+            <input className="tf-input" value={titulo} onChange={e => setTitulo(e.target.value)} required placeholder="Título de la actividad" />
           </div>
 
           <div>
@@ -316,7 +315,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
         <div className="tf-col">
           <div>
             <label className="tf-label">Puntuación *</label>
-            <input type="number" className="tf-input tf-input-sm" value={puntos} onChange={e => setPuntos(e.target.value === '' ? '' : Number(e.target.value))} min="1" />
+            <input type="number" className="tf-input tf-input-sm" value={puntos} onChange={e => setPuntos(e.target.value === '' ? '' : Number(e.target.value))} min="1" required />
           </div>
 
           <label className="tf-check-label">
@@ -383,9 +382,16 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
       </div>{/* close tf-questions */}
 
       <div className="ca-form-footer">
-        <button className="ca-btn-guardar" onClick={handleGuardar} disabled={saving}>
-          {saving ? 'GUARDANDO...' : 'GUARDAR'}
-        </button>
+        <div className="tf-footer-stack">
+          <button className="ca-btn-guardar" onClick={handleGuardar} disabled={saving}>
+            {saving ? 'GUARDANDO...' : 'GUARDAR'}
+          </button>
+          {error && (
+            <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+              {error}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
