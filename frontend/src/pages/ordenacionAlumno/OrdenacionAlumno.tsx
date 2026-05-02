@@ -52,6 +52,10 @@ type RespAlumnoOrdenacionDetalleDTO = {
   readonly valoresCorrectos: string[];
 };
 
+type BubbleLines = readonly [string, string, string];
+
+
+
 function isCompletedAttempt(fechaFin?: string | null): boolean {
   if (!fechaFin) return false;
   const parsed = new Date(fechaFin);
@@ -128,6 +132,23 @@ export default function OrdenacionAlumno() {
   const pendingRespuestaIdRef = useRef<number | null>(null);
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
   
+  const FRASES_BLOQUE: readonly BubbleLines[] = [
+    ['¡Esto es un caos!', 'Ordena las casillas', 'y pon orden en este reino'],
+    ['¡El saber es poder!', '¡Ordena estos elementos', 'de sabiduría!'],
+    ['Mis pergaminos...', 'Todo está revuelto', 'Organízalo, por favor'],
+    ['Mi memoria ya no', 'es lo que era.', 'Ayúdame a ordenar estas piezas'],
+    ['¡Van a destruir mi castillo!', '¡Ordena estas casillas o no', 'habrá forma de salvarlo!'],
+    ['Necesito tu ayuda para', 'organizar la capital del reino.', '¡Ordena estos elementos para que sea próspera!'],
+    ['¡El monstruo viene del más allá!', '¡Ordena estos elementos mágicos', 'para que desaparezca!'],
+    ['¡El dragón va a quemar el castillo!', '¡Ordena estas piezas para', 'invocar el escudo mágico!'],
+  ];
+
+  function elegirAlAzar<T>(arr: readonly T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  const [bubbleLines] = useState(() => elegirAlAzar(FRASES_BLOQUE));
+
   const ordenacionIdNum = useMemo(() => {
     if (!ordenacionId) return Number.NaN;
     return Number.parseInt(ordenacionId, 10);
@@ -441,9 +462,9 @@ export default function OrdenacionAlumno() {
 
     <div className="ord-king-row">
       <div className="ord-speech-bubble">
-        <span>Esto es un caos</span>
-        <span>Ordena las casillas</span>
-        <span>Ordena el reino</span>
+        <span>{bubbleLines[0]}</span>
+        <span>{bubbleLines[1]}</span>
+        <span>{bubbleLines[2]}</span>
       </div>
       <img src={kingImg} alt="Rey" className="ord-king-img" />
     </div>

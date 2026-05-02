@@ -121,6 +121,8 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
         setPuntuacion(String(initialValues.puntuacion) || '');
         setRespVisible(initialValues.respVisible !== undefined ? initialValues.respVisible : true);
         setPermitirReintento(Boolean(initialValues.permitirReintento));
+        setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion));
+        setEncontrarRespuestaMaestro(Boolean(initialValues.encontrarRespuestaMaestro));
 
         if (initialValues.preguntasYRespuestas && Object.keys(initialValues.preguntasYRespuestas).length > 0) {
             setPreguntas(
@@ -295,7 +297,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                                 id="cf-mostrar-resp-maest"
                                 type="checkbox"
                                 checked={encontrarRespuestaMaestro}
-                                onChange={e => setEncontrarRespuestaMaestro(e.target.checked)}
+                                onChange={e => {setEncontrarRespuestaMaestro(e.target.checked); setRespVisible(e.target.checked);}}
                             />
                             <span className="cf-checkbox-label">Mostrar respuesta correcta</span>
                         </label>
