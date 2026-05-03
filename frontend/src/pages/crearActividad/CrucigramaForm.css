@@ -68,6 +68,15 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+.cf-input[readonly]:hover,
+.cf-input[readonly]:focus,
+.cf-textarea[readonly]:hover,
+.cf-textarea[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
+}
+
 .cf-textarea { resize: vertical; min-height: 80px; }
 
 .cf-input-upper { text-transform: uppercase; }

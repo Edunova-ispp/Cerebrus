@@ -57,6 +57,13 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+.tbl-input[readonly]:hover,
+.tbl-input[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
+}
+
 .tbl-textarea {
   width: 100%;
   background: var(--t-input-bg);
@@ -78,6 +85,13 @@
   outline: none;
   border-color: var(--t-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.tbl-textarea[readonly]:hover,
+.tbl-textarea[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
 }
 
 /* ── Secciones ─────────────────────────────────────────────── */
@@ -125,6 +139,13 @@
   background: var(--t-primary-light);
   border-color: var(--t-primary);
   box-shadow: var(--t-shadow);
+}
+
+.tbl-tamano-btn--active[readonly]:hover,
+.tbl-tamano-btn--active[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
 }
 
 .tbl-tamano-label {
@@ -185,6 +206,12 @@
   border-radius: 6px;
 }
 
+.tbl-q-row[readonly]:hover {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
+}
+
 .tbl-q-col-label {
   font-weight: bold;
   font-size: 0.9rem;
@@ -202,12 +229,18 @@
   border-color: var(--t-primary) !important;
 }
 
-.tbl-respuesta-input:hover {
+.tbl-respuesta-input:hover:not([readonly]) {
   background: var(--t-primary-light) !important;
 }
 
-.tbl-respuesta-input:focus {
+.tbl-respuesta-input:focus:not([readonly]) {
   background: var(--t-primary-light) !important;
+  border-color: var(--t-primary) !important;
+}
+
+.tbl-respuesta-input[readonly]:hover,
+.tbl-respuesta-input[readonly]:focus {
+  background: var(--t-input-focus) !important;
   border-color: var(--t-primary) !important;
 }
 

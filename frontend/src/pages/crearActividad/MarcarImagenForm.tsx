@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import './MarcarImagenForm.css';
 
 export type MarcarImagenFormMode = 'create' | 'edit';
 
@@ -33,6 +34,7 @@ interface Props {
   readonly temaIdProp?: string;
   readonly cursoIdProp?: string;
   readonly onDone?: () => void;
+  readonly readOnly?: boolean;
 }
 
 type Point = {
@@ -42,7 +44,7 @@ type Point = {
   pixelY: number;
 };
 
-export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
+export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -66,8 +68,17 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
   const cursoId = cursoIdProp ?? params.id;
   const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
+  // Tracks which activity ID was last initialized to prevent re-initializing on every render
+  const initializedActivityIdRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (!initialValues) return;
+
+    // Only reinitialize if the activity ID changed, not on every render
+    if (initializedActivityIdRef.current === marcarImagenId) return;
+    
+    initializedActivityIdRef.current = marcarImagenId ?? null;
+
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
@@ -90,7 +101,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
     setPuntos(nextPoints);
     setSelectedPointIndex(nextPoints.length ? 0 : null);
-  }, [initialValues]);
+  }, [marcarImagenId, mode]);
 
   const temaIdNum = useMemo(() => {
     if (!temaId) return null;
@@ -132,6 +143,8 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
   };
 
   const handleImageClick = (e: React.MouseEvent) => {
+    if (readOnly) return;
+
     const el = imgRef.current;
     if (!el) return;
 
@@ -224,11 +237,12 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
               Título
             </label>
             <input
+              className="mi-input"
+              readOnly={readOnly}
               type="text"
               id="mi-titulo"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
-              style={{ width: '100%' }}
               placeholder="Ej: Señala los elementos correctos"
               required
             />
@@ -239,11 +253,12 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
               Descripción
             </label>
             <textarea
+              className="mi-textarea"
+              readOnly={readOnly}
               id="mi-descripcion"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               rows={3}
-              style={{ width: '100%', resize: 'vertical' }}
               placeholder="Instrucciones para el alumno"
             />
           </div>
@@ -258,6 +273,8 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
               Puntuación
             </label>
             <input
+              className="mi-input"
+              readOnly={readOnly}
               type="number"
               id="mi-puntuacion"
               value={puntuacion}
@@ -270,6 +287,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               id="mi-resp-visible"
               checked={respVisible}
@@ -282,6 +300,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               id="mi-permitir-reintento"
               checked={permitirReintento}
@@ -294,6 +313,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               id="mi-mostrar-puntuacion"
               checked={mostrarPuntuacion}
@@ -306,6 +326,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               id="mi-mostrar-respuesta-correcta"
               checked={encontrarRespuestaMaestro}
@@ -318,6 +339,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               id="mi-mostrar-respuesta-alumno"
               checked={encontrarRespuestaAlumno}
@@ -334,11 +356,12 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                 Comentarios
               </label>
               <input
+                className="mi-input"
+                readOnly={readOnly}
                 type="text"
                 id="mi-comentarios"
                 value={comentariosRespVisible}
                 onChange={(e) => setComentariosRespVisible(e.target.value)}
-                style={{ width: '100%' }}
               />
             </div>
           )}
@@ -348,11 +371,12 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
               Imagen a marcar (URL)
             </label>
             <input
+              className="mi-input"
+              readOnly={readOnly}
               type="url"
               id="mi-imagen-a-marcar"
               value={imagenAMarcar}
               onChange={(e) => setImagenAMarcar(e.target.value)}
-              style={{ width: '100%' }}
               placeholder="https://..."
             />
           </div>
@@ -430,9 +454,11 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <button className="ca-btn-guardar" type="submit" disabled={loading}>
-                  {loading ? 'Guardando...' : 'Guardar'}
-                </button>
+                {!readOnly && (
+                  <button className="ca-btn-guardar" type="submit" disabled={loading}>
+                    {loading ? 'Guardando...' : 'Guardar'}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -453,6 +479,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                       onClick={() => setSelectedPointIndex(i)}
                     >
                       <button
+                        disabled={readOnly}
                         type="button"
                         aria-label={`Eliminar punto ${i + 1}`}
                         onClick={(ev) => {
@@ -490,6 +517,8 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                         </label>
 
                         <input
+                          className="mi-input"
+                          readOnly={readOnly}
                           type="text"
                           placeholder="Respuesta"
                           value={p.respuesta}

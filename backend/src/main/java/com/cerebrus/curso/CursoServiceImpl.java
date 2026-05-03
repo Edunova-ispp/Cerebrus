@@ -55,7 +55,7 @@ public class CursoServiceImpl implements CursoService {
 
     @Transactional
     @Override
-    public Curso crearCurso(String titulo, String descripcion, String imagen, String codigoPersonalizado) {
+    public Curso crearCurso(String titulo, String descripcion, String imagen, String codigoPersonalizado, Boolean visibilidad) {
         Usuario usuarioActual = usuarioService.findCurrentUser();
         if (!(usuarioActual instanceof Maestro)){
             throw new AccessDeniedException("Solo un maestro puede crear cursos");
@@ -66,7 +66,7 @@ public class CursoServiceImpl implements CursoService {
         curso.setTitulo(titulo);
         curso.setDescripcion(descripcion);
         curso.setImagen(imagen);
-        curso.setVisibilidad(false);
+        curso.setVisibilidad(visibilidad);
         Maestro maestro = (Maestro) usuarioActual;
         curso.setMaestro(maestro);
         
@@ -134,7 +134,7 @@ public class CursoServiceImpl implements CursoService {
      
     @Transactional
     @Override
-    public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen, String codigo) {
+    public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen, String codigo, Boolean visibilidad) {
         Curso curso = cursoRepository.findByID(id);
         if (curso == null) {
             throw new RuntimeException("404 Not Found");
@@ -151,6 +151,7 @@ public class CursoServiceImpl implements CursoService {
         curso.setDescripcion(descripcion);
         curso.setImagen(imagen);
         curso.setCodigo(codigo);
+        curso.setVisibilidad(visibilidad);
         return cursoRepository.save(curso);
     }
 

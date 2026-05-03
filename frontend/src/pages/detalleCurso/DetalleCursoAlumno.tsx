@@ -36,7 +36,7 @@ export default function DetalleCursoAlumno({ curso, progreso }: Props) {
   return (
     <div className="detalle-alumno-page">
       <NavbarMisCursos />
-
+            <h1 className="detalle-alumno-title">Curso: {curso.titulo}</h1>
       <main className="detalle-alumno-main">
         <button className="detalle-volver" onClick={() => navigate(-1)}>
           ←

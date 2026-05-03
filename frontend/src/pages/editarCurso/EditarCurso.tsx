@@ -22,6 +22,7 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
   const [descripcion, setDescripcion] = useState('');
   const [imagen, setImagen] = useState('');
   const [codigo, setCodigo] = useState('');
+  const [publico, setPublico] = useState(false);
   const [error, setError] = useState('');
   const [imagenError, setImagenError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -52,6 +53,7 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
           setDescripcion(data[1] || '');
           setImagen(data[2] || '');
           setCodigo(data[3] || '');
+          setPublico(data[4] || false);
           setError('');
         } else {
           if (response.status === 404) {
@@ -122,6 +124,7 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
           descripcion: descripcion.trim() || '',
           imagen: imagen.trim() || '',
           codigo: codigo.trim() || '',
+          visibilidad: publico
         }),
       });
 console.log('Response status:', response);
@@ -222,6 +225,17 @@ console.log('Response status:', response);
                   className="pixel-input"
                   disabled={loadingUpdate}
                 />
+              </div>
+              <div className="input-group">
+                <span className="label-text">Visible:</span>
+                <label className="crear-curso__toggle">
+                  <input
+                    type="checkbox"
+                    checked={publico}
+                    onChange={(e) => setPublico(e.target.checked)}
+                  />
+                <span className="crear-curso__toggle-slider" />
+                </label>
               </div>
             </div>
 

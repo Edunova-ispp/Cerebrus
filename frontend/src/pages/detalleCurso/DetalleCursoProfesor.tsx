@@ -25,7 +25,7 @@ interface Props {
   readonly curso: Curso;
 }
 
-const TABS: { key: "mapa" | "estadisticas" | "editar"; label: string }[] = [
+const TABS: { key: "mapa" | "estadisticas" | "editar" | "alumnos"; label: string }[] = [
   { key: "mapa", label: "Estructura del curso" },
   { key: "estadisticas", label: "Estadísticas" },
   { key: "alumnos", label: "Alumnos" },
@@ -36,6 +36,8 @@ export default function DetalleCursoProfesor({ curso }: Props) {
   const [view, setView] = useState<View>({ tab: "mapa" });
 
   const goToMapa = useCallback(() => setView({ tab: "mapa" }), []);
+
+  const showBackButton = view.tab === "mapa" && "action" in view && (view.action === "crearActividad" || view.action === "editarActividad");
 
   const renderContent = () => {
     switch (view.tab) {
@@ -75,7 +77,7 @@ export default function DetalleCursoProfesor({ curso }: Props) {
   return (
     <div className="detalle-profesor-page">
       <NavbarMisCursos />
-
+      <h1 className="detalle-profesor-title">Curso: {curso.titulo}</h1>
       <main className="detalle-profesor-layout">
         {/* Sidebar */}
         <aside className="detalle-sidebar">
@@ -83,24 +85,37 @@ export default function DetalleCursoProfesor({ curso }: Props) {
             Código: <strong>{curso.codigo}</strong>
           </div>
 
-          <nav className="detalle-sidebar-nav">
-            {TABS.map((tab) => {
-              const isInAction = "action" in view;
-              const isBack = tab.key === "mapa" && isInAction;
-              const isActive = view.tab === tab.key && !isBack;
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  className={`detalle-sidebar-btn${isActive ? " detalle-sidebar-btn--active" : ""}${isBack ? " detalle-sidebar-btn--back" : ""}`}
-                  onClick={() => setView({ tab: tab.key })}
-                >
-                  {tab.label}
-                  {isBack && <span className="detalle-sidebar-btn__back-hint">Pulsa para volver</span>}
-                </button>
-              );
-            })}
-          </nav>
+          {/* Renderizado condicional de TABS o botón "Volver" */}
+          {!showBackButton ? (
+            <nav className="detalle-sidebar-nav">
+              {TABS.map((tab) => {
+                const isInAction = "action" in view;
+                const isBack = tab.key === "mapa" && isInAction;
+                const isActive = view.tab === tab.key && !isBack;
+                return (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    className={`detalle-sidebar-btn${isActive ? " detalle-sidebar-btn--active" : ""}${isBack ? " detalle-sidebar-btn--back" : ""}`}
+                    onClick={() => setView({ tab: tab.key })}
+                  >
+                    {tab.label}
+                    {isBack && <span className="detalle-sidebar-btn__back-hint">Pulsa para volver</span>}
+                  </button>
+                );
+              })}
+            </nav>
+          ) : (
+            <div className="detalle-sidebar-btn--back">
+              <button
+                type="button"
+                className="detalle-sidebar-btn detalle-sidebar-btn--back"
+                onClick={goToMapa}
+              >
+                Volver
+              </button>
+            </div>
+          )}
         </aside>
 
         {/* Content area */}

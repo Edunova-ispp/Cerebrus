@@ -155,19 +155,16 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
           <p className="ltp-vacio">No hay actividades en este tema</p>
         ) : (
           actividades.map((act) => (
-            <div key={act.id} className="ltp-item">
+            <div 
+              key={act.id} 
+              className="ltp-item"
+              onClick={() => isMaestro && (onEditarActividad ? onEditarActividad(temaSeleccionado.id, act.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/${act.id}/editar`))}
+              onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && isMaestro) (onEditarActividad ? onEditarActividad(temaSeleccionado.id, act.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/${act.id}/editar`)); }}
+              role="button"
+              tabIndex={0}
+            >
               <span className="ltp-item-titulo">{act.titulo}</span>
               <div className="ltp-item-acciones">
-                <button 
-                  className="ltp-btn-icono" 
-                  title="Editar" 
-                  onClick={(e) => { 
-                    e.stopPropagation(); 
-                    isMaestro && (onEditarActividad ? onEditarActividad(temaSeleccionado.id, act.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/${act.id}/editar`));
-                  }}
-                >
-                  ✎
-                </button>
                 <button 
                   className="ltp-btn-icono" 
                   title="Borrar" 
