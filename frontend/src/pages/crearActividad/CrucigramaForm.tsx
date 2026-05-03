@@ -131,6 +131,8 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
         setPuntuacion(String(initialValues.puntuacion) || '');
         setRespVisible(initialValues.respVisible !== undefined ? initialValues.respVisible : true);
         setPermitirReintento(Boolean(initialValues.permitirReintento));
+        setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion));
+        setEncontrarRespuestaMaestro(Boolean(initialValues.encontrarRespuestaMaestro));
 
         if (initialValues.preguntasYRespuestas && Object.keys(initialValues.preguntasYRespuestas).length > 0) {
             setPreguntas(
@@ -235,18 +237,11 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
     return (
         <form onSubmit={handleSubmit} className="cf-form">
 
-            {/* Error */}
-            {error && (
-                <div className="cf-error">
-                    ¡Atención! {error}
-                </div>
-            )}
-
             {/* ── Datos generales ── */}
             <div className="cf-card">
                 <div className="cf-grid-2">
                     <div>
-                        <label className="cf-label" htmlFor="cf-titulo">Título del crucigrama</label>
+                        <label className="cf-label" htmlFor="cf-titulo">Título *</label>
                         <input
                             readOnly={readOnly}
                             id="cf-titulo"
@@ -270,13 +265,13 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                         />
                     </div>
 
-                    <div>
-                        <label className="cf-label" htmlFor="cf-punt">Puntuación total</label>
+                    <div className="tf-col">
+                        <label className="cf-label" htmlFor="cf-punt">Puntuación *</label>
                         <input
                             readOnly={readOnly}
                             id="cf-punt"
                             type="number"
-                            className="cf-input"
+                            className="tf-input tf-input-sm"
                             value={puntuacion}
                             min={1}
                             onChange={e => setPuntuacion(e.target.value)}
@@ -310,7 +305,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                             <span className="cf-checkbox-label">Permitir reintentos</span>
                         </label>
                         <label
-                            className="cf-checkbox-row"
+                            className="tf-check-label"
                             htmlFor="cf-mostrar-puntuacion"
                         >
                             <input
@@ -323,7 +318,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                             <span className="cf-checkbox-label">Mostrar puntuación</span>
                         </label>
                         <label
-                            className="cf-checkbox-row"
+                            className="tf-check-label"
                             htmlFor="cf-mostrar-resp-maest"
                         >
                             <input
@@ -331,7 +326,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                                 id="cf-mostrar-resp-maest"
                                 type="checkbox"
                                 checked={encontrarRespuestaMaestro}
-                                onChange={e => setEncontrarRespuestaMaestro(e.target.checked)}
+                                onChange={e => {setEncontrarRespuestaMaestro(e.target.checked); setRespVisible(e.target.checked);}}
                             />
                             <span className="cf-checkbox-label">Mostrar respuesta correcta</span>
                         </label>
@@ -343,7 +338,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
             <div className="cf-card">
                 <h3 className="cf-section-title">
                     Palabras y pistas
-                    <span>{preguntas.length} / {MAX_PALABRAS}</span>
+                    <span>{preguntas.length} / {MAX_PALABRAS} máx.</span>
                 </h3>
 
                 {preguntas.map((p, index) => (
@@ -393,20 +388,20 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                 )}
             </div>
 
-            {/* ── Submit ── */}
-            {!readOnly && (
-              <button
-                  className="cf-btn-submit"
-                  type="submit"
-                  disabled={loading}
-              >
-                  {loading
-                      ? 'PROCESANDO...'
-                      : mode === 'edit'
-                          ? 'GUARDAR'
-                          : 'GUARDAR '}
-              </button>
-            )}
+            <div className="ca-form-footer">
+                <div className="tf-footer-stack">
+                    {!readOnly && (
+                        <button className="cf-btn-submit" type="submit" disabled={loading}>
+                            {loading ? 'PROCESANDO...' : mode === 'edit' ? 'GUARDAR' : 'GUARDAR '}
+                        </button>
+                    )}
+                    {error && (
+                        <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+                            {error}
+                        </p>
+                    )}
+                </div>
+            </div>
         </form>
     );
 }

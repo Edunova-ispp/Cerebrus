@@ -39,6 +39,8 @@ interface PreguntaAbiertaMeta {
   version?: number;
 }
 
+const MAX_PREGUNTAS = 5;
+
 export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
   mode,
   preguntaAbiertaId,
@@ -97,7 +99,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
   // --- HANDLERS PARA AÑADIR/ELIMINAR ---
 
   const handleAddPregunta = () => {
-    if (preguntas.length < 5) {
+    if (preguntas.length < MAX_PREGUNTAS) {
       setPreguntas([...preguntas, { pregunta: '', respuesta: '' }]);
     }
   };
@@ -131,7 +133,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
     if (puntosNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
 
     if (preguntas.length < 1) return 'Añade al menos una pregunta';
-    if (preguntas.length > 5) return 'No puedes añadir más de 5 preguntas';
+    if (preguntas.length > MAX_PREGUNTAS) return `No puedes añadir más de ${MAX_PREGUNTAS} preguntas`;
 
     for (let i = 0; i < preguntas.length; i++) {
       if (!preguntas[i].pregunta.trim()) return `La pregunta ${i + 1} no tiene texto`;
@@ -265,7 +267,6 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
 
   return (
     <div className="paf-wrapper tf-form">
-      {error && <p className="tf-error">{error}</p>}
       {success && <p className="ca-text" style={{ color: '#27ae60' }}>{success}</p>}
 
       {/* ── TOP: Metadata ── */}
@@ -317,12 +318,12 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
         <div className="tf-col">
           <div>
             <label className="tf-label">Puntuación *</label>
-            <input readOnly={readOnly} type="number" className="tf-input tf-input-sm" value={puntos} onChange={e => setPuntos(e.target.value === '' ? '' : Number(e.target.value))} min="1" />
+            <input readOnly={readOnly} type="number" className="tf-input tf-input-sm" value={puntos} onChange={e => setPuntos(e.target.value === '' ? '' : Number(e.target.value))} min="1" required />
           </div>
 
           <label className="tf-check-label">
             <input disabled={readOnly} type="checkbox" checked={respVisible} onChange={e => setRespVisible(e.target.checked)} />
-            <span>Mostrar correcciones al alumno</span>
+            <span>Mostrar comentarios de corrección</span>
           </label>
 
           <label className="tf-check-label">
@@ -337,12 +338,12 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
 
           <label className="tf-check-label">
             <input disabled={readOnly} type="checkbox" checked={encontrarRespuestaMaestro} onChange={e => setEncontrarRespuestaMaestro(e.target.checked)} />
-            <span>Mostrar respuesta correcta</span>
+            <span>Mostrar respuesta modelo</span>
           </label>
 
           <label className="tf-check-label">
             <input disabled={readOnly} type="checkbox" checked={encontrarRespuestaAlumno} onChange={e => setEncontrarRespuestaAlumno(e.target.checked)} />
-            <span>Mostrar mi respuesta</span>
+            <span>Mostrar respuesta del alumno</span>
           </label>
 
           {respVisible && (
@@ -361,7 +362,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
 
         <div className="paf-preguntas-header">
           <span className="ca-text" style={{ fontWeight: 'bold' }}>Preguntas y Respuestas</span>
-          <span className="paf-badge">{preguntas.length} / 5</span>
+          <span className="paf-badge">{preguntas.length} / {MAX_PREGUNTAS} máx.</span>
         </div>
 
         {preguntas.map((p, index) => (
@@ -376,7 +377,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
           </div>
         ))}
 
-        {preguntas.length < 5 && !readOnly && (
+        {preguntas.length < MAX_PREGUNTAS && !readOnly && (
           <button disabled={readOnly} type="button" className="paf-btn-add" onClick={handleAddPregunta}>
             + Añadir pregunta
           </button>
@@ -384,11 +385,18 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
       </div>{/* close tf-questions */}
 
       <div className="ca-form-footer">
-        {!readOnly && (
-          <button className="ca-btn-guardar" onClick={handleGuardar} disabled={saving}>
-            {saving ? 'GUARDANDO...' : 'GUARDAR'}
-          </button>
-        )}
+        <div className="tf-footer-stack">
+          {!readOnly && (
+            <button className="ca-btn-guardar" onClick={handleGuardar} disabled={saving}>
+              {saving ? 'GUARDANDO...' : 'GUARDAR'}
+            </button>        
+          )}
+          {error && (
+            <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+              {error}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

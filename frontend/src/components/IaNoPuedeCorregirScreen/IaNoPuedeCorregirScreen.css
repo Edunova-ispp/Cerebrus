@@ -1,0 +1,124 @@
+.ia-no-corr-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.ia-no-corr-popup {
+  background: #FFF8E1;
+  border-radius: 18px;
+  padding: 32px 28px 28px;
+  max-width: 460px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 4px solid #000;
+  box-shadow: 6px 6px 0 #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-family: 'Pixelify Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.ia-no-corr-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #0F1338;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-stroke-width: 0;
+}
+
+.ia-no-corr-cara {
+  font-size: 4.5rem;
+  font-weight: 600;
+  color: #b9122e;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-stroke-width: 0;
+}
+
+.ia-no-corr-desc {
+  margin: 0 0 18px 0;
+  font-size: 1.0rem;
+  color: #4f4330;
+  line-height: 1.35;
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-stroke-width: 0;
+}
+
+.ia-no-corr-desc--2 {
+  font-size: 1.1rem;
+}
+
+.ia-no-corr-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.ia-no-corr-btn {
+  padding: 12px 20px;
+  border: 3px solid #000;
+  border-radius: 12px;
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  box-shadow: 3px 3px 0 #000;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.ia-no-corr-btn:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.ia-no-corr-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 #000;
+}
+
+.ia-no-corr-btn-primary {
+  background: var(--color-accent, #FFF294);
+  color: #000;
+  margin-top: 6px;
+}
+
+.ia-no-corr-btn-secondary {
+  background: #fff;
+  color: #0F1338;
+}
+
+@media (max-width: 600px) {
+  .ia-no-corr-popup {
+    padding: 24px 18px;
+    max-width: 95%;
+  }
+}

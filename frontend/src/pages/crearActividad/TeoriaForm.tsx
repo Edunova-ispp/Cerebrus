@@ -148,8 +148,6 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
 
   return (
     <form onSubmit={handleSubmit} className="of-form">
-      {error && <p className="of-error">{error}</p>}
-
       <GenerarIAModal
         tipoActividad="TEORIA"
         open={iaModalOpen}
@@ -215,50 +213,24 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
             />
             <label className="cf-label" htmlFor="teoria-reintento">Permitir reintentos</label>
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <input
-              disabled={readOnly}
-              type="checkbox"
-              id="teoria-mostrar-puntuacion"
-              checked={mostrarPuntuacion}
-              onChange={(e) => setMostrarPuntuacion(e.target.checked)}
-            />
-            <label className="cf-label" htmlFor="teoria-mostrar-puntuacion">Mostrar puntuación</label>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <input
-              disabled={readOnly}
-              type="checkbox"
-              id="teoria-mostrar-resp-maest"
-              checked={encontrarRespuestaMaestro}
-              onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
-            />
-            <label className="cf-label" htmlFor="teoria-mostrar-resp-maest">Mostrar respuesta correcta</label>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <input
-              disabled={readOnly}
-              type="checkbox"
-              id="teoria-mostrar-resp-alumn"
-              checked={encontrarRespuestaAlumno}
-              onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
-            />
-            <label className="cf-label" htmlFor="teoria-mostrar-resp-alumn">Mostrar mi respuesta</label>
-          </div>
       </div>
 
       <div className="ca-form-footer">
         <button disabled={readOnly} type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
           Generar con IA
         </button>
-        {!readOnly && (
-          <button className="ca-btn-guardar" type="submit" disabled={loading}>
-            {loading ? 'Guardando...' : 'Guardar'}
-          </button>
-        )}
+        <div className="tf-footer-stack">
+          {!readOnly && (
+            <button className="ca-btn-guardar" type="submit" disabled={loading}>
+              {loading ? 'Guardando...' : 'Guardar'}
+            </button>
+          )}
+          {error && (
+            <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+              {error}
+            </p>
+          )}
+        </div>
       </div>
     </form>
   );

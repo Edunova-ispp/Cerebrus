@@ -267,17 +267,29 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
           />
         </div>
         <div className="tbl-col">
-          <label className="tbl-label">Puntuación *</label>
-          <input
-            readOnly={readOnly}
-            className="tbl-input"
-            type="number"
-            min={1}
-            value={puntuacion}
-            onChange={(e) => setPuntuacion(e.target.value)}
-            placeholder="Ej. 100"
-            required
-          />
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 80 }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <label className="tbl-label">Puntuación *</label>
+              <input
+                readOnly={readOnly}
+                className="tbl-input"
+                type="number"
+                min={1}
+                value={puntuacion}
+                onChange={(e) => setPuntuacion(e.target.value)}
+                required
+                style={{ width: 90 }}
+              />
+            </div>
+            <button
+              disabled={readOnly}
+              type="button"
+              className="iam-trigger-btn"
+              onClick={() => setShowIAModal(true)}
+            >
+              Generar con IA
+            </button>
+          </div>
           <label className="tbl-label tbl-label--check">
             <input
               disabled={readOnly}
@@ -324,13 +336,8 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
               checked={encontrarRespuestaAlumno}
               onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
             />
-            <span>Mostrar mi respuesta</span>
+            <span>Mostrar respuesta del alumno</span>
           </label>
-          <div>
-            <button disabled={readOnly} type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
-              Generar con IA
-            </button>
-          </div>
         </div>
         
       </div>
@@ -405,19 +412,25 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
         </div>
       )}
 
-      {error && <p className="tbl-error">{error}</p>}
       {success && <p className="tbl-success">{success}</p>}
 
       <div className="tbl-footer">
-        {!readOnly && (
-          <button
-            type="submit"
-            className="ca-btn-guardar"
-            disabled={loading || tamano === null}
-          >
-            {loading ? 'Guardando...' : mode === 'create' ? 'Crear Tablero' : 'Guardar cambios'}
-          </button>
-        )}
+        <div className="tf-footer-stack">
+          {!readOnly && (
+            <button
+              type="submit"
+              className="ca-btn-guardar"
+              disabled={loading || tamano === null}
+            >
+              {loading ? 'Guardando...' : mode === 'create' ? 'Crear Tablero' : 'Guardar cambios'}
+            </button>    
+          )}
+          {error && (
+            <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+              {error}
+            </p>
+          )}
+        </div>
       </div>
     </form>
   );

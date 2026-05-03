@@ -32,6 +32,8 @@ interface Props {
   readonly readOnly?: boolean;
 }
 
+const MAX_ELEMENTOS = 15;
+
 function makeLocalKey(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -135,6 +137,9 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       return;
     }
 
+    if (respVisible && comentariosRespVisible.trim().length > 250) return 'Los comentarios no pueden exceder los 250 caracteres.';
+    if (respVisible && comentariosRespVisible.trim().length === 0) return 'Escribe un comentario para mostrar cuando la respuesta sea visible.';
+
     if (!temaId) {
       setError('Falta el id del tema en la URL');
       return;
@@ -161,9 +166,24 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       return;
     }
 
-    if (valores.length > 50) {
-      setError('No puedes añadir más de 50 valores');
+    if (valores.length > MAX_ELEMENTOS) {
+      setError(`No puedes añadir más de ${MAX_ELEMENTOS} valores`);
       return;
+    }
+
+    for (let i = 0; i < valores.length; i++) {
+      if (valores[i].length > 40 && ordenItemsKind === 'words') {
+        setError(`El valor ${i + 1} no puede exceder los 40 caracteres.`);
+        return;
+      }
+      if (valores[i].trim() === '') {
+        setError(`El valor ${i + 1} no puede estar vacío.`);
+        return;
+      }
+      if (valores[i].trim() in valores.slice(0, i) || valores[i].trim() in valores.slice(i + 1, valores.length)) {
+        setError(`El valor ${i + 1} está repetido .`);
+        return;
+      }
     }
 
     setLoading(true);
@@ -218,8 +238,6 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
 
   return (
     <form onSubmit={handleSubmit} className="of-form">
-      {error && <p className="of-error">{error}</p>}
-
       <GenerarIAModal
         tipoActividad="ORDEN"
         open={iaModalOpen}
@@ -258,18 +276,23 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
         </div>
 
         <div className="of-col">
-          <div className="of-row">
-            <label className="of-label" htmlFor="of-puntuacion">Puntuación *</label>
-            <input
-              readOnly={readOnly}
-              type="number"
-              id="of-puntuacion"
-              className="of-input of-input-sm"
-              value={puntuacion}
-              onChange={(e) => setPuntuacion(e.target.value)}
-              min="1"
-              required
-            />
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 80 }}>
+            <div>
+              <label className="of-label" htmlFor="of-puntuacion">Puntuación *</label>
+              <input
+                readOnly={readOnly} 
+                type="number"
+                id="of-puntuacion"
+                className="of-input of-input-sm"
+                value={puntuacion}
+                onChange={(e) => setPuntuacion(e.target.value)}
+                min="1"
+                required
+              />
+            </div>
+            <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+              Generar con IA
+            </button>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -279,7 +302,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            Correcciones visibles
+            Mostrar comentarios de corrección
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
@@ -318,7 +341,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
               checked={encontrarRespuestaAlumno}
               onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
             />
-            Mostrar mi respuesta
+            Mostrar respuesta del alumno
           </div>
 
           {respVisible && (
@@ -340,8 +363,9 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       <div className="of-items-section">
         <p className="of-help">
           Actividad de ordenación. El alumno debe organizar los valores siguiendo un criterio
-          determinado. Introduzca los valores en el orden correcto y Cerebrus reorganizará los
-          valores aleatoriamente para sus alumnos.
+          determinado. Introduce los valores en el orden correcto y Cerebrus reorganizará los
+          valores aleatoriamente para sus alumnos. Pulsa la tecla de retroceso en un elemento 
+          vacío para eliminarlo.
         </p>
 
         <div className="of-kind-btns">
@@ -361,6 +385,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
           >
             Imágenes
           </button>
+          <span className="paf-badge">{ordenItems.length} / {MAX_ELEMENTOS} máx.</span>
         </div>
 
         <div className="of-items-grid">
@@ -393,7 +418,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
               />
             </div>
           ))}
-          {ordenItems.length < 50 && (
+          {ordenItems.length < MAX_ELEMENTOS && (
             <button
               disabled={readOnly}
               className="of-btn-add"
@@ -410,14 +435,18 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       </div>
 
       <div className="ca-form-footer">
-        <button disabled={readOnly} type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
-          Generar con IA
-        </button>
-        {!readOnly && (
-          <button className="ca-btn-guardar" type="submit" disabled={loading}>
-            {loading ? 'Guardando...' : 'Guardar'}
-          </button>
-        )}
+        <div className="tf-footer-stack">
+          {!readOnly && (
+            <button className="ca-btn-guardar" type="submit" disabled={loading}>
+              {loading ? 'Guardando...' : 'Guardar'}
+            </button>
+          )}
+          {error && (
+            <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+              {error}
+            </p>
+          )}
+        </div>
       </div>
     </form>
   );

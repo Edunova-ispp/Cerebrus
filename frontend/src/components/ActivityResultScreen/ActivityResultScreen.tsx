@@ -7,6 +7,7 @@ export interface ActivityResultConfig {
   readonly allowRetry: boolean;
   readonly showCorrectAnswer: boolean;
   readonly showStudentAnswer: boolean;
+  readonly showComments: boolean;
 }
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
   readonly onRetry?: () => void;
   readonly onViewStudentAnswer?: () => void;
   readonly onViewCorrectAnswer?: () => void;
+  readonly onViewComments?: () => void;
   readonly onCancel?: () => void;
 }
 
@@ -34,6 +36,7 @@ export default function ActivityResultScreen({
   onRetry,
   onViewStudentAnswer,
   onViewCorrectAnswer,
+  onViewComments,
   onCancel,
 }: Props) {
   const hasScoreData =
@@ -98,6 +101,13 @@ export default function ActivityResultScreen({
           {config.allowRetry && onRetry && (
             <button className="ars-btn ars-btn-secondary" type="button" onClick={onRetry}>
               Repetir actividad
+            </button>
+          )}
+
+          {/* Botón Ver comentarios */}
+          {config.showComments && onViewComments && (
+            <button className="ars-btn ars-btn-secondary" type="button" onClick={onViewComments}>
+              Ver comentarios
             </button>
           )}
 

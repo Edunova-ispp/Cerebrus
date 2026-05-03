@@ -25,7 +25,8 @@ export default function TeoriaAlumno() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [actividadAlumnoId, setActividadAlumnoId] = useState<number | null>(null);
-  const [isFlipped, setIsFlipped] = useState(false); 
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [leido, setLeido] = useState(false);
 
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
   const teoriaImageSrc = teoria?.imagen
@@ -119,7 +120,10 @@ export default function TeoriaAlumno() {
 
             <div 
               className={`ta-flashcard ${isFlipped ? 'flipped' : ''}`} 
-              onClick={() => setIsFlipped(!isFlipped)}
+              onClick={() => {
+                setIsFlipped(!isFlipped);
+                setLeido(true);
+              }}
             >
               <div className="ta-card-inner">
                 
@@ -165,7 +169,7 @@ export default function TeoriaAlumno() {
 
             {/* Botón de finalizar */}
             <div className="ta-bottom">
-              <button className="ca-btn-guardar" type="button" onClick={handleFinalizar}>
+              <button className="ca-btn-guardar" type="button" onClick={handleFinalizar} disabled={!leido}>
                 He terminado de leer
               </button>
             </div>

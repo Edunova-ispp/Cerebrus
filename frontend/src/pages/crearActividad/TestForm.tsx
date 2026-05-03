@@ -69,6 +69,9 @@ function makeEmptyQuestion(): Question {
   return { localKey: makeLocalKey(), text: '', options: [makeEmptyOption(), makeEmptyOption()] };
 }
 
+const MAX_OPCIONES = 10;
+const MAX_PREGUNTAS = 50;
+
 export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -198,15 +201,18 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
     if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
 
     if (questions.length === 0) return 'Añade al menos una pregunta';
-    if (questions.length > 100) return 'No puedes añadir más de 100 preguntas';
+    if (questions.length > MAX_PREGUNTAS) return `No puedes añadir más de ${MAX_PREGUNTAS} preguntas`;
+
+    if (respVisible && comentariosRespVisible.trim().length > 250) return 'Los comentarios no pueden exceder los 250 caracteres.';
+    if (respVisible && comentariosRespVisible.trim().length === 0) return 'Escribe un comentario para mostrar cuando la respuesta sea visible.';
 
     for (let qi = 0; qi < questions.length; qi++) {
       const q = questions[qi];
       if (!q.text.trim()) return `La pregunta ${qi + 1} no tiene texto`;
       if (q.options.length < 2)
         return `La pregunta ${qi + 1} debe tener al menos 2 opciones`;
-      if (q.options.length > 26)
-        return `La pregunta ${qi + 1} no puede tener más de 26 opciones`;
+      if (q.options.length > MAX_OPCIONES)
+        return `La pregunta ${qi + 1} no puede tener más de ${MAX_OPCIONES} opciones`;
       for (let oi = 0; oi < q.options.length; oi++) {
         if (!q.options[oi].text.trim())
           return `La opción ${oi + 1} de la pregunta ${qi + 1} está vacía`;
@@ -505,7 +511,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            <span>Mostrar correcciones al alumno</span>
+            <span>Mostrar comentarios de corrección</span>
           </label>
 
           <label className="tf-check-label">
@@ -545,7 +551,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
               checked={encontrarRespuestaAlumno}
               onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
             />
-            <span>Mostrar mi respuesta</span>
+            <span>Mostrar respuesta del alumno</span>
           </label>
 
           {respVisible && (
@@ -569,10 +575,16 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
             Añade las preguntas y opciones. Marca todas las correctas con <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
           </p>
 
+          <h3 className="cf-section-title">
+          Preguntas
+          <span>{questions.length} / {MAX_PREGUNTAS} máx.</span>
+        </h3>
+
           {questions.map((q, qi) => (
             <div key={q.localKey} className="tf-question-block">
               <div className="tf-question-header">
                 <span className="tf-question-label">Pregunta {qi + 1}</span>
+                <span className="paf-badge">{q.options.length} / {MAX_OPCIONES} máx.</span>
                 {questions.length > 1 && !readOnly &&(
                   <button
                     disabled={readOnly}
@@ -634,7 +646,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
                 ))}
               </div>
 
-              {q.options.length < 26 && !readOnly && (
+              {q.options.length < MAX_OPCIONES && !readOnly && (
                 <button disabled={readOnly} type="button" className="tf-btn-add-option" onClick={() => addOption(qi)}>
                   + Añadir opción
                 </button>
@@ -642,7 +654,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
             </div>
           ))}
 
-          {questions.length < 100 && !readOnly && (
+          {questions.length < MAX_PREGUNTAS && !readOnly && (
             <button disabled={readOnly} type="button" className="tf-btn-add-question" onClick={addQuestion}>
             + Añadir pregunta
             </button>
