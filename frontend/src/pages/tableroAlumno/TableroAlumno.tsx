@@ -314,6 +314,7 @@ export default function TableroAlumno() {
           allowRetry: data.permitirReintento ?? false,
           showCorrectAnswer: data.encontrarRespuestaMaestro ?? true,
           showStudentAnswer: data.encontrarRespuestaAlumno ?? true,
+          showComments: data.respVisible ?? true,
         });
 
         // Registro de la actividad del alumno (¡Empieza el tiempo!)

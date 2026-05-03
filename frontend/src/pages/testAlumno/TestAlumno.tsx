@@ -7,6 +7,7 @@ import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
 import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
 import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
+import CommentsViewModal from '../../components/CommentsViewModal/CommentsViewModal';
 import './TestAlumno.css';
 import dragonImg from '../../assets/props/dragon.png';
 import caballeroImg from '../../assets/props/caballero.png';
@@ -115,6 +116,7 @@ export default function TestAlumno() {
   const [error, setError] = useState('');
   const [showAnswerModal, setShowAnswerModal] = useState(false);
   const [answerModalMode, setAnswerModalMode] = useState<'student' | 'correct'>('student');
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [submittedAnswersByQuestion, setSubmittedAnswersByQuestion] = useState<Map<number, string[]>>(new Map());
   const [submittedCorrectByQuestion, setSubmittedCorrectByQuestion] = useState<Map<number, string>>(new Map());
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
@@ -169,6 +171,7 @@ export default function TestAlumno() {
           allowRetry: testData.permitirReintento ?? false,
           showCorrectAnswer: testData.encontrarRespuestaMaestro ?? true,
           showStudentAnswer: testData.encontrarRespuestaAlumno ?? true,
+          showComments: testData.respVisible ?? true,
         });
 
         // 2. Resolve ActividadAlumno
@@ -405,6 +408,8 @@ export default function TestAlumno() {
     setSubmittedCorrectByQuestion(new Map());
     setCurrentIndex(0);
     setError('');
+    setShowAnswerModal(false);
+    setShowCommentsModal(false);
   };
 
   const handleViewStudentAnswers = () => {
@@ -415,6 +420,10 @@ export default function TestAlumno() {
   const handleViewCorrectAnswers = () => {
     setAnswerModalMode('correct');
     setShowAnswerModal(true);
+  };
+
+  const handleViewComments = () => {
+    setShowCommentsModal(true);
   };
 
   // ── Score summary ─────────────────────────────────────────────────────────
@@ -659,6 +668,7 @@ export default function TestAlumno() {
             onRetry={handleRetry}
             onViewStudentAnswer={handleViewStudentAnswers}
             onViewCorrectAnswer={handleViewCorrectAnswers}
+            onViewComments={handleViewComments}
             onCancel={() => navigate(-1)}
           />
         ) : submitted ? (
@@ -689,6 +699,14 @@ export default function TestAlumno() {
             }) : []}
             onClose={() => setShowAnswerModal(false)}
             mode={answerModalMode}
+          />
+        )}
+
+        {showCommentsModal && (
+          <CommentsViewModal
+            title="Comentarios"
+            comment={test?.comentariosRespVisible}
+            onClose={() => setShowCommentsModal(false)}
           />
         )}
       </main>

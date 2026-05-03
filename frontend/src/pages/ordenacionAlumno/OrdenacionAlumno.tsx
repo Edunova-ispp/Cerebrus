@@ -8,6 +8,7 @@ import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import CompletionPopup from '../../components/CompletionPopup/CompletionPopup';
 import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
 import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
+import CommentsViewModal from '../../components/CommentsViewModal/CommentsViewModal';
 import './OrdenacionAlumno.css';
 
 type OrdenacionDTO = {
@@ -50,6 +51,10 @@ type RespAlumnoOrdenacionDetalleDTO = {
   readonly valoresAlum: string[];
   readonly valoresCorrectos: string[];
 };
+
+type BubbleLines = readonly [string, string, string];
+
+
 
 function isCompletedAttempt(fechaFin?: string | null): boolean {
   if (!fechaFin) return false;
@@ -120,12 +125,30 @@ export default function OrdenacionAlumno() {
   const [feedback, setFeedback] = useState<{ correcta: boolean; comentario?: string } | null>(null);
   const [showAnswerModal, setShowAnswerModal] = useState(false);
   const [answerModalMode, setAnswerModalMode] = useState<'student' | 'correct'>('student');
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [submittedOrder, setSubmittedOrder] = useState<string[] | null>(null);
   const [correctOrder, setCorrectOrder] = useState<string[] | null>(null);
   const incorrectosRef = useRef(0);
   const pendingRespuestaIdRef = useRef<number | null>(null);
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
   
+  const FRASES_BLOQUE: readonly BubbleLines[] = [
+    ['¡Esto es un caos!', 'Ordena las casillas', 'y pon orden en este reino'],
+    ['¡El saber es poder!', '¡Ordena estos elementos', 'de sabiduría!'],
+    ['Mis pergaminos...', 'Todo está revuelto', 'Organízalo, por favor'],
+    ['Mi memoria ya no', 'es lo que era.', 'Ayúdame a ordenar estas piezas'],
+    ['¡Van a destruir mi castillo!', '¡Ordena estas casillas o no', 'habrá forma de salvarlo!'],
+    ['Necesito tu ayuda para', 'organizar la capital del reino.', '¡Ordena estos elementos para que sea próspera!'],
+    ['¡El monstruo viene del más allá!', '¡Ordena estos elementos mágicos', 'para que desaparezca!'],
+    ['¡El dragón va a quemar el castillo!', '¡Ordena estas piezas para', 'invocar el escudo mágico!'],
+  ];
+
+  function elegirAlAzar<T>(arr: readonly T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)]; // NOSONAR: uso no criptográfico, solo UI estética
+  }
+
+  const [bubbleLines] = useState(() => elegirAlAzar(FRASES_BLOQUE));
+
   const ordenacionIdNum = useMemo(() => {
     if (!ordenacionId) return Number.NaN;
     return Number.parseInt(ordenacionId, 10);
@@ -174,6 +197,7 @@ export default function OrdenacionAlumno() {
           allowRetry: ordData.permitirReintento ?? false,
           showCorrectAnswer: ordData.encontrarRespuestaMaestro ?? true,
           showStudentAnswer: ordData.encontrarRespuestaAlumno ?? true,
+          showComments: ordData.respVisible ?? true,
         });
 
         const alumnoId = getCurrentUserIdFromJwt();
@@ -339,6 +363,7 @@ export default function OrdenacionAlumno() {
       setLastAttemptGrade(null);
       setShowAnswerModal(false);
       setAnswerModalMode('student');
+      setShowCommentsModal(false);
       setError('');
       incorrectosRef.current = 0;
       pendingRespuestaIdRef.current = null;
@@ -393,6 +418,10 @@ export default function OrdenacionAlumno() {
     void loadAndOpen();
   };
 
+  const handleViewComments = () => {
+    setShowCommentsModal(true);
+  };
+
   if (loading) {
     return (
       <div className="ordenacion-alumno-page">
@@ -433,9 +462,9 @@ export default function OrdenacionAlumno() {
 
     <div className="ord-king-row">
       <div className="ord-speech-bubble">
-        <span>Esto es un caos</span>
-        <span>Ordena las casillas</span>
-        <span>Ordena el reino</span>
+        <span>{bubbleLines[0]}</span>
+        <span>{bubbleLines[1]}</span>
+        <span>{bubbleLines[2]}</span>
       </div>
       <img src={kingImg} alt="Rey" className="ord-king-img" />
     </div>
@@ -516,6 +545,7 @@ export default function OrdenacionAlumno() {
             onRetry={handleRetry}
             onViewStudentAnswer={handleViewStudentAnswers}
             onViewCorrectAnswer={handleViewCorrectAnswers}
+            onViewComments={handleViewComments}
             onCancel={() => navigate(-1)}
           />
         ) : feedback?.correcta ? (
@@ -553,6 +583,14 @@ export default function OrdenacionAlumno() {
             })() : []}
             onClose={() => setShowAnswerModal(false)}
             mode={answerModalMode}
+          />
+        )}
+
+        {showCommentsModal && (
+          <CommentsViewModal
+            title="Comentarios"
+            comment={ordenacion?.comentariosRespVisible}
+            onClose={() => setShowCommentsModal(false)}
           />
         )}
       </main>

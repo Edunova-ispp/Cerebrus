@@ -33,6 +33,8 @@ export interface CartaFormInitialValues {
   readonly encontrarRespuestaMaestro?: boolean;
 }
 
+const MAX_CARDS = 9;
+
 interface Card {
   localKey: string;
   id?: number;
@@ -184,7 +186,8 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
     if (!cursoId) return 'Falta el id del curso en la URL';
 
     if (cards.length === 0) return 'Añade al menos una carta';
-    if (cards.length > 30) return 'No puedes añadir más de 20 cartas';
+    if (cards.length < 2) return 'Necesitas al menos dos cartas para crear la actividad';
+    if (cards.length > MAX_CARDS) return `No puedes añadir más de ${MAX_CARDS} cartas`;
 
     for (let ci = 0; ci < cards.length; ci++) {
       const c = cards[ci];
@@ -355,8 +358,6 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
   return (
     <>
       <form onSubmit={handleSubmit} className="cf-form">
-        {error && <p className="ca-text cf-error">{error}</p>}
-
         {/* ── TOP: Metadata ── */}
         <div className="cf-header">
           <div className="cf-col">
@@ -410,22 +411,22 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
           
 
           <div className="cf-col">
-                      <div>
-            <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
-              Generar con IA
-            </button>
-          </div>
-            <div>
-              <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
-              <input
-                type="number"
-                id="cf-puntuacion"
-                className="cf-input cf-input-sm"
-                value={puntuacion}
-                onChange={(e) => setPuntuacion(e.target.value)}
-                min="1"
-                required
-              />
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 80 }}>
+              <div>
+                <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
+                <input
+                  type="number"
+                  id="cf-puntuacion"
+                  className="cf-input cf-input-sm"
+                  value={puntuacion}
+                  onChange={(e) => setPuntuacion(e.target.value)}
+                  min="1"
+                  required
+                />
+              </div>
+              <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+                Generar con IA
+              </button>
             </div>
 
             <label className="cf-check-label">
@@ -434,7 +435,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
                 checked={respVisible}
                 onChange={(e) => setRespVisible(e.target.checked)}
               />
-              <span>Mostrar correcciones al alumno</span>
+              <span>Mostrar comentarios de corrección</span>
             </label>
 
             <label className="cf-check-label">
@@ -485,6 +486,11 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
           <p className="cf-help">
             Añade las cartas. Cada carta tiene una <strong>pregunta</strong> (anverso) y una <strong>respuesta</strong> (reverso). El alumno deberá emparejar cada pregunta con su respuesta.
           </p>
+          
+          <h3 className="cf-section-title">
+            Cartas
+            <span>{cards.length} / {MAX_CARDS} máx.</span>
+          </h3>
 
           {cards.map((card, ci) => (
             <div key={card.localKey} className="cf-card-block">
@@ -547,7 +553,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             </div>
           ))}
 
-          {cards.length < 30 && (
+          {cards.length < MAX_CARDS && (
             <button type="button" className="cf-btn-add-card" onClick={addCard}>
               + Añadir carta
             </button>
@@ -555,9 +561,16 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
         </div>
 
         <div className="ca-form-footer">
-          <button className="ca-btn-guardar" type="submit" disabled={loading}>
-            {loading ? 'Guardando...' : 'Guardar'}
-          </button>
+          <div className="tf-footer-stack">
+            <button className="ca-btn-guardar" type="submit" disabled={loading}>
+              {loading ? 'Guardando...' : 'Guardar'}
+            </button>
+            {error && (
+              <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+                {error}
+              </p>
+            )}
+          </div>
         </div>
       </form>
       <GenerarIAModal
