@@ -1,6 +1,7 @@
 package com.cerebrus.integration.cursos;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -51,13 +52,15 @@ class CursoProfesorIntegrationTest {
         Curso curso = new Curso();
         curso.setId(1L);
         curso.setTitulo("Java Integration");
+        curso.setVisibilidad(true);
 
-        when(cursoService.crearCurso(any(), any(), any(), any())).thenReturn(curso);
+        when(cursoService.crearCurso(any(), any(), any(), any(), anyBoolean())).thenReturn(curso);
 
         Map<String, Object> body = Map.of(
                 "titulo", "Java Integration",
                 "descripcion", "Curso de tests",
-                "imagen", "logo.png"
+                "imagen", "logo.png", 
+                "visibilidad", true
         );
 
         mockMvc.perform(post("/api/cursos/curso")
@@ -70,9 +73,9 @@ class CursoProfesorIntegrationTest {
     @Test
     void actualizarCurso_noPropietario_devuelve403() throws Exception {
         doThrow(new AccessDeniedException("Solo el propietario del curso puede actualizarlo"))
-                .when(cursoService).actualizarCurso(eq(1L), any(), any(), any(), any());
+                .when(cursoService).actualizarCurso(eq(1L), any(), any(), any(), any(), anyBoolean());
 
-        Map<String, Object> body = Map.of("titulo", "Nuevo Titulo");
+        Map<String, Object> body = Map.of("titulo", "Nuevo Titulo", "visibilidad", true);
 
         mockMvc.perform(patch("/api/cursos/1")
                         .contentType(MediaType.APPLICATION_JSON)
