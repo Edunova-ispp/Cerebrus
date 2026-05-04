@@ -29,7 +29,7 @@ interface Props {
 }
 
 const MAX_CARACTERES_TITULO = 60;
-const MAX_CARACTERES_DESCRIPCION = 1000;
+const MAX_CARACTERES_DESCRIPCION = 600;
 
 export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
   const [titulo, setTitulo] = useState('');
