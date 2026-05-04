@@ -110,7 +110,11 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
 
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
         wait.until(ExpectedConditions.urlContains("/actividades/teoria/6004"));
-        WebElement finalizarLecturaBtn = wait.until(ExpectedConditions.visibilityOfElementLocated(
+
+        WebElement flashcard = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".ta-flashcard")));
+        flashcard.click();
+
+        WebElement finalizarLecturaBtn = wait.until(ExpectedConditions.elementToBeClickable(
             By.xpath("//button[normalize-space()='He terminado de leer']")));
 
         finalizarLecturaBtn.click();

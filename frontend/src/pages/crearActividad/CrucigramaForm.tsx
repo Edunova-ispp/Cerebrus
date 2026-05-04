@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
 import './CrucigramaForm.css';
@@ -31,6 +31,7 @@ interface Props {
     readonly temaIdProp?: string;
     readonly cursoIdProp?: string;
     readonly onDone?: () => void;
+    readonly readOnly?: boolean;
 }
 
 interface PreguntaLocal {
@@ -45,7 +46,7 @@ function sanitizeRespuesta(value: string): string {
     return value.replace(/[^\p{L}]/gu, '').toUpperCase();
 }
 
-export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
+export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
     const [titulo, setTitulo] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [puntuacion, setPuntuacion] = useState('');
@@ -61,6 +62,9 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
     const params = useParams<{ id: string; temaId: string }>();
     const cursoId = cursoIdProp ?? params.id;
     const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
+
+    // Tracks which activity ID was last initialized to prevent re-initializing on every render
+    const initializedActivityIdRef = useRef<number | null>(null);
 
     const readErrorMessage = (value: unknown): string => {
         if (typeof value === 'object' && value !== null && 'message' in value) {
@@ -116,6 +120,12 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
     // ── Load initial values ───────────────────────────────────────────────
     useEffect(() => {
         if (!initialValues) return;
+
+        // Only reinitialize if the activity ID changed, not on every render
+        if (initializedActivityIdRef.current === crucigramaId) return;
+    
+        initializedActivityIdRef.current = crucigramaId ?? null;
+
         setTitulo(initialValues.titulo || '');
         setDescripcion(initialValues.descripcion || '');
         setPuntuacion(String(initialValues.puntuacion) || '');
@@ -139,7 +149,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                 }))
             );
         }
-    }, [initialValues]);
+    }, [crucigramaId, mode]);
 
     // ── Handlers ──────────────────────────────────────────────────────────
     const handlePreguntaChange = (index: number, field: keyof PreguntaLocal, value: string) => {
@@ -233,6 +243,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                     <div>
                         <label className="cf-label" htmlFor="cf-titulo">Título *</label>
                         <input
+                            readOnly={readOnly}
                             id="cf-titulo"
                             type="text"
                             className="cf-input"
@@ -244,6 +255,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
 
                         <label className="cf-label" htmlFor="cf-desc">Descripción</label>
                         <textarea
+                            readOnly={readOnly}
                             id="cf-desc"
                             className="cf-textarea"
                             value={descripcion}
@@ -253,54 +265,61 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                         />
                     </div>
 
-                    <div className="tf-col">
-                        <label className="cf-label" htmlFor="cf-punt">Puntuación *</label>
-                        <input
-                            id="cf-punt"
-                            type="number"
-                            className="tf-input tf-input-sm"
-                            value={puntuacion}
-                            min={1}
-                            onChange={e => setPuntuacion(e.target.value)}
-                            required
-                        />
-
-                        <label
-                            className="tf-check-label"
-                            htmlFor="cf-reintento"
-                        >
+                    <div>
+                        <div style={{marginBottom: 12 }}>
+                            <label className="cf-label" htmlFor="cf-punt">Puntuación *</label>
                             <input
-                                id="cf-reintento"
-                                type="checkbox"
-                                checked={permitirReintento}
-                                onChange={e => setPermitirReintento(e.target.checked)}
+                                readOnly={readOnly}
+                                id="cf-punt"
+                                type="number"
+                                className="cf-input"
+                                value={puntuacion}
+                                min={1}
+                                onChange={e => setPuntuacion(e.target.value)}
+                                required
                             />
-                            <span className="cf-checkbox-label">Permitir reintentos</span>
-                        </label>
-                        <label
-                            className="tf-check-label"
-                            htmlFor="cf-mostrar-puntuacion"
-                        >
-                            <input
-                                id="cf-mostrar-puntuacion"
-                                type="checkbox"
-                                checked={mostrarPuntuacion}
-                                onChange={e => setMostrarPuntuacion(e.target.checked)}
-                            />
-                            <span className="cf-checkbox-label">Mostrar puntuación</span>
-                        </label>
-                        <label
-                            className="tf-check-label"
-                            htmlFor="cf-mostrar-resp-maest"
-                        >
-                            <input
-                                id="cf-mostrar-resp-maest"
-                                type="checkbox"
-                                checked={encontrarRespuestaMaestro}
-                                onChange={e => {setEncontrarRespuestaMaestro(e.target.checked); setRespVisible(e.target.checked);}}
-                            />
-                            <span className="cf-checkbox-label">Mostrar respuesta correcta</span>
-                        </label>
+                        </div>
+                        <div className="tf-col">
+                            <label
+                                className="cf-checkbox-row"
+                                htmlFor="cf-reintento"
+                            >
+                                <input
+                                    disabled={readOnly}
+                                    id="cf-reintento"
+                                    type="checkbox"
+                                    checked={permitirReintento}
+                                    onChange={e => setPermitirReintento(e.target.checked)}
+                                />
+                                <span className="cf-checkbox-label">Permitir reintentos</span>
+                            </label>
+                            <label
+                                className="cf-checkbox-row"
+                                htmlFor="cf-mostrar-puntuacion"
+                            >
+                                <input
+                                    disabled={readOnly}
+                                    id="cf-mostrar-puntuacion"
+                                    type="checkbox"
+                                    checked={mostrarPuntuacion}
+                                    onChange={e => setMostrarPuntuacion(e.target.checked)}
+                                />
+                                <span className="cf-checkbox-label">Mostrar puntuación</span>
+                            </label>
+                            <label
+                                className="cf-checkbox-row"
+                                htmlFor="cf-mostrar-resp-maest"
+                            >
+                                <input
+                                    disabled={readOnly}
+                                    id="cf-mostrar-resp-maest"
+                                    type="checkbox"
+                                    checked={encontrarRespuestaMaestro}
+                                    onChange={e => {setEncontrarRespuestaMaestro(e.target.checked);}}
+                                />
+                                <span className="cf-checkbox-label">Mostrar respuesta correcta</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -317,6 +336,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                         <div className="cf-word-col-clue">
                             <label className="cf-label">Pista (pregunta que verá el alumno)</label>
                             <input
+                                readOnly={readOnly}
                                 className="cf-input"
                                 placeholder="Ej: Capital de España"
                                 value={p.pregunta}
@@ -327,6 +347,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                         <div className="cf-word-col-word">
                             <label className="cf-label">Palabra (respuesta)</label>
                             <input
+                                readOnly={readOnly}
                                 className="cf-input cf-input-upper"
                                 placeholder="MADRID"
                                 value={p.respuesta}
@@ -336,8 +357,9 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                                 required
                             />
                         </div>
-                        {preguntas.length > 1 && (
+                        {preguntas.length > 1 && !readOnly &&(
                             <button
+                                disabled={readOnly}
                                 type="button"
                                 className="cf-btn-remove"
                                 onClick={() => removePregunta(index)}
@@ -349,25 +371,27 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                     </div>
                 ))}
 
-                {preguntas.length < MAX_PALABRAS && (
-                    <button type="button" className="cf-btn-add" onClick={addPregunta}>
+                {preguntas.length < MAX_PALABRAS && !readOnly &&(
+                    <button disabled={readOnly} type="button" className="cf-btn-add" onClick={addPregunta}>
                         + Añadir palabra
                     </button>
                 )}
             </div>
 
-                        <div className="ca-form-footer">
-                            <div className="tf-footer-stack">
-                                <button className="cf-btn-submit" type="submit" disabled={loading}>
-                                    {loading ? 'PROCESANDO...' : mode === 'edit' ? 'GUARDAR' : 'GUARDAR '}
-                                </button>
-                                {error && (
-                                    <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
-                                        {error}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
+            <div className="ca-form-footer">
+                <div className="tf-footer-stack">
+                    {!readOnly && (
+                        <button className="cf-btn-submit" type="submit" disabled={loading}>
+                            {loading ? 'PROCESANDO...' : mode === 'edit' ? 'GUARDAR' : 'GUARDAR '}
+                        </button>
+                    )}
+                    {error && (
+                        <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+                            {error}
+                        </p>
+                    )}
+                </div>
+            </div>
         </form>
     );
 }

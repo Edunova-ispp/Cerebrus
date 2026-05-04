@@ -36,7 +36,7 @@ public class CursoController {
     public ResponseEntity<Curso> crearCurso(@RequestBody @Valid CrearCursoRequest request){
        
         try {
-             Curso creado = cursoService.crearCurso(request.getTitulo(), request.getDescripcion(), request.getImagen(), request.getCodigo());
+            Curso creado = cursoService.crearCurso(request.getTitulo(), request.getDescripcion(), request.getImagen(), request.getCodigo(), request.getVisibilidad());
             return ResponseEntity.status(HttpStatus.CREATED).body(creado);
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -84,7 +84,8 @@ public class CursoController {
                     request.getTitulo(),
                     request.getDescripcion(),
                     request.getImagen(),
-                    request.getCodigo()
+                    request.getCodigo(),
+                    request.getVisibilidad()
             );
             return ResponseEntity.ok(cursoActualizado);
         } catch (AccessDeniedException e) {
@@ -172,6 +173,7 @@ public class CursoController {
         private String descripcion;
         private String imagen;
         private String codigo;
+        private Boolean visibilidad;
 
         public String getTitulo() { return titulo; }
         public void setTitulo(String titulo) { this.titulo = titulo; }
@@ -183,6 +185,9 @@ public class CursoController {
         public void setImagen(String imagen) { this.imagen = imagen; }
         public String getCodigo() { return codigo; }
         public void setCodigo(String codigo) { this.codigo = codigo; }
+
+        public Boolean getVisibilidad() { return visibilidad; }
+        public void setVisibilidad(Boolean visibilidad) { this.visibilidad = visibilidad; }
         
         public CrearCursoRequest() {}
     }
@@ -194,6 +199,7 @@ public class CursoController {
         private String descripcion;
         private String imagen;
         private String codigo;
+        private Boolean visibilidad;
 
         public String getTitulo() { return titulo; }
         public void setTitulo(String titulo) { this.titulo = titulo; }
@@ -205,6 +211,9 @@ public class CursoController {
         public void setImagen(String imagen) { this.imagen = imagen; }
         public String getCodigo() { return codigo; }
         public void setCodigo(String codigo) { this.codigo = codigo; }
+
+        public Boolean getVisibilidad() { return visibilidad; }
+        public void setVisibilidad(Boolean visibilidad) { this.visibilidad = visibilidad; }
 
         public ActualizarCursoRequest() {}
     }

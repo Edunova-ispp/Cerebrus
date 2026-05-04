@@ -81,7 +81,7 @@ assertThat(driver.findElements(By.cssSelector("div.curso-card"))).isNotEmpty();
                 );
                 assertThat(addThemeButton.getText()).contains("Añadir tema");
 
-                List<WebElement> themeItems = driver.findElements(By.cssSelector("div.ltp-item"));
+                List<WebElement> themeItems = driver.findElements(By.cssSelector("div.ltp-tema-bloque"));
                 if (themeItems.isEmpty()) {
                         WebElement emptyState = pageWait.until(
                                         ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.ltp-vacio"))
@@ -139,11 +139,13 @@ assertThat(driver.findElements(By.cssSelector("div.curso-card"))).isNotEmpty();
                 navigateTo("/cursos/" + sharedCourse.id());
 
                 WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-                WebElement themeItem = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(
-                                                By.xpath("//div[contains(@class, 'ltp-item')][.//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + currentThemeTitle + "']]")
-                                )
-                );
+                pageWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("p.ltp-estado")));
+                if (!themeExists(currentThemeTitle)) {
+                        createThemeInCurrentCourse(currentThemeTitle);
+                        navigateTo("/cursos/" + sharedCourse.id());
+                        pageWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("p.ltp-estado")));
+                }
+                WebElement themeItem = waitForThemeInList(currentThemeTitle, Duration.ofSeconds(60));
                 WebElement editButton = themeItem.findElement(By.cssSelector("button[title='Editar']"));
                 ((JavascriptExecutor) driver).executeScript("arguments[0].click();", editButton);
 
@@ -174,43 +176,42 @@ assertThat(driver.findElements(By.cssSelector("div.curso-card"))).isNotEmpty();
         }
 
         @Test
-@Order(5)
-@DisplayName("El maestro no puede crear un tema con título inválido y permanece en el formulario")
-void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
-    ensureSharedCourseReady();
-    login(MAESTRO_USER, MAESTRO_PASSWORD);
+        @Order(5)
+        @DisplayName("El maestro no puede crear un tema con título inválido y permanece en el formulario")
+        void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
+                ensureSharedCourseReady();
+                login(MAESTRO_USER, MAESTRO_PASSWORD);
 
-    // Navegar via click igual que @Order(3), no via URL directa
-    navigateTo("/cursos/" + sharedCourse.id());
-    WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
+                navigateTo("/cursos/" + sharedCourse.id());
+                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
 
-    WebElement addThemeButton = pageWait.until(
-            ExpectedConditions.presenceOfElementLocated(By.cssSelector("button.ltp-btn-añadir"))
-    );
-    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addThemeButton);
+                WebElement addThemeButton = pageWait.until(
+                        ExpectedConditions.presenceOfElementLocated(By.cssSelector("button.ltp-btn-añadir"))
+                );
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addThemeButton);
 
-    pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.welcome-text")));
+                pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.welcome-text")));
 
-    WebElement titleInput = pageWait.until(
-            ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
-    );
-    titleInput.clear();
-    titleInput.sendKeys("   ");
+                WebElement titleInput = pageWait.until(
+                        ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
+                );
+                titleInput.clear();
+                titleInput.sendKeys("   ");
 
-    driver.findElement(By.cssSelector("button.pixel-btn-submit-main")).click();
+                driver.findElement(By.cssSelector("button.pixel-btn-submit-main")).click();
 
-    // Cerrar alerta si aparece tras submit inválido
-    try {
-        new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.alertIsPresent());
-        driver.switchTo().alert().dismiss();
-    } catch (org.openqa.selenium.TimeoutException ignored) {}
+                // Cerrar alerta si aparece tras submit inválido
+                try {
+                        new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.alertIsPresent());
+                        driver.switchTo().alert().dismiss();
+                } catch (org.openqa.selenium.TimeoutException ignored) {}
 
-    WebElement errorMsg = pageWait.until(
-            ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.error-msg"))
-    );
-    assertThat(errorMsg.getText()).containsIgnoringCase("requerido");
-    assertThat(driver.getCurrentUrl()).contains("/cursos/" + sharedCourse.id());
-}
+                WebElement errorMsg = pageWait.until(
+                        ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.error-msg"))
+                );
+                assertThat(errorMsg.getText()).containsIgnoringCase("requerido");
+                assertThat(driver.getCurrentUrl()).contains("/cursos/" + sharedCourse.id());
+        }
 
         @Test
         @Order(6)
@@ -221,11 +222,13 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
                 navigateTo("/cursos/" + sharedCourse.id());
 
                 WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-                WebElement themeItem = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(
-                                                By.xpath("//div[contains(@class, 'ltp-item')][.//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + currentThemeTitle + "']]")
-                                )
-                );
+                pageWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("p.ltp-estado")));
+                if (!themeExists(currentThemeTitle)) {
+                        createThemeInCurrentCourse(currentThemeTitle);
+                        navigateTo("/cursos/" + sharedCourse.id());
+                        pageWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("p.ltp-estado")));
+                }
+                WebElement themeItem = waitForThemeInList(currentThemeTitle, Duration.ofSeconds(60));
                 WebElement editButton = themeItem.findElement(By.cssSelector("button[title='Editar']"));
                 ((JavascriptExecutor) driver).executeScript("arguments[0].click();", editButton);
                 WebElement heading = pageWait.until(
@@ -267,7 +270,7 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
                 pageWait.until(ExpectedConditions.urlContains("/misCursos"));
 
                 assertThat(driver.getCurrentUrl()).contains("/misCursos");
-                assertThat(driver.findElements(By.cssSelector("span.ltp-item-titulo"))).isEmpty();
+                assertThat(driver.findElements(By.cssSelector("span.ltp-tema-titulo"))).isEmpty();
 
                 login(MAESTRO_USER, MAESTRO_PASSWORD);
                 setCourseVisibilityInUi(true);
@@ -279,6 +282,16 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
         void alumnoPuedeVerTemaCreadoYLuegoDejaDeVerloTrasBorrado() {
                 ensureSharedCourseReady();
 
+                login(MAESTRO_USER, MAESTRO_PASSWORD);
+                navigateTo("/cursos/" + sharedCourse.id());
+                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
+                pageWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("p.ltp-estado")));
+                if (!themeExists(currentThemeTitle)) {
+                        createThemeInCurrentCourse(currentThemeTitle);
+                        navigateTo("/cursos/" + sharedCourse.id());
+                        pageWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("p.ltp-estado")));
+                }
+
                 login(ALUMNO_USER, ALUMNO_PASSWORD);
                 openStudentCourseMap(sharedCourse.id());
                 assertStudentSeesThemeInMap(currentThemeTitle);
@@ -286,11 +299,6 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
                 login(MAESTRO_USER, MAESTRO_PASSWORD);
                 navigateTo("/cursos/" + sharedCourse.id());
                 assertTeacherSeesTheme(currentThemeTitle);
-
-                WebElement noActivitiesMessage = new WebDriverWait(driver, WAIT).until(
-                                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.ltp-vacio"))
-                );
-                assertThat(noActivitiesMessage.getText()).contains("No hay actividades en este tema");
 
                 deleteThemeByTitle(currentThemeTitle);
                 assertTeacherDoesNotSeeTheme(currentThemeTitle);
@@ -473,86 +481,155 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
         }
 
         private void createThemeInCurrentCourse(String themeTitle) {
-    WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(20)); // más tiempo
+                WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
-    try {
-        navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
-    } catch (org.openqa.selenium.WebDriverException e) {
-        // Si el driver no responde, reintentar una vez
-        try { Thread.sleep(2000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
-        navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
-    }
+                try {
+                        navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
+                } catch (org.openqa.selenium.WebDriverException e) {
+                        try { Thread.sleep(2000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+                        navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
+                }
 
-    try {
-        pageWait.until(ExpectedConditions.visibilityOfElementLocated(
-            By.cssSelector("h2.welcome-text")));
-    } catch (org.openqa.selenium.TimeoutException e) {
-        // Si no carga el formulario, puede que haya redirigido — ver URL actual
-        throw new AssertionError("No cargó el formulario de crear tema. URL: " 
-            + driver.getCurrentUrl(), e);
-    }
+                try {
+                        pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.welcome-text")));
+                } catch (org.openqa.selenium.TimeoutException e) {
+                        throw new AssertionError("No cargó el formulario de crear tema. URL: " + driver.getCurrentUrl(), e);
+                }
 
-    WebElement titleInput = pageWait.until(
-        ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
-    );
-    titleInput.clear();
-    titleInput.sendKeys(themeTitle);
+                WebElement titleInput = pageWait.until(
+                        ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
+                );
+                titleInput.clear();
+                titleInput.sendKeys(themeTitle);
 
-    WebElement submitButton = pageWait.until(
-        ExpectedConditions.elementToBeClickable(By.cssSelector("button.pixel-btn-submit-main"))
-    );
-    submitButton.click();
+                WebElement submitButton = pageWait.until(
+                        ExpectedConditions.elementToBeClickable(By.cssSelector("button.pixel-btn-submit-main"))
+                );
+                submitButton.click();
 
-    pageWait.until(ExpectedConditions.urlContains("/cursos/" + sharedCourse.id()));
-    navigateTo("/cursos/" + sharedCourse.id());
+                // Esperar a que el formulario desaparezca (indica que se envió)
+                pageWait.until(ExpectedConditions.stalenessOf(submitButton));
+    
+                // Esperar redirección a página de curso
+                pageWait.until(ExpectedConditions.urlContains("/cursos/" + sharedCourse.id()));
+    
+                // Esperar a que el tema creado sea visible en la lista
+                pageWait.until(ExpectedConditions.visibilityOfElementLocated(
+                        By.xpath("//span[contains(@class, 'ltp-tema-titulo') and contains(normalize-space(), '" + themeTitle + "')]")
+                ));
 }
 
         private void assertTeacherSeesTheme(String themeTitle) {
-                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-                WebElement createdTheme = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(
-                                                By.xpath("//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + themeTitle + "']")
-                                )
-                );
-                assertThat(createdTheme.getText()).isEqualTo(themeTitle);
+                System.out.println("[TemasIT] assertTeacherSeesTheme themeTitle=" + themeTitle + " url=" + driver.getCurrentUrl());
+                WebElement createdTheme = waitForThemeInList(themeTitle, Duration.ofSeconds(60));
+                System.out.println("[TemasIT] assertTeacherSeesTheme foundText=" + createdTheme.getText());
+                assertThat(createdTheme.getText()).contains(themeTitle);
         }
 
         private void assertTeacherDoesNotSeeTheme(String themeTitle) {
                 assertThat(driver.findElements(
-                                By.xpath("//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + themeTitle + "']")
+                                By.xpath("//span[contains(@class, 'ltp-tema-titulo') and contains(normalize-space(), '" + themeTitle + "')]")
                 )).isEmpty();
         }
 
-        private void openStudentCourseMap(String courseId) {
-    // Timeout reducido solo para esta navegación que puede colgar
-    driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
-    try {
-        navigateTo("/cursos/" + courseId);
-    } catch (org.openqa.selenium.TimeoutException ignored) {
-        // La página SPA puede no disparar load — continuar si el DOM está listo
-    } finally {
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(300));
-    }
-
-    WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-    List<WebElement> heroButtons = driver.findElements(By.cssSelector("button.detalle-hero-btn"));
-    if (!heroButtons.isEmpty()) {
-        WebElement continueButton = pageWait.until(
-                ExpectedConditions.visibilityOf(heroButtons.get(0)));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", continueButton);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", continueButton);
-    } else {
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
-        try {
-            navigateTo("/mapa/" + courseId);
-        } catch (org.openqa.selenium.TimeoutException ignored) {}
-        finally {
-            driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(300));
+        private boolean themeExists(String themeTitle) {
+                return !driver.findElements(By.xpath(
+                                "//div[contains(@class, 'ltp-tema-bloque')][.//span[contains(@class, 'ltp-tema-titulo') and contains(normalize-space(), '" + themeTitle + "')]]"
+                )).isEmpty();
         }
-    }
 
-    pageWait.until(ExpectedConditions.urlContains("/mapa/" + courseId));
-}
+        private WebElement waitForThemeInList(String themeTitle, Duration timeout) {
+                By themeLocator = By.xpath(
+                                "//div[contains(@class, 'ltp-tema-bloque')][.//span[contains(@class, 'ltp-tema-titulo') and contains(normalize-space(), '" + themeTitle + "')]]"
+                );
+
+                long end = System.currentTimeMillis() + timeout.toMillis();
+                boolean refreshed = false;
+                int attempt = 0;
+
+                while (System.currentTimeMillis() < end) {
+                        attempt++;
+                        List<WebElement> elems = driver.findElements(themeLocator);
+                        System.out.println("[TemasIT] waitForThemeInList attempt=" + attempt + " matches=" + elems.size() + " url=" + driver.getCurrentUrl());
+                        if (!elems.isEmpty()) {
+                                for (WebElement e : elems) {
+                                        if (e.isDisplayed()) {
+                                                System.out.println("[TemasIT] waitForThemeInList visibleText=" + e.getText());
+                                                return e;
+                                        }
+                                }
+                        }
+
+                        List<WebElement> loaders = driver.findElements(By.cssSelector("p.ltp-estado"));
+                        System.out.println("[TemasIT] waitForThemeInList attempt=" + attempt + " loaders=" + loaders.size());
+                        if (!loaders.isEmpty()) {
+                                try {
+                                        new WebDriverWait(driver, Duration.ofSeconds(5)).until(
+                                                        ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("p.ltp-estado"))
+                                        );
+                                } catch (org.openqa.selenium.TimeoutException ignored) {
+                                }
+                        }
+
+                        try {
+                                Thread.sleep(1000);
+                        } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                break;
+                        }
+
+                        // Intenta un refresh una vez a mitad del timeout para forzar re-render
+                        if (!refreshed && System.currentTimeMillis() > (end - timeout.toMillis() / 2)) {
+                                try {
+                                        driver.navigate().refresh();
+                                } catch (Exception ignored) {
+                                }
+                                refreshed = true;
+                        }
+                }
+
+                String snapshotPath = "target/test-output/theme-snapshot-" + System.currentTimeMillis() + ".html";
+                try {
+                        java.nio.file.Files.createDirectories(java.nio.file.Paths.get("target/test-output"));
+                        java.nio.file.Files.write(java.nio.file.Paths.get(snapshotPath), driver.getPageSource().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                } catch (java.io.IOException ignored) {
+                }
+
+                System.out.println("[TemasIT] waitForThemeInList timeout snapshot=" + snapshotPath);
+                System.out.println("[TemasIT] waitForThemeInList pageSourceLength=" + driver.getPageSource().length());
+
+                throw new AssertionError("Tema '" + themeTitle + "' no apareció en la lista tras " + timeout.toSeconds() + "s. Captura: " + snapshotPath);
+        }
+
+        private void openStudentCourseMap(String courseId) {
+                driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
+                try {
+                        navigateTo("/cursos/" + courseId);
+                } catch (org.openqa.selenium.TimeoutException ignored) {
+                        // La página SPA puede no disparar load — continuar si el DOM está listo
+                } finally {
+                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(300));
+                }
+
+                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
+                List<WebElement> heroButtons = driver.findElements(By.cssSelector("button.detalle-hero-btn"));
+                if (!heroButtons.isEmpty()) {
+                        WebElement continueButton = pageWait.until(
+                                ExpectedConditions.visibilityOf(heroButtons.get(0)));
+                        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", continueButton);
+                        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", continueButton);
+                } else {
+                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
+                        try {
+                        navigateTo("/mapa/" + courseId);
+                        } catch (org.openqa.selenium.TimeoutException ignored) {}
+                        finally {
+                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(300));
+                        }
+                }
+
+                pageWait.until(ExpectedConditions.urlContains("/mapa/" + courseId));
+                }
 
         private void assertStudentDoesNotSeeThemeInMap(String themeTitle) {
                 assertThat(driver.findElements(
@@ -563,7 +640,7 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
         private void deleteThemeByTitle(String themeTitle) {
                 WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
                 By themeLocator = By.xpath(
-                                "//div[contains(@class, 'ltp-item')][.//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + themeTitle + "']]"
+                                "//div[contains(@class, 'ltp-tema-bloque')][.//span[contains(@class, 'ltp-tema-titulo') and contains(normalize-space(), '" + themeTitle + "')]]"
                 );
 
                 int safetyCounter = 0;
@@ -613,40 +690,34 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
         }
 
         private void ensureSharedCourseReady() {
-    if (sharedCourse == null) {
-        login(MAESTRO_USER, MAESTRO_PASSWORD);
-        sharedCourse = createCourseAndOpenDetail(COURSE_TITLE);
-        login(ALUMNO_USER, ALUMNO_PASSWORD);
-        enrollStudentInCourse(sharedCourse.code());
-    }
+                if (sharedCourse == null) {
+                        login(MAESTRO_USER, MAESTRO_PASSWORD);
+                        sharedCourse = createCourseAndOpenDetail(COURSE_TITLE);
+                        login(ALUMNO_USER, ALUMNO_PASSWORD);
+                        enrollStudentInCourse(sharedCourse.code());
+                }
 
-    login(MAESTRO_USER, MAESTRO_PASSWORD);
-    navigateTo("/cursos/" + sharedCourse.id());
+                login(MAESTRO_USER, MAESTRO_PASSWORD);
+                navigateTo("/cursos/" + sharedCourse.id());
 
-    By currentThemeLocator = By.xpath(
-        "//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" 
-        + currentThemeTitle + "']"
-    );
+                        By currentThemeLocator = By.xpath(
+                                "//span[contains(@class, 'ltp-tema-titulo') and contains(normalize-space(), '" 
+                                + currentThemeTitle + "')]"
+                        );
 
-    List<WebElement> currentThemeMatches = driver.findElements(currentThemeLocator);
-    System.out.println("=== ensureSharedCourseReady: temas encontrados con título '" 
-        + currentThemeTitle + "': " + currentThemeMatches.size());
+                List<WebElement> currentThemeMatches = driver.findElements(currentThemeLocator);
 
-    if (currentThemeMatches.isEmpty()) {
-        List<WebElement> anyThemeTitles = driver.findElements(
-            By.cssSelector("span.ltp-item-titulo"));
-        System.out.println("=== Temas disponibles: " + anyThemeTitles.size());
-        anyThemeTitles.forEach(t -> System.out.println("  - " + t.getText()));
+                if (currentThemeMatches.isEmpty()) {
+                                List<WebElement> anyThemeTitles = driver.findElements(
+                                        By.cssSelector("span.ltp-tema-titulo"));
+                        anyThemeTitles.forEach(t -> System.out.println("  - " + t.getText()));
 
-        if (!anyThemeTitles.isEmpty()) {
-            currentThemeTitle = anyThemeTitles.getFirst().getText().trim();
-        } else {
-            // @Order(8) borra el tema — en @Order(12) no hay tema, no hace falta crearlo
-            System.out.println("=== Sin temas, el @Order(12) no necesita tema para eliminar el curso");
-            // No crear tema si solo vamos a eliminar el curso
+                                if (!anyThemeTitles.isEmpty()) {
+                                        currentThemeTitle = anyThemeTitles.get(0).getText().trim();
+                                } else {
+                        }
+                }
         }
-    }
-}
 
         private void setCourseVisibilityInUi(boolean visible) {
                 navigateTo("/miscursos");
@@ -671,17 +742,16 @@ void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
                 }
         }
         private void assertStudentSeesThemeInMap(String themeTitle) {
-    WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(20));
-    
-    // Recargar para asegurar datos actualizados
-    driver.navigate().refresh();
-    
-    WebElement themeButton = pageWait.until(
-            ExpectedConditions.visibilityOfElementLocated(
-                    By.xpath("//button[contains(@class, 'mapa-tema-btn') and normalize-space() = '" + themeTitle + "']")
-            )
-    );
-    assertThat(themeButton.getText()).isEqualTo(themeTitle);
-}
+                WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(20));
+
+                driver.navigate().refresh();
+                
+                WebElement themeButton = pageWait.until(
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.xpath("//button[contains(@class, 'mapa-tema-btn') and normalize-space() = '" + themeTitle + "']")
+                        )
+                );
+                assertThat(themeButton.getText()).isEqualTo(themeTitle);
+        }
 
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserRoles } from '../../types/curso';
@@ -29,6 +29,7 @@ interface Props {
   readonly temaIdProp?: string;
   readonly cursoIdProp?: string;
   readonly onDone?: () => void;
+  readonly readOnly?: boolean;
 }
 
 const PREGUNTAS_3X3 = 8;
@@ -46,7 +47,7 @@ function makeQuestions(count: number): QPair[] {
 
 const isCellDark = (row: number, col: number) => (row + col) % 2 === 1;
 
-export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
+export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -71,8 +72,17 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
   // Role check
   const isMaestro = getCurrentUserRoles().some((r) => r.includes('MAESTRO'));
 
+  // Tracks which activity ID was last initialized to prevent re-initializing on every render
+  const initializedActivityIdRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (!initialValues) return;
+
+    // Only reinitialize if the activity ID changed, not on every render
+    if (initializedActivityIdRef.current === tableroId) return;
+    
+    initializedActivityIdRef.current = tableroId ?? null;
+
     setTitulo(initialValues.titulo);
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion));
@@ -86,7 +96,7 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
     setPreguntas(
       initialValues.preguntas.map((p) => ({ localKey: makeLocalKey(), pregunta: p.pregunta, respuesta: p.respuesta })),
     );
-  }, [initialValues]);
+  }, [tableroId, mode]);
 
   const handleTamanoChange = (nuevo: boolean) => {
     if (tamano === nuevo) return;
@@ -237,28 +247,35 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
       {/* ── Datos básicos ─────────────────────────────────────── */}
       <div className="tbl-header">
         <div className="tbl-col">
-          <label className="tbl-label">Título *</label>
-          <input
-            className="tbl-input"
-            value={titulo}
-            onChange={(e) => setTitulo(e.target.value)}
-            placeholder="Título del tablero"
-            required
-          />
-          <label className="tbl-label">Descripción</label>
-          <textarea
-            className="tbl-textarea"
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            placeholder="Descripción opcional"
-            rows={3}
-          />
+          <div className="tbl-input-group">
+            <label className="tbl-label">Título *</label>
+            <input
+              readOnly={readOnly}
+              className="tbl-input"
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value)}
+              placeholder="Título del tablero"
+              required
+            />
+          </div>
+          <div className="tbl-input-group">
+            <label className="tbl-label">Descripción</label>
+            <textarea
+              readOnly={readOnly}
+              className="tbl-textarea"
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+              placeholder="Descripción opcional"
+              rows={3}
+            />
+          </div>
         </div>
         <div className="tbl-col">
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 80 }}>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className="tbl-input-group">
               <label className="tbl-label">Puntuación *</label>
               <input
+                readOnly={readOnly}
                 className="tbl-input"
                 type="number"
                 min={1}
@@ -268,16 +285,29 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
                 style={{ width: 90 }}
               />
             </div>
-            <button
-              type="button"
-              className="iam-trigger-btn"
-              onClick={() => setShowIAModal(true)}
-            >
-              Generar con IA
-            </button>
+              {!readOnly && (
+                <button
+                  disabled={readOnly}
+                  type="button"
+                  className="iam-trigger-btn"
+                  onClick={() => setShowIAModal(true)}
+                >
+                  Generar con IA
+                </button>
+              )}
           </div>
           <label className="tbl-label tbl-label--check">
             <input
+              disabled={readOnly}
+              type="checkbox"
+              checked={respVisible}
+              onChange={(e) => setRespVisible(e.target.checked)}
+            />
+            <span>Mostrar respuesta correcta al alumno</span>
+          </label>
+          <label className="tbl-label tbl-label--check">
+            <input
+              disabled={readOnly}
               type="checkbox"
               checked={permitirReintento}
               onChange={(e) => setPermitirReintento(e.target.checked)}
@@ -287,6 +317,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
 
           <label className="tbl-label tbl-label--check">
             <input
+              disabled={readOnly}
               type="checkbox"
               checked={mostrarPuntuacion}
               onChange={(e) => setMostrarPuntuacion(e.target.checked)}
@@ -296,6 +327,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
 
           <label className="tbl-label tbl-label--check">
             <input
+              disabled={readOnly}
               type="checkbox"
               checked={encontrarRespuestaMaestro}
               onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
@@ -305,6 +337,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
 
           <label className="tbl-label tbl-label--check">
             <input
+              disabled={readOnly}
               type="checkbox"
               checked={encontrarRespuestaAlumno}
               onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
@@ -325,6 +358,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
             const active = tamano === esTres;
             return (
               <button
+                disabled={readOnly}
                 key={String(esTres)}
                 type="button"
                 className={`tbl-tamano-btn${active ? ' tbl-tamano-btn--active' : ''}`}
@@ -366,12 +400,14 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
             <div key={q.localKey} className="tbl-q-row">
               <span className="tbl-q-number">{i + 1}</span>
               <input
+                readOnly={readOnly}
                 className="tbl-input"
                 value={q.pregunta ?? ''}
                 onChange={(e) => updatePregunta(i, e.target.value)}
                 placeholder={`Pregunta ${i + 1}`}
               />
               <input
+                readOnly={readOnly}
                 className="tbl-input tbl-respuesta-input"
                 value={q.respuesta ?? ''}
                 onChange={(e) => updateRespuesta(i, e.target.value)}
@@ -386,13 +422,15 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
 
       <div className="tbl-footer">
         <div className="tf-footer-stack">
-          <button
-            type="submit"
-            className="ca-btn-guardar"
-            disabled={loading || tamano === null}
-          >
-            {loading ? 'Guardando...' : mode === 'create' ? 'Crear Tablero' : 'Guardar cambios'}
-          </button>
+          {!readOnly && (
+            <button
+              type="submit"
+              className="ca-btn-guardar"
+              disabled={loading || tamano === null}
+            >
+              {loading ? 'Guardando...' : mode === 'create' ? 'Crear Tablero' : 'Guardar'}
+            </button>    
+          )}
           {error && (
             <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
               {error}

@@ -1,0 +1,74 @@
+/* ── Inputs del formulario ─────────────────────────────────── */
+
+.mi-input {
+  width: 100%;
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1rem;
+  color: var(--t-text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.mi-input:hover:not([readonly]) {
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.mi-input:focus:not([readonly]) {
+  outline: none;
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.mi-input[readonly] {
+  border-color: var(--t-border);
+  background: var(--t-input-bg);
+}
+
+.mi-input[readonly]:hover,
+.mi-input[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
+}
+
+/* ── Textarea ──────────────────────────────────────────────── */
+
+.mi-textarea {
+  width: 100%;
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1rem;
+  color: var(--t-text);
+  resize: vertical;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.mi-textarea:hover:not([readonly]) {
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.mi-textarea:focus:not([readonly]) {
+  outline: none;
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.mi-textarea[readonly] {
+  border-color: var(--t-border);
+  background: var(--t-input-bg);
+}
+
+.mi-textarea[readonly]:hover,
+.mi-textarea[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
+}

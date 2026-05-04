@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
 import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
@@ -25,9 +25,10 @@ interface Props {
   readonly temaIdProp?: string;
   readonly cursoIdProp?: string;
   readonly onDone?: () => void;
+  readonly readOnly?: boolean;
 }
 
-export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
+export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [imagen, setImagen] = useState('');
@@ -45,9 +46,18 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
   const cursoId = cursoIdProp ?? params.id;
   const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
+  // Tracks which activity ID was last initialized to prevent re-initializing on every render
+  const initializedActivityIdRef = useRef<number | null>(null);
+
   useEffect(() => {
     console.log("Intial values", initialValues);
     if (!initialValues) return;
+
+    // Only reinitialize if the activity ID changed, not on every render
+    if (initializedActivityIdRef.current === actividadId) return;
+    
+    initializedActivityIdRef.current = actividadId ?? null;
+
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setImagen(initialValues.imagen ?? '');
@@ -55,7 +65,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
     setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion));
     setEncontrarRespuestaMaestro(Boolean(initialValues.encontrarRespuestaMaestro));
     setEncontrarRespuestaAlumno(Boolean(initialValues.encontrarRespuestaAlumno));
-  }, [initialValues]);
+  }, [actividadId, mode]);
 
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
@@ -149,6 +159,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
         <div>
           <label className="of-label" htmlFor="teoria-titulo">Título de la Lección *</label>
           <input
+            readOnly={readOnly}
             type="text"
             id="teoria-titulo"
             className="of-input"
@@ -161,6 +172,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
         <div>
           <label className="of-label" htmlFor="teoria-descripcion">Contenido Teórico *</label>
           <textarea
+            readOnly={readOnly}
             id="teoria-descripcion"
             className="of-textarea"
             value={descripcion}
@@ -173,6 +185,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
         <div>
             <label className="cf-label" htmlFor="cf-imagen">URL de imagen (opcional)</label>
             <input
+              readOnly={readOnly}
               type="url"
               id="cf-imagen"
               className="cf-input"
@@ -192,6 +205,7 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               id="teoria-reintento"
               checked={permitirReintento}
@@ -202,13 +216,17 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
       </div>
 
       <div className="ca-form-footer">
-        <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
-          Generar con IA
-        </button>
-        <div className="tf-footer-stack">
-          <button className="ca-btn-guardar" type="submit" disabled={loading}>
-            {loading ? 'Guardando...' : 'Guardar'}
+        {!readOnly && (
+          <button disabled={readOnly} type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+            Generar con IA
           </button>
+        )}
+        <div className="tf-footer-stack">
+          {!readOnly && (
+            <button className="ca-btn-guardar" type="submit" disabled={loading}>
+              {loading ? 'Guardando...' : 'Guardar'}
+            </button>
+          )}
           {error && (
             <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
               {error}

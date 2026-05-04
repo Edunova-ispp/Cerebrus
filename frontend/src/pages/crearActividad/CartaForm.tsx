@@ -55,13 +55,14 @@ interface Props {
   readonly temaIdProp?: string;
   readonly cursoIdProp?: string;
   readonly onDone?: () => void;
+  readonly readOnly?: boolean;
 }
 
 function makeEmptyCard(): Card {
   return { localKey: makeLocalCardKey(), pregunta: '', respuesta: '', imagen: '' };
 }
 
-export function CartaForm({ mode = 'create', generalId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
+export function CartaForm({ mode = 'create', generalId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -84,8 +85,17 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
   const cursoId = cursoIdProp ?? params.id;
   const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
+  // Tracks which activity ID was last initialized to prevent re-initializing on every render
+  const initializedActivityIdRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (!initialValues) return;
+
+    // Only reinitialize if the activity ID changed, not on every render
+    if (initializedActivityIdRef.current === generalId) return;
+    
+    initializedActivityIdRef.current = generalId ?? null;
+
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
@@ -109,7 +119,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
         })),
       );
     }
-  }, [initialValues]);
+  }, [generalId, mode]);
 
   // ── Card state helpers ───────────────────────────────────────────────────
 
@@ -364,6 +374,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             <div>
               <label className="cf-label" htmlFor="cf-titulo">Título *</label>
               <input
+                readOnly={readOnly}
                 type="text"
                 id="cf-titulo"
                 className="cf-input"
@@ -377,6 +388,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             <div>
               <label className="cf-label" htmlFor="cf-descripcion">Descripción</label>
               <textarea
+                readOnly={readOnly}
                 id="cf-descripcion"
                 className="cf-input"
                 value={descripcion}
@@ -390,6 +402,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             <div>
               <label className="cf-label" htmlFor="cf-imagen">URL de imagen (opcional)</label>
               <input
+                readOnly={readOnly}
                 type="url"
                 id="cf-imagen"
                 className="cf-input"
@@ -415,6 +428,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
               <div>
                 <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
                 <input
+                  readOnly={readOnly}
                   type="number"
                   id="cf-puntuacion"
                   className="cf-input cf-input-sm"
@@ -424,13 +438,16 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
                   required
                 />
               </div>
-              <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
-                Generar con IA
-              </button>
+              {!readOnly && (
+                <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+                  Generar con IA
+                </button>
+              )}
             </div>
 
             <label className="cf-check-label">
               <input
+                disabled={readOnly}
                 type="checkbox"
                 checked={respVisible}
                 onChange={(e) => setRespVisible(e.target.checked)}
@@ -440,6 +457,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
 
             <label className="cf-check-label">
               <input
+                disabled={readOnly}
                 type="checkbox"
                 checked={permitirReintento}
                 onChange={(e) => setPermitirReintento(e.target.checked)}
@@ -449,6 +467,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
 
             <label className="cf-check-label">
               <input
+                disabled={readOnly}
                 type="checkbox"
                 checked={mostrarPuntuacion}
                 onChange={(e) => setMostrarPuntuacion(e.target.checked)}
@@ -458,6 +477,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
 
             <label className="cf-check-label">
               <input
+                disabled={readOnly}
                 type="checkbox"
                 checked={encontrarRespuestaMaestro}
                 onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
@@ -469,6 +489,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
               <div>
                 <label className="cf-label" htmlFor="cf-comentarios">Comentarios</label>
                 <input
+                  readOnly={readOnly}
                   type="text"
                   id="cf-comentarios"
                   className="cf-input"
@@ -496,8 +517,9 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             <div key={card.localKey} className="cf-card-block">
               <div className="cf-card-header">
                 <span className="cf-card-label">Carta {ci + 1}</span>
-                {cards.length > 1 && (
+                {cards.length > 1 && !readOnly && (
                   <button
+                    disabled={readOnly}
                     type="button"
                     className="cf-btn-remove-card"
                     onClick={() => removeCard(ci)}
@@ -512,6 +534,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
                 <div className="cf-card-field">
                   <label className="cf-card-field-label">Pregunta</label>
                   <input
+                    readOnly={readOnly}
                     type="text"
                     className="cf-card-input"
                     placeholder={`Pregunta de la carta ${ci + 1}...`}
@@ -522,6 +545,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
                 <div className="cf-card-field">
                   <label className="cf-card-field-label">Respuesta</label>
                   <input
+                    readOnly={readOnly}
                     type="text"
                     className="cf-card-input"
                     placeholder={`Respuesta de la carta ${ci + 1}...`}
@@ -534,6 +558,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
               <div className="cf-card-imagen">
                 <label className="cf-card-field-label">Imagen de la carta (opcional)</label>
                 <input
+                  readOnly={readOnly}
                   type="url"
                   className="cf-card-input"
                   placeholder="https://..."
@@ -553,7 +578,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             </div>
           ))}
 
-          {cards.length < MAX_CARDS && (
+          {cards.length < MAX_CARDS && !readOnly && (
             <button type="button" className="cf-btn-add-card" onClick={addCard}>
               + Añadir carta
             </button>
@@ -562,9 +587,11 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
 
         <div className="ca-form-footer">
           <div className="tf-footer-stack">
-            <button className="ca-btn-guardar" type="submit" disabled={loading}>
-              {loading ? 'Guardando...' : 'Guardar'}
-            </button>
+            {!readOnly && (
+              <button className="ca-btn-guardar" type="submit" disabled={loading}>
+                  {loading ? 'Guardando...' : 'Guardar'}
+              </button>
+            )}
             {error && (
               <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
                 {error}
