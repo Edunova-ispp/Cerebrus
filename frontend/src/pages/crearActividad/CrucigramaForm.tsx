@@ -265,71 +265,61 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                         />
                     </div>
 
-                    <div className="tf-col">
-                        <label className="cf-label" htmlFor="cf-punt">Puntuación *</label>
-                        <input
-                            readOnly={readOnly}
-                            id="cf-punt"
-                            type="number"
-                            className="tf-input tf-input-sm"
-                            value={puntuacion}
-                            min={1}
-                            onChange={e => setPuntuacion(e.target.value)}
-                            required
-                        />
-
-                        <label
-                            className="cf-checkbox-row"
-                            htmlFor="cf-visible"
-                        >
+                    <div>
+                        <div style={{marginBottom: 12 }}>
+                            <label className="cf-label" htmlFor="cf-punt">Puntuación *</label>
                             <input
-                                disabled={readOnly}
-                                id="cf-visible"
-                                type="checkbox"
-                                checked={respVisible}
-                                onChange={e => setRespVisible(e.target.checked)}
+                                readOnly={readOnly}
+                                id="cf-punt"
+                                type="number"
+                                className="cf-input"
+                                value={puntuacion}
+                                min={1}
+                                onChange={e => setPuntuacion(e.target.value)}
+                                required
                             />
-                            <span className="cf-checkbox-label">Mostrar solución al finalizar</span>
-                        </label>
-                        <label
-                            className="cf-checkbox-row"
-                            htmlFor="cf-reintento"
-                        >
-                            <input
-                                disabled={readOnly}
-                                id="cf-reintento"
-                                type="checkbox"
-                                checked={permitirReintento}
-                                onChange={e => setPermitirReintento(e.target.checked)}
-                            />
-                            <span className="cf-checkbox-label">Permitir reintentos</span>
-                        </label>
-                        <label
-                            className="tf-check-label"
-                            htmlFor="cf-mostrar-puntuacion"
-                        >
-                            <input
-                                disabled={readOnly}
-                                id="cf-mostrar-puntuacion"
-                                type="checkbox"
-                                checked={mostrarPuntuacion}
-                                onChange={e => setMostrarPuntuacion(e.target.checked)}
-                            />
-                            <span className="cf-checkbox-label">Mostrar puntuación</span>
-                        </label>
-                        <label
-                            className="tf-check-label"
-                            htmlFor="cf-mostrar-resp-maest"
-                        >
-                            <input
-                                disabled={readOnly}
-                                id="cf-mostrar-resp-maest"
-                                type="checkbox"
-                                checked={encontrarRespuestaMaestro}
-                                onChange={e => {setEncontrarRespuestaMaestro(e.target.checked); setRespVisible(e.target.checked);}}
-                            />
-                            <span className="cf-checkbox-label">Mostrar respuesta correcta</span>
-                        </label>
+                        </div>
+                        <div className="tf-col">
+                            <label
+                                className="cf-checkbox-row"
+                                htmlFor="cf-reintento"
+                            >
+                                <input
+                                    disabled={readOnly}
+                                    id="cf-reintento"
+                                    type="checkbox"
+                                    checked={permitirReintento}
+                                    onChange={e => setPermitirReintento(e.target.checked)}
+                                />
+                                <span className="cf-checkbox-label">Permitir reintentos</span>
+                            </label>
+                            <label
+                                className="cf-checkbox-row"
+                                htmlFor="cf-mostrar-puntuacion"
+                            >
+                                <input
+                                    disabled={readOnly}
+                                    id="cf-mostrar-puntuacion"
+                                    type="checkbox"
+                                    checked={mostrarPuntuacion}
+                                    onChange={e => setMostrarPuntuacion(e.target.checked)}
+                                />
+                                <span className="cf-checkbox-label">Mostrar puntuación</span>
+                            </label>
+                            <label
+                                className="cf-checkbox-row"
+                                htmlFor="cf-mostrar-resp-maest"
+                            >
+                                <input
+                                    disabled={readOnly}
+                                    id="cf-mostrar-resp-maest"
+                                    type="checkbox"
+                                    checked={encontrarRespuestaMaestro}
+                                    onChange={e => {setEncontrarRespuestaMaestro(e.target.checked);}}
+                                />
+                                <span className="cf-checkbox-label">Mostrar respuesta correcta</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>

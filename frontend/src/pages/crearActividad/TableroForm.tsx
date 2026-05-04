@@ -247,28 +247,32 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
       {/* ── Datos básicos ─────────────────────────────────────── */}
       <div className="tbl-header">
         <div className="tbl-col">
-          <label className="tbl-label">Título *</label>
-          <input
-            readOnly={readOnly}
-            className="tbl-input"
-            value={titulo}
-            onChange={(e) => setTitulo(e.target.value)}
-            placeholder="Título del tablero"
-            required
-          />
-          <label className="tbl-label">Descripción</label>
-          <textarea
-            readOnly={readOnly}
-            className="tbl-textarea"
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            placeholder="Descripción opcional"
-            rows={3}
-          />
+          <div className="tbl-input-group">
+            <label className="tbl-label">Título *</label>
+            <input
+              readOnly={readOnly}
+              className="tbl-input"
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value)}
+              placeholder="Título del tablero"
+              required
+            />
+          </div>
+          <div className="tbl-input-group">
+            <label className="tbl-label">Descripción</label>
+            <textarea
+              readOnly={readOnly}
+              className="tbl-textarea"
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+              placeholder="Descripción opcional"
+              rows={3}
+            />
+          </div>
         </div>
         <div className="tbl-col">
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 80 }}>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className="tbl-input-group">
               <label className="tbl-label">Puntuación *</label>
               <input
                 readOnly={readOnly}
@@ -281,14 +285,16 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
                 style={{ width: 90 }}
               />
             </div>
-            <button
-              disabled={readOnly}
-              type="button"
-              className="iam-trigger-btn"
-              onClick={() => setShowIAModal(true)}
-            >
-              Generar con IA
-            </button>
+              {!readOnly && (
+                <button
+                  disabled={readOnly}
+                  type="button"
+                  className="iam-trigger-btn"
+                  onClick={() => setShowIAModal(true)}
+                >
+                  Generar con IA
+                </button>
+              )}
           </div>
           <label className="tbl-label tbl-label--check">
             <input
@@ -422,7 +428,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
               className="ca-btn-guardar"
               disabled={loading || tamano === null}
             >
-              {loading ? 'Guardando...' : mode === 'create' ? 'Crear Tablero' : 'Guardar cambios'}
+              {loading ? 'Guardando...' : mode === 'create' ? 'Crear Tablero' : 'Guardar'}
             </button>    
           )}
           {error && (

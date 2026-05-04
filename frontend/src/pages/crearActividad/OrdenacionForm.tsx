@@ -290,9 +290,11 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
                 required
               />
             </div>
-            <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
-              Generar con IA
-            </button>
+            {!readOnly && (
+              <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+                Generar con IA
+              </button>
+            )}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -418,7 +420,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
               />
             </div>
           ))}
-          {ordenItems.length < MAX_ELEMENTOS && (
+          {ordenItems.length < MAX_ELEMENTOS && !readOnly &&(
             <button
               disabled={readOnly}
               className="of-btn-add"

@@ -18,7 +18,7 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
   const { id } = useParams<{ id: string }>(); // ← lee el id de la URL
   const [curso, setCurso] = useState<Curso | null>(cursoProp ?? null);
   const [temas, setTemas] = useState<Tema[]>([]);
-  const [temaSeleccionado, setTemaSeleccionado] = useState<Tema | null>(null);
+  const [expandedTemas, setExpandedTemas] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
@@ -57,11 +57,22 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
       .then((data) => {
         const lista: Tema[] = Array.isArray(data) ? data : [];
         setTemas(lista);
-        if (lista.length > 0) setTemaSeleccionado(lista[0]);
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Error cargando temas"))
       .finally(() => setLoading(false));
   }, [curso]);
+
+  const toggleExpanded = (temaId: number) => {
+    setExpandedTemas(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(temaId)) {
+        newSet.delete(temaId);
+      } else {
+        newSet.add(temaId);
+      }
+      return newSet;
+    });
+  };
 
   const navigate = useNavigate();
 
@@ -69,13 +80,11 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
     try {
       await apiFetch(`${apiBase}/api/temas/${temaId}`, { method: 'DELETE' });
       // Elimina el tema del estado local
-      setTemas(prev => {
-        const nuevaLista = prev.filter(t => t.id !== temaId);
-        // Si el tema borrado era el seleccionado, selecciona el primero
-        if (temaSeleccionado?.id === temaId) {
-          setTemaSeleccionado(nuevaLista[0] ?? null);
-        }
-        return nuevaLista;
+      setTemas(prev => prev.filter(t => t.id !== temaId));
+      setExpandedTemas(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(temaId);
+        return newSet;
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error al eliminar el tema");
@@ -83,21 +92,21 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
   };
 
   const handleEliminarActividad = async (actividadId: number) => {
-  try {
-    await apiFetch(`${apiBase}/api/actividades/delete/${actividadId}`, { method: 'DELETE' });
-    setTemaSeleccionado(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        actividades: prev.actividades?.filter(a => a.id !== actividadId) ?? []
-      };
-    });
-  } catch (e) {
-    setError(e instanceof Error ? e.message : "Error al eliminar la actividad");
-  }
-};
+    try {
+      await apiFetch(`${apiBase}/api/actividades/delete/${actividadId}`, { method: 'DELETE' });
+      setTemas(prev => prev.map(tema => ({
+        ...tema,
+        actividades: tema.actividades?.filter(a => a.id !== actividadId) ?? []
+      })));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error al eliminar la actividad");
+    }
+  };
 
-  const actividades = temaSeleccionado?.actividades ?? [];
+  const actividades = (temaId: number) => {
+    const tema = temas.find(t => t.id === temaId);
+    return tema?.actividades ?? [];
+  };
 
   return (
     <div className={embedded ? 'ltp-embedded' : 'ltp-page'}>
@@ -116,83 +125,77 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
         {error && <p className="ltp-estado ltp-estado--error">{error}</p>}
 
         {!loading && !error && (
-          <div className="ltp-paneles">
-            {/* Panel izquierdo: Temas */}
-            <div className="ltp-panel">
-              <div className="ltp-lista">
-                {temas.length === 0 ? (
-                  <p className="ltp-vacio">No hay temas todavía</p>
-                ) : (
-                  temas.map((tema) => (
-                    <div
-                      key={tema.id}
-                      className={`ltp-item${
-                        temaSeleccionado?.id === tema.id ? " ltp-item--activo" : ""
-                      }`}
-                      onClick={() => setTemaSeleccionado(tema)}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setTemaSeleccionado(tema); }}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      <span className="ltp-item-titulo">{tema.titulo}</span>
-                      <div className="ltp-item-acciones">
-                        <button className="ltp-btn-icono" title="Editar" onClick={(e) => { e.stopPropagation(); isMaestro && (onEditarTema ? onEditarTema(tema.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${tema.id}/editar`)); }}>✎</button>                        
+          <div className="ltp-temas-lista">
+            {temas.length === 0 ? (
+              <p className="ltp-vacio">No hay temas todavía</p>
+            ) : (
+              temas.map((tema) => {
+                const isExpanded = expandedTemas.has(tema.id);
+                const actividadesTema = actividades(tema.id);
+                return (
+                  <div key={tema.id} className="ltp-tema-bloque">
+                    {/* Header del tema */}
+                    <div className="ltp-tema-header">
+                      <button
+                        className="ltp-tema-expandir"
+                        onClick={() => toggleExpanded(tema.id)}
+                        title={isExpanded ? "Contraer" : "Expandir"}
+                      >
+                        <span className={`ltp-tema-icono ${isExpanded ? 'expandido' : ''}`}>▶</span>
+                        <span className="ltp-tema-titulo">{tema.titulo}</span>
+                      </button>
+                      <div className="ltp-tema-acciones">
+                        <button className="ltp-btn-icono" title="Editar" onClick={(e) => { e.stopPropagation(); isMaestro && (onEditarTema ? onEditarTema(tema.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${tema.id}/editar`)); }}>✎</button>
                         <button className="ltp-btn-icono" title="Borrar" onClick={(e) => { e.stopPropagation(); isMaestro ? handleEliminarTema(tema.id) : undefined; }}>🗑</button>
                       </div>
                     </div>
-                  ))
-                )}
-              </div>
-              <button className="ltp-btn-añadir" onClick={() => isMaestro && (onCrearTema ? onCrearTema() : navigate(`/cursos/${id ?? curso?.id}/temas/crear`))}>+ Añadir tema</button>
-            </div>
 
-            {/* Panel derecho: Actividades */}
-<div className="ltp-panel">
-  {temaSeleccionado ? (
-    <>
-      <div className="ltp-lista">
-        {actividades.length === 0 ? (
-          <p className="ltp-vacio">No hay actividades en este tema</p>
-        ) : (
-          actividades.map((act) => (
-            <div 
-              key={act.id} 
-              className="ltp-item"
-              onClick={() => isMaestro && (onEditarActividad ? onEditarActividad(temaSeleccionado.id, act.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/${act.id}/editar`))}
-              onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && isMaestro) (onEditarActividad ? onEditarActividad(temaSeleccionado.id, act.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/${act.id}/editar`)); }}
-              role="button"
-              tabIndex={0}
-            >
-              <span className="ltp-item-titulo">{act.titulo}</span>
-              <div className="ltp-item-acciones">
-                <button 
-                  className="ltp-btn-icono" 
-                  title="Borrar" 
-                  onClick={(e) => { 
-                    e.stopPropagation(); 
-                    isMaestro ? handleEliminarActividad(act.id) : undefined; 
-                  }}
-                >
-                  🗑
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-      <button 
-        className="ltp-btn-añadir" 
-        onClick={() => isMaestro && (onCrearActividad ? onCrearActividad(temaSeleccionado.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${temaSeleccionado.id}/actividades/crear`))}
-      >
-        + Añadir actividad
-      </button>
-    </>
-  ) : (
-    <div className="ltp-vacio-seleccion">
-      <p className="ltp-vacio">Crea un tema para crear sus actividades</p>
-    </div>
-  )}
-</div>
+                    {/* Contenido desplegable */}
+                    {isExpanded && (
+                      <div className="ltp-tema-contenido">
+                        {actividadesTema.length === 0 ? (
+                          <p className="ltp-vacio-actividades">No hay actividades en este tema</p>
+                        ) : (
+                          <div className="ltp-actividades-lista">
+                            {actividadesTema.map((act) => (
+                              <div
+                                key={act.id}
+                                className="ltp-actividad-item"
+                                onClick={() => isMaestro && (onEditarActividad ? onEditarActividad(tema.id, act.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${tema.id}/actividades/${act.id}/editar`))}
+                                onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && isMaestro) (onEditarActividad ? onEditarActividad(tema.id, act.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${tema.id}/actividades/${act.id}/editar`)); }}
+                                role="button"
+                                tabIndex={0}
+                              >
+                                <span className="ltp-actividad-titulo">{act.titulo}</span>
+                                <div className="ltp-actividad-acciones">
+                                  <button
+                                    className="ltp-btn-icono-sm"
+                                    title="Borrar"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      isMaestro ? handleEliminarActividad(act.id) : undefined;
+                                    }}
+                                  >
+                                    🗑
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <button
+                          className="ltp-btn-añadir-actividad"
+                          onClick={() => isMaestro && (onCrearActividad ? onCrearActividad(tema.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${tema.id}/actividades/crear`))}
+                        >
+                          + Añadir actividad
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+            <button className="ltp-btn-añadir" onClick={() => isMaestro && (onCrearTema ? onCrearTema() : navigate(`/cursos/${id ?? curso?.id}/temas/crear`))}>+ Añadir tema</button>
           </div>
         )}
       </main>

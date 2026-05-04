@@ -238,7 +238,6 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
               readOnly={readOnly}
               type="text"
               id="mi-titulo"
-              className="of-input"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Ej: Señala los elementos correctos"
@@ -254,7 +253,6 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
               className="mi-textarea"
               readOnly={readOnly}
               id="mi-descripcion"
-              className="of-textarea"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               rows={3}
@@ -353,7 +351,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
           {respVisible && (
             <div>
-              <label className="ca-text" htmlFor="mi-comentarios">
+              <label className="of-label" htmlFor="mi-comentarios">
                 Comentarios
               </label>
               <input
@@ -368,7 +366,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
           )}
 
           <div>
-            <label className="ca-text" htmlFor="mi-imagen-a-marcar">
+            <label className="of-label" htmlFor="mi-imagen-a-marcar">
               Imagen a marcar (URL)
             </label>
             <input

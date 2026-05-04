@@ -216,9 +216,11 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
       </div>
 
       <div className="ca-form-footer">
-        <button disabled={readOnly} type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
-          Generar con IA
-        </button>
+        {!readOnly && (
+          <button disabled={readOnly} type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+            Generar con IA
+          </button>
+        )}
         <div className="tf-footer-stack">
           {!readOnly && (
             <button className="ca-btn-guardar" type="submit" disabled={loading}>

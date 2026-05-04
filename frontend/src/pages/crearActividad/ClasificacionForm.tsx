@@ -424,6 +424,7 @@ const handleIAResult = (data: any) => {
               <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
               <input
                 readOnly={readOnly}
+                className="of-input"
                 type="number"
                 id="cf-puntuacion"
                 value={puntuacion}
@@ -433,9 +434,11 @@ const handleIAResult = (data: any) => {
                 style={{ width: 90 }}
               />
             </div>
-            <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
-              Generar con IA
-            </button>
+            {!readOnly && (
+              <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+                Generar con IA
+              </button>
+            )}
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
@@ -463,10 +466,9 @@ const handleIAResult = (data: any) => {
           </div>
           {respVisible && (
             <div style={{ marginTop: 10 }}>
-              <label className="ca-text">Comentarios de corrección</label>
+              <label className="cf-label">Comentarios de corrección</label>
               <input className="tf-input" readOnly={readOnly} id="cf-comentarios" type="text" value={comentariosRespVisible} onChange={(e) => setComentariosRespVisible(e.target.value)} />
             </div>
-            
           )}
         </div>
       </div>
@@ -481,7 +483,7 @@ const handleIAResult = (data: any) => {
             <div className="tf-question-header">
               <span className="tf-question-label">Categoría {pIdx + 1}</span>
               <span className="paf-badge">{p.respuestas.length} / {MAX_ELEMENTOS} máx.</span>
-              {preguntas.length > 2 && (
+              {preguntas.length > 2 && !readOnly && (
                 <button type="button" className="tf-btn-remove-question" onClick={() => removePregunta(pIdx)}>✕</button>
               )}
             </div>
@@ -504,18 +506,18 @@ const handleIAResult = (data: any) => {
                     value={r.text} 
                     onChange={(e) => updateRespuesta(pIdx, rIdx, { text: e.target.value })} 
                   />
-                  {p.respuestas.length > 1 && (
+                  {p.respuestas.length > 1 && !readOnly && (
                     <button type="button" className="tf-btn-remove-option" onClick={() => removeRespuesta(pIdx, rIdx)}>✕</button>
                   )}
                 </div>
               ))}
-              {p.respuestas.length < MAX_ELEMENTOS && (
+              {p.respuestas.length < MAX_ELEMENTOS && !readOnly && (
                 <button type="button" className="tf-btn-add-option" onClick={() => addRespuesta(pIdx)}>+ Añadir Elemento</button>
               )}
             </div>
           </div>
         ))}
-        {preguntas.length < MAX_CATEGORIAS && (
+        {preguntas.length < MAX_CATEGORIAS && !readOnly && (
           <button type="button" className="tf-btn-add-question" onClick={addPregunta} style={{ width: '100%' }}>
             + Añadir Nueva Categoría
           </button>
@@ -526,7 +528,7 @@ const handleIAResult = (data: any) => {
         <div className="tf-footer-stack">
           {!readOnly && (
             <button className="ca-btn-guardar" type="submit" disabled={loading}>
-              {loading ? 'Guardando...' : 'Guardar Actividad'}
+              {loading ? 'Guardando...' : 'Guardar'}
             </button>
           )}
           {error && (

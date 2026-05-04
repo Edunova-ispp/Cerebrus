@@ -251,9 +251,14 @@
 
 .tf-option--correct .tf-option-input[readonly]:hover,
 .tf-option--correct .tf-option-input[readonly]:focus {
-  border-color: var(--t-primary);
+  border-color: #7ECC81;
   box-shadow: none;
-  background: var(--t-input-focus);
+}
+
+.tf-option--correct .tf-option-input:not([readonly]):hover,
+.tf-option--correct .tf-option-input:not([readonly]):focus {
+  border-color: #7ECC81; /* Mismo color que en el readonly */
+  box-shadow: 0 0 0 3px rgba(126, 204, 129, 0.15); /* Verde más leve */
 }
 
 .tf-option--correct .tf-option-input {
@@ -278,13 +283,11 @@
 
 .tf-btn-correct:hover {
   background: #E0FFE2;
-  border-color: var(--t-primary);
   color: #7ECC81;
 }
 
 .tf-btn-correct--active {
   background: #CBF7CE;
-  color: var(--t-primary);
   border-color: #7ECC81;
 }
 

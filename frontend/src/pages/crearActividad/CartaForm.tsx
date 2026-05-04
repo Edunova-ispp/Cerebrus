@@ -438,9 +438,11 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
                   required
                 />
               </div>
-              <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
-                Generar con IA
-              </button>
+              {!readOnly && (
+                <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+                  Generar con IA
+                </button>
+              )}
             </div>
 
             <label className="cf-check-label">
@@ -515,7 +517,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             <div key={card.localKey} className="cf-card-block">
               <div className="cf-card-header">
                 <span className="cf-card-label">Carta {ci + 1}</span>
-                {cards.length > 1 && (
+                {cards.length > 1 && !readOnly && (
                   <button
                     disabled={readOnly}
                     type="button"
@@ -576,7 +578,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             </div>
           ))}
 
-          {cards.length < MAX_CARDS && (
+          {cards.length < MAX_CARDS && !readOnly && (
             <button type="button" className="cf-btn-add-card" onClick={addCard}>
               + Añadir carta
             </button>
@@ -586,9 +588,9 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
         <div className="ca-form-footer">
           <div className="tf-footer-stack">
             {!readOnly && (
-            <button className="ca-btn-guardar" type="submit" disabled={loading}>
-                {loading ? 'Guardando...' : 'Guardar'}
-            </button>
+              <button className="ca-btn-guardar" type="submit" disabled={loading}>
+                  {loading ? 'Guardando...' : 'Guardar'}
+              </button>
             )}
             {error && (
               <p className="ca-text tf-error" style={{ color: '#c0392b' }}>

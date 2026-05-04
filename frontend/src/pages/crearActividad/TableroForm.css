@@ -12,6 +12,7 @@
   gap: 24px;
   flex-wrap: wrap;
   margin-bottom: 28px;
+  align-items: flex-start;
 }
 
 .tbl-col {
@@ -20,6 +21,12 @@
   gap: 10px;
   flex: 1 1 260px;
   min-width: 0;
+}
+
+.tbl-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .tbl-label {
@@ -47,10 +54,7 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.tbl-input:hover {
-  border-color: var(--t-border-dark);
-}
-
+.tbl-input:hover,
 .tbl-input:focus {
   outline: none;
   border-color: var(--t-primary);
@@ -77,10 +81,7 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.tbl-textarea:hover {
-  border-color: var(--t-border-dark);
-}
-
+.tbl-textarea:hover,
 .tbl-textarea:focus {
   outline: none;
   border-color: var(--t-primary);
@@ -135,17 +136,23 @@
   box-shadow: var(--t-shadow);
 }
 
+.tbl-tamano-btn[disabled]:hover {
+  background: var(--t-card);
+  border-color: var(--t-border);
+  box-shadow: var(--t-shadow-sm);
+}
+
 .tbl-tamano-btn--active {
   background: var(--t-primary-light);
   border-color: var(--t-primary);
   box-shadow: var(--t-shadow);
 }
 
-.tbl-tamano-btn--active[readonly]:hover,
-.tbl-tamano-btn--active[readonly]:focus {
-  border-color: var(--t-border);
-  box-shadow: none;
-  background: var(--t-input-bg);
+.tbl-tamano-btn--active[disabled]:hover,
+.tbl-tamano-btn--active[disabled]:focus {
+  background: var(--t-primary-light);
+  border-color: var(--t-primary);
+  box-shadow: var(--t-shadow);
 }
 
 .tbl-tamano-label {
