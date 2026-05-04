@@ -28,6 +28,9 @@ interface Props {
   readonly readOnly?: boolean;
 }
 
+const MAX_CARACTERES_TITULO = 60;
+const MAX_CARACTERES_DESCRIPCION = 1000;
+
 export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -76,8 +79,8 @@ export function TeoriaForm({ mode = 'create', actividadId, initialValues, temaId
     if (!cursoId) return 'Falta el id del curso en la URL';
     if (!descripcion.trim()) return 'La descripción es requerida en una actividad de teoría';
 
-    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
-    if (descripcion.trim().length > 350) return 'La descripción no puede exceder los 350 caracteres.';
+    if (titulo.trim().length > MAX_CARACTERES_TITULO) return `El título no puede exceder ${MAX_CARACTERES_TITULO} caracteres.`;
+    if (descripcion.trim().length > MAX_CARACTERES_DESCRIPCION) return `La descripción no puede exceder ${MAX_CARACTERES_DESCRIPCION} caracteres.`;
     if (/[\r\n]/.test(descripcion)) return 'La descripción no puede incluir saltos de línea.';
 
     return null;

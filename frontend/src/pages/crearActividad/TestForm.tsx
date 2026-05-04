@@ -69,6 +69,10 @@ function makeEmptyQuestion(): Question {
   return { localKey: makeLocalKey(), text: '', options: [makeEmptyOption(), makeEmptyOption()] };
 }
 
+const MAX_CARACTERES_TITULO = 60;
+const MAX_CARACTERES_DESCRIPCION = 1000;
+const MAX_PUNTUACION = 10000;
+const MAX_CARACTERES_COMENTARIOS = 250;
 const MAX_OPCIONES = 10;
 const MAX_PREGUNTAS = 50;
 
@@ -191,20 +195,20 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
     if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
-    if (puntuacionNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
+    if (puntuacionNum > MAX_PUNTUACION) return `La puntuación no puede exceder ${MAX_PUNTUACION.toLocaleString()}`;
 
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
     if (!cursoId) return 'Falta el id del curso en la URL';
 
-    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
-    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+    if (descripcion.trim().length > MAX_CARACTERES_DESCRIPCION) return `La descripción no puede exceder los ${MAX_CARACTERES_DESCRIPCION} caracteres.`;
+    if (titulo.trim().length > MAX_CARACTERES_TITULO) return `El título no puede exceder los ${MAX_CARACTERES_TITULO} caracteres.`;
 
     if (questions.length === 0) return 'Añade al menos una pregunta';
     if (questions.length > MAX_PREGUNTAS) return `No puedes añadir más de ${MAX_PREGUNTAS} preguntas`;
 
-    if (respVisible && comentariosRespVisible.trim().length > 250) return 'Los comentarios no pueden exceder los 250 caracteres.';
-    if (respVisible && comentariosRespVisible.trim().length === 0) return 'Escribe un comentario para mostrar cuando la respuesta sea visible.';
+    if (comentariosRespVisible.trim().length > MAX_CARACTERES_COMENTARIOS) return `Los comentarios no pueden exceder los ${MAX_CARACTERES_COMENTARIOS} caracteres.`;
+    if (respVisible && comentariosRespVisible.trim().length === 0) return 'Escribe un comentario de corrección para mostrar.';
 
     for (let qi = 0; qi < questions.length; qi++) {
       const q = questions[qi];

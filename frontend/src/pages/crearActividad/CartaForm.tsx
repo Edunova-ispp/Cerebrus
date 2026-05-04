@@ -33,6 +33,10 @@ export interface CartaFormInitialValues {
   readonly encontrarRespuestaMaestro?: boolean;
 }
 
+const MAX_CARACTERES_TITULO = 60;
+const MAX_CARACTERES_DESCRIPCION = 1000;
+const MAX_PUNTUACION = 10000;
+const MAX_CARACTERES_COMENTARIOS = 250;
 const MAX_CARDS = 9;
 
 interface Card {
@@ -182,14 +186,16 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
 
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
-    if (titulo.trim().length > 25) return 'El título no puede exceder 25 caracteres';
+    if (titulo.trim().length > MAX_CARACTERES_TITULO) return `El título no puede exceder ${MAX_CARACTERES_TITULO} caracteres`;
 
-    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder 1000 caracteres';
+    if (descripcion.trim().length > MAX_CARACTERES_DESCRIPCION) return `La descripción no puede exceder ${MAX_CARACTERES_DESCRIPCION} caracteres`;
+    if (respVisible && comentariosRespVisible.trim().length === 0) return 'Escribe un comentario de corrección para mostrar.';
+    if (comentariosRespVisible.trim().length > MAX_CARACTERES_COMENTARIOS) return `Los comentarios no pueden exceder ${MAX_CARACTERES_COMENTARIOS} caracteres.`;
 
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
     if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
-    if (puntuacionNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
+    if (puntuacionNum > MAX_PUNTUACION) return `La puntuación no puede exceder ${MAX_PUNTUACION.toLocaleString()}`;
 
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';

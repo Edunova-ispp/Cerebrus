@@ -32,6 +32,9 @@ interface Props {
   readonly readOnly?: boolean;
 }
 
+const MAX_CARACTERES_TITULO = 60;
+const MAX_CARACTERES_DESCRIPCION = 1000;
+const MAX_PUNTUACION = 10000;
 const PREGUNTAS_3X3 = 8;
 const PREGUNTAS_4X4 = 15;
 
@@ -113,12 +116,12 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
     
-    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
-    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
+    if (titulo.trim().length > MAX_CARACTERES_TITULO) return `El título no puede exceder ${MAX_CARACTERES_TITULO} caracteres.`;
+    if (descripcion.trim().length > MAX_CARACTERES_DESCRIPCION) return `La descripción no puede exceder ${MAX_CARACTERES_DESCRIPCION} caracteres.`;
 
     const pts = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(pts) || pts <= 0) return 'La puntuación debe ser un número mayor a 0';
-    if (pts > 999999999) return 'La puntuación no puede exceder 999.999.999';
+    if (pts > MAX_PUNTUACION) return `La puntuación no puede exceder ${MAX_PUNTUACION}`;
     if (tamano === null) return 'Selecciona el tamaño del tablero';
     if (mode === 'create' && !temaId) return 'Falta el id del tema en la URL';
     if (mode === 'edit' && !tableroId) return 'Falta el id del tablero a editar';
