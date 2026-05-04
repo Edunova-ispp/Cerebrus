@@ -1,4 +1,4 @@
-import { Component } from "react";
+// removed unused Component import (Watchbug ErrorBoundary removed)
 import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/auth/login/LoginPage";
 import LogoutPage from "./pages/auth/logout/LogoutPage";
@@ -46,55 +46,10 @@ import GestionUsuarios from "./pages/gestionUsuarios/GestionUsuarios.tsx";
 import CreacionUsuario from "./pages/gestionUsuarios/CreacionUsuario.tsx";
 import ImportarUsuarios from "./pages/gestionUsuarios/ImportarUsuarios.tsx";
 import Pago from "./pages/pago/SimuladorPago.tsx";
-// ErrorBoundary que captura errores de componentes React y los pasa a Watchbug
-class WatchbugErrorBoundary extends Component<
-  { children: React.ReactNode },
-  { hasError: boolean }
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
-    const ws = (globalThis as any).WatchbugState;
-    if (ws) {
-      ws.errors.push({
-        type: 'react',
-        message: error.message,
-        stack: (error.stack ?? '') + '\n\nComponent Stack:\n' + info.componentStack,
-        timestamp: new Date().toISOString(),
-      });
-      if (typeof (globalThis as any).updateErrorBadge === 'function') {
-        (globalThis as any).updateErrorBadge();
-      }
-    }
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div style={{ padding: '40px', textAlign: 'center' }}>
-          <h2>Algo salió mal</h2>
-          <p>Usa el botón 🐛 para reportar el problema.</p>
-          <button onClick={() => this.setState({ hasError: false })}>
-            Reintentar
-          </button>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
 
 function App() {
   return (
-    <WatchbugErrorBoundary>
-      <Routes>
+  <Routes>
       {/* Rutas públicas */}
       <Route path="/terminos" element={<TermsPage />} />
       <Route path="/deploy_testing" element={<DeployTesting />} />
@@ -227,8 +182,7 @@ function App() {
           <ProtectedRoute allowedRoles={['ORGANIZACION', 'DUENO']}><Pago /></ProtectedRoute>
         } />
 
-      </Routes>
-    </WatchbugErrorBoundary>
+    </Routes>
   );
 }
 

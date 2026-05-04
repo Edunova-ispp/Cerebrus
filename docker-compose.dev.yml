@@ -78,7 +78,6 @@ services:
       VITE_API_URL: "http://localhost:8080"
       LOGROCKET_ID: "${LOGROCKET_ID}"
       LOGROCKET_MANUAL_RECORDING: "${LOGROCKET_MANUAL_RECORDING:-true}"
-      WATCHBUG_ADMIN: "${WATCHBUG_ADMIN:-false}"
     volumes:
       - ./frontend:/app:cached
       - /app/node_modules
@@ -87,19 +86,6 @@ services:
     ports:
       - "5173:5173"
     command: sh -c "npm install && npm run dev -- --host"
-
-  watchbug-service:
-    build:
-      context: ./watchbug-app
-    container_name: watchbug
-    ports:
-      - "5000:5000"
-    env_file:
-      - .env
-    environment:
-      - WATCHBUG_ENABLED=True
-      - WATCHBUG_ADMIN=${WATCHBUG_ADMIN:-false}
-      - CORS_ORIGINS=http://localhost:3000,http://localhost:5173
 
 volumes:
   dbdata:
