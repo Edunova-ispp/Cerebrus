@@ -126,7 +126,7 @@ class CursoServiceImplTest {
     // encontrarDetallesCursoPorId
     // -------------------------------------------------------
 
-    // Test para verificar que encontrarDetallesCursoPorId retorna titulo, descripcion, imagen y codigo para el maestro propietario
+    // Test para verificar que encontrarDetallesCursoPorId retorna titulo, descripcion, imagen, codigo y visibilidad para el maestro propietario
     @Test
     void encontrarDetallesCursoPorId_maestroPropietario_retornaDetallesConCodigo() {
         when(cursoRepository.findByID(10L)).thenReturn(curso);
@@ -134,7 +134,13 @@ class CursoServiceImplTest {
 
         List<String> resultado = cursoService.encontrarDetallesCursoPorId(10L);
 
-        assertThat(resultado).containsExactly("Matemáticas", curso.getDescripcion(), curso.getImagen(), curso.getCodigo());
+        assertThat(resultado).containsExactly(
+                "Matemáticas",
+                curso.getDescripcion(),
+                curso.getImagen(),
+                curso.getCodigo(),
+                "true"
+        );
     }
 
     // Test para verificar que encontrarDetallesCursoPorId lanza RuntimeException 403 cuando el maestro no es propietario del curso
