@@ -37,6 +37,13 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
     r.toUpperCase().includes("MAESTRO")
   );
 
+  const parseBooleanValue = (value: unknown): boolean => {
+    if (value === true || value === "true") return true;
+    if (value === false || value === "false" || value == null) return false;
+    if (typeof value === "number") return value !== 0;
+    return Boolean(value);
+  };
+
   // Cargar los datos del curso al iniciar
   useEffect(() => {
     const fetchCurso = async () => {
@@ -48,12 +55,12 @@ export default function EditarCurso({ cursoId, embedded }: EditarCursoProps = {}
 
         if (response.ok) {
           const data = await response.json();
-          // data es List<String>: [titulo, descripcion, imagen]
+          // data es List<String>: [titulo, descripcion, imagen, codigo, visibilidad]
           setTitulo(data[0] || '');
           setDescripcion(data[1] || '');
           setImagen(data[2] || '');
           setCodigo(data[3] || '');
-          setPublico(data[4] || false);
+          setPublico(parseBooleanValue(data[4]));
           setError('');
         } else {
           if (response.status === 404) {
@@ -234,7 +241,7 @@ console.log('Response status:', response);
                     checked={publico}
                     onChange={(e) => setPublico(e.target.checked)}
                   />
-                <span className="crear-curso__toggle-slider" />
+                  <span className="crear-curso__toggle-slider" />
                 </label>
               </div>
             </div>

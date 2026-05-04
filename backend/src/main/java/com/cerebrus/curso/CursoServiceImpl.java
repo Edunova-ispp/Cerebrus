@@ -98,7 +98,13 @@ public class CursoServiceImpl implements CursoService {
             if(!curso.getMaestro().getId().equals(usuario.getId())){
                 throw new RuntimeException("403 Forbidden");
             }else {
-                return List.of(curso.getTitulo(), curso.getDescripcion(), curso.getImagen(), curso.getCodigo());
+                return List.of(
+                    curso.getTitulo(),
+                    curso.getDescripcion(),
+                    curso.getImagen(),
+                    curso.getCodigo(),
+                    String.valueOf(Boolean.TRUE.equals(curso.getVisibilidad()))
+                );
             }
 
 
