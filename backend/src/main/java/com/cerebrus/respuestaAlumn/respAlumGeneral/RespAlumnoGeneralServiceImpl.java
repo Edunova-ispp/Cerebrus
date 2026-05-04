@@ -311,6 +311,9 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
 
         int puntuacionTotal = 0;
         int numPreguntas = respuestas.size();
+        boolean correccionProvisional = false;
+        boolean iaNoDisponible = false;
+        String iaMensaje = null;
         
         int maxPuntuacionPorPregunta = (actividad.getPuntuacion() != null && actividad.getPuntuacion() > 0) 
                                         ? actividad.getPuntuacion() / numPreguntas : 100 / numPreguntas;
@@ -335,24 +338,51 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("No se encontró modelo de respuesta para la pregunta"));
 
-            Map<String, Object> evaluacion = iaConnectionService.evaluarRespuestaAbierta(
-                pregunta.getPregunta(),
-                respuestaDada,
-                modeloRespuesta.getRespuesta(),
-                maxPuntuacionPorPregunta 
-            );
-
             Integer puntuacionPregunta = 0;
             String comentariosIA = "La IA no devolvió comentarios legibles";
 
-            for (Map.Entry<String, Object> evalEntry : evaluacion.entrySet()) {
-                String clave = evalEntry.getKey().toLowerCase();
-                if (clave.contains("puntuacion") || clave.contains("puntuación")) {
-                    puntuacionPregunta = Integer.valueOf(evalEntry.getValue().toString());
+            if (!correccionProvisional) {
+                Map<String, Object> evaluacion = iaConnectionService.evaluarRespuestaAbierta(
+                    pregunta.getPregunta(),
+                    respuestaDada,
+                    modeloRespuesta.getRespuesta(),
+                    maxPuntuacionPorPregunta
+                );
+
+                Object geminiDisponibleRaw = evaluacion.get("geminiDisponible");
+                boolean geminiDisponible = true;
+                if (geminiDisponibleRaw != null) {
+                    if (geminiDisponibleRaw instanceof Boolean b) {
+                        geminiDisponible = b;
+                    } else {
+                        geminiDisponible = !"false".equalsIgnoreCase(geminiDisponibleRaw.toString());
+                    }
                 }
-                if (clave.contains("comentario")) {
-                    comentariosIA = evalEntry.getValue().toString();
+
+                if (!geminiDisponible) {
+                    correccionProvisional = true;
+                    Object geminiMensajeRaw = evaluacion.get("geminiMensaje");
+                    String geminiMensaje = (geminiMensajeRaw != null && !geminiMensajeRaw.toString().isBlank())
+                        ? geminiMensajeRaw.toString()
+                        : "La IA no está disponible para corregir ahora mismo";
+                    iaNoDisponible = true;
+                    iaMensaje = geminiMensaje;
+                    puntuacionPregunta = 0;
+                    comentariosIA = "";
+                } else {
+                    for (Map.Entry<String, Object> evalEntry : evaluacion.entrySet()) {
+                        String clave = evalEntry.getKey().toLowerCase();
+                        if (clave.contains("puntuacion") || clave.contains("puntuación")) {
+                            puntuacionPregunta = Integer.valueOf(evalEntry.getValue().toString());
+                        }
+                        if (clave.contains("comentario")) {
+                            comentariosIA = evalEntry.getValue().toString();
+                        }
+                    }
                 }
+            } else {
+                puntuacionPregunta = 0;
+                comentariosIA = "";
             }
 
             if (puntuacionPregunta > maxPuntuacionPorPregunta) puntuacionPregunta = maxPuntuacionPorPregunta;
@@ -375,7 +405,7 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         }
 
         int maxPuntuacionTotal = (actividad.getPuntuacion() != null && actividad.getPuntuacion() > 0) ? actividad.getPuntuacion() : 100;
-        Integer notaFinal = Math.round(((float) puntuacionTotal / maxPuntuacionTotal) * 10);
+        Integer notaFinal = correccionProvisional ? 5 : Math.round(((float) puntuacionTotal / maxPuntuacionTotal) * 10);
         
         if (notaFinal > 10) notaFinal = 10;
         else if (notaFinal < 0) notaFinal = 0;
@@ -385,6 +415,8 @@ public class RespAlumnoGeneralServiceImpl implements RespAlumnoGeneralService {
         actividadAlumno.setFechaFin(LocalDateTime.now());
         actividadAlumnoRepository.save(actividadAlumno);
 
-        return new EvaluacionActividadAbiertaResponse(notaFinal, puntuacionTotal, detalles);
+        Boolean iaNoDisponibleOut = iaNoDisponible ? Boolean.TRUE : null;
+        String iaMensajeOut = iaNoDisponible ? iaMensaje : null;
+        return new EvaluacionActividadAbiertaResponse(notaFinal, puntuacionTotal, detalles, iaNoDisponibleOut, iaMensajeOut);
     }
 }

@@ -3,9 +3,11 @@ import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/auth/login/LoginPage";
 import LogoutPage from "./pages/auth/logout/LogoutPage";
 import RegisterPage from "./pages/auth/register/RegisterPage";
+import VerifyEmailPage from "./pages/auth/verifyEmail/VerifyEmailPage";
 import ClasificacionAlumno from "./pages/clasificacionAlumno/ClasificacionAlumno";
 import CrearActividad from "./pages/crearActividad/crearActividad.tsx";
 import CrearCurso from "./pages/crearCurso/CrearCurso";
+import InscribirAlumnos from "./pages/gestionAlumnos/InscribirAlumnos";
 import CrearTema from "./pages/crearTema/CrearTema";
 import DeployTesting from "./pages/deployTesting/DeployTesting";
 import DetalleCurso from "./pages/detalleCurso/DetalleCurso";
@@ -99,6 +101,7 @@ function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/edunova" element={<EdunovaPage />} />
       <Route path="/auth/login"    element={<LoginPage />} />
+      <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
       <Route path="/auth/register"    element={<RegisterPage />} />
       <Route path="/auth/logout"    element={<LogoutPage />} />
       <Route path="/infoAlumnos"   element={<InfoPage userType="alumno" />} />
@@ -160,6 +163,9 @@ function App() {
         {/* Rutas profesores y dueños */}
         <Route path="/crearCurso" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><CrearCurso /></ProtectedRoute>
+        } />
+        <Route path="/inscribir-alumnos/:cursoId" element={
+          <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><InscribirAlumnos /></ProtectedRoute>
         } />
         <Route path="/editarCurso/:id" element={
           <ProtectedRoute allowedRoles={['MAESTRO', 'DUENO']}><EditarCurso /></ProtectedRoute>

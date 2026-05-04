@@ -445,10 +445,14 @@ class IaConnectionServiceImplTest {
                         "429 Too Many Requests",
                         "{\"error\": {\"message\": \"quota exceeded\"}}".getBytes(), null));
 
-        // Act & Assert
-        assertThatThrownBy(() -> iaConnectionService.evaluarRespuestaAbierta(
-                pregunta, respuesta, respuesta, puntuacion))
-                .isInstanceOf(QuotaExceededException.class);
+        // Act
+        Map<String, Object> evaluacion = iaConnectionService.evaluarRespuestaAbierta(
+                pregunta, respuesta, respuesta, puntuacion);
+
+        // Assert
+        assertThat(evaluacion.get("geminiDisponible")).isEqualTo(false);
+        assertThat(evaluacion.get("geminiMotivo")).isEqualTo("INDISPONIBLE");
+        assertThat(evaluacion.get("geminiMensaje").toString().toLowerCase()).contains("agotada");
     }
 
     @Test
@@ -462,11 +466,14 @@ class IaConnectionServiceImplTest {
         String respuesta = "Respuesta";
         Integer puntuacion = 10;
 
-        // Act & Assert
-        assertThatThrownBy(() -> iaConnectionService.evaluarRespuestaAbierta(
-                pregunta, respuesta, respuesta, puntuacion))
-                .isInstanceOf(QuotaExceededException.class)
-                .hasMessageContaining("cuota diaria");
+        // Act
+        Map<String, Object> evaluacion = iaConnectionService.evaluarRespuestaAbierta(
+                pregunta, respuesta, respuesta, puntuacion);
+
+        // Assert
+        assertThat(evaluacion.get("geminiDisponible")).isEqualTo(false);
+        assertThat(evaluacion.get("geminiMotivo")).isEqualTo("INDISPONIBLE");
+        assertThat(evaluacion.get("geminiMensaje").toString().toLowerCase()).contains("cuota diaria");
     }
 
     @Test
@@ -477,8 +484,8 @@ class IaConnectionServiceImplTest {
         Integer puntuacion = 10;
 
         when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), eq(Map.class)))
-                .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
-                        "500 Internal Server Error"));
+                .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST,
+                        "400 Bad Request"));
 
         // Act & Assert
         assertThatThrownBy(() -> iaConnectionService.evaluarRespuestaAbierta(
@@ -810,11 +817,14 @@ class IaConnectionServiceImplTest {
                         "429 Too Many Requests",
                         "retry in 30.2s".getBytes(), null));
 
-        // Act & Assert
-        assertThatThrownBy(() -> iaConnectionService.evaluarRespuestaAbierta(
-                pregunta, respuesta, respuesta, puntuacion))
-                .isInstanceOf(QuotaExceededException.class)
-                .hasMessageContaining("31 segundos");
+        // Act
+        Map<String, Object> evaluacion = iaConnectionService.evaluarRespuestaAbierta(
+                pregunta, respuesta, respuesta, puntuacion);
+
+        // Assert
+        assertThat(evaluacion.get("geminiDisponible")).isEqualTo(false);
+        assertThat(evaluacion.get("geminiMotivo")).isEqualTo("INDISPONIBLE");
+        assertThat(evaluacion.get("geminiMensaje").toString()).contains("31 segundos");
     }
 
     @Test
@@ -829,10 +839,13 @@ class IaConnectionServiceImplTest {
                         "429 Too Many Requests",
                         "{\"error\": \"quota exceeded\"}".getBytes(), null));
 
-        // Act & Assert
-        assertThatThrownBy(() -> iaConnectionService.evaluarRespuestaAbierta(
-                pregunta, respuesta, respuesta, puntuacion))
-                .isInstanceOf(QuotaExceededException.class);
+        // Act
+        Map<String, Object> evaluacion = iaConnectionService.evaluarRespuestaAbierta(
+                pregunta, respuesta, respuesta, puntuacion);
+
+        // Assert
+        assertThat(evaluacion.get("geminiDisponible")).isEqualTo(false);
+        assertThat(evaluacion.get("geminiMotivo")).isEqualTo("INDISPONIBLE");
     }
 
     @Test
@@ -1251,10 +1264,13 @@ class IaConnectionServiceImplTest {
                 .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
                         "500 Internal Server Error"));
 
-        // Act & Assert
-        assertThatThrownBy(() -> iaConnectionService.evaluarRespuestaAbierta(
-                pregunta, respuesta, respuesta, puntuacion))
-                .isInstanceOf(IllegalArgumentException.class);
+        // Act
+        Map<String, Object> evaluacion = iaConnectionService.evaluarRespuestaAbierta(
+                pregunta, respuesta, respuesta, puntuacion);
+
+        // Assert
+        assertThat(evaluacion.get("geminiDisponible")).isEqualTo(false);
+        assertThat(evaluacion.get("geminiMotivo")).isEqualTo("INDISPONIBLE");
     }
 
     // ==================== Test generarActividad - Excepciones Internas Exhaustivas ====================
@@ -1606,10 +1622,13 @@ class IaConnectionServiceImplTest {
         when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), eq(Map.class)))
                 .thenReturn(new ResponseEntity<Map>(mockResponse, HttpStatus.OK));
 
-        // Act & Assert
-        assertThatThrownBy(() -> iaConnectionService.evaluarRespuestaAbierta(
-                pregunta, respuesta, respuesta, puntuacion))
-                .isInstanceOf(IllegalArgumentException.class);
+        // Act
+        Map<String, Object> evaluacion = iaConnectionService.evaluarRespuestaAbierta(
+                pregunta, respuesta, respuesta, puntuacion);
+
+        // Assert
+        assertThat(evaluacion.get("geminiDisponible")).isEqualTo(false);
+        assertThat(evaluacion.get("geminiMotivo")).isEqualTo("INDISPONIBLE");
     }
 
     @Test
@@ -1624,10 +1643,13 @@ class IaConnectionServiceImplTest {
                         "429 Too Many Requests",
                         "{\"error\": \"quota exceeded\"}".getBytes(), null));
 
-        // Act & Assert
-        assertThatThrownBy(() -> iaConnectionService.evaluarRespuestaAbierta(
-                pregunta, respuesta, respuesta, puntuacion))
-                .isInstanceOf(QuotaExceededException.class);
+        // Act
+        Map<String, Object> evaluacion = iaConnectionService.evaluarRespuestaAbierta(
+                pregunta, respuesta, respuesta, puntuacion);
+
+        // Assert
+        assertThat(evaluacion.get("geminiDisponible")).isEqualTo(false);
+        assertThat(evaluacion.get("geminiMotivo")).isEqualTo("INDISPONIBLE");
 
         verify(restTemplate, times(5)).postForEntity(anyString(), any(HttpEntity.class), eq(Map.class));
     }
