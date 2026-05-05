@@ -146,7 +146,19 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
                       </button>
                       <div className="ltp-tema-acciones">
                         <button className="ltp-btn-icono" title="Editar" onClick={(e) => { e.stopPropagation(); isMaestro && (onEditarTema ? onEditarTema(tema.id) : navigate(`/cursos/${id ?? curso?.id}/temas/${tema.id}/editar`)); }}>✎</button>
-                        <button className="ltp-btn-icono" title="Borrar" onClick={(e) => { e.stopPropagation(); isMaestro ? handleEliminarTema(tema.id) : undefined; }}>🗑</button>
+                        <button
+                          className="ltp-btn-icono"
+                          title="Borrar"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isMaestro) return;
+                            if (window.confirm("¿Seguro que quieres borrar este tema? No se podrá recuperar después.")) {
+                              handleEliminarTema(tema.id);
+                            }
+                          }}
+                        >
+                          🗑
+                        </button>
                       </div>
                     </div>
 
@@ -173,7 +185,10 @@ export default function ListaTemasCursoProfesor({ curso: cursoProp, embedded, on
                                     title="Borrar"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      isMaestro ? handleEliminarActividad(act.id) : undefined;
+                                      if (!isMaestro) return;
+                                      if (window.confirm("¿Seguro que quieres borrar esta actividad? No se podrá recuperar después.")) {
+                                        handleEliminarActividad(act.id);
+                                      }
                                     }}
                                   >
                                     🗑

@@ -44,6 +44,8 @@ const MAX_CARACTERES_DESCRIPCION = 1000;
 const MAX_PUNTUACION = 10000;
 const MAX_PALABRAS = 10;
 const ONLY_LETTERS_REGEX = /^\p{L}+$/u;
+const MAX_CARACTERES_PISTA = 50;
+const MAX_CARACTERES_PALABRA = 10;
 
 function sanitizeRespuesta(value: string): string {
     return value.replace(/[^\p{L}]/gu, '').toUpperCase();
@@ -106,6 +108,9 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
             if (!clue && !rawAnswer) continue;
             if (!clue) return `La pista de la palabra ${i + 1} es requerida`;
             if (!rawAnswer) return `La palabra (respuesta) ${i + 1} es requerida`;
+
+            if (clue.length > MAX_CARACTERES_PISTA) return `La pista de la palabra ${i + 1} no puede exceder los ${MAX_CARACTERES_PISTA} caracteres.`;
+            if (rawAnswer.length > MAX_CARACTERES_PALABRA) return `La palabra (respuesta) ${i + 1} no puede exceder los ${MAX_CARACTERES_PALABRA} caracteres.`;
 
             const normalizedRespuesta = sanitizeRespuesta(rawAnswer);
             if (!normalizedRespuesta) return `La palabra (respuesta) ${i + 1} es requerida`;
@@ -283,6 +288,19 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                             />
                         </div>
                         <div className="tf-col">
+                            <label
+                                className="cf-checkbox-row"
+                                htmlFor="cf-resp-visible"
+                            >
+                                <input
+                                    disabled={readOnly}
+                                    id="cf-resp-visible"
+                                    type="checkbox"
+                                    checked={respVisible}
+                                    onChange={e => setRespVisible(e.target.checked)}
+                                />
+                                <span className="cf-checkbox-label">Permitir ver respuestas antes de finalizar</span>
+                            </label>
                             <label
                                 className="cf-checkbox-row"
                                 htmlFor="cf-reintento"

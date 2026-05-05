@@ -75,6 +75,8 @@ const MAX_PUNTUACION = 10000;
 const MAX_CARACTERES_COMENTARIOS = 250;
 const MAX_OPCIONES = 10;
 const MAX_PREGUNTAS = 50;
+const MAX_CARACTERES_PREGUNTA = 300;
+const MAX_CARACTERES_RESPUESTA = 150;
 
 export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
   const [titulo, setTitulo] = useState('');
@@ -213,6 +215,8 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
     for (let qi = 0; qi < questions.length; qi++) {
       const q = questions[qi];
       if (!q.text.trim()) return `La pregunta ${qi + 1} no tiene texto`;
+      if (q.text.trim().length > MAX_CARACTERES_PREGUNTA)
+        return `La pregunta ${qi + 1} no puede tener más de ${MAX_CARACTERES_PREGUNTA} caracteres`;
       if (q.options.length < 2)
         return `La pregunta ${qi + 1} debe tener al menos 2 opciones`;
       if (q.options.length > MAX_OPCIONES)
@@ -220,6 +224,8 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
       for (let oi = 0; oi < q.options.length; oi++) {
         if (!q.options[oi].text.trim())
           return `La opción ${oi + 1} de la pregunta ${qi + 1} está vacía`;
+        if (q.options[oi].text.trim().length > MAX_CARACTERES_RESPUESTA)
+          return `La opción ${oi + 1} de la pregunta ${qi + 1} no puede tener más de ${MAX_CARACTERES_RESPUESTA} caracteres`;
       }
       if (!q.options.some((o) => o.correcta))
         return `Marca al menos una respuesta correcta en la pregunta ${qi + 1}`;

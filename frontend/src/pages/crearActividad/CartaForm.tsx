@@ -37,6 +37,8 @@ const MAX_CARACTERES_TITULO = 60;
 const MAX_CARACTERES_DESCRIPCION = 1000;
 const MAX_PUNTUACION = 10000;
 const MAX_CARACTERES_COMENTARIOS = 250;
+const MAX_CARACTERES_PREGUNTA = 70;
+const MAX_CARACTERES_RESPUESTA = 70;
 const MAX_CARDS = 9;
 
 interface Card {
@@ -209,6 +211,8 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
       const c = cards[ci];
       if (!c.pregunta.trim()) return `La carta ${ci + 1} no tiene pregunta`;
       if (!c.respuesta.trim()) return `La carta ${ci + 1} no tiene respuesta`;
+      if (c.pregunta.trim().length > MAX_CARACTERES_PREGUNTA) return `La pregunta de la carta ${ci + 1} no puede tener más de ${MAX_CARACTERES_PREGUNTA} caracteres`;
+      if (c.respuesta.trim().length > MAX_CARACTERES_RESPUESTA) return `La respuesta de la carta ${ci + 1} no puede tener más de ${MAX_CARACTERES_RESPUESTA} caracteres`;
     }
 
     const preguntas = cards.map(c => c.pregunta.trim().toLowerCase());

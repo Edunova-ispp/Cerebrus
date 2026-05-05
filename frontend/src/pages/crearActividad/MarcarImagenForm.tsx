@@ -41,7 +41,8 @@ const MAX_CARACTERES_TITULO = 60;
 const MAX_CARACTERES_DESCRIPCION = 1000;
 const MAX_PUNTUACION = 10000;
 const MAX_CARACTERES_COMENTARIOS = 250;
-const MAX_PUNTOS = 50;
+const MAX_PUNTOS = 55;
+const MAX_CARACTERES_RESPUESTA_PUNTO = 60;
 
 type Point = {
   id?: number;
@@ -138,6 +139,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
     if (puntos.length === 0) return 'Añade al menos un punto haciendo clic en la imagen';
     if (puntos.length > MAX_PUNTOS) return `La imagen no puede tener más de ${MAX_PUNTOS} puntos`;
     if (puntos.some((p) => !p.respuesta.trim())) return 'Todos los puntos deben tener respuesta';
+    if (puntos.some((p) => p.respuesta.trim().length > MAX_CARACTERES_RESPUESTA_PUNTO)) return `La respuesta de un punto no puede tener más de ${MAX_CARACTERES_RESPUESTA_PUNTO} caracteres`;
 
     if (mode === 'edit' && !marcarImagenId) return 'Falta el id de la actividad a editar';
 

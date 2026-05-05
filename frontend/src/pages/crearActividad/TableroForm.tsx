@@ -37,6 +37,8 @@ const MAX_CARACTERES_DESCRIPCION = 1000;
 const MAX_PUNTUACION = 10000;
 const PREGUNTAS_3X3 = 8;
 const PREGUNTAS_4X4 = 15;
+const MAX_CARACTERES_PREGUNTA = 100;
+const MAX_CARACTERES_RESPUESTA = 60;
 
 type QPair = { localKey: string; pregunta: string; respuesta: string };
 
@@ -129,7 +131,9 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
     const textosSeen = new Set<string>();
     for (let i = 0; i < expected; i++) {
       if (!preguntas[i]?.pregunta.trim()) return `La pregunta ${i + 1} está vacía`;
+      if (preguntas[i].pregunta.trim().length > MAX_CARACTERES_PREGUNTA) return `La pregunta ${i + 1} no puede tener más de ${MAX_CARACTERES_PREGUNTA} caracteres`;
       if (!preguntas[i]?.respuesta.trim()) return `La respuesta de la pregunta ${i + 1} está vacía`;
+      if (preguntas[i].respuesta.trim().length > MAX_CARACTERES_RESPUESTA) return `La respuesta de la pregunta ${i + 1} no puede tener más de ${MAX_CARACTERES_RESPUESTA} caracteres`;
       const clave = preguntas[i].pregunta.trim().toLowerCase();
       if (textosSeen.has(clave)) return `Pregunta repetida: "${preguntas[i].pregunta.trim()}" (pregunta ${i + 1})`;
       textosSeen.add(clave);
@@ -306,7 +310,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            <span>Mostrar respuesta correcta al alumno</span>
+            <span>Mostrar respuesta correcta cuando el alumno falle una pregunta</span>
           </label>
           <label className="tbl-label tbl-label--check">
             <input
@@ -335,7 +339,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
               checked={encontrarRespuestaMaestro}
               onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
             />
-            <span>Mostrar respuesta correcta</span>
+            <span>Mostrar respuesta correcta al final de la actividad</span>
           </label>
 
           <label className="tbl-label tbl-label--check">

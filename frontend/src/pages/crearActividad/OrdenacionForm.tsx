@@ -36,7 +36,7 @@ const MAX_CARACTERES_TITULO = 60;
 const MAX_CARACTERES_DESCRIPCION = 1000;
 const MAX_PUNTUACION = 10000;
 const MAX_CARACTERES_COMENTARIOS = 250;
-const MAX_CARACTERES_ELEMENTO = 40;
+const MAX_CARACTERES_ELEMENTO = 60; // Solo aplica para las palabras
 const MAX_ELEMENTOS = 15;
 
 function makeLocalKey(): string {
