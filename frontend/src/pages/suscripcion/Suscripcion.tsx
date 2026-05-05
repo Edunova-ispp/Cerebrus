@@ -14,6 +14,7 @@ export interface SuscripcionDTO {
   fechaFin: string;
   estadoPago: string;
   isActiva: boolean;
+  nombreOrganizacion?: string;
 }
 
 export interface ResumenCompraDTO {
@@ -91,6 +92,7 @@ export default function Suscripcion() {
   }, []);
 
   const [suscripcion, setSuscripcion] = useState<SuscripcionDTO | null>(null);
+  const [nombreOrganizacion, setNombreOrganizacion] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -127,6 +129,20 @@ export default function Suscripcion() {
     };
     fetchSuscripcion();
   }, [organizacionId, apiBase]);
+
+  useEffect(() => {
+    const fetchPerfil = async () => {
+      try {
+        const res = await apiFetch(`${apiBase}/api/usuarios/me`);
+        if (!res.ok) return;
+        const data = await res.json();
+        setNombreOrganizacion(data?.nombreOrganizacion ?? '');
+      } catch {
+        setNombreOrganizacion('');
+      }
+    };
+    fetchPerfil();
+  }, [apiBase]);
 
   useEffect(() => {
     if (touched.numMaestros || touched.numAlumnos || touched.numMeses) {
@@ -212,6 +228,9 @@ export default function Suscripcion() {
       <main className="sub-main">
         <div className="sub-wrapper">
           <h1 className="sub-title">Mi Suscripción</h1>
+          {nombreOrganizacion && (
+            <p className="sub-org-name">Organización: {nombreOrganizacion}</p>
+          )}
 
           {suscripcion ? (
             <div className="sub-card">

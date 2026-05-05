@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
@@ -277,6 +278,24 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(body);
             }
+
+    /**
+     * Maneja métodos HTTP no soportados para el endpoint solicitado
+     * Retorna 405 Method Not Allowed
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<?> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException ex,
+            WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpStatus.METHOD_NOT_ALLOWED.value());
+        body.put("mensaje", "Método HTTP no permitido para este endpoint");
+
+        return ResponseEntity
+                .status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(body);
+    }
 
     /**
      * Maneja excepciones generales

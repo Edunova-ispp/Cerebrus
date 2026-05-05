@@ -1,22 +1,22 @@
 package com.cerebrus.cursoTest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +28,6 @@ import com.cerebrus.curso.CursoServiceImpl;
 import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.estadisticas.EstadisticasMaestroController;
 import com.cerebrus.estadisticas.EstadisticasMaestroServiceImpl;
-import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.usuario.alumno.Alumno;
 import com.cerebrus.usuario.maestro.Maestro;
 
@@ -167,30 +166,32 @@ class CursoControllerTest {
     // Test para verificar que crearCurso retorna 201 CREATED con el curso creado
     @Test
     void crearCurso_requestValido_retorna201ConCurso() {
-        when(cursoService.crearCurso("Física", "Desc", "img.png", "CODIGO123")).thenReturn(curso);
+        when(cursoService.crearCurso("Física", "Desc", "img.png", "CODIGO123", true)).thenReturn(curso);
 
         CursoController.CrearCursoRequest request = new CursoController.CrearCursoRequest();
         request.setTitulo("Física");
         request.setDescripcion("Desc");
         request.setImagen("img.png");
         request.setCodigo("CODIGO123");
+        request.setVisibilidad(true);
 
         ResponseEntity<Curso> respuesta = cursoController.crearCurso(request);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(respuesta.getBody()).isNotNull();
         assertThat(respuesta.getBody().getId()).isEqualTo(10L);
-        verify(cursoService).crearCurso("Física", "Desc", "img.png", "CODIGO123");
+        verify(cursoService).crearCurso("Física", "Desc", "img.png", "CODIGO123", true);
     }
 
     // Test para verificar que crearCurso retorna 201 cuando descripción e imagen son null
     @Test
     void crearCurso_sinDescripcionNiImagen_retorna201() {
-        when(cursoService.crearCurso("Historia", null, null, "CODIGO2")).thenReturn(curso);
+        when(cursoService.crearCurso("Historia", null, null, "CODIGO2", true)).thenReturn(curso);
 
         CursoController.CrearCursoRequest request = new CursoController.CrearCursoRequest();
         request.setTitulo("Historia");
         request.setCodigo("CODIGO2");
+        request.setVisibilidad(true);
 
         ResponseEntity<Curso> respuesta = cursoController.crearCurso(request);
 
@@ -302,18 +303,18 @@ class CursoControllerTest {
     // Test para verificar que actualizarCurso retorna 200 OK con el curso actualizado
     @Test
     void actualizarCurso_maestroPropietario_retorna200ConCursoActualizado() {
-        when(cursoService.actualizarCurso(10L, "Nuevo título", "Nueva desc", "nueva.png", "nuevo-codigo")).thenReturn(curso);
+        when(cursoService.actualizarCurso(10L, "Nuevo título", "Nueva desc", "nueva.png", "nuevo-codigo", true)).thenReturn(curso);
 
         CursoController.ActualizarCursoRequest request = new CursoController.ActualizarCursoRequest();
         request.setTitulo("Nuevo título");
         request.setDescripcion("Nueva desc");
         request.setImagen("nueva.png");
         request.setCodigo("nuevo-codigo");
-
+        request.setVisibilidad(true);
         ResponseEntity<Curso> respuesta = cursoController.actualizarCurso(10L, request);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
-        verify(cursoService).actualizarCurso(10L, "Nuevo título", "Nueva desc", "nueva.png", "nuevo-codigo");
+        verify(cursoService).actualizarCurso(10L, "Nuevo título", "Nueva desc", "nueva.png", "nuevo-codigo", true);
     }
 
     // Test para verificar que actualizarCurso retorna 400 cuando el id es 0 (caso límite)
@@ -321,6 +322,7 @@ class CursoControllerTest {
     void actualizarCurso_idCero_retorna400() {
         CursoController.ActualizarCursoRequest request = new CursoController.ActualizarCursoRequest();
         request.setTitulo("Título");
+        request.setVisibilidad(true);
 
         ResponseEntity<Curso> respuesta = cursoController.actualizarCurso(0L, request);
 
@@ -330,11 +332,12 @@ class CursoControllerTest {
     // Test para verificar que actualizarCurso retorna 403 cuando el service lanza AccessDeniedException
     @Test
     void actualizarCurso_accesoNoPermitido_retorna403() {
-        when(cursoService.actualizarCurso(anyLong(), any(), any(), any(),any()))
+        when(cursoService.actualizarCurso(anyLong(), any(), any(), any(),any(),anyBoolean()))
                 .thenThrow(new AccessDeniedException("Solo un maestro puede actualizar cursos"));
 
         CursoController.ActualizarCursoRequest request = new CursoController.ActualizarCursoRequest();
         request.setTitulo("Título");
+        request.setVisibilidad(true);
 
         ResponseEntity<Curso> respuesta = cursoController.actualizarCurso(10L, request);
 
@@ -344,11 +347,12 @@ class CursoControllerTest {
     // Test para verificar que actualizarCurso retorna 404 cuando el service lanza RuntimeException con mensaje 404
     @Test
     void actualizarCurso_cursoNoExiste_retorna404() {
-        when(cursoService.actualizarCurso(anyLong(), any(), any(), any(),any()))
+        when(cursoService.actualizarCurso(anyLong(), any(), any(), any(),any(), anyBoolean()))
                 .thenThrow(new RuntimeException("404 Not Found"));
 
         CursoController.ActualizarCursoRequest request = new CursoController.ActualizarCursoRequest();
         request.setTitulo("Título");
+        request.setVisibilidad(true);
 
         ResponseEntity<Curso> respuesta = cursoController.actualizarCurso(99L, request);
 
@@ -407,13 +411,13 @@ class CursoControllerTest {
     // Test para verificar que obtenerNotaMediaPorActividadPorCursoId retorna 200 OK con la lista de notas medias
     @Test
     void obtenerNotaMediaPorActividadPorCursoId_maestroPropietario_retorna200ConNotas() {
-        List<Integer> notas = List.of(8, 7, 9);
+        List<Double> notas = List.of(8.0, 7.0, 9.0);
         when(cursoService.obtenerNotaMediaPorActividadPorCursoId(10L)).thenReturn(notas);
 
-        ResponseEntity<List<Integer>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
+        ResponseEntity<List<Double>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(respuesta.getBody()).containsExactly(8, 7, 9);
+        assertThat(respuesta.getBody()).containsExactly(8.0, 7.0, 9.0);
     }
 
     // Test para verificar que obtenerNotaMediaPorActividadPorCursoId retorna 403 cuando el service lanza RuntimeException con mensaje 403
@@ -421,7 +425,7 @@ class CursoControllerTest {
     void obtenerNotaMediaPorActividadPorCursoId_accesoNoPermitido_retorna403() {
         when(cursoService.obtenerNotaMediaPorActividadPorCursoId(10L)).thenThrow(new RuntimeException("403 Forbidden"));
 
-        ResponseEntity<List<Integer>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
+        ResponseEntity<List<Double>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
@@ -431,7 +435,7 @@ class CursoControllerTest {
     void obtenerNotaMediaPorActividadPorCursoId_cursoNoExiste_retorna404() {
         when(cursoService.obtenerNotaMediaPorActividadPorCursoId(99L)).thenThrow(new RuntimeException("404 Not Found"));
 
-        ResponseEntity<List<Integer>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(99L);
+        ResponseEntity<List<Double>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(99L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -441,7 +445,7 @@ class CursoControllerTest {
     void obtenerNotaMediaPorActividadPorCursoId_errorInesperado_retorna500() {
         when(cursoService.obtenerNotaMediaPorActividadPorCursoId(10L)).thenThrow(new RuntimeException("Error interno"));
 
-        ResponseEntity<List<Integer>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
+        ResponseEntity<List<Double>> respuesta = cursoController.obtenerNotaMediaPorActividadPorCursoId(10L);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }

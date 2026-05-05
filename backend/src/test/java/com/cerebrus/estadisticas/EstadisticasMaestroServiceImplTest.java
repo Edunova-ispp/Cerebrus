@@ -924,9 +924,9 @@ class EstadisticasMaestroServiceImplTest {
         assertThat(resultado.getNumActividadesCompletadas()).isEqualTo(1);
         assertThat(resultado.getTotalActividades()).isEqualTo(1);
         assertThat(resultado.getTiempoTotalMinutos()).isEqualTo(20);
-        assertThat(resultado.getNotaMedia()).isEqualTo(8.0);
-        assertThat(resultado.getNotaMax()).isEqualTo(8);
-        assertThat(resultado.getNotaMin()).isEqualTo(8);
+        assertThat(resultado.getNotaMedia()).isEqualTo(10.0);
+        assertThat(resultado.getNotaMax()).isEqualTo(10.0);
+        assertThat(resultado.getNotaMin()).isEqualTo(10.0);
     }
 
     @Test

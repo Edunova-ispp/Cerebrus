@@ -4,15 +4,13 @@
 
 /* ── Base reset ── */
 .agb-btn {
-  padding: 10px 18px;
-  font-size: 1rem;
-  font-weight: 700;
+  padding: 10px 14px;
+  font-family: 'Oxygen', sans-serif;
   cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.1s;
   white-space: nowrap;
-  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
 }
 
-/* ── Teacher variant ── */
 .agb-btn--maestro {
   background: var(--t-primary, #2563EB);
   color: #fff;
@@ -23,19 +21,25 @@
 }
 
 .agb-btn--maestro:hover {
-  background: var(--t-primary-hover, #1D4ED8);
-  box-shadow: var(--t-shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1));
+  background: var(--t-primary-light);
+  color: var(--t-primary);
+  border-color: var(--t-primary);
+  box-shadow: var(--t-shadow);
 }
 
 .agb-btn--maestro:active {
   transform: translateY(1px);
-  box-shadow: var(--t-shadow-sm, 0 1px 2px 0 rgba(0,0,0,0.05));
+  box-shadow: var(--t-shadow-sm);
 }
 
-/* ── Student variant ── */
+.agb-btn--maestro:focus-visible {
+  outline: none;
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
 .agb-btn--alumno {
-  background: var(--color-accent, #FFF294);
-  color: #000;
+  background: #ffd166;
   border: 3px solid #000;
   border-radius: 12px;
   font-family: 'Oxygen ', sans-serif;

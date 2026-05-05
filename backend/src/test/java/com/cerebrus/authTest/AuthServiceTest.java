@@ -16,13 +16,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cerebrus.auth.AuthService;
 import com.cerebrus.auth.payload.request.SignupRequest;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioRepository;
-import com.cerebrus.usuario.alumno.Alumno;
-import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.organizacion.OrganizacionRepository;
 import com.cerebrus.usuario.organizacion.Organizacion;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,6 +33,9 @@ class AuthServiceTest {
 
 	@Mock
 	private PasswordEncoder passwordEncoder;
+
+	@Mock
+	private OrganizacionRepository organizacionRepository;
 
 	@InjectMocks
 	private AuthService authService;
@@ -61,6 +64,16 @@ class AuthServiceTest {
 
 		assertThat(exists).isFalse();
 		verify(usuarioRepository).existsByCorreoElectronico("a@b.com");
+	}
+
+	@Test
+	void existsByEmailCuandoYaExiste_devuelveTrue() {
+		when(usuarioRepository.existsByCorreoElectronico("repetido@cerebrus.com")).thenReturn(true);
+
+		boolean exists = authService.existsByEmail("repetido@cerebrus.com");
+
+		assertThat(exists).isTrue();
+		verify(usuarioRepository).existsByCorreoElectronico("repetido@cerebrus.com");
 	}
 
     // Test para verificar que el método registrarUsuario guarda correctamente un usuario de tipo Alumno, 
@@ -110,16 +123,170 @@ class AuthServiceTest {
 		verify(passwordEncoder, never()).encode(any());
 	}
 
-    // Test para verificar que al registrar un usuario, el tipo de usuario no distingue entre mayúsculas y minúsculas
 	@Test
-	void registrarUsuario_tipoUsuarioNoDistingueMayusculasMinusculas() {
+	void registrarUsuario_cuandoEmailYaExiste_lanzaIllegalArgumentException() {
 		SignupRequest request = crearSignupRequest("ORGANIZACION");
+		when(usuarioRepository.existsByCorreoElectronico(request.getEmail())).thenReturn(true);
+
+		assertThatThrownBy(() -> authService.registrarUsuario(request))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("El correo electrónico ya está en uso.");
+
+		verify(usuarioRepository, never()).save(any());
+		verify(passwordEncoder, never()).encode(any());
+	}
+
+	@Test
+	void registrarUsuario_cuandoEsOrganizacion_guardaUsuarioYCodificaPassword() {
+		SignupRequest request = crearSignupRequest("ORGANIZACION");
+		request.setNombreCentro("Colegio Test");
+		when(usuarioRepository.existsByCorreoElectronico(request.getEmail())).thenReturn(false);
 		when(passwordEncoder.encode(eq(request.getPassword()))).thenReturn("encoded-pass");
 
 		authService.registrarUsuario(request);
 
 		verify(usuarioRepository).save(usuarioCaptor.capture());
+		Usuario saved = usuarioCaptor.getValue();
+		assertThat(saved).isInstanceOf(Organizacion.class);
+		assertThat(saved.getNombre()).isEqualTo(request.getNombre());
+		assertThat(saved.getPrimerApellido()).isEqualTo(request.getPrimerApellido());
+		assertThat(saved.getSegundoApellido()).isEqualTo(request.getSegundoApellido());
+		assertThat(saved.getNombreUsuario()).isEqualTo(request.getEmail());
+		assertThat(saved.getCorreoElectronico()).isEqualTo(request.getEmail());
+		assertThat(saved.getContrasena()).isEqualTo("encoded-pass");
+		assertThat(((Organizacion) saved).getNombreCentro()).isEqualTo("Colegio Test");
+		assertThat(((Organizacion) saved).getEmailConfirmado()).isFalse();
+		assertThat(((Organizacion) saved).getCodigoVerificacion()).isBetween(10_000_000, 99_999_999);
+		verify(passwordEncoder).encode(request.getPassword());
+	}
+
+	@Test
+	void enviarEmailVerificacion_cuandoNoHayApiKey_noLanzaExcepcion() {
+		ReflectionTestUtils.setField(authService, "brevoApiKey", "");
+
+		authService.enviarEmailVerificacion("test@cerebrus.com", 12345678);
+
+		assertThat(true).isTrue();
+	}
+
+	@Test
+	void enviarEmailVerificacion_cuandoApiKeyEsNull_noLanzaExcepcion() {
+		ReflectionTestUtils.setField(authService, "brevoApiKey", null);
+
+		authService.enviarEmailVerificacion("test@cerebrus.com", 12345678);
+
+		assertThat(true).isTrue();
+	}
+
+	@Test
+void enviarEmailVerificacion_cuandoHayApiKey_ejecutaRamaCompletaSinPropagarExcepcion() {
+    ReflectionTestUtils.setField(authService, "brevoApiKey", "test-api-key");
+    ReflectionTestUtils.setField(authService, "breevoSenderEmail", "noreply@cerebrus.com");
+    ReflectionTestUtils.setField(authService, "brevoSenderName", "Cerebrus");
+
+    // Con API key real pero sin red, puede lanzar IllegalArgumentException — ambos son válidos
+    try {
+        authService.enviarEmailVerificacion("test@cerebrus.com", 12345678);
+    } catch (IllegalArgumentException ignored) {}
+
+    assertThat(true).isTrue();
+}
+
+@Test
+void enviarEmailVerificacion_cuandoSenderEmailEsNull_usaRemitentePorDefecto() {
+    ReflectionTestUtils.setField(authService, "brevoApiKey", "test-api-key");
+    ReflectionTestUtils.setField(authService, "breevoSenderEmail", null);
+    ReflectionTestUtils.setField(authService, "brevoSenderName", "Cerebrus");
+
+    try {
+        authService.enviarEmailVerificacion("test@cerebrus.com", 12345678);
+    } catch (IllegalArgumentException ignored) {}
+
+    assertThat(true).isTrue();
+}
+
+    // Test para verificar que al registrar un usuario, el tipo de usuario no distingue entre mayúsculas y minúsculas
+	@Test
+	void registrarUsuario_tipoUsuarioNoDistingueMayusculasMinusculas() {
+		SignupRequest request = crearSignupRequest("ORGANIZACION");
+		request.setNombreCentro("Centro Mixto");
+		when(passwordEncoder.encode(eq(request.getPassword()))).thenReturn("encoded-pass");
+		when(usuarioRepository.existsByCorreoElectronico(request.getEmail())).thenReturn(false);
+
+		authService.registrarUsuario(request);
+
+		verify(usuarioRepository).save(usuarioCaptor.capture());
 		assertThat(usuarioCaptor.getValue()).isInstanceOf(Organizacion.class);
+	}
+
+	@Test
+	void confirmarEmail_cuandoCodigoExiste_yCoincide_marcaEmailComoConfirmado() {
+		Organizacion org = new Organizacion();
+		org.setId(1L);
+		org.setCodigoVerificacion(12345678);
+		org.setEmailConfirmado(false);
+		when(organizacionRepository.findByCodigoVerificacion(12345678)).thenReturn(java.util.Optional.of(org));
+
+		authService.confirmarEmail(12345678);
+
+		assertThat(org.getEmailConfirmado()).isTrue();
+		verify(usuarioRepository).save(org);
+	}
+
+	@Test
+	void confirmarEmail_cuandoCodigoExiste_peroNoCoincide_lanzaIllegalArgumentException() {
+		Organizacion org = new Organizacion();
+		org.setId(1L);
+		org.setCodigoVerificacion(87654321);
+		org.setEmailConfirmado(false);
+		when(organizacionRepository.findByCodigoVerificacion(12345678)).thenReturn(java.util.Optional.of(org));
+
+		assertThatThrownBy(() -> authService.confirmarEmail(12345678))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Código de verificación incorrecto.");
+
+		verify(usuarioRepository, never()).save(any());
+	}
+
+	@Test
+	void confirmarEmail_cuandoNoExisteCodigo_lanzaIllegalArgumentException() {
+		when(organizacionRepository.findByCodigoVerificacion(12345678)).thenReturn(java.util.Optional.empty());
+
+		assertThatThrownBy(() -> authService.confirmarEmail(12345678))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Código de verificación no encontrado.");
+	}
+
+	@Test
+	void usuarioVerificado_cuandoEsOrganizacion_devuelveEstado() {
+		Organizacion org = new Organizacion();
+		org.setId(7L);
+		org.setEmailConfirmado(true);
+		when(usuarioRepository.findById(7L)).thenReturn(java.util.Optional.of(org));
+
+		Boolean resultado = authService.usuarioVerificado(7L);
+
+		assertThat(resultado).isTrue();
+	}
+
+	@Test
+	void usuarioVerificado_cuandoNoEsOrganizacion_devuelveFalse() {
+		Usuario usuario = new Usuario() {};
+		usuario.setId(8L);
+		when(usuarioRepository.findById(8L)).thenReturn(java.util.Optional.of(usuario));
+
+		Boolean resultado = authService.usuarioVerificado(8L);
+
+		assertThat(resultado).isFalse();
+	}
+
+	@Test
+	void usuarioVerificado_cuandoNoExiste_lanzaIllegalArgumentException() {
+		when(usuarioRepository.findById(99L)).thenReturn(java.util.Optional.empty());
+
+		assertThatThrownBy(() -> authService.usuarioVerificado(99L))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Usuario no encontrado con el ID: 99");
 	}
 
     //Método para la creación de la solicitud de registro

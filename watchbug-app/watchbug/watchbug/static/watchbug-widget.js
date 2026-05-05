@@ -377,7 +377,7 @@
                 // Error al cargar
                 button.style.cursor = 'pointer';
                 button.style.opacity = '1';
-                alert('No se pudo iniciar la grabación. Verifica tu conexión o desactiva el bloqueador de anuncios.');
+                alert('No se pudo iniciar la grabación. Verifica tu conexión o desactiva el bloqueador de anuncios o bloqueador de scripts.');
             }
         });
         

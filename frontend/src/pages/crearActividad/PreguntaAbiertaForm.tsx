@@ -31,6 +31,7 @@ interface PreguntaAbiertaFormProps {
   temaIdProp?: string;
   cursoIdProp?: string;
   onDone?: () => void;
+  readOnly?: boolean;
 }
 
 interface PreguntaAbiertaMeta {
@@ -38,12 +39,15 @@ interface PreguntaAbiertaMeta {
   version?: number;
 }
 
+const MAX_PREGUNTAS = 5;
+
 export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
   mode,
   preguntaAbiertaId,
   initialValues,
   temaIdProp,
   onDone,
+  readOnly
 }) => {
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
@@ -95,7 +99,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
   // --- HANDLERS PARA AÑADIR/ELIMINAR ---
 
   const handleAddPregunta = () => {
-    if (preguntas.length < 5) {
+    if (preguntas.length < MAX_PREGUNTAS) {
       setPreguntas([...preguntas, { pregunta: '', respuesta: '' }]);
     }
   };
@@ -112,15 +116,49 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
     setPreguntas(updated);
   };
 
-  const isValid = titulo.trim().length > 0 && puntos !== '' && preguntas.every(p => p.pregunta.trim() && p.respuesta.trim());
+  const validate = (): string | null => {
+    if (!titulo.trim()) return 'El título es requerido';
+    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+
+    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
+
+    if (!temaIdProp) return 'Falta el id del tema en la URL';
+    const temaIdNum = Number.parseInt(String(temaIdProp), 10);
+    if (Number.isNaN(temaIdNum)) return 'El id del tema no es válido';
+
+    if (puntos === '' || puntos === null || puntos === undefined) return 'La puntuación es requerida';
+    const puntosNum = typeof puntos === 'number' ? puntos : Number(puntos);
+    if (!Number.isFinite(puntosNum)) return 'La puntuación debe ser un número válido';
+    if (puntosNum <= 0) return 'La puntuación debe ser un número mayor a 0';
+    if (puntosNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
+
+    if (preguntas.length < 1) return 'Añade al menos una pregunta';
+    if (preguntas.length > MAX_PREGUNTAS) return `No puedes añadir más de ${MAX_PREGUNTAS} preguntas`;
+
+    for (let i = 0; i < preguntas.length; i++) {
+      if (!preguntas[i].pregunta.trim()) return `La pregunta ${i + 1} no tiene texto`;
+      if (!preguntas[i].respuesta.trim()) return `La pregunta ${i + 1} no tiene respuesta modelo`;
+    }
+
+    if (mode === 'edit' && !preguntaAbiertaId) return 'Falta el id de la actividad a editar';
+
+    return null;
+  };
 
   const handleGuardar = async () => {
-    if (!isValid) return;
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      setSuccess('');
+      return;
+    }
+
     setSaving(true);
     setError('');
+    setSuccess('');
 
     try {
-      const tId = Number(temaIdProp);
+      const tId = Number.parseInt(String(temaIdProp), 10);
       let gId = preguntaAbiertaId;
       const idsFinales: number[] = [];
       let posicionFinal = initialValues?.posicion;
@@ -229,7 +267,6 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
 
   return (
     <div className="paf-wrapper tf-form">
-      {error && <p className="tf-error">{error}</p>}
       {success && <p className="ca-text" style={{ color: '#27ae60' }}>{success}</p>}
 
       {/* ── TOP: Metadata ── */}
@@ -237,17 +274,18 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
         <div className="tf-col">
           <div>
             <label className="tf-label">Título *</label>
-            <input className="tf-input" value={titulo} onChange={e => setTitulo(e.target.value)} placeholder="Título de la actividad" />
+            <input readOnly={readOnly} className="tf-input" value={titulo} onChange={e => setTitulo(e.target.value)} placeholder="Título de la actividad" />
           </div>
 
           <div>
             <label className="tf-label">Descripción</label>
-            <textarea className="tf-input" value={descripcion} onChange={e => setDescripcion(e.target.value)} rows={3} style={{ resize: 'vertical' }} placeholder="Descripción opcional" />
+            <textarea readOnly={readOnly} className="tf-input" value={descripcion} onChange={e => setDescripcion(e.target.value)} rows={3} style={{ resize: 'vertical' }} placeholder="Descripción opcional" />
           </div>
 
           <div>
             <label className="tf-label">URL de imagen (opcional)</label>
             <input 
+              readOnly={readOnly}
               type="url" 
               className="tf-input" 
               value={imagen} 
@@ -280,38 +318,38 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
         <div className="tf-col">
           <div>
             <label className="tf-label">Puntuación *</label>
-            <input type="number" className="tf-input tf-input-sm" value={puntos} onChange={e => setPuntos(e.target.value === '' ? '' : Number(e.target.value))} min="1" />
+            <input readOnly={readOnly} type="number" className="tf-input tf-input-sm" value={puntos} onChange={e => setPuntos(e.target.value === '' ? '' : Number(e.target.value))} min="1" required />
           </div>
 
           <label className="tf-check-label">
-            <input type="checkbox" checked={respVisible} onChange={e => setRespVisible(e.target.checked)} />
-            <span>Mostrar correcciones al alumno</span>
+            <input disabled={readOnly} type="checkbox" checked={respVisible} onChange={e => setRespVisible(e.target.checked)} />
+            <span>Mostrar comentarios de corrección</span>
           </label>
 
           <label className="tf-check-label">
-            <input type="checkbox" checked={permitirReintento} onChange={e => setPermitirReintento(e.target.checked)} />
+            <input disabled={readOnly} type="checkbox" checked={permitirReintento} onChange={e => setPermitirReintento(e.target.checked)} />
             <span>Permitir reintentos</span>
           </label>
 
           <label className="tf-check-label">
-            <input type="checkbox" checked={mostrarPuntuacion} onChange={e => setMostrarPuntuacion(e.target.checked)} />
+            <input disabled={readOnly} type="checkbox" checked={mostrarPuntuacion} onChange={e => setMostrarPuntuacion(e.target.checked)} />
             <span>Mostrar puntuación</span>
           </label>
 
           <label className="tf-check-label">
-            <input type="checkbox" checked={encontrarRespuestaMaestro} onChange={e => setEncontrarRespuestaMaestro(e.target.checked)} />
-            <span>Mostrar respuesta correcta</span>
+            <input disabled={readOnly} type="checkbox" checked={encontrarRespuestaMaestro} onChange={e => setEncontrarRespuestaMaestro(e.target.checked)} />
+            <span>Mostrar respuesta modelo</span>
           </label>
 
           <label className="tf-check-label">
-            <input type="checkbox" checked={encontrarRespuestaAlumno} onChange={e => setEncontrarRespuestaAlumno(e.target.checked)} />
-            <span>Mostrar mi respuesta</span>
+            <input disabled={readOnly} type="checkbox" checked={encontrarRespuestaAlumno} onChange={e => setEncontrarRespuestaAlumno(e.target.checked)} />
+            <span>Mostrar respuesta del alumno</span>
           </label>
 
           {respVisible && (
             <div>
               <label className="tf-label">Comentarios</label>
-              <input type="text" className="tf-input" value={comentariosRespVisible} onChange={e => setComentariosRespVisible(e.target.value)} />
+              <input readOnly={readOnly} type="text" className="tf-input" value={comentariosRespVisible} onChange={e => setComentariosRespVisible(e.target.value)} />
             </div>
           )}
         </div>
@@ -324,32 +362,41 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
 
         <div className="paf-preguntas-header">
           <span className="ca-text" style={{ fontWeight: 'bold' }}>Preguntas y Respuestas</span>
-          <span className="paf-badge">{preguntas.length} / 5</span>
+          <span className="paf-badge">{preguntas.length} / {MAX_PREGUNTAS} máx.</span>
         </div>
 
         {preguntas.map((p, index) => (
           <div key={index} className="paf-pregunta-row">
             <div className="paf-input-group">
-              <input className="tf-input" value={p.pregunta} onChange={e => handlePreguntaChange(index, 'pregunta', e.target.value)} placeholder={`Pregunta ${index + 1}`} />
-              <input className="tf-input" value={p.respuesta} onChange={e => handlePreguntaChange(index, 'respuesta', e.target.value)} placeholder="Respuesta modelo" />
+              <input readOnly={readOnly} className="tf-input" value={p.pregunta} onChange={e => handlePreguntaChange(index, 'pregunta', e.target.value)} placeholder={`Pregunta ${index + 1}`} />
+              <input readOnly={readOnly} className="tf-input" value={p.respuesta} onChange={e => handlePreguntaChange(index, 'respuesta', e.target.value)} placeholder="Respuesta modelo" />
             </div>
-            {preguntas.length > 1 && (
-              <button type="button" className="paf-btn-remove" onClick={() => handleRemovePregunta(index)}>✕</button>
+            {preguntas.length > 1 && !readOnly && (
+              <button disabled={readOnly} type="button" className="paf-btn-remove" onClick={() => handleRemovePregunta(index)}>✕</button>
             )}
           </div>
         ))}
 
-        {preguntas.length < 5 && (
-          <button type="button" className="paf-btn-add" onClick={handleAddPregunta}>
+        {preguntas.length < MAX_PREGUNTAS && !readOnly && (
+          <button disabled={readOnly} type="button" className="paf-btn-add" onClick={handleAddPregunta}>
             + Añadir pregunta
           </button>
         )}
       </div>{/* close tf-questions */}
 
       <div className="ca-form-footer">
-        <button className="ca-btn-guardar" onClick={handleGuardar} disabled={saving || !isValid}>
-          {saving ? 'GUARDANDO...' : 'GUARDAR'}
-        </button>
+        <div className="tf-footer-stack">
+          {!readOnly && (
+            <button className="ca-btn-guardar" onClick={handleGuardar} disabled={saving}>
+              {saving ? 'GUARDANDO...' : 'GUARDAR'}
+            </button>        
+          )}
+          {error && (
+            <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+              {error}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

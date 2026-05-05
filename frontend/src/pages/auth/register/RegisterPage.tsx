@@ -27,8 +27,8 @@ const RegisterPage = () => {
     e.preventDefault();
     setError('');
 
-    // VALIDACIÓN: Todos los campos son obligatorios (incluido segundo apellido)
-    if (!nombre || !primerApellido || !segundoApellido || !email || !nombreCentro || !password) {
+    // VALIDACIÓN: Campos obligatorios (segundo apellido es opcional)
+    if (!nombre || !primerApellido || !email || !nombreCentro || !password) {
       setError('Por favor, rellena todos los campos obligatorios.');
       return; 
     }
@@ -45,7 +45,7 @@ const RegisterPage = () => {
     const payload = { 
       nombre, 
       primerApellido, 
-      segundoApellido,
+      segundoApellido: segundoApellido.trim() || undefined,
       email, 
       username: email, // El email actúa como nombre de usuario
       password,
@@ -89,6 +89,15 @@ const RegisterPage = () => {
   if (isSuccess) {
     return (
       <div className="register-page-wrapper">
+        <button
+          type="button"
+          className="register-corner-logo-btn"
+          onClick={() => navigate('/')}
+          aria-label="Volver al inicio"
+        >
+          <img src={mascotImg} alt="Cerebrus" className="register-corner-logo" />
+        </button>
+
         <div className="register-card success-modal">
           <div className="register-header">
             <img src={mascotImg} alt="Cerebrus" className="register-mascot" />
@@ -115,6 +124,15 @@ const RegisterPage = () => {
   // 4. VISTA DEL FORMULARIO
   return (
     <div className="register-page-wrapper">
+      <button
+        type="button"
+        className="register-corner-logo-btn"
+        onClick={() => navigate('/')}
+        aria-label="Volver al inicio"
+      >
+        <img src={mascotImg} alt="Cerebrus" className="register-corner-logo" />
+      </button>
+
       <div className="register-card">
         <div className="register-header">
           <img src={mascotImg} alt="Cerebrus Mascot" className="register-mascot" />
@@ -152,12 +170,11 @@ const RegisterPage = () => {
           {/* Fila: Segundo Apellido y Email */}
           <div className="register-fields-row">
             <div className="register-field-group">
-              <label className="register-label">Segundo apellido: *</label>
+              <label className="register-label">Segundo apellido (opcional):</label>
               <input 
                 type="text" 
                 value={segundoApellido} 
                 onChange={(e) => setSegundoApellido(e.target.value)} 
-                required 
                 className="register-input" 
                 placeholder="Ej: Gómez"
               />

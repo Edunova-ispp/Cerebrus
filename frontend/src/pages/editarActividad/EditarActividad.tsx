@@ -253,6 +253,7 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [kind, setKind] = useState<ActivityKind>(null);
+    const [readOnly, setReadOnly] = useState(true);
 
     // States para los DTOs
     const [ordenacion, setOrdenacion] = useState<OrdenacionDTO | null>(null);
@@ -264,6 +265,58 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
     const [tablero, setTablero] = useState<TableroDTO | null>(null);
     const [generalCarta, setGeneralCarta] = useState<GeneralCartaMaestroDTO | null>(null);
     const [clasificacion, setClasificacion] = useState<ClasificacionMaestroDTO | null>(null);
+
+    const handleCancelarEdicion = () => {
+        const confirmar = window.confirm('Si cancelas la edición se descartarán los cambios no guardados. ¿Quieres continuar?');
+        if (!confirmar) return;
+
+        if (embedded && onDone) {
+            onDone();
+            return;
+        }
+
+        navigate(`/cursos/${cursoId}`);
+    };
+
+    useEffect(() => {
+        if (loading || error) return;
+
+        const contenedor = document.querySelector('.ca-contenido');
+        if (!contenedor) return;
+
+        // Si estamos en modo ReadOnly, eliminar todos los botones de cancelar
+        if (readOnly) {
+            const botonesCancelar = Array.from(
+                contenedor.querySelectorAll<HTMLButtonElement>('button.ca-btn-cancelar[data-ca-cancel-inline="1"]')
+            );
+            botonesCancelar.forEach((btn) => btn.remove());
+            return;
+        }
+
+        // Si estamos en modo edición, crear los botones de cancelar
+        const botonesGuardar = Array.from(
+            contenedor.querySelectorAll<HTMLButtonElement>('button.ca-btn-guardar, button.cf-btn-submit')
+        );
+
+        botonesGuardar.forEach((botonGuardar) => {
+            const hermanoAnterior = botonGuardar.previousElementSibling;
+            if (hermanoAnterior instanceof HTMLButtonElement && hermanoAnterior.dataset.caCancelInline === '1') {
+                return;
+            }
+
+            const botonCancelar = document.createElement('button');
+            botonCancelar.type = 'button';
+            botonCancelar.className = 'ca-btn-cancelar';
+            botonCancelar.textContent = 'Cancelar';
+            botonCancelar.dataset.caCancelInline = '1';
+            botonCancelar.onclick = (event) => {
+                event.preventDefault();
+                handleCancelarEdicion();
+            };
+
+            botonGuardar.parentElement?.insertBefore(botonCancelar, botonGuardar);
+        });
+    }, [loading, error, readOnly, kind, embedded, onDone, cursoId, navigate]);
 
     useEffect(() => {
         const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
@@ -610,23 +663,23 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
         const idNum = Number(actividadId);
         switch (kind) {
             case 'preguntaAbierta':
-                return <PreguntaAbiertaForm mode="edit" preguntaAbiertaId={idNum} initialValues={preguntaAbiertaInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} />;
+                return <PreguntaAbiertaForm mode="edit" preguntaAbiertaId={idNum} initialValues={preguntaAbiertaInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} readOnly={readOnly} />;
             case 'test':
-                return <TestForm mode="edit" generalId={idNum} initialValues={testInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} />;
+                return <TestForm mode="edit" generalId={idNum} initialValues={testInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} readOnly={readOnly} />;
             case 'crucigrama':
-                return <CrucigramaForm mode="edit" crucigramaId={idNum} initialValues={crucigramaInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} />;
+                return <CrucigramaForm mode="edit" crucigramaId={idNum} initialValues={crucigramaInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} readOnly={readOnly} />;
             case 'ordenacion':
-                return <OrdenacionForm mode="edit" ordenacionId={idNum} initialValues={ordenacionInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} />;
+                return <OrdenacionForm mode="edit" ordenacionId={idNum} initialValues={ordenacionInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} readOnly={readOnly} />;
             case 'teoria':
-                return <TeoriaForm mode="edit" actividadId={idNum} initialValues={teoriaInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} />;
+                return <TeoriaForm mode="edit" actividadId={idNum} initialValues={teoriaInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} readOnly={readOnly} />;
             case 'tablero':
-                return <TableroForm mode="edit" tableroId={tablero?.id} initialValues={tableroInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} />;
+                return <TableroForm mode="edit" tableroId={tablero?.id} initialValues={tableroInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} readOnly={readOnly} />;
             case 'carta':
-                return <CartaForm mode="edit" generalId={idNum} initialValues={cartaInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} />;
+                return <CartaForm mode="edit" generalId={idNum} initialValues={cartaInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} readOnly={readOnly} />;
             case 'marcarImagen':
-                return <MarcarImagenForm mode="edit" marcarImagenId={idNum} initialValues={marcarImagenInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} />;
+                return <MarcarImagenForm mode="edit" marcarImagenId={idNum} initialValues={marcarImagenInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} readOnly={readOnly} />;
             case 'clasificacion':
-                return <ClasificacionForm mode="edit" clasificacionId={idNum} initialValues={clasificacionInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} />;
+                return <ClasificacionForm mode="edit" clasificacionId={idNum} initialValues={clasificacionInitialValues} temaIdProp={temaId} cursoIdProp={cursoId} onDone={onDone} readOnly={readOnly} />;
             default:
                 return <p className="ca-text">Tipo de actividad no reconocido.</p>;
         }
@@ -649,6 +702,13 @@ export default function EditarActividad({ actividadIdProp, temaIdProp, cursoIdPr
                     {!loading && !error && (
                         <div className="ca-help-row">
                             <ActivityGuideButton activityType={guideType} role="maestro" buttonLabel="Tutorial" />
+                            <button 
+                                type="button" 
+                                className="agb-btn agb-btn--maestro" 
+                                onClick={() => setReadOnly(!readOnly)}
+                            >
+                                {readOnly ? 'Editar' : 'Visualizar'}
+                            </button>
                         </div>
                     )}
                     {loading && <p className="ca-text">Cargando datos de la actividad...</p>}

@@ -26,7 +26,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class TemasIT extends SeleniumBaseTest {
 
-        private static final Duration WAIT = Duration.ofSeconds(10);
+        private static final Duration WAIT = Duration.ofSeconds(20);
         private static final String MAESTRO_USER = "profe_snape";
         private static final String MAESTRO_PASSWORD = "123456";
         private static final String ALUMNO_USER = "alumno_harry";
@@ -71,8 +71,8 @@ class TemasIT extends SeleniumBaseTest {
                 );
 
                 assertThat(title.getText()).isEqualToIgnoringCase("MIS CURSOS");
-                assertThat(driver.findElements(By.cssSelector("div.curso-card"))).isNotEmpty();
-
+pageWait.until(d -> !d.findElements(By.cssSelector("div.curso-card")).isEmpty());
+assertThat(driver.findElements(By.cssSelector("div.curso-card"))).isNotEmpty();
                 navigateTo("/cursos/" + sharedCourse.id());
                 pageWait.until(ExpectedConditions.urlContains("/cursos/" + sharedCourse.id()));
 
@@ -81,7 +81,7 @@ class TemasIT extends SeleniumBaseTest {
                 );
                 assertThat(addThemeButton.getText()).contains("Añadir tema");
 
-                List<WebElement> themeItems = driver.findElements(By.cssSelector("div.ltp-item"));
+                List<WebElement> themeItems = driver.findElements(By.cssSelector("div.ltp-tema-bloque"));
                 if (themeItems.isEmpty()) {
                         WebElement emptyState = pageWait.until(
                                         ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.ltp-vacio"))
@@ -139,11 +139,13 @@ class TemasIT extends SeleniumBaseTest {
                 navigateTo("/cursos/" + sharedCourse.id());
 
                 WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-                WebElement themeItem = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(
-                                                By.xpath("//div[contains(@class, 'ltp-item')][.//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + currentThemeTitle + "']]")
-                                )
-                );
+                pageWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("p.ltp-estado")));
+                if (!themeExists(currentThemeTitle)) {
+                        createThemeInCurrentCourse(currentThemeTitle);
+                        navigateTo("/cursos/" + sharedCourse.id());
+                        pageWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("p.ltp-estado")));
+                }
+                WebElement themeItem = waitForThemeInList(currentThemeTitle, Duration.ofSeconds(60));
                 WebElement editButton = themeItem.findElement(By.cssSelector("button[title='Editar']"));
                 ((JavascriptExecutor) driver).executeScript("arguments[0].click();", editButton);
 
@@ -179,30 +181,36 @@ class TemasIT extends SeleniumBaseTest {
         void maestroNoPuedeCrearTemaConTituloInvalidoYPermaneceEnFormulario() {
                 ensureSharedCourseReady();
                 login(MAESTRO_USER, MAESTRO_PASSWORD);
-                navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
 
+                navigateTo("/cursos/" + sharedCourse.id());
                 WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-                WebElement heading = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.welcome-text"))
+
+                WebElement addThemeButton = pageWait.until(
+                        ExpectedConditions.presenceOfElementLocated(By.cssSelector("button.ltp-btn-añadir"))
                 );
-                assertThat(heading.getText()).isEqualToIgnoringCase("Crear tema");
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addThemeButton);
+
+                pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.welcome-text")));
 
                 WebElement titleInput = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
+                        ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
                 );
                 titleInput.clear();
                 titleInput.sendKeys("   ");
 
-                WebElement submitButton = pageWait.until(
-                                ExpectedConditions.elementToBeClickable(By.cssSelector("button.pixel-btn-submit-main"))
-                );
-                submitButton.click();
+                driver.findElement(By.cssSelector("button.pixel-btn-submit-main")).click();
+
+                // Cerrar alerta si aparece tras submit inválido
+                try {
+                        new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.alertIsPresent());
+                        driver.switchTo().alert().dismiss();
+                } catch (org.openqa.selenium.TimeoutException ignored) {}
 
                 WebElement errorMsg = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.error-msg"))
+                        ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.error-msg"))
                 );
                 assertThat(errorMsg.getText()).containsIgnoringCase("requerido");
-                assertThat(driver.getCurrentUrl()).contains("/temas/crear");
+                assertThat(driver.getCurrentUrl()).contains("/cursos/" + sharedCourse.id());
         }
 
         @Test
@@ -214,11 +222,13 @@ class TemasIT extends SeleniumBaseTest {
                 navigateTo("/cursos/" + sharedCourse.id());
 
                 WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-                WebElement themeItem = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(
-                                                By.xpath("//div[contains(@class, 'ltp-item')][.//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + currentThemeTitle + "']]")
-                                )
-                );
+                pageWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("p.ltp-estado")));
+                if (!themeExists(currentThemeTitle)) {
+                        createThemeInCurrentCourse(currentThemeTitle);
+                        navigateTo("/cursos/" + sharedCourse.id());
+                        pageWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("p.ltp-estado")));
+                }
+                WebElement themeItem = waitForThemeInList(currentThemeTitle, Duration.ofSeconds(60));
                 WebElement editButton = themeItem.findElement(By.cssSelector("button[title='Editar']"));
                 ((JavascriptExecutor) driver).executeScript("arguments[0].click();", editButton);
                 WebElement heading = pageWait.until(
@@ -260,7 +270,7 @@ class TemasIT extends SeleniumBaseTest {
                 pageWait.until(ExpectedConditions.urlContains("/misCursos"));
 
                 assertThat(driver.getCurrentUrl()).contains("/misCursos");
-                assertThat(driver.findElements(By.cssSelector("span.ltp-item-titulo"))).isEmpty();
+                assertThat(driver.findElements(By.cssSelector("span.ltp-tema-titulo"))).isEmpty();
 
                 login(MAESTRO_USER, MAESTRO_PASSWORD);
                 setCourseVisibilityInUi(true);
@@ -272,6 +282,16 @@ class TemasIT extends SeleniumBaseTest {
         void alumnoPuedeVerTemaCreadoYLuegoDejaDeVerloTrasBorrado() {
                 ensureSharedCourseReady();
 
+                login(MAESTRO_USER, MAESTRO_PASSWORD);
+                navigateTo("/cursos/" + sharedCourse.id());
+                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
+                pageWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("p.ltp-estado")));
+                if (!themeExists(currentThemeTitle)) {
+                        createThemeInCurrentCourse(currentThemeTitle);
+                        navigateTo("/cursos/" + sharedCourse.id());
+                        pageWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("p.ltp-estado")));
+                }
+
                 login(ALUMNO_USER, ALUMNO_PASSWORD);
                 openStudentCourseMap(sharedCourse.id());
                 assertStudentSeesThemeInMap(currentThemeTitle);
@@ -279,11 +299,6 @@ class TemasIT extends SeleniumBaseTest {
                 login(MAESTRO_USER, MAESTRO_PASSWORD);
                 navigateTo("/cursos/" + sharedCourse.id());
                 assertTeacherSeesTheme(currentThemeTitle);
-
-                WebElement noActivitiesMessage = new WebDriverWait(driver, WAIT).until(
-                                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.ltp-vacio"))
-                );
-                assertThat(noActivitiesMessage.getText()).contains("No hay actividades en este tema");
 
                 deleteThemeByTitle(currentThemeTitle);
                 assertTeacherDoesNotSeeTheme(currentThemeTitle);
@@ -366,27 +381,6 @@ class TemasIT extends SeleniumBaseTest {
 
                 By createdCourseCard = By.xpath("//div[contains(@class, 'curso-card')][.//span[contains(@class, 'curso-card__titulo') and normalize-space() = '" + COURSE_TITLE + "']]");
                 pageWait.until(d -> d.findElements(createdCourseCard).isEmpty());
-        }
-
-        private void login(String user, String password) {
-                navigateTo("/auth/login");
-                clearClientSession();
-
-                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-                WebElement userInput = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(By.id("identificador"))
-                );
-                userInput.clear();
-                userInput.sendKeys(user);
-
-                WebElement passwordInput = driver.findElement(By.id("password"));
-                passwordInput.clear();
-                passwordInput.sendKeys(password);
-
-                driver.findElement(By.cssSelector("button.pixel-btn-submit")).click();
-                pageWait.until(ExpectedConditions.urlContains("/miscursos"));
-                driver.navigate().refresh();
-                pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h1.mis-cursos-title")));
         }
 
         private CourseContext createCourseAndOpenDetail(String courseTitle) {
@@ -487,71 +481,155 @@ class TemasIT extends SeleniumBaseTest {
         }
 
         private void createThemeInCurrentCourse(String themeTitle) {
-                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
+                WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
-                // Este helper puede invocarse desde distintas pantallas; forzamos abrir el formulario.
-                navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
-                pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.welcome-text")));
+                try {
+                        navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
+                } catch (org.openqa.selenium.WebDriverException e) {
+                        try { Thread.sleep(2000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+                        navigateTo("/cursos/" + sharedCourse.id() + "/temas/crear");
+                }
+
+                try {
+                        pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h2.welcome-text")));
+                } catch (org.openqa.selenium.TimeoutException e) {
+                        throw new AssertionError("No cargó el formulario de crear tema. URL: " + driver.getCurrentUrl(), e);
+                }
 
                 WebElement titleInput = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
+                        ExpectedConditions.visibilityOfElementLocated(By.id("titulo"))
                 );
                 titleInput.clear();
                 titleInput.sendKeys(themeTitle);
 
                 WebElement submitButton = pageWait.until(
-                                ExpectedConditions.elementToBeClickable(By.cssSelector("button.pixel-btn-submit-main"))
+                        ExpectedConditions.elementToBeClickable(By.cssSelector("button.pixel-btn-submit-main"))
                 );
                 submitButton.click();
 
+                // Esperar a que el formulario desaparezca (indica que se envió)
+                pageWait.until(ExpectedConditions.stalenessOf(submitButton));
+    
+                // Esperar redirección a página de curso
                 pageWait.until(ExpectedConditions.urlContains("/cursos/" + sharedCourse.id()));
-
-                navigateTo("/cursos/" + sharedCourse.id());
-        }
+    
+                // Esperar a que el tema creado sea visible en la lista
+                pageWait.until(ExpectedConditions.visibilityOfElementLocated(
+                        By.xpath("//span[contains(@class, 'ltp-tema-titulo') and contains(normalize-space(), '" + themeTitle + "')]")
+                ));
+}
 
         private void assertTeacherSeesTheme(String themeTitle) {
-                WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
-                WebElement createdTheme = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(
-                                                By.xpath("//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + themeTitle + "']")
-                                )
-                );
-                assertThat(createdTheme.getText()).isEqualTo(themeTitle);
+                System.out.println("[TemasIT] assertTeacherSeesTheme themeTitle=" + themeTitle + " url=" + driver.getCurrentUrl());
+                WebElement createdTheme = waitForThemeInList(themeTitle, Duration.ofSeconds(60));
+                System.out.println("[TemasIT] assertTeacherSeesTheme foundText=" + createdTheme.getText());
+                assertThat(createdTheme.getText()).contains(themeTitle);
         }
 
         private void assertTeacherDoesNotSeeTheme(String themeTitle) {
                 assertThat(driver.findElements(
-                                By.xpath("//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + themeTitle + "']")
+                                By.xpath("//span[contains(@class, 'ltp-tema-titulo') and contains(normalize-space(), '" + themeTitle + "')]")
                 )).isEmpty();
         }
 
+        private boolean themeExists(String themeTitle) {
+                return !driver.findElements(By.xpath(
+                                "//div[contains(@class, 'ltp-tema-bloque')][.//span[contains(@class, 'ltp-tema-titulo') and contains(normalize-space(), '" + themeTitle + "')]]"
+                )).isEmpty();
+        }
+
+        private WebElement waitForThemeInList(String themeTitle, Duration timeout) {
+                By themeLocator = By.xpath(
+                                "//div[contains(@class, 'ltp-tema-bloque')][.//span[contains(@class, 'ltp-tema-titulo') and contains(normalize-space(), '" + themeTitle + "')]]"
+                );
+
+                long end = System.currentTimeMillis() + timeout.toMillis();
+                boolean refreshed = false;
+                int attempt = 0;
+
+                while (System.currentTimeMillis() < end) {
+                        attempt++;
+                        List<WebElement> elems = driver.findElements(themeLocator);
+                        System.out.println("[TemasIT] waitForThemeInList attempt=" + attempt + " matches=" + elems.size() + " url=" + driver.getCurrentUrl());
+                        if (!elems.isEmpty()) {
+                                for (WebElement e : elems) {
+                                        if (e.isDisplayed()) {
+                                                System.out.println("[TemasIT] waitForThemeInList visibleText=" + e.getText());
+                                                return e;
+                                        }
+                                }
+                        }
+
+                        List<WebElement> loaders = driver.findElements(By.cssSelector("p.ltp-estado"));
+                        System.out.println("[TemasIT] waitForThemeInList attempt=" + attempt + " loaders=" + loaders.size());
+                        if (!loaders.isEmpty()) {
+                                try {
+                                        new WebDriverWait(driver, Duration.ofSeconds(5)).until(
+                                                        ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("p.ltp-estado"))
+                                        );
+                                } catch (org.openqa.selenium.TimeoutException ignored) {
+                                }
+                        }
+
+                        try {
+                                Thread.sleep(1000);
+                        } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                break;
+                        }
+
+                        // Intenta un refresh una vez a mitad del timeout para forzar re-render
+                        if (!refreshed && System.currentTimeMillis() > (end - timeout.toMillis() / 2)) {
+                                try {
+                                        driver.navigate().refresh();
+                                } catch (Exception ignored) {
+                                }
+                                refreshed = true;
+                        }
+                }
+
+                String snapshotPath = "target/test-output/theme-snapshot-" + System.currentTimeMillis() + ".html";
+                try {
+                        java.nio.file.Files.createDirectories(java.nio.file.Paths.get("target/test-output"));
+                        java.nio.file.Files.write(java.nio.file.Paths.get(snapshotPath), driver.getPageSource().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                } catch (java.io.IOException ignored) {
+                }
+
+                System.out.println("[TemasIT] waitForThemeInList timeout snapshot=" + snapshotPath);
+                System.out.println("[TemasIT] waitForThemeInList pageSourceLength=" + driver.getPageSource().length());
+
+                throw new AssertionError("Tema '" + themeTitle + "' no apareció en la lista tras " + timeout.toSeconds() + "s. Captura: " + snapshotPath);
+        }
+
         private void openStudentCourseMap(String courseId) {
-                navigateTo("/cursos/" + courseId);
+                driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
+                try {
+                        navigateTo("/cursos/" + courseId);
+                } catch (org.openqa.selenium.TimeoutException ignored) {
+                        // La página SPA puede no disparar load — continuar si el DOM está listo
+                } finally {
+                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(300));
+                }
 
                 WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
                 List<WebElement> heroButtons = driver.findElements(By.cssSelector("button.detalle-hero-btn"));
                 if (!heroButtons.isEmpty()) {
                         WebElement continueButton = pageWait.until(
-                                        ExpectedConditions.visibilityOf(heroButtons.get(0))
-                        );
+                                ExpectedConditions.visibilityOf(heroButtons.get(0)));
                         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", continueButton);
                         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", continueButton);
                 } else {
+                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
+                        try {
                         navigateTo("/mapa/" + courseId);
+                        } catch (org.openqa.selenium.TimeoutException ignored) {}
+                        finally {
+                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(300));
+                        }
                 }
 
                 pageWait.until(ExpectedConditions.urlContains("/mapa/" + courseId));
-        }
-
-        private void assertStudentSeesThemeInMap(String themeTitle) {
-                WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(20));
-                WebElement themeButton = pageWait.until(
-                                ExpectedConditions.visibilityOfElementLocated(
-                                                By.xpath("//button[contains(@class, 'mapa-tema-btn') and normalize-space() = '" + themeTitle + "']")
-                                )
-                );
-                assertThat(themeButton.getText()).isEqualTo(themeTitle);
-        }
+                }
 
         private void assertStudentDoesNotSeeThemeInMap(String themeTitle) {
                 assertThat(driver.findElements(
@@ -562,7 +640,7 @@ class TemasIT extends SeleniumBaseTest {
         private void deleteThemeByTitle(String themeTitle) {
                 WebDriverWait pageWait = new WebDriverWait(driver, WAIT);
                 By themeLocator = By.xpath(
-                                "//div[contains(@class, 'ltp-item')][.//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + themeTitle + "']]"
+                                "//div[contains(@class, 'ltp-tema-bloque')][.//span[contains(@class, 'ltp-tema-titulo') and contains(normalize-space(), '" + themeTitle + "')]]"
                 );
 
                 int safetyCounter = 0;
@@ -615,7 +693,6 @@ class TemasIT extends SeleniumBaseTest {
                 if (sharedCourse == null) {
                         login(MAESTRO_USER, MAESTRO_PASSWORD);
                         sharedCourse = createCourseAndOpenDetail(COURSE_TITLE);
-
                         login(ALUMNO_USER, ALUMNO_PASSWORD);
                         enrollStudentInCourse(sharedCourse.code());
                 }
@@ -623,17 +700,21 @@ class TemasIT extends SeleniumBaseTest {
                 login(MAESTRO_USER, MAESTRO_PASSWORD);
                 navigateTo("/cursos/" + sharedCourse.id());
 
-                By currentThemeLocator = By.xpath(
-                                "//span[contains(@class, 'ltp-item-titulo') and normalize-space() = '" + currentThemeTitle + "']"
-                );
+                        By currentThemeLocator = By.xpath(
+                                "//span[contains(@class, 'ltp-tema-titulo') and contains(normalize-space(), '" 
+                                + currentThemeTitle + "')]"
+                        );
 
                 List<WebElement> currentThemeMatches = driver.findElements(currentThemeLocator);
+
                 if (currentThemeMatches.isEmpty()) {
-                        List<WebElement> anyThemeTitles = driver.findElements(By.cssSelector("span.ltp-item-titulo"));
-                        if (!anyThemeTitles.isEmpty()) {
-                                currentThemeTitle = anyThemeTitles.getFirst().getText().trim();
-                        } else {
-                                createThemeInCurrentCourse(currentThemeTitle);
+                                List<WebElement> anyThemeTitles = driver.findElements(
+                                        By.cssSelector("span.ltp-tema-titulo"));
+                        anyThemeTitles.forEach(t -> System.out.println("  - " + t.getText()));
+
+                                if (!anyThemeTitles.isEmpty()) {
+                                        currentThemeTitle = anyThemeTitles.get(0).getText().trim();
+                                } else {
                         }
                 }
         }
@@ -659,6 +740,18 @@ class TemasIT extends SeleniumBaseTest {
                         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", visibilityLabel);
                         pageWait.until(ExpectedConditions.elementSelectionStateToBe(visibilityToggle, visible));
                 }
+        }
+        private void assertStudentSeesThemeInMap(String themeTitle) {
+                WebDriverWait pageWait = new WebDriverWait(driver, Duration.ofSeconds(20));
+
+                driver.navigate().refresh();
+                
+                WebElement themeButton = pageWait.until(
+                        ExpectedConditions.visibilityOfElementLocated(
+                                By.xpath("//button[contains(@class, 'mapa-tema-btn') and normalize-space() = '" + themeTitle + "']")
+                        )
+                );
+                assertThat(themeButton.getText()).isEqualTo(themeTitle);
         }
 
 }

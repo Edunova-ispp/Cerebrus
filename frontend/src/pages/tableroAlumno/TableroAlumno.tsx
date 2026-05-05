@@ -23,6 +23,7 @@ type PreguntaDTO = { id: number; pregunta: string };
 type TableroAlumnoDTO = {
   id: number;
   titulo: string;
+  descripcion?: string | null;
   tamano: boolean; // true = 3×3, false = 4×4
   respVisible: boolean;
   puntuacion?: number;
@@ -313,6 +314,7 @@ export default function TableroAlumno() {
           allowRetry: data.permitirReintento ?? false,
           showCorrectAnswer: data.encontrarRespuestaMaestro ?? true,
           showStudentAnswer: data.encontrarRespuestaAlumno ?? true,
+          showComments: data.respVisible ?? true,
         });
 
         // Registro de la actividad del alumno (¡Empieza el tiempo!)
@@ -476,18 +478,38 @@ export default function TableroAlumno() {
   const modalQuestion = modalQIdx !== null ? tablero.preguntas[modalQIdx] : null;
 
   const handleRetry = () => {
-    setLastAttemptScore(null);
-    setCerberoPos([0, 0]);
-    setAnsweredSet(new Set());
-    setModalCell(null);
-    setInputAnswer('');
-    setFeedback(null);
-    setAttemptCompleted(false);
-    setAnswerHistory(new Map());
-    setSubmittedAnswersByQuestion(new Map());
-    setCorrectAnswersByQuestion(new Map());
-    setBoardFailureCount(0);
-    completedRef.current = false;
+    if (!tablero) return;
+
+    void (async () => {
+      try {
+        const alumnoId = getCurrentUserIdFromJwt();
+        if (!alumnoId) throw new Error('No se pudo identificar al alumno.');
+
+        const createAA = await apiFetch(`${API_BASE}/api/actividades-alumno`, {
+          method: 'POST',
+          body: JSON.stringify({ alumnoId, actividadId: tablero.id }),
+        });
+        const aaData = (await createAA.json()) as ActividadAlumnoDTO;
+        if (typeof aaData?.id === 'number' && Number.isFinite(aaData.id)) {
+          setActividadAlumnoId(aaData.id);
+        }
+
+        setLastAttemptScore(null);
+        setCerberoPos([0, 0]);
+        setAnsweredSet(new Set());
+        setModalCell(null);
+        setInputAnswer('');
+        setFeedback(null);
+        setAttemptCompleted(false);
+        setAnswerHistory(new Map());
+        setSubmittedAnswersByQuestion(new Map());
+        setCorrectAnswersByQuestion(new Map());
+        setBoardFailureCount(0);
+        completedRef.current = false;
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'No se pudo crear un nuevo intento');
+      }
+    })();
   };
 
   const handleViewStudentAnswers = () => {
@@ -507,7 +529,12 @@ export default function TableroAlumno() {
       <NavbarMisCursos />
       <main className="ta-main">
         <div className="ta-wrapper">
-          <ActivityHeader title={tablero.titulo} guideType="tablero" guideRole="alumno" />
+          <ActivityHeader
+            title={tablero.titulo}
+            subtitle={tablero.descripcion?.trim() || undefined}
+            guideType="tablero"
+            guideRole="alumno"
+          />
 
           <div className="ta-progress">
             <img src={hombreMisteriosoImg} alt="Hombre misterioso" className="ta-progress-avatar" />

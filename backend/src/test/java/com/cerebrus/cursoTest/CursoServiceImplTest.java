@@ -1,22 +1,21 @@
 package com.cerebrus.cursoTest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -70,7 +69,14 @@ class CursoServiceImplTest {
         // Usuario genérico que no es ni Maestro ni Alumno
         usuarioGenerico = new Usuario() {};
 
-        curso = crearCurso(10L, "Matemáticas", maestro, true);
+        curso = new Curso();
+        curso.setId(10L);
+        curso.setTitulo("Matemáticas");
+        curso.setDescripcion("Descripción de prueba"); 
+        curso.setImagen("imagen_prueba.png");
+        curso.setVisibilidad(true);
+        curso.setMaestro(maestro);
+        curso.setCodigo("ABC1234");
     }
 
     // -------------------------------------------------------
@@ -120,7 +126,7 @@ class CursoServiceImplTest {
     // encontrarDetallesCursoPorId
     // -------------------------------------------------------
 
-    // Test para verificar que encontrarDetallesCursoPorId retorna titulo, descripcion, imagen y codigo para el maestro propietario
+    // Test para verificar que encontrarDetallesCursoPorId retorna titulo, descripcion, imagen, codigo y visibilidad para el maestro propietario
     @Test
     void encontrarDetallesCursoPorId_maestroPropietario_retornaDetallesConCodigo() {
         when(cursoRepository.findByID(10L)).thenReturn(curso);
@@ -128,7 +134,13 @@ class CursoServiceImplTest {
 
         List<String> resultado = cursoService.encontrarDetallesCursoPorId(10L);
 
-        assertThat(resultado).containsExactly("Matemáticas", curso.getDescripcion(), curso.getImagen(), curso.getCodigo());
+        assertThat(resultado).containsExactly(
+                "Matemáticas",
+                curso.getDescripcion(),
+                curso.getImagen(),
+                curso.getCodigo(),
+                "true"
+        );
     }
 
     // Test para verificar que encontrarDetallesCursoPorId lanza RuntimeException 403 cuando el maestro no es propietario del curso
@@ -283,12 +295,12 @@ class CursoServiceImplTest {
         when(cursoRepository.existsByCodigo(anyString())).thenReturn(false);
         when(cursoRepository.save(any(Curso.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Curso resultado = cursoService.crearCurso("Física", "Descripción", "img.png", "CODIGO");
+        Curso resultado = cursoService.crearCurso("Física", "Descripción", "img.png", "CODIGO", true);
 
         assertThat(resultado.getTitulo()).isEqualTo("Física");
         assertThat(resultado.getDescripcion()).isEqualTo("Descripción");
         assertThat(resultado.getImagen()).isEqualTo("img.png");
-        assertThat(resultado.getVisibilidad()).isFalse();
+        assertThat(resultado.getVisibilidad()).isTrue();
         assertThat(resultado.getMaestro()).isEqualTo(maestro);
         assertThat(resultado.getCodigo()).isNotBlank();
         verify(cursoRepository).save(any(Curso.class));
@@ -299,7 +311,7 @@ class CursoServiceImplTest {
     void crearCurso_usuarioNoMaestro_lanzaAccessDeniedException() {
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
-        assertThatThrownBy(() -> cursoService.crearCurso("Física", "Desc", null, "CODIGO1234"))
+        assertThatThrownBy(() -> cursoService.crearCurso("Física", "Desc", null, "CODIGO1234", true))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede crear cursos");
 
@@ -313,7 +325,7 @@ class CursoServiceImplTest {
         when(cursoRepository.existsByCodigo(anyString())).thenReturn(false);
         when(cursoRepository.save(any(Curso.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Curso resultado = cursoService.crearCurso("Historia", null, null, "CODIGO12345");
+        Curso resultado = cursoService.crearCurso("Historia", null, null, "CODIGO12345", true);
 
         assertThat(resultado.getDescripcion()).isNull();
         assertThat(resultado.getImagen()).isNull();
@@ -330,12 +342,13 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(cursoRepository.save(curso)).thenReturn(curso);
 
-        Curso resultado = cursoService.actualizarCurso(10L, "Nuevo título", "Nueva desc", "nueva.png", "nuevo-codigo");
+        Curso resultado = cursoService.actualizarCurso(10L, "Nuevo título", "Nueva desc", "nueva.png", "nuevo-codigo", true);
 
         assertThat(resultado.getTitulo()).isEqualTo("Nuevo título");
         assertThat(resultado.getDescripcion()).isEqualTo("Nueva desc");
         assertThat(resultado.getImagen()).isEqualTo("nueva.png");
         assertThat(resultado.getCodigo()).isEqualTo("nuevo-codigo");
+        assertThat(resultado.getVisibilidad()).isTrue();
         verify(cursoRepository).save(curso);
     }
 
@@ -344,7 +357,7 @@ class CursoServiceImplTest {
     void actualizarCurso_cursoNoExiste_lanzaNotFound() {
         when(cursoRepository.findByID(99L)).thenReturn(null);
 
-        assertThatThrownBy(() -> cursoService.actualizarCurso(99L, "T", "D", null, "CODIGO123"))
+        assertThatThrownBy(() -> cursoService.actualizarCurso(99L, "T", "D", null, "CODIGO123", true))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("404 Not Found");
 
@@ -357,7 +370,7 @@ class CursoServiceImplTest {
         when(cursoRepository.findByID(10L)).thenReturn(curso);
         when(usuarioService.findCurrentUser()).thenReturn(alumno);
 
-        assertThatThrownBy(() -> cursoService.actualizarCurso(10L, "T", "D", null, "CODIGO123"))
+        assertThatThrownBy(() -> cursoService.actualizarCurso(10L, "T", "D", null, "CODIGO123", true))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("Solo un maestro puede actualizar cursos");
 
@@ -371,12 +384,13 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(cursoRepository.save(curso)).thenReturn(curso);
 
-        Curso resultado = cursoService.actualizarCurso(10L, "Nuevo título", null, null, "nuevo-codigo");
+        Curso resultado = cursoService.actualizarCurso(10L, "Nuevo título", null, null, "nuevo-codigo", true);
 
         assertThat(resultado.getTitulo()).isEqualTo("Nuevo título");
         assertThat(resultado.getDescripcion()).isNull();
         assertThat(resultado.getImagen()).isNull();
         assertThat(resultado.getCodigo()).isEqualTo("nuevo-codigo");
+        assertThat(resultado.getVisibilidad()).isTrue();
     }
 
     // -------------------------------------------------------
@@ -624,9 +638,9 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(actividadAlumnoRepository.findByCursoID(10L)).thenReturn(actividades);
 
-        List<Integer> resultado = cursoService.obtenerNotaMediaPorActividadPorCursoId(10L);
+        List<Double> resultado = cursoService.obtenerNotaMediaPorActividadPorCursoId(10L);
 
-        assertThat(resultado).containsExactly(9, 7); // (8+10)/2 = 9, 7/1 = 7
+        assertThat(resultado).containsExactly(9.0, 7.0); // (8+10)/2 = 9, 7/1 = 7
     }
 
     // Test para verificar que obtenerNotaMediaPorActividadPorCursoId retorna lista vacía cuando no hay actividades
@@ -636,7 +650,7 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(actividadAlumnoRepository.findByCursoID(10L)).thenReturn(List.of());
 
-        List<Integer> resultado = cursoService.obtenerNotaMediaPorActividadPorCursoId(10L);
+        List<Double> resultado = cursoService.obtenerNotaMediaPorActividadPorCursoId(10L);
 
         assertThat(resultado).isEmpty();
     }
@@ -667,9 +681,9 @@ class CursoServiceImplTest {
         when(usuarioService.findCurrentUser()).thenReturn(maestro);
         when(actividadAlumnoRepository.findByCursoID(10L)).thenReturn(actividades);
 
-        List<Integer> resultado = cursoService.obtenerNotaMediaPorActividadPorCursoId(10L);
+        List<Double> resultado = cursoService.obtenerNotaMediaPorActividadPorCursoId(10L);
 
-        assertThat(resultado).containsExactly(0);
+        assertThat(resultado).containsExactly(0.0);
     }
 
     // -------------------------------------------------------

@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -24,6 +25,7 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
     private static final long ACTIVIDAD_CARTA_SEED_ID = 10402L;
     private static final long ACTIVIDAD_TABLERO_SEED_ID = 10414L;
     private static final long ACTIVIDAD_MARCAR_IMAGEN_SEED_ID = 10415L;
+
 
     @Test
     @DisplayName("Sin autenticacion, rutas de alumno redirigen a login")
@@ -108,7 +110,11 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
 
         WebDriverWait wait = new WebDriverWait(driver, WAIT);
         wait.until(ExpectedConditions.urlContains("/actividades/teoria/6004"));
-        WebElement finalizarLecturaBtn = wait.until(ExpectedConditions.visibilityOfElementLocated(
+
+        WebElement flashcard = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".ta-flashcard")));
+        flashcard.click();
+
+        WebElement finalizarLecturaBtn = wait.until(ExpectedConditions.elementToBeClickable(
             By.xpath("//button[normalize-space()='He terminado de leer']")));
 
         finalizarLecturaBtn.click();
@@ -134,9 +140,17 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
         List<WebElement> downButtons = driver.findElements(By.cssSelector(".ord-item .ord-arrow-btn:last-child"));
         downButtons.stream().filter(WebElement::isEnabled).findFirst().ifPresent(WebElement::click);
 
-        WebElement sendButton = driver.findElement(By.xpath("//button[normalize-space()='Enviar']"));
-        wait.until(ExpectedConditions.elementToBeClickable(sendButton));
-        sendButton.click();
+        dismissArsOverlayIfPresent();
+
+WebElement sendButton = wait.until(ExpectedConditions.presenceOfElementLocated(
+        By.xpath("//button[normalize-space()='Enviar']")));
+try {
+    wait.until(ExpectedConditions.elementToBeClickable(sendButton)).click();
+} catch (org.openqa.selenium.ElementClickInterceptedException ex) {
+    dismissArsOverlayIfPresent();
+    ((org.openqa.selenium.JavascriptExecutor) driver)
+            .executeScript("arguments[0].click();", sendButton);
+}
 
         wait.until(ExpectedConditions.or(
                 ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(normalize-space(), 'Tu respuesta es correcta.')]")),
@@ -353,23 +367,10 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
         loginAsAlumno(ALUMNO_USUARIO);
     }
 
-    private void loginAsAlumno(String usuario) {
-        navigateTo("/auth/login");
-
-        WebDriverWait wait = new WebDriverWait(driver, WAIT);
-        WebElement usuarioInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("identificador")));
-        usuarioInput.clear();
-        usuarioInput.sendKeys(usuario);
-
-        WebElement passwordInput = driver.findElement(By.id("password"));
-        passwordInput.clear();
-        passwordInput.sendKeys(ALUMNO_PASSWORD);
-
-        driver.findElement(By.cssSelector("button.pixel-btn-submit")).click();
-
-        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/auth/login")));
-        assertThat(driver.getCurrentUrl()).doesNotContain("/auth/login");
-    }
+    // En AlumnoActividadesIT — simplificar loginAsAlumno
+private void loginAsAlumno(String usuario) {
+    login(usuario, ALUMNO_PASSWORD);
+}
 
     private void clickContinueIfPresent(WebDriverWait wait) {
         List<WebElement> continueButtons = driver.findElements(By.xpath("//button[normalize-space()='Continuar']"));
@@ -377,13 +378,6 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
             continueButtons.get(0).click();
             wait.until(ExpectedConditions.urlContains("/miscursos"));
             assertThat(driver.getCurrentUrl()).contains("/miscursos");
-        }
-    }
-
-    private void dismissArsOverlayIfPresent() {
-        List<WebElement> closeButtons = driver.findElements(By.cssSelector(".ars-btn.ars-btn-secondary"));
-        if (!closeButtons.isEmpty() && closeButtons.get(0).isDisplayed()) {
-            closeButtons.get(0).click();
         }
     }
 
@@ -458,4 +452,14 @@ class AlumnoActividadesIT extends SeleniumBaseTest {
                 "login-box"
         );
     }
+
+    private void dismissArsOverlayIfPresent() {
+    try {
+        List<WebElement> closeButtons = driver.findElements(By.cssSelector(".ars-btn.ars-btn-secondary"));
+        if (!closeButtons.isEmpty() && closeButtons.get(0).isDisplayed()) {
+            ((org.openqa.selenium.JavascriptExecutor) driver)
+                    .executeScript("arguments[0].click();", closeButtons.get(0));
+        }
+    } catch (org.openqa.selenium.WebDriverException ignored) {}
+}
 }

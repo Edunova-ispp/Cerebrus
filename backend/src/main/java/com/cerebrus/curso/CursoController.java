@@ -36,7 +36,7 @@ public class CursoController {
     public ResponseEntity<Curso> crearCurso(@RequestBody @Valid CrearCursoRequest request){
        
         try {
-             Curso creado = cursoService.crearCurso(request.getTitulo(), request.getDescripcion(), request.getImagen(), request.getCodigo());
+            Curso creado = cursoService.crearCurso(request.getTitulo(), request.getDescripcion(), request.getImagen(), request.getCodigo(), request.getVisibilidad());
             return ResponseEntity.status(HttpStatus.CREATED).body(creado);
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -84,7 +84,8 @@ public class CursoController {
                     request.getTitulo(),
                     request.getDescripcion(),
                     request.getImagen(),
-                    request.getCodigo()
+                    request.getCodigo(),
+                    request.getVisibilidad()
             );
             return ResponseEntity.ok(cursoActualizado);
         } catch (AccessDeniedException e) {
@@ -94,7 +95,7 @@ public class CursoController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             } else if (e.getMessage().equals("403 Forbidden")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            } else if (e.getMessage().equals("Este código ya esta en uso, por favor elige otro")) {
+            } else if (e.getMessage().equals("Este código ya es utilizado por otro curso, por favor elige otro")) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
             }else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -150,7 +151,7 @@ public class CursoController {
     }
 
     @GetMapping("/{id}/NotasMedias")
-    public ResponseEntity<List<Integer>> obtenerNotaMediaPorActividadPorCursoId(@PathVariable Long id) {
+    public ResponseEntity<List<Double>> obtenerNotaMediaPorActividadPorCursoId(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(cursoService.obtenerNotaMediaPorActividadPorCursoId(id));
         } catch (RuntimeException e) {
@@ -172,6 +173,7 @@ public class CursoController {
         private String descripcion;
         private String imagen;
         private String codigo;
+        private Boolean visibilidad;
 
         public String getTitulo() { return titulo; }
         public void setTitulo(String titulo) { this.titulo = titulo; }
@@ -183,6 +185,9 @@ public class CursoController {
         public void setImagen(String imagen) { this.imagen = imagen; }
         public String getCodigo() { return codigo; }
         public void setCodigo(String codigo) { this.codigo = codigo; }
+
+        public Boolean getVisibilidad() { return visibilidad; }
+        public void setVisibilidad(Boolean visibilidad) { this.visibilidad = visibilidad; }
         
         public CrearCursoRequest() {}
     }
@@ -194,6 +199,7 @@ public class CursoController {
         private String descripcion;
         private String imagen;
         private String codigo;
+        private Boolean visibilidad;
 
         public String getTitulo() { return titulo; }
         public void setTitulo(String titulo) { this.titulo = titulo; }
@@ -205,6 +211,9 @@ public class CursoController {
         public void setImagen(String imagen) { this.imagen = imagen; }
         public String getCodigo() { return codigo; }
         public void setCodigo(String codigo) { this.codigo = codigo; }
+
+        public Boolean getVisibilidad() { return visibilidad; }
+        public void setVisibilidad(Boolean visibilidad) { this.visibilidad = visibilidad; }
 
         public ActualizarCursoRequest() {}
     }

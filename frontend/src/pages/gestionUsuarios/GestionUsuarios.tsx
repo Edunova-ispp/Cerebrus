@@ -212,10 +212,11 @@ export default function GestionUsuarios() {
     const errors: string[] = [];
     if (!createForm.nombre.trim()) errors.push('El nombre es obligatorio');
     if (!createForm.primerApellido.trim()) errors.push('El primer apellido es obligatorio');
+    if (!createForm.email.trim()) errors.push('El email es obligatorio');
     if (!createForm.username.trim()) errors.push('El username es obligatorio');
     if (!createForm.password.trim()) errors.push('La contraseña es obligatoria');
     const emailTrimmed = createForm.email.trim();
-    if (emailTrimmed && !emailTrimmed.includes('@')) errors.push('El email debe ser válido');
+    if (!emailTrimmed.includes('@')) errors.push('El email debe ser válido');
     if (errors.length > 0) { setCreateError(errors.join('. ')); return; }
 
     setCreating(true);
@@ -225,7 +226,7 @@ export default function GestionUsuarios() {
         primerApellido: createForm.primerApellido.trim(),
         segundoApellido: createForm.segundoApellido.trim() || undefined,
         username: createForm.username.trim(),
-        email: createForm.email.trim() || undefined,
+        email: createForm.email.trim(),
         password: createForm.password,
         rol: createForm.rol,
       };
@@ -464,7 +465,7 @@ export default function GestionUsuarios() {
                 <input value={createForm.segundoApellido} onChange={e => setCreateForm(f => ({ ...f, segundoApellido: e.target.value }))} autoComplete="family-name" />
               </label>
               <label className="gu-form-label">
-                Email (opcional)
+                Email
                 <input type="email" value={createForm.email} onChange={e => setCreateForm(f => ({ ...f, email: e.target.value }))} autoComplete="email" />
               </label>
               <label className="gu-form-label">

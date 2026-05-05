@@ -58,6 +58,7 @@ interface Props {
   readonly temaIdProp?: string;
   readonly cursoIdProp?: string;
   readonly onDone?: () => void;
+  readonly readOnly?: boolean;
 }
 
 function makeEmptyOption(): QuestionOption {
@@ -68,7 +69,10 @@ function makeEmptyQuestion(): Question {
   return { localKey: makeLocalKey(), text: '', options: [makeEmptyOption(), makeEmptyOption()] };
 }
 
-export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
+const MAX_OPCIONES = 10;
+const MAX_PREGUNTAS = 50;
+
+export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -86,6 +90,8 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
 
   // Tracks original server-loaded preguntas for deletion detection in edit mode
   const originalQuestionsRef = useRef<TestFormInitialPregunta[]>([]);
+  // Tracks which activity ID was last initialized to prevent re-initializing on every render
+  const initializedActivityIdRef = useRef<number | null>(null);
 
   const navigate = useNavigate();
   const params = useParams<{ id: string; temaId: string }>();
@@ -94,6 +100,12 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
 
   useEffect(() => {
     if (!initialValues) return;
+    
+    // Only reinitialize if the activity ID changed, not on every render
+    if (initializedActivityIdRef.current === generalId) return;
+    
+    initializedActivityIdRef.current = generalId ?? null;
+
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
@@ -121,7 +133,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
         })),
       );
     }
-  }, [initialValues]);
+  }, [generalId, mode]);
 
   // ── Question / option state helpers ──────────────────────────────────────
 
@@ -179,18 +191,28 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
     if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
+    if (puntuacionNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
 
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
     if (!cursoId) return 'Falta el id del curso en la URL';
 
+    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
+    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+
     if (questions.length === 0) return 'Añade al menos una pregunta';
+    if (questions.length > MAX_PREGUNTAS) return `No puedes añadir más de ${MAX_PREGUNTAS} preguntas`;
+
+    if (respVisible && comentariosRespVisible.trim().length > 250) return 'Los comentarios no pueden exceder los 250 caracteres.';
+    if (respVisible && comentariosRespVisible.trim().length === 0) return 'Escribe un comentario para mostrar cuando la respuesta sea visible.';
 
     for (let qi = 0; qi < questions.length; qi++) {
       const q = questions[qi];
       if (!q.text.trim()) return `La pregunta ${qi + 1} no tiene texto`;
       if (q.options.length < 2)
         return `La pregunta ${qi + 1} debe tener al menos 2 opciones`;
+      if (q.options.length > MAX_OPCIONES)
+        return `La pregunta ${qi + 1} no puede tener más de ${MAX_OPCIONES} opciones`;
       for (let oi = 0; oi < q.options.length; oi++) {
         if (!q.options[oi].text.trim())
           return `La opción ${oi + 1} de la pregunta ${qi + 1} está vacía`;
@@ -412,6 +434,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
           <div>
             <label className="tf-label" htmlFor="tf-titulo">Título *</label>
             <input
+              readOnly={readOnly}
               type="text"
               id="tf-titulo"
               className="tf-input"
@@ -425,6 +448,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
           <div>
             <label className="tf-label" htmlFor="tf-descripcion">Descripción</label>
             <textarea
+              readOnly={readOnly}
               id="tf-descripcion"
               className="tf-input"
               value={descripcion}
@@ -438,6 +462,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
           <div>
             <label className="tf-label" htmlFor="tf-imagen">URL de imagen (opcional)</label>
             <input
+              readOnly={readOnly}
               type="url"
               id="tf-imagen"
               className="tf-input"
@@ -462,6 +487,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
             <div>
               <label className="tf-label" htmlFor="tf-puntuacion">Puntuación *</label>
               <input
+                readOnly={readOnly}
                 type="number"
                 id="tf-puntuacion"
                 className="tf-input tf-input-sm"
@@ -471,22 +497,26 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
                 required
               />
             </div>
-            <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
-              Generar con IA
-            </button>
+            {!readOnly && (
+              <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+                Generar con IA
+              </button>
+            )}
           </div>
 
           <label className="tf-check-label">
             <input
+              disabled={readOnly}
               type="checkbox"
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            <span>Mostrar correcciones al alumno</span>
+            <span>Mostrar comentarios de corrección</span>
           </label>
 
           <label className="tf-check-label">
             <input
+              disabled={readOnly}
               type="checkbox"
               checked={permitirReintento}
               onChange={(e) => setPermitirReintento(e.target.checked)}
@@ -496,6 +526,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
 
           <label className="tf-check-label">
             <input
+              disabled={readOnly}
               type="checkbox"
               checked={mostrarPuntuacion}
               onChange={(e) => setMostrarPuntuacion(e.target.checked)}
@@ -505,6 +536,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
 
           <label className="tf-check-label">
             <input
+              disabled={readOnly}
               type="checkbox"
               checked={encontrarRespuestaMaestro}
               onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
@@ -514,17 +546,19 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
 
           <label className="tf-check-label">
             <input
+              disabled={readOnly}
               type="checkbox"
               checked={encontrarRespuestaAlumno}
               onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
             />
-            <span>Mostrar mi respuesta</span>
+            <span>Mostrar respuesta del alumno</span>
           </label>
 
           {respVisible && (
             <div>
               <label className="tf-label" htmlFor="tf-comentarios">Comentarios</label>
               <input
+                readOnly={readOnly}
                 type="text"
                 id="tf-comentarios"
                 className="tf-input"
@@ -541,12 +575,19 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
             Añade las preguntas y opciones. Marca todas las correctas con <strong>✓</strong>. Las opciones se mostrarán en orden aleatorio al alumno.
           </p>
 
+          <h3 className="cf-section-title">
+          Preguntas
+          <span>{questions.length} / {MAX_PREGUNTAS} máx.</span>
+        </h3>
+
           {questions.map((q, qi) => (
             <div key={q.localKey} className="tf-question-block">
               <div className="tf-question-header">
                 <span className="tf-question-label">Pregunta {qi + 1}</span>
-                {questions.length > 1 && (
+                <span className="paf-badge">{q.options.length} / {MAX_OPCIONES} máx.</span>
+                {questions.length > 1 && !readOnly &&(
                   <button
+                    disabled={readOnly}
                     type="button"
                     className="tf-btn-remove-question"
                     onClick={() => removeQuestion(qi)}
@@ -558,6 +599,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
               </div>
 
               <input
+                readOnly={readOnly}
                 type="text"
                 className="tf-question-input"
                 placeholder={`Escribe la pregunta ${qi + 1}...`}
@@ -573,22 +615,25 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
                   >
                     <span className="tf-option-letter">{String.fromCharCode(65 + oi)}.</span>
                     <input
+                      readOnly={readOnly}
                       type="text"
                       className="tf-option-input"
                       placeholder={`Opción ${String.fromCharCode(65 + oi)}`}
                       value={opt.text}
                       onChange={(e) => updateOptionText(qi, oi, e.target.value)}
                     />
-                    <button
+                    {!readOnly && (<button
+                      disabled={readOnly}
                       type="button"
                       className={`tf-btn-correct${opt.correcta ? ' tf-btn-correct--active' : ''}`}
                       onClick={() => toggleCorrect(qi, oi)}
                       title={opt.correcta ? 'Respuesta correcta (clic para desmarcar)' : 'Marcar como correcta'}
                     >
                       ✓
-                    </button>
-                    {q.options.length > 2 && (
+                    </button>)}
+                    {q.options.length > 2 && !readOnly && (
                       <button
+                        disabled={readOnly}
                         type="button"
                         className="tf-btn-remove-option"
                         onClick={() => removeOption(qi, oi)}
@@ -601,22 +646,28 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
                 ))}
               </div>
 
-              <button type="button" className="tf-btn-add-option" onClick={() => addOption(qi)}>
-                + Añadir opción
-              </button>
+              {q.options.length < MAX_OPCIONES && !readOnly && (
+                <button disabled={readOnly} type="button" className="tf-btn-add-option" onClick={() => addOption(qi)}>
+                  + Añadir opción
+                </button>
+              )}
             </div>
           ))}
 
-          <button type="button" className="tf-btn-add-question" onClick={addQuestion}>
+          {questions.length < MAX_PREGUNTAS && !readOnly && (
+            <button disabled={readOnly} type="button" className="tf-btn-add-question" onClick={addQuestion}>
             + Añadir pregunta
-          </button>
+            </button>
+          )}
         </div>
 
       <div className="ca-form-footer">
         <div className="tf-footer-stack">
-          <button className="ca-btn-guardar" type="submit" disabled={loading}>
-            {loading ? 'Guardando...' : 'Guardar'}
-          </button>
+          {!readOnly && (
+            <button className="ca-btn-guardar" type="submit" disabled={loading}>
+              {loading ? 'Guardando...' : 'Guardar'}
+            </button>
+          )}
           {error && <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
             {error}
           </p>}

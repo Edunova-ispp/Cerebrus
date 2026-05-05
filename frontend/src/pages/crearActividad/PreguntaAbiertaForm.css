@@ -32,7 +32,7 @@
 .paf-pregunta-row {
   display: flex;
   gap: 12px;
-  align-items: end;
+  align-items: center;
 }
 
 .paf-input-group {

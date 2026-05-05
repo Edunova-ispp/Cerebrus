@@ -112,20 +112,17 @@
 
 /* Video placeholder */
 .info-video-placeholder {
-  border-radius: 20px;
-  border: 2px solid #000000;
-  box-shadow: 6px 6px 0px #000000;
-  background-color: var(--color-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 220px;
 }
 
-.info-video-placeholder svg {
-  width: clamp(40px, 6vw, 70px);
-  height: clamp(40px, 6vw, 70px);
-  fill: rgba(255,255,255,0.5);
+.info-section-image {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 /* Bottom */

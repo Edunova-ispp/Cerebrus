@@ -15,7 +15,6 @@ import com.cerebrus.actividad.ActividadRepository;
 import com.cerebrus.actividadAlumn.ActividadAlumno;
 import com.cerebrus.actividadAlumn.ActividadAlumnoProgreso;
 import com.cerebrus.actividadAlumn.ActividadAlumnoRepository;
-import com.cerebrus.comun.utils.CerebrusUtils;
 import com.cerebrus.curso.dto.ProgresoDTO;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioService;
@@ -45,9 +44,18 @@ public class CursoServiceImpl implements CursoService {
             throw new RuntimeException("Este código ya esta en uso, por favor elige otro");
         }
     }
+    public void validarCodigoUnicoActualizar(String codigo, Long id) {
+        // En la actualización, el código puede ser el mismo que el del curso que se está actualizando, 
+        // pero no puede ser el mismo que el de otro curso diferente.
+        Curso curso = cursoRepository.findByCodigo(codigo);
+        if (curso != null && !curso.getId().equals(id)) {
+            throw new RuntimeException("Este código ya es utilizado por otro curso, por favor elige otro");
+        }
+    }
+
     @Transactional
     @Override
-    public Curso crearCurso(String titulo, String descripcion, String imagen, String codigoPersonalizado) {
+    public Curso crearCurso(String titulo, String descripcion, String imagen, String codigoPersonalizado, Boolean visibilidad) {
         Usuario usuarioActual = usuarioService.findCurrentUser();
         if (!(usuarioActual instanceof Maestro)){
             throw new AccessDeniedException("Solo un maestro puede crear cursos");
@@ -58,7 +66,7 @@ public class CursoServiceImpl implements CursoService {
         curso.setTitulo(titulo);
         curso.setDescripcion(descripcion);
         curso.setImagen(imagen);
-        curso.setVisibilidad(false);
+        curso.setVisibilidad(visibilidad);
         Maestro maestro = (Maestro) usuarioActual;
         curso.setMaestro(maestro);
         
@@ -90,7 +98,13 @@ public class CursoServiceImpl implements CursoService {
             if(!curso.getMaestro().getId().equals(usuario.getId())){
                 throw new RuntimeException("403 Forbidden");
             }else {
-                return List.of(curso.getTitulo(), curso.getDescripcion(), curso.getImagen(), curso.getCodigo());
+                return List.of(
+                    curso.getTitulo(),
+                    curso.getDescripcion(),
+                    curso.getImagen(),
+                    curso.getCodigo(),
+                    String.valueOf(Boolean.TRUE.equals(curso.getVisibilidad()))
+                );
             }
 
 
@@ -126,7 +140,7 @@ public class CursoServiceImpl implements CursoService {
      
     @Transactional
     @Override
-    public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen, String codigo) {
+    public Curso actualizarCurso(Long id, String titulo, String descripcion, String imagen, String codigo, Boolean visibilidad) {
         Curso curso = cursoRepository.findByID(id);
         if (curso == null) {
             throw new RuntimeException("404 Not Found");
@@ -138,11 +152,12 @@ public class CursoServiceImpl implements CursoService {
         if (!curso.getMaestro().getId().equals(usuario.getId())) {
             throw new AccessDeniedException("Solo el propietario del curso puede actualizarlo");
         }
-        validarCodigoUnico(codigo);
+        validarCodigoUnicoActualizar(codigo, id);
         curso.setTitulo(titulo);
         curso.setDescripcion(descripcion);
         curso.setImagen(imagen);
         curso.setCodigo(codigo);
+        curso.setVisibilidad(visibilidad);
         return cursoRepository.save(curso);
     }
 
@@ -163,6 +178,7 @@ public class CursoServiceImpl implements CursoService {
         cursoRepository.delete(curso);
     }
 
+    @Override
     public ProgresoDTO encontrarProgresoPorCursoId(Long cursoId) {
         Curso curso = cursoRepository.findByID(cursoId);
         if (curso == null) {
@@ -254,7 +270,7 @@ public class CursoServiceImpl implements CursoService {
     }
 
     @Override
-    public List<Integer> obtenerNotaMediaPorActividadPorCursoId(Long cursoId) {
+    public List<Double> obtenerNotaMediaPorActividadPorCursoId(Long cursoId) {
         Curso curso = cursoRepository.findByID(cursoId);
         if (curso == null) {
             throw new RuntimeException("404 Not Found");
@@ -267,7 +283,7 @@ public class CursoServiceImpl implements CursoService {
         
         List<ActividadAlumno> actividades = actividadAlumnoRepository.findByCursoID(cursoId);
         System.out.println("Actividades encontradas para el curso ID " + cursoId + ": " + actividades.size());
-        List<Integer> notasMedias = new ArrayList<>();
+        List<Double> notasMedias = new ArrayList<>();
         List<Long> actividadesIds = new ArrayList<>();
         for (ActividadAlumno aa : actividades) {
             if (!actividadesIds.contains(aa.getActividad().getId())) {
@@ -284,7 +300,7 @@ public class CursoServiceImpl implements CursoService {
                     contadorNotas++;
                 }
             }
-            int notaMedia = contadorNotas > 0 ? sumaNotas / contadorNotas : 0;
+            double notaMedia = contadorNotas > 0 ? (double) sumaNotas / contadorNotas : 0.0;
             notasMedias.add(notaMedia);
         }
 

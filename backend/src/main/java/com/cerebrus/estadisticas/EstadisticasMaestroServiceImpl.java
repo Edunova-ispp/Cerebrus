@@ -36,6 +36,9 @@ import com.cerebrus.estadisticas.dto.IntentoActividadDTO;
 import com.cerebrus.estadisticas.dto.IntentoActividadDetalleDTO;
 import com.cerebrus.estadisticas.dto.IntentoDetalleRespuestaDTO;
 import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
+import com.cerebrus.estadisticas.dto.IntentoActividadDetalleDTO;
+import com.cerebrus.estadisticas.dto.IntentoDetalleRespuestaDTO;
+import com.cerebrus.estadisticas.dto.RepeticionesActividadDTO;
 import com.cerebrus.estadisticas.dto.TemaEstadisticasAlumnoDTO;
 import com.cerebrus.estadisticas.dto.TiempoAlumnoDTO;
 import com.cerebrus.inscripcion.Inscripcion;
@@ -766,7 +769,7 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         int totalActividades = 0;
         int actividadesCompletadas = 0;
         int tiempoTotal = 0;
-        List<Integer> notasAlumno = new ArrayList<>();
+        List<Double> notasAlumno = new ArrayList<>();
 
         for (Tema tema : temas) {
             List<Actividad> actividades = actividadRepository.findByTemaId(tema.getId());
@@ -807,8 +810,12 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
                     if (ultimaTerminada.getTiempoMinutos() != null) {
                         tiempoTotal += ultimaTerminada.getTiempoMinutos();
                     }
-                    if (notaAlumnoVal != null) {
-                        notasAlumno.add(notaAlumnoVal);
+                    Double notaDecimal = calcularNotaRealDesdePuntuacion(ultimaTerminada.getPuntuacion(), actividad.getPuntuacion());
+                    if (notaDecimal == null && notaAlumnoVal != null) {
+                        notaDecimal = notaAlumnoVal.doubleValue();
+                    }
+                    if (notaDecimal != null) {
+                        notasAlumno.add(notaDecimal);
                     }
                 }
 
@@ -857,23 +864,28 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         }
 
         Double notaMedia = notasAlumno.isEmpty() ? 0.0
-                : notasAlumno.stream().mapToInt(Integer::intValue).average().orElse(0.0);
-        Integer notaMin = notasAlumno.isEmpty() ? null
-                : notasAlumno.stream().mapToInt(Integer::intValue).min().orElse(0);
-        Integer notaMax = notasAlumno.isEmpty() ? null
-                : notasAlumno.stream().mapToInt(Integer::intValue).max().orElse(0);
+            : notasAlumno.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        Double notaMin = notasAlumno.isEmpty() ? null
+            : notasAlumno.stream().mapToDouble(Double::doubleValue).min().orElse(0.0);
+        Double notaMax = notasAlumno.isEmpty() ? null
+            : notasAlumno.stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
         Integer tiempoTotalSegundos = 0;
         for (Tema tema : curso.getTemas()) {
-            for (Actividad actividad : tema.getActividades()) {
-                ActividadAlumno ultimaTerminada = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
-                        .filter(aa -> aa.getAlumno().getId().equals(alumnoId) && aa.getEstadoActividad() == EstadoActividad.TERMINADA)
-                        .findFirst()
-                        .orElse(null);
-                if (ultimaTerminada != null && ultimaTerminada.getTiempoSegundos() != null) {
-                    tiempoTotalSegundos += ultimaTerminada.getTiempoSegundos();
+            List<Actividad> actividadesTema = tema.getActividades();
+            if (actividadesTema != null) {
+                for (Actividad actividad : actividadesTema) {
+                    if (actividad != null && actividad.getActividadesAlumno() != null) {
+                        ActividadAlumno ultimaTerminada = obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream()
+                                .filter(aa -> aa.getAlumno().getId().equals(alumnoId) && aa.getEstadoActividad() == EstadoActividad.TERMINADA)
+                                .findFirst()
+                                .orElse(null);
+                        if (ultimaTerminada != null && ultimaTerminada.getTiempoSegundos() != null) {
+                            tiempoTotalSegundos += ultimaTerminada.getTiempoSegundos();
+                        }
+                        }
+                    }
                 }
             }
-        }
 
         return new EstadisticasAlumnoResumenDTO(
                 alumnoId,
@@ -1182,25 +1194,29 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
     }
 
     private Integer notaMaximaTema(List<Actividad> actividades) {
-        Map<Long, Integer> sumaNotasPorAlumno = sumaNotasPorAlumnoTema(actividades);
-        if (sumaNotasPorAlumno.isEmpty()) {
+        if (actividades.isEmpty()) {
             return 0;
         }
 
-        return sumaNotasPorAlumno.values().stream()
-                .mapToInt(Integer::intValue)
+        return actividades.stream()
+                .flatMap(actividad -> obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream())
+                .filter(actAlumno -> actAlumno.getEstadoActividad() == EstadoActividad.TERMINADA)
+                .filter(actAlumno -> actAlumno.getNota() != null)
+                .mapToInt(ActividadAlumno::getNota)
                 .max()
                 .orElse(0);
     }
 
     private Integer notaMinimaTema(List<Actividad> actividades) {
-        Map<Long, Integer> sumaNotasPorAlumno = sumaNotasPorAlumnoTema(actividades);
-        if (sumaNotasPorAlumno.isEmpty()) {
+        if (actividades.isEmpty()) {
             return 0;
         }
 
-        return sumaNotasPorAlumno.values().stream()
-                .mapToInt(Integer::intValue)
+        return actividades.stream()
+                .flatMap(actividad -> obtenerUltimasInstanciasPorAlumno(actividad.getActividadesAlumno()).stream())
+                .filter(actAlumno -> actAlumno.getEstadoActividad() == EstadoActividad.TERMINADA)
+                .filter(actAlumno -> actAlumno.getNota() != null)
+                .mapToInt(ActividadAlumno::getNota)
                 .min()
                 .orElse(0);
     }
@@ -1370,6 +1386,16 @@ public class EstadisticasMaestroServiceImpl implements EstadisticasMaestroServic
         double proporcion = (double) puntuacion / (double) puntuacionMaximaActividad;
         int nota = (int) Math.round(proporcion * 10.0);
         return Math.max(0, Math.min(10, nota));
+    }
+
+    private Double calcularNotaRealDesdePuntuacion(Integer puntuacion, Integer puntuacionMaximaActividad) {
+        if (puntuacion == null || puntuacion < 0) {
+            return null;
+        }
+        if (puntuacionMaximaActividad == null || puntuacionMaximaActividad <= 0) {
+            return null;
+        }
+        return ((double) puntuacion / (double) puntuacionMaximaActividad) * 10.0;
     }
 
     private String obtenerImagenActividad(Actividad actividad) {

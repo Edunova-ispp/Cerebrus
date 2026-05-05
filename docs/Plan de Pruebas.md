@@ -10,14 +10,9 @@
 
 1. [Introducción](#1-introducción)
 2. [Alcance](#2-alcance)
-3. [Estrategia de pruebas](#3-estrategia-de-pruebas)  
-   3.1 [Tipos de pruebas](#31-tipos-de-pruebas)
-4. [Herramientas y entorno de pruebas](#4-herramientas-y-entorno-de-pruebas)  
-   4.1 [Herramientas](#41-herramientas)  
-   4.2 [Entorno de pruebas](#42-entorno-de-pruebas)
-5. [Planificación de pruebas](#5-planificación-de-pruebas)  
-   5.1 [Cobertura de pruebas](#51-cobertura-de-pruebas)  
-   5.2 [Matriz de trazabilidad entre pruebas e historias de usuario](#52-matriz-de-trazabilidad-entre-pruebas-e-historias-de-usuario)  
+3. [Estrategia de pruebas](#3-estrategia-de-pruebas)3.1 [Tipos de pruebas](#31-tipos-de-pruebas)
+4. [Herramientas y entorno de pruebas](#4-herramientas-y-entorno-de-pruebas)4.1 [Herramientas](#41-herramientas)4.2 [Entorno de pruebas](#42-entorno-de-pruebas)
+5. [Planificación de pruebas](#5-planificación-de-pruebas)5.1 [Cobertura de pruebas](#51-cobertura-de-pruebas)5.2 [Matriz de trazabilidad entre pruebas e historias de usuario](#52-matriz-de-trazabilidad-entre-pruebas-e-historias-de-usuario)
 6. [Criterios de aceptación](#6-criterios-de-aceptación)
 7. [Conclusión](#7-conclusión)
 
@@ -40,7 +35,6 @@ El alcance de este plan de pruebas incluye:
 
 * **Pruebas unitarias**: se realizarán para verificar que los componentes individuales del software funcionen correctamente de forma aislada.
 * **Pruebas unitarias de backend**: pruebas de los servicios y repositorios responsables de la lógica de la aplicación, la gestión de usuarios, y el acceso a datos. Se validará que cada método de servicio, repositorio y funcionalidad relacionada con la aplicación (como creación de cursos, creación de actividades, etc.) se comporte correctamente.
-* **Pruebas unitarias de frontend**: se probarán los componentes de la interfaz de usuario, asegurando que las funciones TypeScript y los componentes de React devuelvan los resultados esperados y se comporten correctamente. Esto incluye funciones como login, registro, gestión de los cursos y visualización de las estadísticas.
 * **Pruebas de carga**: se validará el comportamiento de la aplicación frente al flujo de múltiles usuarios utilizándola de manera simultánea. Esto incluirá: al menos 10 profores y 100 alumnos a la vez.
 * **Pruebas de integración**: se enfocarán en verificar que la interacción entre los distintos módulos del sistema sea correcta. Esto incluirá la validación de:
   * La correcta comunicación entre el backend y el frontend, mediante la API y los controladores.
@@ -67,11 +61,13 @@ Las pruebas unitarias se realizarán para verificar el correcto funcionamiento d
 * `AuthService`: asegurar que la autenticación de usuarios funciona correctamente y se asignan permisos adecuados.
 
 **Servicios de Gestión de Cursos y Temas** :
+
 * `CursoService`: asegurar que se obtienen todos los cursos con los datos correctos y se insertan, actualizan y borran correctamente.
 * `TemaService`: asegurar que se obtienen todos los temas de un curso y se crean, modifican y eliminan correctamente.
 * `InscripcionService`: asegurar que se manejan correctamente las inscripciones de alumnos a cursos.
 
 **Servicios de Gestión de Actividades** :
+
 * `ActividadService`: asegurar que se obtienen las actividades de un tema y se pueden crear, editar y eliminar correctamente.
 * `ActividadAlumnoService`: asegurar que se gestiona correctamente la relación entre actividades y alumnos.
 * `GeneralService`: asegurar que se procesan correctamente las actividades de tipo general (múltiple choice, crucigramas, ensayos).
@@ -80,6 +76,7 @@ Las pruebas unitarias se realizarán para verificar el correcto funcionamiento d
 * `OrdenacionService`: asegurar que se procesan correctamente las actividades de ordenación.
 
 **Servicios de Gestión de Respuestas de Alumnos** :
+
 * `RespuestaAlumnoService`: una interfaz general para gestionar respuestas de alumnos en diferentes tipos de actividades.
 * `RespAlumnoGeneralService`: asegurar que se procesan correctamente las respuestas de actividades generales.
 * `RespAlumnoOrdenacionService`: asegurar que se procesan correctamente las respuestas de actividades de ordenación.
@@ -87,23 +84,15 @@ Las pruebas unitarias se realizarán para verificar el correcto funcionamiento d
 * `RespuestaMaestroService`: asegurar que se manejan correctamente las respuestas que los maestros crean para las actividades.
 
 **Servicios de Gestión de Preguntas y Estadísticas** :
+
 * `PreguntaService`: asegurar que se obtienen todas las preguntas de un curso/tema y se insertan, actualizan y borran correctamente.
 * `PuntoImagenService`: asegurar que se manejan correctamente los puntos imagen para las actividades de marcar imagen.
 * `EstadisticasMaestroService`: asegurar que se calculan correctamente las estadísticas de progreso de estudiantes en cursos y actividades.
 
 **Servicios de Suscripción e Integración con IA** :
+
 * `SuscripcionService`: asegurar que se manejan correctamente las suscripciones de organizaciones a la aplicación.
 * `IaConnectionService`: asegurar que la conexión e integración con servicios de IA funciona correctamente.
-
-**Frontend** : haremos pruebas para los métodos de los componentes o módulos correspondientes dentro de la aplicación educativa:
-
-* **Cursos** : asegurar que la lista de cursos se muestra correctamente, el usuario puede crear, editar y eliminar cursos (si tiene permisos).
-* **Temas** : asegurar que los temas de un curso se muestran correctamente y se pueden crear, modificar y eliminar.
-* **Actividades** : asegurar que se muestran correctamente en el curso, se pueden crear nuevas actividades de diferentes tipos y se pueden editar y eliminar.
-* **Respuestas del Alumno** : asegurar que los estudiantes pueden interactuar correctamente con cada tipo de actividad.
-* **Estadísticas** : asegurar que las estadísticas del curso y del alumno se calculan y muestran correctamente.
-* **Autenticación** : asegurar que el login y registro funcionan correctamente, y se redirige al usuario a la página apropiada según su rol.
-* **Perfil de Usuario** : asegurar que el usuario puede ver y editar su perfil correctamente.
 
 #### 3.1.2 Pruebas de Integración
 
@@ -118,11 +107,13 @@ Las pruebas de integración se enfocarán en evaluar la interacción entre los d
 * `AuthController`: verificar que el login y registro de usuarios funcionan correctamente.
 
 **Controladores de Cursos, Temas e Inscripciones** :
+
 * `CursoController`: verificar que las solicitudes GET para obtener cursos, POST para crear cursos, PUT para actualizar cursos y DELETE para eliminarlos funcionan correctamente.
 * `TemaController`: verificar que las solicitudes GET para obtener temas de un curso, POST para crear temas, PUT para actualizar y DELETE para eliminar funcionan correctamente.
 * `InscripcionController`: verificar que las solicitudes para crear, obtener y eliminar inscripciones de alumnos a cursos funcionan correctamente.
 
 **Controladores de Actividades** :
+
 * `ActividadController`: verificar que las solicitudes POST para crear actividades, PUT para actualizar, GET para obtenerlas y DELETE para eliminarlas funcionan correctamente, con manejo adecuado de excepciones.
 * `ActividadAlumnoController`: verificar que se gestiona correctamente la creación, modificación y eliminación de una actividad alumno.
 * `GeneralController`: verificar que las solicitudes para actividades de tipo general funcionan correctamente.
@@ -131,6 +122,7 @@ Las pruebas de integración se enfocarán en evaluar la interacción entre los d
 * `OrdenacionController`: verificar que las solicitudes para actividades de ordenación funcionan correctamente.
 
 **Controladores de Respuestas de Alumnos** :
+
 * `RespuestaAlumnoController`: verificar que las solicitudes POST para guardar respuestas, GET para obtener respuestas guardadas funcionan correctamente según el tipo de actividad.
 * `RespAlumnoGeneralController`: verificar que se procesan correctamente las respuestas de actividades generales.
 * `RespAlumnoOrdenacionController`: verificar que se procesan correctamente las respuestas de actividades de ordenación.
@@ -138,11 +130,13 @@ Las pruebas de integración se enfocarán en evaluar la interacción entre los d
 * `RespuestaMaestroController`: verificar que se manejan correctamente las respuestas creadas por maestros.
 
 **Controladores de Preguntas, Puntos Imagen y Estadísticas** :
+
 * `PreguntaController`: verificar que las solicitudes GET para obtener preguntas, POST para crear preguntas, PUT para actualizar y DELETE para eliminar funcionan correctamente.
 * `PuntoImagenController`: verificar que se manejan correctamente los puntos imagen para las actividades de marcar imagen.
 * `EstadisticasMaestroController`: verificar que las solicitudes GET para obtener estadísticas de progreso del estudiante, estadísticas del curso funcionan correctamente y devuelven los datos agregados correctamente. Incluye manejo de excepciones para acceso denegado (403), recursos no encontrados (404) e errores internos (500).
 
 **Controladores de Suscripción e Integración con IA** :
+
 * `SuscripcionController`: verificar que las solicitudes para gestionar suscripciones de usuarios funcionan correctamente.
 * `IaConnectionController`: verificar que la conexión e integración con servicios de IA funciona correctamente según las solicitudes.
 
@@ -162,14 +156,6 @@ Las pruebas de integración se enfocarán en evaluar la interacción entre los d
 | **Spring Security**   | —       | Para pruebas de autenticación y autorización, incluyendo manejo de excepciones como `AccessDeniedException`                      |
 | **JaCoCo**            | —       | Herramienta de generación de informes de cobertura de código en Java                                                               |
 
-#### Frontend (React/TypeScript)
-
-| Herramienta                     | Versión | Uso                                                                                                                     |
-| ------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **Jest**                  | —       | Framework para pruebas unitarias en JavaScript/TypeScript                                                               |
-| **React Testing Library** | —       | Librería para la creación de pruebas unitarias de componentes React, enfocada en probar el comportamiento del usuario |
-| **TypeScript**            | —       | Lenguaje de tipado que ayuda a detectar errores durante las pruebas                                                     |
-
 #### Pruebas E2E (End-to-End)
 
 | Herramienta                  | Versión | Uso                                                                                                                                                                                                                                                                     |
@@ -178,8 +164,8 @@ Las pruebas de integración se enfocarán en evaluar la interacción entre los d
 
 #### Pruebas de Carga (Load Testing)
 
-| Herramienta      | Versión | Uso                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ---------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Herramienta      | Versión | Uso                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ---------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Locust** | —       | Framework de código abierto para pruebas de carga y rendimiento escrito en Python. Define comportamientos de usuarios basados en archivos `Locustfile.py` que simulan múltiples usuarios concurrentes interactuando con la API. Permite identificar cuellos de botella, validar la capacidad de la aplicación bajo carga y monitorear métricas de rendimiento como tiempos de respuesta, throughput y tasa de error |
 
 ### 4.2 Entorno de Pruebas
@@ -190,16 +176,16 @@ Las pruebas se ejecutarán en el entorno de desarrollo local y en el servidor de
 
 * **Descripción** : Este es el entorno en el que los desarrolladores realizarán las pruebas unitarias, de integración y E2E en sus máquinas locales de manera iterativa.
 * **Componentes** :
+
   * **Sistema operativo** : Windows (usado por todos los desarrolladores del equipo).
   * **IDE** : Visual Studio Code (VSCode) con soporte para Java, TypeScript y extensiones relevantes.
 * **Backend** :
+
   * JDK 21
   * Maven 3.9.12 para compilación y ejecución de pruebas
   * Base de datos: MariaDB local para desarrollo y pruebas, permitiendo pruebas realistas con la misma tecnología que producción
-* **Frontend** :
-  * Node.js y npm para gestión de dependencias
-  * Comandos: `npm test` para ejecutar pruebas de Jest
 * **E2E Testing** :
+
   * Selenium WebDriver configurado localmente
   * Navegadores soportados: Chrome, Firefox
   * Servidor local ejecutándose para ejecutar las pruebas de integración completa
@@ -210,16 +196,16 @@ Las pruebas se ejecutarán en el entorno de desarrollo local y en el servidor de
 * **Descripción** : En este entorno se ejecutarán automáticamente las pruebas unitarias cada vez que se realice un commit o pull request en el repositorio. Garantiza que el código no introduce fallos antes de la integración.
 * **Plataforma** : GitHub Actions
 * **Herramientas utilizadas** :
+
   * GitHub Actions: Orquestador de flujos de CI/CD
   * Maven: Para construcción y ejecución de pruebas del backend
   * JUnit 5: Para pruebas unitarias e de integración del backend
   * Mockito: Para pruebas aisladas con mocks
   * JaCoCo: Para generar informes automáticos de cobertura de código
-
 * **Flujo de pruebas** :
 
-1. Compilación automática del código con Maven (backend) y npm (frontend)
-2. Ejecución de todas las pruebas unitarias (backend con JUnit, frontend con Jest)
+1. Compilación automática del código con Maven (backend)
+2. Ejecución de todas las pruebas unitarias (backend con JUnit)
 3. Generación automática de reportes de cobertura con JaCoCo
 4. Validación de que la cobertura de código cumpla con los estándares del proyecto
 
@@ -232,7 +218,7 @@ Las pruebas se ejecutarán en el entorno de desarrollo local y en el servidor de
 
 ### 5.1 Cobertura de Pruebas
 
-La cobertura de pruebas se enfoca en garantizar la máxima cobertura en todos los servicios y controladores del sistema. Se espera alcanzar al menos una cobertura del **70%** en el código del backend y frontend.
+La cobertura de pruebas se enfoca en garantizar la máxima cobertura en todos los servicios y controladores del sistema. Se espera alcanzar al menos una cobertura del **70%** en el código del backend.
 
 ### 5.2 Matriz de Trazabilidad entre Pruebas e Historias de Usuario
 

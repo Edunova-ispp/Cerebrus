@@ -13,6 +13,13 @@
   font-family: 'Oxygen', sans-serif;
 }
 
+.detalle-profesor-title {
+  font-family: 'Oxygen', sans-serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0;
+  color: #0F1338;
+}
+
 /* ===== LAYOUT: sidebar + content ===== */
 .detalle-profesor-layout {
   flex: 1;

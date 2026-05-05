@@ -77,9 +77,44 @@
   background: var(--t-input-bg);
 }
 
+.tf-input[readonly]:hover,
+.tf-input[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
+}
+
 .tf-input-sm {
   width: 90px;
   flex-shrink: 0;
+}
+
+.tf-textarea {
+  width: 100%;
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1rem;
+  color: var(--t-text);
+  resize: vertical;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.tf-textarea:hover,
+.tf-textarea:focus {
+  outline: none;
+  border-color: var(--t-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  background: var(--t-input-bg);
+}
+
+.tf-textarea[readonly]:hover,
+.tf-textarea[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
 }
 
 .tf-img-preview {
@@ -152,6 +187,12 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+.tf-question-input[readonly]:hover,
+.tf-question-input[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+}
+
 /* -- Options --------------------------------------------------- */
 
 .tf-options {
@@ -202,9 +243,27 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+.tf-option-input[readonly]:hover,
+.tf-option-input[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+}
+
+.tf-option--correct .tf-option-input[readonly]:hover,
+.tf-option--correct .tf-option-input[readonly]:focus {
+  border-color: #7ECC81;
+  box-shadow: none;
+}
+
+.tf-option--correct .tf-option-input:not([readonly]):hover,
+.tf-option--correct .tf-option-input:not([readonly]):focus {
+  border-color: #7ECC81; /* Mismo color que en el readonly */
+  box-shadow: 0 0 0 3px rgba(126, 204, 129, 0.15); /* Verde más leve */
+}
+
 .tf-option--correct .tf-option-input {
-  border-color: var(--t-primary);
-  background: var(--t-input-focus);
+  border-color: #7ECC81;
+  background: #CBF7CE;
 }
 
 /* -- Buttons --------------------------------------------------- */
@@ -223,15 +282,13 @@
 }
 
 .tf-btn-correct:hover {
-  background: var(--t-primary-light);
-  border-color: var(--t-primary);
-  color: var(--t-primary);
+  background: #E0FFE2;
+  color: #7ECC81;
 }
 
 .tf-btn-correct--active {
-  background: var(--t-input-focus);
-  color: var(--t-primary);
-  border-color: var(--t-primary);
+  background: #CBF7CE;
+  border-color: #7ECC81;
 }
 
 .tf-btn-remove-option {

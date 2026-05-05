@@ -12,6 +12,7 @@
   gap: 24px;
   flex-wrap: wrap;
   margin-bottom: 28px;
+  align-items: flex-start;
 }
 
 .tbl-col {
@@ -20,6 +21,12 @@
   gap: 10px;
   flex: 1 1 260px;
   min-width: 0;
+}
+
+.tbl-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .tbl-label {
@@ -47,14 +54,18 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.tbl-input:hover {
-  border-color: var(--t-border-dark);
-}
-
+.tbl-input:hover,
 .tbl-input:focus {
   outline: none;
   border-color: var(--t-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.tbl-input[readonly]:hover,
+.tbl-input[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
 }
 
 .tbl-textarea {
@@ -70,14 +81,18 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.tbl-textarea:hover {
-  border-color: var(--t-border-dark);
-}
-
+.tbl-textarea:hover,
 .tbl-textarea:focus {
   outline: none;
   border-color: var(--t-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.tbl-textarea[readonly]:hover,
+.tbl-textarea[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
 }
 
 /* ── Secciones ─────────────────────────────────────────────── */
@@ -121,7 +136,20 @@
   box-shadow: var(--t-shadow);
 }
 
+.tbl-tamano-btn[disabled]:hover {
+  background: var(--t-card);
+  border-color: var(--t-border);
+  box-shadow: var(--t-shadow-sm);
+}
+
 .tbl-tamano-btn--active {
+  background: var(--t-primary-light);
+  border-color: var(--t-primary);
+  box-shadow: var(--t-shadow);
+}
+
+.tbl-tamano-btn--active[disabled]:hover,
+.tbl-tamano-btn--active[disabled]:focus {
   background: var(--t-primary-light);
   border-color: var(--t-primary);
   box-shadow: var(--t-shadow);
@@ -185,6 +213,12 @@
   border-radius: 6px;
 }
 
+.tbl-q-row[readonly]:hover {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
+}
+
 .tbl-q-col-label {
   font-weight: bold;
   font-size: 0.9rem;
@@ -202,12 +236,18 @@
   border-color: var(--t-primary) !important;
 }
 
-.tbl-respuesta-input:hover {
+.tbl-respuesta-input:hover:not([readonly]) {
   background: var(--t-primary-light) !important;
 }
 
-.tbl-respuesta-input:focus {
+.tbl-respuesta-input:focus:not([readonly]) {
   background: var(--t-primary-light) !important;
+  border-color: var(--t-primary) !important;
+}
+
+.tbl-respuesta-input[readonly]:hover,
+.tbl-respuesta-input[readonly]:focus {
+  background: var(--t-input-focus) !important;
   border-color: var(--t-primary) !important;
 }
 

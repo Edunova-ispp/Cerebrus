@@ -1,0 +1,140 @@
+.cvm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.cvm-modal {
+  background: #fffdf5;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: auto;
+  box-shadow: none;
+  border: 4px solid #000;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Pixelify Sans', 'Oxygen', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.cvm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 3px solid #000;
+  flex-shrink: 0;
+}
+
+.cvm-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #222;
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.cvm-close {
+  background: #fff;
+  border: 3px solid #000;
+  font-size: 20px;
+  color: #222;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.cvm-close:hover {
+  background: #f7f7f7;
+  color: #000;
+}
+
+.cvm-content {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.cvm-comment-box {
+  background: #fff;
+  border: 3px solid #000;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.cvm-comment-label {
+  margin: 0 0 6px 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  color: #444;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.cvm-comment-text {
+  margin: 0;
+  font-size: 1rem;
+  color: #222;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.cvm-empty {
+  margin: 0;
+  padding: 12px;
+  background: #fff;
+  border: 3px dashed #000;
+  border-radius: 10px;
+  color: #333;
+}
+
+.cvm-footer {
+  padding: 16px 20px 20px;
+  border-top: 3px solid #000;
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.cvm-btn {
+  padding: 10px 20px;
+  background: #ffcf4d;
+  color: #000;
+  border: 3px solid #000;
+  border-radius: 12px;
+  font-family: 'Pixelify Sans', 'Oxygen', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.08s ease;
+  text-shadow: none;
+}
+
+.cvm-btn:hover {
+  background: #f7f7f7;
+}

@@ -6,7 +6,10 @@
   width: 100vw;
   min-height: 100vh;
   box-sizing: border-box;
-  background-color: #FAF6ED;
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255, 242, 148, 0.30) 0%, rgba(255, 242, 148, 0) 34%),
+    radial-gradient(circle at 86% 84%, rgba(226, 133, 169, 0.16) 0%, rgba(226, 133, 169, 0) 36%),
+    linear-gradient(155deg, #fffdf7 0%, #fff9fc 54%, #fffaf4 100%);
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
@@ -196,7 +199,6 @@
   display: block;
 }
 
-
 /* ── Modal (sin cambios funcionales) ── */
 .detalle-modal-overlay {
   position: fixed;
@@ -209,7 +211,7 @@
 }
 
 .detalle-modal {
-  background: #FAF6ED;
+  background: #f9eed4;
   border: 4px solid #000;
   border-radius: 24px;
   box-shadow: 8px 8px 0 #000;

@@ -33,6 +33,8 @@ export interface CartaFormInitialValues {
   readonly encontrarRespuestaMaestro?: boolean;
 }
 
+const MAX_CARDS = 9;
+
 interface Card {
   localKey: string;
   id?: number;
@@ -53,13 +55,14 @@ interface Props {
   readonly temaIdProp?: string;
   readonly cursoIdProp?: string;
   readonly onDone?: () => void;
+  readonly readOnly?: boolean;
 }
 
 function makeEmptyCard(): Card {
   return { localKey: makeLocalCardKey(), pregunta: '', respuesta: '', imagen: '' };
 }
 
-export function CartaForm({ mode = 'create', generalId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
+export function CartaForm({ mode = 'create', generalId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -82,8 +85,17 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
   const cursoId = cursoIdProp ?? params.id;
   const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
+  // Tracks which activity ID was last initialized to prevent re-initializing on every render
+  const initializedActivityIdRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (!initialValues) return;
+
+    // Only reinitialize if the activity ID changed, not on every render
+    if (initializedActivityIdRef.current === generalId) return;
+    
+    initializedActivityIdRef.current = generalId ?? null;
+
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
@@ -107,7 +119,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
         })),
       );
     }
-  }, [initialValues]);
+  }, [generalId, mode]);
 
   // ── Card state helpers ───────────────────────────────────────────────────
 
@@ -170,16 +182,22 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
 
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
+    if (titulo.trim().length > 25) return 'El título no puede exceder 25 caracteres';
+
+    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder 1000 caracteres';
 
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
     if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
+    if (puntuacionNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
 
     if (!temaId) return 'Falta el id del tema en la URL';
     if (Number.isNaN(Number.parseInt(temaId, 10))) return 'El id del tema no es válido';
     if (!cursoId) return 'Falta el id del curso en la URL';
 
     if (cards.length === 0) return 'Añade al menos una carta';
+    if (cards.length < 2) return 'Necesitas al menos dos cartas para crear la actividad';
+    if (cards.length > MAX_CARDS) return `No puedes añadir más de ${MAX_CARDS} cartas`;
 
     for (let ci = 0; ci < cards.length; ci++) {
       const c = cards[ci];
@@ -350,14 +368,13 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
   return (
     <>
       <form onSubmit={handleSubmit} className="cf-form">
-        {error && <p className="ca-text cf-error">{error}</p>}
-
         {/* ── TOP: Metadata ── */}
         <div className="cf-header">
           <div className="cf-col">
             <div>
               <label className="cf-label" htmlFor="cf-titulo">Título *</label>
               <input
+                readOnly={readOnly}
                 type="text"
                 id="cf-titulo"
                 className="cf-input"
@@ -371,6 +388,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             <div>
               <label className="cf-label" htmlFor="cf-descripcion">Descripción</label>
               <textarea
+                readOnly={readOnly}
                 id="cf-descripcion"
                 className="cf-input"
                 value={descripcion}
@@ -384,6 +402,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             <div>
               <label className="cf-label" htmlFor="cf-imagen">URL de imagen (opcional)</label>
               <input
+                readOnly={readOnly}
                 type="url"
                 id="cf-imagen"
                 className="cf-input"
@@ -405,35 +424,40 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
           
 
           <div className="cf-col">
-                      <div>
-            <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
-              Generar con IA
-            </button>
-          </div>
-            <div>
-              <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
-              <input
-                type="number"
-                id="cf-puntuacion"
-                className="cf-input cf-input-sm"
-                value={puntuacion}
-                onChange={(e) => setPuntuacion(e.target.value)}
-                min="1"
-                required
-              />
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 80 }}>
+              <div>
+                <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
+                <input
+                  readOnly={readOnly}
+                  type="number"
+                  id="cf-puntuacion"
+                  className="cf-input cf-input-sm"
+                  value={puntuacion}
+                  onChange={(e) => setPuntuacion(e.target.value)}
+                  min="1"
+                  required
+                />
+              </div>
+              {!readOnly && (
+                <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+                  Generar con IA
+                </button>
+              )}
             </div>
 
             <label className="cf-check-label">
               <input
+                disabled={readOnly}
                 type="checkbox"
                 checked={respVisible}
                 onChange={(e) => setRespVisible(e.target.checked)}
               />
-              <span>Mostrar correcciones al alumno</span>
+              <span>Mostrar comentarios de corrección</span>
             </label>
 
             <label className="cf-check-label">
               <input
+                disabled={readOnly}
                 type="checkbox"
                 checked={permitirReintento}
                 onChange={(e) => setPermitirReintento(e.target.checked)}
@@ -443,6 +467,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
 
             <label className="cf-check-label">
               <input
+                disabled={readOnly}
                 type="checkbox"
                 checked={mostrarPuntuacion}
                 onChange={(e) => setMostrarPuntuacion(e.target.checked)}
@@ -452,6 +477,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
 
             <label className="cf-check-label">
               <input
+                disabled={readOnly}
                 type="checkbox"
                 checked={encontrarRespuestaMaestro}
                 onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
@@ -463,6 +489,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
               <div>
                 <label className="cf-label" htmlFor="cf-comentarios">Comentarios</label>
                 <input
+                  readOnly={readOnly}
                   type="text"
                   id="cf-comentarios"
                   className="cf-input"
@@ -480,13 +507,19 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
           <p className="cf-help">
             Añade las cartas. Cada carta tiene una <strong>pregunta</strong> (anverso) y una <strong>respuesta</strong> (reverso). El alumno deberá emparejar cada pregunta con su respuesta.
           </p>
+          
+          <h3 className="cf-section-title">
+            Cartas
+            <span>{cards.length} / {MAX_CARDS} máx.</span>
+          </h3>
 
           {cards.map((card, ci) => (
             <div key={card.localKey} className="cf-card-block">
               <div className="cf-card-header">
                 <span className="cf-card-label">Carta {ci + 1}</span>
-                {cards.length > 1 && (
+                {cards.length > 1 && !readOnly && (
                   <button
+                    disabled={readOnly}
                     type="button"
                     className="cf-btn-remove-card"
                     onClick={() => removeCard(ci)}
@@ -501,6 +534,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
                 <div className="cf-card-field">
                   <label className="cf-card-field-label">Pregunta</label>
                   <input
+                    readOnly={readOnly}
                     type="text"
                     className="cf-card-input"
                     placeholder={`Pregunta de la carta ${ci + 1}...`}
@@ -511,6 +545,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
                 <div className="cf-card-field">
                   <label className="cf-card-field-label">Respuesta</label>
                   <input
+                    readOnly={readOnly}
                     type="text"
                     className="cf-card-input"
                     placeholder={`Respuesta de la carta ${ci + 1}...`}
@@ -523,6 +558,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
               <div className="cf-card-imagen">
                 <label className="cf-card-field-label">Imagen de la carta (opcional)</label>
                 <input
+                  readOnly={readOnly}
                   type="url"
                   className="cf-card-input"
                   placeholder="https://..."
@@ -542,15 +578,26 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
             </div>
           ))}
 
-          <button type="button" className="cf-btn-add-card" onClick={addCard}>
-            + Añadir carta
-          </button>
+          {cards.length < MAX_CARDS && !readOnly && (
+            <button type="button" className="cf-btn-add-card" onClick={addCard}>
+              + Añadir carta
+            </button>
+          )}
         </div>
 
         <div className="ca-form-footer">
-          <button className="ca-btn-guardar" type="submit" disabled={loading}>
-            {loading ? 'Guardando...' : 'Guardar'}
-          </button>
+          <div className="tf-footer-stack">
+            {!readOnly && (
+              <button className="ca-btn-guardar" type="submit" disabled={loading}>
+                  {loading ? 'Guardando...' : 'Guardar'}
+              </button>
+            )}
+            {error && (
+              <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+                {error}
+              </p>
+            )}
+          </div>
         </div>
       </form>
       <GenerarIAModal

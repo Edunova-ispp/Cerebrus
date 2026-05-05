@@ -65,6 +65,13 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+.cf-input[readonly]:hover,
+.cf-input[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
+}
+
 .cf-input-sm {
   width: 90px;
   flex-shrink: 0;
@@ -159,6 +166,13 @@
   outline: none;
   border-color: var(--t-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.cf-card-input[readonly]:hover,
+.cf-card-input[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
 }
 
 /* ── Card image ──────────────────────────────────────────────── */

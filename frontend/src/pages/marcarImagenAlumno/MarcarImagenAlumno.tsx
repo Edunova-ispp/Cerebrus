@@ -5,6 +5,7 @@ import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
 import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
+import CommentsViewModal from '../../components/CommentsViewModal/CommentsViewModal';
 import ActivityGuideButton from '../../components/ActivityGuideButton/ActivityGuideButton';
 import espadaImg from '../../assets/props/espada.png';
 import './MarcarImagenAlumno.css';
@@ -94,6 +95,7 @@ export default function MarcarImagenAlumno() {
   const [imageDims, setImageDims] = useState<ImageDims | null>(null);
   const [showAnswerModal, setShowAnswerModal] = useState(false);
   const [answerModalMode, setAnswerModalMode] = useState<'student' | 'correct'>('student');
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
 
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
@@ -174,6 +176,7 @@ export default function MarcarImagenAlumno() {
           allowRetry: actData.permitirReintento ?? false,
           showCorrectAnswer: actData.encontrarRespuestaMaestro ?? true,
           showStudentAnswer: actData.encontrarRespuestaAlumno ?? true,
+          showComments: actData.respVisible ?? true,
         });
 
         const puntos = Array.isArray(actData.puntosImagen) ? actData.puntosImagen : [];
@@ -365,6 +368,7 @@ export default function MarcarImagenAlumno() {
       setError('');
       setShowAnswerModal(false);
       setAnswerModalMode('student');
+      setShowCommentsModal(false);
 
       const puntosActuales = Array.isArray(actividad.puntosImagen) ? actividad.puntosImagen : [];
       if (puntosActuales.length > 0) {
@@ -383,6 +387,10 @@ export default function MarcarImagenAlumno() {
   const handleViewCorrectAnswers = () => {
     setAnswerModalMode('correct');
     setShowAnswerModal(true);
+  };
+
+  const handleViewComments = () => {
+    setShowCommentsModal(true);
   };
 
   if (loading) {
@@ -500,7 +508,7 @@ export default function MarcarImagenAlumno() {
               <div className="mia-bottom-inner">
                 {!submitted && (
                   <button
-                    className="ca-btn-guardar"
+                    className="mia-submit-btn"
                     type="button"
                     disabled={submitting || !actividadAlumnoId || !allAnswered}
                     onClick={handleSubmit}
@@ -522,6 +530,7 @@ export default function MarcarImagenAlumno() {
                 onRetry={handleRetry}
                 onViewStudentAnswer={handleViewStudentAnswers}
                 onViewCorrectAnswer={handleViewCorrectAnswers}
+                onViewComments={handleViewComments}
                 onCancel={() => navigate(-1)}
               />
             ) : submitted ? (
@@ -549,6 +558,14 @@ export default function MarcarImagenAlumno() {
           })) : []}
           onClose={() => setShowAnswerModal(false)}
           mode={answerModalMode}
+        />
+      )}
+
+      {showCommentsModal && (
+        <CommentsViewModal
+          title="Comentarios"
+          comment={actividad?.comentariosRespVisible}
+          onClose={() => setShowCommentsModal(false)}
         />
       )}
     </div>

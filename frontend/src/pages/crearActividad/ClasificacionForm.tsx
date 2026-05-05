@@ -44,6 +44,9 @@ interface Pregunta {
   respuestas: RespuestaOption[];
 }
 
+const MAX_CATEGORIAS = 6;
+const MAX_ELEMENTOS = 10;
+
 function makeLocalKey(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -55,6 +58,7 @@ interface Props {
   readonly temaIdProp?: string;
   readonly cursoIdProp?: string;
   readonly onDone?: () => void;
+  readonly readOnly?: boolean;
 }
 
 function makeEmptyRespuesta(): RespuestaOption {
@@ -65,7 +69,7 @@ function makeEmptyPregunta(): Pregunta {
   return { localKey: makeLocalKey(), text: '', respuestas: [makeEmptyRespuesta()] };
 }
 
-export function ClasificacionForm({ mode = 'create', clasificacionId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
+export function ClasificacionForm({ mode = 'create', clasificacionId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -86,8 +90,17 @@ const [showIAModal, setShowIAModal] = useState(false);
   const cursoId = cursoIdProp ?? params.id;
   const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
+  // Tracks which activity ID was last initialized to prevent re-initializing on every render
+  const initializedActivityIdRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (!initialValues) return;
+
+    // Only reinitialize if the activity ID changed, not on every render
+    if (initializedActivityIdRef.current === clasificacionId) return;
+    
+    initializedActivityIdRef.current = clasificacionId ?? null;
+
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
@@ -113,7 +126,7 @@ const [showIAModal, setShowIAModal] = useState(false);
         }))
       );
     }
-  }, [initialValues]);
+  }, [clasificacionId, mode]);
 
   const addPregunta = () => setPreguntas([...preguntas, makeEmptyPregunta()]);
 
@@ -156,19 +169,39 @@ const [showIAModal, setShowIAModal] = useState(false);
 
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
+    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+
+    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
+
     if (!puntuacion.trim()) return 'La puntuación es requerida';
 
     const pNum = Number.parseInt(puntuacion.trim(), 10);
     if (isNaN(pNum) || pNum <= 0) return 'La puntuación debe ser un número mayor a 0';
+    if (pNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
 
     if (preguntas.length < 2) return 'Debe haber al menos 2 categorías';
+    if (preguntas.length > MAX_CATEGORIAS) return `No puedes tener más de ${MAX_CATEGORIAS} categorías`;
 
     for (let i = 0; i < preguntas.length; i++) {
       if (!preguntas[i].text.trim()) {
         return `La categoría ${i + 1} debe tener un nombre`;
       }
+      if (preguntas[i].text.trim().length > 20) {
+        return `La categoría ${i + 1} debe tener un nombre no mayor a 20 caracteres`;
+      }
       if (preguntas[i].respuestas.length === 0) {
         return `La categoría ${i + 1} debe tener al menos 1 elemento`;
+      }
+      if (preguntas[i].respuestas.length > MAX_ELEMENTOS) {
+        return `La categoría ${i + 1} no puede tener más de ${MAX_ELEMENTOS} elementos`;
+      }
+      for (let j = 0; j < preguntas[i].respuestas.length; j++) {
+        if (!preguntas[i].respuestas[j].text.trim()) {
+          return `El elemento ${j + 1} de la categoría ${i + 1} no puede estar vacío`;
+        }
+        if (preguntas[i].respuestas[j].text.trim().length > 20) {
+          return `El elemento ${j + 1} de la categoría ${i + 1} no puede exceder los 20 caracteres`;
+        }
       }
       const tieneElementosVacios = preguntas[i].respuestas.some((r) => !r.text.trim());
       if (tieneElementosVacios) {
@@ -350,7 +383,6 @@ const handleIAResult = (data: any) => {
 
   return (
     <form onSubmit={handleSubmit} className="tf-form">
-      {error && <p className="tf-error">{error}</p>}
       <GenerarIAModal
         tipoActividad="CLASIFICACION"
         open={showIAModal}
@@ -362,67 +394,101 @@ const handleIAResult = (data: any) => {
         <div className="tf-col">
           <div>
             <label className="cf-label" htmlFor="cf-titulo">Título *</label>
-            <input type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} required style={{ width: '100%' }} />
+            <input 
+              readOnly={readOnly}
+              type="text" 
+              value={titulo} 
+              className="of-input"
+              onChange={(e) => setTitulo(e.target.value)} 
+              placeholder = "Título de la actividad"
+              required 
+              style={{ width: '100%' }} />
           </div>
           <div>
             <label className="cf-label" htmlFor="cf-descripcion">Descripción</label>
-            <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={3} style={{ width: '100%', resize: 'vertical' }} />
+            <textarea 
+              readOnly={readOnly}
+              value={descripcion} 
+              className="of-textarea"
+              onChange={(e) => setDescripcion(e.target.value)} 
+              rows={3} 
+              style={{ width: '100%', resize: 'vertical' }} 
+              placeholder="Descripción de la actividad"
+            />
           </div>
         </div>
 
         <div className="tf-col">
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 80 }}>
             <div>
-            <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
-              Generar con IA
-            </button>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
-            <input type="number" value={puntuacion} onChange={(e) => setPuntuacion(e.target.value)} required style={{ width: 90 }} />
+              <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
+              <input
+                readOnly={readOnly}
+                className="of-input"
+                type="number"
+                id="cf-puntuacion"
+                value={puntuacion}
+                onChange={(e) => setPuntuacion(e.target.value)}
+                min="1"
+                required
+                style={{ width: 90 }}
+              />
+            </div>
+            {!readOnly && (
+              <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+                Generar con IA
+              </button>
+            )}
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
-            <input type="checkbox" id="respVisible" checked={respVisible} onChange={(e) => setRespVisible(e.target.checked)} />
-            <label className="ca-text" htmlFor="respVisible">Corregir automáticamente</label>
+            <input disabled={readOnly} type="checkbox" id="respVisible" checked={respVisible} onChange={(e) => setRespVisible(e.target.checked)} />
+            <label className="ca-text" htmlFor="respVisible">Mostrar comentarios de corrección</label>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
-            <input type="checkbox" id="permitirReintento" checked={permitirReintento} onChange={(e) => setPermitirReintento(e.target.checked)} />
+            <input disabled={readOnly} type="checkbox" id="permitirReintento" checked={permitirReintento} onChange={(e) => setPermitirReintento(e.target.checked)} />
             <label className="ca-text" htmlFor="permitirReintento">Permitir reintentos</label>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
-            <input type="checkbox" id="clasificacion-mostrar-puntuacion" checked={mostrarPuntuacion} onChange={(e) => setMostrarPuntuacion(e.target.checked)} />
+            <input disabled={readOnly} type="checkbox" id="clasificacion-mostrar-puntuacion" checked={mostrarPuntuacion} onChange={(e) => setMostrarPuntuacion(e.target.checked)} />
             <label className="ca-text" htmlFor="clasificacion-mostrar-puntuacion">Mostrar puntuación</label>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
-            <input type="checkbox" id="clasificacion-mostrar-resp-maest" checked={encontrarRespuestaMaestro} onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)} />
+            <input disabled={readOnly} type="checkbox" id="clasificacion-mostrar-resp-maest" checked={encontrarRespuestaMaestro} onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)} />
             <label className="ca-text" htmlFor="clasificacion-mostrar-resp-maest">Mostrar respuesta correcta</label>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
-            <input type="checkbox" id="clasificacion-mostrar-resp-alumn" checked={encontrarRespuestaAlumno} onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)} />
-            <label className="ca-text" htmlFor="clasificacion-mostrar-resp-alumn">Mostrar mi respuesta</label>
+            <input disabled={readOnly} type="checkbox" id="clasificacion-mostrar-resp-alumn" checked={encontrarRespuestaAlumno} onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)} />
+            <label className="ca-text" htmlFor="clasificacion-mostrar-resp-alumn">Mostrar respuesta del alumno</label>
           </div>
           {respVisible && (
             <div style={{ marginTop: 10 }}>
-              <label className="ca-text">Comentarios de corrección</label>
-              <input type="text" value={comentariosRespVisible} onChange={(e) => setComentariosRespVisible(e.target.value)} style={{ width: '100%' }} />
+              <label className="cf-label">Comentarios de corrección</label>
+              <input className="tf-input" readOnly={readOnly} id="cf-comentarios" type="text" value={comentariosRespVisible} onChange={(e) => setComentariosRespVisible(e.target.value)} />
             </div>
-            
           )}
         </div>
       </div>
 
       <div className="ca-contenedor-blanco" style={{ marginTop: 16, flexDirection: 'column', alignItems: 'stretch' }}>
-        <h3 className="ca-text">Configuración de Categorías</h3>
+        <h3 className="cf-section-title">
+          Categorías
+          <span>{preguntas.length} / {MAX_CATEGORIAS} máx.</span>
+        </h3>
         {preguntas.map((p, pIdx) => (
           <div key={p.localKey} className="tf-question-block" style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px', marginBottom: '15px' }}>
             <div className="tf-question-header">
               <span className="tf-question-label">Categoría {pIdx + 1}</span>
-              <button type="button" className="tf-btn-remove-question" onClick={() => removePregunta(pIdx)}>✕</button>
+              <span className="paf-badge">{p.respuestas.length} / {MAX_ELEMENTOS} máx.</span>
+              {preguntas.length > 2 && !readOnly && (
+                <button type="button" className="tf-btn-remove-question" onClick={() => removePregunta(pIdx)}>✕</button>
+              )}
             </div>
             <input 
+              readOnly={readOnly}
               type="text" 
               className="tf-question-input"
               placeholder="Nombre de la categoría" 
@@ -432,29 +498,45 @@ const handleIAResult = (data: any) => {
             <div className="tf-options" style={{ marginLeft: '20px' }}>
               {p.respuestas.map((r, rIdx) => (
                 <div key={r.localKey} className="tf-option" style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                  <input 
+                  <input
+                    readOnly={readOnly}
                     type="text" 
                     className="tf-option-input"
                     placeholder="Elemento a clasificar" 
                     value={r.text} 
                     onChange={(e) => updateRespuesta(pIdx, rIdx, { text: e.target.value })} 
                   />
-                  <button type="button" className="tf-btn-remove-option" onClick={() => removeRespuesta(pIdx, rIdx)}>✕</button>
+                  {p.respuestas.length > 1 && !readOnly && (
+                    <button type="button" className="tf-btn-remove-option" onClick={() => removeRespuesta(pIdx, rIdx)}>✕</button>
+                  )}
                 </div>
               ))}
-              <button type="button" className="tf-btn-add-option" onClick={() => addRespuesta(pIdx)}>+ Añadir Elemento</button>
+              {p.respuestas.length < MAX_ELEMENTOS && !readOnly && (
+                <button type="button" className="tf-btn-add-option" onClick={() => addRespuesta(pIdx)}>+ Añadir Elemento</button>
+              )}
             </div>
           </div>
         ))}
-        <button type="button" className="tf-btn-add-question" onClick={addPregunta} style={{ width: '100%' }}>
-          + Añadir Nueva Categoría
-        </button>
+        {preguntas.length < MAX_CATEGORIAS && !readOnly && (
+          <button type="button" className="tf-btn-add-question" onClick={addPregunta} style={{ width: '100%' }}>
+            + Añadir Nueva Categoría
+          </button>
+        )}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
-        <button className="ca-btn-guardar" type="submit" disabled={loading}>
-          {loading ? 'Guardando...' : 'Guardar Actividad'}
-        </button>
+      <div className="ca-form-footer">
+        <div className="tf-footer-stack">
+          {!readOnly && (
+            <button className="ca-btn-guardar" type="submit" disabled={loading}>
+              {loading ? 'Guardando...' : 'Guardar'}
+            </button>
+          )}
+          {error && (
+            <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+              {error}
+            </p>
+          )}
+        </div>
       </div>
     </form>
   );

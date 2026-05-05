@@ -3,7 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import ActivityHeader from '../../components/ActivityHeader/ActivityHeader';
 import ActivityResultScreen, { type ActivityResultConfig } from '../../components/ActivityResultScreen/ActivityResultScreen';
+import IaNoPuedeCorregirScreen from '../../components/IaNoPuedeCorregirScreen/IaNoPuedeCorregirScreen';
 import AnswerViewModal from '../../components/AnswerViewModal/AnswerViewModal';
+import CommentsViewModal from '../../components/CommentsViewModal/CommentsViewModal';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserInfo } from '../../types/curso';
 
@@ -15,6 +17,8 @@ import caballeroImg from '../../assets/props/caballero.png';
 type EvaluacionAbiertaResponse = {
   readonly notaFinal?: number;
   readonly puntuacionFinal?: number;
+  readonly iaNoDisponible?: boolean;
+  readonly iaMensaje?: string | null;
 };
 
 type PreguntaAbiertaDTO = {
@@ -29,6 +33,8 @@ type AbiertaAlumnoDTO = {
   readonly descripcion?: string | null;
   readonly puntuacion: number;
   readonly imagen?: string | null;
+  readonly respVisible?: boolean;
+  readonly comentariosRespVisible?: string | null;
   readonly preguntas: PreguntaAbiertaDTO[];
   readonly permitirReintento?: boolean;
   readonly mostrarPuntuacion?: boolean;
@@ -65,7 +71,7 @@ function isCompletedAttempt(fechaFin?: string | null): boolean {
 }
 
 export default function PreguntaAbiertaAlumno() {
-  const { actividadId } = useParams<{ actividadId: string }>();
+  const { actividadId } = useParams<{ actividadId?: string }>();
   const navigate = useNavigate();
   const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
 
@@ -80,11 +86,13 @@ export default function PreguntaAbiertaAlumno() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [iaNoPuedeCorregir, setIaNoPuedeCorregir] = useState(false);
   const [lastAttemptGrade, setLastAttemptGrade] = useState<number | null>(null);
   const [lastAttemptScore, setLastAttemptScore] = useState<number | null>(null);
   const [activityConfig, setActivityConfig] = useState<ActivityResultConfig | null>(null);
   const [showAnswerModal, setShowAnswerModal] = useState(false);
   const [answerModalMode, setAnswerModalMode] = useState<'student' | 'correct'>('student');
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
 
   const hydrateAnswersFromHistory = async (actAlumnoId: number) => {
     try {
@@ -124,6 +132,7 @@ export default function PreguntaAbiertaAlumno() {
           allowRetry: data.permitirReintento ?? false,
           showCorrectAnswer: data.encontrarRespuestaMaestro ?? true,
           showStudentAnswer: data.encontrarRespuestaAlumno ?? true,
+          showComments: data.respVisible ?? true,
         });
 
         const initialMap = new Map<number, string>();
@@ -199,6 +208,7 @@ export default function PreguntaAbiertaAlumno() {
       if (!res.ok) {
         const errorData = await res.json();
         const backendMessage = errorData?.mensaje || errorData?.message || 'Error al procesar la corrección';
+
         throw new Error(backendMessage);
       }
 
@@ -206,6 +216,7 @@ export default function PreguntaAbiertaAlumno() {
       setLastAttemptGrade(typeof resultado?.notaFinal === 'number' ? resultado.notaFinal : null);
       setLastAttemptScore(typeof resultado?.puntuacionFinal === 'number' ? resultado.puntuacionFinal : null);
       setSubmitted(true);
+      setIaNoPuedeCorregir(resultado?.iaNoDisponible === true);
 
       await hydrateAnswersFromHistory(actividadAlumnoId);
     } catch (error) {
@@ -225,6 +236,7 @@ export default function PreguntaAbiertaAlumno() {
     if (!actividad) return;
 
     try {
+      setIaNoPuedeCorregir(false);
       const alumnoId = getCurrentUserIdFromJwt();
       if (!alumnoId) throw new Error('No se pudo identificar al alumno.');
 
@@ -246,6 +258,7 @@ export default function PreguntaAbiertaAlumno() {
       setLastAttemptScore(null);
       setLastAttemptGrade(null);
       setSubmitted(false);
+      setShowCommentsModal(false);
     } catch {
       alert('No se pudo crear un nuevo intento.');
     }
@@ -261,6 +274,10 @@ export default function PreguntaAbiertaAlumno() {
     setShowAnswerModal(true);
   };
 
+  const handleViewComments = () => {
+    setShowCommentsModal(true);
+  };
+
   if (loading) return <div className="ta-loading">Preparando tu desafío...</div>;
 
   const currentPregunta = actividad?.preguntas[currentIndex];
@@ -272,7 +289,12 @@ export default function PreguntaAbiertaAlumno() {
       <main className="test-alumno-main">
         {actividad && currentPregunta && (
           <>
-            <ActivityHeader title={actividad.titulo} guideType="pregunta-abierta" guideRole="alumno" />
+            <ActivityHeader
+              title={actividad.titulo}
+              subtitle={actividad.descripcion?.trim() || undefined}
+              guideType="pregunta-abierta"
+              guideRole="alumno"
+            />
             
             <div className="ta-battle-bar">
               <img src={caballeroImg} className="ta-knight-img" alt="Knight" />
@@ -337,20 +359,31 @@ export default function PreguntaAbiertaAlumno() {
           </>
         )}
 
-        {submitted && actividad && activityConfig && (
-          <ActivityResultScreen
-            title="¡ACTIVIDAD CORREGIDA!"
-            score={lastAttemptScore ?? 0}
-            maxScore={actividad.puntuacion}
-            grade={lastAttemptGrade ?? undefined}
-            config={activityConfig}
-            onContinue={() => navigate(-1)}
-            onRetry={handleRetry}
-            onViewStudentAnswer={handleViewStudentAnswers}
-            onViewCorrectAnswer={handleViewCorrectAnswers}
-            onCancel={() => navigate(-1)}
-          />
+        {submitted && actividad && (
+          iaNoPuedeCorregir ? (
+            <IaNoPuedeCorregirScreen
+              onContinue={() => navigate(-1)}
+              allowRetry={Boolean(actividad.permitirReintento)}
+            />
+          ) : (
+            activityConfig && (
+              <ActivityResultScreen
+                title="¡ACTIVIDAD CORREGIDA!"
+                score={lastAttemptScore ?? 0}
+                maxScore={actividad.puntuacion}
+                grade={lastAttemptGrade ?? undefined}
+                config={activityConfig}
+                onContinue={() => navigate(-1)}
+                onRetry={handleRetry}
+                onViewStudentAnswer={handleViewStudentAnswers}
+                onViewCorrectAnswer={handleViewCorrectAnswers}
+                onViewComments={handleViewComments}
+                onCancel={() => navigate(-1)}
+              />
+            )
+          )
         )}
+        
       </main>
 
       {showAnswerModal && (
@@ -369,6 +402,14 @@ export default function PreguntaAbiertaAlumno() {
           }
           onClose={() => setShowAnswerModal(false)}
           mode={answerModalMode}
+        />
+      )}
+
+      {showCommentsModal && (
+        <CommentsViewModal
+          title="Comentarios"
+          comment={actividad?.comentariosRespVisible}
+          onClose={() => setShowCommentsModal(false)}
         />
       )}
     </div>

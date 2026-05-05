@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import './MarcarImagenForm.css';
 
 export type MarcarImagenFormMode = 'create' | 'edit';
 
@@ -33,7 +34,10 @@ interface Props {
   readonly temaIdProp?: string;
   readonly cursoIdProp?: string;
   readonly onDone?: () => void;
+  readonly readOnly?: boolean;
 }
+
+const MAX_PUNTOS = 50;
 
 type Point = {
   id?: number;
@@ -42,7 +46,7 @@ type Point = {
   pixelY: number;
 };
 
-export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
+export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -66,8 +70,17 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
   const cursoId = cursoIdProp ?? params.id;
   const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
+  // Tracks which activity ID was last initialized to prevent re-initializing on every render
+  const initializedActivityIdRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (!initialValues) return;
+
+    // Only reinitialize if the activity ID changed, not on every render
+    if (initializedActivityIdRef.current === marcarImagenId) return;
+    
+    initializedActivityIdRef.current = marcarImagenId ?? null;
+
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
@@ -90,7 +103,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
     setPuntos(nextPoints);
     setSelectedPointIndex(nextPoints.length ? 0 : null);
-  }, [initialValues]);
+  }, [marcarImagenId, mode]);
 
   const temaIdNum = useMemo(() => {
     if (!temaId) return null;
@@ -100,11 +113,15 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
+    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+
+    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
 
     if (!puntuacion.trim()) return 'La puntuación es requerida';
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(puntuacionNum)) return 'La puntuación debe ser un número válido';
     if (puntuacionNum <= 0) return 'La puntuación debe ser un número mayor a 0';
+    if (puntuacionNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
 
     if (!temaIdNum) return 'Falta el id del tema en la URL';
     if (!cursoId) return 'Falta el id del curso en la URL';
@@ -112,6 +129,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
     if (!imagenAMarcar.trim()) return 'La URL de la imagen a marcar es requerida';
 
     if (puntos.length === 0) return 'Añade al menos un punto haciendo clic en la imagen';
+    if (puntos.length > MAX_PUNTOS) return `La imagen no puede tener más de ${MAX_PUNTOS} puntos`;
     if (puntos.some((p) => !p.respuesta.trim())) return 'Todos los puntos deben tener respuesta';
 
     if (mode === 'edit' && !marcarImagenId) return 'Falta el id de la actividad a editar';
@@ -127,8 +145,11 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
   };
 
   const handleImageClick = (e: React.MouseEvent) => {
+    if (readOnly) return;
+
     const el = imgRef.current;
     if (!el) return;
+    if (puntos.length >= MAX_PUNTOS) return;
 
     const rect = el.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
@@ -206,39 +227,35 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
       className="ca-ordenacion-form"
       style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
     >
-      {error && (
-        <p className="ca-text" style={{ marginTop: 0, color: '#c0392b !important' }}>
-          {error}
-        </p>
-      )}
-
       <div className="ca-contenedor-blanco" style={{ gap: 24, maxWidth: '100%' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: '1 1 320px', minWidth: 0 }}>
           <div>
-            <label className="ca-text" htmlFor="mi-titulo">
-              Título
+            <label className="of-label" htmlFor="mi-titulo">
+              Título *
             </label>
             <input
+              className="mi-input"
+              readOnly={readOnly}
               type="text"
               id="mi-titulo"
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
-              style={{ width: '100%' }}
               placeholder="Ej: Señala los elementos correctos"
               required
             />
           </div>
 
           <div>
-            <label className="ca-text" htmlFor="mi-descripcion">
+            <label className="of-label" htmlFor="mi-descripcion">
               Descripción
             </label>
             <textarea
+              className="mi-textarea"
+              readOnly={readOnly}
               id="mi-descripcion"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               rows={3}
-              style={{ width: '100%', resize: 'vertical' }}
               placeholder="Instrucciones para el alumno"
             />
           </div>
@@ -249,34 +266,40 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: '1 1 320px', minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label className="ca-text" htmlFor="mi-puntuacion" style={{ whiteSpace: 'nowrap' }}>
-              Puntuación
-            </label>
-            <input
-              type="number"
-              id="mi-puntuacion"
-              value={puntuacion}
-              onChange={(e) => setPuntuacion(e.target.value)}
-              style={{ width: 90 }}
-              min="1"
-              required
-            />
+            <div>
+              <label className="of-label" htmlFor="mi-puntuacion" style={{ whiteSpace: 'nowrap' }}>
+                Puntuación *
+              </label>
+              <input
+                className="mi-input"
+                readOnly={readOnly}
+                type="number"
+                id="mi-puntuacion"
+                value={puntuacion}
+                onChange={(e) => setPuntuacion(e.target.value)}
+                style={{ width: 90 }}
+                min="1"
+                required
+              />
+            </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               id="mi-resp-visible"
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
             <label className="ca-text" htmlFor="mi-resp-visible">
-              Correcciones visibles
+              Mostrar comentarios de corrección
             </label>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               id="mi-permitir-reintento"
               checked={permitirReintento}
@@ -289,6 +312,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               id="mi-mostrar-puntuacion"
               checked={mostrarPuntuacion}
@@ -301,6 +325,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               id="mi-mostrar-respuesta-correcta"
               checked={encontrarRespuestaMaestro}
@@ -313,41 +338,44 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               id="mi-mostrar-respuesta-alumno"
               checked={encontrarRespuestaAlumno}
               onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
             />
             <label className="ca-text" htmlFor="mi-mostrar-respuesta-alumno">
-              Mostrar mi respuesta
+              Mostrar respuesta del alumno
             </label>
           </div>
 
           {respVisible && (
             <div>
-              <label className="ca-text" htmlFor="mi-comentarios">
+              <label className="of-label" htmlFor="mi-comentarios">
                 Comentarios
               </label>
               <input
+                className="mi-input"
+                readOnly={readOnly}
                 type="text"
                 id="mi-comentarios"
                 value={comentariosRespVisible}
                 onChange={(e) => setComentariosRespVisible(e.target.value)}
-                style={{ width: '100%' }}
               />
             </div>
           )}
 
           <div>
-            <label className="ca-text" htmlFor="mi-imagen-a-marcar">
+            <label className="of-label" htmlFor="mi-imagen-a-marcar">
               Imagen a marcar (URL)
             </label>
             <input
+              className="mi-input"
+              readOnly={readOnly}
               type="url"
               id="mi-imagen-a-marcar"
               value={imagenAMarcar}
               onChange={(e) => setImagenAMarcar(e.target.value)}
-              style={{ width: '100%' }}
               placeholder="https://..."
             />
           </div>
@@ -358,6 +386,10 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
         className="ca-contenedor-blanco"
         style={{ gap: 16, marginTop: 16, marginBottom: 24, flexDirection: 'column', alignItems: 'stretch' }}
       >
+        <h3 className="cf-section-title">
+          Puntos
+          <span>{puntos.length} / {MAX_PUNTOS} máx.</span>
+        </h3>
         <p className="ca-ordenacion-help" style={{ marginTop: 0, marginBottom: 0 }}>
           Haz clic en la imagen para añadir puntos.
         </p>
@@ -424,10 +456,19 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                   })}
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <button className="ca-btn-guardar" type="submit" disabled={loading}>
-                  {loading ? 'Guardando...' : 'Guardar'}
-                </button>
+              <div className="ca-form-footer">
+                <div className="tf-footer-stack">
+                  {!readOnly && (
+                    <button className="ca-btn-guardar" type="submit" disabled={loading}>
+                      {loading ? 'Guardando...' : 'Guardar'}
+                    </button>
+                  )}
+                  {error && (
+                    <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+                      {error}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -448,6 +489,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                       onClick={() => setSelectedPointIndex(i)}
                     >
                       <button
+                        disabled={readOnly}
                         type="button"
                         aria-label={`Eliminar punto ${i + 1}`}
                         onClick={(ev) => {
@@ -485,6 +527,8 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                         </label>
 
                         <input
+                          className="mi-input"
+                          readOnly={readOnly}
                           type="text"
                           placeholder="Respuesta"
                           value={p.respuesta}
@@ -514,10 +558,17 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
         )}
 
         {!imagenAMarcar.trim() && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 8 }}>
-            <button className="ca-btn-guardar" type="submit" disabled={loading}>
-              {loading ? 'Guardando...' : 'Guardar'}
-            </button>
+          <div className="ca-form-footer">
+            <div className="tf-footer-stack">
+              <button className="ca-btn-guardar" type="submit" disabled={loading}>
+                {loading ? 'Guardando...' : 'Guardar'}
+              </button>
+              {error && (
+                <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+                  {error}
+                </p>
+              )}
+            </div>
           </div>
         )}
       </div>

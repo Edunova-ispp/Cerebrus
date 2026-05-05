@@ -45,17 +45,41 @@ function formatFecha(iso?: string | null): string {
   return `${d.toLocaleDateString('es-ES')} ${d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
-function formatTiempo(min?: number | null, segundos?: number | null): string {
-  const totalSegundos =
-    typeof segundos === 'number' && Number.isFinite(segundos)
-      ? segundos
-      : (min ?? 0) * 60;
-  if (totalSegundos <= 0) return '—';
-  if (totalSegundos < 60) return `${totalSegundos} s`;
-  const mins = Math.floor(totalSegundos / 60);
-  const secs = totalSegundos % 60;
-  if (secs === 0) return mins === 1 ? '1 min' : `${mins} min`;
-  return `${mins} min ${secs} s`;
+function formatTiempo(fechaInicio?: string | null, fechaFin?: string | null, minutosFallback?: number | null): string {
+  if (fechaInicio && fechaFin) {
+    const inicio = new Date(fechaInicio);
+    const fin = new Date(fechaFin);
+    if (!isNaN(inicio.getTime()) && !isNaN(fin.getTime())) {
+      const totalSegundos = Math.max(0, Math.round((fin.getTime() - inicio.getTime()) / 1000));
+      if (totalSegundos < 60) {
+        return `${totalSegundos} s`;
+      }
+
+      const minutos = Math.floor(totalSegundos / 60);
+      const segundos = totalSegundos % 60;
+      if (segundos === 0) {
+        return minutos === 1 ? '1 min' : `${minutos} min`;
+      }
+      return `${minutos} min ${String(segundos).padStart(2, '0')} s`;
+    }
+  }
+
+  if (!minutosFallback || minutosFallback <= 0) return '< 1 min';
+  return minutosFallback === 1 ? '1 min' : `${minutosFallback} min`;
+}
+
+function formatNota2Dec(nota?: number | null): string {
+  if (typeof nota !== 'number' || !Number.isFinite(nota)) return '—';
+  return nota.toFixed(2);
+}
+
+function formatNotaDesdePuntuacion(puntuacion?: number | null, puntuacionMaxima?: number | null): string {
+  if (typeof puntuacion !== 'number' || !Number.isFinite(puntuacion)) return '—';
+  if (typeof puntuacionMaxima !== 'number' || !Number.isFinite(puntuacionMaxima) || puntuacionMaxima <= 0) {
+    return formatNota2Dec(puntuacion);
+  }
+
+  return ((puntuacion / puntuacionMaxima) * 10).toFixed(2);
 }
 
 function tipoLegible(tipo: string): string {

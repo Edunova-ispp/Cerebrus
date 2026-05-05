@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarMisCursos from '../../components/NavbarMisCursos/NavbarMisCursos';
 import { ClasificacionForm } from './ClasificacionForm';
@@ -60,6 +60,40 @@ export default function CrearActividad({ cursoIdProp, temaIdProp, embedded, onDo
       navigate(`/cursos/${cursoId}`);
     }
   };
+
+  const handleCancelarCreacion = () => {
+    const confirmar = window.confirm('Si cancelas la creación se descartarán los cambios no guardados. ¿Quieres continuar?');
+    if (!confirmar) return;
+    handleVolver();
+  };
+
+  useEffect(() => {
+    const contenedor = document.querySelector('.ca-contenido');
+    if (!contenedor) return;
+
+    const botonesGuardar = Array.from(
+      contenedor.querySelectorAll<HTMLButtonElement>('button.ca-btn-guardar, button.cf-btn-submit')
+    );
+
+    botonesGuardar.forEach((botonGuardar) => {
+      const hermanoAnterior = botonGuardar.previousElementSibling;
+      if (hermanoAnterior instanceof HTMLButtonElement && hermanoAnterior.dataset.caCancelInline === '1') {
+        return;
+      }
+
+      const botonCancelar = document.createElement('button');
+      botonCancelar.type = 'button';
+      botonCancelar.className = 'ca-btn-cancelar';
+      botonCancelar.textContent = 'Cancelar';
+      botonCancelar.dataset.caCancelInline = '1';
+      botonCancelar.onclick = (event) => {
+        event.preventDefault();
+        handleCancelarCreacion();
+      };
+
+      botonGuardar.parentElement?.insertBefore(botonCancelar, botonGuardar);
+    });
+  }, [tipoSeleccionado, embedded, onDone, cursoId, navigate]);
 
   const sidebar = (
     <div className="ca-sidebar">
