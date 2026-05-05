@@ -32,6 +32,11 @@ interface Props {
   readonly readOnly?: boolean;
 }
 
+const MAX_CARACTERES_TITULO = 60;
+const MAX_CARACTERES_DESCRIPCION = 1000;
+const MAX_PUNTUACION = 10000;
+const MAX_CARACTERES_COMENTARIOS = 250;
+const MAX_CARACTERES_ELEMENTO = 60; // Solo aplica para las palabras
 const MAX_ELEMENTOS = 15;
 
 function makeLocalKey(): string {
@@ -108,13 +113,13 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       return;
     }
 
-    if (titulo.trim().length > 25) {
-      setError('El título no puede exceder los 25 caracteres.');
+    if (titulo.trim().length > MAX_CARACTERES_TITULO) {
+      setError(`El título no puede exceder ${MAX_CARACTERES_TITULO} caracteres.`);
       return;
     }
 
-    if (descripcion.trim().length > 1000) {
-      setError('La descripción no puede exceder los 1000 caracteres.');
+    if (descripcion.trim().length > MAX_CARACTERES_DESCRIPCION) {
+      setError(`La descripción no puede exceder ${MAX_CARACTERES_DESCRIPCION} caracteres.`);
       return;
     }
 
@@ -132,12 +137,12 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       setError('La puntuación debe ser un número mayor a 0');
       return;
     }
-    if (puntuacionNum > 999999999) {
-      setError('La puntuación no puede exceder 999.999.999');
+    if (puntuacionNum > MAX_PUNTUACION) {
+      setError(`La puntuación no puede exceder ${MAX_PUNTUACION}`);
       return;
     }
 
-    if (respVisible && comentariosRespVisible.trim().length > 250) return 'Los comentarios no pueden exceder los 250 caracteres.';
+    if (comentariosRespVisible.trim().length > MAX_CARACTERES_COMENTARIOS) return `Los comentarios no pueden exceder ${MAX_CARACTERES_COMENTARIOS} caracteres.`;
     if (respVisible && comentariosRespVisible.trim().length === 0) return 'Escribe un comentario para mostrar cuando la respuesta sea visible.';
 
     if (!temaId) {
@@ -172,8 +177,8 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
     }
 
     for (let i = 0; i < valores.length; i++) {
-      if (valores[i].length > 40 && ordenItemsKind === 'words') {
-        setError(`El valor ${i + 1} no puede exceder los 40 caracteres.`);
+      if (valores[i].length > MAX_CARACTERES_ELEMENTO && ordenItemsKind === 'words') {
+        setError(`El valor ${i + 1} no puede exceder los ${MAX_CARACTERES_ELEMENTO} caracteres.`);
         return;
       }
       if (valores[i].trim() === '') {

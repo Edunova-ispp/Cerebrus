@@ -32,8 +32,13 @@ interface Props {
   readonly readOnly?: boolean;
 }
 
+const MAX_CARACTERES_TITULO = 60;
+const MAX_CARACTERES_DESCRIPCION = 1000;
+const MAX_PUNTUACION = 10000;
 const PREGUNTAS_3X3 = 8;
 const PREGUNTAS_4X4 = 15;
+const MAX_CARACTERES_PREGUNTA = 100;
+const MAX_CARACTERES_RESPUESTA = 60;
 
 type QPair = { localKey: string; pregunta: string; respuesta: string };
 
@@ -113,12 +118,12 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
     
-    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
-    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
+    if (titulo.trim().length > MAX_CARACTERES_TITULO) return `El título no puede exceder ${MAX_CARACTERES_TITULO} caracteres.`;
+    if (descripcion.trim().length > MAX_CARACTERES_DESCRIPCION) return `La descripción no puede exceder ${MAX_CARACTERES_DESCRIPCION} caracteres.`;
 
     const pts = Number.parseInt(puntuacion.trim(), 10);
     if (Number.isNaN(pts) || pts <= 0) return 'La puntuación debe ser un número mayor a 0';
-    if (pts > 999999999) return 'La puntuación no puede exceder 999.999.999';
+    if (pts > MAX_PUNTUACION) return `La puntuación no puede exceder ${MAX_PUNTUACION}`;
     if (tamano === null) return 'Selecciona el tamaño del tablero';
     if (mode === 'create' && !temaId) return 'Falta el id del tema en la URL';
     if (mode === 'edit' && !tableroId) return 'Falta el id del tablero a editar';
@@ -126,7 +131,9 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
     const textosSeen = new Set<string>();
     for (let i = 0; i < expected; i++) {
       if (!preguntas[i]?.pregunta.trim()) return `La pregunta ${i + 1} está vacía`;
+      if (preguntas[i].pregunta.trim().length > MAX_CARACTERES_PREGUNTA) return `La pregunta ${i + 1} no puede tener más de ${MAX_CARACTERES_PREGUNTA} caracteres`;
       if (!preguntas[i]?.respuesta.trim()) return `La respuesta de la pregunta ${i + 1} está vacía`;
+      if (preguntas[i].respuesta.trim().length > MAX_CARACTERES_RESPUESTA) return `La respuesta de la pregunta ${i + 1} no puede tener más de ${MAX_CARACTERES_RESPUESTA} caracteres`;
       const clave = preguntas[i].pregunta.trim().toLowerCase();
       if (textosSeen.has(clave)) return `Pregunta repetida: "${preguntas[i].pregunta.trim()}" (pregunta ${i + 1})`;
       textosSeen.add(clave);
@@ -303,7 +310,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
             />
-            <span>Mostrar respuesta correcta al alumno</span>
+            <span>Mostrar respuesta correcta cuando el alumno falle una pregunta</span>
           </label>
           <label className="tbl-label tbl-label--check">
             <input
@@ -332,7 +339,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
               checked={encontrarRespuestaMaestro}
               onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
             />
-            <span>Mostrar respuesta correcta</span>
+            <span>Mostrar respuesta correcta al final de la actividad</span>
           </label>
 
           <label className="tbl-label tbl-label--check">

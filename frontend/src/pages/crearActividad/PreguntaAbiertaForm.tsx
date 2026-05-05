@@ -39,6 +39,12 @@ interface PreguntaAbiertaMeta {
   version?: number;
 }
 
+const MAX_CARACTERES_TITULO = 60;
+const MAX_CARACTERES_DESCRIPCION = 1000;
+const MAX_PUNTUACION = 10000;
+const MAX_CARACTERES_COMENTARIOS = 250;
+const MAX_CARACTERES_PREGUNTA = 450;
+const MAX_CARACTERES_RESPUESTA = 1000;
 const MAX_PREGUNTAS = 5;
 
 export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
@@ -118,9 +124,12 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
 
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
-    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+    if (titulo.trim().length > MAX_CARACTERES_TITULO) return `El título no puede exceder ${MAX_CARACTERES_TITULO} caracteres.`;
 
-    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
+    if (descripcion.trim().length > MAX_CARACTERES_DESCRIPCION) return `La descripción no puede exceder ${MAX_CARACTERES_DESCRIPCION} caracteres.`;
+
+    if (respVisible && comentariosRespVisible.trim().length === 0) return 'Escribe un comentario de corrección para mostrar.';
+    if (comentariosRespVisible.trim().length > MAX_CARACTERES_COMENTARIOS) return `Los comentarios no pueden exceder ${MAX_CARACTERES_COMENTARIOS} caracteres.`;
 
     if (!temaIdProp) return 'Falta el id del tema en la URL';
     const temaIdNum = Number.parseInt(String(temaIdProp), 10);
@@ -130,7 +139,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
     const puntosNum = typeof puntos === 'number' ? puntos : Number(puntos);
     if (!Number.isFinite(puntosNum)) return 'La puntuación debe ser un número válido';
     if (puntosNum <= 0) return 'La puntuación debe ser un número mayor a 0';
-    if (puntosNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
+    if (puntosNum > MAX_PUNTUACION) return `La puntuación no puede exceder ${MAX_PUNTUACION}`;
 
     if (preguntas.length < 1) return 'Añade al menos una pregunta';
     if (preguntas.length > MAX_PREGUNTAS) return `No puedes añadir más de ${MAX_PREGUNTAS} preguntas`;
@@ -138,6 +147,9 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
     for (let i = 0; i < preguntas.length; i++) {
       if (!preguntas[i].pregunta.trim()) return `La pregunta ${i + 1} no tiene texto`;
       if (!preguntas[i].respuesta.trim()) return `La pregunta ${i + 1} no tiene respuesta modelo`;
+
+      if (preguntas[i].pregunta.trim().length > MAX_CARACTERES_PREGUNTA) return `La pregunta ${i + 1} no puede exceder los ${MAX_CARACTERES_PREGUNTA} caracteres.`;
+      if (preguntas[i].respuesta.trim().length > MAX_CARACTERES_RESPUESTA) return `La respuesta modelo de la pregunta ${i + 1} no puede exceder los ${MAX_CARACTERES_RESPUESTA} caracteres.`;
     }
 
     if (mode === 'edit' && !preguntaAbiertaId) return 'Falta el id de la actividad a editar';

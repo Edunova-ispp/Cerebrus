@@ -44,6 +44,12 @@ interface Pregunta {
   respuestas: RespuestaOption[];
 }
 
+const MAX_CARACTERES_TITULO = 60;
+const MAX_CARACTERES_DESCRIPCION = 1000;
+const MAX_PUNTUACION = 10000;
+const MAX_CARACTERES_COMENTARIOS = 250;
+const MAX_CARACTERES_CATEGORIA = 25;
+const MAX_CARACTERES_ELEMENTO = 25;
 const MAX_CATEGORIAS = 6;
 const MAX_ELEMENTOS = 10;
 
@@ -82,7 +88,7 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
   const [preguntas, setPreguntas] = useState<Pregunta[]>([makeEmptyPregunta()]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-const [showIAModal, setShowIAModal] = useState(false);
+  const [showIAModal, setShowIAModal] = useState(false);
 
   const originalPreguntasRef = useRef<ClasificacionFormInitialPregunta[]>([]);
   const navigate = useNavigate();
@@ -169,15 +175,17 @@ const [showIAModal, setShowIAModal] = useState(false);
 
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
-    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+    if (titulo.trim().length > MAX_CARACTERES_TITULO) return `El título no puede exceder ${MAX_CARACTERES_TITULO} caracteres.`;
 
-    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
+    if (descripcion.trim().length > MAX_CARACTERES_DESCRIPCION) return `La descripción no puede exceder ${MAX_CARACTERES_DESCRIPCION} caracteres.`;
+    if (respVisible && comentariosRespVisible.trim().length === 0) return 'Escribe un comentario de corrección para mostrar.';
+    if (comentariosRespVisible.trim().length > MAX_CARACTERES_COMENTARIOS) return `Los comentarios no pueden exceder ${MAX_CARACTERES_COMENTARIOS} caracteres.`;
 
     if (!puntuacion.trim()) return 'La puntuación es requerida';
 
     const pNum = Number.parseInt(puntuacion.trim(), 10);
     if (isNaN(pNum) || pNum <= 0) return 'La puntuación debe ser un número mayor a 0';
-    if (pNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
+    if (pNum > MAX_PUNTUACION) return `La puntuación no puede exceder ${MAX_PUNTUACION.toLocaleString()}`;
 
     if (preguntas.length < 2) return 'Debe haber al menos 2 categorías';
     if (preguntas.length > MAX_CATEGORIAS) return `No puedes tener más de ${MAX_CATEGORIAS} categorías`;
@@ -186,8 +194,8 @@ const [showIAModal, setShowIAModal] = useState(false);
       if (!preguntas[i].text.trim()) {
         return `La categoría ${i + 1} debe tener un nombre`;
       }
-      if (preguntas[i].text.trim().length > 20) {
-        return `La categoría ${i + 1} debe tener un nombre no mayor a 20 caracteres`;
+      if (preguntas[i].text.trim().length > MAX_CARACTERES_CATEGORIA) {
+        return `La categoría ${i + 1} debe tener un nombre no mayor a ${MAX_CARACTERES_CATEGORIA} caracteres`;
       }
       if (preguntas[i].respuestas.length === 0) {
         return `La categoría ${i + 1} debe tener al menos 1 elemento`;
@@ -199,8 +207,8 @@ const [showIAModal, setShowIAModal] = useState(false);
         if (!preguntas[i].respuestas[j].text.trim()) {
           return `El elemento ${j + 1} de la categoría ${i + 1} no puede estar vacío`;
         }
-        if (preguntas[i].respuestas[j].text.trim().length > 20) {
-          return `El elemento ${j + 1} de la categoría ${i + 1} no puede exceder los 20 caracteres`;
+        if (preguntas[i].respuestas[j].text.trim().length > MAX_CARACTERES_ELEMENTO) {
+          return `El elemento ${j + 1} de la categoría ${i + 1} no puede exceder los ${MAX_CARACTERES_ELEMENTO} caracteres`;
         }
       }
       const tieneElementosVacios = preguntas[i].respuestas.some((r) => !r.text.trim());

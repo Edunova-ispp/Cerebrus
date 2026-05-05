@@ -31,10 +31,10 @@
 
 /* ── HEADER ── */
 
-/* ── LA FLASHCARD (TAMAÑO JUEGO 190x240) ── */
+/* ── LA FLASHCARD (ANTES: TAMAÑO JUEGO 190x240 ===> 870x460, CAMBIADO PARA MAYOR CAPACIDAD DE CARACTERES) ── */
 .ta-flashcard {
-  width: 570px !important;
-  height: 410px !important;
+  width: 870px !important;
+  height: 460px !important;
   perspective: 600px;
   cursor: pointer;
 }
