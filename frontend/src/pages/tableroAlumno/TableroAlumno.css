@@ -127,7 +127,7 @@
 /* ── Cell label (? / checkmark) ────────────────────────── */
 
 .ta-cell-label {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 2.6rem;
   font-weight: bold;
   pointer-events: none;
@@ -206,7 +206,7 @@
 /* ── Hint & info ───────────────────────────────────────── */
 
 .tablero-hint {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.5rem;
   color: var(--color-text, #000638);
   text-align: center;
@@ -214,7 +214,7 @@
 }
 
 .ta-info-msg {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1rem;
   color: #555;
   padding: 40px;
@@ -233,7 +233,7 @@
   border: 2px solid #FFFAD6;
   border-radius: 12px;
   padding: 12px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 2.05rem;
   font-weight: bold;
   cursor: pointer;
@@ -315,7 +315,7 @@
   border: 2px solid #000;
   border-radius: 10px;
   padding: 10px 14px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 2rem;
   color: #000;
   width: 100%;
@@ -347,4 +347,61 @@
 .ta-modal-feedback--err {
   background: #fff0f0;
   color: #c0392b;
+}
+
+/* --- Modificaciones en el Modal de Preguntas --- */
+
+.ta-modal-q {
+  background: #D6C4FF;    
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 12px 16px;
+  /* CAMBIO: Oxygen para la pregunta */
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1.3rem; /* Tamaño ajustado para lectura cómoda */
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+  text-align: center;
+  text-shadow: none; /* Sin sombras para máxima claridad */
+  line-height: 1.4;
+}
+
+.ta-modal-input {
+  background: var(--color-accent, #FFF294);
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 10px 14px;
+  /* CAMBIO: Oxygen para lo que escribe el alumno */
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #000;
+  width: 100%;
+  box-sizing: border-box;
+  transition: background 0.12s;
+  text-shadow: none;
+}
+
+.ta-modal-feedback {
+  margin: 0;
+  /* CAMBIO: Oxygen para el feedback */
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 2px solid #000;
+  text-align: center;
+  font-weight: bold;
+  text-shadow: none;
+}
+
+.ta-accent-btn {
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1.4rem; 
+  text-shadow: none;
+}
+
+.ta-modal-title, .ta-modal-label {
+  font-family: 'Pixelify Sans', sans-serif;
 }
