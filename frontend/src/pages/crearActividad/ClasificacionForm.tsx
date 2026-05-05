@@ -44,6 +44,12 @@ interface Pregunta {
   respuestas: RespuestaOption[];
 }
 
+const MAX_CARACTERES_TITULO = 60;
+const MAX_CARACTERES_DESCRIPCION = 1000;
+const MAX_PUNTUACION = 10000;
+const MAX_CARACTERES_COMENTARIOS = 250;
+const MAX_CARACTERES_CATEGORIA = 25;
+const MAX_CARACTERES_ELEMENTO = 25;
 const MAX_CATEGORIAS = 6;
 const MAX_ELEMENTOS = 10;
 
@@ -58,6 +64,7 @@ interface Props {
   readonly temaIdProp?: string;
   readonly cursoIdProp?: string;
   readonly onDone?: () => void;
+  readonly readOnly?: boolean;
 }
 
 function makeEmptyRespuesta(): RespuestaOption {
@@ -68,7 +75,7 @@ function makeEmptyPregunta(): Pregunta {
   return { localKey: makeLocalKey(), text: '', respuestas: [makeEmptyRespuesta()] };
 }
 
-export function ClasificacionForm({ mode = 'create', clasificacionId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
+export function ClasificacionForm({ mode = 'create', clasificacionId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -81,7 +88,7 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
   const [preguntas, setPreguntas] = useState<Pregunta[]>([makeEmptyPregunta()]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-const [showIAModal, setShowIAModal] = useState(false);
+  const [showIAModal, setShowIAModal] = useState(false);
 
   const originalPreguntasRef = useRef<ClasificacionFormInitialPregunta[]>([]);
   const navigate = useNavigate();
@@ -89,8 +96,17 @@ const [showIAModal, setShowIAModal] = useState(false);
   const cursoId = cursoIdProp ?? params.id;
   const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
+  // Tracks which activity ID was last initialized to prevent re-initializing on every render
+  const initializedActivityIdRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (!initialValues) return;
+
+    // Only reinitialize if the activity ID changed, not on every render
+    if (initializedActivityIdRef.current === clasificacionId) return;
+    
+    initializedActivityIdRef.current = clasificacionId ?? null;
+
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
@@ -116,7 +132,7 @@ const [showIAModal, setShowIAModal] = useState(false);
         }))
       );
     }
-  }, [initialValues]);
+  }, [clasificacionId, mode]);
 
   const addPregunta = () => setPreguntas([...preguntas, makeEmptyPregunta()]);
 
@@ -159,15 +175,17 @@ const [showIAModal, setShowIAModal] = useState(false);
 
   const validate = (): string | null => {
     if (!titulo.trim()) return 'El título es requerido';
-    if (titulo.trim().length > 25) return 'El título no puede exceder los 25 caracteres.';
+    if (titulo.trim().length > MAX_CARACTERES_TITULO) return `El título no puede exceder ${MAX_CARACTERES_TITULO} caracteres.`;
 
-    if (descripcion.trim().length > 1000) return 'La descripción no puede exceder los 1000 caracteres.';
+    if (descripcion.trim().length > MAX_CARACTERES_DESCRIPCION) return `La descripción no puede exceder ${MAX_CARACTERES_DESCRIPCION} caracteres.`;
+    if (respVisible && comentariosRespVisible.trim().length === 0) return 'Escribe un comentario de corrección para mostrar.';
+    if (comentariosRespVisible.trim().length > MAX_CARACTERES_COMENTARIOS) return `Los comentarios no pueden exceder ${MAX_CARACTERES_COMENTARIOS} caracteres.`;
 
     if (!puntuacion.trim()) return 'La puntuación es requerida';
 
     const pNum = Number.parseInt(puntuacion.trim(), 10);
     if (isNaN(pNum) || pNum <= 0) return 'La puntuación debe ser un número mayor a 0';
-    if (pNum > 999999999) return 'La puntuación no puede exceder 999.999.999';
+    if (pNum > MAX_PUNTUACION) return `La puntuación no puede exceder ${MAX_PUNTUACION.toLocaleString()}`;
 
     if (preguntas.length < 2) return 'Debe haber al menos 2 categorías';
     if (preguntas.length > MAX_CATEGORIAS) return `No puedes tener más de ${MAX_CATEGORIAS} categorías`;
@@ -176,8 +194,8 @@ const [showIAModal, setShowIAModal] = useState(false);
       if (!preguntas[i].text.trim()) {
         return `La categoría ${i + 1} debe tener un nombre`;
       }
-      if (preguntas[i].text.trim().length > 20) {
-        return `La categoría ${i + 1} debe tener un nombre no mayor a 20 caracteres`;
+      if (preguntas[i].text.trim().length > MAX_CARACTERES_CATEGORIA) {
+        return `La categoría ${i + 1} debe tener un nombre no mayor a ${MAX_CARACTERES_CATEGORIA} caracteres`;
       }
       if (preguntas[i].respuestas.length === 0) {
         return `La categoría ${i + 1} debe tener al menos 1 elemento`;
@@ -189,8 +207,8 @@ const [showIAModal, setShowIAModal] = useState(false);
         if (!preguntas[i].respuestas[j].text.trim()) {
           return `El elemento ${j + 1} de la categoría ${i + 1} no puede estar vacío`;
         }
-        if (preguntas[i].respuestas[j].text.trim().length > 20) {
-          return `El elemento ${j + 1} de la categoría ${i + 1} no puede exceder los 20 caracteres`;
+        if (preguntas[i].respuestas[j].text.trim().length > MAX_CARACTERES_ELEMENTO) {
+          return `El elemento ${j + 1} de la categoría ${i + 1} no puede exceder los ${MAX_CARACTERES_ELEMENTO} caracteres`;
         }
       }
       const tieneElementosVacios = preguntas[i].respuestas.some((r) => !r.text.trim());
@@ -385,6 +403,7 @@ const handleIAResult = (data: any) => {
           <div>
             <label className="cf-label" htmlFor="cf-titulo">Título *</label>
             <input 
+              readOnly={readOnly}
               type="text" 
               value={titulo} 
               className="of-input"
@@ -396,6 +415,7 @@ const handleIAResult = (data: any) => {
           <div>
             <label className="cf-label" htmlFor="cf-descripcion">Descripción</label>
             <textarea 
+              readOnly={readOnly}
               value={descripcion} 
               className="of-textarea"
               onChange={(e) => setDescripcion(e.target.value)} 
@@ -411,6 +431,8 @@ const handleIAResult = (data: any) => {
             <div>
               <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
               <input
+                readOnly={readOnly}
+                className="of-input"
                 type="number"
                 id="cf-puntuacion"
                 value={puntuacion}
@@ -420,40 +442,41 @@ const handleIAResult = (data: any) => {
                 style={{ width: 90 }}
               />
             </div>
-            <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
-              Generar con IA
-            </button>
+            {!readOnly && (
+              <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+                Generar con IA
+              </button>
+            )}
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
-            <input type="checkbox" id="respVisible" checked={respVisible} onChange={(e) => setRespVisible(e.target.checked)} />
+            <input disabled={readOnly} type="checkbox" id="respVisible" checked={respVisible} onChange={(e) => setRespVisible(e.target.checked)} />
             <label className="ca-text" htmlFor="respVisible">Mostrar comentarios de corrección</label>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
-            <input type="checkbox" id="permitirReintento" checked={permitirReintento} onChange={(e) => setPermitirReintento(e.target.checked)} />
+            <input disabled={readOnly} type="checkbox" id="permitirReintento" checked={permitirReintento} onChange={(e) => setPermitirReintento(e.target.checked)} />
             <label className="ca-text" htmlFor="permitirReintento">Permitir reintentos</label>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
-            <input type="checkbox" id="clasificacion-mostrar-puntuacion" checked={mostrarPuntuacion} onChange={(e) => setMostrarPuntuacion(e.target.checked)} />
+            <input disabled={readOnly} type="checkbox" id="clasificacion-mostrar-puntuacion" checked={mostrarPuntuacion} onChange={(e) => setMostrarPuntuacion(e.target.checked)} />
             <label className="ca-text" htmlFor="clasificacion-mostrar-puntuacion">Mostrar puntuación</label>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
-            <input type="checkbox" id="clasificacion-mostrar-resp-maest" checked={encontrarRespuestaMaestro} onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)} />
+            <input disabled={readOnly} type="checkbox" id="clasificacion-mostrar-resp-maest" checked={encontrarRespuestaMaestro} onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)} />
             <label className="ca-text" htmlFor="clasificacion-mostrar-resp-maest">Mostrar respuesta correcta</label>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
-            <input type="checkbox" id="clasificacion-mostrar-resp-alumn" checked={encontrarRespuestaAlumno} onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)} />
+            <input disabled={readOnly} type="checkbox" id="clasificacion-mostrar-resp-alumn" checked={encontrarRespuestaAlumno} onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)} />
             <label className="ca-text" htmlFor="clasificacion-mostrar-resp-alumn">Mostrar respuesta del alumno</label>
           </div>
           {respVisible && (
             <div style={{ marginTop: 10 }}>
-              <label className="ca-text">Comentarios de corrección</label>
-              <input type="text" value={comentariosRespVisible} onChange={(e) => setComentariosRespVisible(e.target.value)} style={{ width: '100%' }} />
+              <label className="cf-label">Comentarios de corrección</label>
+              <input className="tf-input" readOnly={readOnly} id="cf-comentarios" type="text" value={comentariosRespVisible} onChange={(e) => setComentariosRespVisible(e.target.value)} />
             </div>
-            
           )}
         </div>
       </div>
@@ -468,11 +491,12 @@ const handleIAResult = (data: any) => {
             <div className="tf-question-header">
               <span className="tf-question-label">Categoría {pIdx + 1}</span>
               <span className="paf-badge">{p.respuestas.length} / {MAX_ELEMENTOS} máx.</span>
-              {preguntas.length > 2 && (
+              {preguntas.length > 2 && !readOnly && (
                 <button type="button" className="tf-btn-remove-question" onClick={() => removePregunta(pIdx)}>✕</button>
               )}
             </div>
             <input 
+              readOnly={readOnly}
               type="text" 
               className="tf-question-input"
               placeholder="Nombre de la categoría" 
@@ -482,25 +506,26 @@ const handleIAResult = (data: any) => {
             <div className="tf-options" style={{ marginLeft: '20px' }}>
               {p.respuestas.map((r, rIdx) => (
                 <div key={r.localKey} className="tf-option" style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                  <input 
+                  <input
+                    readOnly={readOnly}
                     type="text" 
                     className="tf-option-input"
                     placeholder="Elemento a clasificar" 
                     value={r.text} 
                     onChange={(e) => updateRespuesta(pIdx, rIdx, { text: e.target.value })} 
                   />
-                  {p.respuestas.length > 1 && (
+                  {p.respuestas.length > 1 && !readOnly && (
                     <button type="button" className="tf-btn-remove-option" onClick={() => removeRespuesta(pIdx, rIdx)}>✕</button>
                   )}
                 </div>
               ))}
-              {p.respuestas.length < MAX_ELEMENTOS && (
+              {p.respuestas.length < MAX_ELEMENTOS && !readOnly && (
                 <button type="button" className="tf-btn-add-option" onClick={() => addRespuesta(pIdx)}>+ Añadir Elemento</button>
               )}
             </div>
           </div>
         ))}
-        {preguntas.length < MAX_CATEGORIAS && (
+        {preguntas.length < MAX_CATEGORIAS && !readOnly && (
           <button type="button" className="tf-btn-add-question" onClick={addPregunta} style={{ width: '100%' }}>
             + Añadir Nueva Categoría
           </button>
@@ -509,9 +534,11 @@ const handleIAResult = (data: any) => {
 
       <div className="ca-form-footer">
         <div className="tf-footer-stack">
-          <button className="ca-btn-guardar" type="submit" disabled={loading}>
-            {loading ? 'Guardando...' : 'Guardar Actividad'}
-          </button>
+          {!readOnly && (
+            <button className="ca-btn-guardar" type="submit" disabled={loading}>
+              {loading ? 'Guardando...' : 'Guardar'}
+            </button>
+          )}
           {error && (
             <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
               {error}

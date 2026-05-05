@@ -66,32 +66,14 @@ services:
       args:
         LOGROCKET_ID: "${LOGROCKET_ID}"
         LOGROCKET_MANUAL_RECORDING: "${LOGROCKET_MANUAL_RECORDING:-true}"
-        WATCHBUG_ADMIN: "${WATCHBUG_ADMIN:-false}"
     container_name: cerebrus-frontend
     environment:
-        LOGROCKET_ID: "${LOGROCKET_ID}"
-        LOGROCKET_MANUAL_RECORDING: "${LOGROCKET_MANUAL_RECORDING:-true}"
-        WATCHBUG_ADMIN: "${WATCHBUG_ADMIN:-false}"
+      LOGROCKET_ID: "${LOGROCKET_ID}"
+      LOGROCKET_MANUAL_RECORDING: "${LOGROCKET_MANUAL_RECORDING:-true}"
     depends_on:
       - backend
     ports:
       - "3000:80"
-
-  watchbug-service:
-    build: 
-      context: ./watchbug-app
-    container_name: watchbug
-    ports:
-      - "5000:5000"
-    environment:
-      - WATCHBUG_ENABLED=True
-      - WATCHBUG_ADMIN=${WATCHBUG_ADMIN:-false}
-      - SENTRY_DSN=${SENTRY_DSN}
-      - LOGROCKET_ID=${LOGROCKET_ID}
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_KEY=${SUPABASE_KEY}
-      - SUPABASE_BUCKET_NAME=watchbug-screenshots
-      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
 
 volumes:
   dbdata:

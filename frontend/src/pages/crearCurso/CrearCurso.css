@@ -182,3 +182,81 @@
     gap: 30px;
   }
 }
+
+/* === TOGGLE DE VISIBILIDAD (Estilo idéntico a CursoCard Maestro) === */
+
+/* Convertimos el contenedor del toggle en una fila para que queden lado a lado */
+.input-group:has(.crear-curso__toggle) {
+  display: flex;             /* Aseguramos que se comporte como flexbox */
+  flex-direction: row;
+  align-items: center;       /* Esto es lo que los centra verticalmente */
+  gap: 12px;                 /* Separación entre "Visible:" y el botón */
+}
+
+.input-group:has(.crear-curso__toggle) .label-text {
+  /* Usamos un tamaño y grosor estándar para igualar a tus otros labels */
+  font-size: 1.3rem; 
+  font-weight: bold; 
+  color: #000; 
+}
+
+/* Añadimos la coma y la clase del toggle aquí */
+.input-group:has(.crear-curso__toggle) .label-text,
+.crear-curso__toggle {
+  margin: 0 !important;      /* Elimina espacios rebeldes */
+  line-height: 1;            /* Ajusta la altura del texto al mínimo */
+  display: flex;             /* Permite que el navegador alinee mejor el contenido interno */
+  align-items: center;       /* Centrado interno */
+}
+
+/* Contenedor principal del interruptor */
+.crear-curso__toggle {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.crear-curso__toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+/* Fondo del interruptor (apagado) */
+.crear-curso__toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: #F0F0F0;
+  border: 1px solid var(--t-border-dark);
+  border-radius: 13px;
+  transition: background 0.2s;
+}
+
+/* Círculo del interruptor (apagado) */
+.crear-curso__toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--t-text-secondary);
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+/* Fondo del interruptor (encendido) */
+.crear-curso__toggle input:checked + .crear-curso__toggle-slider {
+  background: var(--t-primary);
+}
+
+/* Círculo del interruptor (encendido: se mueve a la derecha y se vuelve blanco) */
+.crear-curso__toggle input:checked + .crear-curso__toggle-slider::before {
+  transform: translate(22px, -50%);
+  background: #fff;
+}

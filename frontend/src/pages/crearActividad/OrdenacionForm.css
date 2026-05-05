@@ -71,6 +71,13 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+.of-input[readonly]:hover,
+.of-input[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
+}
+
 .of-input-sm {
   width: 90px;
   flex-shrink: 0;
@@ -94,6 +101,13 @@
   outline: none;
   border-color: var(--t-primary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.of-textarea[readonly]:hover,
+.of-textarea[readonly]:focus {
+  border-color: var(--t-border);
+  box-shadow: none;
+  background: var(--t-input-bg);
 }
 
 /* ── Row helpers ───────────────────────────────────────────── */

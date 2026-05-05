@@ -17,6 +17,7 @@ export default function CrearCurso() {
   const [descripcion, setDescripcion] = useState('');
   const [imagen, setImagen] = useState('');
   const [codigo, setCodigo] = useState('');
+  const [publico, setPublico] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [imagenError, setImagenError] = useState(false);
@@ -59,7 +60,7 @@ export default function CrearCurso() {
           descripcion: descripcion.trim() || '',
           imagen: imagen.trim() || '',
           codigo: codigo.trim() || '',
-
+          visibilidad: publico
         }),
       });
       console.log('Response status:', response);
@@ -143,6 +144,17 @@ export default function CrearCurso() {
       />
     </div>
 
+    <div className="input-group">
+      <span className="label-text">Visible:</span>
+      <label className="crear-curso__toggle">
+        <input
+          type="checkbox"
+          checked={publico}
+          onChange={(e) => setPublico(e.target.checked)}
+        />
+      <span className="crear-curso__toggle-slider" />
+      </label>
+    </div>
     
   </div>
 

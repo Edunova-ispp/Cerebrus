@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
 import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
@@ -29,15 +29,21 @@ interface Props {
   readonly temaIdProp?: string;
   readonly cursoIdProp?: string;
   readonly onDone?: () => void;
+  readonly readOnly?: boolean;
 }
 
+const MAX_CARACTERES_TITULO = 60;
+const MAX_CARACTERES_DESCRIPCION = 1000;
+const MAX_PUNTUACION = 10000;
+const MAX_CARACTERES_COMENTARIOS = 250;
+const MAX_CARACTERES_ELEMENTO = 60; // Solo aplica para las palabras
 const MAX_ELEMENTOS = 15;
 
 function makeLocalKey(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, temaIdProp, cursoIdProp, onDone }: Props) {
+export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, temaIdProp, cursoIdProp, onDone, readOnly }: Props) {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [puntuacion, setPuntuacion] = useState('');
@@ -65,8 +71,16 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
   const cursoId = cursoIdProp ?? params.id;
   const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
+  // Tracks which activity ID was last initialized to prevent re-initializing on every render
+  const initializedActivityIdRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (!initialValues) return;
+
+    // Only reinitialize if the activity ID changed, not on every render
+    if (initializedActivityIdRef.current === ordenacionId) return;
+    
+    initializedActivityIdRef.current = ordenacionId ?? null;
 
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
@@ -84,7 +98,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
     // Auto-detectar si los valores son URLs de imágenes
     const looksLikeImages = initialItems.some(v => /^https?:\/\/.+\.(png|jpe?g|gif|webp|svg|bmp)/i.test(v.trim()));
     if (looksLikeImages) setOrdenItemsKind('images');
-  }, [initialValues]);
+  }, [ordenacionId, mode]);
 
   const valores = useMemo(() => {
     return ordenItems.map((v) => v.trim()).filter(Boolean);
@@ -99,13 +113,13 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       return;
     }
 
-    if (titulo.trim().length > 25) {
-      setError('El título no puede exceder los 25 caracteres.');
+    if (titulo.trim().length > MAX_CARACTERES_TITULO) {
+      setError(`El título no puede exceder ${MAX_CARACTERES_TITULO} caracteres.`);
       return;
     }
 
-    if (descripcion.trim().length > 1000) {
-      setError('La descripción no puede exceder los 1000 caracteres.');
+    if (descripcion.trim().length > MAX_CARACTERES_DESCRIPCION) {
+      setError(`La descripción no puede exceder ${MAX_CARACTERES_DESCRIPCION} caracteres.`);
       return;
     }
 
@@ -123,12 +137,12 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       setError('La puntuación debe ser un número mayor a 0');
       return;
     }
-    if (puntuacionNum > 999999999) {
-      setError('La puntuación no puede exceder 999.999.999');
+    if (puntuacionNum > MAX_PUNTUACION) {
+      setError(`La puntuación no puede exceder ${MAX_PUNTUACION}`);
       return;
     }
 
-    if (respVisible && comentariosRespVisible.trim().length > 250) return 'Los comentarios no pueden exceder los 250 caracteres.';
+    if (comentariosRespVisible.trim().length > MAX_CARACTERES_COMENTARIOS) return `Los comentarios no pueden exceder ${MAX_CARACTERES_COMENTARIOS} caracteres.`;
     if (respVisible && comentariosRespVisible.trim().length === 0) return 'Escribe un comentario para mostrar cuando la respuesta sea visible.';
 
     if (!temaId) {
@@ -163,8 +177,8 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
     }
 
     for (let i = 0; i < valores.length; i++) {
-      if (valores[i].length > 40 && ordenItemsKind === 'words') {
-        setError(`El valor ${i + 1} no puede exceder los 40 caracteres.`);
+      if (valores[i].length > MAX_CARACTERES_ELEMENTO && ordenItemsKind === 'words') {
+        setError(`El valor ${i + 1} no puede exceder los ${MAX_CARACTERES_ELEMENTO} caracteres.`);
         return;
       }
       if (valores[i].trim() === '') {
@@ -242,6 +256,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
           <div>
             <label className="of-label" htmlFor="of-titulo">Título *</label>
             <input
+              readOnly={readOnly}
               type="text"
               id="of-titulo"
               className="of-input"
@@ -254,6 +269,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
           <div>
             <label className="of-label" htmlFor="of-descripcion">Descripción</label>
             <textarea
+              readOnly={readOnly}
               id="of-descripcion"
               className="of-textarea"
               value={descripcion}
@@ -269,6 +285,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
             <div>
               <label className="of-label" htmlFor="of-puntuacion">Puntuación *</label>
               <input
+                readOnly={readOnly} 
                 type="number"
                 id="of-puntuacion"
                 className="of-input of-input-sm"
@@ -278,13 +295,16 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
                 required
               />
             </div>
-            <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
-              Generar con IA
-            </button>
+            {!readOnly && (
+              <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
+                Generar con IA
+              </button>
+            )}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               checked={respVisible}
               onChange={(e) => setRespVisible(e.target.checked)}
@@ -293,6 +313,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               checked={permitirReintento}
               onChange={(e) => setPermitirReintento(e.target.checked)}
@@ -302,6 +323,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               checked={mostrarPuntuacion}
               onChange={(e) => setMostrarPuntuacion(e.target.checked)}
@@ -311,6 +333,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               checked={encontrarRespuestaMaestro}
               onChange={(e) => setEncontrarRespuestaMaestro(e.target.checked)}
@@ -320,6 +343,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input
+              disabled={readOnly}
               type="checkbox"
               checked={encontrarRespuestaAlumno}
               onChange={(e) => setEncontrarRespuestaAlumno(e.target.checked)}
@@ -331,6 +355,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
             <div>
               <label className="of-label" htmlFor="of-comentarios">Comentarios</label>
               <input
+                readOnly={readOnly}
                 type="text"
                 id="of-comentarios"
                 className="of-input"
@@ -354,7 +379,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
           <button
             className="of-kind-btn"
             type="button"
-            disabled={ordenItemsKind === 'words'}
+            disabled={ordenItemsKind === 'words' || readOnly}
             onClick={() => setOrdenItemsKind('words')}
           >
             Palabras
@@ -362,7 +387,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
           <button
             className="of-kind-btn"
             type="button"
-            disabled={ordenItemsKind === 'images'}
+            disabled={ordenItemsKind === 'images' || readOnly}
             onClick={() => setOrdenItemsKind('images')}
           >
             Imágenes
@@ -381,6 +406,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
                 />
               )}
               <input
+                readOnly={readOnly}
                 type="text"
                 className="of-input"
                 placeholder={ordenItemsKind === 'images' ? `URL imagen ${i + 1}` : `Elemento ${i + 1}`}
@@ -399,8 +425,9 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
               />
             </div>
           ))}
-          {ordenItems.length < MAX_ELEMENTOS && (
+          {ordenItems.length < MAX_ELEMENTOS && !readOnly &&(
             <button
+              disabled={readOnly}
               className="of-btn-add"
               type="button"
               onClick={() => {
@@ -416,9 +443,11 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
 
       <div className="ca-form-footer">
         <div className="tf-footer-stack">
-          <button className="ca-btn-guardar" type="submit" disabled={loading}>
-            {loading ? 'Guardando...' : 'Guardar'}
-          </button>
+          {!readOnly && (
+            <button className="ca-btn-guardar" type="submit" disabled={loading}>
+              {loading ? 'Guardando...' : 'Guardar'}
+            </button>
+          )}
           {error && (
             <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
               {error}

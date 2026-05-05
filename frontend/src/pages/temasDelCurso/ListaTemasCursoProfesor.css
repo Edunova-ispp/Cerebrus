@@ -60,7 +60,7 @@
 }
 .ltp-estado--error { color: #c0392b; }
 
-/* ===== PANELES ===== */
+/* ===== PANELES (DEPRECATED - Mantenido por compatibilidad) ===== */
 .ltp-paneles {
   display: flex;
   gap: 28px;
@@ -79,6 +79,202 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* ===== NUEVA ESTRUCTURA: LISTA ÚNICA CENTRADA ===== */
+.ltp-temas-lista {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ===== BLOQUE DE TEMA ===== */
+.ltp-tema-bloque {
+  background: var(--t-card);
+  border: 2px solid var(--t-border);
+  border-radius: var(--t-radius-lg);
+  box-shadow: var(--t-shadow);
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+
+.ltp-tema-bloque:hover {
+  box-shadow: var(--t-shadow-lg);
+  border-color: var(--t-primary);
+}
+
+/* Header del tema (clickeable para expandir) */
+.ltp-tema-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, var(--t-primary-light), var(--t-input-focus));
+  border-bottom: 1px solid var(--t-border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ltp-tema-header:hover {
+  background: linear-gradient(135deg, var(--t-input-focus), var(--t-primary-light));
+}
+
+.ltp-tema-expandir {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex: 1;
+  text-align: left;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 1.1rem;
+}
+
+.ltp-tema-icono {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s;
+  color: var(--t-primary);
+  font-weight: bold;
+}
+
+.ltp-tema-icono.expandido {
+  transform: rotate(90deg);
+}
+
+.ltp-tema-titulo {
+  font-weight: 700;
+  color: var(--t-text);
+  font-size: 1.1rem;
+  flex: 1;
+}
+
+.ltp-tema-acciones {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Contenido desplegable del tema */
+.ltp-tema-contenido {
+  padding: 16px 20px;
+  background: var(--t-bg);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Lista de actividades */
+.ltp-actividades-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* Elemento individual de actividad */
+.ltp-actividad-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-left: 4px solid var(--t-primary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Oxygen', sans-serif;
+}
+
+.ltp-actividad-item:hover {
+  background: var(--t-primary-light);
+  border-left-color: var(--t-primary);
+  box-shadow: var(--t-shadow-sm);
+  transform: translateX(4px);
+}
+
+.ltp-actividad-titulo {
+  font-size: 1rem;
+  color: var(--t-text);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ltp-actividad-acciones {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.ltp-btn-icono-sm {
+  background: var(--t-card);
+  border: 1px solid var(--t-border);
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  box-shadow: var(--t-shadow-sm);
+  transition: background 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.ltp-btn-icono-sm:hover {
+  background: var(--t-primary-light);
+  border-color: var(--t-primary);
+}
+
+/* Botón para añadir actividades */
+.ltp-btn-añadir-actividad {
+  background: var(--t-input-focus);
+  color: var(--t-primary);
+  border: 1px solid var(--t-primary);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background 0.15s, color 0.15s;
+  width: 100%;
+  text-align: center;
+}
+
+.ltp-btn-añadir-actividad:hover {
+  background: var(--t-primary);
+  color: #fff;
+}
+
+.ltp-vacio-actividades {
+  font-family: 'Oxygen', sans-serif;
+  color: #aaa;
+  text-align: center;
+  padding: 16px;
+  font-size: 0.95rem;
 }
 
 /* ===== LISTA CON SCROLL ===== */
