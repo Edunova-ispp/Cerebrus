@@ -113,7 +113,7 @@
 }
 /* ── CARA BOCA ARRIBA (SOLUCIÓN AMARILLA) ── */
 .ta-card-back {
-  background: #fce8a6 !important; 
+  background: #fce8a6 !important;
   transform: rotateY(180deg);
   padding: 20px 24px;
   justify-content: flex-start;
@@ -135,7 +135,7 @@
 }
 
 .ta-paragraph {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.4rem;
   font-weight: bold;
   text-align: center;

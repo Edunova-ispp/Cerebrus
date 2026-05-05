@@ -23,7 +23,7 @@
 
 .ord-description {
   margin: 0 0 22px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.15rem;
   color: #000;
 }
@@ -63,7 +63,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.2rem;
   font-weight: 700;
   color: #fff;
@@ -81,7 +81,7 @@
 
 .ord-item-text {
   width: 100%;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.15rem;
   font-weight: 600;
   color: var(--color-text, #000638);
@@ -155,7 +155,7 @@
 }
 
 .ord-feedback {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.15rem;
   color: #000;
   text-align: center;
@@ -201,7 +201,7 @@
   border: 3px solid #000;
   border-radius: 12px;
   padding: 10px 14px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 0.95rem;
   color: #000;
   box-shadow: 3px 3px 0 #000;

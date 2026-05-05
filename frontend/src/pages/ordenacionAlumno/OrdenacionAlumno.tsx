@@ -418,12 +418,12 @@ export default function OrdenacionAlumno() {
         {ordenacion && (
           
           <>
-            <ActivityHeader
-              title={ordenacion.titulo}
-              subtitle={ordenacion.descripcion ?? undefined}
-              guideType="ordenacion"
-              guideRole="alumno"
-            />
+          <ActivityHeader
+            title={ordenacion.titulo}
+            subtitle={<span className="ord-description">{ordenacion.descripcion}</span>}
+            guideType="ordenacion"
+            guideRole="alumno"
+          />
 
             {/* Layout: rey izquierda, items derecha */}
 <div className="ord-content-row">

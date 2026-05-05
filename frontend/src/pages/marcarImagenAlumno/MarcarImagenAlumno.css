@@ -80,7 +80,7 @@
 
 .mia-description {
   margin: 0 0 12px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.15rem;
   color: #000;
 }
@@ -92,7 +92,7 @@
 .mia-instruction {
   margin: 0 0 10px;
   text-align: center;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.15rem;
   font-weight: 700;
   color: #000;
@@ -173,7 +173,7 @@
   border-radius: 12px;
   border: 2px solid #000;
   padding: 8px 10px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.05rem;
   box-sizing: border-box;
 }

@@ -18,7 +18,7 @@
   color: #fff;
   border: none;
   border-radius: var(--t-radius, 10px);
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Oxygen ', sans-serif;
   box-shadow: var(--t-shadow, 0 1px 3px 0 rgba(0,0,0,0.1));
 }
 
@@ -38,7 +38,7 @@
   color: #000;
   border: 3px solid #000;
   border-radius: 12px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen ', sans-serif;
   box-shadow: 3px 3px 0 #000;
 }
 

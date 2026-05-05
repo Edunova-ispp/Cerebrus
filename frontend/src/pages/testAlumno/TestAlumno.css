@@ -1,3 +1,5 @@
+/* ── Contenedor General ────────────────────────────────────────── */
+
 .test-alumno-page {
   position: absolute;
   top: 0;
@@ -7,12 +9,13 @@
   box-sizing: border-box;
   background-color: #FAF6ED;
   color: var(--color-accent);
-  text-shadow: 2px 2px#000;
+  text-shadow: 2px 2px #000;
   display: flex;
   font-size: 1.8rem;
   flex-direction: column;
   overflow-x: hidden;
-  font-family: 'Pixelify sans';
+  /* Fuente base para lectura fluida */
+  font-family: 'Oxygen', sans-serif;
   z-index: 10;
 }
 
@@ -29,8 +32,7 @@
   gap: 12px;
 }
 
-
-/* ── Score banner ───────────────────────────────────────────────── */
+/* ── Elementos Decorativos y Banners (Pixelify Sans) ───────────── */
 
 .ta-score-banner {
   background: #fce8a6;
@@ -49,7 +51,26 @@
   border-color: #1a7a40;
 }
 
-/* == Battle bar (wizard vs dragon) == */
+.ta-question-counter-text {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1rem;
+  text-shadow: none;
+  font-weight: bold;
+  color: var(--color-text);
+  letter-spacing: 0.04em;
+}
+
+.test-hint {
+  font-family: 'Pixelify Sans', sans-serif;
+  font-size: 1.5rem;
+  color: var(--color-text, #000638) !important;
+  text-align: center;
+  text-shadow: 0px 0px 0px #000 !important;
+  -webkit-text-stroke: none !important;
+  margin: 2px 0 0;
+}
+
+/* ── Barra de Progreso y Animaciones ────────────────────────────── */
 
 .ta-battle-bar {
   display: flex;
@@ -63,34 +84,11 @@
 }
 
 .ta-knight-img {
-  width: 70px;        /* Mismo tamaño que el dragón para mantener simetría */
+  width: 70px;
   height: 70px;
   object-fit: contain;
   flex-shrink: 0;
-  filter: drop-shadow(2px 2px 0 #000); /* Mantiene el borde estilo pixel art */
-}
-
-.ta-dragon {
-  font-size: 2.4rem;
-  line-height: 1;
-  flex-shrink: 0;
   filter: drop-shadow(2px 2px 0 #000);
-  transition: filter 0.3s;
-}
-
-.ta-dragon--shaking {
-  animation: ta-dragon-shake 0.55s ease;
-  filter: drop-shadow(0 0 8px #ff4500) drop-shadow(2px 2px 0 #000);
-}
-
-@keyframes ta-dragon-shake {
-  0%   { transform: translateX(0) rotate(0deg); }
-  15%  { transform: translateX(-5px) rotate(-8deg); }
-  30%  { transform: translateX(5px) rotate(8deg); }
-  45%  { transform: translateX(-4px) rotate(-5deg); }
-  60%  { transform: translateX(4px) rotate(5deg); }
-  75%  { transform: translateX(-2px) rotate(-2deg); }
-  100% { transform: translateX(0) rotate(0deg); }
 }
 
 .ta-progress-track {
@@ -109,30 +107,35 @@
   transition: width 0.35s ease;
 }
 
-
-.ta-spell-head {
-  display: none;
+.ta-dragon-img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(2px 2px 0 #000);
+  image-rendering: pixelated;
+  transition: filter 0.3s, transform 0.3s;
 }
 
-/* == Question counter == */
-
-.ta-question-counter {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.ta-dragon--shaking {
+  animation: ta-dragon-shake 0.55s ease;
+  filter: drop-shadow(0 0 8px #ff4500) drop-shadow(2px 2px 0 #000);
 }
 
-.ta-question-counter-text {
-  font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1rem;
-  text-shadow: none;
-  font-weight: bold;
-  color: var(--color-text);
-  letter-spacing: 0.04em;
+@keyframes ta-dragon-shake {
+  0%   { transform: translateX(0) rotate(0deg); }
+  15%  { transform: translateX(-5px) rotate(-8deg); }
+  30%  { transform: translateX(5px) rotate(8deg); }
+  45%  { transform: translateX(-4px) rotate(-5deg); }
+  60%  { transform: translateX(4px) rotate(5deg); }
+  75%  { transform: translateX(-2px) rotate(-2deg); }
+  100% { transform: translateX(0) rotate(0deg); }
 }
+
+/* ── Áreas de Lectura Crítica (Oxygen) ─────────────────────────── */
 
 .ta-answered-badge {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 0.9rem;
   font-weight: bold;
   background: #d1005794;
@@ -143,10 +146,6 @@
   box-shadow: 3px 3px 0 #000;
 }
 
-/* ── Questions ──────────────────────────────────────────────────── */
-
-/* == Question card == */
-
 .ta-question-card {
   background: var(--color-primary, #D10057);
   border: 4px solid #000;
@@ -156,31 +155,13 @@
 }
 
 .ta-question-text {
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0 0 14px;
   color: #fff;
   text-shadow: none;
   line-height: 1.4;
-}
-
-.ta-question-img {
-  display: block;
-  max-width: 100%;
-  max-height: 200px;
-  object-fit: contain;
-  border: 2px solid #000;
-  border-radius: 8px;
-  margin-bottom: 14px;
-}
-
-/* ── Options ─────────────────────────────────────────────────────── */
-
-.ta-options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 .ta-option {
@@ -191,7 +172,7 @@
   border: 2px solid #000;
   border-radius: 10px;
   padding: 10px 14px;
-  font-family: 'Pixelify Sans', sans-serif;
+  font-family: 'Oxygen', sans-serif;
   font-size: 1.05rem;
   color: #fff;
   cursor: pointer;
@@ -200,12 +181,28 @@
   width: 100%;
 }
 
-.ta-option:hover:not(:disabled) {
-  background: #6a3de8;
+.ta-option-letter {
+  font-weight: bold;
+  min-width: 22px;
+  color: #fff;
 }
 
-.ta-option:disabled {
-  cursor: default;
+.ta-feedback-comment {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #fffde7;
+  border: 2px solid #f5c518;
+  border-radius: 8px;
+  font-family: 'Oxygen', sans-serif;
+  font-size: 0.95rem;
+  color: #555;
+  text-shadow: none;
+}
+
+/* ── Estados de las Opciones ────────────────────────────────────── */
+
+.ta-option:hover:not(:disabled) {
+  background: #6a3de8;
 }
 
 .ta-option--selected {
@@ -218,59 +215,21 @@
   background: #adf7b6;
   border-color: #1a7a40;
   font-weight: bold;
+  color: #000; /* Mejor contraste en correctas */
 }
 
 .ta-option--wrong {
   background: #fdd;
   border-color: #c0392b;
+  color: #000; /* Mejor contraste en incorrectas */
 }
 
-.ta-option-letter {
-  font-weight: bold;
-  min-width: 22px;
-  color: #fff;
-}
-
-.ta-option--selected .ta-option-letter,
 .ta-option--correct .ta-option-letter,
 .ta-option--wrong .ta-option-letter {
-  color: #fff;
+  color: #000;
 }
 
-.ta-option-text {
-  flex: 1;
-}
-
-.ta-option-icon {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-left: auto;
-}
-
-.ta-option--correct .ta-option-icon {
-  color: #1a7a40;
-}
-
-.ta-option--wrong .ta-option-icon {
-  color: #c0392b;
-}
-
-/* ── Feedback comment ─────────────────────────────────────────── */
-
-.ta-feedback-comment {
-  margin-top: 12px;
-  padding: 10px 14px;
-  background: #fffde7;
-  border: 2px solid #f5c518;
-  border-radius: 8px;
-  font-family: 'Pixelify Sans', sans-serif;
-  font-size: 0.95rem;
-  color: #555;
-}
-
-/* ── Bottom bar ─────────────────────────────────────────────────── */
-
-/* == Navigation buttons == */
+/* ── Navegación (Pixelify Sans) ─────────────────────────────────── */
 
 .ta-nav-buttons {
   display: flex;
@@ -292,6 +251,7 @@
   min-width: 140px;
   background: var(--color-accent, #FFF294);
   color: #000;
+  text-shadow: none; /* Mejor legibilidad en botones */
 }
 
 .ta-nav-btn:hover:not(:disabled) {
@@ -310,59 +270,4 @@
   cursor: default;
   box-shadow: 2px 2px 0 #000000;
   transform: none;
-}
-
-.ta-nav-btn--prev {
-  background: var(--color-accent, #FFF294);
-  box-shadow: 4px 4px 0 #000;
-}
-
-.ta-nav-btn--prev:hover:not(:disabled) {
-  background: var(--color-accent-light, #FCEF91);
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 #000;
-}
-
-.ta-nav-btn--next {
-  background: var(--color-accent, #FFF294);
-}
-
-.ta-nav-btn--submit {
-  background: var(--color-accent, #FFF294);
-  color: #000;
-  animation: none;
-}
-
-.ta-nav-btn--submit:disabled {
-  animation: none;
-  opacity: 0.38;
-}
-
-
-
-.test-hint {
-  font-family: 'Pixelify Sans', sans-serif;
-  font-size: 1.5rem;
-  color: var(--color-text, #000638) !important;
-  text-align: center;
-    text-shadow: 0px 0px 0px #000 !important;
-
-  -webkit-text-stroke: none !important;
-  margin: 2px 0 0;
-}
-/* Estilos para la nueva imagen del dragón */
-.ta-dragon-img {
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
-  flex-shrink: 0;
-  filter: drop-shadow(2px 2px 0 #000);
-  image-rendering: pixelated;
-  transition: filter 0.3s, transform 0.3s;
-}
-
-/* Mantener la animación de temblor para la imagen */
-.ta-dragon--shaking {
-  animation: ta-dragon-shake 0.55s ease;
-  filter: drop-shadow(0 0 8px #ff4500) drop-shadow(2px 2px 0 #000);
 }

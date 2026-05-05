@@ -22,14 +22,20 @@
     box-sizing: border-box;
   }
   
+
+  .clasificacion-alumno-page button,
+  .clasificacion-alumno-page h2 {
+    font-family: 'Pixelify Sans', sans-serif;
+    color: #000;
+    text-shadow: 2px 2px 0px rgba(255,255,255,0.6);
+  }
   .clasificacion-alumno-page p,
   .clasificacion-alumno-page h1,
-  .clasificacion-alumno-page h2,
   .clasificacion-alumno-page h3,
   .clasificacion-alumno-page span,
-  .clasificacion-alumno-page div,
-  .clasificacion-alumno-page button {
-    font-family: 'Pixelify Sans', sans-serif;
+  .clasificacion-alumno-page div {
+    font-family: 'Oxygen ', sans-serif;
+;
   }
 
   .clf-header {
