@@ -12,13 +12,12 @@
 }
 
 .agb-btn--maestro {
-  background: var(--t-card);
-  border: 1px solid var(--t-border);
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--t-text);
-  box-shadow: var(--t-shadow-sm);
+  background: var(--t-primary, #2563EB);
+  color: #fff;
+  border: none;
+  border-radius: var(--t-radius, 10px);
+  font-family: 'Oxygen ', sans-serif;
+  box-shadow: var(--t-shadow, 0 1px 3px 0 rgba(0,0,0,0.1));
 }
 
 .agb-btn--maestro:hover {
@@ -43,9 +42,7 @@
   background: #ffd166;
   border: 3px solid #000;
   border-radius: 12px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #000;
+  font-family: 'Oxygen ', sans-serif;
   box-shadow: 3px 3px 0 #000;
 }
 
