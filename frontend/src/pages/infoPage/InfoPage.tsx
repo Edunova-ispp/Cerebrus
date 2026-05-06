@@ -10,6 +10,9 @@ import paraLosAlumnos from "../../assets/gifsInfoPage/paraLosAlumnos.gif";
 import paraElOrganizador from "../../assets/gifsInfoPage/paraElOrganizador.gif";
 import planDePrecios from "../../assets/gifsInfoPage/planDePrecios.gif";
 import paraLosProfesEstadistica from "../../assets/gifsInfoPage/paraLosProfesEstadistica.gif";
+import profCursoYTemas from "../../assets/gifsInfoPage/profCursoYTemas.gif";
+import profSelectorActs from "../../assets/gifsInfoPage/profSelectorActs.gif";
+import profGestionAlumnos from "../../assets/gifsInfoPage/profGestionAlumnos.gif";
 
 export type UserType = "alumno" | "profesor" | "dueno";
 
@@ -48,11 +51,11 @@ const SECTION_MEDIA: Record<string, MediaSlot> = {
   precios_org:     { src: planDePrecios, alt: "Plan de precios", isGif: true },
   estadisticas_org: { src: paraLosProfesEstadistica, alt: "Estadísticas del profesor", isGif: true },
   // profesor sections
-  cursos_prof:       { placeholder: "GIF de creación de un curso con temas y actividades" },
-  actividades_prof:  { placeholder: "GIF del selector de los 9 tipos de actividad" },
+  cursos_prof:       { src: profCursoYTemas, alt: "Creación de un curso con temas y actividades", isGif: true },
+  actividades_prof:  { src: profSelectorActs, alt: "Selector de los 9 tipos de actividad", isGif: true },
   ia_prof:           { src: paraLosProfesIA, alt: "Generación de actividades con IA", isGif: true },
   estadisticas_prof: { src: paraLosProfesEstadistica, alt: "Panel de estadísticas del profesor", isGif: true },
-  alumnos_prof:      { placeholder: "GIF de gestión de alumnos inscritos" },
+  alumnos_prof:      { src: profGestionAlumnos, alt: "Gestión de alumnos en el curso", isGif: true },
 };
 
 const SECTIONS = {
