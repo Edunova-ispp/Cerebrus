@@ -51,7 +51,7 @@
 
 .info-subtitle {
   margin: 0;
-  font-size: clamp(70px, 3vw, 36px);
+  font-size: clamp(1rem, 3vw, 2rem);
   color: #000638;
   font-family: 'Pixelify Sans', sans-serif;
   -webkit-text-stroke: 1px #1a1a1a;
@@ -135,7 +135,7 @@
 }
 
 .info-bottom-logo {
-  height: clamp(220px, 8vw, 100px);
+  height: clamp(100px, 12vw, 220px);
   object-fit: contain;
 }
 
@@ -147,7 +147,7 @@
   border: none;
   padding: 0;
   font-family: 'Pixelify Sans', sans-serif;
-  font-size: clamp(94px, 3.5vw, 42px);
+  font-size: clamp(2rem, 3.5vw, 4rem);
   color: #000638;
   cursor: pointer;
   transition: color 0.15s ease, text-shadow 0.15s ease;

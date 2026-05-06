@@ -53,7 +53,7 @@
 .title-char.accent    { color: var(--color-accent); }
 
 .landing-logo {
-  height: clamp(250px, 14vw, 160px);
+  height: clamp(100px, 14vw, 250px);
   object-fit: contain;
 }
 
@@ -227,4 +227,68 @@
 
 .landing-edunova-link:hover {
   color: var(--color-primary);
+}
+
+/* ════════════════════════════════════════
+   Responsive
+   ════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .landing-page {
+    padding: 16px 28px 32px;
+  }
+
+  .landing-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .landing-card-wrapper:nth-child(3) {
+    grid-column: 1 / -1;
+    max-width: 420px;
+    justify-self: center;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .landing-page {
+    padding: 12px 16px 28px;
+  }
+
+  .landing-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .landing-logo {
+    height: clamp(80px, 28vw, 140px);
+  }
+
+  .landing-top-buttons {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .landing-cards {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .landing-card-wrapper:nth-child(3) {
+    grid-column: auto;
+    max-width: none;
+    justify-self: auto;
+  }
+
+  .landing-card {
+    border-radius: 20px;
+  }
+
+  .landing-card-images img {
+    height: clamp(70px, 22vw, 110px);
+  }
 }
