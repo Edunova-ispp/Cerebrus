@@ -13,6 +13,12 @@ import paraLosProfesEstadistica from "../../assets/gifsInfoPage/paraLosProfesEst
 import profCursoYTemas from "../../assets/gifsInfoPage/profCursoYTemas.gif";
 import profSelectorActs from "../../assets/gifsInfoPage/profSelectorActs.gif";
 import profGestionAlumnos from "../../assets/gifsInfoPage/profGestionAlumnos.gif";
+import alumUnirseCurso from "../../assets/gifsInfoPage/alumUnirseCurso.gif";
+import alumArenas from "../../assets/gifsInfoPage/alumArenas.gif";
+import alumActCarta from "../../assets/gifsInfoPage/alumActCarta.gif";
+import alumActCrucigrama from "../../assets/gifsInfoPage/alumActCrucigrama.gif";
+import alumActTablero from "../../assets/gifsInfoPage/alumActTablero.gif";
+import alumActTeoria from "../../assets/gifsInfoPage/alumActTeoria.gif";
 
 export type UserType = "alumno" | "profesor" | "dueno";
 
@@ -37,12 +43,12 @@ const SECTION_MEDIA: Record<string, MediaSlot> = {
   cerebrus:        { src: logo,    alt: "Cerebrus" },
   institucion:     { src: dueno,   alt: "Gestión de institución" },
   profesor:        { src: libro,   alt: "Herramientas para profes" },
-  alumno:          { placeholder: "GIF del sistema de arenas" },
-  carta:           { placeholder: "GIF de la actividad Cartas" },
-  crucigrama:      { placeholder: "GIF de la actividad Crucigrama" },
-  tablero:         { placeholder: "GIF de la actividad Tablero" },
-  teoria:          { placeholder: "GIF de la actividad Teoría" },
-  codigo_alumno:   { placeholder: "GIF de unirse a un curso con código" },
+  alumno:          { src: alumArenas, alt: "Evolución de las arenas del alumno", isGif: true },
+  carta:           { src: alumActCarta, alt: "Actividad Cartas", isGif: true },
+  crucigrama:      { src: alumActCrucigrama, alt: "Actividad Crucigrama", isGif: true },
+  tablero:         { src: alumActTablero, alt: "Actividad Tablero", isGif: true },
+  teoria:          { src: alumActTeoria, alt: "Actividad Teoría", isGif: true },
+  codigo_alumno:   { src: alumUnirseCurso, alt: "Unirse a un curso con código como alumno", isGif: true },
   precios:         { placeholder: "Imagen o vídeo ilustrativo de precios" },
   cerebrus_org:    { src: logo, alt: "Cerebrus" },
   plataforma_org:  { src: paraElOrganizador, alt: "Panel de gestión", isGif: true },
