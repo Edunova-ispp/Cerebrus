@@ -533,17 +533,17 @@ const handleIAResult = (data: any) => {
       </div>
 
       <div className="ca-form-footer">
-        <div className="tf-footer-stack">
+        <div className="tf-test-footer-stack">
           {!readOnly && (
-            <button className="ca-btn-guardar" type="submit" disabled={loading}>
-              {loading ? 'Guardando...' : 'Guardar'}
-            </button>
+            <div className="tf-footer-actions">
+              <button className="ca-btn-guardar" type="submit" disabled={loading}>
+                {loading ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
           )}
-          {error && (
-            <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
-              {error}
-            </p>
-          )}
+          {error && <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+            {error}
+          </p>}
         </div>
       </div>
     </form>
