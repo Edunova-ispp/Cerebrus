@@ -264,12 +264,15 @@
 
 .ca-contenido .tf-footer-stack {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: repeat(2, max-content);
   column-gap: 12px;
+  row-gap: 10px;
   align-items: center;
   justify-content: center;
+  justify-items: center;
 }
 
 .ca-contenido .tf-footer-stack .tf-error {
   grid-column: 1 / -1;
+  justify-self: center;
 }
