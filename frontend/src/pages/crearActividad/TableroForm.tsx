@@ -37,8 +37,8 @@ const MAX_CARACTERES_DESCRIPCION = 1000;
 const MAX_PUNTUACION = 10000;
 const PREGUNTAS_3X3 = 8;
 const PREGUNTAS_4X4 = 15;
-const MAX_CARACTERES_PREGUNTA = 100;
-const MAX_CARACTERES_RESPUESTA = 60;
+const MAX_CARACTERES_PREGUNTA = 300;
+const MAX_CARACTERES_RESPUESTA = 150;
 
 type QPair = { localKey: string; pregunta: string; respuesta: string };
 
