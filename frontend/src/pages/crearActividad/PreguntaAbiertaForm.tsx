@@ -397,14 +397,16 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
       </div>{/* close tf-questions */}
 
       <div className="ca-form-footer">
-        <div className="tf-footer-stack">
+        <div className="paf-footer-stack">
           {!readOnly && (
-            <button className="ca-btn-guardar" onClick={handleGuardar} disabled={saving}>
-              {saving ? 'GUARDANDO...' : 'GUARDAR'}
-            </button>        
+            <div className="paf-footer-actions">
+              <button className="ca-btn-guardar" onClick={handleGuardar} disabled={saving}>
+                {saving ? 'GUARDANDO...' : 'GUARDAR'}
+              </button>
+            </div>
           )}
           {error && (
-            <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
+            <p className="ca-text paf-error" style={{ color: '#c0392b' }}>
               {error}
             </p>
           )}
