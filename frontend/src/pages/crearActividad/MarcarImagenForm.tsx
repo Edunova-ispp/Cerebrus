@@ -466,11 +466,13 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
               </div>
 
               <div className="ca-form-footer">
-                <div className="tf-footer-stack">
+                <div className="mi-footer-stack">
                   {!readOnly && (
-                    <button className="ca-btn-guardar" type="submit" disabled={loading}>
-                      {loading ? 'Guardando...' : 'Guardar'}
-                    </button>
+                    <div className="mi-footer-actions">
+                      <button className="ca-btn-guardar" type="submit" disabled={loading}>
+                        {loading ? 'Guardando...' : 'Guardar'}
+                      </button>
+                    </div>
                   )}
                   {error && (
                     <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
@@ -568,10 +570,12 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
         {!imagenAMarcar.trim() && (
           <div className="ca-form-footer">
-            <div className="tf-footer-stack">
-              <button className="ca-btn-guardar" type="submit" disabled={loading}>
-                {loading ? 'Guardando...' : 'Guardar'}
-              </button>
+            <div className="mi-footer-stack">
+              <div className="mi-footer-actions">
+                <button className="ca-btn-guardar" type="submit" disabled={loading}>
+                  {loading ? 'Guardando...' : 'Guardar'}
+                </button>
+              </div>
               {error && (
                 <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
                   {error}
