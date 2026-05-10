@@ -159,7 +159,7 @@ export default function GestionAlumnos({ cursoId, embedded }: Props) {
               <strong>
                 {confirmAlumno.nombre} {confirmAlumno.primerApellido}
               </strong>{" "}
-              de este curso? Esta acción no se puede deshacer.
+              de este curso? Sus estadísticas quedarán guardadas aunque no se te mostrarán. Puedes volver a inscribirlo en cualquier momento, recuperando sus estadísticas.
             </p>
             <div className="ga-modal-actions">
               <button

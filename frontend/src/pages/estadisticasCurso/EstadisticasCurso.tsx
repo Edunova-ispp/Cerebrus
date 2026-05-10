@@ -18,6 +18,11 @@ interface EstadisticaAlumno {
   tiempoTotal: number;
 }
 
+interface AlumnoInscritoCursoDTO {
+  alumnoId: number;
+  nombre: string;
+}
+
 interface OpcionItem {
   id: number;
   nombre: string;
@@ -371,11 +376,12 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
       const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
       // Hacemos 3 llamadas: Puntos, Actividades y la lista completa de tiempos (con límite 1000 para que vengan todos)
-      const [puntosRes, actividadesRes, tiemposRes, cursoRes] = await Promise.all([
+      const [puntosRes, actividadesRes, tiemposRes, cursoRes, alumnosCursoRes] = await Promise.all([
         fetch(`${apiBase}/api/estadisticas/cursos/${id}/puntos`, { headers: { 'Authorization': `Bearer ${token}` } }),
         fetch(`${apiBase}/api/estadisticas/cursos/${id}/actividades-completadas`, { headers: { 'Authorization': `Bearer ${token}` } }),
         fetch(`${apiBase}/api/estadisticas/cursos/${id}/alumnos-rapidos-lentos?limite=1000`, { headers: { 'Authorization': `Bearer ${token}` } }),
         fetch(`${apiBase}/api/estadisticas/cursos/${id}/estadisiticas-curso`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${apiBase}/api/inscripciones/curso/${id}/alumnos`, { headers: { 'Authorization': `Bearer ${token}` } }),
       ]);
 
       if (!puntosRes.ok || !actividadesRes.ok) throw new Error('Error al cargar datos principales');
@@ -384,8 +390,13 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
       const actividadesData = await actividadesRes.json();
       const tiemposData = tiemposRes.ok ? await tiemposRes.json() : null;
       const cursoData: EstadisticasCursoDTO | null = cursoRes.ok ? await cursoRes.json() : null;
+      const alumnosCursoData: AlumnoInscritoCursoDTO[] | null = alumnosCursoRes.ok ? await alumnosCursoRes.json() : null;
 
       const alumnosMap = new Map<string, EstadisticaAlumno>();
+
+      const normalizeNombre = (value: string): string => value.trim().toLowerCase();
+      const alumnosCursoIds = alumnosCursoData ? new Set(alumnosCursoData.map(a => a.alumnoId)) : null;
+      const alumnosCursoNombres = alumnosCursoData ? new Set(alumnosCursoData.map(a => normalizeNombre(a.nombre))) : null;
 
       // 1. Procesar puntos
       Object.entries(puntosData).forEach(([nombre, puntos]) => {
@@ -402,17 +413,30 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
 
       // 3. Procesar tiempos desde el endpoint de tu compañero
       if (tiemposData && tiemposData.masRapidos) {
-        tiemposData.masRapidos.forEach((t: any) => {
+        const tiemposList = [...(tiemposData.masRapidos ?? []), ...(tiemposData.masLentos ?? [])];
+        tiemposList.forEach((t: any) => {
+          if (!t || typeof t.nombreAlumno !== 'string') return;
           if (!alumnosMap.has(t.nombreAlumno)) {
             alumnosMap.set(t.nombreAlumno, { nombre: t.nombreAlumno, puntos: 0, actividadesRealizadas: 0, tiempoTotal: 0 });
           }
-          // El backend de tu compañero nos da el tiempo exacto en minutos
-          alumnosMap.get(t.nombreAlumno)!.tiempoTotal = t.tiempoMinutos || 0;
-          alumnosMap.get(t.nombreAlumno)!.idAlumno = t.alumnoId;
+          // El backend nos da el tiempo exacto en minutos (para algunos alumnos según el límite)
+          alumnosMap.get(t.nombreAlumno)!.tiempoTotal = typeof t.tiempoMinutos === 'number' ? t.tiempoMinutos : (t.tiempoMinutos || 0);
+          if (typeof t.alumnoId === 'number') alumnosMap.get(t.nombreAlumno)!.idAlumno = t.alumnoId;
         });
       }
 
-      setEstadisticas(Array.from(alumnosMap.values()));
+      let estadisticasFinales = Array.from(alumnosMap.values());
+
+      // Filtrar expulsados: si un alumno ya no está inscrito, no debe aparecer en estadísticas.
+      // Priorizamos el cruce por ID cuando existe; si no, caemos a nombre.
+      if (alumnosCursoIds && alumnosCursoNombres) {
+        estadisticasFinales = estadisticasFinales.filter(e => {
+          if (typeof e.idAlumno === 'number') return alumnosCursoIds.has(e.idAlumno);
+          return alumnosCursoNombres.has(normalizeNombre(e.nombre));
+        });
+      }
+
+      setEstadisticas(estadisticasFinales);
       console.log('[cargarEstadisticas] alumnosMap:', Array.from(alumnosMap.entries()));
       setEstadisticasCurso(cursoData);
 
@@ -784,10 +808,11 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
       }
     };
 
-    const getActividadSortValue = (act: OpcionItem, st?: ActividadStats): string | number => {
+    const getActividadSortValue = (act: { id: number; nombre?: string; titulo?: string }, st?: ActividadStats): string | number => {
+      const label = String(act.nombre ?? act.titulo ?? '');
       switch (analisisTablaOrden) {
         case 'elemento':
-          return String(act.nombre ?? '').toLocaleLowerCase('es');
+          return label.toLocaleLowerCase('es');
         case 'tipo':
           return 'actividad';
         case 'notaMedia':
@@ -801,7 +826,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
         case 'completado':
           return st?.actividadCompletadaPorTodos == null ? 2 : (st.actividadCompletadaPorTodos ? 1 : 0);
         default:
-          return String(act.nombre ?? '').toLocaleLowerCase('es');
+          return label.toLocaleLowerCase('es');
       }
     };
 
@@ -1911,7 +1936,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
             <section className="analisis-panel analisis-panel--full">
               <h3 className="analisis-panel-title">Tiempos de la actividad seleccionada</h3>
               {analisisActividadId ? (
-                <EstadisticasActividad actividadIdProp={String(analisisActividadId)} embedded />
+                <EstadisticasActividad actividadIdProp={String(analisisActividadId)} cursoIdProp={id} embedded />
               ) : (
                 <div className="stats-placeholder">Selecciona una actividad para ver tiempos.</div>
               )}
@@ -1947,7 +1972,7 @@ export default function EstadisticasCurso({ cursoId, embedded }: EstadisticasCur
         />;
       case "tiemposActividad":
         if ('actividadId' in statsView && statsView.actividadId) {
-          return <EstadisticasActividad actividadIdProp={String(statsView.actividadId)} embedded />;
+          return <EstadisticasActividad actividadIdProp={String(statsView.actividadId)} cursoIdProp={id} embedded />;
         }
         return <div className="stats-placeholder">Selecciona una actividad de la lista</div>;
       case "alumnos":

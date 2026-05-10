@@ -15,6 +15,11 @@ interface RapidosLentosDTO {
   promedio: number;
 }
 
+interface AlumnoInscritoCursoDTO {
+  alumnoId: number;
+  nombre: string;
+}
+
 function formatearTiempo(minutos: number): string {
   if (!minutos || minutos <= 0) return '0 mins';
   if (minutos === 1) return '1 min';
@@ -23,10 +28,11 @@ function formatearTiempo(minutos: number): string {
 
 interface EstadisticasTemaProps {
   readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
   readonly embedded?: boolean;
 }
 
-export default function EstadisticasTema({ temaIdProp, embedded }: EstadisticasTemaProps = {}) {
+export default function EstadisticasTema({ temaIdProp, cursoIdProp, embedded }: EstadisticasTemaProps = {}) {
   const params = useParams<{ id: string }>();
   const id = temaIdProp ?? params.id;
   const navigate = useNavigate();
@@ -35,8 +41,8 @@ export default function EstadisticasTema({ temaIdProp, embedded }: EstadisticasT
   const [error, setError] = useState('');
 
   useEffect(() => {
-    cargarEstadisticas();
-  }, [id]);
+    void cargarEstadisticas();
+  }, [id, cursoIdProp]);
 
   const cargarEstadisticas = async () => {
     setLoading(true);
@@ -44,15 +50,52 @@ export default function EstadisticasTema({ temaIdProp, embedded }: EstadisticasT
     try {
       const token = localStorage.getItem('token');
       const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
-      
-      const res = await fetch(`${apiBase}/api/estadisticas/temas/${id}/alumnos-rapidos-lentos?limite=1000`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
 
-      if (!res.ok) throw new Error('Error al cargar las estadísticas');
+      let cursoIdEfectivo: string | undefined = cursoIdProp;
+      if (!cursoIdEfectivo) {
+        try {
+          const temaRes = await fetch(`${apiBase}/api/temas/${id}`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+          if (temaRes.ok) {
+            const temaData = await temaRes.json();
+            if (temaData && (typeof temaData.cursoId === 'number' || typeof temaData.cursoId === 'string')) {
+              cursoIdEfectivo = String(temaData.cursoId);
+            }
+          }
+        } catch {
+          // Si falla, seguimos sin filtro (comportamiento actual)
+        }
+      }
 
-      const data = await res.json();
-      setDatos(data);
+      const [statsRes, alumnosCursoRes] = await Promise.all([
+        fetch(`${apiBase}/api/estadisticas/temas/${id}/alumnos-rapidos-lentos?limite=1000`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        }),
+        cursoIdEfectivo
+          ? fetch(`${apiBase}/api/inscripciones/curso/${cursoIdEfectivo}/alumnos`, {
+              headers: { 'Authorization': `Bearer ${token}` },
+            })
+          : Promise.resolve(null),
+      ]);
+
+      if (!statsRes.ok) throw new Error('Error al cargar las estadísticas');
+
+      const data = (await statsRes.json()) as RapidosLentosDTO;
+      const alumnosCursoData: AlumnoInscritoCursoDTO[] | null = alumnosCursoRes && alumnosCursoRes.ok
+        ? await alumnosCursoRes.json()
+        : null;
+
+      if (alumnosCursoData && alumnosCursoData.length > 0) {
+        const ids = new Set(alumnosCursoData.map(a => a.alumnoId));
+        setDatos({
+          ...data,
+          masRapidos: (data.masRapidos ?? []).filter(a => ids.has(a.alumnoId)),
+          masLentos: (data.masLentos ?? []).filter(a => ids.has(a.alumnoId)),
+        });
+      } else {
+        setDatos(data);
+      }
     } catch (err) {
       setError((err as Error).message);
     } finally {
