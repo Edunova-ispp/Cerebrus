@@ -213,3 +213,22 @@
   font-size: 0.95rem;
   margin: 0 0 12px 0;
 }
+
+.of-footer-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.of-footer-stack > button {
+  flex: 0 0 auto;
+}
+
+.of-footer-stack .tf-error {
+  flex-basis: 100%;
+  margin: 0;
+  text-align: center;
+}

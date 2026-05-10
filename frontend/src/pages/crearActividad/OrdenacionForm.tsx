@@ -142,8 +142,14 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       return;
     }
 
-    if (comentariosRespVisible.trim().length > MAX_CARACTERES_COMENTARIOS) return `Los comentarios no pueden exceder ${MAX_CARACTERES_COMENTARIOS} caracteres.`;
-    if (respVisible && comentariosRespVisible.trim().length === 0) return 'Escribe un comentario para mostrar cuando la respuesta sea visible.';
+    if (comentariosRespVisible.trim().length > MAX_CARACTERES_COMENTARIOS) {
+      setError(`Los comentarios no pueden exceder ${MAX_CARACTERES_COMENTARIOS} caracteres.`);
+      return;
+    }
+    if (respVisible && comentariosRespVisible.trim().length === 0) {
+      setError('Escribe un comentario para mostrar cuando la respuesta sea visible.');
+      return;
+    }
 
     if (!temaId) {
       setError('Falta el id del tema en la URL');
@@ -442,7 +448,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       </div>
 
       <div className="ca-form-footer">
-        <div className="tf-footer-stack">
+        <div className="of-footer-stack">
           {!readOnly && (
             <button className="ca-btn-guardar" type="submit" disabled={loading}>
               {loading ? 'Guardando...' : 'Guardar'}

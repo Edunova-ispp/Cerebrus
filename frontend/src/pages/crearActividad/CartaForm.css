@@ -228,3 +228,52 @@
   background: var(--t-input-focus);
   box-shadow: var(--t-shadow);
 }
+
+/* ── Footer ──────────────────────────────────────────────────── */
+
+.cf-form .ca-form-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.cf-form .tf-test-footer-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.cf-form .tf-footer-actions {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: auto;
+  max-width: 100%;
+  align-self: center;
+  min-width: max-content;
+}
+
+.cf-form .tf-footer-actions > button {
+  flex: 0 0 auto;
+}
+
+.cf-form .tf-footer-actions > .ca-btn-cancelar,
+.cf-form .tf-footer-actions > .ca-btn-guardar {
+  margin-top: 0;
+  margin-bottom: 0;
+  align-self: center;
+}
+
+.cf-form .tf-test-footer-stack .tf-error {
+  margin-top: 0;
+  margin-bottom: 0;
+  text-align: center;
+}
