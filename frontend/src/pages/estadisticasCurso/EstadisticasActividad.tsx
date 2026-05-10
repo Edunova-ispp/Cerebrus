@@ -66,7 +66,7 @@ export default function EstadisticasActividad({ actividadIdProp, cursoIdProp, em
       if (!statsRes.ok) throw new Error('Error al cargar las estadísticas de la actividad');
 
       const data = (await statsRes.json()) as RapidosLentosDTO;
-      const alumnosCursoData: AlumnoInscritoCursoDTO[] | null = alumnosCursoRes && alumnosCursoRes.ok
+      const alumnosCursoData: AlumnoInscritoCursoDTO[] | null = alumnosCursoRes?.ok
         ? await alumnosCursoRes.json()
         : null;
 

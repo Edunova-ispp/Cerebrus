@@ -44,60 +44,86 @@ export default function EstadisticasTema({ temaIdProp, cursoIdProp, embedded }: 
     void cargarEstadisticas();
   }, [id, cursoIdProp]);
 
+  type FetchHeaders = Record<string, string>;
+
+  async function fetchJson<T>(url: string, headers: FetchHeaders): Promise<T> {
+    const res = await fetch(url, { headers });
+    if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+    return (await res.json()) as T;
+  }
+
+  async function fetchOptionalJson<T>(url: string, headers: FetchHeaders): Promise<T | null> {
+    try {
+      const res = await fetch(url, { headers });
+      if (!res.ok) return null;
+      return (await res.json()) as T;
+    } catch {
+      return null;
+    }
+  }
+
+  function filtrarPorIds(data: RapidosLentosDTO, ids: Set<number> | null): RapidosLentosDTO {
+    if (!ids) return data;
+    return {
+      ...data,
+      masRapidos: (data.masRapidos ?? []).filter(a => ids.has(a.alumnoId)),
+      masLentos: (data.masLentos ?? []).filter(a => ids.has(a.alumnoId)),
+    };
+  }
+
+  async function resolverCursoIdTema(
+    apiBase: string,
+    temaId: string,
+    headers: FetchHeaders,
+    cursoIdProp?: string
+  ): Promise<string | undefined> {
+    if (cursoIdProp) return cursoIdProp;
+
+    // TemaDTO tiene cursoId
+    const tema = await fetchOptionalJson<{ cursoId?: number | string }>(
+      `${apiBase}/api/temas/${temaId}`,
+      headers
+    );
+
+    return tema?.cursoId != null ? String(tema.cursoId) : undefined;
+  }
+
+  async function cargarIdsInscritos(
+    apiBase: string,
+    cursoId: string | undefined,
+    headers: FetchHeaders
+  ): Promise<Set<number> | null> {
+    if (!cursoId) return null;
+
+    const alumnos = await fetchOptionalJson<AlumnoInscritoCursoDTO[]>(
+      `${apiBase}/api/inscripciones/curso/${cursoId}/alumnos`,
+      headers
+    );
+
+    if (!alumnos || alumnos.length === 0) return null;
+    return new Set(alumnos.map(a => a.alumnoId));
+  }
+
+  // dentro del componente:
   const cargarEstadisticas = async () => {
     setLoading(true);
     setError('');
+
     try {
       const token = localStorage.getItem('token');
-      const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
+      const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
+      const headers = { Authorization: `Bearer ${token}` };
 
-      let cursoIdEfectivo: string | undefined = cursoIdProp;
-      if (!cursoIdEfectivo) {
-        try {
-          const temaRes = await fetch(`${apiBase}/api/temas/${id}`, {
-            headers: { 'Authorization': `Bearer ${token}` },
-          });
-          if (temaRes.ok) {
-            const temaData = await temaRes.json();
-            if (temaData && (typeof temaData.cursoId === 'number' || typeof temaData.cursoId === 'string')) {
-              cursoIdEfectivo = String(temaData.cursoId);
-            }
-          }
-        } catch {
-          // Si falla, seguimos sin filtro (comportamiento actual)
-        }
-      }
+      const cursoIdEfectivo = await resolverCursoIdTema(apiBase, id!, headers, cursoIdProp);
 
-      const [statsRes, alumnosCursoRes] = await Promise.all([
-        fetch(`${apiBase}/api/estadisticas/temas/${id}/alumnos-rapidos-lentos?limite=1000`, {
-          headers: { 'Authorization': `Bearer ${token}` },
-        }),
-        cursoIdEfectivo
-          ? fetch(`${apiBase}/api/inscripciones/curso/${cursoIdEfectivo}/alumnos`, {
-              headers: { 'Authorization': `Bearer ${token}` },
-            })
-          : Promise.resolve(null),
+      const [stats, idsInscritos] = await Promise.all([
+        fetchJson<RapidosLentosDTO>(`${apiBase}/api/estadisticas/temas/${id}/alumnos-rapidos-lentos?limite=1000`, headers),
+        cargarIdsInscritos(apiBase, cursoIdEfectivo, headers),
       ]);
 
-      if (!statsRes.ok) throw new Error('Error al cargar las estadísticas');
-
-      const data = (await statsRes.json()) as RapidosLentosDTO;
-      const alumnosCursoData: AlumnoInscritoCursoDTO[] | null = alumnosCursoRes && alumnosCursoRes.ok
-        ? await alumnosCursoRes.json()
-        : null;
-
-      if (alumnosCursoData && alumnosCursoData.length > 0) {
-        const ids = new Set(alumnosCursoData.map(a => a.alumnoId));
-        setDatos({
-          ...data,
-          masRapidos: (data.masRapidos ?? []).filter(a => ids.has(a.alumnoId)),
-          masLentos: (data.masLentos ?? []).filter(a => ids.has(a.alumnoId)),
-        });
-      } else {
-        setDatos(data);
-      }
+      setDatos(filtrarPorIds(stats, idsInscritos));
     } catch (err) {
-      setError((err as Error).message);
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
