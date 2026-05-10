@@ -435,7 +435,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
               className="ca-btn-guardar"
               disabled={loading || tamano === null}
             >
-              {loading ? 'Guardando...' : mode === 'create' ? 'Guardar' : 'Guardar'}
+              {loading ? 'Guardando...' : 'Guardar'}
             </button>    
           )}
           {error && (
