@@ -575,7 +575,6 @@ button.stats-alert-card:hover {
   border: 1px solid var(--t-border);
   border-radius: 12px;
   padding: 10px 12px;
-  font-family: 'Pixelify Sans', sans-serif;
   font-size: 1.25rem;
   font-weight: 700;
   text-align: center;

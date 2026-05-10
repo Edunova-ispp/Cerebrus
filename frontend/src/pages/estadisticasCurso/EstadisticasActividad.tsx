@@ -15,6 +15,11 @@ interface RapidosLentosDTO {
   promedio: number;
 }
 
+interface AlumnoInscritoCursoDTO {
+  alumnoId: number;
+  nombre: string;
+}
+
 function formatearTiempo(minutos: number): string {
   if (minutos === 0) return '0 mins';
   if (!minutos || minutos < 0) return '< 1 min';
@@ -24,10 +29,11 @@ function formatearTiempo(minutos: number): string {
 
 interface EstadisticasActividadProps {
   readonly actividadIdProp?: string;
+  readonly cursoIdProp?: string;
   readonly embedded?: boolean;
 }
 
-export default function EstadisticasActividad({ actividadIdProp, embedded }: EstadisticasActividadProps = {}) {
+export default function EstadisticasActividad({ actividadIdProp, cursoIdProp, embedded }: EstadisticasActividadProps = {}) {
   const params = useParams<{ id: string }>();
   const id = actividadIdProp ?? params.id;
   const navigate = useNavigate();
@@ -36,8 +42,8 @@ export default function EstadisticasActividad({ actividadIdProp, embedded }: Est
   const [error, setError] = useState('');
 
   useEffect(() => {
-    cargarEstadisticas();
-  }, [id]);
+    void cargarEstadisticas();
+  }, [id, cursoIdProp]);
 
   const cargarEstadisticas = async () => {
     setLoading(true);
@@ -46,14 +52,34 @@ export default function EstadisticasActividad({ actividadIdProp, embedded }: Est
       const token = localStorage.getItem('token');
       const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
 
-      const res = await fetch(`${apiBase}/api/estadisticas/actividades/${id}/alumnos-rapidos-lentos?limite=1000`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const [statsRes, alumnosCursoRes] = await Promise.all([
+        fetch(`${apiBase}/api/estadisticas/actividades/${id}/alumnos-rapidos-lentos?limite=1000`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        }),
+        cursoIdProp
+          ? fetch(`${apiBase}/api/inscripciones/curso/${cursoIdProp}/alumnos`, {
+              headers: { 'Authorization': `Bearer ${token}` },
+            })
+          : Promise.resolve(null),
+      ]);
 
-      if (!res.ok) throw new Error('Error al cargar las estadísticas de la actividad');
+      if (!statsRes.ok) throw new Error('Error al cargar las estadísticas de la actividad');
 
-      const data = await res.json();
-      setDatos(data);
+      const data = (await statsRes.json()) as RapidosLentosDTO;
+      const alumnosCursoData: AlumnoInscritoCursoDTO[] | null = alumnosCursoRes?.ok
+        ? await alumnosCursoRes.json()
+        : null;
+
+      if (alumnosCursoData && alumnosCursoData.length > 0) {
+        const ids = new Set(alumnosCursoData.map(a => a.alumnoId));
+        setDatos({
+          ...data,
+          masRapidos: (data.masRapidos ?? []).filter(a => ids.has(a.alumnoId)),
+          masLentos: (data.masLentos ?? []).filter(a => ids.has(a.alumnoId)),
+        });
+      } else {
+        setDatos(data);
+      }
     } catch (err) {
       setError((err as Error).message);
     } finally {

@@ -15,6 +15,11 @@ interface RapidosLentosDTO {
   promedio: number;
 }
 
+interface AlumnoInscritoCursoDTO {
+  alumnoId: number;
+  nombre: string;
+}
+
 function formatearTiempo(minutos: number): string {
   if (!minutos || minutos <= 0) return '0 mins';
   if (minutos === 1) return '1 min';
@@ -23,10 +28,11 @@ function formatearTiempo(minutos: number): string {
 
 interface EstadisticasTemaProps {
   readonly temaIdProp?: string;
+  readonly cursoIdProp?: string;
   readonly embedded?: boolean;
 }
 
-export default function EstadisticasTema({ temaIdProp, embedded }: EstadisticasTemaProps = {}) {
+export default function EstadisticasTema({ temaIdProp, cursoIdProp, embedded }: EstadisticasTemaProps = {}) {
   const params = useParams<{ id: string }>();
   const id = temaIdProp ?? params.id;
   const navigate = useNavigate();
@@ -35,26 +41,89 @@ export default function EstadisticasTema({ temaIdProp, embedded }: EstadisticasT
   const [error, setError] = useState('');
 
   useEffect(() => {
-    cargarEstadisticas();
-  }, [id]);
+    void cargarEstadisticas();
+  }, [id, cursoIdProp]);
 
+  type FetchHeaders = Record<string, string>;
+
+  async function fetchJson<T>(url: string, headers: FetchHeaders): Promise<T> {
+    const res = await fetch(url, { headers });
+    if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+    return (await res.json()) as T;
+  }
+
+  async function fetchOptionalJson<T>(url: string, headers: FetchHeaders): Promise<T | null> {
+    try {
+      const res = await fetch(url, { headers });
+      if (!res.ok) return null;
+      return (await res.json()) as T;
+    } catch {
+      return null;
+    }
+  }
+
+  function filtrarPorIds(data: RapidosLentosDTO, ids: Set<number> | null): RapidosLentosDTO {
+    if (!ids) return data;
+    return {
+      ...data,
+      masRapidos: (data.masRapidos ?? []).filter(a => ids.has(a.alumnoId)),
+      masLentos: (data.masLentos ?? []).filter(a => ids.has(a.alumnoId)),
+    };
+  }
+
+  async function resolverCursoIdTema(
+    apiBase: string,
+    temaId: string,
+    headers: FetchHeaders,
+    cursoIdProp?: string
+  ): Promise<string | undefined> {
+    if (cursoIdProp) return cursoIdProp;
+
+    // TemaDTO tiene cursoId
+    const tema = await fetchOptionalJson<{ cursoId?: number | string }>(
+      `${apiBase}/api/temas/${temaId}`,
+      headers
+    );
+
+    return tema?.cursoId != null ? String(tema.cursoId) : undefined;
+  }
+
+  async function cargarIdsInscritos(
+    apiBase: string,
+    cursoId: string | undefined,
+    headers: FetchHeaders
+  ): Promise<Set<number> | null> {
+    if (!cursoId) return null;
+
+    const alumnos = await fetchOptionalJson<AlumnoInscritoCursoDTO[]>(
+      `${apiBase}/api/inscripciones/curso/${cursoId}/alumnos`,
+      headers
+    );
+
+    if (!alumnos || alumnos.length === 0) return null;
+    return new Set(alumnos.map(a => a.alumnoId));
+  }
+
+  // dentro del componente:
   const cargarEstadisticas = async () => {
     setLoading(true);
     setError('');
+
     try {
       const token = localStorage.getItem('token');
-      const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
-      
-      const res = await fetch(`${apiBase}/api/estadisticas/temas/${id}/alumnos-rapidos-lentos?limite=1000`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
+      const headers = { Authorization: `Bearer ${token}` };
 
-      if (!res.ok) throw new Error('Error al cargar las estadísticas');
+      const cursoIdEfectivo = await resolverCursoIdTema(apiBase, id!, headers, cursoIdProp);
 
-      const data = await res.json();
-      setDatos(data);
+      const [stats, idsInscritos] = await Promise.all([
+        fetchJson<RapidosLentosDTO>(`${apiBase}/api/estadisticas/temas/${id}/alumnos-rapidos-lentos?limite=1000`, headers),
+        cargarIdsInscritos(apiBase, cursoIdEfectivo, headers),
+      ]);
+
+      setDatos(filtrarPorIds(stats, idsInscritos));
     } catch (err) {
-      setError((err as Error).message);
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
