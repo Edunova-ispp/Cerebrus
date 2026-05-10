@@ -157,7 +157,8 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
     return null;
   };
 
-  const handleGuardar = async () => {
+  const handleGuardar = async (e?: React.FormEvent<HTMLFormElement>) => {
+    e?.preventDefault();
     const validationError = validate();
     if (validationError) {
       setError(validationError);
@@ -282,90 +283,107 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
       {success && <p className="ca-text" style={{ color: '#27ae60' }}>{success}</p>}
 
       {/* ── TOP: Metadata ── */}
-      <div className="tf-header">
-        <div className="tf-col">
-          <div>
-            <label className="tf-label">Título *</label>
-            <input readOnly={readOnly} className="tf-input" value={titulo} onChange={e => setTitulo(e.target.value)} placeholder="Título de la actividad" />
-          </div>
-
-          <div>
-            <label className="tf-label">Descripción</label>
-            <textarea readOnly={readOnly} className="tf-input" value={descripcion} onChange={e => setDescripcion(e.target.value)} rows={3} style={{ resize: 'vertical' }} placeholder="Descripción opcional" />
-          </div>
-
-          <div>
-            <label className="tf-label">URL de imagen (opcional)</label>
-            <input 
-              readOnly={readOnly}
-              type="url" 
-              className="tf-input" 
-              value={imagen} 
-              onChange={e => {
-                setImagen(e.target.value);
-                setImagenError(false); // Reseteamos el error si el usuario cambia la URL
-              }} 
-              placeholder="https://..." 
-            />
-            
-            {/* Renderizado condicional de la imagen usando el estado */}
-            {imagen.trim() && !imagenError && (
-              <img 
-                src={imagen.trim()} 
-                alt="Preview" 
-                className="tf-img-preview" 
-                onError={() => setImagenError(true)} 
-              />
-            )}
-            
-            {/* Mensaje de error visual para el usuario (opcional pero recomendado) */}
-            {imagen.trim() && imagenError && (
-              <span style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px', display: 'block' }}>
-                No se pudo cargar la imagen. Comprueba la URL.
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="tf-col">
-          <div>
-            <label className="tf-label">Puntuación *</label>
-            <input readOnly={readOnly} type="number" className="tf-input tf-input-sm" value={puntos} onChange={e => setPuntos(e.target.value === '' ? '' : Number(e.target.value))} min="1" required />
-          </div>
-
-          <label className="tf-check-label">
-            <input disabled={readOnly} type="checkbox" checked={respVisible} onChange={e => setRespVisible(e.target.checked)} />
-            <span>Mostrar comentarios de corrección</span>
-          </label>
-
-          <label className="tf-check-label">
-            <input disabled={readOnly} type="checkbox" checked={permitirReintento} onChange={e => setPermitirReintento(e.target.checked)} />
-            <span>Permitir reintentos</span>
-          </label>
-
-          <label className="tf-check-label">
-            <input disabled={readOnly} type="checkbox" checked={mostrarPuntuacion} onChange={e => setMostrarPuntuacion(e.target.checked)} />
-            <span>Mostrar puntuación</span>
-          </label>
-
-          <label className="tf-check-label">
-            <input disabled={readOnly} type="checkbox" checked={encontrarRespuestaMaestro} onChange={e => setEncontrarRespuestaMaestro(e.target.checked)} />
-            <span>Mostrar respuesta modelo</span>
-          </label>
-
-          <label className="tf-check-label">
-            <input disabled={readOnly} type="checkbox" checked={encontrarRespuestaAlumno} onChange={e => setEncontrarRespuestaAlumno(e.target.checked)} />
-            <span>Mostrar respuesta del alumno</span>
-          </label>
-
-          {respVisible && (
+      <form className="tf-form" onSubmit={handleGuardar}>
+        <div className="tf-header">
+          <div className="tf-col">
             <div>
-              <label className="tf-label">Comentarios</label>
-              <input readOnly={readOnly} type="text" className="tf-input" value={comentariosRespVisible} onChange={e => setComentariosRespVisible(e.target.value)} />
+              <label className="tf-label" htmlFor="pa-titulo">Título *</label>
+              <input 
+                readOnly={readOnly} 
+                id="pa-titulo" 
+                className="tf-input" 
+                value={titulo} 
+                onChange={e => setTitulo(e.target.value)} 
+                placeholder="Título de la actividad" 
+                required 
+              />
             </div>
-          )}
+
+            <div>
+              <label className="tf-label">Descripción</label>
+              <textarea 
+                readOnly={readOnly} 
+                className="tf-input" 
+                value={descripcion} 
+                onChange={e => setDescripcion(e.target.value)} 
+                rows={3} 
+                style={{ resize: 'vertical' }} 
+                placeholder="Descripción opcional" 
+              />
+            </div>
+
+            <div>
+              <label className="tf-label">URL de imagen (opcional)</label>
+              <input 
+                readOnly={readOnly}
+                type="url" 
+                className="tf-input" 
+                value={imagen} 
+                onChange={e => {
+                  setImagen(e.target.value);
+                  setImagenError(false); // Reseteamos el error si el usuario cambia la URL
+                }} 
+                placeholder="https://..." 
+              />
+              
+              {/* Renderizado condicional de la imagen usando el estado */}
+              {imagen.trim() && !imagenError && (
+                <img 
+                  src={imagen.trim()} 
+                  alt="Preview" 
+                  className="tf-img-preview" 
+                  onError={() => setImagenError(true)} 
+                />
+              )}
+              
+              {/* Mensaje de error visual para el usuario (opcional pero recomendado) */}
+              {imagen.trim() && imagenError && (
+                <span style={{ color: '#e74c3c', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                  No se pudo cargar la imagen. Comprueba la URL.
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="tf-col">
+            <div>
+              <label className="tf-label">Puntuación *</label>
+              <input readOnly={readOnly} type="number" className="tf-input tf-input-sm" value={puntos} onChange={e => setPuntos(e.target.value === '' ? '' : Number(e.target.value))} min="1" required />
+            </div>
+
+            <label className="tf-check-label">
+              <input disabled={readOnly} type="checkbox" checked={respVisible} onChange={e => setRespVisible(e.target.checked)} />
+              <span>Mostrar comentarios de corrección</span>
+            </label>
+
+            <label className="tf-check-label">
+              <input disabled={readOnly} type="checkbox" checked={permitirReintento} onChange={e => setPermitirReintento(e.target.checked)} />
+              <span>Permitir reintentos</span>
+            </label>
+
+            <label className="tf-check-label">
+              <input disabled={readOnly} type="checkbox" checked={mostrarPuntuacion} onChange={e => setMostrarPuntuacion(e.target.checked)} />
+              <span>Mostrar puntuación</span>
+            </label>
+
+            <label className="tf-check-label">
+              <input disabled={readOnly} type="checkbox" checked={encontrarRespuestaMaestro} onChange={e => setEncontrarRespuestaMaestro(e.target.checked)} />
+              <span>Mostrar respuesta modelo</span>
+            </label>
+
+            <label className="tf-check-label">
+              <input disabled={readOnly} type="checkbox" checked={encontrarRespuestaAlumno} onChange={e => setEncontrarRespuestaAlumno(e.target.checked)} />
+              <span>Mostrar respuesta del alumno</span>
+            </label>
+
+            {respVisible && (
+              <div>
+                <label className="tf-label">Comentarios</label>
+                <input readOnly={readOnly} type="text" className="tf-input" value={comentariosRespVisible} onChange={e => setComentariosRespVisible(e.target.value)} />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
       <div className="tf-questions">
         <p className="tf-help">
@@ -396,22 +414,23 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
         )}
       </div>{/* close tf-questions */}
 
-      <div className="ca-form-footer">
-        <div className="paf-footer-stack">
-          {!readOnly && (
-            <div className="paf-footer-actions">
-              <button className="ca-btn-guardar" onClick={handleGuardar} disabled={saving}>
-                {saving ? 'GUARDANDO...' : 'GUARDAR'}
-              </button>
-            </div>
-          )}
-          {error && (
-            <p className="ca-text paf-error" style={{ color: '#c0392b' }}>
-              {error}
-            </p>
-          )}
+        <div className="ca-form-footer">
+          <div className="paf-footer-stack">
+            {!readOnly && (
+              <div className="paf-footer-actions">
+                <button className="ca-btn-guardar" type="submit" disabled={saving}>
+                  {saving ? 'GUARDANDO...' : 'GUARDAR'}
+                </button>
+              </div>
+            )}
+            {error && (
+              <p className="ca-text paf-error" style={{ color: '#c0392b' }}>
+                {error}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 };
