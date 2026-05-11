@@ -338,7 +338,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                                     checked={encontrarRespuestaMaestro}
                                     onChange={e => {setEncontrarRespuestaMaestro(e.target.checked);}}
                                 />
-                                <span className="cf-checkbox-label">Mostrar respuesta correcta</span>
+                                <span className="cf-checkbox-label">Mostrar respuesta correcta después de finalizar</span>
                             </label>
                         </div>
                     </div>
