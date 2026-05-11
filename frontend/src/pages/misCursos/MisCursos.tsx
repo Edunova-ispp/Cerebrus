@@ -60,22 +60,38 @@ export default function MisCursos() {
   }, [token]);
 
   const handleJoin = async () => {
-    const apiBase = (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/$/, "");
     const codigo = codigoCurso.trim();
     if (!codigo) return;
     setJoinLoading(true);
     setJoinError(null);
     setJoinSuccess(null);
     try {
-      await apiFetch(
-        `${apiBase}/api/inscripciones/inscribe?codigoCurso=${encodeURIComponent(codigo)}`,  
-        { method: "POST" }
+      const response = await fetch(
+        `${apiBase}/api/inscripciones/inscribe?codigoCurso=${encodeURIComponent(codigo)}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        }
       );
-      setJoinSuccess("¡Te has unido al curso correctamente!");
+
+      const rawBody = (await response.clone().text()).trim();
+
+      if (!response.ok) {
+        let message = rawBody;
+        if (!message || /^Error\s+\d{3}$/.test(message) || /^<!doctype\s+html/i.test(message) || /^<html/i.test(message)) {
+          message = "No se pudo realizar la inscripción al curso.";
+        }
+        throw new Error(message);
+      }
+
+      setJoinSuccess(rawBody || "¡Te has unido al curso correctamente!");
       setCodigoCurso("");
       await loadCursos();
-    } catch (error) {
-      setJoinError("No se pudo realizar la inscripción al curso. Revisa el código.");
+    } catch (e) {
+      setJoinError(e instanceof Error ? e.message : "No se pudo realizar la inscripción al curso.");
     } finally {
       setJoinLoading(false);
     }
