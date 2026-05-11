@@ -43,6 +43,9 @@ const MAX_PUNTUACION = 10000;
 const MAX_CARACTERES_COMENTARIOS = 250;
 const MAX_PUNTOS = 55;
 const MAX_CARACTERES_RESPUESTA_PUNTO = 60;
+const PREVIEW_BOX_HEIGHT = 420;
+const PREVIEW_BOX_MAX_WIDTH = 720;
+const POINTS_LIST_MAX_WIDTH = 360;
 
 type Point = {
   id?: number;
@@ -65,6 +68,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
   const [puntos, setPuntos] = useState<Point[]>([]);
   const [selectedPointIndex, setSelectedPointIndex] = useState<number | null>(null);
   const [imageNaturalSize, setImageNaturalSize] = useState<{ w: number; h: number } | null>(null);
+  const [previewLoadError, setPreviewLoadError] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -109,6 +113,18 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
     setPuntos(nextPoints);
     setSelectedPointIndex(nextPoints.length ? 0 : null);
   }, [marcarImagenId, mode]);
+
+  useEffect(() => {
+    if (!imagenAMarcar.trim()) {
+      setPreviewLoadError(false);
+      setImageNaturalSize(null);
+      return;
+    }
+
+    // When the URL changes, reset preview state so it can try loading again.
+    setPreviewLoadError(false);
+    setImageNaturalSize(null);
+  }, [imagenAMarcar]);
 
   const temaIdNum = useMemo(() => {
     if (!temaId) return null;
@@ -158,17 +174,36 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
     const el = imgRef.current;
     if (!el) return;
+    if (!imageNaturalSize) return;
     if (puntos.length >= MAX_PUNTOS) return;
 
     const rect = el.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
 
-    const naturalW = el.naturalWidth || imageNaturalSize?.w;
-    const naturalH = el.naturalHeight || imageNaturalSize?.h;
+    const naturalW = imageNaturalSize.w;
+    const naturalH = imageNaturalSize.h;
     if (!naturalW || !naturalH) return;
 
-    const x = Math.round(((e.clientX - rect.left) / rect.width) * naturalW);
-    const y = Math.round(((e.clientY - rect.top) / rect.height) * naturalH);
+    const boxW = el.clientWidth;
+    const boxH = el.clientHeight;
+    if (!boxW || !boxH) return;
+
+    // Account for objectFit: 'contain' (letterboxing inside the image element)
+    const scale = Math.min(boxW / naturalW, boxH / naturalH);
+    const renderedW = naturalW * scale;
+    const renderedH = naturalH * scale;
+    const offsetX = (boxW - renderedW) / 2;
+    const offsetY = (boxH - renderedH) / 2;
+
+    const xInBox = e.clientX - rect.left;
+    const yInBox = e.clientY - rect.top;
+
+    // Ignore clicks on the letterboxed area
+    if (xInBox < offsetX || xInBox > offsetX + renderedW) return;
+    if (yInBox < offsetY || yInBox > offsetY + renderedH) return;
+
+    const x = Math.round(((xInBox - offsetX) / renderedW) * naturalW);
+    const y = Math.round(((yInBox - offsetY) / renderedH) * naturalH);
 
     setPuntos((prev) => {
       const next = [...prev, { respuesta: '', pixelX: x, pixelY: y }];
@@ -180,6 +215,9 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+
+    // Preview error is shown inline in the preview area (not in the generic errors).
+    if (previewLoadError) return;
 
     const validationError = validate();
     if (validationError) {
@@ -393,7 +431,7 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
 
       <div
         className="ca-contenedor-blanco"
-        style={{ gap: 16, marginTop: 16, marginBottom: 24, flexDirection: 'column', alignItems: 'stretch' }}
+        style={{ gap: 16, marginTop: 16, flexDirection: 'column', alignItems: 'stretch', justifyContent: 'flex-start' }}
       >
         <h3 className="cf-section-title">
           Puntos
@@ -404,8 +442,26 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
         </p>
 
         {imagenAMarcar.trim() && (
-          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-            <div style={{ flex: '1 1 300px', maxWidth: 500, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: 16,
+              alignItems: 'flex-start',
+              flexWrap: 'nowrap',
+              width: '100%',
+              justifyContent: 'center',
+            }}
+          >
+            <div
+              style={{
+                flex: `1 1 ${PREVIEW_BOX_MAX_WIDTH}px`,
+                maxWidth: PREVIEW_BOX_MAX_WIDTH,
+                minWidth: 320,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 12,
+              }}
+            >
               <div
                 style={{
                   border: '2px solid #000',
@@ -413,28 +469,69 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                   overflow: 'hidden',
                   background: '#fff',
                   position: 'relative',
+                  height: PREVIEW_BOX_HEIGHT,
+                  width: '100%',
                 }}
               >
-                <img
-                  ref={imgRef}
-                  src={imagenAMarcar.trim()}
-                  alt="Vista previa"
-                  onLoad={handleImageLoad}
-                  onClick={handleImageClick}
-                  style={{
-                    width: '100%',
-                    maxHeight: 350,
-                    objectFit: 'contain',
-                    display: 'block',
-                    cursor: 'crosshair',
-                    userSelect: 'none',
-                  }}
-                />
+                {previewLoadError ? (
+                  <div
+                    style={{
+                      padding: 14,
+                      color: '#c0392b',
+                      fontWeight: 700,
+                      lineHeight: 1.35,
+                    }}
+                    role="alert"
+                  >
+                    No se ha podido cargar la previsualización porque la URL no es válida. Elige una URL válida
+                  </div>
+                ) : (
+                  <img
+                    ref={imgRef}
+                    src={imagenAMarcar.trim()}
+                    alt="Vista previa"
+                    onLoad={() => {
+                      setPreviewLoadError(false);
+                      handleImageLoad();
+                    }}
+                    onError={() => {
+                      setPreviewLoadError(true);
+                      setImageNaturalSize(null);
+                    }}
+                    onClick={handleImageClick}
+                    style={{
+                      width: '100%',
+                      height: PREVIEW_BOX_HEIGHT,
+                      objectFit: 'contain',
+                      display: 'block',
+                      cursor: readOnly ? 'default' : 'crosshair',
+                      userSelect: 'none',
+                    }}
+                  />
+                )}
 
                 {imageNaturalSize &&
                   puntos.map((p, idx) => {
-                    const left = `${(p.pixelX / imageNaturalSize.w) * 100}%`;
-                    const top = `${(p.pixelY / imageNaturalSize.h) * 100}%`;
+                    const el = imgRef.current;
+                    if (!el) return null;
+
+                    const naturalW = imageNaturalSize.w;
+                    const naturalH = imageNaturalSize.h;
+                    const boxW = el.clientWidth;
+                    const boxH = el.clientHeight;
+                    if (!boxW || !boxH || !naturalW || !naturalH) return null;
+
+                    const scale = Math.min(boxW / naturalW, boxH / naturalH);
+                    const renderedW = naturalW * scale;
+                    const renderedH = naturalH * scale;
+                    const offsetX = (boxW - renderedW) / 2;
+                    const offsetY = (boxH - renderedH) / 2;
+
+                    const leftPx = offsetX + (p.pixelX / naturalW) * renderedW;
+                    const topPx = offsetY + (p.pixelY / naturalH) * renderedH;
+
+                    const left = `${(leftPx / boxW) * 100}%`;
+                    const top = `${(topPx / boxH) * 100}%`;
                     const isSelected = selectedPointIndex === idx;
 
                     return (
@@ -464,25 +561,20 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
                     );
                   })}
               </div>
-
-              <div className="ca-form-footer">
-                <div className="tf-footer-stack">
-                  {!readOnly && (
-                    <button className="ca-btn-guardar" type="submit" disabled={loading}>
-                      {loading ? 'Guardando...' : 'Guardar'}
-                    </button>
-                  )}
-                  {error && (
-                    <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
-                      {error}
-                    </p>
-                  )}
-                </div>
-              </div>
             </div>
 
             {puntos.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: '1 1 200px', maxWidth: 300, maxHeight: 400, overflowY: 'auto' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
+                  flex: `0 1 ${POINTS_LIST_MAX_WIDTH}px`,
+                  maxWidth: POINTS_LIST_MAX_WIDTH,
+                  height: PREVIEW_BOX_HEIGHT,
+                  overflowY: 'auto',
+                }}
+              >
                 {puntos.map((p, i) => {
                   const selected = selectedPointIndex === i;
                   return (
@@ -560,26 +652,23 @@ export function MarcarImagenForm({ mode = 'create', marcarImagenId, initialValue
           </div>
         )}
 
-        {puntos.length === 0 && imagenAMarcar.trim() && (
-          <p className="ca-text" style={{ marginTop: 0, marginBottom: 0 }}>
-            Sin puntos todavía. Añádelos haciendo clic en la imagen.
-          </p>
-        )}
+      </div>
 
-        {!imagenAMarcar.trim() && (
-          <div className="ca-form-footer">
-            <div className="tf-footer-stack">
-              <button className="ca-btn-guardar" type="submit" disabled={loading}>
+      <div className="ca-form-footer" style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, width: '100%' }}>
+          {!readOnly && (
+            <div className="ca-actions-row">
+              <button className="ca-btn-guardar" type="submit" disabled={loading || previewLoadError}>
                 {loading ? 'Guardando...' : 'Guardar'}
               </button>
-              {error && (
-                <p className="ca-text tf-error" style={{ color: '#c0392b' }}>
-                  {error}
-                </p>
-              )}
             </div>
-          </div>
-        )}
+          )}
+          {error && (
+            <p className="ca-text tf-error" style={{ color: '#c0392b', margin: 0, textAlign: 'center' }}>
+              {error}
+            </p>
+          )}
+        </div>
       </div>
     </form>
   );

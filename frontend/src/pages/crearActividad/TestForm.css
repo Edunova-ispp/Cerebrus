@@ -12,15 +12,32 @@
   font-size: 0.95rem;
 }
 
-.tf-footer-stack {
+.tf-test-footer-stack {
   display: flex;
   flex-direction: column;
+  gap: 10px;
   align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
-.tf-footer-stack .tf-error {
-  margin-top: 10px;
+.tf-footer-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.tf-footer-actions > button {
+  flex: 0 0 auto;
+}
+
+.tf-test-footer-stack .tf-error {
+  margin-top: 0;
   margin-bottom: 0;
+  text-align: center;
 }
 
 /* -- Header columns -------------------------------------------- */

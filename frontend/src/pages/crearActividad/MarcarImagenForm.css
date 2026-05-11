@@ -72,3 +72,36 @@
   box-shadow: none;
   background: var(--t-input-bg);
 }
+
+/* ── Footer ───────────────────────────────────────────────── */
+
+.mi-footer-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.mi-footer-actions {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: auto;
+  max-width: 100%;
+  align-self: center;
+  min-width: max-content;
+}
+
+.mi-footer-actions > button {
+  flex: 0 0 auto;
+}
+
+.mi-footer-stack .tf-error {
+  margin: 0;
+  text-align: center;
+}
