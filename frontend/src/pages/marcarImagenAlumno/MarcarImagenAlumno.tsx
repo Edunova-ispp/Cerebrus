@@ -497,6 +497,7 @@ export default function MarcarImagenAlumno() {
                           [selectedPunto.id]: e.target.value,
                         }))
                       }
+                      maxLength={80}
                       autoFocus
                     />
                   </div>

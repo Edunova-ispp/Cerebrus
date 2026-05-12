@@ -295,6 +295,7 @@ export default function MapaCurso() {
 
           <section className="mapa-activities">
             {(loading || loadingCompletion) && <p className="mapa-feedback">Cargando actividades...</p>}
+            {actividadRows.length === 0 && temas.length === 0 && <p className="mapa-feedback">Todavía no hay temas creados.</p>}
             
             {!loading && !loadingCompletion && error && (
               <p className="mapa-feedback mapa-feedback--error">{error}</p>
@@ -303,6 +304,7 @@ export default function MapaCurso() {
             {selectedTema && !loading && !loadingCompletion && !error && (
               <>
                 <h2 className="mapa-activities-title">{selectedTema.titulo}</h2>
+                {actividadRows.length === 0 && temas.length > 0 && <p className="mapa-feedback">Todavía no hay actividades en este tema.</p>}
                 <ol className="mapa-activities-map" ref={mapContainerRef}>
                   {actividadRows.map((row, rowIndex) => {
                     const reverse = rowIndex % 2 === 1;

@@ -257,7 +257,7 @@ export default function CrucigramaAlumno() {
         setActivityConfig({
           showScore: data.mostrarPuntuacion ?? true,
           allowRetry: data.permitirReintento ?? false,
-          showCorrectAnswer: data.encontrarRespuestaMaestro ?? true,
+          showCorrectAnswer: data.respVisible,
           showStudentAnswer: data.encontrarRespuestaAlumno ?? true,
           showComments: data.respVisible ?? true,
         });

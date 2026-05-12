@@ -200,7 +200,7 @@ export default function CartaAlumno() {
           showScore: cartaData.mostrarPuntuacion ?? true,
           allowRetry: cartaData.permitirReintento ?? false,
           showCorrectAnswer: cartaData.encontrarRespuestaMaestro ?? true,
-          showStudentAnswer: cartaData.encontrarRespuestaAlumno ?? true,
+          showStudentAnswer: false, // En esta actividad el profesor nunca puede marcar "Mostrar respuesta del alumno"
           showComments: cartaData.respVisible ?? true,
         });
 
