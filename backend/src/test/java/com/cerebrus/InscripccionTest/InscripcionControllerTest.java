@@ -49,7 +49,7 @@ class InscripcionControllerTest {
         ResponseEntity<String> respuesta = controller.inscribirAlumno("NOPE");
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(respuesta.getBody()).isEqualTo("El curso no existe");
+        assertThat(respuesta.getBody()).isEqualTo("El curso no existe. Revisa que el código sea correcto");
     }
 
     @Test
@@ -59,7 +59,7 @@ class InscripcionControllerTest {
         ResponseEntity<String> respuesta = controller.inscribirAlumno("ABC123");
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(respuesta.getBody()).isEqualTo("El alumno ya está inscrito en este curso");
+        assertThat(respuesta.getBody()).isEqualTo("Ya estás inscrito en este curso");
     }
 
     @Test
