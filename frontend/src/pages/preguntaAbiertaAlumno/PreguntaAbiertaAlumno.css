@@ -55,6 +55,7 @@
 
 .ta-open-input:focus {
   background-color: var(--color-accent-light);
+  color: #fff;
 }
 
 /* ── Responsive: apila columnas en móvil ── */
