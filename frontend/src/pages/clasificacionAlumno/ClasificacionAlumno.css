@@ -200,7 +200,7 @@
     padding: 0;
     box-sizing: border-box;
     align-content: flex-start;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .clf-respuestas-asociadas .clf-runa-wrapper.small {

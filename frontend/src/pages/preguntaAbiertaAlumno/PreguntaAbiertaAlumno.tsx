@@ -322,6 +322,7 @@ export default function PreguntaAbiertaAlumno() {
                       setRespuestas(newMap);
                     }}
                     disabled={submitted || submitting}
+                    maxLength={1100}
                   />
                 </div>
 
