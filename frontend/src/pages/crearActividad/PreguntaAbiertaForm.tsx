@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import { useActividadIntentosTerminados } from '../../utils/useActividadIntentosTerminados';
 import './TestForm.css';
 import './PreguntaAbiertaForm.css';
 
@@ -52,6 +54,7 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
   preguntaAbiertaId,
   initialValues,
   temaIdProp,
+  cursoIdProp,
   onDone,
   readOnly
 }) => {
@@ -78,12 +81,26 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
   const [success, setSuccess] = useState('');  
 
   const originalQuestionsRef = useRef<PreguntaAbiertaFormInitialValues['preguntas']>([]);
+  const puntuacionOriginalRef = useRef<number | null>(null);
+
+  const params = useParams<{ id: string; temaId: string }>();
+  const cursoId = cursoIdProp ?? params.id;
+
+  const { hasIntentosTerminados, loading: intentosLoading, error: intentosError } = useActividadIntentosTerminados({
+    enabled: mode === 'edit',
+    cursoId,
+    temaId: temaIdProp,
+    actividadId: preguntaAbiertaId,
+  });
+
+  const puntuacionBloqueada = mode === 'edit' && hasIntentosTerminados === true;
 
   useEffect(() => {
     if (!initialValues) return;
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setPuntos(initialValues.puntuacion ?? '');
+    puntuacionOriginalRef.current = typeof initialValues.puntuacion === 'number' ? initialValues.puntuacion : null;
     
     // Al cargar los datos para edición, seteamos la imagen y reseteamos el error
     setImagen(initialValues.imagen ?? '');
@@ -164,6 +181,31 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
       setError(validationError);
       setSuccess('');
       return;
+    }
+
+    const puntosNum = typeof puntos === 'number' ? puntos : Number(puntos);
+    if (mode === 'edit') {
+      const original = puntuacionOriginalRef.current;
+      const quiereCambiar = original == null ? true : puntosNum !== original;
+      if (quiereCambiar) {
+        if (intentosLoading) {
+          setError('Espera un momento: se está comprobando si existen intentos antes de permitir cambiar la puntuación.');
+          setSuccess('');
+          return;
+        }
+        if (hasIntentosTerminados === true) {
+          setError('No puedes editar la puntuación: hay intentos asociados a esta actividad.');
+          setSuccess('');
+          return;
+        }
+        if (hasIntentosTerminados === null) {
+          setError(
+            `No se pudo verificar si existen intentos${intentosError ? `: ${intentosError}` : ''}. No se permitirá cambiar la puntuación.`
+          );
+          setSuccess('');
+          return;
+        }
+      }
     }
 
     setSaving(true);
@@ -348,7 +390,21 @@ export const PreguntaAbiertaForm: React.FC<PreguntaAbiertaFormProps> = ({
           <div className="tf-col">
             <div>
               <label className="tf-label">Puntuación *</label>
-              <input readOnly={readOnly} type="number" className="tf-input tf-input-sm" value={puntos} onChange={e => setPuntos(e.target.value === '' ? '' : Number(e.target.value))} min="1" required />
+              <input
+                readOnly={readOnly || puntuacionBloqueada}
+                type="number"
+                className="tf-input tf-input-sm"
+                value={puntos}
+                onChange={e => setPuntos(e.target.value === '' ? '' : Number(e.target.value))}
+                min="1"
+                required
+              />
+              {mode === 'edit' && !readOnly && puntuacionBloqueada && (
+                <p className="ca-text">No se puede editar la puntuación porque hay intentos asociados.</p>
+              )}
+              {mode === 'edit' && !readOnly && !puntuacionBloqueada && (intentosLoading || intentosError) && (
+                <p className="ca-text">No se pudo comprobar si existen intentos. Al guardar no se permitirá cambiar la puntuación.</p>
+              )}
             </div>
 
             <label className="tf-check-label">

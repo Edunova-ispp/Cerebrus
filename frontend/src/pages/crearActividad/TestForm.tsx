@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import { useActividadIntentosTerminados } from '../../utils/useActividadIntentosTerminados';
 import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import './TestForm.css';
 
@@ -96,6 +97,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
 
   // Tracks original server-loaded preguntas for deletion detection in edit mode
   const originalQuestionsRef = useRef<TestFormInitialPregunta[]>([]);
+  const puntuacionOriginalRef = useRef<number | null>(null);
   // Tracks which activity ID was last initialized to prevent re-initializing on every render
   const initializedActivityIdRef = useRef<number | null>(null);
 
@@ -103,6 +105,15 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
   const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
+
+  const { hasIntentosTerminados, loading: intentosLoading, error: intentosError } = useActividadIntentosTerminados({
+    enabled: mode === 'edit',
+    cursoId,
+    temaId,
+    actividadId: generalId,
+  });
+
+  const puntuacionBloqueada = mode === 'edit' && hasIntentosTerminados === true;
 
   useEffect(() => {
     if (!initialValues) return;
@@ -115,6 +126,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
+    puntuacionOriginalRef.current = typeof initialValues.puntuacion === 'number' ? initialValues.puntuacion : null;
     setImagen(initialValues.imagen ?? '');
     setRespVisible(Boolean(initialValues.respVisible));
     setPermitirReintento(Boolean(initialValues.permitirReintento));
@@ -250,6 +262,27 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
 
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     const temaIdNum = Number.parseInt(temaId!, 10);
+
+    if (mode === 'edit') {
+      const original = puntuacionOriginalRef.current;
+      const quiereCambiar = original == null ? true : puntuacionNum !== original;
+      if (quiereCambiar) {
+        if (intentosLoading) {
+          setError('Espera un momento: se está comprobando si existen intentos antes de permitir cambiar la puntuación.');
+          return;
+        }
+        if (hasIntentosTerminados === true) {
+          setError('No puedes editar la puntuación: hay intentos asociados a esta actividad.');
+          return;
+        }
+        if (hasIntentosTerminados === null) {
+          setError(
+            `No se pudo verificar si existen intentos${intentosError ? `: ${intentosError}` : ''}. No se permitirá cambiar la puntuación.`
+          );
+          return;
+        }
+      }
+    }
 
     setLoading(true);
     try {
@@ -497,7 +530,7 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
             <div>
               <label className="tf-label" htmlFor="tf-puntuacion">Puntuación *</label>
               <input
-                readOnly={readOnly}
+                readOnly={readOnly || puntuacionBloqueada}
                 type="number"
                 id="tf-puntuacion"
                 className="tf-input tf-input-sm"
@@ -506,6 +539,12 @@ export function TestForm({ mode = 'create', generalId, initialValues, temaIdProp
                 min="1"
                 required
               />
+              {mode === 'edit' && !readOnly && puntuacionBloqueada && (
+                <p className="ca-text">No se puede editar la puntuación porque hay intentos asociados.</p>
+              )}
+              {mode === 'edit' && !readOnly && !puntuacionBloqueada && (intentosLoading || intentosError) && (
+                <p className="ca-text">No se pudo comprobar si existen intentos. Al guardar no se permitirá cambiar la puntuación.</p>
+              )}
             </div>
             {!readOnly && (
               <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
