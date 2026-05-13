@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -29,11 +30,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cerebrus.exceptions.ResourceNotFoundException;
+import com.cerebrus.suscripcion.Suscripcion;
+import com.cerebrus.suscripcion.SuscripcionRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioRepository;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.alumno.AlumnoRepository;
 import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.maestro.MaestroRepository;
 import com.cerebrus.usuario.organizacion.dto.CreateUserRequest;
 import com.cerebrus.usuario.organizacion.dto.UsuarioActualizarDTO;
 
@@ -48,13 +53,19 @@ public class OrganizacionServiceImpl implements OrganizacionService {
     private final UsuarioService usuarioService;
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SuscripcionRepository suscripcionRepository;
+    private final MaestroRepository maestroRepository;
+    private final AlumnoRepository alumnoRepository;
 
     @Autowired
-    public OrganizacionServiceImpl(OrganizacionRepository organizacionRepository, PasswordEncoder passwordEncoder, UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
+    public OrganizacionServiceImpl(OrganizacionRepository organizacionRepository, PasswordEncoder passwordEncoder, UsuarioService usuarioService, UsuarioRepository usuarioRepository, SuscripcionRepository suscripcionRepository, MaestroRepository maestroRepository, AlumnoRepository alumnoRepository) {
         this.organizacionRepository = organizacionRepository;
         this.passwordEncoder = passwordEncoder;
         this.usuarioService = usuarioService;
         this.usuarioRepository = usuarioRepository;
+        this.suscripcionRepository = suscripcionRepository;
+        this.maestroRepository = maestroRepository;
+        this.alumnoRepository = alumnoRepository;
     }
 
     @Override
@@ -242,6 +253,10 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         if (!tieneSuscripcionActiva) {
             throw new AccessDeniedException("La organización no tiene una suscripción activa. No puede crear usuarios.");
         }
+
+        Suscripcion suscripcionActiva = suscripcionRepository
+            .findByOrganizacionIdSuscripcionActiva(organizacion.getId())
+            .orElseThrow(() -> new AccessDeniedException("La organización no tiene una suscripción activa. No puede crear usuarios."));
                  
 
         String rolUpper = request.getRol().toUpperCase();
@@ -267,6 +282,12 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         Usuario nuevoUsuario = null;
         
         if ("MAESTRO".equals(rolUpper)) {
+            long actualesMaestros = maestroRepository.countByOrganizacionId(organizacion.getId());
+            if (actualesMaestros >= suscripcionActiva.getNumMaestros()) {
+                throw new IllegalArgumentException(String.format(
+                    "Has alcanzado el límite de %d profesor(es) de tu suscripción. Amplía tu plan para añadir más.",
+                    suscripcionActiva.getNumMaestros()));
+            }
             Maestro maestro = new Maestro(
                 request.getNombre(),
                 request.getPrimerApellido(),
@@ -280,6 +301,12 @@ public class OrganizacionServiceImpl implements OrganizacionService {
             organizacion.getMaestros().add(maestro);
             nuevoUsuario = maestro;
         } else if ("ALUMNO".equals(rolUpper)) {
+            long actualesAlumnos = alumnoRepository.countByOrganizacionId(organizacion.getId());
+            if (actualesAlumnos >= suscripcionActiva.getNumAlumnos()) {
+                throw new IllegalArgumentException(String.format(
+                    "Has alcanzado el límite de %d alumno(s) de tu suscripción. Amplía tu plan para añadir más.",
+                    suscripcionActiva.getNumAlumnos()));
+            }
             Alumno alumno = new Alumno(
                 request.getNombre(),
                 request.getPrimerApellido(),
@@ -549,6 +576,13 @@ public class OrganizacionServiceImpl implements OrganizacionService {
 
         Usuario usuarioActual = usuarioService.findCurrentUser();
         Organizacion organizacion = (Organizacion) usuarioActual;
+
+        validarCapacidadSuscripcion(organizacion.getId(), requests);
+
+        if (!errores.isEmpty()) {
+            return errores;
+        }
+
         List<Usuario> nuevosUsuarios = new ArrayList<>();
         for (CreateUserRequest request : requests) {
             Usuario nuevo = construirUsuarioImportacionMasiva(request, organizacion);
@@ -660,6 +694,13 @@ public class OrganizacionServiceImpl implements OrganizacionService {
 
         Usuario usuarioActual = usuarioService.findCurrentUser();
         Organizacion organizacion = (Organizacion) usuarioActual;
+
+        validarCapacidadSuscripcion(organizacion.getId(), requests);
+
+        if (!errores.isEmpty()) {
+            return errores;
+        }
+
         List<Usuario> nuevosUsuarios = new ArrayList<>();
         for (CreateUserRequest request : requests) {
             Usuario nuevo = construirUsuarioImportacionMasiva(request, organizacion);
@@ -679,5 +720,24 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         // evitando casos como contraseñas numéricas convertidas a "123.0".
         DataFormatter formatter = new DataFormatter();
         return formatter.formatCellValue(cell);
+    }
+
+    private void validarCapacidadSuscripcion(Long organizacionId, List<CreateUserRequest> requests) {
+        suscripcionRepository.findByOrganizacionIdSuscripcionActiva(organizacionId).ifPresent(sus -> {
+            long maestrosNuevos = requests.stream().filter(r -> "MAESTRO".equalsIgnoreCase(r.getRol())).count();
+            long alumnosNuevos  = requests.stream().filter(r -> "ALUMNO".equalsIgnoreCase(r.getRol())).count();
+            long maestrosActuales = maestroRepository.countByOrganizacionId(organizacionId);
+            long alumnosActuales  = alumnoRepository.countByOrganizacionId(organizacionId);
+            if (maestrosActuales + maestrosNuevos > sus.getNumMaestros()) {
+                throw new IllegalArgumentException(String.format(
+                    "La importaci\u00f3n superar\u00eda el l\u00edmite de %d profesor(es) (actuales: %d, a a\u00f1adir: %d).",
+                    sus.getNumMaestros(), maestrosActuales, maestrosNuevos));
+            }
+            if (alumnosActuales + alumnosNuevos > sus.getNumAlumnos()) {
+                throw new IllegalArgumentException(String.format(
+                    "La importaci\u00f3n superar\u00eda el l\u00edmite de %d alumno(s) (actuales: %d, a a\u00f1adir: %d).",
+                    sus.getNumAlumnos(), alumnosActuales, alumnosNuevos));
+            }
+        });
     }
 }

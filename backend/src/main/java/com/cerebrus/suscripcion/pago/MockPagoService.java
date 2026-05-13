@@ -15,7 +15,8 @@ public class MockPagoService {
 
     public SesionPagoDTO crearSesionDePago(Long suscripcionId, Double costoSuscripcion) {
         String transaccionMockId = "txn_mock_" + UUID.randomUUID().toString();
-        String urlPagoFalsa = frontendUrl + "/simulador-pago?txn=" + transaccionMockId + "&susId=" + suscripcionId;
+        String base = frontendUrl.replaceAll("/+$", "");
+        String urlPagoFalsa = base + "/simulador-pago?txn=" + transaccionMockId + "&susId=" + suscripcionId;
         
         return new SesionPagoDTO(transaccionMockId, urlPagoFalsa);
     }
