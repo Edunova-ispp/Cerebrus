@@ -295,7 +295,7 @@ export default function MapaCurso() {
 
           <section className="mapa-activities">
             {(loading || loadingCompletion) && <p className="mapa-feedback">Cargando actividades...</p>}
-            {actividadRows.length === 0 && temas.length === 0 && <p className="mapa-feedback">Todavía no hay temas creados.</p>}
+            {actividadRows.length === 0 && temas.length === 0 && !loading && <p className="mapa-feedback">Todavía no hay temas creados.</p>}
             
             {!loading && !loadingCompletion && error && (
               <p className="mapa-feedback mapa-feedback--error">{error}</p>

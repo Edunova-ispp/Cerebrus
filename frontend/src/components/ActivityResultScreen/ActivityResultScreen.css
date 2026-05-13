@@ -36,6 +36,7 @@
 .ars-title {
   font-size: 1.3rem;
   font-weight: 600;
+  text-shadow: none;
   color: #0F1338;
   margin: 0 0 16px 0;
   line-height: 1.3;
@@ -58,6 +59,7 @@
   margin: 0 0 8px 0;
   font-size: 0.85rem;
   color: #555;
+  text-shadow: none;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: bold;
@@ -86,6 +88,7 @@
   font-size: 0.95rem;
   color: #666;
   font-weight: bold;
+  text-shadow: none;
 }
 
 .ars-score-grade {
@@ -190,6 +193,7 @@
 
   .ars-title {
     font-size: 1.3rem;
+    text-shadow: none;
   }
 
   .ars-imgs {
@@ -204,5 +208,6 @@
 
   .ars-score-value {
     font-size: 2rem;
+    text-shadow: none;
   }
 }
