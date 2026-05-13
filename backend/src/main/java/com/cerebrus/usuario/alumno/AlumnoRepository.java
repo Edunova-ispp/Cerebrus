@@ -9,8 +9,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
-    
-    
+
+    long countByOrganizacionId(Long organizacionId);
+
     Page<Alumno> findByOrganizacionId(Long organizacionId, Pageable pageable);
     
     
