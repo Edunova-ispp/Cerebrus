@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import { apiFetch } from '../../utils/api';
+import { useActividadIntentosTerminados } from '../../utils/useActividadIntentosTerminados';
 import './CartaForm.css';
 
 export type CartaFormMode = 'create' | 'edit';
@@ -85,11 +86,21 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
   const [showIAModal, setShowIAModal] = useState(false);
 
   const originalCardsRef = useRef<CartaFormInitialPregunta[]>([]);
+  const puntuacionOriginalRef = useRef<number | null>(null);
 
   const navigate = useNavigate();
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
   const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
+
+  const { hasIntentosTerminados, loading: intentosLoading, error: intentosError } = useActividadIntentosTerminados({
+    enabled: mode === 'edit',
+    cursoId,
+    temaId,
+    actividadId: generalId,
+  });
+
+  const puntuacionBloqueada = mode === 'edit' && hasIntentosTerminados === true;
 
   // Tracks which activity ID was last initialized to prevent re-initializing on every render
   const initializedActivityIdRef = useRef<number | null>(null);
@@ -105,6 +116,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
+    puntuacionOriginalRef.current = typeof initialValues.puntuacion === 'number' ? initialValues.puntuacion : null;
     setImagen(initialValues.imagen ?? '');
     setRespVisible(Boolean(initialValues.respVisible));
     setPermitirReintento(Boolean(initialValues.permitirReintento));
@@ -151,7 +163,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
     if (typeof source.titulo === 'string') setTitulo(source.titulo);
     if (typeof source.descripcion === 'string') setDescripcion(source.descripcion);
     if (typeof source.puntuacion === 'string' || typeof source.puntuacion === 'number') {
-      setPuntuacion(String(source.puntuacion));
+      if (!puntuacionBloqueada) setPuntuacion(String(source.puntuacion));
     }
 
     const rawQuestions = [source.preguntas, source.cartas, source.items].find(Array.isArray);
@@ -239,6 +251,27 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
 
     const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
     const temaIdNum = Number.parseInt(temaId!, 10);
+
+    if (mode === 'edit') {
+      const original = puntuacionOriginalRef.current;
+      const quiereCambiar = original == null ? true : puntuacionNum !== original;
+      if (quiereCambiar) {
+        if (intentosLoading) {
+          setError('Espera un momento: se está comprobando si existen intentos antes de permitir cambiar la puntuación.');
+          return;
+        }
+        if (hasIntentosTerminados === true) {
+          setError('No puedes editar la puntuación: hay intentos asociados a esta actividad.');
+          return;
+        }
+        if (hasIntentosTerminados === null) {
+          setError(
+            `No se pudo verificar si existen intentos${intentosError ? `: ${intentosError}` : ''}. No se permitirá cambiar la puntuación.`
+          );
+          return;
+        }
+      }
+    }
 
     setLoading(true);
     try {
@@ -438,7 +471,7 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
               <div>
                 <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
                 <input
-                  readOnly={readOnly}
+                  readOnly={readOnly || puntuacionBloqueada}
                   type="number"
                   id="cf-puntuacion"
                   className="cf-input cf-input-sm"
@@ -447,9 +480,15 @@ export function CartaForm({ mode = 'create', generalId, initialValues, temaIdPro
                   min="1"
                   required
                 />
+                {mode === 'edit' && !readOnly && puntuacionBloqueada && (
+                  <p className="ca-text">No se puede editar la puntuación porque hay intentos asociados.</p>
+                )}
+                {mode === 'edit' && !readOnly && !puntuacionBloqueada && (intentosLoading || intentosError) && (
+                  <p className="ca-text">No se pudo comprobar si existen intentos. Al guardar no se permitirá cambiar la puntuación.</p>
+                )}
               </div>
               {!readOnly && (
-                <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+                <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)} disabled={puntuacionBloqueada}>
                   Generar con IA
                 </button>
               )}

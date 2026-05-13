@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import { useActividadIntentosTerminados } from '../../utils/useActividadIntentosTerminados';
 import './CrucigramaForm.css';
 
 export type CrucigramaFormMode = 'create' | 'edit';
@@ -63,10 +64,21 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
+    const puntuacionOriginalRef = useRef<number | null>(null);
+
     const navigate = useNavigate();
     const params = useParams<{ id: string; temaId: string }>();
     const cursoId = cursoIdProp ?? params.id;
     const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
+
+    const { hasIntentosTerminados, loading: intentosLoading, error: intentosError } = useActividadIntentosTerminados({
+        enabled: mode === 'edit',
+        cursoId,
+        temaId,
+        actividadId: crucigramaId,
+    });
+
+    const puntuacionBloqueada = mode === 'edit' && hasIntentosTerminados === true;
 
     // Tracks which activity ID was last initialized to prevent re-initializing on every render
     const initializedActivityIdRef = useRef<number | null>(null);
@@ -137,6 +149,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
         setTitulo(initialValues.titulo || '');
         setDescripcion(initialValues.descripcion || '');
         setPuntuacion(String(initialValues.puntuacion) || '');
+        puntuacionOriginalRef.current = typeof initialValues.puntuacion === 'number' ? initialValues.puntuacion : null;
         setRespVisible(initialValues.respVisible !== undefined ? initialValues.respVisible : true);
         setPermitirReintento(Boolean(initialValues.permitirReintento));
         setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion));
@@ -185,6 +198,28 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
         if (validationError) {
             setError(validationError);
             return;
+        }
+
+        const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
+        if (mode === 'edit') {
+            const original = puntuacionOriginalRef.current;
+            const quiereCambiar = original == null ? true : puntuacionNum !== original;
+            if (quiereCambiar) {
+                if (intentosLoading) {
+                    setError('Espera un momento: se está comprobando si existen intentos antes de permitir cambiar la puntuación.');
+                    return;
+                }
+                if (hasIntentosTerminados === true) {
+                    setError('No puedes editar la puntuación: hay intentos asociados a esta actividad.');
+                    return;
+                }
+                if (hasIntentosTerminados === null) {
+                    setError(
+                        `No se pudo verificar si existen intentos${intentosError ? `: ${intentosError}` : ''}. No se permitirá cambiar la puntuación.`
+                    );
+                    return;
+                }
+            }
         }
 
         setLoading(true);
@@ -277,7 +312,7 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                         <div style={{marginBottom: 12 }}>
                             <label className="cf-label" htmlFor="cf-punt">Puntuación *</label>
                             <input
-                                readOnly={readOnly}
+                                readOnly={readOnly || puntuacionBloqueada}
                                 id="cf-punt"
                                 type="number"
                                 className="cf-input"
@@ -286,6 +321,12 @@ export function CrucigramaForm({ mode = 'create', crucigramaId, initialValues, t
                                 onChange={e => setPuntuacion(e.target.value)}
                                 required
                             />
+                            {mode === 'edit' && !readOnly && puntuacionBloqueada && (
+                                <p className="ca-text">No se puede editar la puntuación porque hay intentos asociados.</p>
+                            )}
+                            {mode === 'edit' && !readOnly && !puntuacionBloqueada && (intentosLoading || intentosError) && (
+                                <p className="ca-text">No se pudo comprobar si existen intentos. Al guardar no se permitirá cambiar la puntuación.</p>
+                            )}
                         </div>
                         <div className="tf-col">
                             <label

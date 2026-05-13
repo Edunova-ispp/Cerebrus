@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import { useActividadIntentosTerminados } from '../../utils/useActividadIntentosTerminados';
 import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import './OrdenacionForm.css';
 
@@ -71,6 +72,17 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
   const cursoId = cursoIdProp ?? params.id;
   const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
 
+  const puntuacionOriginalRef = useRef<number | null>(null);
+
+  const { hasIntentosTerminados, loading: intentosLoading, error: intentosError } = useActividadIntentosTerminados({
+    enabled: mode === 'edit',
+    cursoId,
+    temaId,
+    actividadId: ordenacionId,
+  });
+
+  const puntuacionBloqueada = mode === 'edit' && hasIntentosTerminados === true;
+
   // Tracks which activity ID was last initialized to prevent re-initializing on every render
   const initializedActivityIdRef = useRef<number | null>(null);
 
@@ -85,6 +97,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
+    puntuacionOriginalRef.current = typeof initialValues.puntuacion === 'number' ? initialValues.puntuacion : null;
     setRespVisible(Boolean(initialValues.respVisible));
     setPermitirReintento(Boolean(initialValues.permitirReintento));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
@@ -142,6 +155,27 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       return;
     }
 
+    if (mode === 'edit') {
+      const original = puntuacionOriginalRef.current;
+      const quiereCambiar = original == null ? true : puntuacionNum !== original;
+      if (quiereCambiar) {
+        if (intentosLoading) {
+          setError('Espera un momento: se está comprobando si existen intentos antes de permitir cambiar la puntuación.');
+          return;
+        }
+        if (hasIntentosTerminados === true) {
+          setError('No puedes editar la puntuación: hay intentos asociados a esta actividad.');
+          return;
+        }
+        if (hasIntentosTerminados === null) {
+          setError(
+            `No se pudo verificar si existen intentos${intentosError ? `: ${intentosError}` : ''}. No se permitirá cambiar la puntuación.`
+          );
+          return;
+        }
+      }
+    }
+
     if (comentariosRespVisible.trim().length > MAX_CARACTERES_COMENTARIOS) {
       setError(`Los comentarios no pueden exceder ${MAX_CARACTERES_COMENTARIOS} caracteres.`);
       return;
@@ -182,6 +216,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       return;
     }
 
+    const valoresSet = new Set<string>();
     for (let i = 0; i < valores.length; i++) {
       if (valores[i].length > MAX_CARACTERES_ELEMENTO && ordenItemsKind === 'words') {
         setError(`El valor ${i + 1} no puede exceder los ${MAX_CARACTERES_ELEMENTO} caracteres.`);
@@ -191,10 +226,11 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
         setError(`El valor ${i + 1} no puede estar vacío.`);
         return;
       }
-      if (valores[i].trim() in valores.slice(0, i) || valores[i].trim() in valores.slice(i + 1, valores.length)) {
-        setError(`El valor ${i + 1} está repetido .`);
+      if (valoresSet.has(valores[i].trim())) {
+        setError(`El valor ${i + 1} está repetido.`);
         return;
       }
+      valoresSet.add(valores[i].trim());
     }
 
     setLoading(true);
@@ -291,7 +327,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
             <div>
               <label className="of-label" htmlFor="of-puntuacion">Puntuación *</label>
               <input
-                readOnly={readOnly} 
+                readOnly={readOnly || puntuacionBloqueada}
                 type="number"
                 id="of-puntuacion"
                 className="of-input of-input-sm"
@@ -300,6 +336,12 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
                 min="1"
                 required
               />
+              {mode === 'edit' && !readOnly && puntuacionBloqueada && (
+                <p className="ca-text">No se puede editar la puntuación porque hay intentos asociados.</p>
+              )}
+              {mode === 'edit' && !readOnly && !puntuacionBloqueada && (intentosLoading || intentosError) && (
+                <p className="ca-text">No se pudo comprobar si existen intentos. Al guardar no se permitirá cambiar la puntuación.</p>
+              )}
             </div>
             {!readOnly && (
               <button type="button" className="iam-trigger-btn" onClick={() => setIaModalOpen(true)}>
