@@ -1,4 +1,4 @@
-# Vídeo Demo — Cerebrus Preparing Project Launch
+# Cerebrus Preparing Project Launch Preparation
 
 ## Descripción
 Este documento recopila el enlace a la landing page de Cerebrus junto al banner oficial.
