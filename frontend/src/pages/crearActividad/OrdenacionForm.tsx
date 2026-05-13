@@ -216,6 +216,7 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
       return;
     }
 
+    const valoresSet = new Set<string>();
     for (let i = 0; i < valores.length; i++) {
       if (valores[i].length > MAX_CARACTERES_ELEMENTO && ordenItemsKind === 'words') {
         setError(`El valor ${i + 1} no puede exceder los ${MAX_CARACTERES_ELEMENTO} caracteres.`);
@@ -225,10 +226,11 @@ export function OrdenacionForm({ mode = 'create', ordenacionId, initialValues, t
         setError(`El valor ${i + 1} no puede estar vacío.`);
         return;
       }
-      if (valores[i].trim() in valores.slice(0, i) || valores[i].trim() in valores.slice(i + 1, valores.length)) {
-        setError(`El valor ${i + 1} está repetido .`);
+      if (valoresSet.has(valores[i].trim())) {
+        setError(`El valor ${i + 1} está repetido.`);
         return;
       }
+      valoresSet.add(valores[i].trim());
     }
 
     setLoading(true);
