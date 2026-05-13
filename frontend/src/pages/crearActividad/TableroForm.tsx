@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
 import { getCurrentUserRoles } from '../../types/curso';
+import { useActividadIntentosTerminados } from '../../utils/useActividadIntentosTerminados';
 import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import './TableroForm.css';
 
@@ -69,10 +70,22 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
   const [success, setSuccess] = useState('');
   const [showIAModal, setShowIAModal] = useState(false);
 
+  const puntuacionOriginalRef = useRef<number | null>(null);
+
   const navigate = useNavigate();
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
   const temaId = temaIdProp ?? params.temaId;
+
+  const temaIdForIntentos = mode === 'edit' ? (temaIdState ?? temaId) : temaId;
+  const { hasIntentosTerminados, loading: intentosLoading, error: intentosError } = useActividadIntentosTerminados({
+    enabled: mode === 'edit',
+    cursoId,
+    temaId: temaIdForIntentos,
+    actividadId: tableroId,
+  });
+
+  const puntuacionBloqueada = mode === 'edit' && hasIntentosTerminados === true;
 
   // Role check
   const isMaestro = getCurrentUserRoles().some((r) => r.includes('MAESTRO'));
@@ -91,6 +104,7 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
     setTitulo(initialValues.titulo);
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion));
+    puntuacionOriginalRef.current = typeof initialValues.puntuacion === 'number' ? initialValues.puntuacion : null;
     setRespVisible(initialValues.respVisible);
     setPermitirReintento(Boolean(initialValues.permitirReintento));
     setMostrarPuntuacion(Boolean(initialValues.mostrarPuntuacion));
@@ -171,6 +185,29 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
       setError(validationError);
       return;
     }
+
+    const puntuacionNum = Number.parseInt(puntuacion.trim(), 10);
+    if (mode === 'edit') {
+      const original = puntuacionOriginalRef.current;
+      const quiereCambiar = original == null ? true : puntuacionNum !== original;
+      if (quiereCambiar) {
+        if (intentosLoading) {
+          setError('Espera un momento: se está comprobando si existen intentos antes de permitir cambiar la puntuación.');
+          return;
+        }
+        if (hasIntentosTerminados === true) {
+          setError('No puedes editar la puntuación: hay intentos asociados a esta actividad.');
+          return;
+        }
+        if (hasIntentosTerminados === null) {
+          setError(
+            `No se pudo verificar si existen intentos${intentosError ? `: ${intentosError}` : ''}. No se permitirá cambiar la puntuación.`
+          );
+          return;
+        }
+      }
+    }
+
     const apiBase = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '');
     setLoading(true);
     try {
@@ -207,7 +244,7 @@ export function TableroForm({ mode = 'create', tableroId, initialValues, temaIdP
 
     if (data.titulo) setTitulo(String(data.titulo));
     if (data.descripcion) setDescripcion(String(data.descripcion));
-    if (data.puntuacion) setPuntuacion(String(data.puntuacion));
+    if (data.puntuacion && !puntuacionBloqueada) setPuntuacion(String(data.puntuacion));
 
     const arrayPreguntas = data.preguntas || data.casillas || data.items || data.tablero || [];
 
@@ -282,7 +319,7 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
             <div className="tbl-input-group">
               <label className="tbl-label">Puntuación *</label>
               <input
-                readOnly={readOnly}
+                readOnly={readOnly || puntuacionBloqueada}
                 className="tbl-input"
                 type="number"
                 min={1}
@@ -291,10 +328,16 @@ for (let i = 0; i < Math.min(arrayPreguntas.length, expectedCount); i++) {
                 required
                 style={{ width: 90 }}
               />
+              {mode === 'edit' && !readOnly && puntuacionBloqueada && (
+                <p className="ca-text">No se puede editar la puntuación porque hay intentos asociados.</p>
+              )}
+              {mode === 'edit' && !readOnly && !puntuacionBloqueada && (intentosLoading || intentosError) && (
+                <p className="ca-text">No se pudo comprobar si existen intentos. Al guardar no se permitirá cambiar la puntuación.</p>
+              )}
             </div>
               {!readOnly && (
                 <button
-                  disabled={readOnly}
+                  disabled={readOnly || puntuacionBloqueada}
                   type="button"
                   className="iam-trigger-btn"
                   onClick={() => setShowIAModal(true)}

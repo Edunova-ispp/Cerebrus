@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../utils/api';
+import { useActividadIntentosTerminados } from '../../utils/useActividadIntentosTerminados';
 import GenerarIAModal from '../../components/GenerarIAModal/GenerarIAModal';
 import './TestForm.css';
 
@@ -91,10 +92,20 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
   const [showIAModal, setShowIAModal] = useState(false);
 
   const originalPreguntasRef = useRef<ClasificacionFormInitialPregunta[]>([]);
+  const puntuacionOriginalRef = useRef<number | null>(null);
   const navigate = useNavigate();
   const params = useParams<{ id: string; temaId: string }>();
   const cursoId = cursoIdProp ?? params.id;
   const temaId = temaIdProp ?? params.temaId ?? (initialValues?.temaId != null ? String(initialValues.temaId) : undefined);
+
+  const { hasIntentosTerminados, loading: intentosLoading, error: intentosError } = useActividadIntentosTerminados({
+    enabled: mode === 'edit',
+    cursoId,
+    temaId,
+    actividadId: clasificacionId,
+  });
+
+  const puntuacionBloqueada = mode === 'edit' && hasIntentosTerminados === true;
 
   // Tracks which activity ID was last initialized to prevent re-initializing on every render
   const initializedActivityIdRef = useRef<number | null>(null);
@@ -110,6 +121,7 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
     setTitulo(initialValues.titulo ?? '');
     setDescripcion(initialValues.descripcion ?? '');
     setPuntuacion(String(initialValues.puntuacion ?? ''));
+    puntuacionOriginalRef.current = typeof initialValues.puntuacion === 'number' ? initialValues.puntuacion : null;
     setRespVisible(Boolean(initialValues.respVisible));
     setPermitirReintento(Boolean(initialValues.permitirReintento));
     setComentariosRespVisible(initialValues.comentariosRespVisible ?? '');
@@ -236,6 +248,27 @@ export function ClasificacionForm({ mode = 'create', clasificacionId, initialVal
 
     const pNum = Number.parseInt(puntuacion.trim(), 10);
 
+    if (mode === 'edit') {
+      const original = puntuacionOriginalRef.current;
+      const quiereCambiar = original == null ? true : pNum !== original;
+      if (quiereCambiar) {
+        if (intentosLoading) {
+          setError('Espera un momento: se está comprobando si existen intentos antes de permitir cambiar la puntuación.');
+          return;
+        }
+        if (hasIntentosTerminados === true) {
+          setError('No puedes editar la puntuación: hay intentos asociados a esta actividad.');
+          return;
+        }
+        if (hasIntentosTerminados === null) {
+          setError(
+            `No se pudo verificar si existen intentos${intentosError ? `: ${intentosError}` : ''}. No se permitirá cambiar la puntuación.`
+          );
+          return;
+        }
+      }
+    }
+
     const tIdNum = Number.parseInt(temaId!, 10);
 
     setLoading(true);
@@ -359,7 +392,7 @@ const handleIAResult = (data: any) => {
 
     if (data.titulo) setTitulo(data.titulo);
     if (data.descripcion) setDescripcion(data.descripcion);
-    if (data.puntuacion) setPuntuacion(String(data.puntuacion));
+    if (data.puntuacion && !puntuacionBloqueada) setPuntuacion(String(data.puntuacion));
 
     // 2. Buscamos el array principal (la IA a veces lo llama 'categorias' en vez de 'preguntas')
     const arrayPrincipal = data.preguntas || data.categorias || data.categories;
@@ -431,7 +464,7 @@ const handleIAResult = (data: any) => {
             <div>
               <label className="cf-label" htmlFor="cf-puntuacion">Puntuación *</label>
               <input
-                readOnly={readOnly}
+                readOnly={readOnly || puntuacionBloqueada}
                 className="of-input"
                 type="number"
                 id="cf-puntuacion"
@@ -441,9 +474,15 @@ const handleIAResult = (data: any) => {
                 required
                 style={{ width: 90 }}
               />
+              {mode === 'edit' && !readOnly && puntuacionBloqueada && (
+                <p className="ca-text">No se puede editar la puntuación porque hay intentos asociados.</p>
+              )}
+              {mode === 'edit' && !readOnly && !puntuacionBloqueada && (intentosLoading || intentosError) && (
+                <p className="ca-text">No se pudo comprobar si existen intentos. Al guardar no se permitirá cambiar la puntuación.</p>
+              )}
             </div>
             {!readOnly && (
-              <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)}>
+              <button type="button" className="iam-trigger-btn" onClick={() => setShowIAModal(true)} disabled={puntuacionBloqueada}>
                 Generar con IA
               </button>
             )}
