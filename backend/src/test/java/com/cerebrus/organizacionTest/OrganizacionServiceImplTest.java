@@ -28,11 +28,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.cerebrus.comun.enumerados.EstadoPagoSuscripcion;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.suscripcion.Suscripcion;
+import com.cerebrus.suscripcion.SuscripcionRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioRepository;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.alumno.AlumnoRepository;
 import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.maestro.MaestroRepository;
 import com.cerebrus.usuario.organizacion.Organizacion;
 import com.cerebrus.usuario.organizacion.OrganizacionRepository;
 import com.cerebrus.usuario.organizacion.OrganizacionServiceImpl;
@@ -53,6 +56,15 @@ class OrganizacionServiceImplTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private SuscripcionRepository suscripcionRepository;
+
+    @Mock
+    private MaestroRepository maestroRepository;
+
+    @Mock
+    private AlumnoRepository alumnoRepository;
 
     @InjectMocks
     private OrganizacionServiceImpl organizacionService;
@@ -237,6 +249,9 @@ class OrganizacionServiceImplTest {
         // Arrange
         CreateUserRequest request = requestBase("MAESTRO");
         when(usuarioService.findCurrentUser()).thenReturn(organizacionActiva);
+        when(suscripcionRepository.findByOrganizacionIdSuscripcionActiva(1L))
+                .thenReturn(Optional.of(suscripcionConCapacidad(10, 10)));
+        when(maestroRepository.countByOrganizacionId(1L)).thenReturn(1L);
         when(usuarioRepository.existsByNombreUsuario("nuevoUser")).thenReturn(false);
         when(usuarioRepository.existsByCorreoElectronico("nuevo@org.com")).thenReturn(false);
         when(passwordEncoder.encode("1234")).thenReturn("encoded");
@@ -268,6 +283,8 @@ class OrganizacionServiceImplTest {
         // Arrange
         CreateUserRequest request = requestBase("ALUMNO");
         when(usuarioService.findCurrentUser()).thenReturn(organizacionActiva);
+        when(suscripcionRepository.findByOrganizacionIdSuscripcionActiva(1L))
+                .thenReturn(Optional.of(suscripcionConCapacidad(10, 10)));
         when(usuarioRepository.existsByNombreUsuario("nuevoUser")).thenReturn(true);
 
         // Act + Assert
@@ -300,6 +317,10 @@ class OrganizacionServiceImplTest {
         MockMultipartFile archivo = new MockMultipartFile("archivo", "usuarios.csv", "text/csv", csv.getBytes(StandardCharsets.UTF_8));
 
         when(usuarioService.findCurrentUser()).thenReturn(organizacionActiva);
+        when(suscripcionRepository.findByOrganizacionIdSuscripcionActiva(1L))
+                .thenReturn(Optional.of(suscripcionConCapacidad(10, 10)));
+        when(alumnoRepository.countByOrganizacionId(1L)).thenReturn(0L);
+        when(maestroRepository.countByOrganizacionId(1L)).thenReturn(0L);
         when(usuarioRepository.existsByNombreUsuario("luis")).thenReturn(false);
         when(usuarioRepository.existsByCorreoElectronico("luis@org.com")).thenReturn(false);
         when(passwordEncoder.encode("pwd")).thenReturn("enc");
@@ -396,6 +417,13 @@ class OrganizacionServiceImplTest {
             org.getSuscripciones().add(s);
         }
         return org;
+    }
+
+    private Suscripcion suscripcionConCapacidad(int numMaestros, int numAlumnos) {
+        Suscripcion s = new Suscripcion();
+        s.setNumMaestros(numMaestros);
+        s.setNumAlumnos(numAlumnos);
+        return s;
     }
 
     private CreateUserRequest requestBase(String rol) {

@@ -248,6 +248,12 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         }
         
         Organizacion organizacion = (Organizacion) usuarioActual;
+
+        String rolUpper = request.getRol().toUpperCase();
+        if ("ORGANIZACION".equals(rolUpper)) {
+            throw new IllegalArgumentException("No se puede crear usuarios con rol ORGANIZACIÓN.");
+        }
+
         // Comprobar suscripciones activas antes de crear usuarios
         boolean tieneSuscripcionActiva = organizacion.getActivo() != null && organizacion.getActivo();
         if (!tieneSuscripcionActiva) {
@@ -257,12 +263,6 @@ public class OrganizacionServiceImpl implements OrganizacionService {
         Suscripcion suscripcionActiva = suscripcionRepository
             .findByOrganizacionIdSuscripcionActiva(organizacion.getId())
             .orElseThrow(() -> new AccessDeniedException("La organización no tiene una suscripción activa. No puede crear usuarios."));
-                 
-
-        String rolUpper = request.getRol().toUpperCase();
-        if ("ORGANIZACION".equals(rolUpper)) {
-            throw new IllegalArgumentException("No se puede crear usuarios con rol ORGANIZACIÓN.");
-        }
 
         
         if (usuarioRepository.existsByNombreUsuario(request.getUsername())) {
