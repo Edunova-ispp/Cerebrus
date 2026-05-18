@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,11 +29,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.cerebrus.comun.enumerados.EstadoPagoSuscripcion;
 import com.cerebrus.exceptions.ResourceNotFoundException;
 import com.cerebrus.suscripcion.Suscripcion;
+import com.cerebrus.suscripcion.SuscripcionRepository;
 import com.cerebrus.usuario.Usuario;
 import com.cerebrus.usuario.UsuarioRepository;
 import com.cerebrus.usuario.UsuarioService;
 import com.cerebrus.usuario.alumno.Alumno;
+import com.cerebrus.usuario.alumno.AlumnoRepository;
 import com.cerebrus.usuario.maestro.Maestro;
+import com.cerebrus.usuario.maestro.MaestroRepository;
 import com.cerebrus.usuario.organizacion.Organizacion;
 import com.cerebrus.usuario.organizacion.OrganizacionRepository;
 import com.cerebrus.usuario.organizacion.OrganizacionServiceImpl;
@@ -54,7 +58,15 @@ class OrganizacionServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @InjectMocks
+    @Mock
+    private SuscripcionRepository suscripcionRepository;
+
+    @Mock
+    private MaestroRepository maestroRepository;
+
+    @Mock
+    private AlumnoRepository alumnoRepository;
+
     private OrganizacionServiceImpl organizacionService;
 
     private Organizacion organizacionActiva;
@@ -64,8 +76,22 @@ class OrganizacionServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        organizacionService = new OrganizacionServiceImpl(
+            organizacionRepository,
+            passwordEncoder,
+            usuarioService,
+            usuarioRepository,
+            suscripcionRepository,
+            maestroRepository,
+            alumnoRepository);
+
         organizacionActiva = crearOrganizacion(1L, true);
         organizacionInactiva = crearOrganizacion(1L, false);
+
+        Suscripcion suscripcionActiva = crearSuscripcionActiva();
+        lenient().when(suscripcionRepository.findByOrganizacionIdSuscripcionActiva(1L)).thenReturn(Optional.of(suscripcionActiva));
+        lenient().when(maestroRepository.countByOrganizacionId(1L)).thenReturn(1L);
+        lenient().when(alumnoRepository.countByOrganizacionId(1L)).thenReturn(1L);
 
         maestro = new Maestro();
         maestro.setId(10L);
@@ -396,6 +422,17 @@ class OrganizacionServiceImplTest {
             org.getSuscripciones().add(s);
         }
         return org;
+    }
+
+    private Suscripcion crearSuscripcionActiva() {
+        Suscripcion suscripcion = new Suscripcion();
+        suscripcion.setNumMaestros(10);
+        suscripcion.setNumAlumnos(10);
+        suscripcion.setPrecio(99.99);
+        suscripcion.setFechaInicio(LocalDate.now().minusDays(1));
+        suscripcion.setFechaFin(LocalDate.now().plusDays(30));
+        suscripcion.setEstadoPagoSuscripcion(EstadoPagoSuscripcion.PAGADA);
+        return suscripcion;
     }
 
     private CreateUserRequest requestBase(String rol) {

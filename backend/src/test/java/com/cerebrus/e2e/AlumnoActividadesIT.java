@@ -375,7 +375,24 @@ private void loginAsAlumno(String usuario) {
     private void clickContinueIfPresent(WebDriverWait wait) {
         List<WebElement> continueButtons = driver.findElements(By.xpath("//button[normalize-space()='Continuar']"));
         if (!continueButtons.isEmpty() && continueButtons.get(0).isDisplayed()) {
-            continueButtons.get(0).click();
+            WebElement btn = continueButtons.get(0);
+            try {
+                btn.click();
+            } catch (org.openqa.selenium.ElementClickInterceptedException ex) {
+                // Try dismissing known overlays and retry with JS click
+                dismissArsOverlayIfPresent();
+                try {
+                    wait.until(ExpectedConditions.elementToBeClickable(btn)).click();
+                } catch (Exception inner) {
+                    try {
+                        ((org.openqa.selenium.JavascriptExecutor) driver)
+                                .executeScript("document.querySelectorAll('.avm-overlay').forEach(e=>e.remove()); arguments[0].scrollIntoView({block:'center'}); arguments[0].click();", btn);
+                    } catch (Exception jsEx) {
+                        // last resort: ignore and continue
+                    }
+                }
+            }
+
             wait.until(ExpectedConditions.urlContains("/miscursos"));
             assertThat(driver.getCurrentUrl()).contains("/miscursos");
         }
