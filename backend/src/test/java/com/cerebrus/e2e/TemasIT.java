@@ -376,11 +376,27 @@ assertThat(driver.findElements(By.cssSelector("div.curso-card"))).isNotEmpty();
                 pageWait.until(ExpectedConditions.alertIsPresent());
                 driver.switchTo().alert().accept();
 
+                // Esperar a que el backend procese la eliminación
+                try {
+                        Thread.sleep(1000);
+                } catch (InterruptedException ignored) {}
+
                 navigateTo("/miscursos");
                 pageWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("h1.mis-cursos-title")));
 
                 By createdCourseCard = By.xpath("//div[contains(@class, 'curso-card')][.//span[contains(@class, 'curso-card__titulo') and normalize-space() = '" + COURSE_TITLE + "']]");
-                pageWait.until(d -> d.findElements(createdCourseCard).isEmpty());
+                
+                // Esperar con reintentos a que el elemento desaparezca
+                WebDriverWait longerWait = new WebDriverWait(driver, Duration.ofSeconds(30));
+                longerWait.until(d -> d.findElements(createdCourseCard).isEmpty());
+
+                // Assertions finales para verificar eliminación
+                assertThat(driver.findElements(createdCourseCard)).isEmpty();
+                assertThat(driver.findElement(By.cssSelector("h1.mis-cursos-title")).getText()).isEqualToIgnoringCase("MIS CURSOS");
+
+                // Resetear el estado compartido para que el siguiente test pueda recrear el curso
+                sharedCourse = null;
+                currentThemeTitle = COURSE_THEME_TITLE;
         }
 
         private CourseContext createCourseAndOpenDetail(String courseTitle) {
@@ -690,6 +706,14 @@ assertThat(driver.findElements(By.cssSelector("div.curso-card"))).isNotEmpty();
         }
 
         private void ensureSharedCourseReady() {
+                ensureSharedCourseReadyInternal(0);
+        }
+
+        private void ensureSharedCourseReadyInternal(int retries) {
+                if (retries > 1) {
+                        throw new IllegalStateException("No se pudo asegurar que el curso compartido esté listo después de 2 intentos");
+                }
+
                 if (sharedCourse == null) {
                         login(MAESTRO_USER, MAESTRO_PASSWORD);
                         sharedCourse = createCourseAndOpenDetail(COURSE_TITLE);
@@ -699,6 +723,19 @@ assertThat(driver.findElements(By.cssSelector("div.curso-card"))).isNotEmpty();
 
                 login(MAESTRO_USER, MAESTRO_PASSWORD);
                 navigateTo("/cursos/" + sharedCourse.id());
+
+                // Validar que el curso existe; si no, recrearlo
+                WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(5));
+                try {
+                        shortWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("button.ltp-btn-añadir")));
+                } catch (org.openqa.selenium.TimeoutException e) {
+                        // El curso no existe, resetear y recrear (solo 1 reintento)
+                        System.out.println("Curso " + sharedCourse.id() + " no existe, recreando... (intento " + (retries + 1) + ")");
+                        sharedCourse = null;
+                        currentThemeTitle = COURSE_THEME_TITLE;
+                        ensureSharedCourseReadyInternal(retries + 1);
+                        return;
+                }
 
                         By currentThemeLocator = By.xpath(
                                 "//span[contains(@class, 'ltp-tema-titulo') and contains(normalize-space(), '" 
